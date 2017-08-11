@@ -1,0 +1,189 @@
+    <div class="left-column noselect">
+        <div class="main-info-wrap xabber-info-wrap">
+            <div class="picture-wrap">
+                <img class="logo" src="images/xabber-logo-76.png"/>
+            </div>
+            <div class="name">Xabber.Web</div>
+            <div class="version"></div>
+        </div>
+        <div class="settings-tabs-wrap">
+            <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">
+                <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>
+                <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>
+                <div class="settings-block-name one-line">Xabber Account</div>
+            </div>
+            <div class="settings-tab" data-block-name="xmpp-accounts">
+                <i class="mdi mdi-24px mdi-settings"/>
+                <div class="settings-block-name one-line">XMPP Accounts</div>
+            </div>
+            <div class="settings-tab" data-block-name="keyboard">
+                <i class="mdi mdi-24px mdi-keyboard"></i>
+                <div class="settings-block-name one-line">Keyboard</div>
+            </div>
+            <div class="settings-tab" data-block-name="contact-list">
+                <i class="mdi mdi-24px mdi-account-multiple"></i>
+                <div class="settings-block-name one-line">Contact list</div>
+            </div>
+            <div class="settings-tab" data-block-name="notifications">
+                <i class="mdi mdi-24px mdi-bell"></i>
+                <div class="settings-block-name one-line">Notifications</div>
+            </div>
+            <div class="settings-tab" data-block-name="sounds">
+                <i class="mdi mdi-24px mdi-volume-high"></i>
+                <div class="settings-block-name one-line">Sounds</div>
+            </div>
+        </div>
+        <div class="settings-tabs-bottom-wrap">
+            <div class="settings-tab delete-all-accounts">
+                <i class="mdi mdi-24px mdi-logout-variant"></i>
+                <div class="settings-block-name">Quit Xabber Web</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-column noselect">
+        <div class="settings-panel-head">
+            <span>Settings</span>
+        </div>
+
+        <div class="panel-content-wrap">
+            <div class="panel-content">
+                <div class="settings-block-wrap xabber-account">
+                    <div class="block-header">
+                        <span class="block-name">Xabber account</span>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap xmpp-accounts">
+                    <div class="block-header">
+                        <span class="block-name">XMPP accounts</span>
+                    </div>
+                    <div class="setting xmpp-account-list">
+                        <span class="no-accounts-tip">No accounts</span>
+                        <div class="move-account-to-bottom droppable"></div>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap keyboard">
+                    <div class="block-header">
+                        <span class="block-name">Keyboard</span>
+                    </div>
+
+                    <div class="setting hotkeys radio-button field-wrap">
+                        <div class="field radio-field clickable-field">
+                            <form action="#">
+                                <p>
+                                    <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />
+                                    <label for="{{view.cid}}-enter">Send message on Enter</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />
+                                    <label for="{{view.cid}}-ctrlenter">Send message on Ctrl+Enter</label>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap contact-list">
+                    <div class="block-header">
+                        <span class="block-name">Contact list</span>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap notifications">
+                    <div class="block-header">
+                        <span class="block-name">Notifications</span>
+                    </div>
+
+                    <div class="setting notifications field-wrap">
+                        <div class="field clickable-field switch small">
+                            <span class="field-name">Desktop notifications</span>
+                            <label class="field-value">
+                                <input type="checkbox" name="notifications">
+                                <span class="lever"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting message-preview field-wrap">
+                        <div class="field clickable-field switch small">
+                            <span class="field-name">Message preview</span>
+                            <label class="field-value">
+                                <input type="checkbox" name="message-preview">
+                                <span class="lever"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap sounds">
+                    <div class="block-header">
+                        <span class="block-name">Sounds</span>
+                    </div>
+                    <div class="setting sound radio-button field-wrap">
+                        <div class="field radio-field clickable-field">
+                            <form action="#">
+                                <p>
+                                    <input class="with-gap" name="sound" value="" type="radio" id="{{view.cid}}-sound-no" />
+                                    <label for="{{view.cid}}-sound-no">No sound</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="beep_up" type="radio" id="{{view.cid}}-sound-beep-up" />
+                                    <label for="{{view.cid}}-sound-beep-up">Beep Up</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="tiny_noize" type="radio" id="{{view.cid}}-sound-tiny-noize" />
+                                    <label for="{{view.cid}}-sound-tiny-noize">Tiny Noize</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="retro_game" type="radio" id="{{view.cid}}-sound-retro-game" />
+                                    <label for="{{view.cid}}-sound-retro-game">Retro Game</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="pixel_beep" type="radio" id="{{view.cid}}-sound-pixel-beep" />
+                                    <label for="{{view.cid}}-sound-pixel-beep">Pixel Beep</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="beep_positive" type="radio" id="{{view.cid}}-sound-beep-positive" />
+                                    <label for="{{view.cid}}-sound-beep-positive">Beep Positive</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="good_chime" type="radio" id="{{view.cid}}-sound-good-chime" />
+                                    <label for="{{view.cid}}-sound-good-chime">Good Chime</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="cellular_click" type="radio" id="{{view.cid}}-sound-cellular-click" />
+                                    <label for="{{view.cid}}-sound-cellular-click">Cellular Click</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="bleep" type="radio" id="{{view.cid}}-sound-bleep" />
+                                    <label for="{{view.cid}}-sound-bleep">Bleep</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="mono_u" type="radio" id="{{view.cid}}-sound-mono-u" />
+                                    <label for="{{view.cid}}-sound-mono-u">Mono U</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="plop" type="radio" id="{{view.cid}}-sound-plop" />
+                                    <label for="{{view.cid}}-sound-plop">Plop</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="ether" type="radio" id="{{view.cid}}-sound-ether" />
+                                    <label for="{{view.cid}}-sound-ether">Ether</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="pop" type="radio" id="{{view.cid}}-sound-pop" />
+                                    <label for="{{view.cid}}-sound-pop">Pop</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="sound" value="computer_chime" type="radio" id="{{view.cid}}-sound-computer-chime" />
+                                    <label for="{{view.cid}}-sound-computer-chime">Computer Chime</label>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>

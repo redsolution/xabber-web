@@ -1,0 +1,30 @@
+    <div class="setting-name">Show offline contacts</div>
+    <div class="setting offline-contacts radio-button field-wrap">
+        <div class="field radio-field clickable-field">
+            <form action="#">
+                <p>
+                    <input class="with-gap" name="offline-contacts" value="yes" type="radio" id="{{view.cid}}-show" />
+                    <label for="{{view.cid}}-show">Always show</label>
+                </p>
+                <p>
+                    <input class="with-gap" name="offline-contacts" value="no" type="radio" id="{{view.cid}}-hide" />
+                    <label for="{{view.cid}}-hide">Always hide</label>
+                </p>
+            </form>
+        </div>
+    </div>
+    <div class="setting-name">Sorting contacts</div>
+    <div class="setting sorting-contacts radio-button field-wrap">
+        <div class="field radio-field clickable-field">
+            <form action="#">
+                <p>
+                    <input class="with-gap" name="sorting-contacts" value="online-first" type="radio" id="{{view.cid}}-online-first" />
+                    <label for="{{view.cid}}-online-first">Online first</label>
+                </p>
+                <p>
+                    <input class="with-gap" name="sorting-contacts" value="by-alphabet" type="radio" id="{{view.cid}}-by-alphabet" />
+                    <label for="{{view.cid}}-by-alphabet">Alphabet order (A -> Z)</label>
+                </p>
+            </form>
+        </div>
+    </div>

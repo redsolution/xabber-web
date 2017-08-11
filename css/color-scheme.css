@@ -1,0 +1,1626 @@
+/* ----------------- RED ------------------- */
+
+.ground-color-red-900,
+.hover-ground-color-red-900:hover,
+[data-color=red] .ground-color-900,
+[data-color=red] .hover-ground-color-900:hover {
+  background-color: #B71C1C !important;
+}
+.text-color-red-900,
+.hover-text-color-red-900:hover,
+[data-color=red] .text-color-900,
+[data-color=red] .hover-text-color-900:hover {
+  color: #B71C1C !important;
+}
+
+.ground-color-red-700,
+.hover-ground-color-red-700:hover,
+[data-color=red] .ground-color-700,
+[data-color=red] .hover-ground-color-700:hover {
+  background-color: #D32F2F !important;
+}
+.text-color-red-700,
+.hover-text-color-red-700:hover,
+[data-color=red] .text-color-700,
+[data-color=red] .hover-text-color-700:hover {
+  color: #D32F2F !important;
+}
+
+.ground-color-red-500,
+.hover-ground-color-red-500:hover,
+[data-color=red] .ground-color-500,
+[data-color=red] .hover-ground-color-500:hover {
+  background-color: #F44336 !important;
+}
+.text-color-red-500,
+.hover-text-color-red-500:hover,
+[data-color=red] .text-color-500,
+[data-color=red] .hover-text-color-500:hover {
+  color: #F44336 !important;
+}
+
+.ground-color-red-300,
+.hover-ground-color-red-300:hover,
+[data-color=red] .ground-color-300,
+[data-color=red] .hover-ground-color-300:hover {
+  background-color: #E57373 !important;
+}
+.text-color-red-300,
+.hover-text-color-red-300:hover,
+[data-color=red] .text-color-300,
+[data-color=red] .hover-text-color-300:hover {
+  color: #E57373 !important;
+}
+
+.ground-color-red-100,
+.hover-ground-color-red-100:hover,
+[data-color=red] .ground-color-100,
+[data-color=red] .hover-ground-color-100:hover {
+  background-color: #FFCDD2 !important;
+}
+.text-color-red-100,
+.hover-text-color-red-100:hover,
+[data-color=red] .text-color-100,
+[data-color=red] .hover-text-color-100:hover {
+  color: #FFCDD2 !important;
+}
+
+.ground-color-red-50,
+.hover-ground-color-red-50:hover,
+[data-color=red] .ground-color-50,
+[data-color=red] .hover-ground-color-50:hover {
+  background-color: #FFEBEE !important;
+}
+.text-color-red-50,
+.hover-text-color-red-50:hover,
+[data-color=red] .text-color-50,
+[data-color=red] .hover-text-color-50:hover {
+  color: #FFEBEE !important;
+}
+
+[data-color=red] .border-color {
+  border-color: #F44336 !important;
+}
+
+[data-color=red] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #D32F2F !important;
+  box-shadow: 0 1px 0 0 #D32F2F !important;
+}
+[data-color=red] .rich-textarea:focus:not([readonly]) + label {
+  color: #D32F2F !important;
+}
+
+/* ----------------- PINK ------------------- */
+
+.ground-color-pink-900,
+.hover-ground-color-pink-900:hover,
+[data-color=pink] .ground-color-900,
+[data-color=pink] .hover-ground-color-900:hover {
+  background-color: #880E4F !important;
+}
+.text-color-pink-900,
+.hover-text-color-pink-900:hover,
+[data-color=pink] .text-color-900,
+[data-color=pink] .hover-text-color-900:hover {
+  color: #880E4F !important;
+}
+
+.ground-color-pink-700,
+.hover-ground-color-pink-700:hover,
+[data-color=pink] .ground-color-700,
+[data-color=pink] .hover-ground-color-700:hover {
+  background-color: #C2185B !important;
+}
+.text-color-pink-700,
+.hover-text-color-pink-700:hover,
+[data-color=pink] .text-color-700,
+[data-color=pink] .hover-text-color-700:hover {
+  color: #C2185B !important;
+}
+
+.ground-color-pink-500,
+.hover-ground-color-pink-500:hover,
+[data-color=pink] .ground-color-500,
+[data-color=pink] .hover-ground-color-500:hover {
+  background-color: #E91E63 !important;
+}
+.text-color-pink-500,
+.hover-text-color-pink-500:hover,
+[data-color=pink] .text-color-500,
+[data-color=pink] .hover-text-color-500:hover {
+  color: #E91E63 !important;
+}
+
+.ground-color-pink-300,
+.hover-ground-color-pink-300:hover,
+[data-color=pink] .ground-color-300,
+[data-color=pink] .hover-ground-color-300:hover {
+  background-color: #F06292 !important;
+}
+.text-color-pink-300,
+.hover-text-color-pink-300:hover,
+[data-color=pink] .text-color-300,
+[data-color=pink] .hover-text-color-300:hover {
+  color: #F06292 !important;
+}
+
+.ground-color-pink-100,
+.hover-ground-color-pink-100:hover,
+[data-color=pink] .ground-color-100,
+[data-color=pink] .hover-ground-color-100:hover {
+  background-color: #F8BBD0 !important;
+}
+.text-color-pink-100,
+.hover-text-color-pink-100:hover,
+[data-color=pink] .text-color-100,
+[data-color=pink] .hover-text-color-100:hover {
+  color: #F8BBD0 !important;
+}
+
+.ground-color-pink-50,
+.hover-ground-color-pink-50:hover,
+[data-color=pink] .ground-color-50,
+[data-color=pink] .hover-ground-color-50:hover {
+  background-color: #FCE4EC !important;
+}
+.text-color-pink-50,
+.hover-text-color-pink-50:hover,
+[data-color=pink] .text-color-50,
+[data-color=pink] .hover-text-color-50:hover {
+  color: #FCE4EC !important;
+}
+
+[data-color=pink] .border-color {
+  border-color: #E91E63 !important;
+}
+
+[data-color=pink] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #C2185B !important;
+  box-shadow: 0 1px 0 0 #C2185B !important;
+}
+[data-color=pink] .rich-textarea:focus:not([readonly]) + label {
+  color: #C2185B !important;
+}
+
+/* ----------------- PURPLE ------------------- */
+
+.ground-color-purple-900,
+.hover-ground-color-purple-900:hover,
+[data-color=purple] .ground-color-900,
+[data-color=purple] .hover-ground-color-900:hover {
+  background-color: #4A148C !important;
+}
+.text-color-purple-900,
+.hover-text-color-purple-900:hover,
+[data-color=purple] .text-color-900,
+[data-color=purple] .hover-text-color-900:hover {
+  color: #4A148C !important;
+}
+
+.ground-color-purple-700,
+.hover-ground-color-purple-700:hover,
+[data-color=purple] .ground-color-700,
+[data-color=purple] .hover-ground-color-700:hover {
+  background-color: #7B1FA2 !important;
+}
+.text-color-purple-700,
+.hover-text-color-purple-700:hover,
+[data-color=purple] .text-color-700,
+[data-color=purple] .hover-text-color-700:hover {
+  color: #7B1FA2 !important;
+}
+
+.ground-color-purple-500,
+.hover-ground-color-purple-500:hover,
+[data-color=purple] .ground-color-500,
+[data-color=purple] .hover-ground-color-500:hover {
+  background-color: #9C27B0 !important;
+}
+.text-color-purple-500,
+.hover-text-color-purple-500:hover,
+[data-color=purple] .text-color-500,
+[data-color=purple] .hover-text-color-500:hover {
+  color: #9C27B0 !important;
+}
+
+.ground-color-purple-300,
+.hover-ground-color-purple-300:hover,
+[data-color=purple] .ground-color-300,
+[data-color=purple] .hover-ground-color-300:hover {
+  background-color: #BA68C8 !important;
+}
+.text-color-purple-300,
+.hover-text-color-purple-300:hover,
+[data-color=purple] .text-color-300,
+[data-color=purple] .hover-text-color-300:hover {
+  color: #BA68C8 !important;
+}
+
+.ground-color-purple-100,
+.hover-ground-color-purple-100:hover,
+[data-color=purple] .ground-color-100,
+[data-color=purple] .hover-ground-color-100:hover {
+  background-color: #E1BEE7 !important;
+}
+.text-color-purple-100,
+.hover-text-color-purple-100:hover,
+[data-color=purple] .text-color-100,
+[data-color=purple] .hover-text-color-100:hover {
+  color: #E1BEE7 !important;
+}
+
+.ground-color-purple-50,
+.hover-ground-color-purple-50:hover,
+[data-color=purple] .ground-color-50,
+[data-color=purple] .hover-ground-color-50:hover {
+  background-color: #F3E5F5 !important;
+}
+.text-color-purple-50,
+.hover-text-color-purple-50:hover,
+[data-color=purple] .text-color-50,
+[data-color=purple] .hover-text-color-50:hover {
+  color: #F3E5F5 !important;
+}
+
+[data-color=purple] .border-color {
+  border-color: #9C27B0 !important;
+}
+
+[data-color=purple] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #7B1FA2 !important;
+  box-shadow: 0 1px 0 0 #7B1FA2 !important;
+}
+
+[data-color=purple] .rich-textarea:focus:not([readonly]) + label {
+  color: #7B1FA2 !important;
+}
+
+/* ----------------- DEEP PURPLE ------------------- */
+
+.ground-color-deep-purple-900,
+.hover-ground-color-deep-purple-900:hover,
+[data-color=deep-purple] .ground-color-900,
+[data-color=deep-purple] .hover-ground-color-900:hover {
+  background-color: #311B92 !important;
+}
+.text-color-deep-purple-900,
+.hover-text-color-deep-purple-900:hover,
+[data-color=deep-purple] .text-color-900,
+[data-color=deep-purple] .hover-text-color-900:hover {
+  color: #311B92 !important;
+}
+
+.ground-color-deep-purple-700,
+.hover-ground-color-deep-purple-700:hover,
+[data-color=deep-purple] .ground-color-700,
+[data-color=deep-purple] .hover-ground-color-700:hover {
+  background-color: #512DA8 !important;
+}
+.text-color-deep-purple-700,
+.hover-text-color-deep-purple-700:hover,
+[data-color=deep-purple] .text-color-700,
+[data-color=deep-purple] .hover-text-color-700:hover {
+  color: #512DA8 !important;
+}
+
+.ground-color-deep-purple-500,
+.hover-ground-color-deep-purple-500:hover,
+[data-color=deep-purple] .ground-color-500,
+[data-color=deep-purple] .hover-ground-color-500:hover {
+  background-color: #673AB7 !important;
+}
+.text-color-deep-purple-500,
+.hover-text-color-deep-purple-500:hover,
+[data-color=deep-purple] .text-color-500,
+[data-color=deep-purple] .hover-text-color-500:hover {
+  color: #673AB7 !important;
+}
+
+.ground-color-deep-purple-300,
+.hover-ground-color-deep-purple-300:hover,
+[data-color=deep-purple] .ground-color-300,
+[data-color=deep-purple] .hover-ground-color-300:hover {
+  background-color: #9575CD !important;
+}
+.text-color-deep-purple-300,
+.hover-text-color-deep-purple-300:hover,
+[data-color=deep-purple] .text-color-300,
+[data-color=deep-purple] .hover-text-color-300:hover {
+  color: #9575CD !important;
+}
+
+.ground-color-deep-purple-100,
+.hover-ground-color-deep-purple-100:hover,
+[data-color=deep-purple] .ground-color-100,
+[data-color=deep-purple] .hover-ground-color-100:hover {
+  background-color: #D1C4E9 !important;
+}
+.text-color-deep-purple-100,
+.hover-text-color-deep-purple-100:hover,
+[data-color=deep-purple] .text-color-100,
+[data-color=deep-purple] .hover-text-color-100:hover {
+  color: #D1C4E9 !important;
+}
+
+.ground-color-deep-purple-50,
+.hover-ground-color-deep-purple-50:hover,
+[data-color=deep-purple] .ground-color-50,
+[data-color=deep-purple] .hover-ground-color-50:hover {
+  background-color: #EDE7F6 !important;
+}
+.text-color-deep-purple-50,
+.hover-text-color-deep-purple-50:hover,
+[data-color=deep-purple] .text-color-50,
+[data-color=deep-purple] .hover-text-color-50:hover {
+  color: #EDE7F6 !important;
+}
+
+[data-color=deep-purple] .border-color {
+  border-color: #673AB7 !important;
+}
+
+[data-color=deep-purple] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #512DA8 !important;
+  box-shadow: 0 1px 0 0 #512DA8 !important;
+}
+[data-color=deep-purple] .rich-textarea:focus:not([readonly]) + label {
+  color: #512DA8 !important;
+}
+
+/* ----------------- INDIGO ------------------- */
+
+.ground-color-indigo-900,
+.hover-ground-color-indigo-900:hover,
+[data-color=indigo] .ground-color-900,
+[data-color=indigo] .hover-ground-color-900:hover {
+  background-color: #1A237E !important;
+}
+.text-color-indigo-900,
+.hover-text-color-indigo-900:hover,
+[data-color=indigo] .text-color-900,
+[data-color=indigo] .hover-text-color-900:hover {
+  color: #1A237E !important;
+}
+
+.ground-color-indigo-700,
+.hover-ground-color-indigo-700:hover,
+[data-color=indigo] .ground-color-700,
+[data-color=indigo] .hover-ground-color-700:hover {
+  background-color: #303F9F !important;
+}
+.text-color-indigo-700,
+.hover-text-color-indigo-700:hover,
+[data-color=indigo] .text-color-700,
+[data-color=indigo] .hover-text-color-700:hover {
+  color: #303F9F !important;
+}
+
+.ground-color-indigo-500,
+.hover-ground-color-indigo-500:hover,
+[data-color=indigo] .ground-color-500,
+[data-color=indigo] .hover-ground-color-500:hover {
+  background-color: #3F51B5 !important;
+}
+.text-color-indigo-500,
+.hover-text-color-indigo-500:hover,
+[data-color=indigo] .text-color-500,
+[data-color=indigo] .hover-text-color-500:hover {
+  color: #3F51B5 !important;
+}
+
+.ground-color-indigo-300,
+.hover-ground-color-indigo-300:hover,
+[data-color=indigo] .ground-color-300,
+[data-color=indigo] .hover-ground-color-300:hover {
+  background-color: #7986CB !important;
+}
+.text-color-indigo-300,
+.hover-text-color-indigo-300:hover,
+[data-color=indigo] .text-color-300,
+[data-color=indigo] .hover-text-color-300:hover {
+  color: #7986CB !important;
+}
+
+.ground-color-indigo-100,
+.hover-ground-color-indigo-100:hover,
+[data-color=indigo] .ground-color-100,
+[data-color=indigo] .hover-ground-color-100:hover {
+  background-color: #C5CAE9 !important;
+}
+.text-color-indigo-100,
+.hover-text-color-indigo-100:hover,
+[data-color=indigo] .text-color-100,
+[data-color=indigo] .hover-text-color-100:hover {
+  color: #C5CAE9 !important;
+}
+
+.ground-color-indigo-50,
+.hover-ground-color-indigo-50:hover,
+[data-color=indigo] .ground-color-50,
+[data-color=indigo] .hover-ground-color-50:hover {
+  background-color: #E8EAF6 !important;
+}
+.text-color-indigo-50,
+.hover-text-color-indigo-50:hover,
+[data-color=indigo] .text-color-50,
+[data-color=indigo] .hover-text-color-50:hover {
+  color: #E8EAF6 !important;
+}
+
+[data-color=indigo] .border-color {
+  border-color: #3F51B5 !important;
+}
+
+[data-color=indigo] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #303F9F !important;
+  box-shadow: 0 1px 0 0 #303F9F !important;
+}
+
+[data-color=indigo] .rich-textarea:focus:not([readonly]) + label {
+  color: #303F9F !important;
+}
+
+/* ----------------- BLUE ------------------- */
+
+.ground-color-blue-900,
+.hover-ground-color-blue-900:hover,
+[data-color=blue] .ground-color-900,
+[data-color=blue] .hover-ground-color-900:hover {
+  background-color: #0D47A1 !important;
+}
+.text-color-blue-900,
+.hover-text-color-blue-900:hover,
+[data-color=blue] .text-color-900,
+[data-color=blue] .hover-text-color-900:hover {
+  color: #0D47A1 !important;
+}
+
+.ground-color-blue-700,
+.hover-ground-color-blue-700:hover,
+[data-color=blue] .ground-color-700,
+[data-color=blue] .hover-ground-color-700:hover {
+  background-color: #1976D2 !important;
+}
+.text-color-blue-700,
+.hover-text-color-blue-700:hover,
+[data-color=blue] .text-color-700,
+[data-color=blue] .hover-text-color-700:hover {
+  color: #1976D2 !important;
+}
+
+.ground-color-blue-500,
+.hover-ground-color-blue-500:hover,
+[data-color=blue] .ground-color-500,
+[data-color=blue] .hover-ground-color-500:hover {
+  background-color: #2196F3 !important;
+}
+.text-color-blue-500,
+.hover-text-color-blue-500:hover,
+[data-color=blue] .text-color-500,
+[data-color=blue] .hover-text-color-500:hover {
+  color: #2196F3 !important;
+}
+
+.ground-color-blue-300,
+.hover-ground-color-blue-300:hover,
+[data-color=blue] .ground-color-300,
+[data-color=blue] .hover-ground-color-300:hover {
+  background-color: #64B5F6 !important;
+}
+.text-color-blue-300,
+.hover-text-color-blue-300:hover,
+[data-color=blue] .text-color-300,
+[data-color=blue] .hover-text-color-300:hover {
+  color: #64B5F6 !important;
+}
+
+.ground-color-blue-100,
+.hover-ground-color-blue-100:hover,
+[data-color=blue] .ground-color-100,
+[data-color=blue] .hover-ground-color-100:hover {
+  background-color: #BBDEFB !important;
+}
+.text-color-blue-100,
+.hover-text-color-blue-100:hover,
+[data-color=blue] .text-color-100,
+[data-color=blue] .hover-text-color-100:hover {
+  color: #BBDEFB !important;
+}
+
+.ground-color-blue-50,
+.hover-ground-color-blue-50:hover,
+[data-color=blue] .ground-color-50,
+[data-color=blue] .hover-ground-color-50:hover {
+  background-color: #E3F2FD !important;
+}
+.text-color-blue-50,
+.hover-text-color-blue-50:hover,
+[data-color=blue] .text-color-50,
+[data-color=blue] .hover-text-color-50:hover {
+  color: #E3F2FD !important;
+}
+
+[data-color=blue] .border-color {
+  border-color: #2196F3 !important;
+}
+
+[data-color=blue] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #1976D2 !important;
+  box-shadow: 0 1px 0 0 #1976D2 !important;
+}
+
+[data-color=blue] .rich-textarea:focus:not([readonly]) + label {
+  color: #1976D2 !important;
+}
+
+/* ----------------- LIGHT BLUE ------------------- */
+
+.ground-color-light-blue-900,
+.hover-ground-color-light-blue-900:hover,
+[data-color=light-blue] .ground-color-900,
+[data-color=light-blue] .hover-ground-color-900:hover {
+  background-color: #01579B !important;
+}
+.text-color-light-blue-900,
+.hover-text-color-light-blue-900:hover,
+[data-color=light-blue] .text-color-900,
+[data-color=light-blue] .hover-text-color-900:hover {
+  color: #01579B !important;
+}
+
+.ground-color-light-blue-700,
+.hover-ground-color-light-blue-700:hover,
+[data-color=light-blue] .ground-color-700,
+[data-color=light-blue] .hover-ground-color-700:hover {
+  background-color: #0288D1 !important;
+}
+.text-color-light-blue-700,
+.hover-text-color-light-blue-700:hover,
+[data-color=light-blue] .text-color-700,
+[data-color=light-blue] .hover-text-color-700:hover {
+  color: #0288D1 !important;
+}
+
+.ground-color-light-blue-500,
+.hover-ground-color-light-blue-500:hover,
+[data-color=light-blue] .ground-color-500,
+[data-color=light-blue] .hover-ground-color-500:hover {
+  background-color: #03A9F4 !important;
+}
+.text-color-light-blue-500,
+.hover-text-color-light-blue-500:hover,
+[data-color=light-blue] .text-color-500,
+[data-color=light-blue] .hover-text-color-500:hover {
+  color: #03A9F4 !important;
+}
+
+.ground-color-light-blue-300,
+.hover-ground-color-light-blue-300:hover,
+[data-color=light-blue] .ground-color-300,
+[data-color=light-blue] .hover-ground-color-300:hover {
+  background-color: #4FC3F7 !important;
+}
+.text-color-light-blue-300,
+.hover-text-color-light-blue-300:hover,
+[data-color=light-blue] .text-color-300,
+[data-color=light-blue] .hover-text-color-300:hover {
+  color: #4FC3F7 !important;
+}
+
+.ground-color-light-blue-100,
+.hover-ground-color-light-blue-100:hover,
+[data-color=light-blue] .ground-color-100,
+[data-color=light-blue] .hover-ground-color-100:hover {
+  background-color: #B3E5FC !important;
+}
+.text-color-light-blue-100,
+.hover-text-color-light-blue-100:hover,
+[data-color=light-blue] .text-color-100,
+[data-color=light-blue] .hover-text-color-100:hover {
+  color: #B3E5FC !important;
+}
+
+.ground-color-light-blue-50,
+.hover-ground-color-light-blue-50:hover,
+[data-color=light-blue] .ground-color-50,
+[data-color=light-blue] .hover-ground-color-50:hover {
+  background-color: #E1F5FE !important;
+}
+.text-color-light-blue-50,
+.hover-text-color-light-blue-50:hover,
+[data-color=light-blue] .text-color-50,
+[data-color=light-blue] .hover-text-color-50:hover {
+  color: #E1F5FE !important;
+}
+
+[data-color=light-blue] .border-color {
+  border-color: #03A9F4 !important;
+}
+
+[data-color=light-blue] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #0288D1 !important;
+  box-shadow: 0 1px 0 0 #0288D1 !important;
+}
+[data-color=light-blue] .rich-textarea:focus:not([readonly]) + label {
+  color: #0288D1 !important;
+}
+
+/* ----------------- CYAN ------------------- */
+
+.ground-color-cyan-900,
+.hover-ground-color-cyan-900:hover,
+[data-color=cyan] .ground-color-900,
+[data-color=cyan] .hover-ground-color-900:hover {
+  background-color: #006064 !important;
+}
+.text-color-cyan-900,
+.hover-text-color-cyan-900:hover,
+[data-color=cyan] .text-color-900,
+[data-color=cyan] .hover-text-color-900:hover {
+  color: #006064 !important;
+}
+
+.ground-color-cyan-700,
+.hover-ground-color-cyan-700:hover,
+[data-color=cyan] .ground-color-700,
+[data-color=cyan] .hover-ground-color-700:hover {
+  background-color: #0097A7 !important;
+}
+.text-color-cyan-700,
+.hover-text-color-cyan-700:hover,
+[data-color=cyan] .text-color-700,
+[data-color=cyan] .hover-text-color-700:hover {
+  color: #0097A7 !important;
+}
+
+.ground-color-cyan-500,
+.hover-ground-color-cyan-500:hover,
+[data-color=cyan] .ground-color-500,
+[data-color=cyan] .hover-ground-color-500:hover {
+  background-color: #00BCD4 !important;
+}
+.text-color-cyan-500,
+.hover-text-color-cyan-500:hover,
+[data-color=cyan] .text-color-500,
+[data-color=cyan] .hover-text-color-500:hover {
+  color: #00BCD4 !important;
+}
+
+.ground-color-cyan-300,
+.hover-ground-color-cyan-300:hover,
+[data-color=cyan] .ground-color-300,
+[data-color=cyan] .hover-ground-color-300:hover {
+  background-color: #4DD0E1 !important;
+}
+.text-color-cyan-300,
+.hover-text-color-cyan-300:hover,
+[data-color=cyan] .text-color-300,
+[data-color=cyan] .hover-text-color-300:hover {
+  color: #4DD0E1 !important;
+}
+
+.ground-color-cyan-100,
+.hover-ground-color-cyan-100:hover,
+[data-color=cyan] .ground-color-100,
+[data-color=cyan] .hover-ground-color-100:hover {
+  background-color: #B2EBF2 !important;
+}
+.text-color-cyan-100,
+.hover-text-color-cyan-100:hover,
+[data-color=cyan] .text-color-100,
+[data-color=cyan] .hover-text-color-100:hover {
+  color: #B2EBF2 !important;
+}
+
+.ground-color-cyan-50,
+.hover-ground-color-cyan-50:hover,
+[data-color=cyan] .ground-color-50,
+[data-color=cyan] .hover-ground-color-50:hover {
+  background-color: #E0F7FA !important;
+}
+.text-color-cyan-50,
+.hover-text-color-cyan-50:hover,
+[data-color=cyan] .text-color-50,
+[data-color=cyan] .hover-text-color-50:hover {
+  color: #E0F7FA !important;
+}
+
+[data-color=cyan] .border-color {
+  border-color: #00BCD4 !important;
+}
+
+[data-color=cyan] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #0097A7 !important;
+  box-shadow: 0 1px 0 0 #0097A7 !important;
+}
+[data-color=cyan] .rich-textarea:focus:not([readonly]) + label {
+  color: #0097A7 !important;
+}
+
+/* ----------------- TEAL ------------------- */
+
+.ground-color-teal-900,
+.hover-ground-color-teal-900:hover,
+[data-color=teal] .ground-color-900,
+[data-color=teal] .hover-ground-color-900:hover {
+  background-color: #004D40 !important;
+}
+.text-color-teal-900,
+.hover-text-color-teal-900:hover,
+[data-color=teal] .text-color-900,
+[data-color=teal] .hover-text-color-900:hover {
+  color: #004D40 !important;
+}
+
+.ground-color-teal-700,
+.hover-ground-color-teal-700:hover,
+[data-color=teal] .ground-color-700,
+[data-color=teal] .hover-ground-color-700:hover {
+  background-color: #00796B !important;
+}
+.text-color-teal-700,
+.hover-text-color-teal-700:hover,
+[data-color=teal] .text-color-700,
+[data-color=teal] .hover-text-color-700:hover {
+  color: #00796B !important;
+}
+
+.ground-color-teal-500,
+.hover-ground-color-teal-500:hover,
+[data-color=teal] .ground-color-500,
+[data-color=teal] .hover-ground-color-500:hover {
+  background-color: #009688 !important;
+}
+.text-color-teal-500,
+.hover-text-color-teal-500:hover,
+[data-color=teal] .text-color-500,
+[data-color=teal] .hover-text-color-500:hover {
+  color: #009688 !important;
+}
+
+.ground-color-teal-300,
+.hover-ground-color-teal-300:hover,
+[data-color=teal] .ground-color-300,
+[data-color=teal] .hover-ground-color-300:hover {
+  background-color: #4DB6AC !important;
+}
+.text-color-teal-300,
+.hover-text-color-teal-300:hover,
+[data-color=teal] .text-color-300,
+[data-color=teal] .hover-text-color-300:hover {
+  color: #4DB6AC !important;
+}
+
+.ground-color-teal-100,
+.hover-ground-color-teal-100:hover,
+[data-color=teal] .ground-color-100,
+[data-color=teal] .hover-ground-color-100:hover {
+  background-color: #B2DFDB !important;
+}
+.text-color-teal-100,
+.hover-text-color-teal-100:hover,
+[data-color=teal] .text-color-100,
+[data-color=teal] .hover-text-color-100:hover {
+  color: #B2DFDB !important;
+}
+
+.ground-color-teal-50,
+.hover-ground-color-teal-50:hover,
+[data-color=teal] .ground-color-50,
+[data-color=teal] .hover-ground-color-50:hover {
+  background-color: #E0F2F1 !important;
+}
+.text-color-teal-50,
+.hover-text-color-teal-50:hover,
+[data-color=teal] .text-color-50,
+[data-color=teal] .hover-text-color-50:hover {
+  color: #E0F2F1 !important;
+}
+
+[data-color=teal] .border-color {
+  border-color: #009688 !important;
+}
+
+[data-color=teal] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #00796B !important;
+  box-shadow: 0 1px 0 0 #00796B !important;
+}
+
+[data-color=teal] .rich-textarea:focus:not([readonly]) + label {
+  color: #00796B !important;
+}
+
+/* ----------------- GREEN ------------------- */
+
+.ground-color-green-900,
+.hover-ground-color-green-900:hover,
+[data-color=green] .ground-color-900,
+[data-color=green] .hover-ground-color-900:hover {
+  background-color: #1B5E20 !important;
+}
+.text-color-green-900,
+.hover-text-color-green-900:hover,
+[data-color=green] .text-color-900,
+[data-color=green] .hover-text-color-900:hover {
+  color: #1B5E20 !important;
+}
+
+.ground-color-green-700,
+.hover-ground-color-green-700:hover,
+[data-color=green] .ground-color-700,
+[data-color=green] .hover-ground-color-700:hover {
+  background-color: #388E3C !important;
+}
+.text-color-green-700,
+.hover-text-color-green-700:hover,
+[data-color=green] .text-color-700,
+[data-color=green] .hover-text-color-700:hover {
+  color: #388E3C !important;
+}
+
+.ground-color-green-500,
+.hover-ground-color-green-500:hover,
+[data-color=green] .ground-color-500,
+[data-color=green] .hover-ground-color-500:hover {
+  background-color: #4CAF50 !important;
+}
+.text-color-green-500,
+.hover-text-color-green-500:hover,
+[data-color=green] .text-color-500,
+[data-color=green] .hover-text-color-500:hover {
+  color: #4CAF50 !important;
+}
+
+.ground-color-green-300,
+.hover-ground-color-green-300:hover,
+[data-color=green] .ground-color-300,
+[data-color=green] .hover-ground-color-300:hover {
+  background-color: #81C784 !important;
+}
+.text-color-green-300,
+.hover-text-color-green-300:hover,
+[data-color=green] .text-color-300,
+[data-color=green] .hover-text-color-300:hover {
+  color: #81C784 !important;
+}
+
+.ground-color-green-100,
+.hover-ground-color-green-100:hover,
+[data-color=green] .ground-color-100,
+[data-color=green] .hover-ground-color-100:hover {
+  background-color: #C8E6C9 !important;
+}
+.text-color-green-100,
+.hover-text-color-green-100:hover,
+[data-color=green] .text-color-100,
+[data-color=green] .hover-text-color-100:hover {
+  color: #C8E6C9 !important;
+}
+
+.ground-color-green-50,
+.hover-ground-color-green-50:hover,
+[data-color=green] .ground-color-50,
+[data-color=green] .hover-ground-color-50:hover {
+  background-color: #E8F5E9 !important;
+}
+.text-color-green-50,
+.hover-text-color-green-50:hover,
+[data-color=green] .text-color-50,
+[data-color=green] .hover-text-color-50:hover {
+  color: #E8F5E9 !important;
+}
+
+[data-color=green] .border-color {
+  border-color: #4CAF50 !important;
+}
+
+[data-color=green] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #388E3C !important;
+  box-shadow: 0 1px 0 0 #388E3C !important;
+}
+
+[data-color=green] .rich-textarea:focus:not([readonly]) + label {
+  color: #388E3C !important;
+}
+
+/* ----------------- LIGHT GREEN ------------------- */
+
+.ground-color-light-green-900,
+.hover-ground-color-light-green-900:hover,
+[data-color=light-green] .ground-color-900,
+[data-color=light-green] .hover-ground-color-900:hover {
+  background-color: #33691E !important;
+}
+.text-color-light-green-900,
+.hover-text-color-light-green-900:hover,
+[data-color=light-green] .text-color-900,
+[data-color=light-green] .hover-text-color-900:hover {
+  color: #33691E !important;
+}
+
+.ground-color-light-green-700,
+.hover-ground-color-light-green-700:hover,
+[data-color=light-green] .ground-color-700,
+[data-color=light-green] .hover-ground-color-700:hover {
+  background-color: #689F38 !important;
+}
+.text-color-light-green-700,
+.hover-text-color-light-green-700:hover,
+[data-color=light-green] .text-color-700,
+[data-color=light-green] .hover-text-color-700:hover {
+  color: #689F38 !important;
+}
+
+.ground-color-light-green-500,
+.hover-ground-color-light-green-500:hover,
+[data-color=light-green] .ground-color-500,
+[data-color=light-green] .hover-ground-color-500:hover {
+  background-color: #8BC34A !important;
+}
+.text-color-light-green-500,
+.hover-text-color-light-green-500:hover,
+[data-color=light-green] .text-color-500,
+[data-color=light-green] .hover-text-color-500:hover {
+  color: #8BC34A !important;
+}
+
+.ground-color-light-green-300,
+.hover-ground-color-light-green-300:hover,
+[data-color=light-green] .ground-color-300,
+[data-color=light-green] .hover-ground-color-300:hover {
+  background-color: #AED581 !important;
+}
+.text-color-light-green-300,
+.hover-text-color-light-green-300:hover,
+[data-color=light-green] .text-color-300,
+[data-color=light-green] .hover-text-color-300:hover {
+  color: #AED581 !important;
+}
+
+.ground-color-light-green-100,
+.hover-ground-color-light-green-100:hover,
+[data-color=light-green] .ground-color-100,
+[data-color=light-green] .hover-ground-color-100:hover {
+  background-color: #DCEDC8 !important;
+}
+.text-color-light-green-100,
+.hover-text-color-light-green-100:hover,
+[data-color=light-green] .text-color-100,
+[data-color=light-green] .hover-text-color-100:hover {
+  color: #DCEDC8 !important;
+}
+
+.ground-color-light-green-50,
+.hover-ground-color-light-green-50:hover,
+[data-color=light-green] .ground-color-50,
+[data-color=light-green] .hover-ground-color-50:hover {
+  background-color: #F1F8E9 !important;
+}
+.text-color-light-green-50,
+.hover-text-color-light-green-50:hover,
+[data-color=light-green] .text-color-50,
+[data-color=light-green] .hover-text-color-50:hover {
+  color: #F1F8E9 !important;
+}
+
+[data-color=light-green] .border-color {
+  border-color: #8BC34A !important;
+}
+
+[data-color=light-green] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #689F38 !important;
+  box-shadow: 0 1px 0 0 #689F38 !important;
+}
+[data-color=light-green] .rich-textarea:focus:not([readonly]) + label {
+  color: #689F38 !important;
+}
+
+/* ----------------- LIME ------------------- */
+
+.ground-color-lime-900,
+.hover-ground-color-lime-900:hover,
+[data-color=lime] .ground-color-900,
+[data-color=lime] .hover-ground-color-900:hover {
+  background-color: #827717 !important;
+}
+.text-color-lime-900,
+.hover-text-color-lime-900:hover,
+[data-color=lime] .text-color-900,
+[data-color=lime] .hover-text-color-900:hover {
+  color: #827717 !important;
+}
+
+.ground-color-lime-700,
+.hover-ground-color-lime-700:hover,
+[data-color=lime] .ground-color-700,
+[data-color=lime] .hover-ground-color-700:hover {
+  background-color: #AFB42B !important;
+}
+.text-color-lime-700,
+.hover-text-color-lime-700:hover,
+[data-color=lime] .text-color-700,
+[data-color=lime] .hover-text-color-700:hover {
+  color: #AFB42B !important;
+}
+
+.ground-color-lime-500,
+.hover-ground-color-lime-500:hover,
+[data-color=lime] .ground-color-500,
+[data-color=lime] .hover-ground-color-500:hover {
+  background-color: #CDDC39 !important;
+}
+.text-color-lime-500,
+.hover-text-color-lime-500:hover,
+[data-color=lime] .text-color-500,
+[data-color=lime] .hover-text-color-500:hover {
+  color: #CDDC39 !important;
+}
+
+.ground-color-lime-300,
+.hover-ground-color-lime-300:hover,
+[data-color=lime] .ground-color-300,
+[data-color=lime] .hover-ground-color-300:hover {
+  background-color: #DCE775 !important;
+}
+.text-color-lime-300,
+.hover-text-color-lime-300:hover,
+[data-color=lime] .text-color-300,
+[data-color=lime] .hover-text-color-300:hover {
+  color: #DCE775 !important;
+}
+
+.ground-color-lime-100,
+.hover-ground-color-lime-100:hover,
+[data-color=lime] .ground-color-100,
+[data-color=lime] .hover-ground-color-100:hover {
+  background-color: #F0F4C3 !important;
+}
+.text-color-lime-100,
+.hover-text-color-lime-100:hover,
+[data-color=lime] .text-color-100,
+[data-color=lime] .hover-text-color-100:hover {
+  color: #F0F4C3 !important;
+}
+
+.ground-color-lime-50,
+.hover-ground-color-lime-50:hover,
+[data-color=lime] .ground-color-50,
+[data-color=lime] .hover-ground-color-50:hover {
+  background-color: #F9FBE7 !important;
+}
+.text-color-lime-50,
+.hover-text-color-lime-50:hover,
+[data-color=lime] .text-color-50,
+[data-color=lime] .hover-text-color-50:hover {
+  color: #F9FBE7 !important;
+}
+
+[data-color=lime] .border-color {
+  border-color: #CDDC39 !important;
+}
+
+[data-color=lime] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #AFB42B !important;
+  box-shadow: 0 1px 0 0 #AFB42B !important;
+}
+
+[data-color=lime] .rich-textarea:focus:not([readonly]) + label {
+  color: #AFB42B !important;
+}
+
+/* ----------------- AMBER ------------------- */
+
+.ground-color-amber-900,
+.hover-ground-color-amber-900:hover,
+[data-color=amber] .ground-color-900,
+[data-color=amber] .hover-ground-color-900:hover {
+  background-color: #FF6F00 !important;
+}
+.text-color-amber-900,
+.hover-text-color-amber-900:hover,
+[data-color=amber] .text-color-900,
+[data-color=amber] .hover-text-color-900:hover {
+  color: #FF6F00 !important;
+}
+
+.ground-color-amber-700,
+.hover-ground-color-amber-700:hover,
+[data-color=amber] .ground-color-700,
+[data-color=amber] .hover-ground-color-700:hover {
+  background-color: #FFA000 !important;
+}
+.text-color-amber-700,
+.hover-text-color-amber-700:hover,
+[data-color=amber] .text-color-700,
+[data-color=amber] .hover-text-color-700:hover {
+  color: #FFA000 !important;
+}
+
+.ground-color-amber-500,
+.hover-ground-color-amber-500:hover,
+[data-color=amber] .ground-color-500,
+[data-color=amber] .hover-ground-color-500:hover {
+  background-color: #FFC107 !important;
+}
+.text-color-amber-500,
+.hover-text-color-amber-500:hover,
+[data-color=amber] .text-color-500,
+[data-color=amber] .hover-text-color-500:hover {
+  color: #FFC107 !important;
+}
+
+.ground-color-amber-300,
+.hover-ground-color-amber-300:hover,
+[data-color=amber] .ground-color-300,
+[data-color=amber] .hover-ground-color-300:hover {
+  background-color: #FFD54F !important;
+}
+.text-color-amber-300,
+.hover-text-color-amber-300:hover,
+[data-color=amber] .text-color-300,
+[data-color=amber] .hover-text-color-300:hover {
+  color: #FFD54F !important;
+}
+
+.ground-color-amber-100,
+.hover-ground-color-amber-100:hover,
+[data-color=amber] .ground-color-100,
+[data-color=amber] .hover-ground-color-100:hover {
+  background-color: #FFECB3 !important;
+}
+.text-color-amber-100,
+.hover-text-color-amber-100:hover,
+[data-color=amber] .text-color-100,
+[data-color=amber] .hover-text-color-100:hover {
+  color: #FFECB3 !important;
+}
+
+.ground-color-amber-50,
+.hover-ground-color-amber-50:hover,
+[data-color=amber] .ground-color-50,
+[data-color=amber] .hover-ground-color-50:hover {
+  background-color: #FFF8E1 !important;
+}
+.text-color-amber-50,
+.hover-text-color-amber-50:hover,
+[data-color=amber] .text-color-50,
+[data-color=amber] .hover-text-color-50:hover {
+  color: #FFF8E1 !important;
+}
+
+[data-color=amber] .border-color {
+  border-color: #FFC107 !important;
+}
+
+[data-color=amber] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #FFA000 !important;
+  box-shadow: 0 1px 0 0 #FFA000 !important;
+}
+[data-color=amber] .rich-textarea:focus:not([readonly]) + label {
+  color: #FFA000 !important;
+}
+
+/* ----------------- ORANGE ------------------- */
+
+.ground-color-orange-900,
+.hover-ground-color-orange-900:hover,
+[data-color=orange] .ground-color-900,
+[data-color=orange] .hover-ground-color-900:hover {
+  background-color: #E65100 !important;
+}
+.text-color-orange-900,
+.hover-text-color-orange-900:hover,
+[data-color=orange] .text-color-900,
+[data-color=orange] .hover-text-color-900:hover {
+  color: #E65100 !important;
+}
+
+.ground-color-orange-700,
+.hover-ground-color-orange-700:hover,
+[data-color=orange] .ground-color-700,
+[data-color=orange] .hover-ground-color-700:hover {
+  background-color: #F57C00 !important;
+}
+.text-color-orange-700,
+.hover-text-color-orange-700:hover,
+[data-color=orange] .text-color-700,
+[data-color=orange] .hover-text-color-700:hover {
+  color: #F57C00 !important;
+}
+
+.ground-color-orange-500,
+.hover-ground-color-orange-500:hover,
+[data-color=orange] .ground-color-500,
+[data-color=orange] .hover-ground-color-500:hover {
+  background-color: #FF9800 !important;
+}
+.text-color-orange-500,
+.hover-text-color-orange-500:hover,
+[data-color=orange] .text-color-500,
+[data-color=orange] .hover-text-color-500:hover {
+  color: #FF9800 !important;
+}
+
+.ground-color-orange-300,
+.hover-ground-color-orange-300:hover,
+[data-color=orange] .ground-color-300,
+[data-color=orange] .hover-ground-color-300:hover {
+  background-color: #FFB74D !important;
+}
+.text-color-orange-300,
+.hover-text-color-orange-300:hover,
+[data-color=orange] .text-color-300,
+[data-color=orange] .hover-text-color-300:hover {
+  color: #FFB74D !important;
+}
+
+.ground-color-orange-100,
+.hover-ground-color-orange-100:hover,
+[data-color=orange] .ground-color-100,
+[data-color=orange] .hover-ground-color-100:hover {
+  background-color: #FFE0B2 !important;
+}
+.text-color-orange-100,
+.hover-text-color-orange-100:hover,
+[data-color=orange] .text-color-100,
+[data-color=orange] .hover-text-color-100:hover {
+  color: #FFE0B2 !important;
+}
+
+.ground-color-orange-50,
+.hover-ground-color-orange-50:hover,
+[data-color=orange] .ground-color-50,
+[data-color=orange] .hover-ground-color-50:hover {
+  background-color: #FFF3E0 !important;
+}
+.text-color-orange-50,
+.hover-text-color-orange-50:hover,
+[data-color=orange] .text-color-50,
+[data-color=orange] .hover-text-color-50:hover {
+  color: #FFF3E0 !important;
+}
+
+[data-color=orange] .border-color {
+  border-color: #FF9800 !important;
+}
+
+[data-color=orange] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #F57C00 !important;
+  box-shadow: 0 1px 0 0 #F57C00 !important;
+}
+
+[data-color=orange] .rich-textarea:focus:not([readonly]) + label {
+  color: #F57C00 !important;
+}
+
+/* ----------------- DEEP ORANGE ------------------- */
+
+.ground-color-deep-orange-900,
+.hover-ground-color-deep-orange-900:hover,
+[data-color=deep-orange] .ground-color-900,
+[data-color=deep-orange] .hover-ground-color-900:hover {
+  background-color: #BF360C !important;
+}
+.text-color-deep-orange-900,
+.hover-text-color-deep-orange-900:hover,
+[data-color=deep-orange] .text-color-900,
+[data-color=deep-orange] .hover-text-color-900:hover {
+  color: #BF360C !important;
+}
+
+.ground-color-deep-orange-700,
+.hover-ground-color-deep-orange-700:hover,
+[data-color=deep-orange] .ground-color-700,
+[data-color=deep-orange] .hover-ground-color-700:hover {
+  background-color: #E64A19 !important;
+}
+.text-color-deep-orange-700,
+.hover-text-color-deep-orange-700:hover,
+[data-color=deep-orange] .text-color-700,
+[data-color=deep-orange] .hover-text-color-700:hover {
+  color: #E64A19 !important;
+}
+
+.ground-color-deep-orange-500,
+.hover-ground-color-deep-orange-500:hover,
+[data-color=deep-orange] .ground-color-500,
+[data-color=deep-orange] .hover-ground-color-500:hover {
+  background-color: #FF5722 !important;
+}
+.text-color-deep-orange-500,
+.hover-text-color-deep-orange-500:hover,
+[data-color=deep-orange] .text-color-500,
+[data-color=deep-orange] .hover-text-color-500:hover {
+  color: #FF5722 !important;
+}
+
+.ground-color-deep-orange-300,
+.hover-ground-color-deep-orange-300:hover,
+[data-color=deep-orange] .ground-color-300,
+[data-color=deep-orange] .hover-ground-color-300:hover {
+  background-color: #FF8A65 !important;
+}
+.text-color-deep-orange-300,
+.hover-text-color-deep-orange-300:hover,
+[data-color=deep-orange] .text-color-300,
+[data-color=deep-orange] .hover-text-color-300:hover {
+  color: #FF8A65 !important;
+}
+
+.ground-color-deep-orange-100,
+.hover-ground-color-deep-orange-100:hover,
+[data-color=deep-orange] .ground-color-100,
+[data-color=deep-orange] .hover-ground-color-100:hover {
+  background-color: #FFCCBC !important;
+}
+.text-color-deep-orange-100,
+.hover-text-color-deep-orange-100:hover,
+[data-color=deep-orange] .text-color-100,
+[data-color=deep-orange] .hover-text-color-100:hover {
+  color: #FFCCBC !important;
+}
+
+.ground-color-deep-orange-50,
+.hover-ground-color-deep-orange-50:hover,
+[data-color=deep-orange] .ground-color-50,
+[data-color=deep-orange] .hover-ground-color-50:hover {
+  background-color: #FBE9E7 !important;
+}
+.text-color-deep-orange-50,
+.hover-text-color-deep-orange-50:hover,
+[data-color=deep-orange] .text-color-50,
+[data-color=deep-orange] .hover-text-color-50:hover {
+  color: #FBE9E7 !important;
+}
+
+[data-color=deep-orange] .border-color {
+  border-color: #FF5722 !important;
+}
+
+[data-color=deep-orange] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #E64A19 !important;
+  box-shadow: 0 1px 0 0 #E64A19 !important;
+}
+[data-color=deep-orange] .rich-textarea:focus:not([readonly]) + label {
+  color: #E64A19 !important;
+}
+
+/* ----------------- BROWN ------------------- */
+
+.ground-color-brown-900,
+.hover-ground-color-brown-900:hover,
+[data-color=brown] .ground-color-900,
+[data-color=brown] .hover-ground-color-900:hover {
+  background-color: #3E2723 !important;
+}
+.text-color-brown-900,
+.hover-text-color-brown-900:hover,
+[data-color=brown] .text-color-900,
+[data-color=brown] .hover-text-color-900:hover {
+  color: #3E2723 !important;
+}
+
+.ground-color-brown-700,
+.hover-ground-color-brown-700:hover,
+[data-color=brown] .ground-color-700,
+[data-color=brown] .hover-ground-color-700:hover {
+  background-color: #5D4037 !important;
+}
+.text-color-brown-700,
+.hover-text-color-brown-700:hover,
+[data-color=brown] .text-color-700,
+[data-color=brown] .hover-text-color-700:hover {
+  color: #5D4037 !important;
+}
+
+.ground-color-brown-500,
+.hover-ground-color-brown-500:hover,
+[data-color=brown] .ground-color-500,
+[data-color=brown] .hover-ground-color-500:hover {
+  background-color: #795548 !important;
+}
+.text-color-brown-500,
+.hover-text-color-brown-500:hover,
+[data-color=brown] .text-color-500,
+[data-color=brown] .hover-text-color-500:hover {
+  color: #795548 !important;
+}
+
+.ground-color-brown-300,
+.hover-ground-color-brown-300:hover,
+[data-color=brown] .ground-color-300,
+[data-color=brown] .hover-ground-color-300:hover {
+  background-color: #A1887F !important;
+}
+.text-color-brown-300,
+.hover-text-color-brown-300:hover,
+[data-color=brown] .text-color-300,
+[data-color=brown] .hover-text-color-300:hover {
+  color: #A1887F !important;
+}
+
+.ground-color-brown-100,
+.hover-ground-color-brown-100:hover,
+[data-color=brown] .ground-color-100,
+[data-color=brown] .hover-ground-color-100:hover {
+  background-color: #D7CCC8 !important;
+}
+.text-color-brown-100,
+.hover-text-color-brown-100:hover,
+[data-color=brown] .text-color-100,
+[data-color=brown] .hover-text-color-100:hover {
+  color: #D7CCC8 !important;
+}
+
+.ground-color-brown-50,
+.hover-ground-color-brown-50:hover,
+[data-color=brown] .ground-color-50,
+[data-color=brown] .hover-ground-color-50:hover {
+  background-color: #EFEBE9 !important;
+}
+.text-color-brown-50,
+.hover-text-color-brown-50:hover,
+[data-color=brown] .text-color-50,
+[data-color=brown] .hover-text-color-50:hover {
+  color: #EFEBE9 !important;
+}
+
+[data-color=brown] .border-color {
+  border-color: #795548 !important;
+}
+
+[data-color=brown] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #5D4037 !important;
+  box-shadow: 0 1px 0 0 #5D4037 !important;
+}
+[data-color=brown] .rich-textarea:focus:not([readonly]) + label {
+  color: #5D4037 !important;
+}
+
+/* ----------------- BLUE GREY ------------------- */
+
+.ground-color-blue-grey-900,
+.hover-ground-color-blue-grey-900:hover,
+[data-color=blue-grey] .ground-color-900,
+[data-color=blue-grey] .hover-ground-color-900:hover {
+  background-color: #263238 !important;
+}
+.text-color-blue-grey-900,
+.hover-text-color-blue-grey-900:hover,
+[data-color=blue-grey] .text-color-900,
+[data-color=blue-grey] .hover-text-color-900:hover {
+  color: #263238 !important;
+}
+
+.ground-color-blue-grey-700,
+.hover-ground-color-blue-grey-700:hover,
+[data-color=blue-grey] .ground-color-700,
+[data-color=blue-grey] .hover-ground-color-700:hover {
+  background-color: #455A64 !important;
+}
+.text-color-blue-grey-700,
+.hover-text-color-blue-grey-700:hover,
+[data-color=blue-grey] .text-color-700,
+[data-color=blue-grey] .hover-text-color-700:hover {
+  color: #455A64 !important;
+}
+
+.ground-color-blue-grey-500,
+.hover-ground-color-blue-grey-500:hover,
+[data-color=blue-grey] .ground-color-500,
+[data-color=blue-grey] .hover-ground-color-500:hover {
+  background-color: #607D8B !important;
+}
+.text-color-blue-grey-500,
+.hover-text-color-blue-grey-500:hover,
+[data-color=blue-grey] .text-color-500,
+[data-color=blue-grey] .hover-text-color-500:hover {
+  color: #607D8B !important;
+}
+
+.ground-color-blue-grey-300,
+.hover-ground-color-blue-grey-300:hover,
+[data-color=blue-grey] .ground-color-300,
+[data-color=blue-grey] .hover-ground-color-300:hover {
+  background-color: #90A4AE !important;
+}
+.text-color-blue-grey-300,
+.hover-text-color-blue-grey-300:hover,
+[data-color=blue-grey] .text-color-300,
+[data-color=blue-grey] .hover-text-color-300:hover {
+  color: #90A4AE !important;
+}
+
+.ground-color-blue-grey-100,
+.hover-ground-color-blue-grey-100:hover,
+[data-color=blue-grey] .ground-color-100,
+[data-color=blue-grey] .hover-ground-color-100:hover {
+  background-color: #CFD8DC !important;
+}
+.text-color-blue-grey-100,
+.hover-text-color-blue-grey-100:hover,
+[data-color=blue-grey] .text-color-100,
+[data-color=blue-grey] .hover-text-color-100:hover {
+  color: #CFD8DC !important;
+}
+
+.ground-color-blue-grey-50,
+.hover-ground-color-blue-grey-50:hover,
+[data-color=blue-grey] .ground-color-50,
+[data-color=blue-grey] .hover-ground-color-50:hover {
+  background-color: #ECEFF1 !important;
+}
+.text-color-blue-grey-50,
+.hover-text-color-blue-grey-50:hover,
+[data-color=blue-grey] .text-color-50,
+[data-color=blue-grey] .hover-text-color-50:hover {
+  color: #ECEFF1 !important;
+}
+
+[data-color=blue-grey] .border-color {
+  border-color: #607D8B !important;
+}
+
+[data-color=blue-grey] .rich-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #455A64 !important;
+  box-shadow: 0 1px 0 0 #455A64 !important;
+}
+[data-color=blue-grey] .rich-textarea:focus:not([readonly]) + label {
+  color: #455A64 !important;
+}
+
+/* ----------------- GREY ------------------- */
+
+.ground-color-grey-900,
+.hover-ground-color-grey-900:hover {
+  background-color: #212121 !important;
+}
+.text-color-grey-900,
+.hover-text-color-grey-900:hover {
+  color: #212121 !important;
+}
+
+.ground-color-grey-700,
+.hover-ground-color-grey-700:hover {
+  background-color: #616161 !important;
+}
+.text-color-grey-700,
+.hover-text-color-grey-700:hover {
+  color: #616161 !important;
+}
+
+.ground-color-grey-500,
+.hover-ground-color-grey-500:hover {
+  background-color: #9E9E9E !important;
+}
+.text-color-grey-500,
+.hover-text-color-grey-500:hover {
+  color: #9E9E9E !important;
+}
+
+.ground-color-grey-300,
+.hover-ground-color-grey-300:hover {
+  background-color: #E0E0E0 !important;
+}
+.text-color-grey-300,
+.hover-text-color-grey-300:hover {
+  color: #E0E0E0 !important;
+}
+
+.ground-color-grey-100,
+.hover-ground-color-grey-100:hover {
+  background-color: #F5F5F5 !important;
+}
+.text-color-grey-100,
+.hover-text-color-grey-100:hover {
+  color: #F5F5F5 !important;
+}
+
+.ground-color-grey-50,
+.hover-ground-color-grey-50:hover {
+  background-color: #FAFAFA !important;
+}
+.text-color-grey-50,
+.hover-text-color-grey-50:hover {
+  color: #FAFAFA !important;
+}

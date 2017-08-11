@@ -1,0 +1,56 @@
+<div class="login-panel">
+    <div class="login-panel-head noselect">
+        <img src="images/xabber-logo.png" class="client-logo">
+        <span class="client-name">Xabber Web</span>
+        <span class="login-type">XMPP Login</span>
+    </div>
+    <div class="login-panel-form xmpp-login-form noselect">
+        <div class="login-form-header">Xabber Login</div>
+        <div class="input-field">
+            <input id="username" type="text" name="username">
+            <label for="username">Xabber username or email</label>
+            <span class="errors fixed one-line"></span>
+        </div>
+        <div class="input-field">
+            <input id="password" type="password" name="password" class="noselect">
+            <label for="password">Password</label>
+            <span class="errors fixed one-line"></span>
+        </div>
+        <div class="input-field buttons-wrap">
+            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">Forgot password?</a>
+            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>
+        </div>
+        <div class="clearfix"></div>
+        {[ if (USE_SOCIAL_AUTH) { ]}
+        <div class="social-auth-wrap">
+            <div class="social-header">
+                <div class="divider"></div>
+                <div class="social-header-tip">Social Sign In</div>
+            </div>
+            <div class="social-buttons">
+                <div class="btn-social google-color" data-provider="google">
+                    <i class="mdi mdi-28px mdi-google-plus"></i>
+                </div>
+                <div class="btn-social facebook-color" data-provider="facebook">
+                    <i class="mdi mdi-28px mdi-facebook"></i>
+                </div>
+                <div class="btn-social twitter-color" data-provider="twitter">
+                    <i class="mdi mdi-28px mdi-twitter"></i>
+                </div>
+                <div class="btn-social github-color" data-provider="github">
+                    <i class="mdi mdi-28px mdi-github-circle"></i>
+                </div>
+            </div>
+        </div>
+        {[ } ]}
+    </div>
+    <div class="login-panel-footer">
+        <div class="registration-footer">
+            <div class="registration-tip-wrap">
+                <span class="registration-tip">No Xabber account?</span>
+                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>
+            </div>
+        </div>
+        <div class="footer-text clearfix">Xabber account lets you easily sync your settings and connected XMPP accounts between various devices. Visit Xabber.com for more details.</div>
+    </div>
+</div>

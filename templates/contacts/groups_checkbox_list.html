@@ -1,0 +1,15 @@
+{[ for (var i = 0; i < groups.length; i++) { var name = groups[i].name, checked = groups[i].checked, group_id = groups[i].id; ]}
+    <div class="input-field checkbox-field existing-group-field">
+        <input type="checkbox" class="filled-in" id="{{group_id}}" data-groupname="{{name}}" {[ if (checked) { ]}checked="checked"{[ } ]} />
+        <label for="{{group_id}}">{{name}}</label>
+    </div>
+{[ } ]}
+    <div class="new-group-field-wrap">
+        <div class="input-field checkbox-field new-group-checkbox hidden">
+            <input type="checkbox" class="filled-in" id="new_group_checkbox"/>
+            <label for="new_group_checkbox">.</label>
+        </div>
+        <div class="input-field new-group-name">
+            <input class="xabber-input" id="new-group-name" type="text" name="new_group_name" placeholder="Create new group">
+        </div>
+    </div>

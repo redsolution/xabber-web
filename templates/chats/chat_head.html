@@ -1,0 +1,34 @@
+    <div class="circle-avatar">
+        <img>
+    </div>
+    <div class="contact-status hide-offline"></div>
+    <div class="contact-info">
+        <p class="contact-name one-line"></p>
+        <p class="contact-status-message one-line"></p>
+    </div>
+    <div class="chat-tools-wrap">
+        <div class="chat-tool btn-notifications">
+            <i class="no-muted mdi mdi-20px mdi-volume-medium"></i>
+            <svg class="muted mdi mdi-16px mdi-svg-template" data-svgname="volume-off-variant" viewBox="0 0 13 16"></svg>
+        </div>
+        <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">
+            <i class="mdi mdi-20px mdi-dots-vertical"></i>
+        </div>
+        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
+            <li class="btn-contact-details">
+                <span class="one-line">Contact info</span>
+            </li>
+            <li class="btn-clear-history">
+                <span class="one-line">Clear message history</span>
+            </li>
+            <li class="btn-block-contact">
+                <span class="one-line">Block contact</span>
+            </li>
+            <li class="btn-unblock-contact">
+                <span class="one-line">Unblock contact</span>
+            </li>
+            <li class="btn-close-chat">
+                <span class="one-line">Close chat</span>
+            </li>
+        </ul>
+    </div>

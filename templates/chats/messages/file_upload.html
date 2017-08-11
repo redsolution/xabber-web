@@ -1,0 +1,31 @@
+<div class="chat-message file-upload noselect" data-time="{{timestamp}}" data-from="{{from_jid}}" data-msgid="{{msgid}}">
+    <div class="left-side noselect">
+        <div class="circle-avatar"><img></div>
+    </div>
+
+    <div class="msg-wrap">
+        <div class="chat-msg-author-wrap">
+            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
+        </div>
+        <div class="chat-msg-content chat-file-content">
+            <div class="chat-file-info">
+                <div class="filename text-color-700 one-line">{{file.name}}</div>
+                <div class="filesize grey-text one-line"></div>
+                <div class="status-area">
+                    <div class="status one-line text-color-700" style="display: none"></div>
+                    <div class="repeat-upload text-color-700" style="display: none;">Resend</div>
+                </div>
+                <div class="progress-area">
+                    <div class="progress ground-color-100">
+                        <div class="determinate ground-color-700" style="width: 0%"></div>
+                    </div>
+                    <div class="cancel-upload text-color-700">Cancel</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-side noselect">
+        <div class="msg-time selectable-text">{{time}}</div>
+        <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}"></i>
+    </div>

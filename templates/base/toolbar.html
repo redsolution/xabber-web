@@ -1,0 +1,56 @@
+<div class="toolbar-item all-chats" title="All chats">
+    <div class="border"></div>
+    <img class="logo" src="images/xabber-logo.png">
+</div>
+
+<div class="toolbar-item chats active" title="Chats">
+    <div class="border"></div>
+    <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>
+    <span class="msg-indicator"></span>
+</div>
+
+<div class="toolbar-item group-chats" title="Group chats">
+    <div class="border"></div>
+    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" data-svgname="message-group"></svg>
+</div>
+
+<div class="toolbar-item contacts" title="Contacts">
+    <div class="border"></div>
+    <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>
+</div>
+
+<div class="toolbar-item settings" title="Settings">
+    <div class="border"></div>
+    <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>
+</div>
+
+<div class="add-something-wrap">
+    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add">
+        <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>
+    </div>
+
+    <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">
+        <div class="add-variant contact">
+            <i class="mdi mdi-20px mdi-account-plus"></i>
+            <span class="text">Add contact</span>
+        </div>
+        <div class="add-variant account">
+            <i class="mdi mdi-20px mdi-account-circle"></i>
+            <span class="text">Add account</span>
+        </div>
+    </div>
+</div>
+
+<div class="divider noselect"></div>
+
+<div class="accounts-wrap">
+    <div class="accounts">
+    </div>
+</div>
+
+<div class="toolbar-bottom">
+    <div class="toolbar-item about" title="About">
+        <div class="border"></div>
+        <i class="toolbar-icon mdi mdi-24px mdi-information"></i>
+    </div>
+</div>

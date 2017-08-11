@@ -1,0 +1,7 @@
+*~
+node_modules
+npm-ready
+/*.html
+!example_index.html
+!example_dev.html
+

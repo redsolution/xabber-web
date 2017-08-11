@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Xabber Web</title>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <link rel="stylesheet" href="css/materialdesignicons.css"/>
+    <link rel="stylesheet" href="node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.css"/>
+    <link rel="stylesheet" href="css/materialize.css"/>
+    <link rel="stylesheet" href="css/color-scheme.css"/>
+    <link rel="stylesheet" href="css/xabber.css"/>
+    <script src="node_modules/requirejs/require.js"></script>
+    <script src="config.js"></script>
+    <script>
+        require(["xabber"], function (xabber) {
+            xabber.configure({
+                // Please specify location of xabber-websocket service,
+                // e.g. 'https://web.xabber.com/websocket
+                // To run your own server visit https://github.com/redsolution/xabber-websocket
+                CONNECTION_URL: '',
+                LOG_LEVEL: 'INFO',
+                DEBUG: true,
+                STORAGE_NAME_ENDING: 'dev'
+            });
+            xabber.start();
+        });
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

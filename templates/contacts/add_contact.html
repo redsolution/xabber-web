@@ -1,0 +1,50 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>Add new contact</span>
+    </div>
+    <div class="modal-content">
+        <div class="row account-field">
+            <div class="field-header">Account</div>
+            <div class="multiple-acc">
+                <div class="account-dropdown-wrap">
+                    <div class="dropdown-button" data-activates="select-account-for-add-contact">
+                        <div class="account-item-wrap">
+                        </div>
+                        <div class="caret">
+                            <i class="mdi mdi-20px mdi-menu-down"></i>
+                        </div>
+                    </div>
+                    <div id="select-account-for-add-contact" class="dropdown-content noselect">
+                    </div>
+                </div>
+            </div>
+            <div class="single-acc">
+                <div class="dropdown-button">
+                    <div class="account-item-wrap">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row name-field">
+            <div class="input-field">
+                <input id="new_contact_username" type="text" name="username">
+                <label for="new_contact_username">Contact username</label>
+                <span class="errors fixed"></span>
+            </div>
+            <div class="input-field">
+                <input id="new_contact_name" type="text" name="contact_name" required>
+                <label for="new_contact_name">Contact name</label>
+            </div>
+            <span class="add-contact-feedback red-text"></span>
+        </div>
+        <div class="row groups-field">
+            <div class="field-header">Groups</div>
+            <div class="groups checkbox-list">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-add">Add</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    </div>
+</div>

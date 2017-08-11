@@ -1,0 +1,42 @@
+<div class="modal-content-wrap settings-panel">
+    <div class="modal-header">
+        <span>Group settings</span>
+    </div>
+
+    <div class="modal-content">
+            <div class="field-wrap group-name">
+                <div class="input-field">
+                    <input id="{{view.cid}}-group-name" type="text" name="group_name">
+                    <label for="{{view.cid}}-group-name">Name</label>
+                    <span class="errors fixed"></span>
+                </div>
+            </div>
+
+            <div class="setting-name">Offline contacts</div>
+            <div class="setting-wrap">
+                <div class="setting offline radio-button field-wrap">
+                    <div class="field radio-field clickable-field">
+                        <form action="#">
+                            <p>
+                                <input class="with-gap" name="offline" value="yes" type="radio" id="{{view.cid}}-show" />
+                                <label for="{{view.cid}}-show">Always show</label>
+                            </p>
+                            <p>
+                                <input class="with-gap" name="offline" value="no" type="radio" id="{{view.cid}}-hide" />
+                                <label for="{{view.cid}}-hide">Always hide</label>
+                            </p>
+                            <p>
+                                <input class="with-gap" name="offline" value="default" type="radio" id="{{view.cid}}-show-offline-default" />
+                                <label for="{{view.cid}}-show-offline-default">Use common settings</label>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-dark btn-delete left">Delete</button>
+        <button class="btn-flat btn-main btn-apply">Apply</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    </div>
+</div>

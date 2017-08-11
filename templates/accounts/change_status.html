@@ -1,0 +1,44 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>Set status</span>
+    </div>
+    <ul class="status-values noselect">
+        <li data-value="chat">
+            <span class="status-value one-line">Ready for chat</span>
+            <span class="status-bulb" data-status="chat"></span>
+        </li>
+        <li data-value="online">
+            <span class="status-value one-line">Online</span>
+            <span class="status-bulb" data-status="online"></span>
+        </li>
+        <li data-value="away">
+            <span class="status-value one-line">Away</span>
+            <span class="status-bulb" data-status="away"></span>
+        </li>
+        <li data-value="xa">
+            <span class="status-value one-line">Away for long time</span>
+            <span class="status-bulb" data-status="xa"></span>
+        </li>
+        <li data-value="dnd">
+            <span class="status-value one-line">Busy</span>
+            <span class="status-bulb" data-status="dnd"></span>
+        </li>
+        <li data-value="offline">
+            <span class="status-value one-line">Offline</span>
+            <span class="status-bulb" data-status="offline"></span>
+        </li>
+    </ul>
+    <div class="modal-content">
+        <div class="row">
+            <div class="input-field status-message-wrap">
+                <span class="static-label">Custom status message</span>
+                <input type="text" class="status-message">
+                <i class="clear-input mdi mdi-20px mdi-close"></i>
+            </div>
+            <div class="input-field checkbox-field no-padding">
+                <input type="checkbox" class="filled-in apply-to-all" id="{{view.cid}}_apply_to_all"/>
+                <label for="{{view.cid}}_apply_to_all">Apply to all accounts</label>
+            </div>
+        </div>
+    </div>
+</div>

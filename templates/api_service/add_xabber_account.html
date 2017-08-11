@@ -1,0 +1,59 @@
+<div class="modal main-modal add-xabber-account-modal">
+
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>Xabber Login</span>
+    </div>
+    <div class="modal-content">
+        <div class="row login-form-field">
+            <div class="input-field">
+                <input id="username" type="text" name="username">
+                <label for="username">Xabber username or email</label>
+                <span class="errors fixed"></span>
+            </div>
+            <div class="input-field">
+                <input id="password" type="password" name="password" class="noselect">
+                <label for="password">Password</label>
+                <span class="errors fixed"></span>
+            </div>
+        </div>
+        {[ if (USE_SOCIAL_AUTH) { ]}
+        <div class="row social-auth-wrap">
+            <div class="social-header">
+                <div class="divider"></div>
+                <div class="social-header-tip">Social Sign In</div>
+            </div>
+            <div class="social-buttons">
+                <div class="btn-social google-color" data-provider="google">
+                    <i class="mdi mdi-28px mdi-google-plus"></i>
+                </div>
+                <div class="btn-social facebook-color" data-provider="facebook">
+                    <i class="mdi mdi-28px mdi-facebook"></i>
+                </div>
+                <div class="btn-social twitter-color" data-provider="twitter">
+                    <i class="mdi mdi-28px mdi-twitter"></i>
+                </div>
+                <div class="btn-social github-color" data-provider="github">
+                    <i class="mdi mdi-28px mdi-github-circle"></i>
+                </div>
+            </div>
+        </div>
+        {[ } ]}
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-add">Log in</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    </div>
+</div>
+
+</div>
+
+    <div class="login-panel-footer">
+        <div class="registration-footer">
+            <div class="registration-tip-wrap">
+                <span class="registration-tip">No Xabber account?</span>
+                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>
+            </div>
+        </div>
+        <div class="footer-text clearfix">Xabber account lets you easily sync your settings and connected XMPP accounts between various devices. Visit Xabber.com for more details.</div>
+    </div>
