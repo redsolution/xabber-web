@@ -1281,7 +1281,7 @@ body {
   color: #FFFFFF;
 }
 
-.group-head .group-toggle {
+.group-head .group-name {
   float: left;
   max-width: 210px;
 }

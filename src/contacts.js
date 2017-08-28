@@ -745,7 +745,7 @@ define("xabber-contacts", function () {
         },
 
         updateName: function () {
-            this.$('.group-toggle').text(this.model.get('name'));
+            this.$('.group-name').text(this.model.get('name'));
         },
 
         updateMembersCounter: function () {
