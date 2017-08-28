@@ -203,7 +203,7 @@ input[type=checkbox].filled-in:checked + label:after {
 
 .one-line {
   white-space: nowrap;
-  overflow-x: hidden;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
