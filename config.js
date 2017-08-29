@@ -33,7 +33,7 @@ require.config({
         "xabber-textarea-utils":    "src/utils/textarea",
         "xabber-emoji-utils":       "src/utils/emoji",
         "xabber-image-utils":       "src/utils/images",
-        "xabber-dialog-utils":      "src/utils/dialogs",
+        "xabber-modal-utils":       "src/utils/modals",
         "xabber-environment":       "src/environment",
 
         "xabber-core":              "src/core",

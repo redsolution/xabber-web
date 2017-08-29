@@ -838,13 +838,13 @@ if ($) {
           // Handle modal ready callback
           complete: function() {
             $overlay.css({display:"none"});
+            _stack--;
+            $overlay.remove();
 
             // Call complete callback
             if (typeof(options.complete) === "function") {
               options.complete();
             }
-            $overlay.remove();
-            _stack--;
           }
         });
       }
@@ -854,14 +854,14 @@ if ($) {
           duration: options.out_duration,
           complete:
             function() {
-
               $(this).css('display', 'none');
+              _stack--;
+              $overlay.remove();
+
               // Call complete callback
               if (typeof(options.complete) === "function") {
                 options.complete();
               }
-              $overlay.remove();
-              _stack--;
             }
           }
         );

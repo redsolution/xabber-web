@@ -2,9 +2,9 @@ define([
     "xabber-dependencies",
     "xabber-emoji-utils",
     "xabber-image-utils",
-    "xabber-dialog-utils",
+    "xabber-modal-utils",
     "xabber-textarea-utils"
-], function (deps, emoji, images, dialogs, textarea) {
+], function (deps, emoji, images, modals, textarea) {
     var $ = deps.$,
         _ = deps._,
         moment = deps.moment;
@@ -147,7 +147,8 @@ define([
 
         emoji: emoji,
         images: images,
-        dialogs: dialogs
+        modals: modals,
+        dialogs: modals.dialogs
     };
 
     return utils;

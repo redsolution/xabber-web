@@ -1568,7 +1568,7 @@ define("xabber-chats", function () {
             this.$('.chat-item').removeClass('active');
             this.clearSearch();
             this.data.set('visible', true);
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: function () {
                     this.updateScrollBar();
                     this.$('.search-input').focus();
