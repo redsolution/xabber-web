@@ -1332,7 +1332,7 @@ define("xabber-accounts", function () {
         },
 
         render: function (options) {
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: this.onRender.bind(this),
                 complete: this.close.bind(this)
             });
@@ -1381,7 +1381,8 @@ define("xabber-accounts", function () {
             this.is_login = options.login;
             this.$('.modal-header span').text(this.is_login ? 'Log In' : 'Set password');
             this.$('.btn-change').text(this.is_login ? 'Log In': 'Set');
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
+                use_queue: true,
                 ready: this.onRender.bind(this),
                 complete: this.close.bind(this)
             });
@@ -1594,7 +1595,7 @@ define("xabber-accounts", function () {
         },
 
         render: function (options) {
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: this.onRender.bind(this),
                 complete: this.close.bind(this)
             });

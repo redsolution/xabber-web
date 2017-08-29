@@ -455,7 +455,7 @@ define("xabber-api-service", function () {
         },
 
         render: function () {
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 opacity: 0.9,
                 ready: this.onRender.bind(this),
                 complete: this.closeModal.bind(this)
@@ -497,7 +497,7 @@ define("xabber-api-service", function () {
 
         render: function (data, options) {
             this.settings = data;
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: this.onRender.bind(this),
                 complete: this.close.bind(this)
             });
