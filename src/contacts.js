@@ -745,7 +745,7 @@ define("xabber-contacts", function () {
         },
 
         updateName: function () {
-            this.$('.group-toggle').text(this.model.get('name'));
+            this.$('.group-name').text(this.model.get('name'));
         },
 
         updateMembersCounter: function () {
@@ -872,7 +872,7 @@ define("xabber-contacts", function () {
             this.$('.group-name .errors').addClass('hidden');
             this.$('.offline input[type=radio][name=offline][value='+
                     (this.model.settings.show_offline)+']').prop('checked', true);
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: function () {
                     Materialize.updateTextFields();
                 },
@@ -1651,7 +1651,7 @@ define("xabber-contacts", function () {
             }.bind(this));
             this.bindAccount(accounts[0]);
             this.$('span.errors').text('');
-            this.$el.appendTo('#modals').openModal({
+            this.$el.openModal({
                 ready: function () {
                     Materialize.updateTextFields();
                     this.$('.account-field .dropdown-button').dropdown({
