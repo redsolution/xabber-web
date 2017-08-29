@@ -1380,6 +1380,7 @@ define("xabber-accounts", function () {
             options || (options = {});
             this.is_login = options.login;
             this.$('.modal-header span').text(this.is_login ? 'Log In' : 'Set password');
+            this.$('.btn-cancel').text(this.is_login ? 'Skip' : 'Cancel');
             this.$('.btn-change').text(this.is_login ? 'Log In': 'Set');
             this.$el.openModal({
                 use_queue: true,
@@ -1389,8 +1390,8 @@ define("xabber-accounts", function () {
         },
 
         onRender: function () {
-            this.authFeedback({});
             Materialize.updateTextFields();
+            this.authFeedback({});
             this.$password_input.val('').focus();
         },
 
@@ -1437,7 +1438,6 @@ define("xabber-accounts", function () {
 
         cancel: function () {
             this.data.set('authentication', false);
-            this.onRender();
         },
 
         updateButtons: function () {
@@ -1465,6 +1465,9 @@ define("xabber-accounts", function () {
         },
 
         close: function () {
+            if (this.is_login) {
+                this.model.save('enabled', false);
+            }
             this.cancel();
             this.closeModal();
         },
