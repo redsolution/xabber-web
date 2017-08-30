@@ -16,3 +16,6 @@ httpserver: npm-ready
 minify: npm-ready
 	./node_modules/.bin/cleancss -o dist/xabber.min.css css/materialdesignicons.css node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.css css/materialize.css css/color-scheme.css css/xabber.css
 	./node_modules/.bin/r.js -o name=node_modules/requirejs/require.js mainConfigFile=config.js
+
+release: npm-ready
+	./bash/release.sh
