@@ -42,6 +42,7 @@ define("xabber-accounts", function () {
             settings.color || (settings.color = this.collection.getDefaultColor());
             settings.order || (settings.order = this.collection.getLastOrder() + 1);
             this.settings.save(settings);
+            this.settings.on("delete_account", this.deleteAccount, this);
             var attrs = _.clone(_attrs);
             attrs.name || (attrs.name = attrs.jid);
             attrs.image || (attrs.image = Images.getDefaultAvatar(attrs.jid, attrs.name));
@@ -550,6 +551,7 @@ define("xabber-accounts", function () {
         deleteAll: function () {
             xabber.api_account.logout();
             _.each(_.clone(this.models), function (account) {
+                account.deleted_by_user = true;
                 account.deleteAccount();
             });
         },
@@ -581,7 +583,11 @@ define("xabber-accounts", function () {
         onDestroy: function (account) {
             if (!account.get('is_new')) {
                 var no_accounts = !(this.length || xabber.api_account.get('connected'));
-                xabber.body.setScreen(no_accounts ? 'login' : 'chats');
+                if (no_accounts) {
+                    xabber.body.setScreen('login');
+                } else if (account.deleted_by_user) {
+                    xabber.body.setScreen('chats');
+                }
             }
         },
 
@@ -955,7 +961,10 @@ define("xabber-accounts", function () {
         deleteAccount: function (ev) {
             utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
                     "Account will not be deleted from the server.").done(function (res) {
-                res && this.model.deleteAccount();
+                if (res) {
+                    this.model.deleted_by_user = true;
+                    this.model.deleteAccount();
+                }
             }.bind(this));
         }
     });

@@ -3927,18 +3927,16 @@ body {
 
 .sync-settings-modal .account-info-wrap .name {
   height: 19px;
-  margin-top: 7px;
   font-size: 16px;
   line-height: 19px;
 }
 
-.sync-settings-modal .account-info-wrap .jid {
+.sync-settings-modal .account-info-wrap .action {
   height: 14px;
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 300;
   line-height: 14px;
-  color: #9E9E9E;
 }
 
 
