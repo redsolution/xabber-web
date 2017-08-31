@@ -1,11 +1,11 @@
 <div class="account-wrap">
     <div class="account-info-wrap">
-        <div class="circle-avatar noselect">
-            <img>
-        </div>
+        <i class="sync-icon mdi mdi-24px {{sync_way_data.icon}}"></i>
+        <i class="no-sync-icon mdi mdi-24px mdi mdi-24px mdi-cloud-outline-off"></i>
         <div class="text-info-wrap">
             <div class="name text-color-grey-900 one-line">{{jid}}</div>
-            <div class="action text-color-grey-500 one-line">{{sync_way}}</div>
+            <div class="sync-tip text-color-grey-500 one-line">{{sync_way_data.tip}}</div>
+            <div class="no-sync-tip text-color-grey-500 one-line">Local account</div>
         </div>
     </div>
     <div class="input-field checkbox-field sync-one-wrap no-padding">

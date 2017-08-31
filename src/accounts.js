@@ -29,6 +29,7 @@ define("xabber-accounts", function () {
             options || (options = {});
             if (_attrs.is_new && !options.auth_view) {
                 this.is_invalid = true;
+                this.on("destroy", this.onDestroy, this);
                 return;
             }
             this.settings = xabber.account_settings_list.get(_attrs.jid);
@@ -1152,6 +1153,7 @@ define("xabber-accounts", function () {
             this.$el.on('drag_to', this.onDragTo.bind(this));
             this.$('.move-account-to-this')
                 .on('move_xmpp_account', this.onMoveAccount.bind(this));
+            this.model.settings.on("change:synced", this.onChangedSyncedState, this);
         },
 
         updateAvatar: function () {
@@ -1185,6 +1187,10 @@ define("xabber-accounts", function () {
 
         onMoveAccount: function (ev, account) {
             this.model.collection.moveBefore(account, this.model);
+        },
+
+        onChangedSyncedState: function () {
+            this.$el.switchClass(this.model.settings.get('synced'));
         },
 
         showSettings: function () {
