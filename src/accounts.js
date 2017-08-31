@@ -1145,6 +1145,7 @@ define("xabber-accounts", function () {
             this.updateEnabled();
             this.updateAvatar();
             this.updateColorScheme();
+            this.updateSyncState();
             this.showConnectionStatus();
             this.model.on("change:enabled", this.updateEnabled, this);
             this.model.on("change:image", this.updateAvatar, this);
@@ -1153,7 +1154,7 @@ define("xabber-accounts", function () {
             this.$el.on('drag_to', this.onDragTo.bind(this));
             this.$('.move-account-to-this')
                 .on('move_xmpp_account', this.onMoveAccount.bind(this));
-            this.model.settings.on("change:synced", this.onChangedSyncedState, this);
+            this.model.settings.on("change:to_sync", this.updateSyncState, this);
         },
 
         updateAvatar: function () {
@@ -1189,8 +1190,8 @@ define("xabber-accounts", function () {
             this.model.collection.moveBefore(account, this.model);
         },
 
-        onChangedSyncedState: function () {
-            this.$el.switchClass(this.model.settings.get('synced'));
+        updateSyncState: function () {
+            this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
         },
 
         showSettings: function () {
@@ -1262,7 +1263,7 @@ define("xabber-accounts", function () {
             this.$('.jid').addClass('inline').each(function () {
                 this.offsetWidth > max_width && (max_width = this.offsetWidth);
             }).removeClass('inline');
-            max_width += 135;
+            max_width += 175;
             this.$('.xmpp-account-list').css('width', max_width + 48);
             _.each(this.children, function (view) {
                 view.$el.css('width', max_width);
