@@ -2954,7 +2954,7 @@ body {
   position: absolute;
   top: 10px;
   right: 75px;
-  color: #388E3C;
+  color: #757575;
 }
 
 .settings-block-wrap.xabber-account .xabber-account-content-wrap {
@@ -3945,26 +3945,12 @@ body {
   padding: 8px 36px 4px 44px;
 }
 
-.sync-settings-modal .sync-icon,
-.sync-settings-modal .no-sync-icon {
+.sync-settings-modal .sync-icon {
   position: absolute;
   top: 12px;
   left: 6px;
   color: #757575;
-}
-
-.sync-settings-modal .account-wrap .sync-icon,
-.sync-settings-modal .account-wrap .sync-tip,
-.sync-settings-modal .account-wrap.sync .no-sync-icon,
-.sync-settings-modal .account-wrap.sync .no-sync-tip {
-  display: none;
-}
-
-.sync-settings-modal .account-wrap .no-sync-icon,
-.sync-settings-modal .account-wrap .no-sync-tip,
-.sync-settings-modal .account-wrap.sync .sync-icon,
-.sync-settings-modal .account-wrap.sync .sync-tip {
-  display: block;
+  cursor: pointer;
 }
 
 .sync-settings-modal .sync-one-wrap {
@@ -3979,8 +3965,7 @@ body {
   line-height: 19px;
 }
 
-.sync-settings-modal .account-info-wrap .sync-tip,
-.sync-settings-modal .account-info-wrap .no-sync-tip {
+.sync-settings-modal .account-info-wrap .sync-tip {
   height: 14px;
   margin-top: 3px;
   font-size: 13px;
