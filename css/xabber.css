@@ -2806,6 +2806,32 @@ body {
   max-width: 100%;
 }
 
+.settings-block-wrap.xmpp-accounts .accounts-head-wrap {
+  position: relative;
+  height: 19px;
+}
+
+.settings-block-wrap.xmpp-accounts .accounts-head {
+  position: absolute;
+  top: 0;
+  font-size: 14px;
+  line-height: 19px;
+  color: #424242;
+}
+
+.settings-block-wrap.xmpp-accounts .xmppid-head {
+  left: 40px;
+}
+
+.settings-block-wrap.xmpp-accounts .sync-head {
+  right: 70px;
+}
+
+.settings-block-wrap.xmpp-accounts .enabled-head {
+  right: 2px;
+}
+
+
 .settings-block-wrap.xmpp-accounts .move-account-to-bottom {
   width: 100%;
   height: 6px;
@@ -2821,7 +2847,7 @@ body {
   width: 100%;
   height: 48px;
   margin: 1px;
-  padding: 8px 100px 4px 28px;
+  padding: 8px 120px 4px 28px;
   background-color: rgba(255,255,255,0.5);
   cursor: pointer;
 }
@@ -2927,7 +2953,7 @@ body {
 .xmpp-account .sync-marker {
   position: absolute;
   top: 10px;
-  right: 64px;
+  right: 75px;
   color: #388E3C;
 }
 

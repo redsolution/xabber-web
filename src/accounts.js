@@ -1218,8 +1218,7 @@ define("xabber-accounts", function () {
                 }
                 this.$('.no-accounts-tip').before(view.$el);
             }.bind(this));
-            this.$('.no-accounts-tip').hideIf(this.model.length);
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
@@ -1234,27 +1233,31 @@ define("xabber-accounts", function () {
             }
             var index = this.model.indexOf(account);
             if (index === 0) {
-                this.$('.xmpp-account-list').prepend(view.$el);
+                this.$('.accounts-head-wrap').after(view.$el);
             } else {
-                this.$('.xmpp-account-list').children().eq(index - 1).after(view.$el);
+                this.$('.xmpp-account').eq(index - 1).after(view.$el);
             }
-            this.$('.no-accounts-tip').addClass('hidden');
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
         onAccountRemoved: function (account) {
             this.removeChild(account.get('jid'));
-            this.$('.no-accounts-tip').hideIf(this.model.length);
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
         render: function () {
-            this.updateCSS();
+            this.updateHtml();
             _.each(this.children, function (view) {
                 view.updateEnabled();
             });
+        },
+
+        updateHtml: function () {
+            this.$('.no-accounts-tip').hideIf(this.model.length);
+            this.$('.accounts-head-wrap').showIf(this.model.length);
+            this.updateCSS();
         },
 
         // TODO: refactor CSS and remove this
@@ -1263,7 +1266,7 @@ define("xabber-accounts", function () {
             this.$('.jid').addClass('inline').each(function () {
                 this.offsetWidth > max_width && (max_width = this.offsetWidth);
             }).removeClass('inline');
-            max_width += 175;
+            max_width += 195;
             this.$('.xmpp-account-list').css('width', max_width + 48);
             _.each(this.children, function (view) {
                 view.$el.css('width', max_width);
