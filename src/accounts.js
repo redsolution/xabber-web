@@ -36,6 +36,7 @@ define("xabber-accounts", function () {
             if (!this.settings) {
                 this.settings = xabber.account_settings_list.create({
                     jid: _attrs.jid,
+                    timestamp: utils.now(),
                     to_sync: xabber.api_account.get('sync_all')
                 });
             }
@@ -437,6 +438,7 @@ define("xabber-accounts", function () {
         },
 
         deleteAccount: function () {
+            this.deleted_by_user = true;
             this.session.set('delete', true);
             this.deactivate();
         },
@@ -552,7 +554,6 @@ define("xabber-accounts", function () {
         deleteAll: function () {
             xabber.api_account.logout();
             _.each(_.clone(this.models), function (account) {
-                account.deleted_by_user = true;
                 account.deleteAccount();
             });
         },
@@ -965,7 +966,6 @@ define("xabber-accounts", function () {
             utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
                     "Account will not be deleted from the server.").done(function (res) {
                 if (res) {
-                    this.model.deleted_by_user = true;
                     this.model.deleteAccount();
                 }
             }.bind(this));
