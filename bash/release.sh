@@ -22,6 +22,8 @@ sed -i "s/\"version\":\ \"[^\"]\+/\"version\":\ \"${VERSION_NUMBER}/g" bower.jso
 sed -i "s/\"version_number\":\"[^\"]\+/\"version_number\":\"${VERSION_NUMBER}/g" src/version.js
 sed -i "s/\"version_description\":\".*$/\"version_description\":\"${VERSION_DESCRIPTION}\"}'/g" src/version.js
 
+make minify
+
 git add .
 git commit -m "Make version (${VERSION_NUMBER})"
 git checkout master
