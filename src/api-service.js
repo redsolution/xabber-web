@@ -13,6 +13,7 @@ define("xabber-api-service", function () {
 
         defaults: {
             timestamp: 0,
+            synced: false,
             to_sync: false,
             deleted: false
         },
@@ -26,7 +27,7 @@ define("xabber-api-service", function () {
                 jid: this.get('jid'),
                 timestamp: this.get('timestamp'),
                 settings: _.omit(this.attributes, [
-                    'jid', 'timestamp', 'order', 'to_sync', 'deleted'
+                    'jid', 'timestamp', 'order', 'synced', 'to_sync', 'deleted'
                 ])
             };
         }
@@ -179,17 +180,19 @@ define("xabber-api-service", function () {
             }
         },
 
-        fetch_from_server: function (data, options) {
-            options || (options = {});
+        fetch_from_server: function (data) {
             var deleted_list = data.deleted,
                 settings_list = data.settings_data,
                 order_timestamp = data.order_data.timestamp,
                 order_list = data.order_data.settings,
                 list = this.list,
                 sync_all = this.get('sync_all');
-            _.each(deleted_list, function (jid) {
-                var settings = list.get(jid);
-                settings && settings.save({to_sync: false, deleted: true});
+            _.each(deleted_list, function (item) {
+                var settings = list.get(item.jid);
+                if (settings && settings.get('to_sync') &&
+                        settings.get('timestamp') <= item.timestamp) {
+                    settings.trigger('delete_account');
+                }
             });
             _.each(settings_list, function (settings_item) {
                 var settings = list.get(settings_item.jid);
@@ -224,10 +227,6 @@ define("xabber-api-service", function () {
             }
             this.trigger('settings_result', data);
             this.save('last_sync', utils.now());
-            if (options.sync) {
-                this.synchronize_main_settings();
-                this.synchronize_order_settings();
-            }
         },
 
         onAPIError: function (jqXHR, errback) {
@@ -265,7 +264,7 @@ define("xabber-api-service", function () {
             });
         },
 
-        onLogin: function (data) {
+        onLogin: function (data, textStatus, request) {
             this.save('token', data.token);
             this.get_settings();
         },
@@ -275,7 +274,7 @@ define("xabber-api-service", function () {
             this.trigger('login_failed', response);
         },
 
-        onSocialLogin: function (data) {
+        onSocialLogin: function (data, textStatus, request) {
             this.save('token', data.token);
             xabber.body.setScreen('settings');
             this.ready.resolve();
@@ -305,7 +304,7 @@ define("xabber-api-service", function () {
             if (sync_request === 'window') {
                 this.trigger('open_sync_window', data);
             } else if (sync_request === 'silent') {
-                this.fetch_from_server(data, {sync: true});
+                this.synchronize_main_settings();
             } else {
                 this.fetch_from_server(data);
             }
@@ -313,7 +312,13 @@ define("xabber-api-service", function () {
 
         onSettingsFailed: function (response, status) {
             if (status === 403) {
-                utils.dialogs.error('Authentication failed for Xabber account.');
+                utils.dialogs.common(
+                    'Error',
+                    'Invalid token for Xabber account. Do you want relogin?',
+                    {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
+                ).done(function (result) {
+                    result && this.trigger('relogin');
+                }.bind(this));
             }
             this.trigger('settings_result', null);
         },
@@ -478,15 +483,39 @@ define("xabber-api-service", function () {
     });
 
     xabber.SyncSettingsView = xabber.BasicView.extend({
-        className: 'modal main-modal sync-settings-modal',
+        className: 'modal main-modal sync-settings-modal noselect',
         template: templates.sync_settings,
         ps_selector: '.modal-content',
         avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
+        sync_way_data: {
+            no: {
+                tip: 'Settings are already synchronized',
+                icon: 'mdi-cloud-check'
+            },
+            from_server: {
+                tip: 'Settings will be downloaded from the cloud',
+                icon: 'mdi-cloud-download'
+            },
+            to_server: {
+                tip: 'Local settings will be uploaded to cloud',
+                icon: 'mdi-cloud-upload'
+            },
+            delete: {
+                tip: 'Local account will be deleted',
+                icon: 'mdi-delete'
+            },
+            off: {
+                tip: 'Local account',
+                icon: 'mdi-cloud-outline-off'
+            }
+        },
 
         events: {
             "click .btn-sync": "syncSettings",
             "click .btn-cancel": "close",
-            "change .sync-all": "updateSyncOptionsState"
+            "change .sync-all": "changeSyncAll",
+            "change .sync-one": "changeSyncOne",
+            "click .sync-icon": "changeSyncWay"
         },
 
         _initialize: function () {
@@ -497,6 +526,8 @@ define("xabber-api-service", function () {
 
         render: function (data, options) {
             this.settings = data;
+            this.sync_all = this.model.get('sync_all');
+            this.accounts = [];
             this.$el.openModal({
                 ready: this.onRender.bind(this),
                 complete: this.close.bind(this)
@@ -507,8 +538,7 @@ define("xabber-api-service", function () {
             this.$('.accounts-wrap').empty();
             var list = this.model.list,
                 accounts_map = {},
-                accounts = [],
-                deleted = this.settings.deleted,
+                deleted_map = {},
                 settings_map = {},
                 order_map = {};
             _.each(this.settings.settings_data, function (settings_item) {
@@ -518,37 +548,71 @@ define("xabber-api-service", function () {
             _.each(this.settings.order_data.settings, function (order_item) {
                 order_map[order_item.jid] = order_item.order;
             });
+            _.each(this.settings.deleted, function (deleted_item) {
+                deleted_map[deleted_item.jid] = deleted_item.timestamp;
+            });
+
+            // Make synchronization list
             _.each(settings_map, function (obj, jid) {
-                var settings = obj.settings;
+                // pick accounts that are present on server only
                 if (!list.get(jid)) {
-                    accounts_map[jid] = _.extend({jid: jid}, settings);
+                    accounts_map[jid] = _.extend({
+                        jid: jid,
+                        to_sync: this.sync_all,
+                        sync_way: 'from_server'
+                    }, obj);
                 }
             }.bind(this));
             list.each(function (settings) {
                 var jid = settings.get('jid'),
-                    obj = settings_map[jid];
-                if (_.contains(deleted, jid)) {
-                    settings.save({to_sync: false, deleted: true});
-                    accounts_map[jid] = _.omit(settings.attributes, ['order']);
-                } else if (obj && obj.timestamp > settings.get('timestamp')) {
-                    accounts_map[jid] = _.extend({jid: jid}, obj.settings);
+                    obj = settings_map[jid],
+                    sync_way;
+                if (_.has(deleted_map, jid)) {
+                    // pick local but deleted from server accounts
+                    sync_way = deleted_map[jid] >= settings.get('timestamp') ? 'delete' : 'to_server';
+                    accounts_map[jid] = _.extend({
+                        sync_way: sync_way,
+                        sync_choose: ['delete', 'to_server']
+                    }, _.omit(settings.attributes, ['order']));
+                } else if (obj) {
+                    // pick accounts that are present on both server and client
+                    if (obj.timestamp > settings.get('timestamp')) {
+                        sync_way = 'from_server';
+                    } else if (obj.timestamp < settings.get('timestamp')) {
+                        sync_way = 'to_server';
+                    } else {
+                        sync_way = 'no';
+                    }
+                    accounts_map[jid] = _.extend({
+                        jid: jid,
+                        to_sync: settings.get('to_sync'),
+                        sync_way: sync_way,
+                        sync_choose: sync_way !== 'no' ? ['from_server', 'to_server'] : false
+                    }, obj.settings);
                 } else {
-                    accounts_map[jid] = _.omit(settings.attributes, ['order']);
+                    // pick local accounts
+                    accounts_map[jid] = _.extend({
+                        sync_way: 'to_server'
+                    }, _.omit(settings.attributes, ['order']));
                 }
             }.bind(this));
-            if (this.settings.order_data.timestamp >= list.order_timestamp.get('timestamp')) {
-                _.each(order_map, function (order, jid) {
-                    var item = accounts_map[jid];
-                    item && (item.order = order);
-                });
-            } else {
-                list.each(function (settings) {
-                    var item = accounts_map[settings.get('jid')];
-                    item && (item.order = settings.get('order'));
-                });
-            }
-            accounts = _.map(accounts_map, function (value, key) { return value; });
-            accounts.sort(function (acc1, acc2) {
+
+            // fetch server order of accounts and merge it with local order
+            var max_order = _.max(order_map) || 0;
+            _.each(order_map, function (order, jid) {
+                accounts_map[jid].order = order;
+            });
+            list.each(function (settings) {
+                var jid = settings.get('jid');
+                if (!accounts_map[jid].order) {
+                    accounts_map[jid].order = (++max_order);
+                }
+            });
+
+            this.accounts_map = accounts_map;
+            this.accounts = _.map(accounts_map, function (value, key) { return value; });
+            // sort merged list by new order value
+            this.accounts.sort(function (acc1, acc2) {
                 if (!acc1.order) {
                     return true;
                 } else if (!acc2.order) {
@@ -556,73 +620,109 @@ define("xabber-api-service", function () {
                 }
                 return acc1.order > acc2.order;
             });
-            _.each(accounts, this.addAccount.bind(this));
-            this.updateSyncOptionsValue();
-            this.updateSyncOptionsState();
+            _.each(this.accounts, this.addAccountHtml.bind(this));
+            this.updateSyncOptions();
         },
 
-        addAccount: function (settings) {
-            var jid = settings.jid,
-                name = settings.name || jid,
-                image = settings.image || utils.images.getDefaultAvatar(jid, name);
+        addAccountHtml: function (settings) {
+            var jid = settings.jid;
             var $account_el = $(templates.sync_settings_account_item({
                 jid: jid,
-                name: name,
-                color: settings.color || 'grey',
                 view: this
             }));
-            $account_el.setAvatar(utils.images.getCachedImage(image), this.avatar_size);
             this.$('.accounts-wrap').append($account_el);
         },
 
-        updateSyncOptionsValue: function () {
-            var list = this.model.list,
-                sync_all = this.model.get('sync_all');
-            this.$('.sync-all').prop('checked', sync_all ? 'checked' : '');
-            this.$('.sync-one').each(function () {
-                var $this = $(this),
-                    jid = $this.data('jid'),
-                    settings = list.get(jid),
-                    to_sync;
-                if (sync_all) {
-                    to_sync = true;
-                } else {
-                    to_sync = settings ? settings.get('to_sync') : false;
-                }
-                $this.prop('checked', to_sync);
-            });
+        updateAccountHtml: function (account_wrap) {
+            var $account_wrap = $(account_wrap),
+                jid = $account_wrap.data('jid'),
+                account_item = this.accounts_map[jid];
+            this.sync_all && (account_item.to_sync = true);
+            $account_wrap.switchClass('sync', account_item.to_sync);
+            $account_wrap.find('.sync-one').prop('checked', account_item.to_sync);
+            var sync_way = account_item.to_sync ? account_item.sync_way : 'off',
+                mdiclass = this.sync_way_data[sync_way].icon,
+                $sync_icon = $account_wrap.find('.sync-icon');
+            $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
+                .attr('data-mdiclass', mdiclass).addClass(mdiclass);
+            $account_wrap.find('.sync-tip').text(this.sync_way_data[sync_way].tip);
         },
 
-        updateSyncOptionsState: function () {
-            var sync_all = this.$('.sync-all').prop('checked');
+        updateSyncOptions: function () {
+            var list = this.model.list,
+                sync_all = this.sync_all,
+                accounts_map = this.accounts_map;
+            this.$('.sync-all').prop('checked', sync_all ? 'checked' : '');
+            this.$('.sync-one').prop('disabled', sync_all ? 'disabled' : '');
+            this.$('.account-wrap').each(function (idx, el) {
+                this.updateAccountHtml(el);
+            }.bind(this));
+        },
+
+        changeSyncAll: function (ev) {
+            var $target = $(ev.target),
+                sync_all = $target.prop('checked');
+            this.sync_all = sync_all;
             this.$('.sync-one').prop('disabled', sync_all ? 'disabled' : '');
             if (sync_all) {
-                this.$('.sync-one').prop('checked', true);
+                _.each(this.accounts, function (account_item) {
+                    account_item.to_sync = true;
+                });
+                this.$('.account-wrap').each(function (idx, el) {
+                    this.updateAccountHtml(el);
+                }.bind(this));
             }
+        },
+
+        changeSyncOne: function (ev) {
+            var $target = $(ev.target),
+                value = $target.prop('checked'),
+                $account_wrap = $target.closest('.account-wrap'),
+                jid = $account_wrap.data('jid');
+            this.accounts_map[jid].to_sync = value;
+            this.updateAccountHtml($account_wrap);
+        },
+
+        changeSyncWay: function (ev) {
+            var $account_wrap = $(ev.target).closest('.account-wrap'),
+                jid = $account_wrap.data('jid'),
+                account_item = this.accounts_map[jid];
+            if (!account_item.to_sync || !account_item.sync_choose) {
+                return;
+            }
+            var sync_choose = account_item.sync_choose,
+                idx = sync_choose.indexOf(account_item.sync_way) + 1;
+            if (idx === sync_choose.length) {
+                idx = 0;
+            }
+            account_item.sync_way = sync_choose[idx];
+            this.updateAccountHtml($account_wrap);
         },
 
         syncSettings: function () {
             var list = this.model.list,
-                sync_all = this.$('.sync-all').prop('checked'),
-                settings_map = this.settings_map,
-                to_sync_map = {};
-            this.$('.sync-one').each(function () {
-                var jid = $(this).data('jid');
-                to_sync_map[jid] = sync_all || $(this).prop('checked');
-            });
-            _.each(to_sync_map, function (to_sync, jid) {
-                var settings = list.get(jid);
+                sync_all = this.sync_all;
+            this.model.save('sync_all', this.sync_all);
+            _.each(this.accounts, function (account_item) {
+                var jid = account_item.jid,
+                    settings = list.get(jid);
                 if (settings) {
-                    settings.save('to_sync', to_sync);
-                    if (to_sync && settings.get('deleted')) {
-                        settings.lazy_update();
+                    settings.save('to_sync', account_item.to_sync);
+                    if (sync_all) {
+                        settings.save('order', account_item.order);
+                    }
+                    if (account_item.sync_way === 'to_server') {
+                        settings.save('timestamp', utils.now());
+                    } else if (account_item.sync_way === 'from_server') {
+                        settings.save('timestamp', 0);
                     }
                 }
-                if (!settings && to_sync) {
-                    settings = list.create_from_server(settings_map[jid]);
+                if (!settings && account_item.to_sync) {
+                    settings = list.create_from_server(
+                        _.omit(account_item, ['sync_way', 'sync_choose']));
                 }
             });
-            this.model.save('sync_all', sync_all);
+            this.model.synchronize_main_settings();
             this.do_sync = true;
             this.close();
         },
@@ -635,10 +735,7 @@ define("xabber-api-service", function () {
         },
 
         close: function () {
-            if (this.do_sync) {
-                this.model.synchronize_main_settings();
-                this.model.synchronize_order_settings();
-            } else {
+            if (!this.do_sync) {
                 this.model.trigger('settings_result', null);
             }
             this.do_sync = null;
@@ -658,6 +755,7 @@ define("xabber-api-service", function () {
         avatar_size: constants.AVATAR_SIZES.XABBER_ACCOUNT,
 
         events: {
+            "click .account-info-wrap": "openAccount",
             "click .btn-login": "login",
             "click .btn-logout": "logout",
             "click .btn-sync": "synchronize"
@@ -671,6 +769,7 @@ define("xabber-api-service", function () {
             this.model.on("change:name", this.updateAvatar, this);
             this.model.on("change:connected", this.updateForConnectedStatus, this);
             this.model.on("change:last_sync", this.updateLastSyncInfo, this);
+            this.model.on("relogin", this.login, this);
             this.data.on("change:sync", this.updateSyncButton, this);
         },
 
@@ -738,6 +837,10 @@ define("xabber-api-service", function () {
 
         logout: function () {
             this.model.logout();
+        },
+
+        openAccount: function () {
+            utils.openWindow(constants.XABBER_ACCOUNT_URL + '?token=' + this.model.get('token'));
         }
     });
 

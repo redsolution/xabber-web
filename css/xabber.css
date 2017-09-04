@@ -526,7 +526,7 @@ input[type=file] {
 html {
   width: 100%;
   height: 100%;
-  background-image: url(/images/background.png);
+  background-image: url(../images/background.png);
 }
 
 body {
@@ -2806,6 +2806,32 @@ body {
   max-width: 100%;
 }
 
+.settings-block-wrap.xmpp-accounts .accounts-head-wrap {
+  position: relative;
+  height: 19px;
+}
+
+.settings-block-wrap.xmpp-accounts .accounts-head {
+  position: absolute;
+  top: 0;
+  font-size: 14px;
+  line-height: 19px;
+  color: #424242;
+}
+
+.settings-block-wrap.xmpp-accounts .xmppid-head {
+  left: 40px;
+}
+
+.settings-block-wrap.xmpp-accounts .sync-head {
+  right: 70px;
+}
+
+.settings-block-wrap.xmpp-accounts .enabled-head {
+  right: 2px;
+}
+
+
 .settings-block-wrap.xmpp-accounts .move-account-to-bottom {
   width: 100%;
   height: 6px;
@@ -2821,7 +2847,7 @@ body {
   width: 100%;
   height: 48px;
   margin: 1px;
-  padding: 8px 60px 4px 28px;
+  padding: 8px 120px 4px 28px;
   background-color: rgba(255,255,255,0.5);
   cursor: pointer;
 }
@@ -2919,10 +2945,17 @@ body {
   opacity: 0.5;
 }
 
-.xmpp-account.dragging .switch {
+.xmpp-account.dragging .switch,
+.xmpp-account.dragging .sync-marker-wrap {
   display: none;
 }
 
+.xmpp-account .sync-marker {
+  position: absolute;
+  top: 10px;
+  right: 75px;
+  color: #757575;
+}
 
 .settings-block-wrap.xabber-account .xabber-account-content-wrap {
   overflow: hidden;
@@ -2933,6 +2966,7 @@ body {
   position: relative;
   height: 44px;
   padding: 6px 8px 6px 48px;
+  cursor: pointer;
 }
 
 .settings-block-wrap.xabber-account .account-info-wrap .circle-avatar {
@@ -3798,7 +3832,7 @@ body {
 }
 
 .emoji-spritesheet-0 {
-  background-image: url(/images/emoji/emojisprite_0.png);
+  background-image: url(../images/emoji/emojisprite_0.png);
 }
 
 /* ------------------ ROSTER SETTINGS -------------------- */
@@ -3908,37 +3942,35 @@ body {
 .sync-settings-modal .account-wrap {
   position: relative;
   height: 48px;
-  padding: 8px 36px 4px 48px;
+  padding: 8px 36px 4px 44px;
 }
 
-.sync-settings-modal .circle-avatar {
+.sync-settings-modal .sync-icon {
   position: absolute;
-  top: 8px;
-  left: 0;
-  width: 36px;
-  height: 36px;
+  top: 12px;
+  left: 6px;
+  color: #757575;
+  cursor: pointer;
 }
 
 .sync-settings-modal .sync-one-wrap {
   position: absolute;
-  top: 6px;
+  top: 4px;
   right: 0;
 }
 
 .sync-settings-modal .account-info-wrap .name {
   height: 19px;
-  margin-top: 7px;
   font-size: 16px;
   line-height: 19px;
 }
 
-.sync-settings-modal .account-info-wrap .jid {
+.sync-settings-modal .account-info-wrap .sync-tip {
   height: 14px;
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 300;
   line-height: 14px;
-  color: #9E9E9E;
 }
 
 

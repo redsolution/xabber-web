@@ -29,12 +29,14 @@ define("xabber-accounts", function () {
             options || (options = {});
             if (_attrs.is_new && !options.auth_view) {
                 this.is_invalid = true;
+                this.on("destroy", this.onDestroy, this);
                 return;
             }
             this.settings = xabber.account_settings_list.get(_attrs.jid);
             if (!this.settings) {
                 this.settings = xabber.account_settings_list.create({
                     jid: _attrs.jid,
+                    timestamp: utils.now(),
                     to_sync: xabber.api_account.get('sync_all')
                 });
             }
@@ -42,6 +44,7 @@ define("xabber-accounts", function () {
             settings.color || (settings.color = this.collection.getDefaultColor());
             settings.order || (settings.order = this.collection.getLastOrder() + 1);
             this.settings.save(settings);
+            this.settings.on("delete_account", this.deleteAccount, this);
             var attrs = _.clone(_attrs);
             attrs.name || (attrs.name = attrs.jid);
             attrs.image || (attrs.image = Images.getDefaultAvatar(attrs.jid, attrs.name));
@@ -435,6 +438,7 @@ define("xabber-accounts", function () {
         },
 
         deleteAccount: function () {
+            this.deleted_by_user = true;
             this.session.set('delete', true);
             this.deactivate();
         },
@@ -581,7 +585,11 @@ define("xabber-accounts", function () {
         onDestroy: function (account) {
             if (!account.get('is_new')) {
                 var no_accounts = !(this.length || xabber.api_account.get('connected'));
-                xabber.body.setScreen(no_accounts ? 'login' : 'chats');
+                if (no_accounts) {
+                    xabber.body.setScreen('login');
+                } else if (account.deleted_by_user) {
+                    xabber.body.setScreen('chats');
+                }
             }
         },
 
@@ -628,13 +636,15 @@ define("xabber-accounts", function () {
         },
 
         _updateOrder: function () {
-            this.settings_list.order_timestamp.save('timestamp', utils.now());
             this.sort();
             this.each(function (acc, index) {
                 acc.settings.save({order: index + 1});
             });
             this.trigger('update_order');
-            xabber.api_account.synchronize_order_settings();
+            if (xabber.api_account.get('connected')) {
+                this.settings_list.order_timestamp.save('timestamp', utils.now());
+                xabber.api_account.synchronize_order_settings();
+            }
         }
     });
 
@@ -955,7 +965,9 @@ define("xabber-accounts", function () {
         deleteAccount: function (ev) {
             utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
                     "Account will not be deleted from the server.").done(function (res) {
-                res && this.model.deleteAccount();
+                if (res) {
+                    this.model.deleteAccount();
+                }
             }.bind(this));
         }
     });
@@ -1135,6 +1147,7 @@ define("xabber-accounts", function () {
             this.updateEnabled();
             this.updateAvatar();
             this.updateColorScheme();
+            this.updateSyncState();
             this.showConnectionStatus();
             this.model.on("change:enabled", this.updateEnabled, this);
             this.model.on("change:image", this.updateAvatar, this);
@@ -1143,6 +1156,7 @@ define("xabber-accounts", function () {
             this.$el.on('drag_to', this.onDragTo.bind(this));
             this.$('.move-account-to-this')
                 .on('move_xmpp_account', this.onMoveAccount.bind(this));
+            this.model.settings.on("change:to_sync", this.updateSyncState, this);
         },
 
         updateAvatar: function () {
@@ -1178,6 +1192,10 @@ define("xabber-accounts", function () {
             this.model.collection.moveBefore(account, this.model);
         },
 
+        updateSyncState: function () {
+            this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
+        },
+
         showSettings: function () {
             this.model.showSettings();
         }
@@ -1202,8 +1220,7 @@ define("xabber-accounts", function () {
                 }
                 this.$('.no-accounts-tip').before(view.$el);
             }.bind(this));
-            this.$('.no-accounts-tip').hideIf(this.model.length);
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
@@ -1218,27 +1235,31 @@ define("xabber-accounts", function () {
             }
             var index = this.model.indexOf(account);
             if (index === 0) {
-                this.$('.xmpp-account-list').prepend(view.$el);
+                this.$('.accounts-head-wrap').after(view.$el);
             } else {
-                this.$('.xmpp-account-list').children().eq(index - 1).after(view.$el);
+                this.$('.xmpp-account').eq(index - 1).after(view.$el);
             }
-            this.$('.no-accounts-tip').addClass('hidden');
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
         onAccountRemoved: function (account) {
             this.removeChild(account.get('jid'));
-            this.$('.no-accounts-tip').hideIf(this.model.length);
-            this.updateCSS();
+            this.updateHtml();
             this.parent.updateScrollBar();
         },
 
         render: function () {
-            this.updateCSS();
+            this.updateHtml();
             _.each(this.children, function (view) {
                 view.updateEnabled();
             });
+        },
+
+        updateHtml: function () {
+            this.$('.no-accounts-tip').hideIf(this.model.length);
+            this.$('.accounts-head-wrap').showIf(this.model.length);
+            this.updateCSS();
         },
 
         // TODO: refactor CSS and remove this
@@ -1247,7 +1268,7 @@ define("xabber-accounts", function () {
             this.$('.jid').addClass('inline').each(function () {
                 this.offsetWidth > max_width && (max_width = this.offsetWidth);
             }).removeClass('inline');
-            max_width += 135;
+            max_width += 195;
             this.$('.xmpp-account-list').css('width', max_width + 48);
             _.each(this.children, function (view) {
                 view.$el.css('width', max_width);
