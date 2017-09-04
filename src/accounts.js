@@ -635,13 +635,15 @@ define("xabber-accounts", function () {
         },
 
         _updateOrder: function () {
-            this.settings_list.order_timestamp.save('timestamp', utils.now());
             this.sort();
             this.each(function (acc, index) {
                 acc.settings.save({order: index + 1});
             });
             this.trigger('update_order');
-            xabber.api_account.synchronize_order_settings();
+            if (xabber.api_account.get('connected')) {
+                this.settings_list.order_timestamp.save('timestamp', utils.now());
+                xabber.api_account.synchronize_order_settings();
+            }
         }
     });
 

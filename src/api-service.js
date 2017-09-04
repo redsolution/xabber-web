@@ -180,8 +180,7 @@ define("xabber-api-service", function () {
             }
         },
 
-        fetch_from_server: function (data, options) {
-            options || (options = {});
+        fetch_from_server: function (data) {
             var deleted_list = data.deleted,
                 settings_list = data.settings_data,
                 order_timestamp = data.order_data.timestamp,
@@ -228,10 +227,6 @@ define("xabber-api-service", function () {
             }
             this.trigger('settings_result', data);
             this.save('last_sync', utils.now());
-            if (options.sync) {
-                this.synchronize_main_settings();
-                this.synchronize_order_settings();
-            }
         },
 
         onAPIError: function (jqXHR, errback) {
@@ -309,7 +304,7 @@ define("xabber-api-service", function () {
             if (sync_request === 'window') {
                 this.trigger('open_sync_window', data);
             } else if (sync_request === 'silent') {
-                this.fetch_from_server(data, {sync: true});
+                this.synchronize_main_settings();
             } else {
                 this.fetch_from_server(data);
             }
@@ -601,20 +596,19 @@ define("xabber-api-service", function () {
                     }, _.omit(settings.attributes, ['order']));
                 }
             }.bind(this));
-            if (this.settings.order_data.timestamp >= list.order_timestamp.get('timestamp')) {
-                // fetch server order of accounts and merge it with local order
-                var max_order = _.max(order_map) || 0;
-                _.each(accounts_map, function (account_item) {
-                    account_item.order = order_map[account_item.jid] || (++max_order);
-                });
-            } else {
-                // fetch local order of accounts
-                var max_order = _.max(list.map('order')) || 0;
-                _.each(accounts_map, function (account_item) {
-                    var item = list.get(account_item.jid);
-                    account_item.order = item ? item.get('order') : (++max_order);
-                });
-            }
+
+            // fetch server order of accounts and merge it with local order
+            var max_order = _.max(order_map) || 0;
+            _.each(order_map, function (order, jid) {
+                accounts_map[jid].order = order;
+            });
+            list.each(function (settings) {
+                var jid = settings.get('jid');
+                if (!accounts_map[jid].order) {
+                    accounts_map[jid].order = (++max_order);
+                }
+            });
+
             this.accounts_map = accounts_map;
             this.accounts = _.map(accounts_map, function (value, key) { return value; });
             // sort merged list by new order value
@@ -729,7 +723,6 @@ define("xabber-api-service", function () {
                 }
             });
             this.model.synchronize_main_settings();
-            this.model.synchronize_order_settings();
             this.do_sync = true;
             this.close();
         },
