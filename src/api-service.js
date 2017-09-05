@@ -613,12 +613,7 @@ define("xabber-api-service", function () {
             this.accounts = _.map(accounts_map, function (value, key) { return value; });
             // sort merged list by new order value
             this.accounts.sort(function (acc1, acc2) {
-                if (!acc1.order) {
-                    return true;
-                } else if (!acc2.order) {
-                    return false;
-                }
-                return acc1.order > acc2.order;
+                return acc1.order - acc2.order;
             });
             _.each(this.accounts, this.addAccountHtml.bind(this));
             this.updateSyncOptions();
