@@ -71,7 +71,7 @@ define(["xabber-dependencies"], function (deps) {
         ctx.rect(0, 0, 128, 128);
         ctx.fillStyle = COLORS[color_index];
         ctx.fill();
-        ctx.font = "bold 50px Roboto, sans-serif";
+        ctx.font = "bold 50px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
         ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 64, 80);
@@ -84,9 +84,17 @@ define(["xabber-dependencies"], function (deps) {
     };
 
     var setCss = function (image_el, cached_image, img_size) {
-        var width = cached_image.width,
+        var $image_el = $(image_el),
+            width = cached_image.width,
             height = cached_image.height,
-            scale, css = {};
+            scale, css = {
+                minWidth: '',
+                maxWidth: '',
+                minHeight: '',
+                maxHeight: '',
+                left: 0,
+                top: 0
+            };
         if (width < img_size) {
             if (height < img_size) {
                 scale = (width > height) ? img_size/height : img_size/width;
@@ -107,8 +115,7 @@ define(["xabber-dependencies"], function (deps) {
             scale ? (css.minWidth = '100%') : (css.maxWidth = '100%');
             css.top = -(img_size/2)*(height-width)/width+'px';
         }
-        image_el.style = '';
-        _.extend(image_el.style, css);
+        $image_el.css(css);
     };
 
     var getAvatarFromFile = function (file, max_size) {
@@ -150,7 +157,7 @@ define(["xabber-dependencies"], function (deps) {
         return deferred.promise();
     };
 
-    $.fn.setAvatar = function (image, size, _log) {
+    $.fn.setAvatar = function (image, size) {
         var elem = this.find('img')[0];
         if (!elem) return;
         size || (size = this.width());
