@@ -37,10 +37,13 @@ input[type=text][readonly] {
 }
 
 input::-webkit-input-placeholder {
+  vertical-align: top;
   color: #9E9E9E;
 }
 
 input::-moz-placeholder {
+  opacity: 1;
+  vertical-align: top;
   color: #9E9E9E;
 }
 
@@ -406,6 +409,8 @@ input[type=text].simple-input-field:hover {
   transition: all .3s;
   cursor: text;
   white-space: pre-wrap;
+  /* requred in Safari */
+  -webkit-user-select: text;
 }
 
 
@@ -1724,18 +1729,19 @@ body {
   padding: 0 60px;
   margin: 0;
   font-size: 14px;
+  line-height: 20px;
   color: #757575 !important;
   border-radius: 2px;
 }
 
 .search-form input::-webkit-input-placeholder {
   font-size: 14px;
-  line-height: 28px;
+  line-height: 20px;
 }
 
 .search-form input::-moz-placeholder {
   font-size: 14px;
-  line-height: 28px;
+  line-height: 20px;
 }
 
 .search-form > i {
