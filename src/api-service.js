@@ -784,7 +784,7 @@ define("xabber-api-service", function () {
 
         updateAvatar: function () {
             var name = this.model.get('name'),
-                image = this.model.get('image') || utils.images.getDefaultAvatar(name, name);
+                image = this.model.get('image') || utils.images.getDefaultAvatar(name);
             this.$('.circle-avatar').setAvatar(utils.images.getCachedImage(image), this.avatar_size);
         },
 

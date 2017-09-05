@@ -49,23 +49,23 @@ define(["xabber-dependencies"], function (deps) {
         return _image_cache[image] || new CachedImage(image);
     };
 
-    var getDefaultAvatar = function (jid, name) {
+    var getDefaultAvatar = function (name) {
         // generate colored avatar with first letters of username
         var canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d'),
-            _name = name ? name.trim() : jid,
+            _name = name ? name.trim() : '',
             first_name, last_name, splitted_name = _name.split(' ', 2),
             first_letter, second_letter,
             color_index;
         first_name = splitted_name[0];
         last_name = (splitted_name.length > 1 ? splitted_name[1] : '');
-        first_letter = first_name[0];
+        first_letter = first_name[0] || '';
         if (last_name) {
             second_letter = last_name[0];
         } else {
             second_letter = (first_name.length > 1 ? first_name[1] : '');
         }
-        color_index = Math.floor(hasher(jid).charCodeAt(0) % COLORS.length);
+        color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
         canvas.width = 128;
         canvas.height = 128;
         ctx.rect(0, 0, 128, 128);
@@ -79,8 +79,8 @@ define(["xabber-dependencies"], function (deps) {
         return image;
     };
 
-    var getCachedDefaultAvatar = function (jid, name) {
-        return getCachedImage(getDefaultAvatar(jid, name));
+    var getCachedDefaultAvatar = function (name) {
+        return getCachedImage(getDefaultAvatar(name));
     };
 
     var setCss = function (image_el, cached_image, img_size) {

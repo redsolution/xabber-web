@@ -47,7 +47,7 @@ define("xabber-accounts", function () {
             this.settings.on("delete_account", this.deleteAccount, this);
             var attrs = _.clone(_attrs);
             attrs.name || (attrs.name = attrs.jid);
-            attrs.image || (attrs.image = Images.getDefaultAvatar(attrs.jid, attrs.name));
+            attrs.image || (attrs.image = Images.getDefaultAvatar(attrs.name));
             this.cached_image = Images.getCachedImage(attrs.image);
             attrs.vcard = utils.vcard.getBlank(attrs.jid);
             attrs.photo_hash = '';
@@ -353,7 +353,7 @@ define("xabber-accounts", function () {
                         vcard_updated: moment.now()
                     };
                     attrs.name = vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
-                    attrs.image = vcard.photo.image || Images.getDefaultAvatar(jid, attrs.name);
+                    attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
                     this.cached_image = Images.getCachedImage(attrs.image);
                     this.save(attrs);
                     is_callback && callback(vcard);

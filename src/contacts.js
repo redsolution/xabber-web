@@ -28,7 +28,7 @@ define("xabber-contacts", function () {
             var attrs = _.clone(_attrs);
             attrs.name = attrs.roster_name || attrs.jid;
             if (!attrs.image) {
-                attrs.image = Images.getDefaultAvatar(attrs.jid, attrs.name);
+                attrs.image = Images.getDefaultAvatar(attrs.name);
             }
             this.cached_image = Images.getCachedImage(attrs.image);
             attrs.vcard = utils.vcard.getBlank(attrs.jid);
@@ -59,7 +59,7 @@ define("xabber-contacts", function () {
                     if (!attrs.name) {
                         attrs.name = vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
                     }
-                    attrs.image = vcard.photo.image || Images.getDefaultAvatar(jid, attrs.name);
+                    attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
                     this.cached_image = Images.getCachedImage(attrs.image);
                     this.set(attrs);
                     is_callback && callback(vcard);
