@@ -107,6 +107,11 @@
                 alert('Missing connection URL!');
                 return;
             }
+            if (!Backbone.useLocalStorage) {
+                alert('Your web browser does not support storing data locally. '+
+                      'In Safari, the most common cause of this is using "Private Browsing Mode". '+
+                      'So, you will need log in after page refresh again.');
+            }
             this.trigger('start');
         },
 
