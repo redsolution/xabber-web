@@ -835,7 +835,7 @@ define("xabber-api-service", function () {
         },
 
         openAccount: function () {
-            utils.openWindow(constants.XABBER_ACCOUNT_URL + '?token=' + this.model.get('token'));
+            utils.openWindow(constants.XABBER_ACCOUNT_URL + '/?token=' + this.model.get('token'));
         }
     });
 
