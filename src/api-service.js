@@ -234,6 +234,23 @@ define("xabber-api-service", function () {
                 response = jqXHR.responseJSON;
             if (status === 403) {
                 this.save({connected: false, token: null});
+                if (response.detail === 'Invalid token') {
+                    if (response.reason === 'not_found') {
+                        // TODO remove only Xabber-related XMPP accounts
+                    } else if (response.reason === 'revoked') {
+                        _.each(this.list.where({to_sync: true}), function (settings) {
+                            settings.trigger('delete_account');
+                        });
+                    } else if (response.reason === 'expired'){
+                        utils.dialogs.common(
+                            'Error',
+                            'Token for your Xabber account expired. Do you want relogin?',
+                            {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
+                        ).done(function (result) {
+                            result && this.trigger('relogin');
+                        }.bind(this));
+                    }
+                }
             }
             errback && errback(response, status);
         },
@@ -311,15 +328,6 @@ define("xabber-api-service", function () {
         },
 
         onSettingsFailed: function (response, status) {
-            if (status === 403) {
-                utils.dialogs.common(
-                    'Error',
-                    'Invalid token for Xabber account. Do you want relogin?',
-                    {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
-                ).done(function (result) {
-                    result && this.trigger('relogin');
-                }.bind(this));
-            }
             this.trigger('settings_result', null);
         },
 
