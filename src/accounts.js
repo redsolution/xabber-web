@@ -88,7 +88,7 @@ define("xabber-accounts", function () {
             this.once("start", this.start, this);
             xabber.api_account.on("settings_result", function (result) {
                 if (result && this.settings.get('token')) {
-                    this.save('auth_type', 'token');
+                    this.save({auth_type: 'token', password: ''});
                 }
                 this.trigger('start');
             }, this);
@@ -437,8 +437,8 @@ define("xabber-accounts", function () {
             this.vcard_edit.$el.attr('data-color', color);
         },
 
-        deleteAccount: function () {
-            this.deleted_by_user = true;
+        deleteAccount: function (show_settings) {
+            this.show_settings_after_delete = show_settings;
             this.session.set('delete', true);
             this.deactivate();
         },
@@ -587,7 +587,9 @@ define("xabber-accounts", function () {
                 var no_accounts = !(this.length || xabber.api_account.get('connected'));
                 if (no_accounts) {
                     xabber.body.setScreen('login');
-                } else if (account.deleted_by_user) {
+                } else if (account.show_settings_after_delete) {
+                    xabber.body.setScreen('settings');
+                } else {
                     xabber.body.setScreen('chats');
                 }
             }
@@ -966,6 +968,7 @@ define("xabber-accounts", function () {
             utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
                     "Account will not be deleted from the server.").done(function (res) {
                 if (res) {
+                    xabber.api_account.save('sync_all', false);
                     this.model.deleteAccount();
                 }
             }.bind(this));
@@ -1662,6 +1665,7 @@ define("xabber-accounts", function () {
             storage_name: this.getStorageName() + '-accounts'
         });
         this.accounts.fetch();
+        this.accounts.length || this.api_account.save('sync_request', 'window');
 
         this.toolbar_view.addChild('accounts', this.ToolbarAccountsBlockView,
                 {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});

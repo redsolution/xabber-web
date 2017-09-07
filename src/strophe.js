@@ -62,6 +62,7 @@ define("xabber-strophe", function () {
                 this.connection.registerSASLMechanisms();
             } else {
                 this.connection.registerSASLMechanism(Strophe.SASLXOAuth2);
+                delete this.connection._sasl_data.server_signature;
             }
             this.connection.connect(jid, password, callback);
         },

@@ -191,7 +191,7 @@ define("xabber-api-service", function () {
                 var settings = list.get(item.jid);
                 if (settings && settings.get('to_sync') &&
                         settings.get('timestamp') <= item.timestamp) {
-                    settings.trigger('delete_account');
+                    settings.trigger('delete_account', true);
                 }
             });
             _.each(settings_list, function (settings_item) {
@@ -234,6 +234,23 @@ define("xabber-api-service", function () {
                 response = jqXHR.responseJSON;
             if (status === 403) {
                 this.save({connected: false, token: null});
+                if (response.detail === 'Invalid token') {
+                    if (response.reason === 'not_found') {
+                        // TODO remove only Xabber-related XMPP accounts
+                    } else if (response.reason === 'revoked') {
+                        _.each(this.list.where({to_sync: true}), function (settings) {
+                            settings.trigger('delete_account', true);
+                        });
+                    } else if (response.reason === 'expired'){
+                        utils.dialogs.common(
+                            'Error',
+                            'Token for your Xabber account expired. Do you want relogin?',
+                            {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
+                        ).done(function (result) {
+                            result && this.trigger('relogin');
+                        }.bind(this));
+                    }
+                }
             }
             errback && errback(response, status);
         },
@@ -311,15 +328,6 @@ define("xabber-api-service", function () {
         },
 
         onSettingsFailed: function (response, status) {
-            if (status === 403) {
-                utils.dialogs.common(
-                    'Error',
-                    'Invalid token for Xabber account. Do you want relogin?',
-                    {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
-                ).done(function (result) {
-                    result && this.trigger('relogin');
-                }.bind(this));
-            }
             this.trigger('settings_result', null);
         },
 
@@ -504,8 +512,12 @@ define("xabber-api-service", function () {
                 tip: 'Local account will be deleted',
                 icon: 'mdi-delete'
             },
-            off: {
+            off_local: {
                 tip: 'Local account',
+                icon: 'mdi-cloud-outline-off'
+            },
+            off_remote: {
+                tip: 'Remote account',
                 icon: 'mdi-cloud-outline-off'
             }
         },
@@ -635,8 +647,15 @@ define("xabber-api-service", function () {
             this.sync_all && (account_item.to_sync = true);
             $account_wrap.switchClass('sync', account_item.to_sync);
             $account_wrap.find('.sync-one').prop('checked', account_item.to_sync);
-            var sync_way = account_item.to_sync ? account_item.sync_way : 'off',
-                mdiclass = this.sync_way_data[sync_way].icon,
+            var sync_way;
+            if (account_item.to_sync) {
+                sync_way = account_item.sync_way;
+            } else if (this.model.list.get(jid)) {
+                sync_way = 'off_local';
+            } else {
+                sync_way = 'off_remote';
+            }
+            var mdiclass = this.sync_way_data[sync_way].icon,
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
@@ -835,7 +854,7 @@ define("xabber-api-service", function () {
         },
 
         openAccount: function () {
-            utils.openWindow(constants.XABBER_ACCOUNT_URL + '?token=' + this.model.get('token'));
+            utils.openWindow(constants.XABBER_ACCOUNT_URL + '/?token=' + this.model.get('token'));
         }
     });
 

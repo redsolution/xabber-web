@@ -4,6 +4,20 @@
     });
 }(this, function (Backbone, _) {
 
+    try {
+        localStorage.setItem('test', 1);
+        localStorage.removeItem('test');
+        Backbone.useLocalStorage = true;
+    } catch (e) {
+        Storage.prototype._getItem = Storage.prototype.getItem;
+        Storage.prototype._setItem = Storage.prototype.setItem;
+        Storage.prototype._removeItem = Storage.prototype.removeItem;
+        Storage.prototype.getItem = function() {};
+        Storage.prototype.setItem = function() {};
+        Storage.prototype.removeItem = function() {};
+        Backbone.useLocalStorage = false;
+    }
+
     var DataStorage = function (name) {
         this.name = name;
         var data = localStorage.getItem(this.name);
