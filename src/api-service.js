@@ -191,7 +191,7 @@ define("xabber-api-service", function () {
                 var settings = list.get(item.jid);
                 if (settings && settings.get('to_sync') &&
                         settings.get('timestamp') <= item.timestamp) {
-                    settings.trigger('delete_account');
+                    settings.trigger('delete_account', true);
                 }
             });
             _.each(settings_list, function (settings_item) {
@@ -239,7 +239,7 @@ define("xabber-api-service", function () {
                         // TODO remove only Xabber-related XMPP accounts
                     } else if (response.reason === 'revoked') {
                         _.each(this.list.where({to_sync: true}), function (settings) {
-                            settings.trigger('delete_account');
+                            settings.trigger('delete_account', true);
                         });
                     } else if (response.reason === 'expired'){
                         utils.dialogs.common(
@@ -512,8 +512,12 @@ define("xabber-api-service", function () {
                 tip: 'Local account will be deleted',
                 icon: 'mdi-delete'
             },
-            off: {
+            off_local: {
                 tip: 'Local account',
+                icon: 'mdi-cloud-outline-off'
+            },
+            off_remote: {
+                tip: 'Remote account',
                 icon: 'mdi-cloud-outline-off'
             }
         },
@@ -643,8 +647,15 @@ define("xabber-api-service", function () {
             this.sync_all && (account_item.to_sync = true);
             $account_wrap.switchClass('sync', account_item.to_sync);
             $account_wrap.find('.sync-one').prop('checked', account_item.to_sync);
-            var sync_way = account_item.to_sync ? account_item.sync_way : 'off',
-                mdiclass = this.sync_way_data[sync_way].icon,
+            var sync_way;
+            if (account_item.to_sync) {
+                sync_way = account_item.sync_way;
+            } else if (this.model.list.get(jid)) {
+                sync_way = 'off_local';
+            } else {
+                sync_way = 'off_remote';
+            }
+            var mdiclass = this.sync_way_data[sync_way].icon,
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
