@@ -113,14 +113,12 @@ define("xabber-chats", function () {
     });
 
     xabber.Chat = Backbone.Model.extend({
-        defaults: function () {
-            return {
-                opened: true,
-                active: false,
-                display: false,
-                unread: 0,
-                timestamp: 0
-            };
+        defaults: {
+            opened: true,
+            active: false,
+            display: false,
+            unread: 0,
+            timestamp: 0
         },
 
         initialize: function (attrs, options) {
@@ -816,7 +814,7 @@ define("xabber-chats", function () {
                     username = contact.get('name');
                 }
                 var $f_message = $(templates.messages.forwarded(_.extend(attrs, {
-                    time: utils.pretty_short_datetime(moment(attrs.msg_time)),
+                    time: utils.pretty_short_datetime(moment(attrs.time)),
                     username: username,
                     message: _.escape(attrs.message)
                 })));
