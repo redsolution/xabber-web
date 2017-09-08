@@ -49,9 +49,5 @@ require.config({
 
         // main file
         "xabber":                   "src/xabber"
-    },
-
-    shim: {
-        'materialize':              { deps: ['jquery', "hammerjs"] }
     }
 });

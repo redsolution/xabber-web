@@ -4,17 +4,12 @@
  * MIT License (https://raw.githubusercontent.com/Dogfalo/materialize/master/LICENSE)
  */
 // Check for jQuery.
-if (typeof(jQuery) === 'undefined') {
-  var jQuery;
-  // Check if require is a defined function.
-  if (typeof(require) === 'function') {
-    jQuery = $ = require('jquery');
-  // Else use the dollar sign alias.
-  } else {
-    jQuery = $;
-  }
-}
-;/*
+
+define (['jquery', 'hammerjs'], function (jQuery) {
+
+$ = jQuery;
+
+/*
  * jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
  *
  * Uses the built in easing capabilities added In jQuery 1.1
@@ -3982,16 +3977,7 @@ $(document).ready(function(){
 
 (function ( factory ) {
 
-    // AMD.
-    if ( typeof define == 'function' && define.amd )
-        define( 'picker', ['jquery'], factory )
-
-    // Node.js/browserify.
-    else if ( typeof exports == 'object' )
-        module.exports = factory( require('jquery') )
-
-    // Browser globals.
-    else this.Picker = factory( jQuery )
+    Materialize.DefaultDatePicker = factory( jQuery )
 
 }(function( $ ) {
 
@@ -5103,16 +5089,7 @@ return PickerConstructor
 
 (function ( factory ) {
 
-    // AMD.
-    if ( typeof define == 'function' && define.amd )
-        define(['picker', 'jquery'], factory )
-
-    // Node.js/browserify.
-    else if ( typeof exports == 'object' )
-        module.exports = factory( require('./picker.js'), require('jquery') )
-
-    // Browser globals.
-    else factory( Picker, jQuery )
+    factory( Materialize.DefaultDatePicker, jQuery )
 
 }(function( Picker, $ ) {
 
@@ -6948,3 +6925,5 @@ Picker.extend( 'pickadate', DatePicker )
       }
     }; // Plugin end
 }( jQuery ));
+
+});
