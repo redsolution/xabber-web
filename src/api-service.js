@@ -72,7 +72,7 @@ define("xabber-api-service", function () {
                 var social_auth = xabber.url_params.social_auth;
                 delete xabber.url_params.social_auth;
                 try {
-                    var data = atob(social_auth);
+                    var data = JSON.parse(atob(social_auth));
                     this.save('token', null);
                     this.social_login(data);
                 } catch (e) {
@@ -112,6 +112,10 @@ define("xabber-api-service", function () {
                 request.data = JSON.stringify(data);
             }
             $.ajax(request);
+        },
+
+        add_source: function (data) {
+            return _.extend({source: 'Xabber Web '+xabber.get('version_number')}, data);
         },
 
         get_settings: function () {
@@ -260,6 +264,9 @@ define("xabber-api-service", function () {
                 type: 'POST',
                 url: constants.API_SERVICE_URL + '/accounts/login/',
                 headers: {"Authorization": "Basic " + utils.utoa(username+':'+password)},
+                contentType: "application/json",
+                dataType: 'json',
+                data: JSON.stringify(this.add_source()),
                 success: this.onLogin.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
                     this.onAPIError(jqXHR, this.onLoginFailed.bind(this));
@@ -273,7 +280,7 @@ define("xabber-api-service", function () {
                 url: constants.API_SERVICE_URL + '/accounts/social_auth/',
                 contentType: "application/json",
                 dataType: 'json',
-                data: data,
+                data: JSON.stringify(this.add_source(data)),
                 success: this.onSocialLogin.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
                     this.onAPIError(jqXHR, this.onSocialLoginFailed.bind(this));
