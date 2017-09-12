@@ -352,13 +352,14 @@ define("xabber-chats", function () {
                 return;
             }
             var msg_text = msg.getText(),
-                msg_time = moment(msg.get('time')),
+                msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'),
                 forwarded_message = msg.get('forwarded_message');
             this.model.set({timestamp: timestamp});
             this.$('.last-msg').text(msg_text);
             this.$el.emojify('.last-msg', {emoji_size: 14});
-            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time));
+            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+                .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.isSenderMe())
                 .attr('data-state', msg.getState());
             this.updateCSS();
@@ -696,7 +697,8 @@ define("xabber-chats", function () {
             }
             this.bottom.showChatNotification(message);
             this.chat_item.$('.last-msg').text(message);
-            this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime());
+            this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime())
+                .attr('title', utils.pretty_datetime());
             this.chat_item.$('.msg-delivering-state').addClass('hidden');
         },
 
@@ -787,7 +789,8 @@ define("xabber-chats", function () {
                 username: username,
                 state: message.getState(),
                 verbose_state: message.getVerboseState(),
-                time: moment(attrs.time).format('HH:mm:ss')
+                time: utils.pretty_datetime(attrs.time),
+                short_time: utils.pretty_time(attrs.time)
             });
             if (attrs.type === 'file_upload') {
                 return $(templates.messages.file_upload(attrs));
@@ -814,7 +817,8 @@ define("xabber-chats", function () {
                     username = contact.get('name');
                 }
                 var $f_message = $(templates.messages.forwarded(_.extend(attrs, {
-                    time: utils.pretty_short_datetime(moment(attrs.time)),
+                    time: utils.pretty_datetime(attrs.time),
+                    short_time: utils.pretty_short_datetime(attrs.time),
                     username: username,
                     message: _.escape(attrs.message)
                 })));
@@ -828,7 +832,7 @@ define("xabber-chats", function () {
         getDateIndicator: function (date) {
             var day_date = moment(date).startOf('day');
             return $('<div class="chat-day-indicator one-line noselect" data-time="'+
-                day_date.format('x')+'">'+day_date.format("dddd, MMMM D, YYYY")+'</div>');
+                day_date.format('x')+'">'+utils.pretty_date(day_date)+'</div>');
         },
 
         hideMessageAuthor: function ($msg) {
