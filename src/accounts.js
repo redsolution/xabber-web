@@ -1207,9 +1207,11 @@ define("xabber-accounts", function () {
     xabber.SettingsAccountsBlockView = xabber.BasicView.extend({
         _initialize: function () {
             this.updateList();
+            this.updateSyncState();
             this.model.on("add", this.updateOneInList, this);
             this.model.on("update_order", this.updateList, this);
             this.model.on("destroy", this.onAccountRemoved, this);
+            xabber.api_account.on("change:connected", this.updateSyncState, this);
             this.$('.move-account-to-bottom')
                 .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
         },
@@ -1271,11 +1273,21 @@ define("xabber-accounts", function () {
             this.$('.jid').addClass('inline').each(function () {
                 this.offsetWidth > max_width && (max_width = this.offsetWidth);
             }).removeClass('inline');
-            max_width += 195;
+            max_width += 150;
+            if (xabber.api_account.get('connected')) {
+                max_width += 45;
+            }
             this.$('.xmpp-account-list').css('width', max_width + 48);
             _.each(this.children, function (view) {
                 view.$el.css('width', max_width);
             });
+        },
+
+        updateSyncState: function () {
+            var connected = xabber.api_account.get('connected');
+            this.$('.sync-head').showIf(connected);
+            this.$('.sync-marker-wrap').showIf(connected);
+            this.updateCSS();
         },
 
         onMoveAccountToBottom: function (ev, account) {
