@@ -1112,10 +1112,19 @@ define("xabber-accounts", function () {
         },
 
         deleteSettings: function () {
-            utils.dialogs.ask("Delete settings", "Do you want to delete settings of " +
-                this.model.get('jid') + " from Xabber account?").done(function (res) { if (res) {
+            utils.dialogs.ask("Delete settings", "Settings for this XMPP account "+
+                              "will be deleted from Xabber account",
+                              [{name: 'delete_account', checked: this.model.settings.get('to_sync'),
+                                text: 'Delete synced XMPP account'}]).done(function (res) {
+                if (res) {
+                    if (!res.delete_account) {
+                        this.model.settings.save('to_sync', false);
+                    } else if (!this.model.settings.get('to_sync')) {
+                        this.model.deleteAccount(true);
+                    }
                     xabber.api_account.delete_settings(this.model.get('jid'));
-                }}.bind(this));
+                }
+            }.bind(this));
         },
 
         changeColor: function (ev) {
