@@ -135,6 +135,33 @@ define(function () {
             beep_a:             'sounds/beep_a.ogg'
         },
 
+        SYNC_WAY_DATA: {
+            no: {
+                tip: 'Settings are already synchronized',
+                icon: 'mdi-cloud-check'
+            },
+            from_server: {
+                tip: 'Settings will be downloaded from the cloud',
+                icon: 'mdi-cloud-download'
+            },
+            to_server: {
+                tip: 'Local settings will be uploaded to cloud',
+                icon: 'mdi-cloud-upload'
+            },
+            delete: {
+                tip: 'Local account will be deleted',
+                icon: 'mdi-delete'
+            },
+            off_local: {
+                tip: 'Local account',
+                icon: 'mdi-cloud-outline-off'
+            },
+            off_remote: {
+                tip: 'Remote account',
+                icon: 'mdi-cloud-outline-off'
+            }
+        },
+
         XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
         API_SERVICE_URL: 'https://api.xabber.com/api/v1',
         USE_SOCIAL_AUTH: true,

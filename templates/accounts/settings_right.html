@@ -17,7 +17,7 @@
                         <span class="block-name">Connection settings</span>
                     </div>
                     <div class="connection-wrap">
-                        <div class="connection-setting">
+                        <div class="readonly-setting">
                             <i class="details-icon mdi mdi-24px mdi-account"></i>
                             <div class="setting-wrap account-name">
                                 <div class="value one-line"></div>
@@ -28,17 +28,28 @@
                             <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>
                             <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>
                         </div>
-                        <div class="xabber-account-features-wrap clearfix">
-                            <div class="sub-block-header">
-                                <div class="sub-block-name">Synchronization with Xabber account</div>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap synchronization">
+                    <div class="block-header">
+                        <span class="block-name">Synchronization</span>
+                    </div>
+                    <div class="synchronization-wrap">
+                        <div class="readonly-setting">
+                            <i class="details-icon mdi mdi-24px" data-mdiclass=""></i>
+                            <div class="setting-wrap account-name">
+                                <div class="value one-line"></div>
+                                <div class="label sync-status"></div>
                             </div>
-                            <div class="synchronization-wrap">
-                                <div class="sync-enable-wrap">
-                                    <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>
-                                    <label for="{{view.cid}}_sync_account">Enable synchronization</label>
-                                </div>
+                        </div>
+                        <div class="xabber-account-features-wrap">
+                            <div class="sync-enable-wrap">
+                                <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>
+                                <label for="{{view.cid}}_sync_account">Enable synchronization</label>
+                            </div>
+                            <div class="buttons-wrap">
                                 <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>
-                                <div style="display: inline-block;"></div>
                             </div>
                         </div>
                     </div>

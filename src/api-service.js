@@ -13,8 +13,8 @@ define("xabber-api-service", function () {
 
         defaults: {
             timestamp: 0,
-            synced: false,
             to_sync: false,
+            sync_state: 'not',
             deleted: false
         },
 
@@ -27,7 +27,8 @@ define("xabber-api-service", function () {
                 jid: this.get('jid'),
                 timestamp: this.get('timestamp'),
                 settings: _.omit(this.attributes, [
-                    'jid', 'timestamp', 'order', 'synced', 'to_sync', 'deleted'
+                    'jid', 'timestamp', 'order',
+                    'to_sync', 'sync_state', 'deleted'
                 ])
             };
         }
@@ -44,6 +45,10 @@ define("xabber-api-service", function () {
             }, settings_item.settings));
             this.trigger('add_settings', settings);
             return settings;
+        },
+
+        updateSyncState: function () {
+            // TODO
         }
     });
 
@@ -323,6 +328,7 @@ define("xabber-api-service", function () {
 
         onSettings: function (data) {
             this.save('connected', true);
+            this.list.updateSyncState(data);
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
@@ -502,32 +508,6 @@ define("xabber-api-service", function () {
         template: templates.sync_settings,
         ps_selector: '.modal-content',
         avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
-        sync_way_data: {
-            no: {
-                tip: 'Settings are already synchronized',
-                icon: 'mdi-cloud-check'
-            },
-            from_server: {
-                tip: 'Settings will be downloaded from the cloud',
-                icon: 'mdi-cloud-download'
-            },
-            to_server: {
-                tip: 'Local settings will be uploaded to cloud',
-                icon: 'mdi-cloud-upload'
-            },
-            delete: {
-                tip: 'Local account will be deleted',
-                icon: 'mdi-delete'
-            },
-            off_local: {
-                tip: 'Local account',
-                icon: 'mdi-cloud-outline-off'
-            },
-            off_remote: {
-                tip: 'Remote account',
-                icon: 'mdi-cloud-outline-off'
-            }
-        },
 
         events: {
             "click .btn-sync": "syncSettings",
@@ -662,11 +642,11 @@ define("xabber-api-service", function () {
             } else {
                 sync_way = 'off_remote';
             }
-            var mdiclass = this.sync_way_data[sync_way].icon,
+            var mdiclass = constants.SYNC_WAY_DATA[sync_way].icon,
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
-            $account_wrap.find('.sync-tip').text(this.sync_way_data[sync_way].tip);
+            $account_wrap.find('.sync-tip').text(constants.SYNC_WAY_DATA[sync_way].tip);
         },
 
         updateSyncOptions: function () {

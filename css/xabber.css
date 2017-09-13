@@ -3160,12 +3160,12 @@ body {
   right: 20px;
 }
 
-.account-settings-panel .connection-setting {
+.account-settings-panel .readonly-setting {
   position: relative;
-  padding: 0 0 12px 36px;
+  padding: 0 0 6px 36px;
 }
 
-.account-settings-panel .connection-setting .setting-wrap .value {
+.account-settings-panel .readonly-setting .setting-wrap .value {
   max-width: 100%;
   height: 16px;
   font-size: 14px;
@@ -3173,7 +3173,7 @@ body {
   color: #616161;
 }
 
-.account-settings-panel .connection-setting .setting-wrap .label {
+.account-settings-panel .readonly-setting .setting-wrap .label {
   height: 14px;
   margin-top: 3px;
   font-size: 12px;
@@ -3190,11 +3190,10 @@ body {
   display: inline-block;
   height: 36px;
   padding-top: 6px;
-  margin-right: 10px;
 }
 
 .account-settings-panel .buttons-wrap {
-  padding-bottom: 6px;
+  padding: 6px 0;
 }
 
 .account-settings-panel .account-color {
@@ -3357,6 +3356,7 @@ body {
 }
 
 .details-panel .connection-wrap,
+.details-panel .synchronization-wrap,
 .details-panel .color-scheme-wrap,
 .details-panel .resources-wrap,
 .details-panel .vcard-wrap {
