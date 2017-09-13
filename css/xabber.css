@@ -3732,6 +3732,10 @@ body {
   font-size: 16px;
 }
 
+.dialog-modal .dialog-options-wrap {
+  margin-top: 8px;
+}
+
 .new-version-description {
   font-size: 14px;
   color: #F44336;

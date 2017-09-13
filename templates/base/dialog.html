@@ -4,6 +4,14 @@
     </div>
     <div class="modal-content">
         <div class="dialog-text">{{text}}</div>
+        <div class="dialog-options-wrap">
+        {[ for (var idx in dialog_options) { var option = dialog_options[idx]; ]}
+            <div class="dialog-option" data-name="{{option.name}}">
+                <input type="checkbox" class="filled-in" id="dialog_option_{{option.name}}" {[ if (option.checked) { ]}checked="checked"{[ } ]}/>
+                <label for="dialog_option_{{option.name}}">{{option.text}}</label>
+            </div>
+        {[ } ]}
+        </div>
     </div>
     <div class="modal-footer">
         {[ if (ok_button) { ]}

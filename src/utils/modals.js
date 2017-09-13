@@ -101,9 +101,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         Modal: Modal,
 
         dialogs: {
-            common: function (header, text, buttons) {
+            common: function (header, text, buttons, dialog_options) {
                 var dialog = new Modal(function () {
                     buttons || (buttons = {});
+                    dialog_options || (dialog_options = []);
                     var ok_button = buttons.ok_button,
                         cancel_button = buttons.cancel_button,
                         optional_buttons = (buttons.optional_buttons || []).reverse();
@@ -114,11 +115,23 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         text: text,
                         ok_button: ok_button,
                         cancel_button: cancel_button,
-                        optional_buttons: optional_buttons
+                        optional_buttons: optional_buttons,
+                        dialog_options: dialog_options
                     });
                 }, {use_queue: true});
                 dialog.$modal.find('.modal-footer button').click(function (ev) {
-                    dialog.close({complete_data: $(ev.target).data('option')});
+                    var option = $(ev.target).data('option'),
+                        $options = dialog.$modal.find('.dialog-option');
+                    if (option && $options.length) {
+                        var result = {};
+                        _.each($options, function (item) {
+                            var $item = $(item);
+                            result[$item.data('name')] = $item.find('input').prop('checked');
+                        });
+                        dialog.close({complete_data: result});
+                    } else {
+                        dialog.close({complete_data: option});
+                    }
                 });
                 return dialog.open();
             },
@@ -127,8 +140,8 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 return this.common('Error', text, {ok_button: true});
             },
 
-            ask: function (header, text) {
-                return this.common(header, text, {ok_button: true, cancel_button: true});
+            ask: function (header, text, dialog_options) {
+                return this.common(header, text, {ok_button: true, cancel_button: true}, dialog_options);
             }
         }
     };
