@@ -18,7 +18,11 @@ define("xabber-api-service", function () {
             deleted: false
         },
 
-        lazy_update: function (settings) {
+        update_timestamp: function () {
+            this.save('timestamp', utils.now());
+        },
+
+        update_settings: function (settings) {
             this.save(_.extend({timestamp: utils.now()}, settings));
         },
 
@@ -345,11 +349,22 @@ define("xabber-api-service", function () {
         },
 
         logout: function () {
-            var token = this.get('token');
-            if (token !== null) {
-                this._call_method('delete', '/accounts/current/tokens/', {token: token});
-            }
-            this.save({connected: false, token: null});
+            utils.dialogs.ask("Log out", "Do you want to log out Xabber account?",
+                              [{name: 'delete_accounts', checked: true,
+                                text: 'Delete synced XMPP accounts'}]).done(function (res) {
+                if (res) {
+                    if (res.delete_accounts) {
+                        _.each(this.list.where({to_sync: true}), function (settings) {
+                            settings.trigger('delete_account', true);
+                        });
+                    }
+                    var token = this.get('token');
+                    if (token !== null) {
+                        this._call_method('delete', '/accounts/current/tokens/', {token: token});
+                    }
+                    this.save({connected: false, token: null});
+                }
+            }.bind(this));
         }
     });
 
@@ -712,9 +727,10 @@ define("xabber-api-service", function () {
                     if (sync_all) {
                         settings.save('order', account_item.order);
                     }
-                    if (account_item.sync_way === 'to_server') {
-                        settings.save('timestamp', utils.now());
-                    } else if (account_item.sync_way === 'from_server') {
+                    var sync_way = account_item.sync_way;
+                    if (sync_way === 'to_server') {
+                        settings.update_timestamp();
+                    } else if (sync_way === 'from_server' || sync_way === 'delete') {
                         settings.save('timestamp', 0);
                     }
                 }

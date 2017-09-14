@@ -965,12 +965,22 @@ define("xabber-accounts", function () {
         },
 
         deleteAccount: function (ev) {
-            utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
-                    "Account will not be deleted from the server.").done(function (res) {
-                if (res) {
-                    xabber.api_account.save('sync_all', false);
-                    this.model.deleteAccount();
+            var dialog_options = [];
+            if (xabber.api_account.get('connected')) {
+                dialog_options = [{name: 'delete_settings',
+                                   checked: this.model.settings.get('to_sync'),
+                                   text: 'Delete synced settings'}];
+            }
+            utils.dialogs.ask("Delete account", "Do you want to delete this account from Xabber Web? "+
+                              "Account will not be deleted from the server.",
+                              dialog_options).done(function (res) {
+                if (!res) {
+                    return;
                 }
+                if (res.delete_settings) {
+                    xabber.api_account.delete_settings(this.model.get('jid'));
+                }
+                this.model.deleteAccount();
             }.bind(this));
         }
     });
@@ -1104,9 +1114,7 @@ define("xabber-accounts", function () {
                 settings = this.model.settings;
             settings.save('to_sync', to_sync);
             if (to_sync) {
-                if (settings.get('deleted')) {
-                    settings.lazy_update();
-                }
+                settings.update_timestamp();
                 xabber.api_account.synchronize_main_settings();
             }
         },
@@ -1129,7 +1137,7 @@ define("xabber-accounts", function () {
 
         changeColor: function (ev) {
             var $elem = $(ev.target).closest('.color-value');
-            this.model.settings.lazy_update({color: $elem.data('value')});
+            this.model.settings.update_settings({color: $elem.data('value')});
             xabber.api_account.synchronize_main_settings();
         }
     });
@@ -1549,6 +1557,7 @@ define("xabber-accounts", function () {
             this.$jid_input.val('').focus();
             this.$password_input.val('');
             this.updateButtons();
+            this.updateOptions && this.updateOptions();
         },
 
         keyUp: function (ev) {
@@ -1656,6 +1665,11 @@ define("xabber-accounts", function () {
             });
         },
 
+        updateOptions: function () {
+            this.$('.sync-option').showIf(xabber.api_account.get('connected'))
+                .find('input').prop('checked', xabber.api_account.get('sync_all'));
+        },
+
         updateButtons: function () {
             var authentication = this.data.get('authentication');
             this.$('.btn-add').text(authentication ? 'Stop' : 'Add');
@@ -1663,6 +1677,12 @@ define("xabber-accounts", function () {
 
         successFeedback: function (account) {
             this.data.set('authentication', false);
+            if (this.$('.sync-option input').prop('checked')) {
+                account.settings.update_timestamp();
+                xabber.api_account.synchronize_main_settings();
+            } else {
+                account.settings.save('to_sync', false);
+            }
             this.closeModal();
         },
 
