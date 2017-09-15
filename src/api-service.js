@@ -14,7 +14,7 @@ define("xabber-api-service", function () {
         defaults: {
             timestamp: 0,
             to_sync: false,
-            sync_state: 'not',
+            synced: false,
             deleted: false
         },
 
@@ -32,7 +32,7 @@ define("xabber-api-service", function () {
                 timestamp: this.get('timestamp'),
                 settings: _.omit(this.attributes, [
                     'jid', 'timestamp', 'order',
-                    'to_sync', 'sync_state', 'deleted'
+                    'to_sync', 'synced', 'deleted'
                 ])
             };
         }
@@ -43,9 +43,10 @@ define("xabber-api-service", function () {
 
         create_from_server: function (settings_item) {
             var settings = this.create(_.extend({
-               jid: settings_item.jid,
-               timestamp: settings_item.timestamp,
-               to_sync: true
+                jid: settings_item.jid,
+                timestamp: settings_item.timestamp,
+                to_sync: true,
+                synced: true
             }, settings_item.settings));
             this.trigger('add_settings', settings);
             return settings;
@@ -209,11 +210,16 @@ define("xabber-api-service", function () {
             });
             _.each(settings_list, function (settings_item) {
                 var settings = list.get(settings_item.jid);
-                if (settings && settings.get('to_sync')) {
-                    settings.save(_.extend({
-                        timestamp: settings_item.timestamp,
-                        deleted: false
-                    }, settings_item.settings));
+                if (settings) {
+                    if (settings.get('to_sync')) {
+                        settings.save(_.extend({
+                            timestamp: settings_item.timestamp,
+                            deleted: false,
+                            synced: true
+                        }, settings_item.settings));
+                    } else {
+                        settings.save('synced', settings_item.timestamp === settings.get('timestamp'));
+                    }
                 }
                 if (!settings && sync_all) {
                     settings = list.create_from_server(settings_item);
@@ -588,6 +594,7 @@ define("xabber-api-service", function () {
                         sync_way: sync_way,
                         sync_choose: ['delete', 'to_server']
                     }, _.omit(settings.attributes, ['order']));
+                    settings.save('synced', false);
                 } else if (obj) {
                     // pick accounts that are present on both server and client
                     if (obj.timestamp > settings.get('timestamp')) {
@@ -603,11 +610,13 @@ define("xabber-api-service", function () {
                         sync_way: sync_way,
                         sync_choose: sync_way !== 'no' ? ['from_server', 'to_server'] : false
                     }, obj.settings);
+                    settings.save('synced', sync_way === 'no');
                 } else {
                     // pick local accounts
                     accounts_map[jid] = _.extend({
                         sync_way: 'to_server'
                     }, _.omit(settings.attributes, ['order']));
+                    settings.save('synced', false);
                 }
             }.bind(this));
 

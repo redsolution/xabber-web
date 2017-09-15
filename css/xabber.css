@@ -3189,7 +3189,11 @@ body {
 .account-settings-panel .sync-enable-wrap {
   display: inline-block;
   height: 36px;
-  padding-top: 6px;
+  padding: 6px 0 0 2px;
+}
+
+.account-settings-panel .sync-enable-wrap label {
+  padding-left: 32px;
 }
 
 .account-settings-panel .buttons-wrap {

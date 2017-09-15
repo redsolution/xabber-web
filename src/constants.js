@@ -162,6 +162,21 @@ define(function () {
             }
         },
 
+        SYNCED_STATUS_DATA: {
+            off: {
+                tip: 'Synchronization disabled',
+                icon: 'mdi-cloud-outline-off'
+            },
+            yes: {
+                tip: 'Settings are synchronized',
+                icon: 'mdi-cloud-check'
+            },
+            no: {
+                tip: 'Settings are not synchronized with cloud',
+                icon: 'mdi-cloud'
+            }
+        },
+
         XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
         API_SERVICE_URL: 'https://api.xabber.com/api/v1',
         USE_SOCIAL_AUTH: true,
