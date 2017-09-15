@@ -81,24 +81,31 @@ define([
             return Math.floor(moment.now() / 1000);
         },
 
+        pretty_time: function (timestamp) {
+            var datetime = timestamp ? moment(timestamp) : moment();
+            return datetime.format('HH:mm:ss');
+        },
+
+        pretty_date: function (timestamp) {
+            var datetime = timestamp ? moment(timestamp) : moment();
+            return datetime.format('dddd, MMMM D, YYYY');
+        },
+
         pretty_datetime: function (timestamp) {
-            var datetime = moment(timestamp), day = moment(datetime).startOf('day');
-            if (day.isSame(moment().startOf('day'))) {
-                return datetime.format("HH:mm");
-            }
-            return datetime.format("Do MMM YYYY HH:mm");
+            var datetime = timestamp ? moment(timestamp) : moment();
+            return datetime.format('MMMM D, YYYY HH:mm:ss');
         },
 
         pretty_short_datetime: function (timestamp) {
             var datetime = timestamp ? moment(timestamp) : moment(),
                 day = moment(datetime).startOf('day'),
-                week = moment(datetime).startOf('week');
+                year = moment(datetime).startOf('year');
             if (day.isSame(moment().startOf('day'))) {
-                return datetime.format('HH:mm');
-            } else if (week.isSame(moment().startOf('week'))) {
-                return datetime.format('ddd');
+                return datetime.format('HH:mm:ss');
+            } else if (year.isSame(moment().startOf('year'))) {
+                return datetime.format('MMM D');
             } else {
-                return datetime.format('M/D/gg');
+                return datetime.format('DD/MM/gg');
             }
         },
 

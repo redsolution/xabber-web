@@ -11,7 +11,7 @@
     </div>
 
     <div class="right-side noselect">
-        <div class="msg-time selectable-text">{{time}}</div>
+        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
         {[ if (is_sender) { ]}
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}"></i>
         {[ } ]}

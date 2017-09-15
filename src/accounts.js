@@ -965,12 +965,22 @@ define("xabber-accounts", function () {
         },
 
         deleteAccount: function (ev) {
-            utils.dialogs.ask("Delete account", "Do you want to delete account from Xabber Web? "+
-                    "Account will not be deleted from the server.").done(function (res) {
-                if (res) {
-                    xabber.api_account.save('sync_all', false);
-                    this.model.deleteAccount();
+            var dialog_options = [];
+            if (xabber.api_account.get('connected')) {
+                dialog_options = [{name: 'delete_settings',
+                                   checked: this.model.settings.get('to_sync'),
+                                   text: 'Delete synced settings'}];
+            }
+            utils.dialogs.ask("Delete account", "Do you want to delete this account from Xabber Web? "+
+                              "Account will not be deleted from the server.",
+                              dialog_options).done(function (res) {
+                if (!res) {
+                    return;
                 }
+                if (res.delete_settings) {
+                    xabber.api_account.delete_settings(this.model.get('jid'));
+                }
+                this.model.deleteAccount();
             }.bind(this));
         }
     });
@@ -1003,6 +1013,7 @@ define("xabber-accounts", function () {
             this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
             this.model.settings.on("change:to_sync", this.updateSyncOption, this);
             this.model.settings.on("change:deleted", this.updateDelSettingsButton, this);
+            this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
             xabber.api_account.on("change:connected", this.updateXabberAccountBlock, this);
             this.model.on("change:enabled", this.updateEnabled, this);
             this.model.on("change:status_updated", this.updateStatus, this);
@@ -1045,8 +1056,23 @@ define("xabber-accounts", function () {
 
         updateXabberAccountBlock: function () {
             this.$('.xabber-account-features-wrap').showIf(xabber.api_account.get('connected'));
+            this.updateSyncState();
             this.updateSyncOption();
             this.updateDelSettingsButton();
+        },
+
+        updateSyncState: function () {
+            var state;
+            if (!this.model.settings.get('to_sync')) {
+                state = 'off';
+            } else {
+                state = this.model.settings.get('synced') ? 'yes' : 'no';
+            }
+            this.$('.sync-status').text(constants.SYNCED_STATUS_DATA[state].tip);
+            var mdiclass = constants.SYNCED_STATUS_DATA[state].icon,
+                $sync_icon = this.$('.sync-status-icon');
+            $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
+                .attr('data-mdiclass', mdiclass).addClass(mdiclass);
         },
 
         updateSyncOption: function () {
@@ -1097,23 +1123,30 @@ define("xabber-accounts", function () {
                 settings = this.model.settings;
             settings.save('to_sync', to_sync);
             if (to_sync) {
-                if (settings.get('deleted')) {
-                    settings.lazy_update();
-                }
+                settings.update_timestamp();
                 xabber.api_account.synchronize_main_settings();
             }
         },
 
         deleteSettings: function () {
-            utils.dialogs.ask("Delete settings", "Do you want to delete settings of " +
-                this.model.get('jid') + " from Xabber account?").done(function (res) { if (res) {
+            utils.dialogs.ask("Delete settings", "Settings for this XMPP account "+
+                              "will be deleted from Xabber account",
+                              [{name: 'delete_account', checked: this.model.settings.get('to_sync'),
+                                text: 'Delete synced XMPP account'}]).done(function (res) {
+                if (res) {
+                    if (!res.delete_account) {
+                        this.model.settings.save('to_sync', false);
+                    } else if (!this.model.settings.get('to_sync')) {
+                        this.model.deleteAccount(true);
+                    }
                     xabber.api_account.delete_settings(this.model.get('jid'));
-                }}.bind(this));
+                }
+            }.bind(this));
         },
 
         changeColor: function (ev) {
             var $elem = $(ev.target).closest('.color-value');
-            this.model.settings.lazy_update({color: $elem.data('value')});
+            this.model.settings.update_settings({color: $elem.data('value')});
             xabber.api_account.synchronize_main_settings();
         }
     });
@@ -1207,9 +1240,11 @@ define("xabber-accounts", function () {
     xabber.SettingsAccountsBlockView = xabber.BasicView.extend({
         _initialize: function () {
             this.updateList();
+            this.updateSyncState();
             this.model.on("add", this.updateOneInList, this);
             this.model.on("update_order", this.updateList, this);
             this.model.on("destroy", this.onAccountRemoved, this);
+            xabber.api_account.on("change:connected", this.updateSyncState, this);
             this.$('.move-account-to-bottom')
                 .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
         },
@@ -1271,11 +1306,21 @@ define("xabber-accounts", function () {
             this.$('.jid').addClass('inline').each(function () {
                 this.offsetWidth > max_width && (max_width = this.offsetWidth);
             }).removeClass('inline');
-            max_width += 195;
+            max_width += 150;
+            if (xabber.api_account.get('connected')) {
+                max_width += 45;
+            }
             this.$('.xmpp-account-list').css('width', max_width + 48);
             _.each(this.children, function (view) {
                 view.$el.css('width', max_width);
             });
+        },
+
+        updateSyncState: function () {
+            var connected = xabber.api_account.get('connected');
+            this.$('.sync-head').showIf(connected);
+            this.$('.sync-marker-wrap').showIf(connected);
+            this.updateCSS();
         },
 
         onMoveAccountToBottom: function (ev, account) {
@@ -1521,6 +1566,7 @@ define("xabber-accounts", function () {
             this.$jid_input.val('').focus();
             this.$password_input.val('');
             this.updateButtons();
+            this.updateOptions && this.updateOptions();
         },
 
         keyUp: function (ev) {
@@ -1628,6 +1674,11 @@ define("xabber-accounts", function () {
             });
         },
 
+        updateOptions: function () {
+            this.$('.sync-option').showIf(xabber.api_account.get('connected'))
+                .find('input').prop('checked', xabber.api_account.get('sync_all'));
+        },
+
         updateButtons: function () {
             var authentication = this.data.get('authentication');
             this.$('.btn-add').text(authentication ? 'Stop' : 'Add');
@@ -1635,6 +1686,12 @@ define("xabber-accounts", function () {
 
         successFeedback: function (account) {
             this.data.set('authentication', false);
+            if (this.$('.sync-option input').prop('checked')) {
+                account.settings.update_timestamp();
+                xabber.api_account.synchronize_main_settings();
+            } else {
+                account.settings.save('to_sync', false);
+            }
             this.closeModal();
         },
 

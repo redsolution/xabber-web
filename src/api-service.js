@@ -13,12 +13,16 @@ define("xabber-api-service", function () {
 
         defaults: {
             timestamp: 0,
-            synced: false,
             to_sync: false,
+            synced: false,
             deleted: false
         },
 
-        lazy_update: function (settings) {
+        update_timestamp: function () {
+            this.save('timestamp', utils.now());
+        },
+
+        update_settings: function (settings) {
             this.save(_.extend({timestamp: utils.now()}, settings));
         },
 
@@ -27,7 +31,8 @@ define("xabber-api-service", function () {
                 jid: this.get('jid'),
                 timestamp: this.get('timestamp'),
                 settings: _.omit(this.attributes, [
-                    'jid', 'timestamp', 'order', 'synced', 'to_sync', 'deleted'
+                    'jid', 'timestamp', 'order',
+                    'to_sync', 'synced', 'deleted'
                 ])
             };
         }
@@ -38,12 +43,17 @@ define("xabber-api-service", function () {
 
         create_from_server: function (settings_item) {
             var settings = this.create(_.extend({
-               jid: settings_item.jid,
-               timestamp: settings_item.timestamp,
-               to_sync: true
+                jid: settings_item.jid,
+                timestamp: settings_item.timestamp,
+                to_sync: true,
+                synced: true
             }, settings_item.settings));
             this.trigger('add_settings', settings);
             return settings;
+        },
+
+        updateSyncState: function () {
+            // TODO
         }
     });
 
@@ -72,7 +82,7 @@ define("xabber-api-service", function () {
                 var social_auth = xabber.url_params.social_auth;
                 delete xabber.url_params.social_auth;
                 try {
-                    var data = atob(social_auth);
+                    var data = JSON.parse(atob(social_auth));
                     this.save('token', null);
                     this.social_login(data);
                 } catch (e) {
@@ -112,6 +122,10 @@ define("xabber-api-service", function () {
                 request.data = JSON.stringify(data);
             }
             $.ajax(request);
+        },
+
+        add_source: function (data) {
+            return _.extend({source: 'Xabber Web '+xabber.get('version_number')}, data);
         },
 
         get_settings: function () {
@@ -196,11 +210,16 @@ define("xabber-api-service", function () {
             });
             _.each(settings_list, function (settings_item) {
                 var settings = list.get(settings_item.jid);
-                if (settings && settings.get('to_sync')) {
-                    settings.save(_.extend({
-                        timestamp: settings_item.timestamp,
-                        deleted: false
-                    }, settings_item.settings));
+                if (settings) {
+                    if (settings.get('to_sync')) {
+                        settings.save(_.extend({
+                            timestamp: settings_item.timestamp,
+                            deleted: false,
+                            synced: true
+                        }, settings_item.settings));
+                    } else {
+                        settings.save('synced', settings_item.timestamp === settings.get('timestamp'));
+                    }
                 }
                 if (!settings && sync_all) {
                     settings = list.create_from_server(settings_item);
@@ -260,6 +279,9 @@ define("xabber-api-service", function () {
                 type: 'POST',
                 url: constants.API_SERVICE_URL + '/accounts/login/',
                 headers: {"Authorization": "Basic " + utils.utoa(username+':'+password)},
+                contentType: "application/json",
+                dataType: 'json',
+                data: JSON.stringify(this.add_source()),
                 success: this.onLogin.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
                     this.onAPIError(jqXHR, this.onLoginFailed.bind(this));
@@ -273,7 +295,7 @@ define("xabber-api-service", function () {
                 url: constants.API_SERVICE_URL + '/accounts/social_auth/',
                 contentType: "application/json",
                 dataType: 'json',
-                data: data,
+                data: JSON.stringify(this.add_source(data)),
                 success: this.onSocialLogin.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
                     this.onAPIError(jqXHR, this.onSocialLoginFailed.bind(this));
@@ -316,6 +338,7 @@ define("xabber-api-service", function () {
 
         onSettings: function (data) {
             this.save('connected', true);
+            this.list.updateSyncState(data);
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
@@ -332,11 +355,22 @@ define("xabber-api-service", function () {
         },
 
         logout: function () {
-            var token = this.get('token');
-            if (token !== null) {
-                this._call_method('delete', '/accounts/current/tokens/', {token: token});
-            }
-            this.save({connected: false, token: null});
+            utils.dialogs.ask("Log out", "Do you want to log out Xabber account?",
+                              [{name: 'delete_accounts', checked: true,
+                                text: 'Delete synced XMPP accounts'}]).done(function (res) {
+                if (res) {
+                    if (res.delete_accounts) {
+                        _.each(this.list.where({to_sync: true}), function (settings) {
+                            settings.trigger('delete_account', true);
+                        });
+                    }
+                    var token = this.get('token');
+                    if (token !== null) {
+                        this._call_method('delete', '/accounts/current/tokens/', {token: token});
+                    }
+                    this.save({connected: false, token: null});
+                }
+            }.bind(this));
         }
     });
 
@@ -495,32 +529,6 @@ define("xabber-api-service", function () {
         template: templates.sync_settings,
         ps_selector: '.modal-content',
         avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
-        sync_way_data: {
-            no: {
-                tip: 'Settings are already synchronized',
-                icon: 'mdi-cloud-check'
-            },
-            from_server: {
-                tip: 'Settings will be downloaded from the cloud',
-                icon: 'mdi-cloud-download'
-            },
-            to_server: {
-                tip: 'Local settings will be uploaded to cloud',
-                icon: 'mdi-cloud-upload'
-            },
-            delete: {
-                tip: 'Local account will be deleted',
-                icon: 'mdi-delete'
-            },
-            off_local: {
-                tip: 'Local account',
-                icon: 'mdi-cloud-outline-off'
-            },
-            off_remote: {
-                tip: 'Remote account',
-                icon: 'mdi-cloud-outline-off'
-            }
-        },
 
         events: {
             "click .btn-sync": "syncSettings",
@@ -586,6 +594,7 @@ define("xabber-api-service", function () {
                         sync_way: sync_way,
                         sync_choose: ['delete', 'to_server']
                     }, _.omit(settings.attributes, ['order']));
+                    settings.save('synced', false);
                 } else if (obj) {
                     // pick accounts that are present on both server and client
                     if (obj.timestamp > settings.get('timestamp')) {
@@ -601,11 +610,13 @@ define("xabber-api-service", function () {
                         sync_way: sync_way,
                         sync_choose: sync_way !== 'no' ? ['from_server', 'to_server'] : false
                     }, obj.settings);
+                    settings.save('synced', sync_way === 'no');
                 } else {
                     // pick local accounts
                     accounts_map[jid] = _.extend({
                         sync_way: 'to_server'
                     }, _.omit(settings.attributes, ['order']));
+                    settings.save('synced', false);
                 }
             }.bind(this));
 
@@ -655,11 +666,11 @@ define("xabber-api-service", function () {
             } else {
                 sync_way = 'off_remote';
             }
-            var mdiclass = this.sync_way_data[sync_way].icon,
+            var mdiclass = constants.SYNC_WAY_DATA[sync_way].icon,
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
-            $account_wrap.find('.sync-tip').text(this.sync_way_data[sync_way].tip);
+            $account_wrap.find('.sync-tip').text(constants.SYNC_WAY_DATA[sync_way].tip);
         },
 
         updateSyncOptions: function () {
@@ -725,9 +736,10 @@ define("xabber-api-service", function () {
                     if (sync_all) {
                         settings.save('order', account_item.order);
                     }
-                    if (account_item.sync_way === 'to_server') {
-                        settings.save('timestamp', utils.now());
-                    } else if (account_item.sync_way === 'from_server') {
+                    var sync_way = account_item.sync_way;
+                    if (sync_way === 'to_server') {
+                        settings.update_timestamp();
+                    } else if (sync_way === 'from_server' || sync_way === 'delete') {
                         settings.save('timestamp', 0);
                     }
                 }
