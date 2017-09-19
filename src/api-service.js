@@ -50,10 +50,6 @@ define("xabber-api-service", function () {
             }, settings_item.settings));
             this.trigger('add_settings', settings);
             return settings;
-        },
-
-        updateSyncState: function () {
-            // TODO
         }
     });
 
@@ -125,7 +121,10 @@ define("xabber-api-service", function () {
         },
 
         add_source: function (data) {
-            return _.extend({source: 'Xabber Web '+xabber.get('version_number')}, data);
+            return _.extend({
+                source: 'Xabber Web '+xabber.get('version_number'),
+                endpoint_key: xabber.cache.endpoint_key
+            }, data);
         },
 
         get_settings: function () {
@@ -338,7 +337,6 @@ define("xabber-api-service", function () {
 
         onSettings: function (data) {
             this.save('connected', true);
-            this.list.updateSyncState(data);
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {

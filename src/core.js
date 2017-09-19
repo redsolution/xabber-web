@@ -5,6 +5,7 @@
 }(this, function (env) {
     var constants = env.constants,
         _ = env._,
+        $ = env.$,
         uuid = env.uuid,
         utils = env.utils;
 
@@ -20,6 +21,13 @@
             this.env = env;
             this.fetchURLParams();
             this.cleanUpStorage();
+            this._settings = new this.Settings({id: 'settings'},
+                    {storage_name: this.getStorageName(), fetch: 'before'});
+            this.settings = this._settings.attributes;
+            this._cache = new Backbone.ModelWithStorage({id: 'cache'},
+                    {storage_name: this.getStorageName(), fetch: 'before'});
+            this.cache = this._cache.attributes;
+            this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         },
@@ -103,16 +111,10 @@
         }),
 
         start: function () {
-            if (!constants.CONNECTION_URL) {
-                alert('Missing connection URL!');
-                return;
-            }
-            if (!Backbone.useLocalStorage) {
-                alert('Your web browser does not support storing data locally. '+
-                      'In Safari, the most common cause of this is using "Private Browsing Mode". '+
-                      'So, you will need log in after page refresh again.');
-            }
-            this.trigger('start');
+            this.check_config.done(function (result) {
+                this.check_config = undefined;
+                result && this.trigger('start');
+            }.bind(this));
         },
 
         configure: function (config) {
@@ -126,17 +128,6 @@
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING'
             ]));
-            this._settings = new this.Settings({id: 'settings'},
-                    {storage_name: this.getStorageName(), fetch: 'before'});
-            this.settings = this._settings.attributes;
-
-            if (this.settings.notifications) {
-                window.Notification.requestPermission(function (permission) {
-                    if (permission.toLowerCase() === "denied") {
-                        this._settings.save('notifications', false);
-                    }
-                }.bind(this));
-            }
 
             var log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
             constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
@@ -145,6 +136,46 @@
                 window.xabber = this;
                 _.extend(window, env);
             }
+
+            if (!constants.CONNECTION_URL) {
+                utils.dialogs.error('Missing connection URL!');
+                this.check_config.resolve(false);
+                return;
+            }
+
+            var self = this;
+            if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
+                utils.dialogs.warning(
+                    'Your web browser does not support storing data locally. '+
+                    'In Safari, the most common cause of this is using "Private Browsing Mode". '+
+                    'So, you will need log in after page refresh again.',
+                    [{name: 'ignore', text: 'Don\'t show this message again'}]
+                ).done(function (res) {
+                    res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
+                });
+            }
+
+            this.requestNotifications().done(function (granted) {
+                self._cache.save('notifications', granted);
+                if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
+                    self.setUpPushNotifications().done(function (res) {
+                        if (res !== true) {
+                            utils.dialogs.error('Could not enable push notifications! '+res);
+                        }
+                        self.check_config.resolve(true);
+                    });
+                } else {
+                    if (granted && !self.cache.ignore_push_warning) {
+                        utils.dialogs.warning('Push notifications are not supported',
+                            [{name: 'ignore', text: 'Don\'t show this message again'}]
+                        ).done(function (res) {
+                            res && res.ignore && self._cache.save('ignore_push_warning', true);
+                        });
+                    }
+                    self._cache.save('endpoint_key', undefined);
+                    self.check_config.resolve(true);
+                }
+            });
         },
 
         fetchURLParams: function () {
@@ -180,6 +211,74 @@
                     window.localStorage.removeItem(key);
                 }
             }
+        },
+
+        requestNotifications: function () {
+            var result = new $.Deferred(),
+                self = this;
+            if (window.Notification.permission === 'granted') {
+                result.resolve(true);
+            } else {
+                window.Notification.requestPermission(function (permission) {
+                    if (permission !== 'granted' && !self.cache.ignore_notifications_warning) {
+                        utils.dialogs.warning(
+                            'You should allow popup notifications for this site if you want '+
+                            'to receive popups on new messages and some important push notifications.',
+                            [{name: 'ignore', text: 'Don\'t show this message again'}]
+                        ).done(function (res) {
+                            res && res.ignore && self._cache.save('ignore_notifications_warning', true);
+                        });
+                    }
+                    result.resolve(permission === 'granted');
+                });
+            }
+            return result.promise();
+        },
+
+        setUpPushNotifications: function () {
+            var result = new $.Deferred(),
+                self = this;
+            firebase.initializeApp({
+                apiKey: constants.GCM_API_KEY,
+                messagingSenderId: constants.GCM_SENDER_ID
+            });
+            self.messaging = firebase.messaging();
+
+            self.messaging.requestPermission().then(function () {
+                self.messaging.getToken().then(function (currentToken) {
+                    self._cache.save('endpoint_key', currentToken || undefined);
+                    result.resolve(currentToken ? true : 'No Instance ID token available.');
+                }).catch(function (err) {
+                    result.resolve(err);
+                });
+
+                self.messaging.onTokenRefresh(function () {
+                    self.messaging.getToken().then(function (refreshedToken) {
+                        self._cache.save('endpoint_key', refreshedToken);
+                    }).catch(function (err) {
+                        // TODO
+                    });
+                });
+
+                navigator.serviceWorker.addEventListener('message', function (event) {
+                    var data = event.data;
+                    if (data['firebase-messaging-msg-type'] === 'push-msg-received') {
+                        var message = data['firebase-messaging-msg-data'];
+                        if (message && message.data && message.from === constants.GCM_SENDER_ID) {
+                            var payload;
+                            try {
+                                payload = JSON.parse(atob(message.data.body));
+                            } catch (e) {
+                                payload = message.data;
+                            }
+                            self.trigger('push_message', payload);
+                        }
+                    }
+                });
+            }).catch(function (err) {
+                result.resolve({'error': err});
+            });
+            return result.promise();
         },
 
         extendWith: function () {
