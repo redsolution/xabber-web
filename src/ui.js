@@ -195,7 +195,7 @@ define("xabber-ui", function () {
             }
         }, this);
 
-        this.api_account.ready.then(this.api_account.get_settings.bind(this.api_account));
+        this.api_account.ready.then(this.api_account.start.bind(this.api_account));
     }, xabber);
 
     return xabber;

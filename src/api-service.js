@@ -68,9 +68,21 @@ define("xabber-api-service", function () {
         _initialize: function (_attrs, options) {
             this.list = options.settings_list;
             this.save({connected: false, sync_request: 'silent'});
+            this.on("change:connected", function () {
+                if (this.get('connected')) {
+                    this.fcm_subscribe();
+                } else {
+                    this.fcm_unsubscribe();
+                }
+            }, this);
             this.on("change:token", function () {
                 if (this.get('token') !== null) {
                     this.save({sync_request: 'window', sync_all: true});
+                }
+            }, this);
+            this.list.on("change:to_sync", function (item) {
+                if (this.get('sync_all') && !item.get('to_sync')) {
+                    this.save('sync_all', false);
                 }
             }, this);
             this.ready = new $.Deferred();
@@ -81,22 +93,18 @@ define("xabber-api-service", function () {
                     var data = JSON.parse(atob(social_auth));
                     this.save('token', null);
                     this.social_login(data);
-                } catch (e) {
-                    this.ready.resolve();
                     return;
-                }
+                } catch (e) {}
+            }
+            if (xabber.url_params.token) {
+                this.save('token', xabber.url_params.token);
+                delete xabber.url_params.token;
+            }
+            if (this.get('token')) {
+                this.login_by_token();
             } else {
-                if (xabber.url_params.token) {
-                    this.save('token', xabber.url_params.token);
-                    delete xabber.url_params.token;
-                }
                 this.ready.resolve();
             }
-            this.list.on("change:to_sync", function (item) {
-                if (this.get('sync_all') && !item.get('to_sync')) {
-                    this.save('sync_all', false);
-                }
-            }, this);
         },
 
         _call_method: function (method, url, data, callback, errback) {
@@ -122,8 +130,7 @@ define("xabber-api-service", function () {
 
         add_source: function (data) {
             return _.extend({
-                source: 'Xabber Web '+xabber.get('version_number'),
-                endpoint_key: xabber.cache.endpoint_key
+                source: 'Xabber Web '+xabber.get('version_number')
             }, data);
         },
 
@@ -273,28 +280,45 @@ define("xabber-api-service", function () {
             errback && errback(response, status);
         },
 
-        login: function (username, password) {
-            $.ajax({
+        _login: function (credentials, callback, errback) {
+            var request = {
                 type: 'POST',
                 url: constants.API_SERVICE_URL + '/accounts/login/',
-                headers: {"Authorization": "Basic " + utils.utoa(username+':'+password)},
                 contentType: "application/json",
                 dataType: 'json',
                 data: JSON.stringify(this.add_source()),
-                success: this.onLogin.bind(this),
+                success: callback,
                 error: function (jqXHR, textStatus, errorThrown) {
-                    this.onAPIError(jqXHR, this.onLoginFailed.bind(this));
+                    this.onAPIError(jqXHR, errback);
                 }.bind(this)
-            });
+            };
+            if (credentials.token) {
+                request.headers = {"Authorization": "Token " + credentials.token};
+            } else {
+                var username = credentials.username,
+                    password = credentials.password;
+                request.headers = {"Authorization": "Basic " + utils.utoa(username+':'+password)};
+            }
+            $.ajax(request);
         },
 
-        social_login: function (data) {
+        login: function (username, password) {
+            this._login({username: username, password: password}, this.onLogin.bind(this),
+                    this.onLoginFailed.bind(this));
+        },
+
+        login_by_token: function () {
+            this._login({token: this.get('token')}, this.onLoginByToken.bind(this),
+                    this.onLoginByTokenFailed.bind(this));
+        },
+
+        social_login: function (credentials) {
             $.ajax({
                 type: 'POST',
                 url: constants.API_SERVICE_URL + '/accounts/social_auth/',
                 contentType: "application/json",
                 dataType: 'json',
-                data: JSON.stringify(this.add_source(data)),
+                data: JSON.stringify(this.add_source(credentials)),
                 success: this.onSocialLogin.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
                     this.onAPIError(jqXHR, this.onSocialLoginFailed.bind(this));
@@ -302,8 +326,18 @@ define("xabber-api-service", function () {
             });
         },
 
+        onLoginByToken: function (data, textStatus, request) {
+            this.save({token: data.token, connected: true});
+            this.ready.resolve();
+        },
+
+        onLoginByTokenFailed: function (response, status) {
+            this.save('connected', false);
+            this.ready.resolve();
+        },
+
         onLogin: function (data, textStatus, request) {
-            this.save('token', data.token);
+            this.save({token: data.token, connected: true});
             this.get_settings();
         },
 
@@ -313,7 +347,7 @@ define("xabber-api-service", function () {
         },
 
         onSocialLogin: function (data, textStatus, request) {
-            this.save('token', data.token);
+            this.save({token: data.token, connected: true});
             xabber.body.setScreen('settings');
             this.ready.resolve();
         },
@@ -336,7 +370,6 @@ define("xabber-api-service", function () {
         },
 
         onSettings: function (data) {
-            this.save('connected', true);
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
@@ -369,6 +402,27 @@ define("xabber-api-service", function () {
                     this.save({connected: false, token: null});
                 }
             }.bind(this));
+        },
+
+        start: function () {
+            if (!this.get('connected')) {
+                this.fcm_unsubscribe();
+            }
+            this.get_settings();
+        },
+
+        fcm_subscribe: function () {
+            this._call_method('post', '/fcm/subscription/', {endpoint_key: xabber.cache.endpoint_key});
+        },
+
+        fcm_unsubscribe: function () {
+            $.ajax({
+                type: 'DELETE',
+                url: constants.API_SERVICE_URL + '/fcm/subscription/',
+                contentType: "application/json",
+                dataType: 'json',
+                data: JSON.stringify({endpoint_key: xabber.cache.endpoint_key})
+            });
         }
     });
 
@@ -891,6 +945,11 @@ define("xabber-api-service", function () {
             {model: this.api_account});
 
         this.add_api_account_view = new this.AddAPIAccountView({model: this.api_account});
+
+        this.on("push_message", function (message) {
+            // TODO
+            console.log(message);
+        });
     }, xabber);
 
     return xabber;
