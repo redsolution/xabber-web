@@ -544,15 +544,15 @@ define("xabber-accounts", function () {
             this.on("change:enabled", this.getEnabledList, this);
             this.on("update_order", this.onUpdatedOrder, this);
             this.on("add destroy activate deactivate", this.onListChanged, this);
-            xabber.on("delete_all_accounts", this.deleteAll, this);
+            xabber.on("quit", this.onQuit, this);
             this.settings_list.on("add_settings", this.onSettingsAdded, this);
             xabber.api_account.on("settings_result", function (result) {
                 result && this.trigger('update_order');
             }, this);
         },
 
-        deleteAll: function () {
-            xabber.api_account.logout();
+        onQuit: function () {
+            xabber.api_account.revoke_token();
             _.each(_.clone(this.models), function (account) {
                 account.deleteAccount();
             });

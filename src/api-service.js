@@ -336,6 +336,14 @@ define("xabber-api-service", function () {
             });
         },
 
+        revoke_token: function () {
+            var token = this.get('token');
+            if (token !== null) {
+                this._call_method('delete', '/accounts/current/tokens/', {token: token});
+            }
+            this.save({connected: false, token: null});
+        },
+
         onLoginByToken: function (data, textStatus, request) {
             this.save({token: data.token, connected: true});
             this.ready.resolve();
@@ -400,16 +408,12 @@ define("xabber-api-service", function () {
                               [{name: 'delete_accounts', checked: true,
                                 text: 'Delete synced XMPP accounts'}]).done(function (res) {
                 if (res) {
+                    this.revoke_token();
                     if (res.delete_accounts) {
                         _.each(this.list.where({to_sync: true}), function (settings) {
                             settings.trigger('delete_account', true);
                         });
                     }
-                    var token = this.get('token');
-                    if (token !== null) {
-                        this._call_method('delete', '/accounts/current/tokens/', {token: token});
-                    }
-                    this.save({connected: false, token: null});
                 }
             }.bind(this));
         },
