@@ -1,7 +1,7 @@
 {
   "name": "xabber-web",
   "description": "Open-source XMPP messenger for web browsers",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "GPL-3.0",
   "dependencies": {},
   "devDependencies": {}
