@@ -85,6 +85,16 @@ define("xabber-api-service", function () {
                     this.save('sync_all', false);
                 }
             }, this);
+            xabber.on("push_message", function (message) {
+                if (    this.get('connected') &&
+                        message.username === this.get('username') &&
+                        message.from_token !== this.get('token') &&
+                        message.action === 'settings_updated') {
+                    this.synchronize_main_settings();
+                    this.synchronize_order_settings();
+                }
+            }, this);
+
             this.ready = new $.Deferred();
             if (xabber.url_params.social_auth) {
                 var social_auth = xabber.url_params.social_auth;
@@ -366,7 +376,7 @@ define("xabber-api-service", function () {
             } else {
                 name = data.username;
             }
-            this.save('name', name);
+            this.save({username: data.username, name: name});
         },
 
         onSettings: function (data) {
@@ -945,11 +955,6 @@ define("xabber-api-service", function () {
             {model: this.api_account});
 
         this.add_api_account_view = new this.AddAPIAccountView({model: this.api_account});
-
-        this.on("push_message", function (message) {
-            // TODO
-            console.log(message);
-        });
     }, xabber);
 
     return xabber;
