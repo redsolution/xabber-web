@@ -321,10 +321,13 @@ define("xabber-accounts", function () {
                 this.destroy();
                 return;
             }
-            if (this.session.get('deactivate')) {
+            var deactivate = this.session.get('deactivate');
+            if (deactivate) {
                 this.connFeedback('Disconnected');
-                this.session.set('deactivate', false);
-                this.trigger('deactivate', this);
+                this.session.set('deactivate', null);
+                if (deactivate === 'set_off') {
+                    this.trigger('deactivate', this);
+                }
             } else {
                 if (this.session.get('no_reconnect')) {
                     this.session.set('no_reconnect', false);
@@ -385,7 +388,7 @@ define("xabber-accounts", function () {
                 return;
             }
             if (status === 'offline') {
-                this.deactivate();
+                this.deactivate('set_offline');
             } else if (!this.isConnected()) {
                 this.activate();
             } else {
@@ -449,8 +452,9 @@ define("xabber-accounts", function () {
             }
         },
 
-        deactivate: function () {
-            this.session.set('deactivate', true);
+        deactivate: function (type) {
+            type || (type = 'set_off');
+            this.session.set('deactivate', type);
             if (this.isConnected()) {
                 this.connFeedback('Disconnecting...');
                 this.sendPresence('offline');
@@ -544,15 +548,15 @@ define("xabber-accounts", function () {
             this.on("change:enabled", this.getEnabledList, this);
             this.on("update_order", this.onUpdatedOrder, this);
             this.on("add destroy activate deactivate", this.onListChanged, this);
-            xabber.on("delete_all_accounts", this.deleteAll, this);
+            xabber.on("quit", this.onQuit, this);
             this.settings_list.on("add_settings", this.onSettingsAdded, this);
             xabber.api_account.on("settings_result", function (result) {
                 result && this.trigger('update_order');
             }, this);
         },
 
-        deleteAll: function () {
-            xabber.api_account.logout();
+        onQuit: function () {
+            xabber.api_account.revoke_token();
             _.each(_.clone(this.models), function (account) {
                 account.deleteAccount();
             });

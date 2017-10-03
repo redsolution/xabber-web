@@ -658,7 +658,7 @@ define("xabber-views", function () {
         deleteAllAccounts: function (ev) {
             utils.dialogs.ask("Quit Xabber Web", "Do you want to delete all accounts from Xabber Web? "+
                     "Accounts will not be deleted from the server.").done(function (res) {
-                res && xabber.trigger('delete_all_accounts');
+                res && xabber.trigger('quit');
             });
         }
     });
