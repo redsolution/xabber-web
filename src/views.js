@@ -432,7 +432,7 @@ define("xabber-views", function () {
             this.screen_map = new Backbone.Model();
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
-            $('body').html('<div id="modals"/>').append(this.$el);
+            $('body').append(this.$el);
         },
 
         addScreen: function (name, attrs) {

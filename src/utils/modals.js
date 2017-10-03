@@ -2,6 +2,8 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
     var _ = deps._,
         $ = deps.$;
 
+    var $modal_container = $('<div>').attr('id', 'modals').appendTo('body');
+
     var modal_queue = [];
  
     var Modal = function (modal_constructor, options) {
@@ -26,7 +28,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         },
 
         throw: function () {
-            this.$modal.appendTo('#modals').prop('modal', this);
+            this.$modal.appendTo($modal_container).prop('modal', this);
             var modal_options = _.omit(this.options, ['use_queue']);
             _.extend(modal_options, {
                 is_default_complete: true,
@@ -136,8 +138,12 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 return dialog.open();
             },
 
-            error: function (text) {
-                return this.common('Error', text, {ok_button: true});
+            warning: function (text, dialog_options) {
+                return this.common('Warning', text, {ok_button: true}, dialog_options);
+            },
+
+            error: function (text, dialog_options) {
+                return this.common('Error', text, {ok_button: true}, dialog_options);
             },
 
             ask: function (header, text, dialog_options) {
