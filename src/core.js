@@ -216,17 +216,27 @@
         requestNotifications: function () {
             var result = new $.Deferred(),
                 self = this;
-            if (window.Notification.permission === 'granted') {
+            if (!window.Notification) {
+                if (!self.cache.ignore_notifications_warning) {
+                    utils.dialogs.warning(
+                        'Notifications are not supported.',
+                        [{name: 'ignore', text: 'Don\'t show this message again'}]
+                    ).done(function (res) {
+                        res && res.ignore && self._cache.save('ignore_notifications_warning', true);
+                    });
+                }
+                result.resolve(false);
+            } else if (window.Notification.permission === 'granted') {
                 result.resolve(true);
             } else {
                 window.Notification.requestPermission(function (permission) {
-                    if (permission !== 'granted' && !self.cache.ignore_notifications_warning) {
+                    if (permission !== 'granted' && !self.cache.ignore_push_warning) {
                         utils.dialogs.warning(
                             'You should allow popup notifications for this site if you want '+
                             'to receive popups on new messages and some important push notifications.',
                             [{name: 'ignore', text: 'Don\'t show this message again'}]
                         ).done(function (res) {
-                            res && res.ignore && self._cache.save('ignore_notifications_warning', true);
+                            res && res.ignore && self._cache.save('ignore_push_warning', true);
                         });
                     }
                     result.resolve(permission === 'granted');
