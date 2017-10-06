@@ -77,7 +77,8 @@ define("xabber-api-service", function () {
             }, this);
             this.on("change:token", function () {
                 if (this.get('token') !== null) {
-                    this.save({sync_request: 'window', sync_all: true});
+                    this.save({sync_all: true,
+                               sync_request: this.list_length ? 'window' : 'silent'});
                 }
             }, this);
             this.list.on("change:to_sync", function (item) {
@@ -184,11 +185,15 @@ define("xabber-api-service", function () {
                 var data = _.map(this.list.where({to_sync: true}), function (settings) {
                     return settings.request_data();
                 });
-                this._call_method('PATCH', '/accounts/current/client-settings/',
-                    {settings_data: data},
-                    this.onSettings.bind(this),
-                    this.onSettingsFailed.bind(this)
-                );
+                if (data.length) {
+                    this._call_method('PATCH', '/accounts/current/client-settings/',
+                        {settings_data: data},
+                        this.onSettings.bind(this),
+                        this.onSettingsFailed.bind(this)
+                    );
+                } else {
+                    this.get_settings();
+                }
             } else {
                 this.trigger('settings_result', null);
             }
