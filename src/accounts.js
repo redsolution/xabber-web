@@ -1726,7 +1726,6 @@ define("xabber-accounts", function () {
             storage_name: this.getStorageName() + '-accounts'
         });
         this.accounts.fetch();
-        this.accounts.length || this.api_account.save('sync_request', 'window');
 
         this.toolbar_view.addChild('accounts', this.ToolbarAccountsBlockView,
                 {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});
