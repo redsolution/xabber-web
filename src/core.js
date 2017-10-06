@@ -137,6 +137,23 @@
                 _.extend(window, env);
             }
 
+            if (utils.isMobile.any()) {
+                var ios_msg = 'Sorry, but Xabber for Web does not support iOS browsers. ',
+                    android_msg = 'You should use Xabber for Android client.',
+                    any_mobile_msg = 'Sorry, but Xabber for Web may not work correctly on your device. ',
+                    goto_site_msg = 'Go to <a href="www.xabber.com">Xabber site</a> for more details.',
+                    msg;
+                if (utils.isMobile.iOS()) {
+                    msg = ios_msg + goto_site_msg;
+                } else if (utils.isMobile.Android()) {
+                    msg = any_mobile_msg + android_msg;
+                } else {
+                    msg = any_mobile_msg + goto_site_msg;
+                }
+                utils.dialogs.error(msg);
+                this.check_config.resolve(false);
+                return;
+            }
             if (!constants.CONNECTION_URL) {
                 utils.dialogs.error('Missing connection URL!');
                 this.check_config.resolve(false);
