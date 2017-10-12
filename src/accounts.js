@@ -1012,13 +1012,13 @@ define("xabber-accounts", function () {
             this.updateStatus();
             this.updateView();
             this.showConnectionStatus();
-            this.updateXabberAccountBlock();
+            this.updateSynchronizationBlock();
             this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
             this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
             this.model.settings.on("change:to_sync", this.updateSyncOption, this);
             this.model.settings.on("change:deleted", this.updateDelSettingsButton, this);
             this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
-            xabber.api_account.on("change:connected", this.updateXabberAccountBlock, this);
+            xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
             this.model.on("change:enabled", this.updateEnabled, this);
             this.model.on("change:status_updated", this.updateStatus, this);
             this.model.on("activate deactivate", this.updateView, this);
@@ -1058,7 +1058,7 @@ define("xabber-accounts", function () {
             this.updateScrollBar();
         },
 
-        updateXabberAccountBlock: function () {
+        updateSynchronizationBlock: function () {
             this.$('.xabber-account-features-wrap').showIf(xabber.api_account.get('connected'));
             this.updateSyncState();
             this.updateSyncOption();
