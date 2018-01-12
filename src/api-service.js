@@ -531,7 +531,7 @@ define("xabber-api-service", function () {
             var origin = window.location.href,
                 provider = $(ev.target).closest('.btn-social').data('provider');
             window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' +
-                provider + '/?origin=' + origin;
+                provider + '/?origin=' + origin + '&source=Xabber Web';
         }
     });
 
