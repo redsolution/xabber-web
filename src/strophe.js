@@ -83,6 +83,8 @@ define("xabber-strophe", function () {
     Strophe.addNamespace('HTTP_UPLOAD', 'urn:xmpp:http:upload');
     Strophe.addNamespace('BLOCKING', 'urn:xmpp:blocking');
     Strophe.addNamespace('SEARCH', 'jabber:iq:search');
+    Strophe.addNamespace('OOB', 'jabber:x:oob');
+    Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
 
     return xabber;
   };

@@ -17,7 +17,6 @@ require.config({
         "strophe.ping":             "node_modules/strophejs-plugins/ping/strophe.ping",
         "strophe.rsm":              "node_modules/strophejs-plugins/rsm/strophe.rsm",
         "text":                     "node_modules/requirejs-text/text",
-
         // modified libs and plugins
         "backbone.localsync":       "src/lib/backbone.localsync",
         "hammerjs":                 "src/lib/hammer.min",
