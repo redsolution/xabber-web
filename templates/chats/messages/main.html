@@ -7,7 +7,7 @@
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
         </div>
-        <div class="chat-msg-content chat-text-content">{{message}}</div>
+        <div class="chat-msg-content chat-text-content">{[ if (is_file) {]}<div class="file-in-circle"><i class="mdi mdi-24px mdi-file"></i></div>{[ } ]}{{message}}</div>
     </div>
 
     <div class="right-side noselect">
@@ -15,5 +15,6 @@
         {[ if (is_sender) { ]}
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}"></i>
         {[ } ]}
+        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>
     </div>
 </div>
