@@ -72,7 +72,6 @@ define("xabber-chats", function () {
 
         createFromStanza: function ($message, options) {
             options || (options = {});
-
             var $delay = options.delay || $message.find('delay'),
                 body = _.escape($message.children('body').text()),
                 markable = $message.find('markable').length > 0,
@@ -105,6 +104,7 @@ define("xabber-chats", function () {
                     filename = field_tag.attr('label'),
                     full_type = uri_tag.attr('type'),
                     filesize = uri_tag.attr('size'),
+                    fileduration = uri_tag.attr('duration'),
                     type = (!_.isUndefined(full_type)) ? this.getFileType(full_type) : full_type;
                 if (type == 'image') {
                     var height = media_tag.attr('height'),
@@ -112,7 +112,7 @@ define("xabber-chats", function () {
                         image = { url: url_media, height: height, width: width },
                     attrs.image = image;
                 }
-                var file = { name: filename, file_url: url_media, type: type, size: filesize };
+                var file = { name: filename, file_url: url_media, type: full_type, size: filesize, duration: fileduration };
                 attrs.file_ = file;
             }
 
@@ -393,12 +393,12 @@ define("xabber-chats", function () {
             var msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'),
                 forwarded_message = msg.get('forwarded_message'),
-                img_file = (forwarded_message) ? msg.get('forwarded_message').get('file_') : undefined || msg.get('file_'),
-                filetype = (img_file) ? ((img_file.type) ? img_file.type[0].toUpperCase() + img_file.type.substr(1, img_file.type.length - 1)  + ": " : "File: ") : "",
-                msg_text = (img_file) ? img_file.name : msg.getText(),
+                msg_file = (forwarded_message) ? msg.get('forwarded_message').get('file_') : undefined || msg.get('file_'),
+                filetype = (msg_file) ? ((msg_file.type) ? msg_file.type[0].toUpperCase() + msg_file.type.substr(1, this.model.messages.getFileType(msg_file.type).length - 1)  + ": " : "File: ") : "",
+                msg_text = (msg_file) ? msg_file.name : msg.getText(),
                 color = this.account.settings.get('color'), sp;
             this.model.set({timestamp: timestamp});
-            if (img_file) {
+            if (msg_file) {
                 sp = document.createElement('span');
                 sp.id = "last-msg-file-color";
                 sp.append(filetype);
@@ -449,12 +449,13 @@ define("xabber-chats", function () {
 
         events: {
             'mousedown .chat-message': 'onTouchMessage',
-            'mouseup .chat-message': 'onClickMessage',
-            'mouseup .mdi-link-variant' : 'onClickLink'
+            'click .chat-message': 'onClickMessage', // mouseup
+            'click .mdi-link-variant' : 'onClickLink' // mouseup
         },
 
         _initialize: function (options) {
             this.chat_item = options.chat_item;
+            this.prev_audio_message;
             this.account = this.chat_item.account;
             this.model = this.chat_item.model;
             this.contact = this.model.contact;
@@ -487,6 +488,16 @@ define("xabber-chats", function () {
 
         render: function () {
             this.scrollToBottom();
+            this.updateContactStatus();
+
+        },
+
+        updateContactStatus: function () {
+            if ((this.head.$('.contact-status').attr('data-status') == 'offline')&&(this.contact.get('last_seen'))) {
+                var seconds = (moment.now() - this.contact.get('last_seen'))/1000,
+                    new_status = this.contact.lastSeenNewFormat(seconds, this.contact.get('last_seen'));
+                this.contact.set({status_message: new_status });
+            }
         },
 
         onChangedVisibility: function () {
@@ -867,17 +878,74 @@ define("xabber-chats", function () {
             return number;
         },
 
+        durationFileNewFormat: function(seconds) {
+            if (seconds < 10)
+                return ("0:0" + seconds);
+            if (seconds < 60)
+                return ("0:" + seconds);
+            if (seconds > 60)
+                return (Math.trunc(seconds/60) + ":" + ((seconds%60 < 10) ? ("0" + (seconds%60)) : seconds%60));
+        },
+
 
         createFileContent: function (attrs) {
             var link = document.createElement('a'), download_str = "\nDownload",
                 file_content = document.createElement('div'),
                 name = attrs.name.bold();
+            file_content.classList.add('file-container');
             link.href = attrs.file_url;
             link.classList.add("file-link-download");
             link.append(download_str);
-            file_content.innerHTML = (attrs.size) ? name + ",  " +  this.fileSizeNewFormat(attrs.size).fontcolor('#696969') : name; // .toFixed(2) - get round to 2 decimal places
+            file_content.innerHTML = (attrs.size) ? name + ((attrs.duration) ? (",  " + this.durationFileNewFormat(attrs.duration)) : "") + ",  " +  (this.fileSizeNewFormat(attrs.size)).fontcolor('#696969') : name;
             file_content.append(link);
+            var ftype = (attrs.type) ? ((this.isVoiceMessage(attrs.type)) ? 'Voice' : attrs.type) : undefined;
+            if (ftype == 'Voice') {
+                var play = document.createElement('a'), play_str = "Play";
+                play.file_url = attrs.file_url;
+                play.classList.add("voice-message-play");
+                play.append(play_str);
+                file_content.append(play);
+            }
             return file_content;
+        },
+
+        isVoiceMessage: function(type) {
+            if (type.indexOf('codecs=opus') != -1)
+                return true;
+            else
+                return false;
+        },
+
+        renderVoiceMessage: function(element, file_url) {
+            var audio_container = document.createElement('div'),
+                unique_id = 'waveform' + moment.now(), self = this;
+                volume = document.createElement('input');
+            volume.type = 'range';
+            volume.value = 50;
+            $(volume).addClass('voice-message-volume');
+            audio_container.id = unique_id;
+            audio_container.classList.add('waveform');
+            element.innerHTML = "";
+            $(element).addClass('voice-message-rendering');
+            element.appendChild(audio_container);
+            var div_duration = document.createElement('span'),
+                    audio_control_panel = document.createElement('div');
+            $(div_duration).addClass('voice-msg-current-time');
+            $(audio_control_panel).addClass('audio-control-panel');
+            div_duration.innerHTML = "0:00";
+            audio_control_panel.append(div_duration);
+            element.appendChild(audio_control_panel);
+            var aud = this.createAudio(file_url, unique_id);
+            aud.on('ready', function () {
+                var duration = Math.round(aud.getDuration());
+                audio_control_panel.append(" / " + self.durationFileNewFormat(duration));
+                audio_control_panel.append(volume);
+                element.appendChild(audio_control_panel);
+            });
+            volume.onchange = function () {
+                aud.setVolume(volume.value/100);
+            };
+            return aud;
         },
 
         buildMessageHtml: function (message) {
@@ -887,7 +955,8 @@ define("xabber-chats", function () {
                 image = attrs.image,
                 is_image = !_.isUndefined(image),
                 self = this,
-                is_file = (attrs.file_ || attrs.file) ? true : false;
+                is_file = (attrs.file_ || attrs.file) ? true : false,
+                is_voice_message;
             _.extend(attrs, {
                 username: username,
                 state: message.getState(),
@@ -899,12 +968,26 @@ define("xabber-chats", function () {
             });
 
             if (attrs.type === 'file_upload') {
+                if (attrs.file.type) {
+                    if (this.isVoiceMessage(attrs.file.type))
+                        is_voice_message = true;
+                }
+                _.extend(attrs, { is_voice_message: is_voice_message });
                 return $(templates.messages.file_upload(attrs));
             }
+
             if (attrs.type === 'system') {
                 var tpl_name = attrs.auth_request ? 'auth_request' : 'system';
                 return $(templates.messages[tpl_name](attrs));
             }
+
+            if (is_file) {
+                if (attrs.file_.type) {
+                    if (this.isVoiceMessage(attrs.file_.type))
+                        is_voice_message = true;
+                }
+            }
+
             var classes = [
                 attrs.forwarded_message && 'forwarding'
             ];
@@ -912,7 +995,8 @@ define("xabber-chats", function () {
             var $message = $(templates.messages.main(_.extend(attrs, {
                 is_sender: is_sender,
                 message: (is_image || is_file) ? "" : attrs.message ,
-                classlist: classes.join(' ')
+                classlist: classes.join(' '),
+                is_voice_message: is_voice_message
             })));
 
             if ((is_file)&&(!is_image)) {
@@ -943,19 +1027,27 @@ define("xabber-chats", function () {
                 var is_image_forward = !_.isUndefined(attrs.image),
                     image_forward = is_image_forward ? _.clone(attrs.image) : undefined,
                     set_img_forward,
-                    is_forward_file = (attrs.file_) ? true : false;
+                    is_forward_file = (attrs.file_) ? true : false,
+                    is_fwd_voice_message;
                 if (is_sender) {
                     username = this.account.get('name');
                 } else {
                     var contact = this.account.contacts.mergeContact(attrs.from_jid);
                     username = contact.get('name');
                 }
+                if (is_forward_file) {
+                    if (attrs.file_.type) {
+                        if (this.isVoiceMessage(attrs.file_.type))
+                            is_fwd_voice_message = true;
+                    }
+                }
                 var $f_message = $(templates.messages.forwarded(_.extend(attrs, {
                     time: utils.pretty_datetime(attrs.time),
                     short_time: utils.pretty_short_datetime(attrs.time),
                     username: username,
                     message: (is_image_forward || is_forward_file) ? "" : attrs.message,
-                    is_file: is_forward_file
+                    is_file: is_forward_file,
+                    is_voice_message: is_fwd_voice_message
                 })));
                 $message.find('.msg-wrap .chat-msg-content').remove();
 
@@ -1124,6 +1216,7 @@ define("xabber-chats", function () {
                     file_name = file.name,
                     file_size = file.size,
                     file_type = file.type,
+                    file_duration = file.duration,
                     img_obj = message.get('image'),
                     file_uri = message.get('file_').file_url;
                     stanza.c('x', {xmlns: Strophe.NS.XFORM, type: 'form'})
@@ -1137,7 +1230,10 @@ define("xabber-chats", function () {
                 {
                     stanza.c('media', {xmlns: Strophe.NS.MEDIA});
                 }
-                stanza.c('uri', {type: file_type, size: file_size}).t(file_uri).up().up().up().up();
+                if (file_duration)
+                    stanza.c('uri', {type: file_type, size: file_size, duration: file_duration}).t(file_uri).up().up().up().up();
+                else
+                    stanza.c('uri', {type: file_type, size: file_size}).t(file_uri).up().up().up().up();
                 message.set({type: 'main'});
             }
 
@@ -1152,7 +1248,6 @@ define("xabber-chats", function () {
             this.account.sendMsg(stanza, function () {
                 message.set('state', constants.MSG_SENT);
             });
-
         },
 
         isImageType: function(type) {
@@ -1284,8 +1379,9 @@ define("xabber-chats", function () {
                 is_file = true,
                 file_type = file.type, self = this,
                 file_size = file.size,
+                file_duration = file.duration,
                 is_image = this.isImageType(file_type),
-                file_uploaded = { name: file.name, file_url: data.get_url, type: this.model.messages.getFileType(file_type), size: file_size };
+                file_uploaded = { name: file.name, file_url: data.get_url, type: file_type, size: file_size, duration: file_duration };
             message.set({ file_: file_uploaded });
             //  loaded and send image
             if (is_image) {
@@ -1321,14 +1417,32 @@ define("xabber-chats", function () {
             else
             {
                 var fileContent = this.createFileContent(file_uploaded);
-                $iconFile = $message.find('.file-in-circle');
-                $iconFile.show();
+                $message.find('.file-in-circle').show();
+                $message.find('.chat-file-info').get(0).remove();
                 $message.removeClass('file-upload noselect');
                 $message.find('.chat-msg-content').removeClass('chat-file-content')
-                    .addClass('link-file').html($iconFile).append(fileContent);
+                    .addClass('link-file').append(fileContent);
                 $message.hyperlinkify({selector: '.chat-text-content'});
                 this.sendMessage(message);
             }
+        },
+
+        createAudio: function(file_url, unique_id) {
+            var audio = WaveSurfer.create({
+                container: "#" + unique_id,
+                scrollParent: false,
+                barWidth: 3,
+                height: 48,
+                barHeight: 48,
+                cursorColor: 'rgba(211,47,47,0.8)',
+                autoCenter: false,
+                normalize: true,
+                hideScrollBar: true,
+                progressColor: '#757575'
+            });
+            audio.load(file_url);
+            audio.setVolume(0.5);
+            return audio;
         },
 
         createImage: function(image) {
@@ -1486,11 +1600,11 @@ define("xabber-chats", function () {
 
         onClickMessage: function (ev) {
             var $elem = $(ev.target);
-            if ((!$elem.hasClass('mdi-link-variant'))&&(!$elem.hasClass('file-link-download'))) {
+            if ((!$elem.hasClass('mdi-link-variant'))&&(!$elem.hasClass('file-link-download'))&&(!$elem.is('canvas'))&&(!$elem.hasClass('voice-message-volume'))) {
             var $msg = $elem.closest('.chat-message'), msg,
                 $fwd_message = $elem.parents('.fwd-message').first(),
-                is_forwarded = $fwd_message.length > 0;
-            var no_select_message = $msg.attr('data-no-select-on-mouseup');
+                is_forwarded = $fwd_message.length > 0,
+                no_select_message = $msg.attr('data-no-select-on-mouseup');
             $msg.attr('data-no-select-on-mouseup', '');
             if (window.getSelection() != 0) {
                 return;
@@ -1509,17 +1623,75 @@ define("xabber-chats", function () {
                 }
                 return;
             }
+
+            if (($elem.hasClass('voice-message-play'))||($elem.hasClass('no-uploaded'))||($elem.hasClass('file-in-circle')&&($elem.find('.no-uploaded').length > 0))) {
+                var voice_msg_container = $elem.get(0).parentNode.parentNode;
+                    f_url = voice_msg_container.querySelector('.voice-message-play').file_url, self = this;
+                $(voice_msg_container.querySelector('.mdi-play')).addClass('hidden');
+                $(voice_msg_container.querySelector('.mdi-pause')).removeClass('hidden');
+                ($elem.hasClass('no-uploaded')) ? $elem.removeClass('no-uploaded') : $(voice_msg_container.querySelector('.mdi-play')).removeClass('no-uploaded');
+                $msg.get(0).voice_message = this.renderVoiceMessage(voice_msg_container.querySelector('.file-container'), f_url);
+                $msg.get(0).voice_message.on('play', function() {
+                    var timerId = setInterval(function() {
+                        var cur_time = Math.round($msg.get(0).voice_message.getCurrentTime());
+                        if ($msg.get(0).voice_message.isPlaying()) {
+                            $msg.find('.voice-msg-current-time').text(self.durationFileNewFormat(cur_time));
+                        }
+                        else
+                        {
+                            clearInterval(timerId);
+                        }
+
+                }, 100);
+                });
+                $msg.get(0).voice_message.on('ready', function () {
+                    $msg.get(0).voice_message.play();
+                });
+                if (this.prev_audio_message) {
+                    this.prev_audio_message.voice_message.pause();
+                    $(this.prev_audio_message).find('.mdi-pause').addClass('hidden');
+                    $(this.prev_audio_message).find('.mdi-play').removeClass('hidden');
+                }
+                this.prev_audio_message = $msg.get(0);
+                $msg.get(0).voice_message.on('finish', function () {
+                    $(voice_msg_container.querySelector('.mdi-play')).removeClass('hidden');
+                    $(voice_msg_container.querySelector('.mdi-pause')).addClass('hidden');
+                });
+                return;
+            }
+
+            if (($elem.hasClass('mdi-play'))||(($elem.hasClass('file-in-circle'))&&($elem.find('.mdi-play').length > 0)&&(!$elem.find('.mdi-play').hasClass('hidden')))) {
+                this.prev_audio_message.voice_message.pause();
+                $(this.prev_audio_message).find('.mdi-pause').addClass('hidden');
+                $(this.prev_audio_message).find('.mdi-play').removeClass('hidden');
+                this.prev_audio_message = $msg.get(0);
+                ($elem.hasClass('mdi-play')) ? $elem.addClass('hidden') : $elem.find('.mdi-play').addClass('hidden');
+                $($elem.get(0).parentNode.querySelector('.mdi-pause')).removeClass('hidden');
+                $msg.get(0).voice_message.play();
+                return;
+            }
+
+            if (($elem.hasClass('mdi-pause'))||(($elem.hasClass('file-in-circle'))&&($elem.find('.mdi-pause').length > 0)&&(!$elem.find('.mdi-pause').hasClass('hidden')))) {
+                ($elem.hasClass('mdi-pause')) ? $elem.addClass('hidden') : $elem.find('.mdi-pause').addClass('hidden');
+                $($elem.get(0).parentNode.querySelector('.mdi-play')).removeClass('hidden');
+                this.prev_audio_message.voice_message.pause();
+                return;
+            }
+
             if ($elem.hasClass('msg-hyperlink')) {
                 return;
             }
+
             if ($elem.hasClass('uploaded-img')) {
                 xabber.openWindow($elem.attr('src'));
                 return;
             }
+
             msg = this.model.messages.get($msg.data('msgid'));
             if (!msg) {
                 return;
             }
+
             var type = msg.get('type');
             if (type === 'file_upload') {
                 return;
@@ -1964,6 +2136,7 @@ define("xabber-chats", function () {
             this.updateNotifications();
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
+            this.contact.on("change:status_message", this.updateStatusMsg, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.updateMenu, this);
             this.contact.on("change:muted", this.updateNotifications, this);
@@ -1990,6 +2163,10 @@ define("xabber-chats", function () {
                 status_message = this.contact.getStatusMessage();
             this.$('.contact-status').attr('data-status', status);
             this.$('.contact-status-message').text(status_message);
+        },
+
+        updateStatusMsg: function () {
+            this.$('.contact-status-message').text(this.contact.getStatusMessage());
         },
 
         updateAvatar: function () {
@@ -2050,11 +2227,14 @@ define("xabber-chats", function () {
             "keyup .input-message .rich-textarea": "keyUp",
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
+            "mouseup .attach-voice-message": "writeVoiceMessage",
+            "mouseup .message-input-panel": "stopWritingVoiceMessage",
+            "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
             "click .reply-message": "replyMessage",
             "click .forward-message": "forwardMessages",
-            "click .close-message-panel": "resetSelectedMessages"
+            "click .close-message-panel": "resetSelectedMessages",
         },
 
         _initialize: function (options) {
@@ -2071,6 +2251,7 @@ define("xabber-chats", function () {
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
                 $placeholder = $rich_textarea.siblings('.placeholder');
             rich_textarea.onpaste = this.onPaste.bind(this);
+            rich_textarea.oncut = this.onCut.bind(this);
             rich_textarea.ondragenter = function (ev) {
                 ev.preventDefault();
                 $placeholder.text('Drop files here to send');
@@ -2186,23 +2367,54 @@ define("xabber-chats", function () {
             this.view.sendChatState('composing');
         },
 
+        displayMicrophone: function () {
+            this.$('.mdi-send').addClass('hidden');
+            this.$('.attach-voice-message').removeClass('hidden');
+        },
+
+        displaySend: function () {
+            this.$('.mdi-send').removeClass('hidden');
+            this.$('.attach-voice-message').addClass('hidden');
+        },
+
         keyUp: function (ev) {
             var $rich_textarea = $(ev.target);
+            if (this.$('.input-message .rich-textarea').getTextFromRichTextarea() != "") {
+                this.displaySend();
+            }
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 // clear input
                 ev.preventDefault();
+                this.displayMicrophone();
                 $rich_textarea.flushRichTextarea();
                 this.unsetForwardedMessages();
                 this.view.sendChatState('active');
             } else if (ev.keyCode === constants.KEY_BACKSPACE || ev.keyCode === constants.KEY_DELETE) {
                 var text = $rich_textarea.getTextFromRichTextarea();
                 if (!text) {
+                    if (this.$('.fwd-messages-preview').hasClass('hidden'))
+                        this.displayMicrophone();
+                    else
+                        this.displaySend();
                     $rich_textarea.flushRichTextarea();
                     this.view.sendChatState('active');
                 }
             }
             $rich_textarea.updateRichTextarea().focus();
             xabber.chat_body.updateHeight();
+        },
+
+        onCut: function (ev) {
+            var $rich_textarea = $(ev.target),
+                text = $rich_textarea.getTextFromRichTextarea();
+            if (!text) {
+                if (this.$('.fwd-messages-preview').hasClass('hidden'))
+                    this.displayMicrophone();
+                else
+                    this.displaySend();
+                    $rich_textarea.flushRichTextarea();
+                    this.view.sendChatState('active');
+            }
         },
 
         onPaste: function (ev) {
@@ -2224,10 +2436,165 @@ define("xabber-chats", function () {
                 files = target.files;
 
             if (files) {
-                var file = files[0];
-                this.view.addFileMessage(file);
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    this.view.addFileMessage(file);
+                }
                 $(target).val('');
             }
+        },
+
+        stopWritingVoiceMessage: function (ev) {
+            $bottom_panel = this.$('.message-input-panel');
+            if ($bottom_panel.find('.recording').length > 0) {
+                $bottom_panel.find('.recording').removeClass('recording');
+                return;
+            }
+        },
+
+        writeVoiceMessage: function (ev) {
+            var elem = ev.target.parentNode;
+            if ($(elem).hasClass('recording')) {
+                $(elem).removeClass('recording');
+            }
+            else
+            {
+                $(elem).addClass('recording');
+                $(elem).addClass('ground-color-50');
+                this.initAudio();
+            }
+        },
+
+        createTimerVisualizer: function() {
+            var timer = document.createElement('div');
+            timer.classList.add('timer');
+            timer.append("0:00");
+            return timer;
+        },
+
+        createVoiceVisualizer: function() {
+            var voice = document.createElement('div');
+            voice.classList.add('voice-visualizer');
+            return voice;
+        },
+
+        voiceMsgRecordingStatus: function() {
+            var status = document.createElement('div');
+            status.classList.add('voice-msg-status');
+            status.innerHTML = 'Release outside this form to cancel';
+            return status;
+        },
+
+        initAudio: function() {
+            navigator.getUserMedia = (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia);
+            if (navigator.getUserMedia) {
+                var constraints = { audio: true },
+                    chunks = [], self = this, audio;
+                var onSuccess = function(stream) {
+                    var /*options = {mimeType: 'audio/ogg'},*/
+                        mediaRecorder = new MediaRecorder(stream),
+                        timer = 1,
+                        mic_hover = true, start_time, stop_time;
+                $mic = self.$('.send-area .attach-voice-message');
+                mediaRecorder.start();
+                mediaRecorder.onstart = function(e) {
+                start_time = moment.now();
+                var visual_timer = self.createTimerVisualizer(),
+                    visual_voice = self.createVoiceVisualizer(),
+                    visual_status = self.voiceMsgRecordingStatus();
+                $bottom_panel = self.$('.message-input-panel');
+                $rich_textarea = self.$('.input-message .rich-textarea');
+                $placeholder = self.$('.input-message .placeholder');
+                $emojipanel = self.$('.insert-emoticon');
+                if (!$placeholder.hasClass('hidden')) $placeholder.addClass('hidden');
+                $rich_textarea.addClass('voice-message-recording');
+                $emojipanel.addClass('hidden');
+                $rich_textarea.get(0).contentEditable = "false";
+                $rich_textarea.get(0).appendChild(visual_voice);
+                $rich_textarea.get(0).appendChild(visual_timer);
+                $rich_textarea.get(0).appendChild(visual_status);
+                $rich_textarea.css('border', 'none');
+                $rich_textarea.css('box-shadow', 'none');
+                var timerId = setInterval(function() {
+                    if (($mic.hasClass('recording'))&&(timer < constants.VOICE_MSG_TIME)) {
+                        if (timer%1 == 0) {
+                            visual_timer.innerHTML = self.view.durationFileNewFormat(timer);
+                        }
+                        timer = (timer*10 + 2)/10;
+                        mic_hover = $bottom_panel.is(":hover");
+                        if (!mic_hover) {
+                            $(visual_status).css('color', '#D32F2F');
+                            $(visual_status).text('Release to cancel record');
+                        }
+                        else
+                        {
+                            $(visual_status).css('color', '#9E9E9E');
+                            $(visual_status).text('Release outside this form to cancel');
+                        }
+                    }
+                    else
+                    {
+                        mic_hover = $bottom_panel.is(":hover");
+                        mediaRecorder.stop();
+                        stop_time = moment.now();
+                        $mic.removeClass('ground-color-50');
+                        $mic.removeClass('recording');
+                        $bottom_panel.css('border', 'none');
+                        $rich_textarea.get(0).contentEditable = "true";
+                        $rich_textarea.removeClass('voice-message-recording');
+                        $placeholder.removeClass('hidden');
+                        $emojipanel.removeClass('hidden');
+                        $rich_textarea.css('border-bottom', '1px solid #9E9E9E');
+                        $rich_textarea.get(0).removeChild(visual_voice);
+                        $rich_textarea.get(0).removeChild(visual_timer);
+                        $rich_textarea.get(0).removeChild(visual_status);
+                        clearInterval(timerId);
+                    }
+                }, 200);
+                var flag = 0;
+                var timerIdDot = setInterval(function() {
+                    if ($mic.hasClass('recording')) {
+                        if (flag){
+                            $(visual_voice).css('background-color', '#FFF');
+                            flag = 0;
+                        }
+                        else
+                        {
+                            $(visual_voice).css('background-color', '#D32F2F');
+                            flag = 1;
+                        }
+                    }
+                    else
+                    {
+                        clearInterval(timerIdDot);
+                    }
+                }, 500);
+            }
+
+            mediaRecorder.onstop = function(e) {
+                if (mic_hover) {
+                var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+                var audio_name = "Voice message";
+                    file = new File([blob], audio_name, {
+                type: "audio/ogg; codecs=opus",
+                });
+                file.duration = Math.round((stop_time-start_time)/1000);
+                self.view.addFileMessage(file);
+                }
+                chunks = [];
+            }
+            mediaRecorder.ondataavailable = function(e) {
+                chunks.push(e.data);
+                stream.getTracks().forEach( track => track.stop() );
+            }
+        }
+
+            var onError = function(err) {
+                console.log('The following error occured: ' + err);
+            }
+
+            navigator.getUserMedia(constraints, onSuccess, onError);
+        }
         },
 
         typeEmoticon: function (emoji) {
@@ -2264,6 +2631,8 @@ define("xabber-chats", function () {
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 text = _.escape($rich_textarea.getTextFromRichTextarea().trim());
             $rich_textarea.flushRichTextarea().focus();
+            this.$('.mdi-send').addClass('hidden');
+            this.$('.attach-voice-message').removeClass('hidden');
             if (text || this.fwd_messages.length) {
                 this.view.onSubmit(text, this.fwd_messages);
             }
@@ -2283,13 +2652,16 @@ define("xabber-chats", function () {
                 } else {
                     msg_text = msg.get('message').emojify();
                     var image_fwd_preview = msg.get('image'), is_file = (msg.get('file_') ? true : false);
-                    if (!_.isUndefined(image_preview)) {
+                    if (!_.isUndefined(image_fwd_preview)) {
                         image_preview = _.clone(image_fwd_preview);
                         set_img_preview = this.createPreviewImage(image_preview);
                     }
                     else {
-                        if (is_file)
-                            msg_text = msg.get('file_').name;
+                        if (is_file) {
+                            var filesize = (msg.get('file_').size) ? this.view.fileSizeNewFormat(msg.get('file_').size) : "";
+                            msg_text = (filesize) ? msg.get('file_').name + ",   " + filesize : msg.get('file_').name;
+                        }
+
                     }
                 }
                 var from_jid = msg.get('from_jid');
@@ -2347,6 +2719,8 @@ define("xabber-chats", function () {
         replyMessage: function (ev) {
             var $msg = this.view.$('.chat-message.selected').first(),
                 msg = this.model.messages.get($msg.data('msgid'));
+            this.$('.mdi-send').removeClass('hidden');
+            this.$('.attach-voice-message').addClass('hidden');
             this.resetSelectedMessages();
             this.setForwardedMessages([msg.get('forwarded_message') || msg]);
         },
@@ -2358,6 +2732,8 @@ define("xabber-chats", function () {
                 var msg = this.model.messages.get(item.dataset.msgid);
                 msg && msgs.push(msg.get('forwarded_message') || msg);
             }.bind(this));
+            this.$('.mdi-send').removeClass('hidden');
+            this.$('.attach-voice-message').addClass('hidden');
             this.resetSelectedMessages();
             xabber.forward_panel.open(msgs);
         },

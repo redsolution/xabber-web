@@ -8,6 +8,6 @@
             <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>
             <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
         </div>
-        <div class="chat-msg-content chat-text-content">{[ if (is_file) { ]}<div class="file-in-circle"><i class="mdi mdi-24px mdi-file"></i></div>{[ } ]}{{message}}</div>
+        <div class="chat-msg-content chat-text-content">{[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_voice_message) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_voice_message) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}{{message}}</div>
     </div>
 </div>

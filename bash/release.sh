@@ -23,8 +23,8 @@ git checkout -b ${GIT_RELEASE_BR}
 sed -i "s/\"dist\/xabber\.min\.js?v[^\"]\+/\"dist\/xabber\.min\.js?v${VERSION_NUMBER}/g" example_index.html
 sed -i "s/\"dist\/xabber\.min\.css?v[^\"]\+/\"dist\/xabber\.min\.css?v${VERSION_NUMBER}/g" example_index.html
 sed -i "s/\"version\":\ \"[^\"]\+/\"version\":\ \"${VERSION_NUMBER}/g" bower.json package.json
-sed -i "s/\"version_number\":\"[^\"]\+/\"version_number\":\"${VERSION_NUMBER}/g" src/version.js
-sed -i "s/\"version_description\":\".*$/\"version_description\":\"${VERSION_DESCRIPTION}\"}'/g" src/version.js
+sed -i "s/\"version_number\":\"[^\"]\+/\"version_number\":\"${VERSION_NUMBER}/g" version.js
+sed -i "s/\"version_description\":\".*$/\"version_description\":\"${VERSION_DESCRIPTION}\"}'/g" version.js
 
 make minify
 

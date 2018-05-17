@@ -17,6 +17,7 @@ require.config({
         "strophe.ping":             "node_modules/strophejs-plugins/ping/strophe.ping",
         "strophe.rsm":              "node_modules/strophejs-plugins/rsm/strophe.rsm",
         "text":                     "node_modules/requirejs-text/text",
+        "wavesurfer":               "node_modules/wavesurfer/dist/wavesurfer",
         // modified libs and plugins
         "backbone.localsync":       "src/lib/backbone.localsync",
         "hammerjs":                 "src/lib/hammer.min",
@@ -24,7 +25,7 @@ require.config({
         "strophe.caps":             "src/lib/strophe.caps",
 
         // Xabber sources
-        "xabber-version":           "src/version",
+        "xabber-version":           "version",
         "xabber-dependencies":      "src/dependencies",
         "xabber-templates":         "src/templates",
         "xabber-constants":         "src/constants",

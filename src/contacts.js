@@ -39,6 +39,7 @@ define("xabber-contacts", function () {
             this.on("change:photo_hash", this.getVCard, this);
             this.account.dfd_presence.done(function () {
                 this.getVCard();
+                this.getLastSeen();
             }.bind(this));
         },
 
@@ -68,6 +69,24 @@ define("xabber-contacts", function () {
                     is_callback && callback(null);
                 }
             );
+        },
+
+        getLastSeen: function() {
+            if (this.get('status') == 'offline') {
+            var iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
+            this.account.sendIQ(iq, function (iq) {
+                    var last_seen = this.getLastSeenStatus(iq);
+                    if (this.get('status') == 'offline')
+                        this.set({status_message: last_seen });
+            }.bind(this));
+            }
+        },
+
+        getLastSeenStatus: function(iq) {
+            var seconds = $(iq).children('query').attr('seconds'),
+                message_time = moment.now() - 1000*seconds;
+            this.set({ last_seen: message_time });
+            return this.lastSeenNewFormat(seconds, message_time);
         },
 
         pres: function (type) {
@@ -162,8 +181,10 @@ define("xabber-contacts", function () {
                 clearTimeout(this._reset_status_timeout);
                 var resource_obj = this.resources.get(resource);
                 if (type === 'unavailable') {
+                    this.set({ last_seen: moment.now() });
                     resource_obj && resource_obj.destroy();
                 } else {
+                    this.set({ last_seen: undefined });
                     var attrs = {
                         resource: resource,
                         priority: priority,
@@ -190,6 +211,19 @@ define("xabber-contacts", function () {
             }.bind(this), timeout || 5000);
         },
 
+        lastSeenNewFormat: function (seconds, message_time) {
+            if ((seconds >= 0)&&(seconds < 60))
+                return 'last seen just now';
+            if ((seconds > 60)&&(seconds < 3600))
+                return ('last seen ' + Math.trunc(seconds/60) + ' minutes ago');
+            if ((seconds >= 3600)&&(seconds < 7200))
+                return ('last seen hour ago');
+            if ((seconds >= 3600*48*2))
+                return ('last seen '+ moment().subtract(seconds, 'seconds').format('LL'));
+            else
+                return ('last seen '+ (moment().subtract(seconds, 'seconds').calendar()).toLowerCase());
+        },
+
         showDetails: function (screen) {
             screen || (screen = 'contacts');
             xabber.body.setScreen(screen, {right: 'contact_details', contact: this});
@@ -203,12 +237,15 @@ define("xabber-contacts", function () {
             this.account = this.model.account;
             this.$el.attr({'data-id': uuid(), 'data-jid': this.model.get('jid')});
             this.$('.jid').text(this.model.get('jid'));
+            this.interval_last;
             this.updateName();
             this.updateStatus();
             this.updateAvatar();
             this.model.on("change:name", this.updateName, this);
             this.model.on("change:image", this.updateAvatar, this);
             this.model.on("change:status_updated", this.updateStatus, this);
+            this.model.on("change:status_message", this.updateStatusMsg, this);
+            this.model.on("change:last_seen", this.lastSeenUpdated, this);
         },
 
         updateName: function () {
@@ -221,6 +258,29 @@ define("xabber-contacts", function () {
 
         updateStatus: function () {
             this.$('.status').attr('data-status', this.model.get('status'));
+            this.$('.status-message').text(this.model.getStatusMessage());
+            if ((this.model.get('status') == 'offline')&&(this.model.get('last_seen'))) {
+                var seconds = (moment.now() - this.model.get('last_seen'))/1000,
+                    new_status = this.model.lastSeenNewFormat(seconds, this.model.get('last_seen'));
+                this.model.set({ status_message: new_status });
+            }
+        },
+
+        lastSeenUpdated: function () {
+            if ((this.model.get('status') == 'offline')&&(this.model.get('last_seen'))&&(_.isUndefined(this.interval_last))) {
+                this.interval_last = setInterval(function() {
+                var seconds = (moment.now() - this.model.get('last_seen'))/1000,
+                    new_status = this.model.lastSeenNewFormat(seconds, this.model.get('last_seen'));
+                this.model.set({ status_message: new_status });
+            }.bind(this), 60000);
+            }
+            else
+            {
+                clearInterval(this.interval_last);
+            }
+        },
+
+        updateStatusMsg: function() {
             this.$('.status-message').text(this.model.getStatusMessage());
         }
     });
@@ -409,6 +469,7 @@ define("xabber-contacts", function () {
             if (_.has(changed, 'name')) this.updateName();
             if (_.has(changed, 'image')) this.updateAvatar();
             if (_.has(changed, 'status_updated')) this.updateStatus();
+            if (_.has(changed, 'status_message')) this.updateStatusMsg();
             if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
                     _.has(changed, 'subscription')) {
                 this.updateButtons();
@@ -420,10 +481,12 @@ define("xabber-contacts", function () {
         },
 
         updateStatus: function () {
-            var status = this.model.get('status'),
-                status_message = this.model.getStatusMessage();
-            this.$('.main-info .status').attr('data-status', status);
-            this.$('.main-info .status-message').text(status_message);
+            this.$('.status').attr('data-status', this.model.get('status'));
+            this.$('.status-message').text(this.model.getStatusMessage());
+        },
+
+        updateStatusMsg: function () {
+            this.$('.status-message').text(this.model.getStatusMessage());
         },
 
         updateAvatar: function () {

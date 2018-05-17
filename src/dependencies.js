@@ -4,6 +4,7 @@ define([
     "underscore",
     "jquery",
     "moment",
+    "wavesurfer",
     "strophe",
     "strophe.disco",
     "strophe.ping",
@@ -12,11 +13,12 @@ define([
     "backbone.localsync",
     "materialize",
     "perfectScrollbarJQuery"
-], function(Backbone, _, $, moment, Strophe) {
+], function(Backbone, _, $, moment, WaveSurfer, Strophe) {
     return _.extend({
         $: $,
         _: _,
         moment: moment,
+        WaveSurfer: WaveSurfer,
         Strophe: Strophe
     }, Strophe);
 });

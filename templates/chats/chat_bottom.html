@@ -30,8 +30,8 @@
             </div>
             <div class="input-toolbar">
                 <div class="attach attach-file">
+                    <input type="file" title="Send file" multiple>
                     <i class="mdi mdi-24px mdi-paperclip"></i>
-                    <input type="file" title="Send file">
                 </div>
                 <div class="last-emoticons">
                 </div>
@@ -39,7 +39,10 @@
             </div>
         </div>
         <div class="send-area">
-            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500"></i>
+            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>
+            <div class="attach attach-voice-message" title="Send voice message">
+                    <i class="mdi mdi-28px mdi-microphone text-color-700 hover-text-color-500"></i>
+            </div>
         </div>
     </div>
     <div class="message-actions-panel noselect hidden">

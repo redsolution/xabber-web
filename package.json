@@ -1,6 +1,6 @@
 {
   "name": "xabber.web",
-  "version": "1.0.13",
+  "version": "1.0.12",
   "description": "Open-source XMPP messenger for web browsers",
   "keywords": ["xmpp", "jabber", "messenger", "chat", "web", "javascript"],
   "bugs": {
@@ -19,13 +19,14 @@
     "clean-css-cli": "~4.0.11",
     "http-server": "^0.9.0",
     "jquery": ">3.0.0",
-    "moment": "~2.18.1",
+    "moment": ">2.19.3",
     "npm": "^4.5.0",
     "perfect-scrollbar": "~0.6.16",
     "requirejs": "~2.3.3",
     "requirejs-text": "~2.0.15",
     "strophe.js": "~1.2.13",
     "strophejs-plugins": "0.0.7",
-    "underscore": "~1.8.3"
+    "underscore": "~1.8.3",
+    "wavesurfer": ">0.0.0"
   }
 }

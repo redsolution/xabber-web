@@ -85,6 +85,7 @@ define("xabber-strophe", function () {
     Strophe.addNamespace('SEARCH', 'jabber:iq:search');
     Strophe.addNamespace('OOB', 'jabber:x:oob');
     Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
+    Strophe.addNamespace('LAST', 'jabber:iq:last');
 
     return xabber;
   };

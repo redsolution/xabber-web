@@ -730,6 +730,11 @@ define("xabber-views", function () {
         },
 
         onMouseUp: function (ev) {
+            var selector = document.querySelector('.recording');
+            if (selector) {
+                $(selector).removeClass('recording');
+                return;
+            }
             this.get('avatar') && this.finishDrag(ev);
             this.resetElem();
         },

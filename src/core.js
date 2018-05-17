@@ -59,7 +59,7 @@
         readActualVersion: function () {
             // get version.js file from server and parse it
             var rawFile = new XMLHttpRequest();
-            rawFile.open("GET", "src/version.js?"+uuid(), true);
+            rawFile.open("GET", "version.js?"+uuid(), true);
             rawFile.onreadystatechange = function () {
                 if (rawFile.readyState === 4 && rawFile.status === 200) {
                     rawFile.onreadystatechange = null;

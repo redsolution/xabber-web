@@ -7,7 +7,7 @@
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
         </div>
-        <div class="chat-msg-content chat-file-content">{[ if (is_file) { ]}<div class="file-in-circle"><i class="mdi mdi-24px mdi-file"></i></div>{[ } ]}
+        <div class="chat-msg-content chat-file-content">{[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_voice_message) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_voice_message) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}
             <div class="chat-file-info">
                 <div class="filename text-color-700 one-line">{{file.name}}</div>
                 <div class="filesize grey-text one-line"></div>
@@ -28,5 +28,5 @@
     <div class="right-side noselect">
         <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
         <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}"></i>
-        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>
+        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_file}}"></i></div>
     </div>
