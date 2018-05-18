@@ -7,7 +7,7 @@
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
         </div>
-        <div class="chat-msg-content chat-file-content">{[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_voice_message) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_voice_message) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}
+        <div class="chat-msg-content chat-file-content">
             <div class="chat-file-info">
                 <div class="filename text-color-700 one-line">{{file.name}}</div>
                 <div class="filesize grey-text one-line"></div>
@@ -22,6 +22,7 @@
                     <div class="cancel-upload text-color-700">Cancel</div>
                 </div>
             </div>
+            {[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_audio) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_audio) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}
         </div>
     </div>
 

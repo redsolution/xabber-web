@@ -30,6 +30,8 @@ var constants = {
     KEY_DELETE: 46,
     KEY_FORWARD_SLASH: 47,
 
+    VOICE_MSG_TIME: 120,
+
     PASSWORD_DOT: String.fromCharCode(0x2022),
 
     CONNECTION_URL: null,
@@ -74,7 +76,6 @@ var constants = {
 
     CHATSTATE_TIMEOUT_PAUSED:   5000,
     CHATSTATE_TIMEOUT_STOPPED:  5000,
-    VOICE_MSG_TIME: 120,
 
     MSG_ERROR: -1,
     MSG_PENDING: 0,

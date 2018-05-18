@@ -215,7 +215,7 @@ define("xabber-contacts", function () {
             if ((seconds >= 0)&&(seconds < 60))
                 return 'last seen just now';
             if ((seconds > 60)&&(seconds < 3600))
-                return ('last seen ' + Math.trunc(seconds/60) + ' minutes ago');
+                return ('last seen ' + Math.trunc(seconds/60) + ((seconds < 120) ? ' minute ago' : ' minutes ago'));
             if ((seconds >= 3600)&&(seconds < 7200))
                 return ('last seen hour ago');
             if ((seconds >= 3600*48*2))
