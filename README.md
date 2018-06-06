@@ -49,10 +49,8 @@ We share with Bitcoin similar values and approaches, so no wonder that we love i
 
 bitcoin:1L78Z8etFrddc32CrrY88SpsL5mft51JS6
 
-
 ## Join Xabber development
 We also welcome any developers, designers, translators, and testers to help us to make the art software together.  Your pull requests will be highly appreciated. 
-
 
 
 ## Online documentation
