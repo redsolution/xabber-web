@@ -27,6 +27,8 @@
     "strophe.js": "~1.2.13",
     "strophejs-plugins": "0.0.7",
     "underscore": "~1.8.3",
-    "wavesurfer": ">0.0.0"
+    "wavesurfer": ">0.0.0",
+    "slug": ">0.0.0",
+    "magnific-popup": ">0.0.0"
   }
 }

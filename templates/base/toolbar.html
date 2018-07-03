@@ -1,9 +1,10 @@
-<div class="toolbar-item all-chats" title="All chats">
+<div class="toolbar-item all-chats active" title="All chats">
     <div class="border"></div>
     <img class="logo" src="images/xabber-logo.png">
+    <span class="all-msg-indicator"></span>
 </div>
 
-<div class="toolbar-item chats active" title="Chats">
+<div class="toolbar-item chats" title="Chats">
     <div class="border"></div>
     <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>
     <span class="msg-indicator"></span>
@@ -12,6 +13,13 @@
 <div class="toolbar-item group-chats" title="Group chats">
     <div class="border"></div>
     <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" data-svgname="message-group"></svg>
+    <span class="group-msg-indicator"></span>
+</div>
+
+<div class="toolbar-item archive-chats" title="Archive chats">
+    <div class="border"></div>
+    <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>
+    <span class="archive-msg-indicator hidden"></span>
 </div>
 
 <div class="toolbar-item contacts" title="Contacts">
@@ -25,11 +33,15 @@
 </div>
 
 <div class="add-something-wrap">
-    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add contact or account">
+    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add group chat, contact or account">
         <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>
     </div>
 
     <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">
+        <div class="add-variant groupchat">
+            <i class="mdi mdi-20px mdi-account-multiple-plus"></i>
+            <span class="text">Add group chat</span>
+        </div>
         <div class="add-variant contact">
             <i class="mdi mdi-20px mdi-account-plus"></i>
             <span class="text">Add contact</span>

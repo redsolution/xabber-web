@@ -355,7 +355,7 @@ define("xabber-accounts", function () {
                         vcard: vcard,
                         vcard_updated: moment.now()
                     };
-                    attrs.name = vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
+                    attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
                     attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
                     this.cached_image = Images.getCachedImage(attrs.image);
                     this.save(attrs);
@@ -482,8 +482,8 @@ define("xabber-accounts", function () {
             var $presence = $(presence),
                 type = presence.getAttribute('type');
             if (type === 'error') { return; }
-            if (($presence.find('x').attr('xmlns') || '').indexOf(Strophe.NS.MUC) === 0) {
-                return;
+            if (($presence.find('x').attr('xmlns') || '').indexOf(Strophe.NS.GROUP_CHAT) === 0) {
+                chat_type = 'group_chat';
             }
             var jid = presence.getAttribute('from'),
                 bare_jid = Strophe.getBareJidFromJid(jid);
@@ -594,7 +594,7 @@ define("xabber-accounts", function () {
                 } else if (account.show_settings_after_delete) {
                     xabber.body.setScreen('settings');
                 } else {
-                    xabber.body.setScreen('chats');
+                    xabber.body.setScreen('all-chats');
                 }
             }
         },
@@ -1657,7 +1657,7 @@ define("xabber-accounts", function () {
         successFeedback: function (account) {
             account.auth_view = null;
             this.data.set('authentication', false);
-            xabber.body.setScreen('chats');
+            xabber.body.setScreen('all-chats');
         }
     });
 

@@ -143,13 +143,23 @@ define("xabber-ui", function () {
         var path_chat_head = new this.ViewPath('chat_item.content.head'),
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
-            path_contact_details = new this.ViewPath('contact.details_view');
+            path_contact_details = new this.ViewPath('contact.details_view'),
+            path_group_invitation = new this.ViewPath('contact.invitation');
 
         this.body.addScreen('contacts', {
             toolbar: null,
             main: {
                 left: { contacts: null },
                 right: { contact_placeholder: null }
+            },
+            roster: null
+        });
+
+        this.body.addScreen('all-chats', {
+            toolbar: null,
+            main: {
+                left: { chats: null },
+                right: { chat_placeholder: null }
             },
             roster: null
         });
@@ -166,12 +176,25 @@ define("xabber-ui", function () {
         this.body.addScreen('group-chats', {
             toolbar: null,
             main: {
-                wide: { group_chat_placeholder: null }
+                left: { group_chats: null },
+                right: { group_chat_placeholder: null }
+            },
+            roster: null
+        });
+
+        this.body.addScreen('archive-chats', {
+            toolbar: null,
+            main: {
+                left: { archive_chats: null },
+                right: { archive_placeholder: null }
             },
             roster: null
         });
 
         this.right_panel.patchTree = function (tree, options) {
+            if (options.right === 'group_invitation') {
+                return { details: path_group_invitation };
+            }
             if (options.right === 'contact_details') {
                 return { details: path_contact_details };
             }
@@ -191,7 +214,7 @@ define("xabber-ui", function () {
             if (result === null && !this.accounts.length) {
                 this.body.setScreen('login');
             } else if (this.body.isScreen('blank')) {
-                this.body.setScreen('chats');
+                this.body.setScreen('all-chats');
             }
         }, this);
 

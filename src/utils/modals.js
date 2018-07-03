@@ -121,6 +121,11 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         dialog_options: dialog_options
                     });
                 }, {use_queue: true});
+                if (dialog_options.blob_image_from_clipboard) {
+                    dialog.$modal.find('.dialog-options-wrap').html('');
+                    dialog.$modal.find('.img-from-clipboard').get(0).src = dialog_options.blob_image_from_clipboard;
+                    dialog.$modal.find('.container-for-img').removeClass('hidden');
+                }
                 dialog.$modal.find('.modal-footer button').click(function (ev) {
                     var option = $(ev.target).data('option'),
                         $options = dialog.$modal.find('.dialog-option');

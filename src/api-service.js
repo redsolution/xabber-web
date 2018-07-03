@@ -553,7 +553,7 @@ define("xabber-api-service", function () {
         successFeedback: function () {
             this.authFeedback({});
             this.data.set('authentication', false);
-            xabber.body.setScreen('chats');
+            xabber.body.setScreen('all-chats');
         },
 
         changeLoginType: function () {
@@ -827,7 +827,7 @@ define("xabber-api-service", function () {
         onHide: function () {
             this.$el.detach();
             if (xabber.body.isScreen('blank')) {
-                xabber.body.setScreen('chats');
+                xabber.body.setScreen('all-chats');
             }
         },
 

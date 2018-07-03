@@ -318,6 +318,10 @@ input[type=text].simple-input-field:hover {
   margin: 0 5px;
 }
 
+.modal-footer .errors {
+  color: #f44336;
+  line-height: 18px;
+}
 
 .main-modal {
   top: 100px !important;
@@ -471,6 +475,13 @@ input[type=file] {
   line-height: 20px;
 }
 
+.mdi.mdi-18px {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+}
+
 .mdi.mdi-16px {
   width: 16px;
   height: 16px;
@@ -571,6 +582,10 @@ body {
   background-color: rgba(183, 28, 28, 0.05);
   overflow: hidden;
   z-index: 500;
+}
+
+.roster-right-container .mdi-account-multiple {
+  color: #9E9E9E;
 }
 
 .main-wrap {
@@ -705,15 +720,14 @@ body {
   background-color: #E0E0E0;
 }
 
-.toolbar .msg-indicator {
+.toolbar .msg-indicator,
+.toolbar .group-msg-indicator,
+.toolbar .archive-msg-indicator,
+.toolbar .all-msg-indicator {
   position: absolute;
   display: none;
-  top: 7px;
-  left: 35px;
-  padding: 0 4px;
-  min-width: 16px;
-  height: 16px;
   border-radius: 8px;
+  padding: 0 4px;
   color: #FFFFFF !important;
   font-size: 12px;
   font-weight: bold;
@@ -727,14 +741,35 @@ body {
   transform: translateX(-50%);
 }
 
-.toolbar .msg-indicator.unread {
+.toolbar .all-msg-indicator {
+  top: 7px;
+  left: 35px;
+  min-width: 16px;
+  height: 16px;
+}
+
+.toolbar .msg-indicator,
+.toolbar .group-msg-indicator,
+.toolbar .archive-msg-indicator {
+  top: 8px;
+  left: 38px;
+  min-width: 8px;
+  height: 8px;
+}
+
+.toolbar .msg-indicator.unread,
+.toolbar .group-msg-indicator.unread,
+.toolbar .archive-msg-indicator.unread,
+.toolbar .all-msg-indicator.unread {
   display: inline-block;
 }
 
-.toolbar .show-chats.active .msg-indicator {
+.toolbar .show-chats.active .msg-indicator,
+.toolbar .show-chats.active .group-msg-indicator,
+.toolbar .show-chats.active .archive-msg-indicator,
+.toolbar .show-chats.active .all-msg-indicator {
   display: none !important;
 }
-
 
 .toolbar-bottom {
   position: absolute;
@@ -755,7 +790,7 @@ body {
 .toolbar .add-variants {
   top: -21px !important;
   left: 50px !important;
-  min-width: 150px !important;
+  min-width: 170px !important;
   background-color: transparent;
   box-shadow: none;
   z-index: 1100;
@@ -794,7 +829,7 @@ body {
 
 .toolbar .accounts-wrap {
   position: absolute;
-  top: 300px;
+  top: 350px;
   bottom: 48px;
   width: 100%;
 }
@@ -1684,6 +1719,87 @@ body {
   padding: 10px 0;
 }
 
+/* ----------------- ADD GROUP CHAT VIEW ------------------------ */
+
+input#new_chat_anonymous,
+input#new_chat_searchable {
+  line-height: 25px;
+}
+
+input#new_chat_jid {
+  width: 45%;
+}
+
+#new_chat_model {
+  display: block;
+  width: max-content;
+  padding-right: 10px;
+}
+
+.input-field .field-jid {
+    display: inline;
+    vertical-align: bottom;
+    margin-left: 4px;
+    color: #616161;
+    line-height: 3rem;
+}
+
+.add-user-group-chat .group-title, .add-user-group-chat .arrow {
+  color: #616161;
+}
+
+.add-user-group-chat .roster-contact:hover,
+.add-user-group-chat .group-head:hover {
+  background-color: transparent;
+}
+
+.add-user-group-chat .list-item.selected {
+  background-color: #FFEBEE;
+}
+
+.add-user-group-chat .roster-contact .name {
+  height: 18px;
+}
+
+.group-chat-members {
+  padding: 18px 7px 11px 65px !important;
+}
+
+.group-chat-members .member-info {
+  position: absolute;
+  top: 10px;
+}
+
+.group-chat-members .member-info .role {
+  line-height: 14px;
+  font-size: 14px;
+  color: #9E9E9E;
+}
+
+.members-list-wrap {
+  max-height: calc(56px * 8);
+  overflow-y: auto;
+}
+
+.btn-chat-member-more, .btn-delete-user , .btn-make-user-admin {
+    position: absolute;
+    right: 15px;
+    top: 18px;
+    width: 20px;
+    height: 20px;
+    color: #9E9E9E;
+}
+
+.btn-make-user-admin {
+  right: 50px;
+}
+
+.btn-chat-member-more:hover,
+.btn-delete-user:hover,
+.btn-make-user-admin:hover {
+  color: #616161;
+}
+
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */
 
 .groups.checkbox-list .input-field {
@@ -1971,6 +2087,10 @@ body {
   cursor: pointer;
 }
 
+.name-is-jid {
+  color: #616161 !important;
+}
+
 .chat-head-wrap .contact-info .contact-status-message {
   height: 14px;
   font-size: 12px;
@@ -2019,7 +2139,6 @@ body {
   min-width: 200px !important;
 }
 
-
 .chat-content-wrap {
   width: 100%;
   height: 100%;
@@ -2056,7 +2175,7 @@ body {
   cursor: pointer;
 }
 
-.chat-message.selected {
+.chat-message.selected, .list-item.selected {
   background-color: #FFEBEE;
 }
 
@@ -2142,7 +2261,8 @@ body {
 
 .chat-message.system .chat-msg-content {
   color: #757575;
-  font-style: italic;
+    font-style: italic;
+    text-align: center;
 }
 
 .chat-message .chat-msg-content a:hover {
@@ -2175,14 +2295,22 @@ img.fwd-img-preview {
 
 .chat-message.auth-request .accept-request,
 .chat-message.auth-request .block-request,
-.chat-message.auth-request .decline-request {
+.chat-message.auth-request .decline-request,
+.chat-message.auth-request .block-request-group,
+.chat-message.auth-request .decline-request-group  {
   margin-left: 7px;
   color: #D32F2F;
 }
-
+.chat-message.auth-request .accept-request-group {
+  margin-left: 0px;
+  color: #D32F2F;
+}
 .chat-message.auth-request .accept-request:hover,
 .chat-message.auth-request .block-request:hover,
-.chat-message.auth-request .decline-request:hover {
+.chat-message.auth-request .decline-request:hover,
+.chat-message.auth-request .accept-request-group:hover,
+.chat-message.auth-request .block-request-group:hover,
+.chat-message.auth-request .decline-request-group:hover  {
   text-decoration: underline;
   cursor: pointer;
 }
@@ -2272,6 +2400,12 @@ img.fwd-img-preview {
   overflow: hidden;
 }
 
+.mdi-account-multiple {
+  float: left;
+  color: #616161;
+  margin-right: 2px;
+}
+
 .chat-message .mdi-link-variant {
   position: absolute;
     text-align: center;
@@ -2280,7 +2414,6 @@ img.fwd-img-preview {
     width: 30px;
     height: 30px;
     border-radius: 50px;
-    z-index: 100;
 }
 
 .msg-copy-link {
@@ -3708,17 +3841,17 @@ input[type='range'].voice-message-volume:focus {
 
 /* ------------------- VCARD INFO ---------------------- */
 
-.vcard .info-wrap {
+.vcard .info-wrap, .group-info .info-wrap  {
   position: relative;
   width: 100%;
   padding: 0 0 6px 36px;
 }
 
-.vcard .details-icon {
+.vcard .details-icon, .group-info .details-icon {
   top: 2px;
 }
 
-.vcard .info {
+.vcard .info, .group-info .info {
   width: 100%;
   padding-bottom: 6px;
   -webkit-touch-callout: default;/* iOS Safari */
@@ -3729,7 +3862,7 @@ input[type='range'].voice-message-volume:focus {
                                   not supported by any browser */
 }
 
-.vcard .info .value {
+.vcard .info .value, .group-info .info .value {
   max-width: 100%;
   height: 16px;
   font-size: 14px;
@@ -3737,7 +3870,7 @@ input[type='range'].voice-message-volume:focus {
   color: #616161;
 }
 
-.vcard .info .label {
+.vcard .info .label, .group-info .info .label {
   height: 14px;
   margin-top: 3px;
   font-size: 12px;
@@ -3746,11 +3879,11 @@ input[type='range'].voice-message-volume:focus {
   color: #9E9E9E;
 }
 
-.vcard .block-header {
+.vcard .block-header, .group-info .block-header {
   width: 30%;
 }
 
-.vcard .block-name {
+.vcard .block-name, .group-info .block-name {
   float: left;
 }
 
@@ -3789,6 +3922,16 @@ input[type='range'].voice-message-volume:focus {
 .preloader-20px .circle {
   border-width: 2px;
 }
+
+.chat-members-info span {
+    cursor: pointer;
+}
+
+.chat-members-info span:hover {
+    padding: 2px 0px;
+    border-bottom: 2px dashed #9E9E9E;
+}
+
 
 /* ------------------ VCARD EDIT ---------------------- */
 
@@ -3888,7 +4031,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .main-info .contact-name,
-.details-panel .main-info .contact-name-input {
+.details-panel .main-info .contact-name-input,
+.details-panel .main-info .name-wrap {
   max-width: 100%;
   height: 35px;
   margin: 0;
@@ -3903,7 +4047,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 
-.details-panel .main-info .status-message {
+.details-panel .main-info .status-message,
+.right-panel-wrap .invitation .main-info .jid {
   clear: both;
   max-width: 100%;
   height: 21px;
@@ -3989,6 +4134,34 @@ input[type='range'].voice-message-volume:focus {
   color: #9E9E9E;
 }
 
+.right-panel-wrap .invitation .invite-msg {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+}
+
+.right-panel-wrap .invitation .invite-msg .invite-msg-text {
+  color: #616161;
+  font-style: italic;
+  width: 80%;
+  margin: 0 auto;
+}
+.right-panel-wrap .invitation .panel-content {
+    position: relative !important;
+    top: 0px;
+}
+.right-panel-wrap .invitation .panel-footer {
+    position: relative !important;
+}
+.right-panel-wrap .invitation .panel-footer .buttons-wrap {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 /* ---------------- DIALOG MODALS --------------------- */
 .dialog-modal {
   top: 180px !important;
@@ -4002,6 +4175,16 @@ input[type='range'].voice-message-volume:focus {
 .dialog-modal .panel-header {
   font-size: 16px;
   font-weight: bold;
+}
+
+.dialog-modal .img-from-clipboard {
+    max-width: 380px;
+    max-height: 380px;
+}
+
+.dialog-modal .container-for-img {
+    margin: 20px auto;
+    width: max-content;
 }
 
 .dialog-modal .modal-content {
@@ -4159,7 +4342,6 @@ input[type='range'].voice-message-volume:focus {
   margin: 0;
 }
 
-
 /* ------------------ RECENT CHATS MODAL ------------------ */
 
 .forward-panel-modal {
@@ -4218,6 +4400,36 @@ input[type='range'].voice-message-volume:focus {
   background-color: #EEEEEE;
 }
 
+.add-user-group-chat .roster-contact {
+  height: 48px;
+}
+.add-user-group-chat .roster-contact .blocked-indicator {
+  display: none;
+}
+
+.add-user-group-chat .roster-contact .name {
+  color: #212121;
+}
+
+.add-user-group-chat .roster-contact .jid {
+  color: #616161;
+}
+
+.add-user-group-chat .chat-list {
+  max-height: calc(48px * 8);
+  overflow-y: auto;
+  margin: 5px 0px;
+}
+
+.add-user-group-chat .modal-footer .btn-add .counter {
+    margin-right: 4px;
+    opacity: 0.7;
+}
+
+.add-user-group-chat .modal-footer .btn-flat {
+    margin: 0 10px;
+    min-width:  50px;
+}
 /* ----------------- SYNC SETTTINGS MODAL ---------------- */
 
 .sync-settings-modal {

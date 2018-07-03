@@ -265,10 +265,17 @@
         setUpPushNotifications: function () {
             var result = new $.Deferred(),
                 self = this;
+
+            navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
+                firebase.messaging().useServiceWorker(registration);
+            });
+
             firebase.initializeApp({
                 apiKey: constants.GCM_API_KEY,
                 messagingSenderId: constants.GCM_SENDER_ID
             });
+
+
             self.messaging = firebase.messaging();
 
             self.messaging.requestPermission().then(function () {

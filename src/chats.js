@@ -72,14 +72,20 @@ define("xabber-chats", function () {
 
         createFromStanza: function ($message, options) {
             options || (options = {});
+            // if ($message.find('invite').length > 0)
+            //     console.log($message);
+            // if (($message.children('invite').length > 0)&&(this.account.get('jid') == Strophe.getBareJidFromJid($message.attr('from'))))
+            //     return;
+            var group_chat = $message.children('groupchat');
             var $delay = options.delay || $message.find('delay'),
-                body = _.escape($message.children('body').text()),
+                invite_group_chat = $message.children('invite'),
+                full_jid = (invite_group_chat.length > 0) ? invite_group_chat.attr('jid') : (group_chat.attr('from') || $message.attr('from')),
+                from_jid = Strophe.getBareJidFromJid(full_jid),
+                body = _.escape(group_chat.text()) || _.escape($message.children('body').text()),
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
-                from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 message = msgid && this.get(msgid),
                 url_media = this.parseURLFromStanza($message);
-
             if (message) {
                 return message;
             }
@@ -124,12 +130,41 @@ define("xabber-chats", function () {
                 attrs.file_ = file;
             }
 
+            if ($message.attr('from') == group_chat.attr('from')) {
+                attrs.type = 'system';
+            }
+
+            if (invite_group_chat.length > 0) {
+                attrs.invite = true;
+                attrs.type = 'system';
+            }
+
             $delay.length && (attrs.time = $delay.attr('stamp'));
             body && (attrs.message = body);
             attrs.carbon_copied && (attrs.state = constants.MSG_SENT);
             options.is_archived && (attrs.state = constants.MSG_DISPLAYED);
 
-            message = this.create(attrs);
+            if (invite_group_chat.length > 0) {
+                var contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid));
+                var chat = this.account.chats.getChat(contact);
+                contact.set('group_chat', true);
+                contact.set('in_roster', false);
+                var invite_msg_text = Strophe.getBareJidFromJid($message.attr('from')) + ' invites you to join group chat. If you accept, ' + from_jid + ' username shall be visible to group chat members';
+                contact.invitation.updateInviteMsg(invite_msg_text);
+                chat.messages.createSystemMessage({
+                    from_jid: from_jid,
+                    auth_request: true,
+                    invite: true,
+                    is_accepted: false,
+                    silent: false,
+                    message: invite_msg_text
+                });
+                return;
+            }
+            else {
+                message = this.create(attrs);
+            }
+
             return message;
         },
 
@@ -167,6 +202,7 @@ define("xabber-chats", function () {
             opened: true,
             active: false,
             display: false,
+            group_chat: false,
             unread: 0,
             timestamp: 0
         },
@@ -180,6 +216,7 @@ define("xabber-chats", function () {
                 jid: jid
             });
             this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
+            this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
@@ -188,15 +225,31 @@ define("xabber-chats", function () {
 
         increaseUnread: function () {
             this.set('unread', this.get('unread') + 1);
-            xabber.toolbar_view.increaseMessageCounter();
+            if ((this.contact.get('archived'))&&(this.contact.get('muted'))) {
+            }
+            else {
+                xabber.toolbar_view.increaseAllMessageCounter();
+                if (this.contact.get('group_chat'))
+                    xabber.toolbar_view.increaseGroupMessageCounter();
+                else
+                    xabber.toolbar_view.increaseMessageCounter();
+            }
         },
 
         decreaseUnread: function () {
             var unread = this.get('unread');
             if (unread > 0) {
                 this.set('unread', unread - 1);
-                xabber.decreaseMessageCounter();
-                xabber.toolbar_view.decreaseMessageCounter();
+                xabber.decreaseAllMessageCounter();
+                if ((this.contact.get('archived'))&&(this.contact.get('muted'))) {
+                }
+                else {
+                    xabber.toolbar_view.decreaseAllMessageCounter();
+                    if (this.contact.get('group_chat'))
+                        xabber.toolbar_view.decreaseGroupMessageCounter();
+                    else
+                        xabber.toolbar_view.decreaseMessageCounter();
+                }
             }
         },
 
@@ -204,14 +257,13 @@ define("xabber-chats", function () {
             var unread = this.get('unread');
             if (unread > 0) {
                 this.set('unread', 0);
-                xabber.decreaseMessageCounter(unread);
-                xabber.toolbar_view.decreaseMessageCounter(unread);
+                xabber.decreaseAllMessageCounter(unread);
+                xabber.toolbar_view.decreaseAllMessageCounter(unread);
             }
         },
 
         receiveMessage: function ($message, options) {
             var carbon_copied = options.carbon_copied;
-
             // discovering chat marker message
             var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]');
             if ($marker.length) {
@@ -234,6 +286,14 @@ define("xabber-chats", function () {
                 var $archived = $message.find('archived');
                 if ($archived.length) {
                     options.archive_id = $archived.attr('id');
+                }
+            }
+            else
+            {
+                if ($message.find('invite').length) {
+                    // console.log($message.find('invite').attr('jid'));
+                    // console.log(this.account.contacts.get(Strophe.getBareJidFromJid($message.find('invite').attr('jid'))));
+                    return;
                 }
             }
 
@@ -260,50 +320,79 @@ define("xabber-chats", function () {
 
         onPresence: function (type) {
             var jid = this.get('jid');
-            if (type === 'subscribe_from') {
-                this.messages.createSystemMessage({
-                    from_jid: this.account.get('jid'),
-                    silent: false,
-                    message: 'You sent an authorization request.'
-                });
-            } else if (type === 'subscribe') {
-                this.messages.createSystemMessage({
-                    from_jid: jid,
-                    auth_request: true,
-                    silent: false,
-                    message: 'User '+jid+' wants to be in your contact list.'
-                });
-            } else if (type === 'subscribed') {
-                this.messages.createSystemMessage({
-                    from_jid: jid,
-                    message: 'User '+jid+' authorized you.',
-                });
-            } else if (type === 'unsubscribed') {
-                this.messages.createSystemMessage({
-                    from_jid: jid,
-                    message: 'User '+jid+' cancelled your authorization.'
-                });
+            if (!this.get('group_chat')) {
+                if (type === 'subscribe_from') {
+                    this.messages.createSystemMessage({
+                        from_jid: this.account.get('jid'),
+                        silent: false,
+                        message: 'You sent an authorization request'
+                    });
+                } else if (type === 'subscribe') {
+                    this.messages.createSystemMessage({
+                        from_jid: jid,
+                        auth_request: true,
+                        is_accepted: false,
+                        silent: false,
+                        message: 'User ' + jid + ' wants to be in your contact list'
+                    });
+                } else if (type === 'subscribed') {
+                    this.messages.createSystemMessage({
+                        from_jid: jid,
+                        system_last_message: 'Authorization granted',
+                        message: 'User ' + jid + ' was authorized for chat',
+                    });
+                } else if (type === 'unsubscribed') {
+                    this.messages.createSystemMessage({
+                        from_jid: jid,
+                        system_last_message: 'Authorization denied',
+                        message: 'User ' + jid + ' was not authorized for chat'
+                    });
+                }
+            }
+            else {
+                if (type === 'subscribed') {
+                    if (this.contact.get('group_chat_owner')) {
+                        this.messages.createSystemMessage({
+                            from_jid: jid,
+                            system_last_message: 'Group chat was created',
+                            message: 'You created a group chat'
+                        });
+                        xabber.toolbar_view.$('.toolbar-item').removeClass('active')
+                            .filter('.all-chats').addClass('active');
+                        xabber.chats_view.showAllChats();
+                        this.contact.set('group_chat_owner', false); // delete after roots server realization
+                        this.contact.trigger('open_chat', this.contact);
+                    }
+                    else {
+                        this.messages.createSystemMessage({
+                            from_jid: jid,
+                            system_last_message: 'Invitation accepted',
+                            message: 'You have joined group chat'
+                        });
+                    }
+                }
             }
         },
 
         showAcceptedRequestMessage: function () {
             this.messages.createSystemMessage({
                 from_jid: this.account.get('jid'),
-                message: 'Authorization accepted.'
+                message: 'Authorization accepted'
             });
         },
 
         showDeclinedRequestMessage: function () {
             this.messages.createSystemMessage({
                 from_jid: this.account.get('jid'),
-                message: 'Authorization rejected.'
+                message: 'Authorization denied'
             });
         },
 
         showBlockedRequestMessage: function () {
             this.messages.createSystemMessage({
                 from_jid: this.account.get('jid'),
-                message: 'You have blocked user '+this.get('jid')
+                system_last_message: 'Authorization denied',
+                message: this.get('jid') + ' was blocked'
             });
         }
     });
@@ -328,17 +417,22 @@ define("xabber-chats", function () {
             this.updateAvatar();
             this.updateBlockedState();
             this.updateMutedState();
+            this.updateArchivedState();
             this.updateColorScheme();
+            this.updateGroupChats();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
             this.model.messages.on("destroy", this.onMessageRemoved, this);
+            this.contact.on("remove_invite", this.removeInvite, this);
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status", this.updateStatus, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
             this.contact.on("change:muted", this.updateMutedState, this);
+            this.contact.on("change:archived", this.updateArchivedState, this);
+            this.contact.on("change:group_chat", this.updateGroupChats, this);
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -374,6 +468,22 @@ define("xabber-chats", function () {
             this.updateCSS();
         },
 
+        updateArchivedState: function () {
+            var archived = this.contact.get('archived');
+            if (archived || ((!archived) && xabber.toolbar_view.$('.active').hasClass('archive-chats')))
+                this.$el.addClass('hidden');
+            if (((archived) && xabber.toolbar_view.$('.active').hasClass('archive-chats')) || ((!archived) && (!xabber.toolbar_view.$('.active').hasClass('archive-chats'))))
+                this.$el.removeClass('hidden');
+        },
+
+        updateGroupChats: function () {
+            this.$('.mdi-account-multiple').showIf(this.contact.get('group_chat'));
+            if (this.contact.get('group_chat'))
+                this.model.set('group_chat', true);
+            if (this.contact.get('group_chat'))
+                this.$el.addClass('group-chat');
+        },
+
         updateColorScheme: function () {
             var color = this.account.settings.get('color');
             this.$el.attr('data-color', color);
@@ -403,7 +513,6 @@ define("xabber-chats", function () {
             if (!msg) {
                 return;
             }
-
             var msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'),
                 forwarded_message = msg.get('forwarded_message'),
@@ -419,9 +528,28 @@ define("xabber-chats", function () {
                 this.$('.last-msg').text("").append(sp).append(msg_text);
                 this.$('#last-msg-file-color').css('color', color);
             }
-            else
-                this.$('.last-msg').text("").append(msg_text);
+            else {
+                if (msg.get('type') == 'system') {
+                    if (msg.get('auth_request')) {
+                        if (msg.get('invite'))
+                            msg_text = 'Invitation to group chat';
+                        else
+                            msg_text = 'Authorization request';
+                    }
+                    else {
+                        if (msg.get('system_last_message'))
+                            msg_text = msg.get('system_last_message');
+                    }
+                    //this.$('.last-msg').text("").append(msg_text).css('color', color);
+                }
+                this.$('.last-msg').text("").append(msg_text).css('color', '#757575');
+                if (msg.get('type') == 'system')
+                    this.$('.last-msg').css('color', color);
+                else
+                    this.$('.last-msg').css('color', '#757575');
 
+
+            }
             this.$el.emojify('.last-msg', {emoji_size: 14});
             this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
@@ -435,7 +563,10 @@ define("xabber-chats", function () {
             this.$('.chat-title-wrap').css('padding-right', date_width + 5);
             var title_width = this.$('.chat-title-wrap').width();
             this.contact.get('muted') && (title_width -= 24);
-            this.$('.chat-title').css('max-width', title_width);
+            if (!this.$('.mdi-account-multiple').hasClass('hidden'))
+                this.$('.chat-title').css('max-width', title_width - 24);
+            else
+                this.$('.chat-title').css('max-width', title_width);
         },
 
         openByClick: function () {
@@ -445,6 +576,11 @@ define("xabber-chats", function () {
         open: function (options) {
             options || (options = {});
             xabber.chats_view.openChat(this, options);
+        },
+
+        removeInvite: function (options) {
+            options || (options = {});
+            xabber.chats_view.removeInvite(this, options);
         },
 
         onClosed: function () {
@@ -590,17 +726,17 @@ define("xabber-chats", function () {
         },
 
         updateBlockedState: function () {
-            var text;
             if (this.contact.get('blocked')) {
-                text = 'You have blocked this contact';
+                this.model.showBlockedRequestMessage();
             }
-            this.bottom.showChatNotification(text || '');
+
         },
 
         readMessages: function (timestamp) {
             _.each(_.clone(this.model.messages_unread.models), function (msg) {
                 if (!timestamp || msg.get('timestamp') <= timestamp) {
-                    msg.set('is_unread', false);
+                    if (this.model.get('is_accepted') != false)
+                        msg.set('is_unread', false);
                 }
             }.bind(this));
         },
@@ -669,7 +805,7 @@ define("xabber-chats", function () {
                 this._loading_history = true;
                 this.showHistoryFeedback();
             }
-            var account = this.model.account;
+            var account = this.model.account, counter = 0;
             this.MAMRequest(query,
                 function (messages, rsm) {
                     if (options.previous_history) {
@@ -686,10 +822,17 @@ define("xabber-chats", function () {
                         rsm.last && this.model.set('last_archive_id', rsm.last);
                     }
                     _.each(messages, function (message) {
-                        account.chats.receiveChatMessage(message,
+                        var loaded_message = account.chats.receiveChatMessage(message,
                             _.extend({is_archived: true}, options)
                         );
+                        if (loaded_message) counter++;
                     });
+                    if ((counter < query.max)&&(options.previous_history)&&(!this.model.get('history_loaded')))  {
+                        this.getMessageArchive({
+                        max: query.max - counter,
+                        before: this.model.get('first_archive_id') || ''
+                    }, {previous_history: true});
+                    }
                 }.bind(this),
                 function (err) {
                     if (options.previous_history) {
@@ -781,10 +924,14 @@ define("xabber-chats", function () {
 
         onMessage: function (message) {
             this.account.messages.add(message);
+            if (!_.isUndefined(message.get('is_accepted'))) {
+                this.model.set('is_accepted', false);
+            }
             this.model.set('opened', true);
             if (!message.get('is_archived') && message.get('archive_id')) {
                 this.model.set('last_archive_id', message.get('archive_id'));
             }
+
             var is_scrolled_to_bottom = this.isScrolledToBottom();
             var $message = this.addMessage(message);
 
@@ -800,9 +947,16 @@ define("xabber-chats", function () {
             if (!(message.get('is_archived') || message.isSenderMe() || message.get('silent'))) {
                 message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
                 if (!xabber.get('focused')) {
-                    if (this.contact.get('muted')) {
+                    if ((this.contact.get('muted'))&&(this.contact.get('archived'))) {
                         message.set('muted', true);
+                        message.set('archived', true);
                     } else {
+                        if ((this.contact.get('archived'))&&(!this.contact.get('muted'))) {
+                            message.set('muted', false);
+                            this.head.archiveChat();
+                            this.contact.set('archived', false);
+                            this.updateScreenAllChats();
+                        }
                         this.notifyMessage(message);
                     }
                 }
@@ -810,12 +964,14 @@ define("xabber-chats", function () {
             if (message.isSenderMe()) {
                 this.readMessages(message.get('timestamp'));
             }
-            if (!message.get('silent')) {
-                var last_message = this.model.last_message;
-                if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
-                    this.model.last_message = message;
-                    this.chat_item.updateLastMessage();
-                }
+            if ((this.model.get('active'))&&(message.get('invite'))) {
+                this.model.contact.trigger('open_chat', this.model.contact);
+            }
+
+            var last_message = this.model.last_message;
+            if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
+                this.model.last_message = message;
+                this.chat_item.updateLastMessage();
             }
         },
 
@@ -832,7 +988,29 @@ define("xabber-chats", function () {
             if ($next_message.length) {
                 this.updateMessageInChat($next_message[0]);
             }
+            var $elem =  $message.find('.uploaded-img');
+            if ($elem.length) {
+                this.initMagnificPopup($elem);
+            }
             return $message;
+        },
+
+        initMagnificPopup: function ($elem) {
+            $elem.attr('data-mfp-src', $elem.attr('src'));
+            $elem.addClass('popup-img');
+            $elem.magnificPopup({
+                type: 'image',
+                closeOnContentClick: true,
+                fixedContentPos: true,
+                mainClass: 'mfp-no-margins mfp-with-zoom',
+                image: {
+                    verticalFit: true
+                },
+                zoom: {
+                    enabled: true,
+                    duration: 300
+                }
+            });
         },
 
         removeMessage: function (item) {
@@ -977,7 +1155,7 @@ define("xabber-chats", function () {
         buildMessageHtml: function (message) {
             var attrs = _.clone(message.attributes),
                 is_sender = message.isSenderMe(),
-                username = is_sender ? this.account.get('name') : this.contact.get('name'),
+                username = is_sender ? this.account.get('name') : ((this.account.contacts.get(attrs.from_jid)) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid),
                 image = attrs.image,
                 is_image = !_.isUndefined(image),
                 self = this,
@@ -992,7 +1170,6 @@ define("xabber-chats", function () {
                 is_image: is_image,
                 is_file: is_file
             });
-
             if (attrs.type === 'file_upload') {
                 if (attrs.file.type) {
                     if (this.isAudio(attrs.file.type))
@@ -1003,7 +1180,7 @@ define("xabber-chats", function () {
             }
 
             if (attrs.type === 'system') {
-                var tpl_name = attrs.auth_request ? 'auth_request' : 'system';
+                var tpl_name = attrs.auth_request ? ( attrs.invite ? 'group_request' : 'auth_request') : 'system';
                 return $(templates.messages[tpl_name](attrs));
             }
 
@@ -1038,8 +1215,9 @@ define("xabber-chats", function () {
                 this.updateScrollBar();
 
                 set_img.onload = function () {
-                    $message.find('.img-content').css("border-color", 'white');
-                    $message.find('.img-content').css("background-image", 'none');
+                    var $elem =  $message.find('.img-content');
+                    $elem.css("border-color", 'white');
+                    $elem.css("background-image", 'none');
                     $img = $message.find('.mdi-link-variant');
                     $img.attr({
                         'data-image': is_image
@@ -1091,8 +1269,9 @@ define("xabber-chats", function () {
                 this.updateScrollBar();
                 if (is_image_forward) {
                     set_img_forward.onload = function () {
-                        $f_message.find('.img-content').css("border-color", 'white');
-                        $f_message.find('.img-content').css("background-image", 'none');
+                        var $elem = $f_message.find('.img-content');
+                        $elem.css("border-color", 'white');
+                        $elem.css("background-image", 'none');
                         $el = $message.find('.mdi-link-variant');
                         $el.attr({
                             'data-image': 'true'
@@ -1124,7 +1303,8 @@ define("xabber-chats", function () {
             if ($msg.data('from') === this.account.get('jid')) {
                 image = this.account.cached_image;
             } else {
-                image = this.contact.cached_image;
+                var author = this.account.contacts.get($msg.data('from')) || this.contact;
+                image = author.cached_image;
             }
             $avatar.setAvatar(image, this.avatar_size);
         },
@@ -1222,7 +1402,7 @@ define("xabber-chats", function () {
                 }
                 xabber.playAudio(sound);
             }
-            xabber.increaseMessageCounter();
+            xabber.increaseAllMessageCounter();
         },
 
         sendMessage: function (message) {
@@ -1271,7 +1451,6 @@ define("xabber-chats", function () {
                         stamp: forwarded_message.get('time')
                     }).up().cnode(forwarded_message.get('xml')).up();
             }
-
             this.account.sendMsg(stanza, function () {
                 message.set('state', constants.MSG_SENT);
             });
@@ -1325,6 +1504,18 @@ define("xabber-chats", function () {
                 });
                 this.sendMessage(message);
             }
+            if ((this.contact.get('archived'))&&(!this.contact.get('muted'))) {
+                message.set('muted', false);
+                this.head.archiveChat();
+                this.contact.set('archived', false);
+                this.updateScreenAllChats();
+            }
+        },
+
+        updateScreenAllChats: function () {
+            xabber.toolbar_view.$('.toolbar-item').removeClass('active')
+                .filter('.all-chats').addClass('active');
+            xabber.chats_view.showAllChats();
         },
 
         addFileMessage: function (file) {
@@ -1431,12 +1622,15 @@ define("xabber-chats", function () {
                         $message.find('.img-content').html(img);
                         self.scrollToBottom();
                         img.onload = function () {
-                            $message.find('.img-content').css("border-color", 'white');
-                            $message.find('.img-content').css("background-image", 'none');
-                            $elem = $message.find('.mdi-link-variant');
-                            $elem.attr({
+                            var $img_container= $message.find('.img-content'),
+                                $elem = $message.find('.img-content');
+                            $img_container.css("border-color", 'white');
+                            $img_container.css("background-image", 'none');
+                            var $el = $message.find('.mdi-link-variant');
+                            $el.attr({
                                 'data-image': 'true'
                             });
+                            self.initMagnificPopup($elem);
                         };
                     };
                 };
@@ -1518,6 +1712,7 @@ define("xabber-chats", function () {
             if (state === 'composing') {
                 this._chatstate_send_timeout = setTimeout(function () {
                     this.sendChatState('paused');
+                    this.bottom.chat_state = false;
                 }.bind(this), constants.CHATSTATE_TIMEOUT_PAUSED);
             }
         },
@@ -1546,7 +1741,7 @@ define("xabber-chats", function () {
                     this.sendMarker(message, 'displayed');
                 }
                 if (!message.get('muted')) {
-                    xabber.decreaseMessageCounter();
+                    xabber.decreaseAllMessageCounter();
                 }
             }
         },
@@ -1558,6 +1753,7 @@ define("xabber-chats", function () {
             var $elem = $(ev.target), $msg, msg,
                 $fwd_message = $elem.parents('.fwd-message').first(),
                 is_forwarded = $fwd_message.length > 0;
+
             if ($elem.hasClass('chat-message')) {
                 $msg = $elem;
             } else {
@@ -1627,6 +1823,12 @@ define("xabber-chats", function () {
 
         onClickMessage: function (ev) {
             var $elem = $(ev.target);
+
+            if ($elem.hasClass('file-link-download')) {
+                ev.preventDefault();
+                xabber.openWindow($elem.attr('href'));
+            }
+
             if ((!$elem.hasClass('mdi-link-variant'))&&(!$elem.hasClass('file-link-download'))&&(!$elem.is('canvas'))&&(!$elem.hasClass('voice-message-volume'))) {
             var $msg = $elem.closest('.chat-message'), msg,
                 $fwd_message = $elem.parents('.fwd-message').first(),
@@ -1711,7 +1913,6 @@ define("xabber-chats", function () {
             }
 
             if ($elem.hasClass('uploaded-img')) {
-                xabber.openWindow($elem.attr('src'));
                 return;
             }
 
@@ -1743,12 +1944,33 @@ define("xabber-chats", function () {
                     }.bind(this));
                 } else if ($elem.hasClass('block-request')) {
                     this.contact.blockRequest(function () {
-                        this.model.showBlockedRequestMessage();
+                        this.removeMessage($msg);
                     }.bind(this));
                 } else if ($elem.hasClass('decline-request')) {
                     this.contact.declineRequest(function () {
                         this.removeMessage($msg);
-                        this.model.showDeclinedRequestMessage();
+                        this.model.set('active', false);
+                        this.head.closeChat();
+                        xabber.body.setScreen('all-chats', {right: null});
+                    }.bind(this));
+                }
+
+                if ($elem.hasClass('accept-request-group')) {
+                    this.contact.acceptGroupRequest(function () {
+                        this.removeMessage($msg);
+                        this.contact.set('in_roster', true);
+                        this.contact.trigger("open_chat", this.model);
+                    }.bind(this));
+                } else if ($elem.hasClass('block-request-group')) {
+                    this.contact.blockRequest(function () {
+                        this.removeMessage($msg);
+                    }.bind(this));
+                } else if ($elem.hasClass('decline-request-group')) {
+                    this.contact.declineRequest(function () {
+                        this.removeMessage($msg);
+                        this.model.set('active', false);
+                        this.head.closeChat();
+                        xabber.body.setScreen('all-chats', {right: null});
                     }.bind(this));
                 }
             } else if (is_forwarded) {
@@ -1859,7 +2081,7 @@ define("xabber-chats", function () {
             }.bind(this), null, 'message');
         },
 
-        onStartedMAMRequest: function (deferred) {
+        onStartedMAMRequest : function (deferred) {
             this.deferred_mam_requests.push(deferred);
             this.runMAMRequests();
         },
@@ -1989,6 +2211,160 @@ define("xabber-chats", function () {
         }
     });
 
+    xabber.AddGroupChatView = xabber.SearchView.extend({
+        className: 'modal main-modal add-contact-modal',
+        template: templates.add_group_chat,
+        ps_selector: '.modal-content',
+        avatar_size: constants.AVATAR_SIZES.ACCOUNT_ITEM,
+
+        events: {
+            "click .account-field .dropdown-content": "selectAccount",
+            "click .btn-add": "addGroupChat",
+            "keyup .input-group-chat-name input": "updateGroupJid",
+            "keyup .input-group-chat-jid input": "fixJid",
+            "click .btn-cancel": "close",
+        },
+
+        render: function (options) {
+            if (!xabber.accounts.connected.length) {
+                utils.dialogs.error('No connected accounts found.');
+                return;
+            }
+            options || (options = {});
+            this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
+            this.$('input[name=chat_name]').val("");
+            this.$('span.errors').text('').addClass('hidden');
+            var accounts = options.account ? [options.account] : xabber.accounts.connected,
+                jid = options.jid || '';
+            this.$('.single-acc').showIf(accounts.length === 1);
+            this.$('.multiple-acc').hideIf(accounts.length === 1);
+            this.$('.account-field .dropdown-content').empty();
+            _.each(accounts, function (account) {
+                this.$('.account-field .dropdown-content').append(
+                        this.renderAccountItem(account));
+            }.bind(this));
+            this.bindAccount(accounts[0]);
+            var name = this.$('input[name=chat_name]').val(),
+                contact, error_text;
+            this.$('.btn-cancel').text(this.is_login ? 'Skip' : 'Cancel');
+            this.$el.openModal({
+                ready: function () {
+                    Materialize.updateTextFields();
+                    this.$('.account-field .dropdown-button').dropdown({
+                        inDuration: 100,
+                        outDuration: 100,
+                        constrainWidth: false,
+                        hover: false,
+                        alignment: 'left'
+                    });
+                }.bind(this),
+                complete: this.hide.bind(this)
+            });
+
+        },
+
+        bindAccount: function (account) {
+            this.account = account;
+            this.$('.account-field .dropdown-button .account-item-wrap')
+                    .replaceWith(this.renderAccountItem(account));
+            this.$('.input-field .field-jid').text('@xmppdev01.xabber.com');
+        },
+
+        renderAccountItem: function (account) {
+            var $item = $(templates.add_chat_account_item({jid: account.get('jid')}));
+            $item.find('.circle-avatar').setAvatar(account.cached_image, 32);
+            return $item;
+        },
+
+        selectAccount: function (ev) {
+            var $item = $(ev.target).closest('.account-item-wrap'),
+                account = xabber.accounts.get($item.data('jid'));
+            this.bindAccount(account);
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        updateGroupJid: function () {
+            var elem = this.$('input[name=chat_jid]');
+            if (!elem.hasClass('fixed-jid')) {
+            var text = slug(this.$('.input-group-chat-name input').get(0).value);
+            this.$("label[for=new_chat_jid]").addClass('active');
+            this.$('.input-field #new_chat_jid').get(0).value = text;
+            }
+        },
+
+        fixJid: function () {
+            var elem = this.$('input[name=chat_jid]');
+            if (!elem.hasClass('fixed-jid')) {
+                elem.addClass('fixed-jid');
+            }
+            if (elem.get(0).value == "") {
+                elem.removeClass('fixed-jid');
+            }
+        },
+
+        createGroupChat: function () {
+            var jid = this.account.resources.connection.jid,
+                chat_name = this.$('input[name=chat_name]').val(),
+                chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
+                chat_anonymous = this.$('input[name=chat_anonymous]:checked').val() ? true : false,
+                chat_searchable = this.$('input[name=chat_searchable]:checked').val() ? true : false,
+                chat_description = this.$('input[name=chat_description]').val() || 'The best group chat',
+                chat_model = this.$('#new_chat_model').val(),
+                iq = $iq({from: jid, type: 'set', to: 'xmppdev01.xabber.com' }).c('create', {xmlns: Strophe.NS.GROUP_CHAT})
+                    .c('name').t(chat_name).up()
+                    .c('anonymous').t(chat_anonymous).up()
+                    .c('searchable').t(chat_searchable).up()
+                    .c('description').t(chat_description).up()
+                    .c('model').t(chat_model).up();
+                if (chat_jid)
+                    iq.c('localpart').t(chat_jid);
+
+                this.account.sendIQ(iq,
+                    function (iq) {
+                        if ($(iq).attr('type') === 'result'){
+                            var group_jid = $(iq).find('created').find('jid').text();
+                            var contact = this.account.contacts.mergeContact(group_jid);
+                            contact.set('group_chat', true);
+                            contact.set('group_chat_owner', true);
+                            this.$el.closeModal({ complete: this.hide.bind(this) });
+                            contact.acceptGroupRequest();
+                            contact.acceptRequest();
+                        }
+                    }.bind(this),
+                    function () {
+                        this.$('.modal-footer .errors').removeClass('hidden').text('Jid is already in use');
+                    });
+        },
+
+        addGroupChat: function () {
+            var input_value = this.$('input[name=chat_jid]').val();
+            if (this.$('input[name=chat_name]').val() == "")
+                this.$('.modal-footer .errors').text('Enter group chat name').removeClass('hidden');
+            else {
+            if ((input_value == "")||((input_value.search(/[А-яЁё]/) == -1)&&(input_value.search(/\s/) == -1)&&(input_value != ""))) {
+            this.$('.modal-footer .errors').text('').addClass('hidden');
+            var jid = this.account.resources.connection.jid,
+                iq = $iq({from: jid, type: 'get', to: 'xmppdev01.xabber.com' }).c('query', {xmlns: 'http://jabber.org/protocol/disco#info'}),
+                group_chats_support;
+            this.account.sendIQ(iq, function (iq) {
+                $(iq).children('query').children('feature').each(function(elem, item) {
+                    if ($(item).attr('var') == Strophe.NS.GROUP_CHAT)
+                        group_chats_support = true;
+                }.bind(this));
+                if (group_chats_support)
+                    this.createGroupChat();
+            }.bind(this));
+            }
+            else {
+                this.$('.modal-footer .errors').removeClass('hidden').text('Invalid jid');
+            }
+        }
+        }
+    });
+
     xabber.ChatsView = xabber.SearchView.extend({
         className: 'recent-chats-container container',
         ps_selector: '.chat-list-wrap',
@@ -2006,6 +2382,17 @@ define("xabber-chats", function () {
 
         render: function (options) {
             options.right !== 'chat' && this.clearSearch();
+            if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
+                this.showAllChats();
+            }
+        },
+
+        changeView: function () {
+            if (((chat.item_view.$el.hasClass('group-chat'))&&(xabber.toolbar_view.$('.active').hasClass('group-chats'))) ||
+                ((!chat.item_view.$el.hasClass('group-chat'))&&(xabber.toolbar_view.$('.active').hasClass('chats'))) ||
+                ((xabber.toolbar_view.$('.active').hasClass('all-chats')))) {
+                chat.item_view.$el.removeClass('hidden');
+            }
         },
 
         updateLeftIndicator: function (accounts) {
@@ -2013,6 +2400,7 @@ define("xabber-chats", function () {
         },
 
         onChatAdded: function (chat) {
+            chat.item_view.$el.addClass('hidden');
             this.addChild(chat.id, chat.item_view);
             this.updateChatPosition(chat);
         },
@@ -2040,12 +2428,17 @@ define("xabber-chats", function () {
             if (view && item.get('timestamp')) {
                 view.$el.detach();
                 var index = this.model.indexOf(item);
+                if ((((view.$el.hasClass('group-chat'))&&(xabber.toolbar_view.$('.active').hasClass('group-chats'))) ||
+                    ((!view.$el.hasClass('group-chat'))&&(xabber.toolbar_view.$('.active').hasClass('chats'))) ||
+                    ((xabber.toolbar_view.$('.active').hasClass('all-chats'))))&&(!item.contact.get('archived')) ||
+                    ((xabber.toolbar_view.$('.active').hasClass('archive-chats'))&&(item.contact.get('archived')))) {
+                    view.$el.removeClass('hidden');
+                }
                 if (index === 0) {
                     this.$('.chat-list').prepend(view.$el);
                 } else {
                     this.$('.chat-item').eq(index - 1).after(view.$el);
                 }
-                this.updateScrollBar();
             }
         },
 
@@ -2068,8 +2461,63 @@ define("xabber-chats", function () {
 
         openChat: function (view, options) {
             options.clear_search && this.clearSearch();
-            xabber.body.setScreen('chats', {right: 'chat', chat_item: view});
+            if ((!view.contact.get('in_roster'))&&(view.model.get('is_accepted') == false)) {
+                view.model.set('display', true);
+                view.model.set('active', true);
+                xabber.body.setScreen('chats', {right: 'group_invitation', contact: view.contact });
+                view.content.readMessages();
+            }
+            else
+            {
+                xabber.body.setScreen('chats', {right: 'chat', chat_item: view});
+            }
+        },
+
+        removeInvite: function (view, options) {
+            var invites = view.content.$('.auth-request');
+            if (invites.length > 0) {
+                invites.each(function (idx, item) {
+                    view.content.removeMessage($(item));
+                }.bind(this));
+            }
+        },
+
+        showGroupChats: function () {
+            var chats = this.model;
+            xabber.chats_view.$('.chat-item').each(function () {
+                var $this = $(this),
+                    chat = chats.get($this.data('id'));
+                if (chat) $this.hideIf(!chat.get('group_chat')||chat.contact.get('archived'));
+            });
+        },
+
+        showChats: function () {
+            var chats = this.model;
+            xabber.chats_view.$('.chat-item').each(function () {
+                var $this = $(this),
+                    chat = chats.get($this.data('id'));
+                if (chat) $this.hideIf(chat.get('group_chat')||chat.contact.get('archived'));
+            });
+        },
+
+        showArchiveChats: function () {
+            var chats = this.model;
+            xabber.chats_view.$('.chat-item').each(function () {
+                var $this = $(this),
+                    chat = chats.get($this.data('id'));
+                if (chat) $this.hideIf(!chat.contact.get('archived'));
+            });
+        },
+
+        showAllChats: function () {
+            var chats = this.model;
+            xabber.chats_view.$('.chat-item').each(function () {
+                var $this = $(this),
+                    chat = chats.get($this.data('id'));
+                if (chat) $this.hideIf(chat.contact.get('archived'));
+            });
         }
+
     });
 
     xabber.ForwardPanelView = xabber.SearchView.extend({
@@ -2136,6 +2584,294 @@ define("xabber-chats", function () {
         }
     });
 
+
+    xabber.ShowChatMembersView = xabber.SearchView.extend({
+        className: 'modal forward-panel-modal show-members-modal',
+        template: templates.chat_members,
+        avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
+        events: {
+            "click .close-button": "close",
+            "click .btn-delete-user": "deleteMember",
+            "click .btn-make-user-admin": "makeMemberAdmin"
+        },
+
+        open: function (account, contact) {
+            this.$('.members-list-wrap').html('');
+            this.account = account;
+            this.contact = contact;
+            this.getGroupChatMembers();
+            this.$el.openModal({
+                ready: function () {
+                    this.updateScrollBar();
+                }.bind(this),
+                complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        getGroupChatMembers: function () {
+            var iq = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#items' });
+            this.account.sendIQ(iq, function (iq) {
+                this.$('.members-list-wrap').html('');
+                $(iq).children('query').children('item').each(function (idx, item) {
+                    var member_jid = $(item).attr('id'), member_role = $(item).attr('role'), member = {};
+                    member.jid = member_jid;
+                    member.role = member_role;
+                    var $item_view = this.addMemberItem(member);
+                    var view = this.child(member.jid);
+                    if (view) {
+                        view.$el.detach();
+                    }
+                    else {
+                        $item_view.prependTo(this.$('.members-list-wrap'));
+                        this.updateAvatar(member);
+                    }
+                }.bind(this));
+            }.bind(this));
+        },
+
+        addMemberItem: function (item) {
+            return $(templates.group_member_item(item));
+        },
+
+        updateAvatar: function (item) {
+            item.image = Images.getDefaultAvatar(item.jid);
+            this.$('.circle-avatar').setAvatar(item.image, this.avatar_size);
+        },
+
+        deleteMember: function (ev) {
+            var $target = $(ev.target).closest('.list-item');
+            var contact_jid = $target.attr('data-jid');
+            var jid = this.account.resources.connection.jid,
+            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid') })
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#items' })
+                .c('item', {id: contact_jid, role: 'none' });
+            this.account.sendIQ(iq, function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            }.bind(this));
+        },
+
+        makeMemberAdmin: function(ev) {
+            var $target = $(ev.target).closest('.list-item');
+            var contact_jid = $target.attr('data-jid');
+            var jid = this.account.resources.connection.jid,
+            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid') })
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#items" })
+                .c('item', {id: contact_jid, role: 'admin' });
+            this.account.sendIQ(iq, function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            }.bind(this));
+        }
+
+    });
+
+    xabber.AddUserToGroupChatView = xabber.SearchView.extend({
+        className: 'modal forward-panel-modal add-user-group-chat',
+        template: templates.add_user_group_chat,
+
+        events: {
+            "click .close-button": "close",
+            "keyup .search-input": "keyUpOnSearch",
+            "click .btn-add": "addSelectedUsers",
+            "mousedown .list-item": "startTimer",
+            "mouseup .list-item": "addUser",
+            "click .arrow": "toggleContacts",
+            "click .group-head": "selectAllGroup"
+        },
+
+        open: function (account, contact) {
+            this.selected_contacts = [];
+            this.timer = 0;
+            this.click_time = 0;
+            this.$('.modal-footer .errors').text('');
+            this.$('.counter').text('');
+            this.account = account;
+            this.contact = contact;
+            this.$('.chat-list').empty();
+            xabber.contacts_view.$('.account-roster-wrap[data-jid="'+this.account.get('jid')+'"] .roster-group').each(function (idx, item) {
+                var group_node = $(item).clone();
+                $(group_node).find('.list-item').each(function (i, list_item) {
+                    var contact_node = this.account.contacts.get($(list_item).attr('data-jid'));
+                        if (contact_node.get('group_chat'))
+                            list_item.remove();
+                }.bind(this));
+                this.$('.chat-list').append(group_node);
+                var contacts_counter = group_node.find('.list-item').length;
+                group_node.find('.member-counter.one-line').text('(' + contacts_counter + ')');
+            }.bind(this));
+            this.$('.chat-item').removeClass('active');
+            this.clearSearch();
+            this.data.set('visible', true);
+            this.$el.openModal({
+                ready: function () {
+                    this.updateScrollBar();
+                    this.$('.search-input').focus();
+                }.bind(this),
+                complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
+        },
+
+        addSelectedUsers: function() {
+            if (this.selected_contacts.length == 0) {
+                return;
+            }
+            $(this.selected_contacts).each(function (idx, item) {
+                this.sendInvite(item);
+            }.bind(this));
+        },
+
+        addUser: function (ev) {
+            this.endTimer();
+            var click_t = this.click_time;
+            this.click_time = 0;
+            var $target = $(ev.target).closest('.list-item'),
+                contact_jid = $target.attr('data-jid');
+            if (click_t > 1000) {
+                this.sendInvite(contact_jid);
+            }
+            else
+            {
+                if ($target.hasClass('selected')) {
+                    $target.removeClass('selected');
+                    var itemIdx = this.selected_contacts.indexOf(contact_jid);
+                    if (itemIdx > -1) {
+                        this.selected_contacts.splice(itemIdx, 1);
+                    }
+                }
+                else {
+                    $target.addClass('selected');
+                    this.selected_contacts.push(contact_jid);
+                }
+                this.updateCounter();
+            }
+        },
+
+        sendInvite: function (contact_jid) {
+            var jid = this.account.resources.connection.jid,
+            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid') })
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#items' })
+                .c('item', {id: contact_jid, role: 'member' });
+            this.account.sendIQ(iq,
+                function () {
+                    this.sendMessage(contact_jid);
+                    this.$el.closeModal({ complete: this.hide.bind(this) });
+                }.bind(this),
+
+                function() {
+                    var err_text = contact_jid + ' already in group chat';
+                    this.$('.modal-footer .errors').text(err_text);
+                }.bind(this));
+        },
+
+        sendMessage: function(jid_to) {
+            var body = 'Add '+ this.contact.get('jid') +' to the contacts to join a group chat',
+                stanza = $msg({
+                from: this.account.resources.connection.jid,
+                to: jid_to,
+                type: 'chat'
+                }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT, jid: this.contact.get('jid')}).
+                c('reason').t('Invite').up().up()
+                .c('body').t(body).up();
+
+                this.account.sendMsg(stanza, function() {
+                });
+        },
+
+        search: function (query) {
+            query = query.toLowerCase();
+            this.$('.list-item').each(function (idx, item) {
+                var jid = $(item).attr('data-jid'),
+                name = this.account.contacts.get(jid).get('name').toLowerCase();
+                $(item).hideIf(name.indexOf(query) < 0 && jid.indexOf(query) < 0);
+            }.bind(this));
+        },
+
+        keyUpOnSearch: function () {
+            this.$('.modal-footer .errors').addClass('hidden');
+            this.search(this.$('.search-input').val());
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        startTimer: function() {
+            this.timer = setInterval(function() {
+                this.click_time += 200;
+            }.bind(this), 200);
+        },
+
+        endTimer: function() {
+            clearInterval(this.timer);
+        },
+
+        toggleContacts: function(ev) {
+            var is_visible = $(ev.target).hasClass('mdi-chevron-down');
+            if (is_visible) {
+                var group_roster = $(ev.target).closest('.roster-group');
+                group_roster.find('.list-item').each(function (idx, item) {
+                    $(item).addClass('hidden');
+                }.bind(this));
+            }
+            else
+            {
+                var group_roster = $(ev.target).closest('.roster-group');
+                group_roster.find('.list-item').each(function (idx, item) {
+                    $(item).removeClass('hidden');
+                }.bind(this));
+            }
+            $(ev.target).switchClass('mdi-chevron-right', is_visible);
+            $(ev.target).switchClass('mdi-chevron-down', !is_visible);
+        },
+
+        selectAllGroup: function (ev) {
+            if ($(ev.target).hasClass('arrow'))
+                return;
+           var group_roster = $(ev.target).closest('.roster-group');
+           if (group_roster.hasClass('.selected')) {
+               group_roster.removeClass('.selected');
+               group_roster.find('.list-item').each(function (idx, item) {
+                   var contact_jid = $(item).attr('data-jid'),
+                       itemIdx = this.selected_contacts.indexOf(contact_jid);
+                   if (itemIdx > -1) {
+                       this.selected_contacts.splice(itemIdx, 1);
+                       $(item).removeClass('selected');
+                   }
+               }.bind(this));
+           }
+           else
+           {
+               group_roster.addClass('.selected');
+               group_roster.find('.list-item').each(function (idx, item) {
+                   var contact_jid = $(item).attr('data-jid'),
+                       itemIdx = this.selected_contacts.indexOf(contact_jid);
+                   if (itemIdx > -1)
+                       return;
+                   else
+                       this.selected_contacts.push(contact_jid);
+                   $(item).addClass('selected');
+               }.bind(this));
+           }
+            this.updateCounter();
+        },
+
+        updateCounter: function () {
+            var selected_counter = this.$('.list-item.selected').length;
+            (selected_counter) ? this.$('.counter').removeClass('hidden').text(selected_counter) : this.$('.counter').text('');
+        }
+
+    });
+
     xabber.ChatHeadView = xabber.BasicView.extend({
         className: 'chat-head-wrap',
         template: templates.chat_head,
@@ -2149,7 +2885,10 @@ define("xabber-chats", function () {
             "click .btn-clear-history": "clearHistory",
             "click .btn-block-contact": "blockContact",
             "click .btn-unblock-contact": "unblockContact",
-            "click .btn-close-chat": "closeChat"
+            "click .btn-close-chat": "closeChat",
+            "click .btn-add-user": "addUserToGroupChat",
+            "click .btn-members-chat": "showChatMembers",
+            "click .btn-archive-chat": "archiveChat"
         },
 
         _initialize: function (options) {
@@ -2162,12 +2901,14 @@ define("xabber-chats", function () {
             this.updateAvatar();
             this.updateMenu();
             this.updateNotifications();
+            this.updateArchiveButton();
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.updateMenu, this);
             this.contact.on("change:muted", this.updateNotifications, this);
+            this.contact.on("change:group_chat", this.updateGroupChatHead, this);
         },
 
         render: function (options) {
@@ -2194,7 +2935,8 @@ define("xabber-chats", function () {
         },
 
         updateStatusMsg: function () {
-            this.$('.contact-status-message').text(this.contact.getStatusMessage());
+            //this.$('.contact-status-message').text(this.contact.getStatusMessage());
+            this.contact.get('group_chat') ? this.$('.contact-status-message').text('Group chat') : this.$('.contact-status-message').text(this.contact.getStatusMessage());
         },
 
         updateAvatar: function () {
@@ -2222,6 +2964,81 @@ define("xabber-chats", function () {
             var muted = !this.contact.get('muted');
             this.contact.set('muted', muted);
             this.account.chat_settings.updateMutedList(this.contact.get('jid'), muted);
+        },
+
+        archiveChat: function (ev) {
+            if (ev) {
+                if (($(ev.target).hasClass('mdi-package-down')) || ($(ev.target).hasClass('mdi-package-up'))) {
+                    var archived_chat = this.model.item_view.$el,
+                        next_chat_item = archived_chat,
+                        next_chat = null,
+                        next_contact;
+                    while ((next_chat == null) && (next_chat_item.length > 0)) {
+                        next_chat_item = next_chat_item.next();
+                        if (next_chat_item) {
+                            if (!next_chat_item.hasClass('hidden')) {
+                                var next_chat_id = next_chat_item.attr('data-id');
+                                next_chat = this.account.chats.get(next_chat_id);
+                            }
+                        }
+                    }
+                    if (next_chat != null) {
+                        next_contact = next_chat.contact;
+                        next_contact.trigger("open_chat", next_contact);
+                    }
+                    else
+                    {
+                        this.getActiveScreen();
+                    }
+                }
+            }
+            var archived = !this.contact.get('archived'),
+                is_archived = archived ? true : false;
+            this.contact.set('archived', archived);
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', is_archived);
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', !is_archived);
+            this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
+        },
+
+        getActiveScreen: function () {
+            var active_screen = xabber.toolbar_view.$('.active');
+            if (active_screen.hasClass('archive-chats')) {
+                xabber.toolbar_view.showArchive();
+                return;
+            }
+            if (active_screen.hasClass('all-chats')) {
+                xabber.toolbar_view.showAllChats();
+                return;
+            }
+            if (active_screen.hasClass('chats')) {
+                xabber.toolbar_view.showChats();
+                return;
+            }
+            if (active_screen.hasClass('group-chats')) {
+                xabber.toolbar_view.showGroupChats();
+                return;
+            }
+        },
+
+        updateArchiveButton: function () {
+            var archived = this.contact.get('archived'),
+                is_archived = archived ? true : false;
+            this.contact.set('archived', archived);
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', is_archived);
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', !is_archived);
+        },
+
+        updateGroupChatHead: function () {
+            this.$('.chat-tools-wrap .btn-add-user').showIf(this.contact.get('group_chat'));
+            this.$('.chat-head-menu .btn-members-chat').showIf(this.contact.get('group_chat'));
+        },
+
+        addUserToGroupChat: function () {
+            xabber.add_user_group_chat.open(this.account, this.contact);
+        },
+
+        showChatMembers: function () {
+            xabber.show_members_group_chat.open(this.account, this.contact);
         },
 
         clearHistory: function () {
@@ -2260,7 +3077,7 @@ define("xabber-chats", function () {
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
-            "click .reply-message": "replyMessage",
+            "click .reply-message": "forwardMessages",
             "click .forward-message": "forwardMessages",
             "click .close-message-panel": "resetSelectedMessages",
         },
@@ -2271,6 +3088,7 @@ define("xabber-chats", function () {
             this.contact = this.view.contact;
             this.account = this.view.account;
             this.fwd_messages = [];
+            this.chat_state = false;
             this.$('.account-jid').text(this.account.get('jid'));
             this.updateAvatar();
             this.account.on("change:image", this.updateAvatar, this);
@@ -2377,7 +3195,6 @@ define("xabber-chats", function () {
         },
 
         keyDown: function (ev) {
-            ev.stopPropagation();
             if (ev.keyCode === constants.KEY_ESCAPE ||
                     ev.keyCode === constants.KEY_BACKSPACE ||
                     ev.keyCode === constants.KEY_DELETE) {
@@ -2392,7 +3209,10 @@ define("xabber-chats", function () {
                     return;
                 }
             }
-            this.view.sendChatState('composing');
+            if ((this.$('.input-message .rich-textarea').getTextFromRichTextarea() == "")||(!this.chat_state)) {
+                this.view.sendChatState('composing');
+                this.chat_state = true;
+            }
         },
 
         displayMicrophone: function () {
@@ -2445,8 +3265,20 @@ define("xabber-chats", function () {
             var $rich_textarea = $(ev.target),
                 clipboard_data = ev.clipboardData;
             if (clipboard_data) {
-                var text = _.escape(clipboard_data.getData('text'));
-                window.document.execCommand('insertHTML', false, text);
+                if (clipboard_data.files.length > 0) {
+                    var image_from_clipboard = clipboard_data.files[clipboard_data.files.length - 1],
+                        blob_image = window.URL.createObjectURL(new Blob([image_from_clipboard])),
+                        options = { blob_image_from_clipboard: blob_image};
+                    utils.dialogs.ask("Send Image from Clipboard", "Do you want to send Image from Clipboard?", options).done(function (result) {
+                        if (result) {
+                            this.view.addFileMessage(image_from_clipboard);
+                        }
+                    }.bind(this));
+                }
+                else {
+                    var text = _.escape(clipboard_data.getData('text'));
+                    window.document.execCommand('insertHTML', false, text);
+                }
             }
             this.view.sendChatState('composing');
             $rich_textarea.updateRichTextarea().focus();
@@ -2625,6 +3457,7 @@ define("xabber-chats", function () {
                 $rich_textarea = this.$('.input-message .rich-textarea');
             $rich_textarea.focus();
             window.document.execCommand('insertHTML', false, emoji_node);
+            this.displaySend();
             this.view.sendChatState('composing');
             $rich_textarea.updateRichTextarea().focus();
             xabber.chat_body.updateHeight();
@@ -2734,20 +3567,10 @@ define("xabber-chats", function () {
             $input_panel.hideIf(length);
             $message_actions.showIf(length);
             if (length) {
-                $message_actions.find('.reply-message').showIf(length === 1);
-                $message_actions.find('.forward-message .counter').text(length);
+                $message_actions.find('.counter').text(length);
             } else {
                 this.focusOnInput();
             }
-        },
-
-        replyMessage: function (ev) {
-            var $msg = this.view.$('.chat-message.selected').first(),
-                msg = this.model.messages.get($msg.data('msgid'));
-            this.$('.mdi-send').removeClass('hidden');
-            this.$('.attach-voice-message').addClass('hidden');
-            this.resetSelectedMessages();
-            this.setForwardedMessages([msg.get('forwarded_message') || msg]);
         },
 
         forwardMessages: function (ev) {
@@ -2760,7 +3583,10 @@ define("xabber-chats", function () {
             this.$('.mdi-send').removeClass('hidden');
             this.$('.attach-voice-message').addClass('hidden');
             this.resetSelectedMessages();
-            xabber.forward_panel.open(msgs);
+            if ($(ev.target).hasClass('forward-message'))
+                xabber.forward_panel.open(msgs);
+            if ($(ev.target).hasClass('reply-message'))
+                this.setForwardedMessages(msgs);
         },
 
         showChatNotification: function (message, is_colored) {
@@ -2802,7 +3628,8 @@ define("xabber-chats", function () {
 
     xabber.ChatSettings = Backbone.ModelWithStorage.extend({
         defaults: {
-            muted: []
+            muted: [],
+            archived: []
         },
 
         updateMutedList: function (jid, muted) {
@@ -2815,6 +3642,18 @@ define("xabber-chats", function () {
                 muted_list.splice(index, 1);
             }
             this.save('muted', muted_list);
+        },
+
+        updateArchiveChatsList: function (jid, archived) {
+            var archived_list = _.clone(this.get('archived')),
+                index = archived_list.indexOf(jid);
+            if (archived && index < 0) {
+                archived_list.push(jid);
+            }
+            if (!archived && index >= 0) {
+                archived_list.splice(index, 1);
+            }
+            this.save('archived', archived_list);
         }
     });
 
@@ -2855,18 +3694,41 @@ define("xabber-chats", function () {
                 this.ChatBottomContainer);
         this.chat_placeholder = this.right_panel.addChild('chat_placeholder',
                 this.ChatPlaceholderView);
-        this.group_chat_placeholder = this.wide_panel.addChild('group_chat_placeholder',
+        this.group_chat_placeholder = this.right_panel.addChild('group_chat_placeholder',
                 this.GroupChatPlaceholderView);
-        this.forward_panel = new this.ForwardPanelView({model: this.opened_chats});
+        this.forward_panel = new this.ForwardPanelView({ model: this.opened_chats });
+
+        this.add_user_group_chat = new this.AddUserToGroupChatView({ model: this.opened_chats });
+
+        this.show_members_group_chat = new this.ShowChatMembersView();
+
+        this.add_group_chat_view = new this.AddGroupChatView();
+
+        this.on("add_group_chat", function () {
+            this.add_group_chat_view.show();
+        }, this);
 
         this.on("change:focused", function () {
             if (this.get('focused')) {
                 var view = this.chats_view.active_chat;
                 if (view && view.model.get('display')) {
                     view.content.readMessages();
-                    view.content.bottom.focusOnInput();
+                    if (view.model.get('is_accepted') != false)
+                        view.content.bottom.focusOnInput();
                 }
             }
+        }, this);
+
+        this.on("show_group_chats", function () {
+            this.chats_view.showGroupChats();
+        }, this);
+
+        this.on("show_chats", function () {
+            this.chats_view.showChats();
+        }, this);
+
+        this.on("show_archive_chats", function () {
+            this.chats_view.showArchiveChats();
         }, this);
 
         this.on("clear_search", function () {

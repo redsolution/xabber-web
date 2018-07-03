@@ -1,0 +1,16 @@
+<div class="chat-message system auth-request" data-time="{{timestamp}}" data-msgid="{{msgid}}" data-from="{{from_jid}}">
+    <div class="left-side noselect">
+        <div class="circle-avatar"><img></div>
+    </div>
+
+    <div class="msg-wrap">
+        <div class="chat-msg-author-wrap">
+            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
+        </div>
+        <div class="chat-msg-content chat-text-content">{{message}}<div><span class="accept-request-group">Accept</span><span class="decline-request-group">Decline</span><span class="block-request-group">Block</span></div></div>
+    </div>
+
+    <div class="right-side noselect">
+        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
+    </div>
+</div>

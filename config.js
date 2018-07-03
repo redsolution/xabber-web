@@ -18,6 +18,9 @@ require.config({
         "strophe.rsm":              "node_modules/strophejs-plugins/rsm/strophe.rsm",
         "text":                     "node_modules/requirejs-text/text",
         "wavesurfer":               "node_modules/wavesurfer/dist/wavesurfer",
+        "slug":                     "node_modules/slug/slug",
+        "magnific-popup":           "node_modules/magnific-popup/dist/jquery.magnific-popup",
+
         // modified libs and plugins
         "backbone.localsync":       "src/lib/backbone.localsync",
         "hammerjs":                 "src/lib/hammer.min",
