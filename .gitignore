@@ -2,6 +2,7 @@
 node_modules
 npm-ready
 /*.html
+.idea
 !example_index.html
 !example_dev.html
 

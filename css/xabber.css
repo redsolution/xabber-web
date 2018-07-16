@@ -2248,7 +2248,6 @@ input#new_chat_jid {
 
 .chat-message .chat-msg-content {
   width: 100%;
-  margin-top: 3px;
   font-size: 12px;
   line-height: 16px;
   color: #212121;
@@ -2278,6 +2277,173 @@ input#new_chat_jid {
   max-height: 256px;
 }
 
+.chat-message .img-content-template {
+  background-image: url(../images/loading.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+  border: 1px solid transparent;
+  display: inline-block !important;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.chat-message .img-content-template.template-for-2 {
+  width: 45%;
+  height: 256px;
+}
+
+.chat-message .img-content-template.template-for-3.main {
+  width: 45%;
+  height: 300px;
+}
+
+.chat-message .img-content-template.template-for-4.main {
+    width: 45%;
+    height: 328px;
+}
+
+.chat-message .img-content-template.template-for-3.minor {
+  height: 50%;
+}
+
+.chat-message .img-content-template.template-for-5.main {
+  width: 60%;
+  height: 602px;
+  display: flex !important;
+  vertical-align: top;
+  flex-direction: column;
+}
+
+.chat-message .img-content-template.template-for-6.main-row {
+  width: 100%;
+  height: 300px;
+  display: inline-flex !important;
+  vertical-align: top;
+  flex-direction: row;
+}
+
+.chat-message .img-content-template.template-for-6.main {
+  width: 60%;
+  height: 300px;
+  display: inline-flex !important;
+  vertical-align: top;
+  flex-direction: row;
+}
+
+.chat-message .img-content-template.template-for-6.minor-1 {
+  width: 30%;
+  height: 300px;
+  display: flex !important;
+  vertical-align: top;
+  flex-direction: column;
+}
+
+.chat-message .img-content-template.template-for-6.minor-1 .img-content-template {
+    min-height: 148px;
+}
+
+.chat-message .img-content-template.template-for-6.minor-1 img {
+    height: 148px;
+}
+
+.chat-message .img-content-template.template-for-6.minor-2 .img-content-template{
+  min-width: 28%;
+}
+
+.chat-message .img-content-template.template-for-6.minor-2 {
+  width: 90%;
+  height: 148px;
+  display: inline-flex !important;
+  vertical-align: top;
+  flex-direction: row;
+}
+
+.image-collection.template-for-5 {
+  display: flex !important;
+  vertical-align: top;
+  flex-direction: row;
+}
+
+.image-collection.template-for-6 {
+  display: flex !important;
+  vertical-align: top;
+  flex-direction: column;
+}
+
+.image-collection .template-for-3.minor-images,
+.image-collection .template-for-4.minor-images,
+.image-collection .template-for-5.minor-images{
+  width: 35%;
+  height: 300px;
+  display: inline-flex !important;
+  vertical-align: top;
+  flex-direction: column;
+}
+
+.image-collection .template-for-4.minor-images {
+    height: 328px;
+}
+
+.image-collection .template-for-4.minor-images .minor {
+    min-height: 33%;
+}
+
+.image-collection .template-for-5.minor-images{
+  height: 602px;
+}
+
+.chat-message .img-content-template.template-for-5.main .img-content-template{
+  height: 50%;
+}
+
+.image-collection .template-for-5.minor-images .img-content-template {
+  height: 33.5%;
+}
+
+.img-content-template .uploaded-img-for-collage {
+  display: inline-block;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.image-collection.template-for-6 .hidden-images {
+    position: relative;
+}
+
+.hidden-images::after {
+    content: '';
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.image-collection.template-for-6 span.image-counter {
+    position: absolute;
+    color: rgba(255,255,255,1);
+    font-size: 28px;
+    top: 60px;
+    left: 40%;
+    z-index: 10;
+}
+
+.image-collection.template-for-6 .img-content-template.hidden{
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.image-source-link {
+    color: #E0E0E0;
+}
+
 img.uploaded-img {
   max-height: 256px;
   max-width: 300px;
@@ -2287,6 +2453,10 @@ img.uploaded-img {
 img.fwd-img-preview {
   max-width: 180px;
   max-height: 80px;
+}
+
+.image-collection {
+  white-space: initial;
 }
 
 .chat-message.auth-request .chat-msg-content {
@@ -2368,6 +2538,15 @@ img.fwd-img-preview {
   display: inline-flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.link-file .file-size {
+  color: #696969;
+}
+
+.one-file-wrap {
+  margin: 5px 0px;
+  width: 100%;
 }
 
 .voice-message-rendering {

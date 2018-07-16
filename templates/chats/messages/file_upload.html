@@ -9,7 +9,7 @@
         </div>
         <div class="chat-msg-content chat-file-content">
             <div class="chat-file-info">
-                <div class="filename text-color-700 one-line">{{file.name}}</div>
+                <div class="filename text-color-700 one-line">{{files[0].name}}</div>
                 <div class="filesize grey-text one-line"></div>
                 <div class="status-area">
                     <div class="status one-line text-color-700" style="display: none"></div>
@@ -22,7 +22,6 @@
                     <div class="cancel-upload text-color-700">Cancel</div>
                 </div>
             </div>
-            {[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_audio) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_audio) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}
         </div>
     </div>
 

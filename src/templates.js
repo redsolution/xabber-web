@@ -66,8 +66,14 @@ define("xabber-templates", [
     "text!templates/chats/messages/forwarded.html",
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
+    "text!templates/chats/messages/file.html",
     "text!templates/chats/messages/auth_request.html",
     "text!templates/chats/messages/group_request.html",
+    "text!templates/chats/messages/template-for-2.html",
+    "text!templates/chats/messages/template-for-3.html",
+    "text!templates/chats/messages/template-for-4.html",
+    "text!templates/chats/messages/template-for-5.html",
+    "text!templates/chats/messages/template-for-6.html",
     "text!templates/chats/archive_placeholder.html",
 
     "text!templates/svg/ic-jabber.html",
@@ -188,8 +194,14 @@ define("xabber-templates", [
     addTemplate('chats.messages.forwarded');
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
+    addTemplate('chats.messages.file');
     addTemplate('chats.messages.auth_request');
     addTemplate('chats.messages.group_request');
+    addTemplate('chats.messages.template-for-2');
+    addTemplate('chats.messages.template-for-3');
+    addTemplate('chats.messages.template-for-4');
+    addTemplate('chats.messages.template-for-5');
+    addTemplate('chats.messages.template-for-6');
     addTemplate('chats.archive_placeholder');
 
     addSvgTemplate('svg.ic-jabber');
