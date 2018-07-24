@@ -1,7 +1,7 @@
 # Xabber for Web
 
 Xabber for Web is an open-source XMPP client built to provide first-class chat experience in any modern browser. It looks and works great and is meant to provide seamless convergence with other versions of Xabber for different platforms.
-
+![screenshot1](xabber_chat_screenshot_1.png) ![screenshot2](xabber_chat_screenshot_2.png)
 
 # Features
 ## Superb design
