@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="18px" viewBox="0 0 18 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>Xabber/Web/GroupchatBorderless</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M9.500501,7 C10.3287776,7 10.995,6.328 10.995,5.5 C10.995,4.672 10.3287776,4 9.500501,4 C8.67222445,4 8,4.672 8,5.5 C8,6.328 8.67222445,7 9.500501,7 Z M5.5,6 C6.33,6 6.995,5.33 6.995,4.5 C6.995,3.67 6.33,3 5.5,3 C4.67,3 4,3.67 4,4.5 C4,5.33 4.67,6 5.5,6 Z M9.5,8 C8.66818182,8 7,8.46 7,9.375 L7,9.99891779 L12,9.99891779 L12,9.375 C12,8.46 10.3318182,8 9.5,8 Z M5.50474946,6.99186821 C3.77490105,6.99186821 2,7.585 2,8.75 L2,10 L6,10 L6,9 C6,8.24841871 6.73828683,7.72461975 7.70884076,7.35916117 C7.08932051,7.04219075 5.85693708,6.99186821 5.50474946,6.99186821 Z" id="path-1"></path>
+    </defs>
+    <g id="Xabber/Web/GroupchatBorderless" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icon/Groupchat" transform="translate(2.000000, 2.000000)">
+            <circle id="Oval" fill="#388E3C" cx="7" cy="7" r="7"></circle>
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <use id="Shape" fill="#FFFFFF" fill-rule="nonzero" xlink:href="#path-1"></use>
+        </g>
+    </g>
+</svg>

@@ -62,7 +62,7 @@ define("xabber-api-service", function () {
     xabber.APIAccount = Backbone.ModelWithStorage.extend({
         defaults: {
             token: null,
-            sync_all: false
+            sync_all: true
         },
 
         _initialize: function (_attrs, options) {
@@ -78,7 +78,7 @@ define("xabber-api-service", function () {
             this.on("change:token", function () {
                 if (this.get('token') !== null) {
                     this.save({sync_all: true,
-                               sync_request: this.list_length ? 'window' : 'silent'});
+                               sync_request: this.list.length ? 'window' : 'silent'});
                 }
             }, this);
             this.list.on("change:to_sync", function (item) {
@@ -93,6 +93,12 @@ define("xabber-api-service", function () {
                         message.action === 'settings_updated') {
                     this.synchronize_main_settings();
                     this.synchronize_order_settings();
+                }
+                if (    this.get('connected') &&
+                    message.username === this.get('username') &&
+                    message.from_token !== this.get('token') &&
+                    message.action === 'account_updated') {
+                    this.get_settings();
                 }
             }, this);
 
@@ -239,7 +245,7 @@ define("xabber-api-service", function () {
                             synced: true
                         }, settings_item.settings));
                     } else {
-                        settings.save('synced', settings_item.timestamp === settings.get('timestamp'));
+                        settings.save('synced', settings_item.timestamp >= settings.get('timestamp'));
                     }
                 }
                 if (!settings && sync_all) {
@@ -350,7 +356,8 @@ define("xabber-api-service", function () {
         },
 
         onLoginByToken: function (data, textStatus, request) {
-            this.save({token: data.token, connected: true});
+            this.save({token: data.token, connected: true, sync_request: 'silent'});
+            this.get_settings();
             this.ready.resolve();
         },
 
@@ -383,13 +390,16 @@ define("xabber-api-service", function () {
         },
 
         onUserData: function (data) {
-            var name;
+            var name, xmpp_binding_jid;
             if (data.first_name && data.last_name) {
                 name = data.first_name + ' ' + data.last_name;
             } else {
                 name = data.username;
             }
-            this.save({username: data.username, name: name});
+            if (data.xmpp_binding) {
+                xmpp_binding_jid = data.xmpp_binding.jid;
+            }
+            this.save({username: data.full_id, name: name, linked_email_list: data.email_list, linked_social: data.social_bindings, xmpp_binding: xmpp_binding_jid });
         },
 
         onSettings: function (data) {
@@ -409,10 +419,15 @@ define("xabber-api-service", function () {
         },
 
         logout: function () {
-            utils.dialogs.ask("Log out", "Do you want to log out Xabber account?",
+            utils.dialogs.ask("Quit", "You will quit from Xabber Account. You will not be able to use enhanced Xabber services, but basic XMPP will work as usual.",
                               [{name: 'delete_accounts', checked: true,
-                                text: 'Delete synced XMPP accounts'}]).done(function (res) {
+                                text: 'Delete synced XMPP accounts'}], { ok_button_text: 'quit'}).done(function (res) {
                 if (res) {
+                    if (xabber.accounts.connected.length > 0)
+                        _.each(xabber.accounts.connected, function (account){
+                            account.set('auto_login_xa', false);
+                            account.save('auto_login_xa', false);
+                        }.bind(this));
                     this.revoke_token();
                     if (res.delete_accounts) {
                         _.each(this.list.where({to_sync: true}), function (settings) {
@@ -530,10 +545,50 @@ define("xabber-api-service", function () {
         socialAuth: function (ev) {
             var origin = window.location.href,
                 provider = $(ev.target).closest('.btn-social').data('provider');
-            window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' +
-                provider + '/?origin=' + origin + '&source=Xabber Web';
+            if (provider == 'email') {
+                this.closeModal();
+                xabber.email_auth_view.show();
+                // return;
+            }
+            else
+                window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' + provider + '/?origin=' + origin + '&source=Xabber Web';
         }
     });
+
+      xabber.XabberLoginByEmailPanel = xabber.APIAccountAuthView.extend({
+          className: 'login-panel add-xabber-account-panel',
+          template: templates.xabber_login_by_email,
+
+          events: {
+              "click .btn-cancel": "close",
+              "click .btn-log-in": "submit",
+              "keyup input[name=password]": "keyUp"
+          },
+
+          render: function () {
+              this.$el.openModal({
+                  opacity: 0.9,
+                  ready: this.onRender.bind(this),
+                  complete: this.close.bind(this)
+              });
+          },
+
+          successFeedback: function () {
+              this.authFeedback({});
+              this.data.set('authentication', false);
+              this.close();
+          },
+
+          onRender: function () {
+              Materialize.updateTextFields();
+              this.$username_input.val('').focus();
+              this.$password_input.val('');
+          },
+
+          close: function (auth) {
+              this.$el.closeModal({ complete: this.hide.bind(this) });
+          }
+      });
 
     xabber.XabberLoginPanel = xabber.APIAccountAuthView.extend({
         className: 'login-panel',
@@ -542,8 +597,9 @@ define("xabber-api-service", function () {
         events: {
             "click .login-type": "changeLoginType",
             "click .btn-log-in": "submit",
-            "keyup input[name=password]": "keyUp",
-            "click .btn-social": "socialAuth"
+            "click .btn-social": "socialAuth",
+            "click .btn-escape": "openXmppLoginPanel",
+            "keyup input[name=password]": "keyUp"
         },
 
         render: function () {
@@ -558,6 +614,10 @@ define("xabber-api-service", function () {
 
         changeLoginType: function () {
             xabber.body.setScreen('login', {'login_screen': 'xmpp'});
+        },
+
+        openXmppLoginPanel: function () {
+            xabber.body.setScreen('login', {'login_screen': 'xmpp'});
         }
     });
 
@@ -566,18 +626,71 @@ define("xabber-api-service", function () {
         template: templates.add_xabber_account,
 
         events: {
-            "click .btn-add": "submit",
+            "click .account-field .dropdown-content": "selectAccount",
+            "click .btn-add": "loginXabberAccount",
             "keyup input[name=password]": "keyUp",
             "click .btn-social": "socialAuth",
             "click .btn-cancel": "closeModal"
         },
 
-        render: function () {
+        render: function (options) {
+            if (!xabber.accounts.connected.length) {
+                utils.dialogs.error('No connected accounts found.');
+                return;
+            }
+            options || (options = {});
+            var accounts = xabber.accounts.connected,
+                jid = options.jid || '';
+            this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
+                .removeClass('invalid');
+            this.$('.single-acc').showIf(accounts.length === 1);
+            this.$('.multiple-acc').hideIf(accounts.length === 1);
+            this.$('.account-field .dropdown-content').empty();
+            _.each(accounts, function (account) {
+                this.$('.account-field .dropdown-content').append(
+                    this.renderAccountItem(account));
+            }.bind(this));
+            this.bindAccount(accounts[0]);
+            this.$('span.errors').text('');
             this.$el.openModal({
                 opacity: 0.9,
-                ready: this.onRender.bind(this),
+                ready: function () {
+                    this.onRender.bind(this);
+                    this.$('.account-field .dropdown-button').dropdown({
+                        inDuration: 100,
+                        outDuration: 100,
+                        constrainWidth: false,
+                        hover: false,
+                        alignment: 'left',
+                    });
+                }.bind(this),
                 complete: this.closeModal.bind(this)
             });
+            return this;
+        },
+
+        bindAccount: function (account) {
+            this.$('.account-field .dropdown-button .account-item-wrap')
+                .replaceWith(this.renderAccountItem(account));
+        },
+
+        renderAccountItem: function (account) {
+            var $item = $(env.templates.contacts.add_contact_account_item({jid: account.get('jid')}));
+            $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
+            return $item;
+        },
+
+        selectAccount: function (ev) {
+            var $item = $(ev.target).closest('.account-item-wrap'),
+                account = xabber.accounts.get($item.data('jid'));
+            this.bindAccount(account);
+            this.loginXabberAccount(account);
+        },
+
+        loginXabberAccount: function (account) {
+            account.set('auto_login_xa', true);
+            account.authXabberAccount();
+            this.closeModal();
         },
 
         successFeedback: function () {
@@ -855,28 +968,179 @@ define("xabber-api-service", function () {
             "click .account-info-wrap": "openAccount",
             "click .btn-login": "login",
             "click .btn-logout": "logout",
-            "click .btn-sync": "synchronize"
+            "click .btn-set-password": "setPassword",
+            "click .btn-sync-settings": "synchronize",
+            "click .social-linked-header": "changeExpanded",
+            "click .btn-unlink": "unlinkSocial",
+            "click .btn-link": "linkSocial",
+            "click .btn-verify-email": "verifyEmail"
         },
 
         _initialize: function () {
             this.$el.appendTo(this.parent.$('.settings-block-wrap.xabber-account'));
             this.$tab = this.parent.$('.xabber-account-tab');
             this.updateForConnectedStatus();
+            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
             this.model.on("change:name", this.updateName, this);
             this.model.on("change:name", this.updateAvatar, this);
             this.model.on("change:connected", this.updateForConnectedStatus, this);
             this.model.on("change:last_sync", this.updateLastSyncInfo, this);
+            this.model.on("change:linked_email_list", this.updateSocialBindings, this);
+            this.model.on("change:linked_social", this.updateSocialBindings, this);
             this.model.on("relogin", this.login, this);
             this.data.on("change:sync", this.updateSyncButton, this);
+            this.data.on("change:expanded", this.updateExpanded, this);
+            this.data.set('expanded', false);
         },
 
         render: function () {
             this.data.set('sync', false);
+            this.$('span.errors ').html("");
             this.updateLastSyncInfo();
+            this.updateSocialBindings();
+            this.$('.btn-more').dropdown({
+                inDuration: 100,
+                outDuration: 100,
+                hover: false
+            });
+        },
+
+        changeExpanded: function () {
+            this.data.set('expanded', (this.data.get('expanded')) ? false : true);
+        },
+
+        updateExpanded: function () {
+            var expanded = this.data.get('expanded');
+            this.$('.arrow').switchClass('mdi-chevron-down', expanded);
+            this.$('.arrow').switchClass('mdi-chevron-right', !expanded);
+            this.$('.social-linked-wrap').showIf(expanded);
+        },
+
+        updateSocialBindings: function () {
+            var linked_emails = this.model.get('linked_email_list'),
+                linked_social = this.model.get('linked_social');
+            this.$('.email-linked').remove();
+            this.$('.social-account').each(function (idx, item) {
+                var $social_item = $(item);
+                $social_item.addClass('not-linked');
+                $social_item.find('.synced-info').text('Not linked');
+                $social_item.find('.btn-link').text('link').removeClass('btn-unlink');
+            });
+            _.each(linked_emails, function(email) {
+                var email_id = email.id,
+                    email_address = email.email,
+                    is_verified = email.verified,
+                    verified_status = (is_verified) ? 'Verified' : 'Unverified',
+                    email_item_html = $(templates.linked_email_item({email_id: email_id, email: email_address, verified: is_verified, verified_status: verified_status, color: this.default_color}));
+                email_item_html.insertBefore(this.$('#email.not-linked'));
+            }.bind(this));
+            _.each(linked_social, function(social) {
+                var social_provider = social.provider,
+                    social_name = social.first_name + " " + social.last_name;
+                this.$('.'+ social_provider + '-linked').removeClass('not-linked');
+                this.$('.' + social_provider + '-linked .btn-link').text('unlink').addClass('btn-unlink');
+                this.$('.'+ social_provider + '-linked .synced-info').html($('<div class="name one-line">' + social_name + '</div><div class="verified-status one-line">Linked ' + social_provider + ' account</div>'));
+            }.bind(this));
+        },
+
+        linkSocial: function (ev) {
+            if ((this.model.get('token'))&&(!$(ev.target).hasClass('btn-unlink'))) {
+                var social_elem = $(ev.target).closest('.social-linked-item-wrap'),
+                    provider = social_elem.attr('id');
+                if (provider === 'email') {
+                    utils.dialogs.ask_enter_value("Add email", null, {input_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
+                        if (mail) {
+                            this.model._call_method('POST', '/accounts/current/email_list/', {email: mail},
+                                function (mail_data) {
+                                    var email_list = this.model.get('linked_email_list');
+                                    email_list.push(mail_data);
+                                    this.model.set('linked_email_list', email_list);
+                                    this.updateSocialBindings();
+                                }.bind(this),
+                                function (jqXHR, textStatus, errorThrown) {
+                                    this.$('span.errors ').text(jqXHR.email[0]);
+                                }.bind(this));
+                        }
+                    }.bind(this));
+                }
+                else {
+                    this.openAccount();
+                }
+            }
+        },
+
+        verifyEmail: function (ev) {
+            var $target = $(ev.target),
+                $email_html = $target.closest('.social-linked-item-wrap'),
+                email_address = $email_html.data('email');
+            utils.dialogs.ask_enter_value("Confirm email", null, {input_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
+                if (code) {
+                    if (code === email_address) {
+                        this.model._call_method('POST', '/accounts/current/email_list/', {email: code});
+                    }
+                    else {
+                        this.model._call_method('POST', '/accounts/email_confirmation/', {code: code},
+                            function (mail_data) {
+                                var email_list = mail_data.email_list;
+                                this.model.set('linked_email_list', email_list);
+                                this.updateSocialBindings();
+                            }.bind(this),
+                            function (jqXHR, textStatus, errorThrown) {
+                                this.$('span.errors ').text(jqXHR.code[0]);
+                            }.bind(this));
+                    }
+                }
+            }.bind(this));
+        },
+
+        unlinkSocial: function (ev) {
+            var $target = $(ev.target);
+            if (!$target.hasClass('btn-verify-email')) {
+                var $social_html = $target.closest('.social-linked-item-wrap');
+                var provider = $social_html.attr('id'),
+                    is_email = $social_html.data('email');
+                if (is_email) {
+                    var email_address = $social_html.data('email');
+                    utils.dialogs.ask("Unlink email", "Do you want to unlink email " +
+                        email_address + "?", null, {ok_button_text: 'unlink'}).done(function (result) {
+                        if (result) {
+                            this.model._call_method('DELETE', '/accounts/current/email_list/' + $social_html.data('id') + '/', null,
+                                function (mail_data) {
+                                    var email_list = this.model.get('linked_email_list'),
+                                        deleted_mail_index = email_list.indexOf(email_list.find(email => email.id === $social_html.data('id')));
+                                    email_list.splice(deleted_mail_index, 1);
+                                    this.model.set('linked_email_list', email_list);
+                                    this.updateSocialBindings();
+                                }.bind(this),
+                                function (jqXHR, textStatus, errorThrown) {
+                                    this.model.get_settings();
+                                }.bind(this));
+                        }
+                    }.bind(this));
+                }
+                else if (provider !== 'email') {
+                    utils.dialogs.ask("Unlink social account", "Do you want to unlink " + provider + " account?", null, {ok_button_text: 'unlink'}).done(function (result) {
+                        if (result) {
+                            this.model._call_method('POST', '/accounts/current/social_unbind/', {provider: provider},
+                                function () {
+                                    var social_list = this.model.get('linked_social'),
+                                        deleted_social_index = social_list.indexOf(social_list.find(social => social.provider === provider));
+                                    social_list.splice(deleted_social_index, 1);
+                                    this.model.set('linked_social', social_list);
+                                    this.updateSocialBindings();
+                                }.bind(this),
+                                function (jqXHR, textStatus, errorThrown) {
+                                    this.model.get_settings();
+                                }.bind(this));
+                        }
+                    }.bind(this));
+                }
+            }
         },
 
         updateName: function () {
-            this.$('.name').text(this.model.get('name'));
+            this.$('.account-info-wrap .name').text(this.model.get('name'));
+            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
         },
 
         updateAvatar: function () {
@@ -889,6 +1153,7 @@ define("xabber-api-service", function () {
             var connected = this.model.get('connected');
             this.$tab.switchClass('online', connected)
                      .switchClass('offline', !connected);
+            this.$('.linked-social-accounts-and-emails').showIf(connected);
             this.$('.account-info-wrap').showIf(connected);
             this.$('.sync-wrap').showIf(connected);
             if (connected) {
@@ -898,7 +1163,7 @@ define("xabber-api-service", function () {
                 this.updateLastSyncInfo();
             }
             this.$('.btn-login').hideIf(connected);
-            this.$('.btn-logout').showIf(connected);
+            this.$('.btn-more').showIf(connected);
         },
 
         updateSyncButton: function () {
@@ -929,11 +1194,46 @@ define("xabber-api-service", function () {
         },
 
         login: function () {
-            xabber.add_api_account_view.show();            
+            if (xabber.accounts.connected.length > 1)
+                xabber.add_api_account_view.show();
+            else {
+                var account = xabber.accounts.connected[0];
+                account.set('auto_login_xa', true);
+                account.authXabberAccount();
+            }
         },
 
         logout: function () {
             this.model.logout();
+        },
+
+        onPasswordResetFailed: function () {
+            utils.dialogs.error("For reset password need at least one confirmed email");
+        },
+
+        setPassword: function () {
+            var email_list = this.model.get('linked_email_list');
+            if (email_list) {
+                var verified_email = email_list.find(mail => mail.verified === true);
+                if (email_list.indexOf(verified_email) != -1) {
+                    $.ajax({
+                        type: 'POST',
+                        url: constants.API_SERVICE_URL + '/accounts/password_reset_request/',
+                        contentType: "application/json",
+                        dataType: 'json',
+                        data: JSON.stringify({email: verified_email.email}),
+                        success: function () {
+                            utils.dialogs.notify("Set password", "Request for set password sent on email " +
+                                verified_email.email);
+                        }.bind(this),
+                        error: this.onPasswordResetFailed.bind(this)
+                    });
+                }
+                else
+                    this.onPasswordResetFailed();
+            }
+            else
+                this.onPasswordResetFailed();
         },
 
         openAccount: function () {
@@ -964,6 +1264,7 @@ define("xabber-api-service", function () {
             {model: this.api_account});
 
         this.add_api_account_view = new this.AddAPIAccountView({model: this.api_account});
+        this.email_auth_view = new xabber.XabberLoginByEmailPanel({parent: this.add_api_account_view, model: this.api_account});
     }, xabber);
 
     return xabber;

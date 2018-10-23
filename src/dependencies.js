@@ -12,7 +12,9 @@ define([
     "strophe.ping",
     "strophe.rsm",
     "strophe.caps",
+    "strophe.pubsub",
     "backbone.localsync",
+    "sha1_hasher",
     "materialize",
     "perfectScrollbarJQuery"
 ], function(Backbone, _, $, moment, WaveSurfer, slug, magnificPopup, Strophe) {

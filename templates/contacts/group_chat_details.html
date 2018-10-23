@@ -1,7 +1,7 @@
 <div class="panel-content-wrap noselect">
     <div class="main-info">
-        <div class="circle-avatar"><img></div>
-        <div class="status hide-offline"></div>
+        <div class="circle-avatar"><input title="Change avatar" type="file"/><img></div>
+        <div class="group-chat-icon"><img src="./images/GroupchatBorderless2x.svg"></div>
         <div class="text-info">
             <div class="name-wrap"></div>
             <div class="status-message one-line"></div>
@@ -14,17 +14,32 @@
 
     <div class="panel-content private-chat">
         <div class="left-column">
-            <div class="block-wrap group-info">
-            </div>
             <div class="block-wrap chat-members-info">
-                <div class="block-header">
-                    <span class="block-name btn-view-group-members">View chat members</span>
+                <div class="block-header members-lists">
+                    <span class="block-name active-list chat-members-list">Chat members</span>
+                    <span class="block-name hidden-list invited-list">Invited</span>
+                    <span class="block-name hidden-list blocked-list">Blocked</span>
                 </div>
+                <div class="members-list-wrap"><div class="owners"></div><div class="admins"></div><div class="members"></div><div class="preloader-wrapper preloader-20px active">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div></div>
             </div>
         </div>
 
         <div class="right-column">
             <div class="block-wrap groups-block-wrap">
+                <div class="block-wrap groupchat-info">
+                </div>
                 <div class="block-header">
                     <span class="block-name">Groups</span>
                 </div>
@@ -38,10 +53,8 @@
 </div>
 <div class="panel-footer noselect">
     <div class="buttons-wrap">
-        <button class="btn-add btn-flat btn-main">Join</button>
         <button class="btn-chat btn-flat btn-main">Chat</button>
-        <button class="btn-block btn-flat btn-main">Block</button>
-        <button class="btn-unblock btn-flat btn-main">Unblock</button>
-        <button class="btn-delete btn-flat btn-main">Delete</button>
+        <button class="btn-delete btn-flat btn-dark btn-main">Leave</button>
+        <button class="btn-join btn-flat btn-dark btn-main">Join</button>
     </div>
 </div>

@@ -198,7 +198,7 @@ define("xabber-ui", function () {
             if (options.right === 'contact_details') {
                 return { details: path_contact_details };
             }
-            if (options.name === 'chats' && options.chat_item) {
+            if ((options.name === 'chats' || options.name === 'all-chats') && options.chat_item) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,

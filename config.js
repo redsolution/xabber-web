@@ -26,6 +26,8 @@ require.config({
         "hammerjs":                 "src/lib/hammer.min",
         "materialize":              "src/lib/materialize",
         "strophe.caps":             "src/lib/strophe.caps",
+        "strophe.pubsub":           "src/lib/strophe.pubsub",
+        "sha1_hasher":              "src/lib/sha1.min",
 
         // Xabber sources
         "xabber-version":           "version",

@@ -432,11 +432,9 @@ define("xabber-views", function () {
             var value = this.getValue(),
                 new_value = this.$input.removeClass('changed').val();
             new_value !== value && this.setValue(new_value);
-            if ((new_value !== value)&&(this.model.get('group_chat'))&&(this.$el.hasClass('name-wrap'))) {
-                this.model.details_view.setGroupChatName(new_value);
-            }
+            if ((new_value == "")&&(this.$el.hasClass('name-wrap')))
+                this.setValue(this.model.attributes.vcard.nickname);
             this.data.set('input_mode', false);
-
         },
 
         updateValue: function () {
@@ -547,7 +545,7 @@ define("xabber-views", function () {
         },
 
         onUpdatedScreen: function (name) {
-            if ((name === 'chats' || name === 'all-chats' || name === 'group-chats' || name === 'archive-chats') &&
+            if ((name === 'all-chats') &&
                     (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
                     this.$('.toolbar-item.chats').hasClass('active')||
@@ -565,10 +563,6 @@ define("xabber-views", function () {
             this.$('.toolbar-item').removeClass('active')
                 .filter('.all-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
-            if ((ev)&&(xabber.chats_view.active_chat)) {
-                xabber.chats_view.active_chat.model.set('active', false);
-                xabber.chats_view.active_chat = null;
-            }
         },
 
         showChats: function (ev) {
@@ -576,10 +570,6 @@ define("xabber-views", function () {
                 .filter('.chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_chats');
-            if ((ev)&&(xabber.chats_view.active_chat)) {
-                xabber.chats_view.active_chat.model.set('active', false);
-                xabber.chats_view.active_chat = null;
-            }
         },
 
         showGroupChats: function (ev) {
@@ -587,10 +577,6 @@ define("xabber-views", function () {
                 .filter('.group-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_group_chats');
-            if ((ev)&&(xabber.chats_view.active_chat)) {
-                xabber.chats_view.active_chat.model.set('active', false);
-                xabber.chats_view.active_chat = null;
-            }
         },
 
         showArchive: function (ev) {
@@ -598,10 +584,6 @@ define("xabber-views", function () {
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_archive_chats');
-            if ((ev)&&(xabber.chats_view.active_chat)) {
-                xabber.chats_view.active_chat.model.set('active', false);
-                xabber.chats_view.active_chat = null;
-            }
         },
 
         showContacts: function (ev) {
@@ -629,63 +611,29 @@ define("xabber-views", function () {
         },
 
         setAllMessageCounter: function () {
-            var count_msg = 0;
+            var count_msg = 0, count_all_msg = 0, count_group_msg = 0;
             xabber.accounts.each(function(idx) {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
                     var $chat = xabber.accounts.get(idx).chats.get(idx1);
-                    if (!$chat.contact.get('archived'))
-                        count_msg += xabber.accounts.get(idx).chats.get(idx1).get('unread');
+                    if (($chat.contact.get('archived'))&&($chat.contact.get('muted'))) {
+                    }
+                    else {
+                        count_all_msg += $chat.get('unread');
+                        if ($chat.contact.get('group_chat'))
+                            count_group_msg += $chat.get('unread');
+                        else
+                            count_msg += $chat.get('unread');
+                    }
                 }.bind(this));
             }.bind(this));
-            return count_msg;
+            return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg };
         },
 
-        setGroupMessageCounter: function () {
-            var count_msg = 0;
-            xabber.accounts.each(function(idx) {
-                xabber.accounts.get(idx).chats.each(function (idx1) {
-                    var $chat = xabber.accounts.get(idx).chats.get(idx1)
-                    if ($chat.contact.get('group_chat'))
-                        count_msg += $chat.get('unread');
-                }.bind(this));
-            }.bind(this));
-            return count_msg;
-        },
-
-        setMessageCounter: function () {
-            var count_msg = 0;
-            xabber.accounts.each(function(idx) {
-                xabber.accounts.get(idx).chats.each(function (idx1) {
-                    var $chat = xabber.accounts.get(idx).chats.get(idx1)
-                    if (!$chat.contact.get('group_chat'))
-                        count_msg += $chat.get('unread');
-                }.bind(this));
-            }.bind(this));
-            return count_msg;
-        },
-
-        increaseMessageCounter: function () {
-            this.data.set('msg_counter', this.setMessageCounter());
-        },
-
-        increaseGroupMessageCounter: function () {
-            this.data.set('group_msg_counter', this.setGroupMessageCounter());
-        },
-
-        increaseAllMessageCounter: function () {
-            this.data.set('all_msg_counter', this.setAllMessageCounter());
-        },
-
-        decreaseMessageCounter: function () {
-            this.data.set('msg_counter', this.setMessageCounter());
-        },
-
-        decreaseGroupMessageCounter: function () {
-            this.data.set('group_msg_counter', this.setGroupMessageCounter());
-        },
-
-        decreaseAllMessageCounter: function () {
-            this.data.set('all_msg_counter', this.setAllMessageCounter());
+        recountAllMessageCounter: function () {
+            var unread_messages = this.setAllMessageCounter();
+            this.data.set('all_msg_counter', unread_messages.all_msgs);
+            this.data.set('msg_counter', unread_messages.msgs);
+            this.data.set('group_msg_counter', unread_messages.group_msgs);
         },
 
         onChangedMessageCounter: function () {
@@ -993,17 +941,13 @@ define("xabber-views", function () {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
                     var $chat = xabber.accounts.get(idx).chats.get(idx1);
                     if (!$chat.contact.get('archived'))
-                        count_msg += xabber.accounts.get(idx).chats.get(idx1).get('unread');
+                        count_msg += $chat.get('unread');
                 }.bind(this));
             }.bind(this));
             return count_msg;
         },
 
-        increaseAllMessageCounter: function () {
-            this.set('all_msg_counter', this.setAllMessageCounter());
-        },
-
-        decreaseAllMessageCounter: function () {
+        recountAllMessageCounter: function () {
             this.set('all_msg_counter', this.setAllMessageCounter());
         },
 

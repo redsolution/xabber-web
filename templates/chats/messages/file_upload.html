@@ -1,4 +1,4 @@
-<div class="chat-message file-upload noselect" data-time="{{timestamp}}" data-from="{{from_jid}}" data-msgid="{{msgid}}">
+<div class="chat-message file-upload noselect" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-from="{{from_jid}}" data-msgid="{{msgid}}">
     <div class="left-side noselect">
         <div class="circle-avatar"><img></div>
     </div>
@@ -6,6 +6,8 @@
     <div class="msg-wrap">
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
+            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
+            {[ } if ((role)&&(role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
         </div>
         <div class="chat-msg-content chat-file-content">
             <div class="chat-file-info">
@@ -30,3 +32,4 @@
         <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}"></i>
         <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_file}}"></i></div>
     </div>
+</div>

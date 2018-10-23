@@ -426,7 +426,6 @@ define("xabber-vcard", function () {
             addr.region = $info.find('.region input').val();
             addr.pcode = $info.find('.pcode input').val();
             addr.country = $info.find('.country input').val();
-
             return vcard;
         },
 
@@ -439,8 +438,10 @@ define("xabber-vcard", function () {
             field.value = '';
             if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
                 utils.dialogs.error('File is too large');
+                return;
             } else if (!file.type.startsWith('image')) {
                 utils.dialogs.error('Wrong image');
+                return;
             }
             utils.images.getAvatarFromFile(file).done(function (image) {
                 if (image) {
