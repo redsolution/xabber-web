@@ -1,9 +1,10 @@
 importScripts('https://www.gstatic.com/firebasejs/4.3.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/4.3.1/firebase-messaging.js');
-importScripts('src/constants.js')
+
+const msg_sender_id = '868637702480';
 
 firebase.initializeApp({
-    'messagingSenderId': constants.GCM_SENDER_ID
+    'messagingSenderId': msg_sender_id
 });
 
 const messaging = firebase.messaging();
@@ -21,7 +22,7 @@ messaging.setBackgroundMessageHandler(function (message) {
         })
     });
 
-    if (message.from === constants.GCM_SENDER_ID) {
+    if (message.from === msg_sender_id) {
         var title, body,
             icon = 'images/xabber-logo-48.png';
 

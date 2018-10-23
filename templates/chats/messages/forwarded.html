@@ -1,4 +1,4 @@
-<div class="fwd-message" data-time="{{timestamp}}" data-msgid="{{msgid}}" data-from="{{from_jid}}">
+<div class="fwd-message" data-time="{{timestamp}}" data-msgid="{{msgid}}" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-from-id="{{from_id}}" data-from="{{from_jid}}">
     <div class="fwd-left-side noselect">
         <div class="circle-avatar"><img></div>
     </div>
@@ -6,8 +6,10 @@
     <div class="msg-wrap">
         <div class="fwd-msg-author-wrap">
             <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>
+            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
+            {[ } if ((role)&&(role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
             <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
         </div>
-        <div class="chat-msg-content chat-text-content">{[ if (is_file) {]}<div class="file-in-circle">{[ if (!is_audio) {]}<i class="mdi mdi-24px mdi-file"></i>{[} else if (is_audio) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i></div>{[ }} ]}{{message}}</div>
+        <div class="chat-msg-content chat-text-content">{{message}}</div>
     </div>
 </div>

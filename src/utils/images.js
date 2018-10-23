@@ -55,8 +55,8 @@ define(["xabber-dependencies"], function (deps) {
             ctx = canvas.getContext('2d'),
             _name = name ? name.trim() : '',
             first_name, last_name, splitted_name = _name.split(' ', 2),
-            first_letter, second_letter,
-            color_index;
+            first_letter, second_letter;
+            // color_index;
         first_name = splitted_name[0];
         last_name = (splitted_name.length > 1 ? splitted_name[1] : '');
         first_letter = first_name[0] || '';
@@ -65,11 +65,11 @@ define(["xabber-dependencies"], function (deps) {
         } else {
             second_letter = (first_name.length > 1 ? first_name[1] : '');
         }
-        color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
+        // color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
         canvas.width = 128;
         canvas.height = 128;
         ctx.rect(0, 0, 128, 128);
-        ctx.fillStyle = COLORS[color_index];
+        ctx.fillStyle = getAccountColor(name);//COLORS[color_index];
         ctx.fill();
         ctx.font = "bold 50px sans-serif";
         ctx.fillStyle = "#FFF";
@@ -77,6 +77,12 @@ define(["xabber-dependencies"], function (deps) {
         ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 64, 80);
         var image = canvas.toDataURL().replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
         return image;
+    };
+
+    var getAccountColor = function (name) {
+        var _name = name ? name.trim() : '',
+            color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
+        return COLORS[color_index];
     };
 
     var getCachedDefaultAvatar = function (name) {
@@ -174,11 +180,12 @@ define(["xabber-dependencies"], function (deps) {
             }
         }
         elem.src = cached_image.url;
-    };
+    }
 
     return {
         getCachedImage: getCachedImage,
         getDefaultAvatar: getDefaultAvatar,
-        getAvatarFromFile: getAvatarFromFile
+        getAvatarFromFile: getAvatarFromFile,
+        getDefaultColor: getAccountColor
     };
 });

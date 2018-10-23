@@ -121,9 +121,19 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         dialog_options: dialog_options
                     });
                 }, {use_queue: true});
+                if (dialog_options.blob_image_from_clipboard) {
+                    dialog.$modal.find('.dialog-options-wrap').html('');
+                    dialog.$modal.find('.img-from-clipboard').get(0).src = dialog_options.blob_image_from_clipboard;
+                    dialog.$modal.find('.container-for-img').removeClass('hidden');
+                }
+                if (dialog_options.input_value) {
+                    dialog.$modal.find('.dialog-options-wrap').html($('<input type="text" placeholder="' + dialog_options.input_value + '" id="user_value"/>'));
+                }
+
                 dialog.$modal.find('.modal-footer button').click(function (ev) {
                     var option = $(ev.target).data('option'),
-                        $options = dialog.$modal.find('.dialog-option');
+                        $options = dialog.$modal.find('.dialog-option'),
+                        user_value_input = dialog.$modal.find('#user_value');
                     if (option && $options.length) {
                         var result = {};
                         _.each($options, function (item) {
@@ -132,9 +142,20 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         });
                         dialog.close({complete_data: result});
                     } else {
-                        dialog.close({complete_data: option});
+                        if (user_value_input.length) {
+                            if ($(ev.target).hasClass('optional-button')) {
+                                dialog.close({complete_data: option});
+                            }
+                            else {
+                                var user_value = user_value_input.val();
+                                dialog.close({complete_data: user_value});
+                            }
+                        }
+                        else
+                            dialog.close({complete_data: option});
                     }
                 });
+
                 return dialog.open();
             },
 
@@ -146,8 +167,25 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 return this.common('Error', text, {ok_button: true}, dialog_options);
             },
 
-            ask: function (header, text, dialog_options) {
-                return this.common(header, text, {ok_button: true, cancel_button: true}, dialog_options);
+            ask: function (header, text, dialog_options, buttons) {
+                var ok_text;
+                if (buttons) {
+                    ok_text = buttons.ok_button_text;
+                }
+                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true}, dialog_options);
+            },
+
+            ask_enter_value: function (header, text, dialog_options, buttons) {
+                var ok_text, resend_button;
+                if (buttons) {
+                    ok_text = buttons.ok_button_text;
+                    resend_button = (buttons.resend_button_text) ? [{value: buttons.resend_to, name: buttons.resend_button_text}] : false;
+                }
+                return this.common(header, text, {ok_button: {text: ok_text}, optional_buttons: resend_button, cancel_button: true}, dialog_options);
+            },
+
+            notify: function (header, text) {
+                return this.common(header, text, {ok_button: true});
             }
         }
     };

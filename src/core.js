@@ -13,7 +13,7 @@
         defaults: {
             version_number: env.version_number,
             actual_version_number: env.version_number,
-            client_id: uuid().substring(0, 18),
+            client_id: uuid().substring(0, 8),
             client_name: 'Xabber Web ' + env.version_number
         },
 
@@ -104,7 +104,7 @@
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',
                 load_history: true,
-                mam_requests_limit: 50,
+                mam_requests_limit: 200,
                 mam_messages_limit: 20,
                 ping_interval: 180
             }
@@ -120,6 +120,7 @@
         configure: function (config) {
             _.extend(constants, _.pick(config, [
                 'CONNECTION_URL',
+                'XMPP_SERVER_GROUPCHATS',
                 'LOG_LEVEL',
                 'DEBUG',
                 'XABBER_ACCOUNT_URL',
@@ -265,45 +266,50 @@
         setUpPushNotifications: function () {
             var result = new $.Deferred(),
                 self = this;
+
             firebase.initializeApp({
                 apiKey: constants.GCM_API_KEY,
                 messagingSenderId: constants.GCM_SENDER_ID
             });
-            self.messaging = firebase.messaging();
 
-            self.messaging.requestPermission().then(function () {
-                self.messaging.getToken().then(function (currentToken) {
-                    self._cache.save('endpoint_key', currentToken || undefined);
-                    result.resolve(currentToken ? true : 'No Instance ID token available.');
-                }).catch(function (err) {
-                    result.resolve(err);
-                });
+            navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
+                firebase.messaging().useServiceWorker(registration);
 
-                self.messaging.onTokenRefresh(function () {
-                    self.messaging.getToken().then(function (refreshedToken) {
-                        self._cache.save('endpoint_key', refreshedToken);
+                self.messaging = firebase.messaging();
+                self.messaging.requestPermission().then(function () {
+                    self.messaging.getToken().then(function (currentToken) {
+                        self._cache.save('endpoint_key', currentToken || undefined);
+                        result.resolve(currentToken ? true : 'No Instance ID token available.');
                     }).catch(function (err) {
-                        // TODO
+                        result.resolve(err);
                     });
-                });
 
-                navigator.serviceWorker.addEventListener('message', function (event) {
-                    var data = event.data;
-                    if (data['firebase-messaging-msg-type'] === 'push-msg-received') {
-                        var message = data['firebase-messaging-msg-data'];
-                        if (message && message.data && message.from === constants.GCM_SENDER_ID) {
-                            var payload;
-                            try {
-                                payload = JSON.parse(atob(message.data.body));
-                            } catch (e) {
-                                payload = message.data;
+                    self.messaging.onTokenRefresh(function () {
+                        self.messaging.getToken().then(function (refreshedToken) {
+                            self._cache.save('endpoint_key', refreshedToken);
+                        }).catch(function (err) {
+                            // TODO
+                        });
+                    });
+
+                    navigator.serviceWorker.addEventListener('message', function (event) {
+                        var data = event.data;
+                        if (data['firebase-messaging-msg-type'] === 'push-msg-received') {
+                            var message = data['firebase-messaging-msg-data'];
+                            if (message && message.data && message.from === constants.GCM_SENDER_ID) {
+                                var payload;
+                                try {
+                                    payload = JSON.parse(atob(message.data.body));
+                                } catch (e) {
+                                    payload = message.data;
+                                }
+                                self.trigger('push_message', payload);
                             }
-                            self.trigger('push_message', payload);
                         }
-                    }
+                    });
+                }).catch(function (err) {
+                    result.resolve({'error': err});
                 });
-            }).catch(function (err) {
-                result.resolve({'error': err});
             });
             return result.promise();
         },

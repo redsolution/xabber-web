@@ -1,206 +1,231 @@
-    <div class="right-column noselect">
-        <div class="settings-panel-head">
-            <span>Account settings</span>
-            <div class="field enabled-state switch normal">
-                <label class="field-value">
-                    <input type="checkbox">
-                    <span class="lever"></span>
-                </label>
-            </div>
+<div class="right-column noselect">
+    <div class="settings-panel-head">
+        <span>Account settings</span>
+        <div class="field enabled-state switch normal">
+            <label class="field-value">
+                <input type="checkbox">
+                <span class="lever"></span>
+            </label>
         </div>
+    </div>
 
-        <div class="panel-content-wrap">
-            <div class="panel-content details-panel">
+    <div class="panel-content-wrap">
+        <div class="panel-content details-panel">
 
-                <div class="settings-block-wrap connection">
-                    <div class="block-header">
-                        <span class="block-name">Connection settings</span>
+            <div class="settings-block-wrap connection">
+                <div class="block-header">
+                    <span class="block-name">Connection settings</span>
+                </div>
+                <div class="connection-wrap">
+                    <div class="readonly-setting">
+                        <i class="details-icon mdi mdi-24px mdi-account"></i>
+                        <div class="setting-wrap account-name">
+                            <div class="value one-line"></div>
+                            <div class="label conn-status"></div>
+                        </div>
                     </div>
-                    <div class="connection-wrap">
-                        <div class="readonly-setting">
-                            <i class="details-icon mdi mdi-24px mdi-account"></i>
-                            <div class="setting-wrap account-name">
-                                <div class="value one-line"></div>
-                                <div class="label conn-status"></div>
-                            </div>
+                    <div class="buttons-wrap">
+                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>
+                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-block-wrap tokens">
+                <div class="block-header">
+                    <span class="block-name">Tokens</span>
+                </div>
+                <div class="tokens-wrap">
+                </div>
+                <div class="buttons-wrap hidden">
+                    <button class="btn-revoke-all-tokens btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Revoke all</button>
+                </div>
+            </div>
+
+            <div class="settings-block-wrap synchronization">
+                <div class="block-header">
+                    <span class="block-name">Synchronization</span>
+                </div>
+                <div class="synchronization-wrap">
+                    <div class="readonly-setting">
+                        <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>
+                        <div class="setting-wrap account-name">
+                            <div class="value one-line"></div>
+                            <div class="label sync-status"></div>
+                        </div>
+                    </div>
+                    <div class="xabber-account-features-wrap">
+                        <div class="sync-enable-wrap">
+                            <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>
+                            <label for="{{view.cid}}_sync_account">Enable synchronization</label>
                         </div>
                         <div class="buttons-wrap">
-                            <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>
-                            <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>
+                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="settings-block-wrap synchronization">
-                    <div class="block-header">
-                        <span class="block-name">Synchronization</span>
-                    </div>
-                    <div class="synchronization-wrap">
-                        <div class="readonly-setting">
-                            <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>
-                            <div class="setting-wrap account-name">
-                                <div class="value one-line"></div>
-                                <div class="label sync-status"></div>
-                            </div>
+            <div class="settings-block-wrap color-scheme">
+                <div class="block-header">
+                    <span class="block-name">Color scheme</span>
+                </div>
+                <div class="color-scheme-wrap">
+                    <div class="account-color">
+                        <div class="current-color-name text-color-700"></div>
+                        <div class="dropdown-button" data-activates="select-color-{{view.cid}}">
+                            <i class="mdi mdi-24px mdi-menu-down"></i>
                         </div>
-                        <div class="xabber-account-features-wrap">
-                            <div class="sync-enable-wrap">
-                                <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>
-                                <label for="{{view.cid}}_sync_account">Enable synchronization</label>
-                            </div>
-                            <div class="buttons-wrap">
-                                <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>
-                            </div>
+                        <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">
+                            <li class="color-value" data-value="red">
+                                <div class="color-name text-color-red-700">red</div>
+                                <div class="color-pattern ground-color-red-700"></div>
+                            </li>
+                            <li class="color-value" data-value="pink">
+                                <div class="color-name text-color-pink-700">pink</div>
+                                <div class="color-pattern ground-color-pink-700"></div>
+                            </li>
+                            <li class="color-value" data-value="purple">
+                                <div class="color-name text-color-purple-700">purple</div>
+                                <div class="color-pattern ground-color-purple-700"></div>
+                            </li>
+                            <li class="color-value" data-value="deep-purple">
+                                <div class="color-name text-color-deep-purple-700">deep purple</div>
+                                <div class="color-pattern ground-color-deep-purple-700"></div>
+                            </li>
+                            <li class="color-value" data-value="indigo">
+                                <div class="color-name text-color-indigo-700">indigo</div>
+                                <div class="color-pattern ground-color-indigo-700"></div>
+                            </li>
+                            <li class="color-value" data-value="blue">
+                                <div class="color-name text-color-blue-700">blue</div>
+                                <div class="color-pattern ground-color-blue-700"></div>
+                            </li>
+                            <li class="color-value" data-value="light-blue">
+                                <div class="color-name text-color-light-blue-700">light blue</div>
+                                <div class="color-pattern ground-color-light-blue-700"></div>
+                            </li>
+                            <li class="color-value" data-value="cyan">
+                                <div class="color-name text-color-cyan-700">cyan</div>
+                                <div class="color-pattern ground-color-cyan-700"></div>
+                            </li>
+                            <li class="color-value" data-value="teal">
+                                <div class="color-name text-color-teal-700">teal</div>
+                                <div class="color-pattern ground-color-teal-700"></div>
+                            </li>
+                            <li class="color-value" data-value="green">
+                                <div class="color-name text-color-green-700">green</div>
+                                <div class="color-pattern ground-color-green-700"></div>
+                            </li>
+                            <li class="color-value" data-value="light-green">
+                                <div class="color-name text-color-light-green-700">light green</div>
+                                <div class="color-pattern ground-color-light-green-700"></div>
+                            </li>
+                            <li class="color-value" data-value="lime">
+                                <div class="color-name text-color-lime-700">lime</div>
+                                <div class="color-pattern ground-color-lime-700"></div>
+                            </li>
+                            <li class="color-value" data-value="amber">
+                                <div class="color-name text-color-amber-700">amber</div>
+                                <div class="color-pattern ground-color-amber-700"></div>
+                            </li>
+                            <li class="color-value" data-value="orange">
+                                <div class="color-name text-color-orange-700">orange</div>
+                                <div class="color-pattern ground-color-orange-700"></div>
+                            </li>
+                            <li class="color-value" data-value="deep-orange">
+                                <div class="color-name text-color-deep-orange-700">deep orange</div>
+                                <div class="color-pattern ground-color-deep-orange-700"></div>
+                            </li>
+                            <li class="color-value" data-value="brown">
+                                <div class="color-name text-color-brown-700">brown</div>
+                                <div class="color-pattern ground-color-brown-700"></div>
+                            </li>
+                            <li class="color-value" data-value="blue-grey">
+                                <div class="color-name text-color-blue-grey-700">blue grey</div>
+                                <div class="color-pattern ground-color-blue-grey-700"></div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-block-wrap xmpp-resources">
+                <div class="block-header">
+                    <span class="block-name">XMPP Resources</span>
+                </div>
+                <div class="resources-wrap">
+                    <div class="resource-wrap main-resource">
+                        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>
+                        <div class="info status-info">
+                            <div class="label">Status:</div>
+                            <div class="value status-message one-line"></div>
+                            <div class="status"></div>
+                        </div>
+                        <div class="info client-info">
+                            <div class="label">Client:</div>
+                            <div class="value client one-line"></div>
+                        </div>
+                        <div class="info resource-info">
+                            <div class="label">Resource:</div>
+                            <div class="value resource one-line"></div>
+                            <div class="device-indicator text-color-700">(this device)</div>
+                        </div>
+                        <div class="info priority-info">
+                            <div class="label">Priority:</div>
+                            <div class="value priority"></div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="settings-block-wrap color-scheme">
-                    <div class="block-header">
-                        <span class="block-name">Color scheme</span>
-                    </div>
-                    <div class="color-scheme-wrap">
-                        <div class="account-color">
-                            <div class="current-color-name text-color-700"></div>
-                            <div class="dropdown-button" data-activates="select-color-{{view.cid}}">
-                                <i class="mdi mdi-24px mdi-menu-down"></i>
-                            </div>
-                            <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">
-                                <li class="color-value" data-value="red">
-                                    <div class="color-name text-color-red-700">red</div>
-                                    <div class="color-pattern ground-color-red-700"></div>
-                                </li>
-                                <li class="color-value" data-value="pink">
-                                    <div class="color-name text-color-pink-700">pink</div>
-                                    <div class="color-pattern ground-color-pink-700"></div>
-                                </li>
-                                <li class="color-value" data-value="purple">
-                                    <div class="color-name text-color-purple-700">purple</div>
-                                    <div class="color-pattern ground-color-purple-700"></div>
-                                </li>
-                                <li class="color-value" data-value="deep-purple">
-                                    <div class="color-name text-color-deep-purple-700">deep purple</div>
-                                    <div class="color-pattern ground-color-deep-purple-700"></div>
-                                </li>
-                                <li class="color-value" data-value="indigo">
-                                    <div class="color-name text-color-indigo-700">indigo</div>
-                                    <div class="color-pattern ground-color-indigo-700"></div>
-                                </li>
-                                <li class="color-value" data-value="blue">
-                                    <div class="color-name text-color-blue-700">blue</div>
-                                    <div class="color-pattern ground-color-blue-700"></div>
-                                </li>
-                                <li class="color-value" data-value="light-blue">
-                                    <div class="color-name text-color-light-blue-700">light blue</div>
-                                    <div class="color-pattern ground-color-light-blue-700"></div>
-                                </li>
-                                <li class="color-value" data-value="cyan">
-                                    <div class="color-name text-color-cyan-700">cyan</div>
-                                    <div class="color-pattern ground-color-cyan-700"></div>
-                                </li>
-                                <li class="color-value" data-value="teal">
-                                    <div class="color-name text-color-teal-700">teal</div>
-                                    <div class="color-pattern ground-color-teal-700"></div>
-                                </li>
-                                <li class="color-value" data-value="green">
-                                    <div class="color-name text-color-green-700">green</div>
-                                    <div class="color-pattern ground-color-green-700"></div>
-                                </li>
-                                <li class="color-value" data-value="light-green">
-                                    <div class="color-name text-color-light-green-700">light green</div>
-                                    <div class="color-pattern ground-color-light-green-700"></div>
-                                </li>
-                                <li class="color-value" data-value="lime">
-                                    <div class="color-name text-color-lime-700">lime</div>
-                                    <div class="color-pattern ground-color-lime-700"></div>
-                                </li>
-                                <li class="color-value" data-value="amber">
-                                    <div class="color-name text-color-amber-700">amber</div>
-                                    <div class="color-pattern ground-color-amber-700"></div>
-                                </li>
-                                <li class="color-value" data-value="orange">
-                                    <div class="color-name text-color-orange-700">orange</div>
-                                    <div class="color-pattern ground-color-orange-700"></div>
-                                </li>
-                                <li class="color-value" data-value="deep-orange">
-                                    <div class="color-name text-color-deep-orange-700">deep orange</div>
-                                    <div class="color-pattern ground-color-deep-orange-700"></div>
-                                </li>
-                                <li class="color-value" data-value="brown">
-                                    <div class="color-name text-color-brown-700">brown</div>
-                                    <div class="color-pattern ground-color-brown-700"></div>
-                                </li>
-                                <li class="color-value" data-value="blue-grey">
-                                    <div class="color-name text-color-blue-grey-700">blue grey</div>
-                                    <div class="color-pattern ground-color-blue-grey-700"></div>
-                                </li>
-                            </ul>
-                        </div>
+            <div class="settings-block-wrap vcard">
+            </div>
+
+            <div class="settings-block-wrap server-info">
+                <div class="block-header">
+                    <span class="block-name">Server capabilities</span>
+                </div>
+                <div class="capabilities-wrap">
+                    <div class="capabilities">
                     </div>
                 </div>
+            </div>
 
-                <div class="settings-block-wrap xmpp-resources">
-                    <div class="block-header">
-                        <span class="block-name">XMPP Resources</span>
-                    </div>
-                    <div class="resources-wrap">
-                        <div class="resource-wrap main-resource">
-                            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>
-                            <div class="info status-info">
-                                <div class="label">Status:</div>
-                                <div class="value status-message one-line"></div>
-                                <div class="status"></div>
-                            </div>
-                            <div class="info client-info">
-                                <div class="label">Client:</div>
-                                <div class="value client one-line"></div>
-                            </div>
-                            <div class="info resource-info">
-                                <div class="label">Resource:</div>
-                                <div class="value resource one-line"></div>
-                                <div class="device-indicator text-color-700">(this device)</div>
-                            </div>
-                            <div class="info priority-info">
-                                <div class="label">Priority:</div>
-                                <div class="value priority"></div>
-                            </div>
-                        </div>
+            <div class="settings-block-wrap blocklist-info">
+                <div class="block-header">
+                    <span class="block-name">Blocked contacts</span>
+                </div>
+                <div class="blocklist-wrap">
+                    <div class="blocked-contacts">
+                        <div class="placeholder">No blocked contacts yet</div>
                     </div>
                 </div>
+            </div>
 
-                <div class="settings-block-wrap vcard">
+            <div class="settings-block-wrap groups-info">
+                <div class="block-header">
+                    <span class="block-name">Groups</span>
                 </div>
-
-                <div class="settings-block-wrap server-info">
-                    <div class="block-header">
-                        <span class="block-name">Server capabilities</span>
-                    </div>
-                    <div class="capabilities-wrap">
-                        <div class="capabilities">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-block-wrap blocklist-info">
-                    <div class="block-header">
-                        <span class="block-name">Blocked contacts</span>
-                    </div>
-                    <div class="blocklist-wrap">
-                        <div class="blocked-contacts">
-                            <div class="placeholder">No blocked contacts yet</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-block-wrap groups-info">
-                    <div class="block-header">
-                        <span class="block-name">Groups</span>
-                    </div>
-                    <div class="groups-wrap">
-                        <div class="groups">
-                        </div>
+                <div class="groups-wrap">
+                    <div class="groups">
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="settings-block-wrap existing-group-chats-info hidden">
+        <div class="block-header">
+            <span class="block-name">Existing group chats</span>
+        </div>
+        <div class="find-existing-chats-by-domain search-form panel-head">
+            <i class="search-icon mdi mdi-20px mdi-magnify"></i>
+            <input type="text" name="search-chats-by-domain " class="search-input simple-input-field" tabindex="1" placeholder="Search existing chats by domain">
+            <span class="errors"></span>
+        </div>
+        <div class="groupchats-wrap">
+            <div class="groupchats">
+            </div>
+        </div>
+    </div>
+</div>

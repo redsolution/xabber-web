@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16px"
+   height="16px"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="svg3394"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="Groupchat16gr.svg">
+  <metadata
+     id="metadata3412">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Xabber/Web/Groupchat16</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     id="namedview3410"
+     showgrid="false"
+     inkscape:zoom="57.4375"
+     inkscape:cx="8"
+     inkscape:cy="8"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Icon/Groupchat" />
+  <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+  <title
+     id="title3396">Xabber/Web/Groupchat16</title>
+  <desc
+     id="desc3398">Created with Sketch.</desc>
+  <defs
+     id="defs3400">
+    <path
+       d="M10.500501,8 C11.3287776,8 11.995,7.328 11.995,6.5 C11.995,5.672 11.3287776,5 10.500501,5 C9.67222445,5 9,5.672 9,6.5 C9,7.328 9.67222445,8 10.500501,8 Z M6.5,7 C7.33,7 7.995,6.33 7.995,5.5 C7.995,4.67 7.33,4 6.5,4 C5.67,4 5,4.67 5,5.5 C5,6.33 5.67,7 6.5,7 Z M10.5,9 C9.66818182,9 8,9.46 8,10.375 L8,10.9989178 L13,10.9989178 L13,10.375 C13,9.46 11.3318182,9 10.5,9 Z M6.50474946,7.99186821 C4.77490105,7.99186821 3,8.585 3,9.75 L3,11 L7,11 L7,10 C7,9.24841871 7.73828683,8.72461975 8.70884076,8.35916117 C8.08932051,8.04219075 6.85693708,7.99186821 6.50474946,7.99186821 Z"
+       id="path-1" />
+  </defs>
+  <g
+     id="Xabber/Web/Groupchat16"
+     stroke="none"
+     stroke-width="1"
+     fill="none"
+     fill-rule="evenodd">
+    <g
+       id="Icon/Groupchat">
+      <circle
+         id="Oval"
+         fill="#388E3C"
+         cx="8"
+         cy="8"
+         r="8"
+         style="fill:#2e7d32;fill-opacity:1" />
+      <mask
+         id="mask-2"
+         fill="white">
+        <use
+           xlink:href="#path-1"
+           id="use3407" />
+      </mask>
+      <use
+         id="Shape"
+         fill="#FFFFFF"
+         fill-rule="nonzero"
+         xlink:href="#path-1"
+         style="fill:#eeeeee;fill-opacity:1" />
+    </g>
+  </g>
+</svg>

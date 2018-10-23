@@ -5,19 +5,28 @@
         <span>Xabber Login</span>
     </div>
     <div class="modal-content">
-        <div class="row login-form-field">
-            <div class="input-field">
-                <input id="username" type="text" name="username">
-                <label for="username">Xabber username or email</label>
-                <span class="errors fixed"></span>
+        <div class="row account-field">
+            <div class="multiple-acc">
+                <div class="account-dropdown-wrap">
+                    <div class="dropdown-button" data-activates="select-account-for-add-contact">
+                        <div class="account-item-wrap">
+                        </div>
+                        <div class="caret">
+                            <i class="mdi mdi-20px mdi-menu-down"></i>
+                        </div>
+                    </div>
+                    <div id="select-account-for-add-contact" class="dropdown-content noselect">
+                    </div>
+                </div>
             </div>
-            <div class="input-field">
-                <input id="password" type="password" name="password">
-                <label for="password">Password</label>
-                <span class="errors fixed"></span>
+            <div class="single-acc">
+                <div class="dropdown-button">
+                    <div class="account-item-wrap">
+                    </div>
+                </div>
             </div>
         </div>
-        {[ if (USE_SOCIAL_AUTH) { ]}
+
         <div class="row social-auth-wrap">
             <div class="social-header">
                 <div class="divider"></div>
@@ -33,15 +42,15 @@
                 <div class="btn-social twitter-color" data-provider="twitter">
                     <i class="mdi mdi-28px mdi-twitter"></i>
                 </div>
-                <div class="btn-social github-color" data-provider="github">
-                    <i class="mdi mdi-28px mdi-github-circle"></i>
+                <div class="btn-social xabber-color" data-provider="email">
+                    <i class="mdi mdi-28px mdi-at"></i>
                 </div>
             </div>
         </div>
-        {[ } ]}
+
     </div>
     <div class="modal-footer">
-        <button class="btn-flat btn-main btn-add">Log in</button>
+        <!--<button class="btn-flat btn-main btn-add">Log in</button>-->
         <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
     </div>
 </div>

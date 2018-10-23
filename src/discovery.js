@@ -101,7 +101,44 @@ define("xabber-discovery", function () {
                     'var': namespace,
                     from: from
                 });
+                if (namespace === Strophe.NS.AUTH_TOKENS) {
+                    self.account.settings_right.getAllXTokens();
+                    if (self.account.get('x_token'))
+                        if ((self.account.get('x_token').token) && (moment(moment.now()).startOf('seconds').format('x') < self.account.get('x_token').expire*1000))
+                            return;
+                    self.getXToken();
+                }
             });
+        },
+
+        getXToken: function () {
+            var iq = $iq({
+                from: this.account.get('jid'),
+                type: 'set',
+                to: Strophe.getDomainFromJid(this.account.get('jid'))
+            }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
+                .c('client').t(xabber.get('client_name')).up()
+                .c('os').t(navigator.platform);
+            this.account.sendIQ(iq,
+                function (callback_iq) {
+                var token = $(callback_iq).find('token').text(),
+                    expires_at = $(callback_iq).find('expire').text(),
+                    token_uid = $(callback_iq).find('token-uid').text();
+                    this.account.save('auth_type', 'x-token');
+                    this.account.save('x_token', {token: token, expire: expires_at, token_uid: token_uid });
+                    this.account.save('password', null);
+                    this.connection.x_token = {token: token, expire: expires_at, token_uid: token_uid };
+                    this.connection.pass = token;
+                    this.connection._sasl_data["server-signature"] = null;
+                    /*this.account.deactivate();
+                    this.account.activate();*/
+                    this.account.session.set('deactivate', 'set_off');
+                    this.connection.disconnect();
+                    setTimeout(function () {
+                        this.account.connect();
+                    }.bind(this), 1000);
+                    this.account.settings_right.getAllXTokens();
+                }.bind(this));
         },
 
         onFeatureAdded: function (feature) {
