@@ -1127,7 +1127,7 @@ define("xabber-contacts", function () {
                 utils.dialogs.ask("User messages retraction", "Do you want to delete all messages of " + (this.member.nickname || this.member.jid || this.member.id) + " in this groupchat?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         if (this.member.id) {
-                            var group_chat = this.account.chats.getChat(this.model);
+                            var group_chat = this.account.chats.getChat(this.model.model);
                             group_chat.retractMessagesByUser(this.member.id);
                         }
                     }
@@ -1261,6 +1261,7 @@ define("xabber-contacts", function () {
                 "click .btn-escape": "openChat",
                 "click .btn-chat": "openChat",
                 "click .btn-join": "joinChat",
+                "click .btn-delete-all-messages": "retractAllMessages",
                 "click .btn-delete": "deleteContact",
                 "click .group-chat-member": "editMemberRights",
                 "click .btn-group-info-edit": "updateGroupChatParams",
@@ -1695,7 +1696,15 @@ define("xabber-contacts", function () {
                         this.openChat();
                     }
                 }.bind(this));
-            }
+            },
+
+            retractAllMessages: function () {
+                var group_chat = this.account.chats.getChat(this.model);
+                utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        group_chat.retractAllMessages();
+                    }
+                }.bind(this));}
         });
 
         xabber.GroupInfo = xabber.BasicView.extend({

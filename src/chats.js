@@ -344,7 +344,6 @@ define("xabber-chats", function () {
             }
         },
 
-
         resetUnread: function () {
             var unread = this.get('unread');
             if (unread > 0) {
@@ -522,8 +521,15 @@ define("xabber-chats", function () {
             var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
                 .c('retract-all', {xmlns: Strophe.NS.GROUP_CHAT + '#history'});
             this.account.sendIQ(iq_retraction, function (iq_response) {
-
-            }.bind(this));
+                var all_messages = this.messages.models;
+                $(all_messages).each(function (idx, msg) {
+                    this.item_view.content.removeMessage(msg);
+                }.bind(this));
+            }.bind(this),
+                function (error) {
+                    if ($(error).find('not-allowed').length)
+                        utils.dialogs.error("You have no permission to clear message archive");
+                }.bind(this));
         },
 
         getAllMessageRetractions: function () {
@@ -2921,6 +2927,7 @@ define("xabber-chats", function () {
                     if (msg_item) {
                         msg_item.set('is_unread', false);
                         groupchat.item_view.content.removeMessage(msg_item);
+                        groupchat.item_view.updateLastMessage(groupchat.last_message);
                     }
                 }
                 if ($message.find('retract-user').length) {
@@ -2928,11 +2935,21 @@ define("xabber-chats", function () {
                         retracted_user_id = $retracted_user_msgs.attr('id'),
                         groupchat_contact = this.account.contacts.get(msg_from),
                         groupchat = this.account.chats.getChat(groupchat_contact),
-                        msg_item = groupchat.messages.find(msg => msg.get('from_id') == retracted_user_id);
-                    groupchat.item_view.content.removeMessage(msg_item);
+                        msg_item = groupchat.messages.filter(msg => msg.get('from_id') == retracted_user_id);
+                    if (msg_item)
+                        $(msg_item).each(function (idx, item) {
+                            groupchat.item_view.content.removeMessage(item);
+                        }.bind(this));
+                    groupchat.item_view.updateLastMessage(groupchat.last_message);
                 }
                 if ($message.find('retract-all').length) {
-
+                    var groupchat_contact = this.account.contacts.get(msg_from),
+                        groupchat = this.account.chats.getChat(groupchat_contact),
+                        all_messages = groupchat.messages.models;
+                    $(all_messages).each(function (idx, item) {
+                        groupchat.item_view.content.removeMessage(item);
+                    }.bind(this));
+                    groupchat.item_view.content.head.closeChat();
                 }
                 if ($message.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH + '"]').length) {
                     var code =  $message.find('confirm').attr('id');
