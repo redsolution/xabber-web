@@ -48,7 +48,6 @@ define([
                 return;
             }
             if (list.length === 1 && list[0] === x) {
-                // TODO: parse media link
                 $obj.html(getHyperLink(x));
             } else {
                 for (i = 0; i < list.length; i++) {

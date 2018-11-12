@@ -94,6 +94,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
         Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
+        Strophe.addNamespace('RETRACTIONS', 'http://xabber.com/protocol/retract');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
         Strophe.addNamespace('UNIQUE', 'http://xabber.com/protocol/unique');

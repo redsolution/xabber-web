@@ -1982,23 +1982,22 @@ input#new_chat_jid {
     height: 18px;
 }
 
-.group-chat-members .member-info {
+.group-chat-member .member-info {
     position: absolute;
-    top: 0px;
     width: 70%;
 }
 
-.group-chat-members .member-item .role-star {
+.group-chat-member .member-item .role-star {
     width: 20px;
     height: 20px;
     position: absolute;
     right: 8px;
-    top: 18px;
+    top: 12px;
     color: #616161;
 }
 
 .invited-user:hover,
-.group-chat-members:hover,
+.group-chat-member:hover,
 .blocked-user:hover{
     background: none !important;
 }
@@ -2007,64 +2006,47 @@ input#new_chat_jid {
     background-color: #EEEEEE;
 }
 
-.group-chat-members .member-info .jid,
-.group-chat-members .member-info .id {
-    line-height: 14px;
-    font-size: 12px;
-    color: #9E9E9E;
-}
-
 .edit-rights .member-info-item .nickname {
     cursor: pointer;
 }
 
 .edit-rights .member-info-item #edit-nickname {
-    height: 17px;
-    margin-bottom: 2px;
+    height: 14px;
+    margin: 0px;
+    padding-bottom: 1px;
     border-bottom: 1px dotted #9E9E9E;
+    font-size: 14px;
 }
 
 .edit-rights .member-info-item #edit-nickname:focus {
     box-shadow: none !important;
 }
 
-.edit-rights .member-item .circle-avatar {
-    cursor: pointer;
+.edit-rights .group-chat-member .member-info {
+    top: 5px;
 }
 
-.chat-item.group-chat-members,
-.chat-item.invited-user,
-.chat-item.blocked-user {
+.list-item.group-chat-member,
+.list-item.invited-user,
+.list-item.blocked-user {
+    position: relative;
     padding: 0 !important;
 }
 
-.chat-item.group-chat-members .member-item {
-    padding: 0px 7px 0px 65px;
-    height: 56px;
+.list-item.group-chat-member .member-item {
+    padding: 0px 7px 0px 62px;
+    height: 44px;
 }
 
-.chat-item.invited-user .member-item,
-.chat-item.blocked-user .member-item,
-.edit-rights .member-item {
-    padding: 18px 7px 11px 65px !important;
-    height: 56px;
+.list-item.invited-user .member-item,
+.list-item.blocked-user .member-item {
+    padding: 14px 7px 14px 62px !important;
 }
 
 .invited-user .member-item p.one-line,
 .blocked-user .member-item p.one-line {
-    width: calc(100% - 44px);
-}
-
-.members-list-wrap {
-    position: relative;
-    min-height: 40px;
-    max-height: calc(56px * 8);
-    overflow-y: auto;
-}
-
-.chat-members-modal .members-list-wrap .preloader-wrapper {
-    top: 10px;
-    left: 230px;
+    width: calc(100% - 40px);
+    margin: 0;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */
@@ -2195,7 +2177,7 @@ input#new_chat_jid {
     height: 40px;
 }
 
-.chat-item p, .group-chat-members .member-info .jid {
+.chat-item p, .group-chat-member .member-info .jid {
     margin: 0;
 }
 
@@ -2426,6 +2408,14 @@ input#new_chat_jid {
 
 .xabber-account-menu {
     top: 0px !important;
+    left: initial !important;
+    right: 18px !important;
+    min-width: 200px !important;
+    z-index: 500;
+}
+
+.group-chat-lists-menu {
+    top: 4px !important;
     left: initial !important;
     right: 18px !important;
     min-width: 200px !important;
@@ -4329,6 +4319,10 @@ input[type='range'].voice-message-volume:focus {
     height: 32px;
 }
 
+.account-settings-panel .existing-group-chats-info .groupchats-waiting {
+    margin: 0 32px;
+}
+
 .account-settings-panel .existing-group-chats-info .groupchats {
     width: 100%;
     padding: 12px 24px 11px;
@@ -4721,6 +4715,19 @@ input[type='range'].voice-message-volume:focus {
     height: 20px;
 }
 
+.preloader-17px {
+    width: 17px;
+    height: 17px;
+}
+
+.preloader-17px .spinner-layer {
+    border-color: #212121;
+}
+
+.preloader-17px .circle {
+    border-width: 2px;
+}
+
 .preloader-20px .spinner-layer {
     border-color: #212121;
 }
@@ -4917,6 +4924,10 @@ input[type='range'].voice-message-volume:focus {
     padding-top: 5px;
 }
 
+.edit-badge .badge-text .emoji {
+    margin-bottom: 2px;
+}
+
 .panel-footer .btn-main {
     float: left;
     margin: 0 10px;
@@ -4949,31 +4960,36 @@ input[type='range'].voice-message-volume:focus {
     color: #212121;
 }
 
-.contact-details-panel .members-lists .block-name {
+/*.contact-details-panel .members-lists .block-name {
     margin-right: 5px;
-}
+}*/
 
-.contact-details-panel .hidden-list {
+/*.contact-details-panel .hidden-list {
     color: #9E9E9E !important;
 }
 
 .contact-details-panel .hidden-list:hover {
     color: #616161 !important;
     cursor: pointer;
-}
+}*/
 
 .contact-details-panel .members-lists {
     cursor: pointer;
 }
 
+.contact-details-panel .members-lists .btn-more {
+    display: inline-block;
+    height: 21px;
+}
+
 .contact-details-panel .chat-members-info .errors {
-    color: #c62828;
+    color: #9E9E9E;
     margin: 0px 24px;
 }
 
-.contact-details-panel .members-lists:hover .hidden-list {
+/*.contact-details-panel .members-lists:hover .hidden-list {
     display: inline-block;
-}
+}*/
 
 .contact-details-panel .groups {
     position: relative;
@@ -5024,52 +5040,82 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .groupchat-details-panel .chat-members-info .members-list-wrap {
+    position: relative;
     min-height: 30px;
     max-height: calc(100% - 40px);
 }
 
-.group-chat-members .member-info .nickname,
-.group-chat-members .member-info .badge {
+.group-chat-member .member-info .nickname,
+.group-chat-member .member-info .badge {
     display: inline-block;
-    line-height: 16px;
     vertical-align: bottom;
 }
 
-.group-chat-members .member-info .last-seen {
-    font-size: 12px;
-    line-height: 14px;
+.group-chat-member .member-info .jid,
+.group-chat-member .member-info .id,
+.group-chat-member .member-info .last-seen {
     color: #757575;
+    margin-top: 2px;
+    font-size: 11px;
 }
 
-.group-chat-members .member-info .nickname {
+.edit-rights .group-chat-member .member-info .jid,
+.edit-rights .group-chat-member .member-info .id {
+    color: #BDBDBD;
+}
+
+.group-chat-member .last-seen[data-present=true] {
+    color: #388E3C;
+}
+
+.group-chat-member .member-info .nickname {
     max-width: 76%;
 }
 
-.group-chat-members .member-info .badge {
+.group-chat-member .member-info .badge {
     margin-left: 4px;
-    max-width: 20%;
+    max-width: 22%;
     font-size: small;
+}
+
+.member-info .badge .emoji {
+    margin-bottom: 2px;
 }
 
 .groupchat-details-panel .left-column, .groupchat-details-panel .right-column, .block-wrap.groups-block-wrap {
     height: 100%;
 }
 
-.groupchat-details-panel .members-list-wrap .preloader-wrapper {
+.groupchat-details-panel .preloader-wrapper {
     display: inline-block;
-    left: 30px;
+    float:right;
 }
 
+.edit-rights .member-item .circle-avatar {
+    cursor: pointer;
+}
+
+.edit-rights .circle-avatar input {
+    position: absolute;
+    bottom: 0;
+}
+
+.edit-rights .member-item .circle-avatar ,
 .groupchat-details-panel .members-list-wrap .circle-avatar {
+    position: absolute;
     left: 18px;
+    top: 6px;
+    width: 32px;
+    height: 32px;
 }
 .groupchat-details-panel .member-item .member-info {
     width: calc(100% - 96px);
-    top: 0px;
+    height: auto;
+    top: 5px;
 }
-.groupchat-details-panel .members-list-wrap .member-item {
+/*.groupchat-details-panel .members-list-wrap .member-item {
     padding: 0px 8px 0px 68px !important;
-}
+}*/
 .groupchat-details-panel .members-list-wrap .member-item:hover {
     background-color: transparent;
 }
@@ -5077,14 +5123,22 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .member-item .revoke-invitation,
 .groupchat-details-panel .member-item .unblock-user {
     position: absolute;
-    right: 24px;
+    right: 8px;
     line-height: 20px;
-    top: 17px;
+    top: 10px;
     color: #424242;
 }
 
-.groupchat-details-panel .members-list-wrap .group-chat-members {
-    font-size: 14px;
+
+.list-item.invited-user,
+.list-item.blocked-user,
+.groupchat-details-panel .members-list-wrap .group-chat-member {
+    font-size: 12px;
+    line-height: 16px;
+    height: 44px;
+    position: relative;
+    padding: 11px 7px 11px 60px;
+    cursor: pointer;
 }
 
 .groupchat-details-panel .members-list-wrap .permission-list-item,
@@ -5377,6 +5431,8 @@ input[type='range'].voice-message-volume:focus {
 .edit-rights .modal-header {
     height: auto !important;
     padding: 8px;
+    font-size: 12px;
+    line-height: 16px;
 }
 
 .forward-panel-modal .panel-header,

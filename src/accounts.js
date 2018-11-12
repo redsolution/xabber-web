@@ -245,6 +245,7 @@ define("xabber-accounts", function () {
                         }
                     }.bind(this));
                 },
+
                 authXabberAccount: function (callback) {
                     this.requestPassword(function(data) {
                         this.xabber_auth = { api_jid: data.api_jid, request_id: data.request_id };
@@ -1159,6 +1160,8 @@ define("xabber-accounts", function () {
                 });
                 this.$('.account-color .dropdown-content').hide();
                 this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
+                this.$('.existing-group-chats-info').addClass('hidden');
+                this.$('.panel-content-wrap').removeClass('hidden');
                 return this;
             },
 
@@ -1195,7 +1198,13 @@ define("xabber-accounts", function () {
             },
 
             getExistingGroupchats: function (domain) {
-                this.model.connection.disco.items((domain || constants.XMPP_SERVER_GROUPCHATS), null, this.getGroupchatService.bind(this));
+                this.model.settings_right.$('.groupchats-waiting .preloader-wrapper').addClass('active');
+                this.model.settings_right.$('.existing-group-chats-info .groupchats').html("");
+                this.model.connection.disco.items((domain || constants.XMPP_SERVER_GROUPCHATS), null, this.getGroupchatService.bind(this), this.endFinding.bind(this));
+            },
+
+            endFinding: function () {
+                this.model.settings_right.$('.groupchats-waiting .preloader-wrapper').removeClass('active');
             },
 
             getGroupchatService: function (stanza) {
@@ -1205,12 +1214,13 @@ define("xabber-accounts", function () {
                         this.getGroupchatFeature(jid);
                     }
                 }.bind(this));
+                this.endFinding();
             },
 
             getGroupchatFeature: function (jid) {
                 var iq = $iq({type: 'get', to: jid})
                     .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
-                this.model.sendIQ(iq, this.getServerInfo.bind(this));
+                this.model.sendIQ(iq, this.getServerInfo.bind(this), this.endFinding.bind(this));
             },
 
             getServerInfo: function (stanza) {
@@ -1224,7 +1234,6 @@ define("xabber-accounts", function () {
             },
 
             getChatsFromSever: function (jid) {
-                this.model.settings_right.$('.existing-group-chats-info .groupchats').html("");
                 var iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
                 this.model.sendIQ(iq, function (stanza) {
                     $(stanza).find('query item').each(function (idx, item) {
@@ -1242,12 +1251,13 @@ define("xabber-accounts", function () {
             joinExistingChat: function (ev) {
                 var $target = $(ev.target).closest('.existing-chat-wrap'),
                     group_jid = $target.data('jid'),
+                    group_name = $target.data('name'),
                     contact = this.model.contacts.mergeContact(group_jid);
                 contact.set('group_chat', true);
                 contact.pres('subscribed');
                 contact.pres('subscribe');
-                contact.pushInRoster({name: group_jid}, function () {
-                    contact.showDetails();
+                contact.pushInRoster({name: group_name}, function () {
+                    contact.trigger("open_chat", contact);
                 }.bind(this));
             },
 

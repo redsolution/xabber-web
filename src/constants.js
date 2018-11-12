@@ -106,6 +106,7 @@ var constants = {
         ROSTER_RIGHT_ACCOUNT_ITEM:      38,
         ROSTER_LEFT_ACCOUNT_ITEM:       40,
         CONTACT_RIGHT_ITEM:             32,
+        GROUPCHAT_MEMBER_ITEM:          32,
         CONTACT_LEFT_ITEM:              32,
         CONTACT_BLOCKED_ITEM:           32,
         CONTACT_DETAILS:                96,

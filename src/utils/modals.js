@@ -24,6 +24,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
             } else {
                 this.throw();
             }
+            document.addEventListener("keyup", this.clickHandler.bind(this));
             return this.closed.promise();
         },
 
@@ -75,7 +76,14 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         },
 
         complete: function (value) {
+            document.removeEventListener("keyup", this.clickHandler);
             this.$modal.trigger('modal_close', {value: value});
+        },
+
+        clickHandler: function (ev) {
+            if (ev.keyCode === 13) {
+                this.$modal.find('.modal-footer button.ok-button').click();
+            }
         }
     });
 
@@ -121,6 +129,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         dialog_options: dialog_options
                     });
                 }, {use_queue: true});
+
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
                     dialog.$modal.find('.img-from-clipboard').get(0).src = dialog_options.blob_image_from_clipboard;

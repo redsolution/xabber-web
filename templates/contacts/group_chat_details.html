@@ -16,23 +16,41 @@
         <div class="left-column">
             <div class="block-wrap chat-members-info">
                 <div class="block-header members-lists">
-                    <span class="block-name active-list chat-members-list">Chat members</span>
+                    <!--<span class="block-name active-list chat-members-list">Chat members</span>
                     <span class="block-name hidden-list invited-list">Invited</span>
-                    <span class="block-name hidden-list blocked-list">Blocked</span>
-                </div>
-                <div class="members-list-wrap"><div class="owners"></div><div class="admins"></div><div class="members"></div><div class="preloader-wrapper preloader-20px active">
-                    <div class="spinner-layer">
-                        <div class="circle-clipper left">
-                            <div class="circle"></div>
+                    <span class="block-name hidden-list blocked-list">Blocked</span>-->
+                    <div class="list-members-wrap" data-list="chat-members" data-activates="chat-members-input-list">
+                        <span class="block-name selected-list">Chat members</span>
+                        <div class="chat-tool btn-more dropdown-button">
+                            <i class="mdi mdi-20px mdi-chevron-down"></i>
                         </div>
-                        <div class="gap-patch">
-                            <div class="circle"></div>
+                        <div class="preloader-wrapper preloader-17px active">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="circle-clipper right">
-                            <div class="circle"></div>
-                        </div>
+                        <ul id="chat-members-input-list" class="group-chat-lists-menu dropdown-content noselect">
+                            <li class="block-name chat-members-list">
+                                <span class="one-line">Chat members</span>
+                            </li>
+                            <li class="block-name invited-list">
+                                <span class="one-line">Invited</span>
+                            </li>
+                            <li class="block-name blocked-list">
+                                <span class="one-line">Blocked</span>
+                            </li>
+                        </ul>
                     </div>
-                </div></div>
+                </div>
+                <div class="members-list-wrap"><div class="owners"></div><div class="admins"></div><div class="members"></div></div>
             </div>
         </div>
 
