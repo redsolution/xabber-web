@@ -2577,6 +2577,10 @@ input#new_chat_jid {
     padding: 0 112px 0 64px;
 }
 
+.forwarded .msg-wrap {
+    padding: 0 12px 0 8px;
+}
+
 .chat-message .chat-msg-author-wrap,
 .fwd-message .fwd-msg-author-wrap {
     display: none;
@@ -2637,6 +2641,11 @@ input#new_chat_jid {
     line-height: 16px;
     color: #212121;
     white-space: pre-wrap;
+}
+
+.chat-message .fwd-msgs-block {
+    border-left: 2px solid rgba(158, 158, 158, .6);
+    padding-left: 8px;
 }
 
 .chat-message .chat-msg-content b {
@@ -3127,6 +3136,7 @@ img.fwd-img-preview {
 .fwd-message {
     position: relative;
     width: 100%;
+    margin: 5px 0 0 0;
 }
 
 .fwd-message .fwd-left-side {
