@@ -39,6 +39,7 @@
             </div>
         </div>
         <div class="send-area">
+            <button class="btn-save btn-flat btn-main text-color-700 hidden">Save</button>
             <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>
             <div class="attach attach-voice-message" title="Send voice message">
                     <i class="mdi mdi-28px mdi-microphone text-color-700 hover-text-color-500"></i>
@@ -48,8 +49,23 @@
     <div class="message-actions-panel noselect hidden">
         <button class="forward-message btn btn-main-filled ground-color-700">Forward<span class="counter"></span></button>
         <button class="reply-message btn btn-main-filled ground-color-700">Reply</button>
-        <button class="copy-message btn-flat btn-main text-color-700">Copy</button>
+        <button class="btn-more-actions btn-flat btn-main text-color-700 dropdown-button" data-activates="message-actions-more"><i class="mdi mdi-dots-horizontal mdi-28"></i></button>
+        <!--<button class="copy-message btn-flat btn-main text-color-700">Copy</button>
         <button class="delete-message btn-flat btn-main text-color-700">Delete</button>
-        <button class="pin-message btn-flat btn-main text-color-700">Pin</button>
+        <button class="pin-message btn-flat btn-main text-color-700">Pin</button>-->
         <button class="close-message-panel btn-flat btn-main right">Cancel</button>
+        <ul id="message-actions-more" class="message-actions-menu dropdown-content noselect">
+            <li class="copy-message">
+                <span class="one-line">Copy</span>
+            </li>
+            <li class="delete-message">
+                <span class="one-line">Delete</span>
+            </li>
+            <li class="pin-message">
+                <span class="one-line">Pin</span>
+            </li>
+            <li class="edit-message">
+                <span class="one-line">Edit</span>
+            </li>
+        </ul>
     </div>

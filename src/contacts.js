@@ -393,7 +393,6 @@ define("xabber-contacts", function () {
                     var handler = this.account.connection.addHandler(function (message) {
                         var $msg = $(message);
                         if ($msg.find('result').attr('queryid') === queryid) {
-                            this.set('pinned_message', $msg);
                             this.parsePinnedMessage($msg, pinned_msg_elem);
                         }
                         return true;
@@ -416,33 +415,30 @@ define("xabber-contacts", function () {
             },
 
             parsePinnedMessage: function ($message, pinned_msg_elem) {
-                if ($message === undefined) {
-                    pinned_msg_elem.html("");
-                    pinned_msg_elem.siblings('.chat-content').css({'height':'100%'});
-                    return;
+                if (!$message) {
+                    this.renderPinnedMessage(null, pinned_msg_elem);
                 }
                 else {
-                    var $msg = $message.find('message').first(),
-                        this_chat = this.account.chats.get(this.hash_id),
-                        message_from_stanza = this_chat.messages.createFromStanza($msg, {pinned_message: true}),
-                        pinned_msg_elem = this_chat.item_view.content.$pinned_message,
-                        $forwarded_msg = $msg.find('forwarded'), msg_author, msg_text, msg_timestamp, fwd_msg_author;
-                        msg_author = $msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').first().find('nickname').text() ||
-                            $msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').first().find('jid').text() ||
-                            $msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').first().find('id').text();
-                        msg_text = message_from_stanza.message;
-                        msg_timestamp = utils.pretty_datetime($message.find('delay').last().attr('stamp'));
-                    if ($forwarded_msg.length > 0) {
-                        fwd_msg_author = $forwarded_msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').find('nickname').text() ||
-                            $forwarded_msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').find('jid').text() ||
-                            $forwarded_msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').find('id').text();
-                        if (!fwd_msg_author)
-                            fwd_msg_author = ($forwarded_msg.find('message').attr('from') == this.account.get('jid')) ? this.account.get('name') : this.account.contacts.mergeContact(Strophe.getBareJidFromJid($forwarded_msg.find('message').attr('from'))).get('name');
-                        msg_text = _.escape($forwarded_msg.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').find('body').text()) || _.escape($forwarded_msg.find('body').text());
-                    }
+                    var $msg = $message.find('result message').first();
+                    if (this.get('pinned_message'))
+                        if (this.get('pinned_message').archive_id === $msg.find('stanza-id').attr('id'))
+                            return;
+                    var message = this.account.chats.receiveChatMessage($message, {pinned_message: true});
+                    this.set('pinned_message', message);
+                    this.renderPinnedMessage(message, pinned_msg_elem);
+                }
+            },
 
-                    var images = message_from_stanza.images,
-                        files = message_from_stanza.files;
+            renderPinnedMessage: function (message, pinned_msg_elem) {
+                if (!message) {
+                    pinned_msg_elem.html("");
+                    pinned_msg_elem.siblings('.chat-content').css({'height':'100%'});
+                }
+                else {
+                    var images = message.get('images'),
+                        files = message.get('files'),
+                        fwd_message = message.get('forwarded_message'),
+                        msg_text = fwd_message ? _.escape(fwd_message.get('message')) : _.escape(message.get('message'));
                     if (images) {
                         if (images.length == 1)
                             msg_text = '<span class=text-color-500>Image</span>';
@@ -456,11 +452,14 @@ define("xabber-contacts", function () {
                             msg_text = '<span class=text-color-500>' + files.length + ' files</span>';
                     }
 
-                    var pinned_msg = {
+                    var chat_content = this.account.chats.get(this.hash_id).item_view.content,
+                        is_scrolled = chat_content.isScrolledToBottom(),
+                        msg_author = message.get('from_nickname') || message.get('from_jid') || message.get('from_id'),
+                        pinned_msg = {
                             author: msg_author,
-                            time: msg_timestamp,
+                            time: utils.pretty_datetime(message.get('time')),
                             message: msg_text,
-                            fwd_author: fwd_msg_author
+                            fwd_author: fwd_message ? (fwd_message.get('from_nickname') || fwd_message.get('from_jid') || fwd_message.get('from_id')) : null
                         },
                         pinned_msg_html = $(templates.pinned_message(pinned_msg));
                     pinned_msg_elem.html(pinned_msg_html).emojify('.chat-msg-content', {emoji_size: 18});
@@ -468,7 +467,9 @@ define("xabber-contacts", function () {
                     pinned_msg_elem.siblings('.chat-content').css({
                         'height': 'calc(100% - ' + height_pinned_msg + 'px)'
                     });
-                    pinned_msg_elem.attr('data-msgid', $message.find('message').attr('id'));
+                    if (is_scrolled)
+                        chat_content.scrollToBottom();
+                    pinned_msg_elem.attr('data-msgid', message.msgid);
                 }
             },
 
