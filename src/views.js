@@ -502,6 +502,7 @@ define("xabber-views", function () {
             "click .chats":                 "showChats",
             "click .group-chats":           "showGroupChats",
             "click .contacts":              "showContacts",
+            "click .search":                "showSearch",
             "click .archive-chats":         "showArchive",
             "click .settings":              "showSettings",
             "click .add-variant.contact":   "showAddContactView",
@@ -554,7 +555,7 @@ define("xabber-views", function () {
             }
             this.$('.toolbar-item').removeClass('active');
             if (_.contains(['all-chats', 'contacts',
-                            'settings', 'about'], name)) {
+                            'settings', 'search', 'about'], name)) {
                 this.$('.toolbar-item.'+name).addClass('active');
             }
         },
@@ -584,6 +585,10 @@ define("xabber-views", function () {
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_archive_chats');
+        },
+
+        showSearch: function (ev) {
+            xabber.body.setScreen('search');
         },
 
         showContacts: function (ev) {

@@ -207,6 +207,16 @@ input[type=checkbox].filled-in:checked + label:after {
     border-radius: 2px !important;
 }
 
+.ps-theme-existing-chats-list.ps-container > .ps-scrollbar-y-rail {
+    width: 0px !important;
+}
+
+.ps-theme-existing-chats-list.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+    width: 0px !important;
+    right: 0 !important;
+    border-radius: 2px !important;
+}
+
 /* ------------------------------------------------------ */
 
 .hidden {
@@ -873,7 +883,7 @@ body {
 
 .toolbar .accounts-wrap {
     position: absolute;
-    top: 350px;
+    top: 398px;
     bottom: 48px;
     width: 100%;
 }
@@ -1268,6 +1278,275 @@ body {
 }
 .login-panel-footer .redsolution-src .red-part {
     color: #d32f2f;
+}
+/* ------------- SEARCHING --------------- */
+
+.searching-main {
+    width: 100%;
+    height: 100%;
+}
+
+.searching-main .searching-panel {
+    width: calc(42% - 1px);
+    box-shadow: 0 0 1px 0 rgba(0,0,0,0.25);
+}
+
+.searching-main .search-form {
+    width: calc(100% - 64px);
+    display: inline-block;
+    border: none;
+}
+.searching-main .search-form .account-indicator {
+    height: 56px
+}
+
+.searching-main .search-form input.simple-input-field {
+    padding-right: 24px;
+}
+
+.searching-panel .btn-search {
+    float: right;
+    margin: 12px 24px 18px 0;
+}
+
+#select-searching-properties .input-field {
+    width: calc(100% - 144px);
+    display: inline-block;
+    margin: 0 24px 0 0;
+    float: right;
+    height: 56px;
+    vertical-align: bottom;
+}
+
+#select-searching-properties .input-field input {
+    height: 23px;
+    margin-top: 15px;
+}
+
+.searching-panel .account-as-text {
+    margin: 0 24px 0 0;
+    color: #757575;
+    font-size: 16px;
+    float: right;
+}
+
+.searching-panel .searching-properties-field {
+    margin: 0px auto;
+    display: inline-block;
+    padding: 15px 20px 14px 20px;
+    color: #9E9E9E;
+    cursor: pointer;
+    float: right;
+    width: auto;
+    vertical-align: bottom;
+}
+
+.searching-main #select-searching-properties {
+    opacity: 1;
+    z-index: 999;
+    width: 42%;
+    top: 56px;
+    left: 0;
+    background-color: #fff;
+    margin: 0;
+    display: none;
+    position: absolute;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.searching-panel .account-field {
+    margin: 0px auto;
+    display: inline-block;
+    float: right;
+    width: calc(100% - 120px);
+    vertical-align: bottom;
+}
+
+.searching-main .account-field .account-dropdown-wrap {
+    position: relative;
+}
+
+.searching-main .account-field .dropdown-button {
+    position: relative;
+    width: 100%;
+    height: 56px;
+    padding-right: 44px;
+    cursor: pointer;
+}
+
+.searching-main .account-field .dropdown-content {
+    top: 0 !important;
+    width: calc(100% - 36px) !important;
+    left: -8px !important;
+}
+
+#select-searching-properties .property-name {
+    color: #9E9E9E;
+    position: relative;
+    margin: 15px 24px;
+    display: inline-block;
+    line-height: 26px;
+}
+
+.searching-main .account-field .dropdown-content .account-item-wrap:hover {
+    background-color: #EEEEEE;
+}
+
+.searching-main .account-field .dropdown-button .caret {
+    position: absolute;
+    top: 0;
+    right: 24px;
+    height: 100%;
+    padding: 16px 0px;
+    color: #212121;
+}
+
+.searching-main .account-field .dropdown-button:hover .caret {
+    color: #9E9E9E;
+}
+
+.searching-main .account-item-wrap {
+    position: relative;
+    width: 100%;
+    height: 56px;
+    padding: 19px 10px 8px 0;
+    cursor: pointer;
+}
+
+.searching-main #select-account-for-searching .account-item-wrap {
+    padding: 19px 10px 8px 8px;
+}
+
+.searching-main .account-item-wrap .circle-avatar {
+    position: absolute;
+    top: 9px;
+    left: 4px;
+    width: 36px;
+    height: 36px;
+}
+
+.searching-main .account-item-wrap .name {
+    max-width: 100%;
+    height: 16px;
+    font-size: 14px;
+    line-height: 16px;
+    color: #616161;
+}
+
+.searching-main .searching-result-wrap {
+    height: calc(100% - 56px);
+}
+
+.searching-main .searching-more {
+    border-top: 1px solid #EEEEEE;
+    float: right;
+    width: 58%;
+    height: 100%;
+    display: inline-block;
+}
+
+.searching-main .searching-more .block-header {
+    width: 100%;
+    height: 40px;
+    padding: 8px 24px 11px;
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.searching-main .searching-more .chat-properties-wrap {
+    position: relative;
+    width: 100%;
+    padding: 6px 0 6px 36px;
+}
+
+.searching-main .searching-more .details-icon {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: #9E9E9E;
+    fill: #9E9E9E;
+}
+
+.searching-main .searching-more .btn-join-chat {
+    float: left;
+    margin: 12px 24px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.searching-main .searching-more .info-wrap  {
+    position: relative;
+    width: 100%;
+    padding: 0 0 6px 36px;
+}
+
+.searching-more .info-wrap .value {
+    max-width: 100%;
+    height: 16px;
+    font-size: 14px;
+    line-height: 16px;
+    color: #616161;
+}
+
+.searching-more .info-wrap .label {
+    height: 14px;
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 300;
+    color: #9E9E9E;
+}
+
+
+.searching-main .searching-result-wrap .result-string,
+.searching-main .searching-result-wrap .preloader-wrapper {
+    margin: 12px;
+}
+
+.searching-main .searching-result-wrap .result-string {
+    color: #757575;
+    font-size: 12px;
+}
+
+.searching-main .searching-result-wrap .chats-list-wrap {
+    float: left;
+    width: 42%;
+    height: 100%;
+    border-right: 1px solid #EEEEEE;
+    display: inline-block;
+}
+
+.searching-result-wrap .existing-chat-wrap .circle-avatar {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    width: 32px;
+    height: 32px;
+
+}
+.searching-result-wrap .existing-chat-wrap {
+    display: block;
+    position: relative;
+    padding: 0;
+    cursor: pointer;
+}
+
+.searching-result-wrap .existing-chat-item {
+    padding: 8px 4px 8px 56px;
+    display: block;
+    vertical-align: middle;
+}
+
+.searching-result-wrap .existing-chat-item .name {
+    font-weight: 400;
+    line-height: 16px;
+    font-size: 14px;
+}
+
+.searching-result-wrap .existing-chat-item .jid {
+    color: #9E9E9E;
+    line-height: 16px;
+    font-size: 14px;
 }
 /* ------------- CONTACTS --------------- */
 
@@ -4319,7 +4598,7 @@ input[type='range'].voice-message-volume:focus {
     height: 32px;
 }
 
-.account-settings-panel .existing-group-chats-info .groupchats-waiting {
+/*.account-settings-panel .existing-group-chats-info .groupchats-waiting {
     margin: 0 32px;
 }
 
@@ -4381,7 +4660,7 @@ input[type='range'].voice-message-volume:focus {
     font-size: 12px;
     height: 28px;
     font-weight: 400;
-}
+}*/
 
 .account-color .current-color-name {
     float: left;

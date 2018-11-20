@@ -460,6 +460,7 @@ if ($) {
       hover: false,
       gutter: 0, // Spacing from edge
       belowOrigin: false,
+      closeOnClick: true,
       alignment: 'left'
     };
 
@@ -484,6 +485,8 @@ if ($) {
         options.gutter = origin.data('gutter');
       if (origin.data('beloworigin') !== undefined)
         options.belowOrigin = origin.data('beloworigin');
+      if (origin.data('closeOnClick') !== undefined)
+          options.closeOnClick = origin.data('closeOnClick');
       if (origin.data('alignment') !== undefined)
         options.alignment = origin.data('alignment');
     }

@@ -1956,7 +1956,7 @@ define("xabber-contacts", function () {
                 this.$('.invite-msg .invite-msg-text')
                     .text('User requests permission to add you to his contact list. If you accept, '+ this.model.get('jid') + ' will also be added to ' +  this.account.get('jid') + ' contacts');
                 this.model.on("change", this.update, this);
-                this.on("change: invite_message", this.onChangedInviteMessage, this);
+                this.on("change:invite_message", this.onChangedInviteMessage, this);
             },
 
             render: function (options) {
@@ -2023,7 +2023,7 @@ define("xabber-contacts", function () {
                 contact.acceptRequest();
                 this.changeInviteStatus();
                 contact.trigger('remove_invite', contact);
-                contact.showDetails('chats');
+                contact.showDetails('all-chats');
             },
 
             blockInvitation: function () {
@@ -3222,7 +3222,7 @@ define("xabber-contacts", function () {
             className: 'modal main-modal add-contact-modal',
             template: templates.add_contact,
             ps_selector: '.modal-content',
-            avatar_size: constants.AVATAR_SIZES.ACCOUNT_ITEM,
+            avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
             events: {
                 "click .account-field .dropdown-content": "selectAccount",

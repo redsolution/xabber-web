@@ -2965,7 +2965,6 @@ define("xabber-chats", function () {
         events: {
             "click .account-field .dropdown-content": "selectAccount",
             "click .btn-add": "addGroupChat",
-            "keyup input": "keyUpButton" ,
             "keyup .input-group-chat-name input": "updateGroupJid",
             "keyup .input-group-chat-jid input": "fixJid",
             "click .btn-cancel": "close",
@@ -3153,7 +3152,7 @@ define("xabber-chats", function () {
             if (this.active_chat === this.child(chat.id)) {
                 this.active_chat = null;
                 xabber.body.setScreen(null, {chat_item: null},
-                        {silent: !xabber.body.isScreen('chats')});
+                        {silent: !xabber.body.isScreen('all-chats')});
             }
             this.removeChild(chat.id, options);
             this.updateScrollBar();
@@ -3208,7 +3207,7 @@ define("xabber-chats", function () {
             if ((!view.contact.get('in_roster'))&&(view.model.get('is_accepted') == false)) {
                 view.model.set('display', true);
                 view.model.set('active', true);
-                xabber.body.setScreen('chats', {right: 'group_invitation', contact: view.contact });
+                xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
                 view.content.readMessages();
             }
             else

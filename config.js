@@ -50,6 +50,7 @@ require.config({
         "xabber-vcard":             "src/vcard",
         "xabber-contacts":          "src/contacts",
         "xabber-chats":             "src/chats",
+        "xabber-searching":         "src/searching",
         "xabber-ui":                "src/ui",
 
         // main file

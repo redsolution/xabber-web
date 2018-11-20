@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"1.0.19","version_description":"Pinned messages implementation has optimized. Different bugs have fixed."}'
+'{"version_number":"1.0.20","version_description":"New interface for group chats discovery."}'
 )});

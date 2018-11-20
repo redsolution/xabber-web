@@ -31,6 +31,11 @@ define("xabber-templates", [
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
 
+    "text!templates/searching/searching_wide.html",
+    "text!templates/searching/searching_account_item.html",
+    "text!templates/searching/existing_groupchat_item.html",
+    "text!templates/searching/existing_groupchat_details_view.html",
+
     "text!templates/contacts/roster_right.html",
     "text!templates/contacts/roster_left.html",
     "text!templates/contacts/account_roster_right.html",
@@ -169,6 +174,11 @@ define("xabber-templates", [
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');
+
+    addTemplate('searching.searching_wide');
+    addTemplate('searching.searching_account_item');
+    addTemplate('searching.existing_groupchat_item');
+    addTemplate('searching.existing_groupchat_details_view');
 
     addTemplate('contacts.roster_right');
     addTemplate('contacts.roster_left');

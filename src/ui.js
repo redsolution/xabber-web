@@ -155,6 +155,14 @@ define("xabber-ui", function () {
             roster: null
         });
 
+        this.body.addScreen('search', {
+            toolbar: null,
+            main: {
+                wide: { searching_main: null}
+            },
+            roster: null
+        });
+
         this.body.addScreen('all-chats', {
             toolbar: null,
             main: {
@@ -164,32 +172,6 @@ define("xabber-ui", function () {
             roster: null
         });
 
-        this.body.addScreen('chats', {
-            toolbar: null,
-            main: {
-                left: { chats: null },
-                right: { chat_placeholder: null }
-            },
-            roster: null
-        });
-
-        this.body.addScreen('group-chats', {
-            toolbar: null,
-            main: {
-                left: { group_chats: null },
-                right: { group_chat_placeholder: null }
-            },
-            roster: null
-        });
-
-        this.body.addScreen('archive-chats', {
-            toolbar: null,
-            main: {
-                left: { archive_chats: null },
-                right: { archive_placeholder: null }
-            },
-            roster: null
-        });
 
         this.right_panel.patchTree = function (tree, options) {
             if (options.right === 'group_invitation') {
