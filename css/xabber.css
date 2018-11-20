@@ -2644,6 +2644,7 @@ input#new_chat_jid {
 }
 
 .chat-message .fwd-msgs-block {
+    font-size: 12px;
     border-left: 2px solid rgba(158, 158, 158, .6);
     padding-left: 8px;
 }

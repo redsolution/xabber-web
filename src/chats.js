@@ -1652,10 +1652,10 @@ define("xabber-chats", function () {
                 }
             }
 
-            if (is_forwarded) {
+            /*if (is_forwarded) {
                 $message.removeClass('chat-message main').addClass('forwarded');
                 $message.find('left-side').remove();
-            }
+            }*/
 
             if (attrs.forwarded_message) {
                 $(attrs.forwarded_message).each(function(idx, fwd_msg) {
@@ -1676,9 +1676,8 @@ define("xabber-chats", function () {
                         username = attrs.from_nickname || attrs.from_id || this.account.contacts.mergeContact(attrs.from_jid).get('name');
                     }
 
-                    if (fwd_msg.get('forwarded_message'))
-                        var $f_message = this.buildMessageHtml(fwd_msg, true);
-                    else
+                        // var $f_message = this.buildMessageHtml(fwd_msg, true);
+                    // else
                         var $f_message = $(templates.messages.forwarded(_.extend(attrs, {
                         time: utils.pretty_datetime(attrs.time),
                         short_time: utils.pretty_short_datetime(attrs.time),
@@ -1691,6 +1690,13 @@ define("xabber-chats", function () {
                         badge: badge,
                         from_id: from_id
                     })));
+
+                    if (fwd_msg.get('forwarded_message')) {
+                        var fwd_messages_count = fwd_msg.get('forwarded_message').length,
+                            fwd_messages_link = fwd_messages_count + ' forwarded message' + ((fwd_messages_count > 1) ? 's' : "");
+                        $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message'}).text(fwd_messages_link));
+
+                    }
                     /*if (idx === 0)
                         $message.find('.msg-wrap .chat-msg-content').remove();*/
                     if (is_image_forward) {
