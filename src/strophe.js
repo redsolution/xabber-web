@@ -91,13 +91,14 @@ define("xabber-strophe", function () {
 
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+        Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
         Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
         Strophe.addNamespace('RETRACTIONS', 'http://xabber.com/protocol/retract');
+        Strophe.addNamespace('DELIVERY', 'http://xabber.com/protocol/delivery');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
-        Strophe.addNamespace('UNIQUE', 'http://xabber.com/protocol/unique');
         Strophe.addNamespace('XFORM', 'jabber:x:data');
         Strophe.addNamespace('CHAT_MARKERS', 'urn:xmpp:chat-markers:0');
         Strophe.addNamespace('VCARD_UPDATE', 'vcard-temp:x:update');

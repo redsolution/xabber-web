@@ -80,7 +80,9 @@ var constants = {
     MSG_ERROR: -1,
     MSG_PENDING: 0,
     MSG_SENT: 1,
-    MSG_DISPLAYED: 2,
+    MSG_DELIVERED: 2,
+    MSG_DISPLAYED: 3,
+    MSG_ARCHIVED: 4,
 
     RSM_ATTRIBUTES: ['max', 'first', 'last', 'after', 'before', 'index', 'count'],
     MAM_ATTRIBUTES: ['with', 'start', 'end'],
@@ -190,13 +192,17 @@ constants.MSG_STATE = {};
 constants.MSG_STATE[constants.MSG_ERROR] = 'error';
 constants.MSG_STATE[constants.MSG_PENDING] = 'pending';
 constants.MSG_STATE[constants.MSG_SENT] = 'sent';
+constants.MSG_STATE[constants.MSG_DELIVERED] = 'delivered';
 constants.MSG_STATE[constants.MSG_DISPLAYED] = 'displayed';
+constants.MSG_STATE[constants.MSG_ARCHIVED] = 'archived';
 
 constants.MSG_VERBOSE_STATE = {};
 constants.MSG_VERBOSE_STATE[constants.MSG_ERROR] = 'Message error';
 constants.MSG_VERBOSE_STATE[constants.MSG_PENDING] = 'Message not sent';
 constants.MSG_VERBOSE_STATE[constants.MSG_SENT] = 'Message sent';
-constants.MSG_VERBOSE_STATE[constants.MSG_DISPLAYED] = 'Message delivered to user';
+constants.MSG_VERBOSE_STATE[constants.MSG_DELIVERED] = 'Message delivered to user';
+constants.MSG_VERBOSE_STATE[constants.MSG_DISPLAYED] = 'Message read';
+constants.MSG_VERBOSE_STATE[constants.MSG_ARCHIVED] = 'Message from archive';
 
 
 if (typeof define === "function") {

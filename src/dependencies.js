@@ -11,6 +11,7 @@ define([
     "strophe.disco",
     "strophe.ping",
     "strophe.rsm",
+    "strophe.stream_management",
     "strophe.caps",
     "strophe.pubsub",
     "backbone.localsync",

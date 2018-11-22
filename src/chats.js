@@ -204,7 +204,7 @@ define("xabber-chats", function () {
             $delay.length && (attrs.time = $delay.attr('stamp'));
             body && (attrs.message = body);
             attrs.carbon_copied && (attrs.state = constants.MSG_SENT);
-            options.is_archived && (attrs.state = constants.MSG_DISPLAYED);
+            options.is_archived && (attrs.state = constants.MSG_ARCHIVED);
 
             if (options.pinned_message)
                 return this.account.pinned_messages.create(attrs);
@@ -356,13 +356,23 @@ define("xabber-chats", function () {
         receiveMessage: function ($message, options) {
             var carbon_copied = options.carbon_copied;
             // discovering chat marker message
-            var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]');
+            var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]'),
+                $receipt_request = $message.children('request[xmlns="'+Strophe.NS.RECEIPTS+'"]'),
+                $receipt_response = $message.children('received[xmlns="'+Strophe.NS.RECEIPTS+'"]');
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
                 if (marker_tag !== 'markable') {
                     this.receiveMarker($message, marker_tag, carbon_copied);
                     return;
                 }
+            }
+
+            if ($receipt_request.length) {
+                this.sendDeliveryReceipt($message);
+            }
+
+            if ($receipt_response.length) {
+                this.receiveDeliveryReceipt($message);
             }
 
             if (!$message.find('body').length) {
@@ -428,6 +438,15 @@ define("xabber-chats", function () {
 
         },
 
+        sendDeliveryReceipt: function ($message) {
+            var $delivery_msg = $msg({from: this.account.get('jid'),
+                to: this.contact.get('jid'),
+                type: 'chat',
+                id: uuid()})
+                .c('received', { xmlns: Strophe.NS.RECEIPTS, id: $message.attr('id')});
+            this.account.sendMsg($delivery_msg);
+        },
+
         receiveMarker: function ($message, tag, carbon_copied) {
             var $displayed = $message.find('displayed'),
                 error = $message.attr('type') === 'error';
@@ -440,15 +459,27 @@ define("xabber-chats", function () {
                 return;
             }
             if (msg.isSenderMe()) {
-                for (var i = this.messages.length - 1; i >= 0; i--) {
+                /*for (var i = this.messages.length - 1; i >= 0; i--) {
                     var msg = this.messages.models[i];
-                    if (msg.get('state') === constants.MSG_SENT)
+                    if (msg.get('state') === constants.MSG_SENT)*/
                         msg.set('state', constants.MSG_DISPLAYED);
-                    else
+                    /*else
                         return;
-                }
+                }*/
             } else {
                 msg.set('is_unread', false);
+            }
+        },
+
+        receiveDeliveryReceipt: function ($message) {
+            var $received = $message.find('received'),
+                delivered_msgid = $received.attr('id'),
+                msg = this.account.messages.get(delivered_msgid);
+            if (!msg) {
+                return;
+            }
+            if (msg.isSenderMe()) {
+                msg.set('state', constants.MSG_DELIVERED);
             }
         },
 
@@ -778,13 +809,13 @@ define("xabber-chats", function () {
 
         open: function (options) {
             options || (options = {});
-            var last_msg = this.model.last_message;
+            /*var last_msg = this.model.last_message;
             if (last_msg) {
                 if ((last_msg.get('markable')) && (this.model.get('last_msgid_marker') != last_msg.get('archive_id'))) {
                     this.content.sendMarker(last_msg, 'displayed');
                     this.model.set('last_msgid_marker', last_msg.get('archive_id'))
                 }
-            }
+            }*/
             xabber.chats_view.openChat(this, options);
         },
 
@@ -993,6 +1024,7 @@ define("xabber-chats", function () {
         MAMRequest: function (options, callback, errback) {
             var account = this.account,
                 chat = this.model,
+                self = this,
                 contact = this.contact,
                 messages = [], queryid = uuid(),
                 is_groupchat = contact.get('group_chat'), success = true, iq;
@@ -1031,6 +1063,9 @@ define("xabber-chats", function () {
                         var $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
                         if ($fin.length && $fin.attr('queryid') === queryid) {
                             var rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
+                            if ((messages.length)&&(contact.get('status') === 'online')) {
+                                self.sendMarker($(messages[messages.length - 1]).find('result message').first().attr('id'), 'displayed');
+                            }
                             callback && callback(success, messages, rsm);
                         }
                         if (contact.get('group_chat')) {
@@ -1841,7 +1876,12 @@ define("xabber-chats", function () {
 
             stanza.c('body').t(body).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
-                .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
+                .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up()
+                .c('request', {xmlns: Strophe.NS.RECEIPTS}).up();
+            if (this.contact.get('group_chat'))
+                stanza.c('request', {xmlns: Strophe.NS.DELIVERY, to: this.model.get('jid')}).up();
+            else
+                stanza.c('request', {xmlns: Strophe.NS.DELIVERY}).up();
             message.set({xml: stanza.tree()});
 
             this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, msg_id: msg_id});
@@ -1855,18 +1895,12 @@ define("xabber-chats", function () {
             }
 
             this.account.sendMsg(stanza, function () {
-                message.set('state', constants.MSG_SENT);
-                var archive_msg = {
-                    primary: (this.account.get('jid') + msg_id),
-                    body: body,
-                    opponent: this.model.get('jid'),
-                    income: false,
-                    isRead: true,
-                    messageID: msg_id,
-                    owner: this.account.get('jid'),
-                    previousID: null,
-                    date: message.get('time')
-                };
+                    // message.set('state', constants.MSG_SENT);
+                if (!this.contact.get('group_chat')&&(!this.account.server_features.find(feature => feature.get('var') === Strophe.NS.DELIVERY)))
+                    this.account.connection.ping.ping(this.account.get('jid'), function () {
+                        if (message.get('state') === constants.MSG_PENDING)
+                            message.set('state', constants.MSG_SENT);
+                    }.bind(this));
             }.bind(this));
         },
 
@@ -1877,7 +1911,7 @@ define("xabber-chats", function () {
                 return false;
         },
 
-        sendMarker: function (message, status) {
+        sendMarker: function (msgid, status) {
             status || (status = 'displayed');
             var stanza = $msg({
                 from: this.account.jid,
@@ -1886,7 +1920,7 @@ define("xabber-chats", function () {
                 id: uuid()
             }).c(status).attrs({
                 xmlns: Strophe.NS.CHAT_MARKERS,
-                id: message.get('msgid')
+                id: msgid
             }).up();
             this.account.sendMsg(stanza);
         },
@@ -2257,6 +2291,9 @@ define("xabber-chats", function () {
             } else {
                 this.model.messages_unread.remove(message);
                 this.model.recountUnread();
+                if (message.get('markable')&&(!message.get('is_archived'))) {
+                    this.sendMarker(message.get('msgid'), 'displayed');
+                }
                 if (!message.get('muted')) {
                     xabber.recountAllMessageCounter();
                 }
@@ -2682,7 +2719,7 @@ define("xabber-chats", function () {
         },
 
         setArchiveId: function ($message) {
-            var $received = $message.find('received[xmlns="' + Strophe.NS.UNIQUE + '"]'),
+            var $received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]'),
                 origin_id = $received.find('origin-id').attr('id');
             $(this.account._pending_messages).each(function (idx, item) {
                 if (origin_id == item.msg_id) {
@@ -2751,13 +2788,17 @@ define("xabber-chats", function () {
                 if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length) {
                     this.account.settings_right.getAllXTokens();
                 }
-                if ($message.find('received[xmlns="' + Strophe.NS.UNIQUE + '"]').length) {
-                    if ($message.find('received[xmlns="' + Strophe.NS.UNIQUE + '"]').find('origin-id').length) {
+                var $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]');
+                if ($stanza_received.length) {
+                    if ($stanza_received.find('origin-id').length) {
+                        this.account.messages.get($stanza_received.find('origin-id').attr('id')).set('state', constants.MSG_SENT);
                         var contact = this.account.contacts.get(msg_from);
                         if (contact) {
                             if (contact.get('group_chat')) {
-                                if ($message.find('received[xmlns="' + Strophe.NS.UNIQUE + '"]').find('stanza-id').attr('by') == contact.get('jid'))
+                                if ($stanza_received.find('stanza-id').attr('by') == contact.get('jid')) {
                                     this.setArchiveId($message);
+                                    this.account.messages.get($stanza_received.find('origin-id').attr('id')).set('state', constants.MSG_DISPLAYED);
+                                }
                             }
                             else
                                 this.setArchiveId($message);

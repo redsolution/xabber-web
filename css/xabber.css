@@ -3293,6 +3293,11 @@ img.fwd-img-preview {
 }
 
 .msg-delivering-state[data-state=sent],
+.msg-delivering-state[data-state=archived] {
+    color: #BDBDBD;
+}
+
+.msg-delivering-state[data-state=delivered],
 .msg-delivering-state[data-state=displayed] {
     color: #388E3C;
 }
@@ -3301,11 +3306,19 @@ img.fwd-img-preview {
     color: #D32F2F;
 }
 
+.msg-delivering-state[data-state=archived]:before {
+    content: "\F162";
+}
+
 .msg-delivering-state[data-state=pending]:before {
     content: "\F150";
 }
 
 .msg-delivering-state[data-state=sent]:before {
+    content: "\F12C";
+}
+
+.msg-delivering-state[data-state=delivered]:before {
     content: "\F12C";
 }
 
