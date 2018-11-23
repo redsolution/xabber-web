@@ -195,6 +195,14 @@ define("xabber-accounts", function () {
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
                 },
 
+                fullReconnect: function () {
+                    this.session.set('deactivate', 'set_off');
+                    this.connection.disconnect();
+                    setTimeout(function () {
+                        this.connect();
+                    }.bind(this), 1000);
+                },
+
                 reconnect: function () {
                     var conn_retries = this.session.get('conn_retries'),
                         timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;

@@ -440,7 +440,16 @@ define("xabber-contacts", function () {
                     var images = message.get('images'),
                         files = message.get('files'),
                         fwd_message = message.get('forwarded_message'),
-                        msg_text = fwd_message ? _.escape(fwd_message.get('message')) : _.escape(message.get('message'));
+                        fwd_msg_author = null,
+                        msg_text = _.escape(message.get('message'));
+                    if (fwd_message) {
+                        if (fwd_message.length > 1)
+                            msg_text = fwd_message.length + ' forwarded messages';
+                        else {
+                            msg_text = _.escape(fwd_message[0].get('message')) || (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
+                            fwd_msg_author = fwd_message[0].get('from_nickname') || fwd_message[0].get('from_jid') || fwd_message[0].get('from_id');
+                        }
+                    }
                     if (images) {
                         if (images.length == 1)
                             msg_text = '<span class=text-color-500>Image</span>';
@@ -461,7 +470,7 @@ define("xabber-contacts", function () {
                             author: msg_author,
                             time: utils.pretty_datetime(message.get('time')),
                             message: msg_text,
-                            fwd_author: fwd_message ? (fwd_message.get('from_nickname') || fwd_message.get('from_jid') || fwd_message.get('from_id')) : null
+                            fwd_author: fwd_msg_author
                         },
                         pinned_msg_html = $(templates.pinned_message(pinned_msg));
                     pinned_msg_elem.html(pinned_msg_html).emojify('.chat-msg-content', {emoji_size: 18});

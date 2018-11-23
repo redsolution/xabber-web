@@ -10,11 +10,12 @@
             {[ } if ((role)&&(role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
         </div>
         <div class="chat-msg-content chat-text-content">{{message}}</div>
+        <div class="fwd-msgs-block"></div>
     </div>
 
     <div class="right-side noselect">
         <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
-        {[ if (is_sender) { ]}
+        {[ if (is_sender||is_archived) { ]}
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}"></i>
         {[ } ]}
         <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_file}}"></i></div>
