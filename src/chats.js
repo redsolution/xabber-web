@@ -1675,9 +1675,6 @@ define("xabber-chats", function () {
                     } else {
                         username = attrs.from_nickname || attrs.from_id || this.account.contacts.mergeContact(attrs.from_jid).get('name');
                     }
-
-                        // var $f_message = this.buildMessageHtml(fwd_msg, true);
-                    // else
                         var $f_message = $(templates.messages.forwarded(_.extend(attrs, {
                         time: utils.pretty_datetime(attrs.time),
                         short_time: utils.pretty_short_datetime(attrs.time),
@@ -1694,8 +1691,7 @@ define("xabber-chats", function () {
                     if (fwd_msg.get('forwarded_message')) {
                         var fwd_messages_count = fwd_msg.get('forwarded_message').length,
                             fwd_messages_link = fwd_messages_count + ' forwarded message' + ((fwd_messages_count > 1) ? 's' : "");
-                        $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message'}).text(fwd_messages_link));
-
+                        $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message', 'data-msgid': attrs.msgid}).text(fwd_messages_link));
                     }
                     /*if (idx === 0)
                         $message.find('.msg-wrap .chat-msg-content').remove();*/
@@ -1734,7 +1730,6 @@ define("xabber-chats", function () {
                             }.bind(this));
                         }
                     }
-                    // $message.children('.msg-wrap').append($f_message);
                     $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
@@ -2507,6 +2502,16 @@ define("xabber-chats", function () {
                 return;
             }
 
+                if ($elem.hasClass('collapsed-forwarded-message')) {
+                    var msg = this.buildMessageHtml(this.account.forwarded_messages.get($elem.data('msgid'))),
+                        pinned_msg_modal = new xabber.PinnedMessagePanel();
+                    pinned_msg_modal.$el.attr('data-color', this.account.settings.get('color'));
+                    this.updateMessageInChat(msg);
+                    this.initPopup(msg);
+                    pinned_msg_modal.open(msg);
+                    return;
+                }
+
             if ($elem.hasClass('chat-msg-author') || $elem.hasClass('fwd-msg-author') ||
                         $elem.parent().hasClass('circle-avatar')) {
                 var from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
@@ -2953,9 +2958,10 @@ define("xabber-chats", function () {
             var from_bare_jid = Strophe.getBareJidFromJid(from_jid),
                 is_sender = from_bare_jid === this.account.get('jid');
 
-            if (options.forwarded) {
+            if ((options.forwarded)&&(!$forwarded.length)) {
                 return this.account.forwarded_messages.createFromStanza($message, {
                     is_forwarded: true,
+                    forwarded_message: options.forwarded_message || null,
                     delay: $delay
                 });
             }
@@ -3002,13 +3008,14 @@ define("xabber-chats", function () {
                     var $forwarded_msg = $(forwarded_msg),
                         $forwarded_message = $forwarded_msg.children('message'),
                         $forwarded_delay = $forwarded_msg.children('delay');
-                    $forwarded_msg.remove();
+                    // $forwarded_msg.remove();
                     var forwarded_message = this.receiveChatMessage($forwarded_message[0], {
                         forwarded: true,
                         delay: $forwarded_delay
                     });
                     $forwarded_msgs.push(forwarded_message);
                 }.bind(this));
+                $forwarded.remove();
                 return this.receiveChatMessage($message[0], _.extend({
                     forwarded_message: $forwarded_msgs
                 }, options));

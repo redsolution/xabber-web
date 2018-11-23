@@ -130,13 +130,7 @@ define("xabber-discovery", function () {
                     this.connection.x_token = {token: token, expire: expires_at, token_uid: token_uid };
                     this.connection.pass = token;
                     this.connection._sasl_data["server-signature"] = null;
-                    /*this.account.deactivate();
-                    this.account.activate();*/
-                    this.account.session.set('deactivate', 'set_off');
-                    this.connection.disconnect();
-                    setTimeout(function () {
-                        this.account.connect();
-                    }.bind(this), 1000);
+                    this.account.fullReconnect();
                     this.account.settings_right.getAllXTokens();
                 }.bind(this));
         },

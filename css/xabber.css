@@ -2649,6 +2649,10 @@ input#new_chat_jid {
     padding-left: 8px;
 }
 
+.chat-message .fwd-msgs-block:hover > .collapsed-forwarded-message {
+    text-decoration: underline;
+}
+
 .chat-message .chat-msg-content b {
     font-weight: 500;
 }
