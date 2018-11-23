@@ -313,8 +313,7 @@ define("xabber-chats", function () {
             active: false,
             display: false,
             unread: 0,
-            timestamp: 0,
-            last_msgid_marker: 0
+            timestamp: 0
         },
 
         initialize: function (attrs, options) {
@@ -327,8 +326,6 @@ define("xabber-chats", function () {
             });
             this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
             this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
-            if (!this.contact.get('group_chat'))
-                this.contact.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), jid));
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
@@ -367,7 +364,7 @@ define("xabber-chats", function () {
                 }
             }
 
-            if ($receipt_request.length) {
+            if (($receipt_request.length)&&(!options.is_archived)) {
                 this.sendDeliveryReceipt($message);
             }
 
@@ -459,13 +456,15 @@ define("xabber-chats", function () {
                 return;
             }
             if (msg.isSenderMe()) {
-                /*for (var i = this.messages.length - 1; i >= 0; i--) {
+                for (var i = this.messages.length - 1; i >= 0; i--) {
                     var msg = this.messages.models[i];
-                    if (msg.get('state') === constants.MSG_SENT)*/
-                        msg.set('state', constants.MSG_DISPLAYED);
-                    /*else
-                        return;
-                }*/
+                    if (msg.isSenderMe()) {
+                        if ((msg.get('state') === constants.MSG_SENT)||(msg.get('state') === constants.MSG_DELIVERED))
+                            msg.set('state', constants.MSG_DISPLAYED);
+                        else
+                            return;
+                    }
+                }
             } else {
                 msg.set('is_unread', false);
             }
@@ -809,13 +808,9 @@ define("xabber-chats", function () {
 
         open: function (options) {
             options || (options = {});
-            /*var last_msg = this.model.last_message;
-            if (last_msg) {
-                if ((last_msg.get('markable')) && (this.model.get('last_msgid_marker') != last_msg.get('archive_id'))) {
-                    this.content.sendMarker(last_msg, 'displayed');
-                    this.model.set('last_msgid_marker', last_msg.get('archive_id'))
-                }
-            }*/
+            if ((!this.model.get('history_loaded'))&&(this.model.messages.length < 20))
+                this.content.loadPreviousHistory();
+
             xabber.chats_view.openChat(this, options);
         },
 
@@ -857,7 +852,7 @@ define("xabber-chats", function () {
             this.$pinned_message = this.$('.pinned-message');
             this.$el.attr('data-id', this.model.id);
             this._scrolltop = this.getScrollTop();
-            var wheel_ev = _.isUndefined(window.onwheel) ? "wheel" : "mousewheel";
+            var wheel_ev = this.defineMouseWheelEvent();
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
             this.model.on("change:active", this.onChangedActiveStatus, this);
@@ -872,9 +867,20 @@ define("xabber-chats", function () {
             this.account.contacts.on("change:image", this.updateAvatar, this);
             this.account.on("change", this.updateMyInfo, this);
             this.account.dfd_presence.done(function () {
-                this.loadPreviousHistory();
+                // this.loadPreviousHistory();
+                this.loadLastHistory();
             }.bind(this));
             return this;
+        },
+
+        defineMouseWheelEvent: function () {
+            if (!_.isUndefined(window.onwheel)) {
+                return "wheel";
+            } else if (!_.isUndefined(window.onmousewheel)) {
+                return "mousewheel";
+            } else {
+                return "MozMousePixelScroll";
+            }
         },
 
         updateMyInfo: function () {
@@ -887,7 +893,7 @@ define("xabber-chats", function () {
         updateGroupChat: function () {
             this._loading_history = false;
             this.model.set('history_loaded', false);
-            this.loadPreviousHistory();
+            this.loadLastHistory();
         },
 
         render: function () {
@@ -998,7 +1004,11 @@ define("xabber-chats", function () {
         },
 
         readMessages: function (timestamp) {
-            _.each(_.clone(this.model.messages_unread.models), function (msg) {
+            var unread_messages = _.clone(this.model.messages_unread.models);
+            if (unread_messages.length) {
+                this.sendMarker(unread_messages[unread_messages.length - 1].get('msgid'), 'displayed');
+            }
+            _.each(unread_messages, function (msg) {
                 if (!timestamp || msg.get('timestamp') <= timestamp) {
                     if (this.model.get('is_accepted') != false)
                         msg.set('is_unread', false);
@@ -1071,6 +1081,10 @@ define("xabber-chats", function () {
                         if (contact.get('group_chat')) {
                             chat.getAllMessageRetractions();
                         }
+                        else {
+                            if (!contact.get('last_seen'))
+                                contact.getLastSeen();
+                        }
                     },
                     function (err) {
                         account.connection.deleteHandler(handler);
@@ -1094,13 +1108,13 @@ define("xabber-chats", function () {
             var account = this.model.account, counter = 0;
                 this.MAMRequest(query,
                     function (success, messages, rsm) {
-                        if (options.previous_history) {
+                        //if (options.previous_history) {
                             this._loading_history = false;
                             this.hideHistoryFeedback();
                             if ((messages.length < query.max) && success) {
                                 this.model.set('history_loaded', true);
                             }
-                        }
+                        //}
                         if (options.previous_history || !this.model.get('first_archive_id')) {
                             rsm.first && this.model.set('first_archive_id', rsm.first);
                         }
@@ -1139,7 +1153,7 @@ define("xabber-chats", function () {
                 query.after = last_archive_id;
             } else {
                 query.before = '';
-                query.max = xabber.settings.mam_messages_limit;
+                query.max = xabber.settings.mam_messages_limit_start;
             }
             this.getMessageArchive(query, {last_history: true});
         },
@@ -2291,9 +2305,6 @@ define("xabber-chats", function () {
             } else {
                 this.model.messages_unread.remove(message);
                 this.model.recountUnread();
-                if (message.get('markable')&&(!message.get('is_archived'))) {
-                    this.sendMarker(message.get('msgid'), 'displayed');
-                }
                 if (!message.get('muted')) {
                     xabber.recountAllMessageCounter();
                 }
@@ -3112,7 +3123,7 @@ define("xabber-chats", function () {
                 function (iq) {
                     if ($(iq).attr('type') === 'result'){
                         var group_jid = $(iq).find('created jid').text();
-                        var contact = this.account.contacts.mergeContact({jid: group_jid, group_chat: true, group_chat_owner: true});
+                        var contact = this.account.contacts.mergeContact({jid: group_jid, group_chat: true});
                             contact.pres('subscribed');
                         contact.pushInRoster({name: chat_name}, function () {
                             contact.pres('subscribe');

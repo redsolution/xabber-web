@@ -22,8 +22,7 @@ define("xabber-contacts", function () {
                 status_message: "",
                 subscription: null,
                 groups: [],
-                group_chat: false,
-                group_chat_owner: false
+                group_chat: false
             },
 
             initialize: function (_attrs, options) {
@@ -36,15 +35,18 @@ define("xabber-contacts", function () {
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
+                this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
-                this.details_view = new xabber.ContactDetailsView({model: this});
+                this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
                 this.invitation = new xabber.ContactInvitationView({model: this});
                 this.on("change:photo_hash", this.getVCard, this);
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account.dfd_presence.done(function () {
-                    this.getVCard();
-                    this.getLastSeen();
+                    if (!this.get('group_chat')) {
+                        this.getVCard();
+                        // this.getLastSeen();
+                    }
                 }.bind(this));
             },
 

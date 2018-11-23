@@ -130,8 +130,6 @@ define("xabber-discovery", function () {
                     this.connection.x_token = {token: token, expire: expires_at, token_uid: token_uid };
                     this.connection.pass = token;
                     this.connection._sasl_data["server-signature"] = null;
-                    /*this.account.deactivate();
-                    this.account.activate();*/
                     this.account.session.set('deactivate', 'set_off');
                     this.connection.disconnect();
                     setTimeout(function () {
@@ -197,7 +195,11 @@ define("xabber-discovery", function () {
         this.connection.deleteTimedHandler(this._ping_handler);
         this._ping_handler = this.connection.addTimedHandler(10000, function () {
             var downtime = moment.now() - this.last_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.ping_interval || 180)) {
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                this.settings_right.reconnect();
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
                 this.last_stanza_timestamp = moment.now();
                 this.connection.ping.ping(this.get('jid'));
             }

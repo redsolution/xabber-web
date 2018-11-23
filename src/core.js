@@ -105,8 +105,10 @@
                 hotkeys: 'enter',
                 load_history: true,
                 mam_requests_limit: 200,
+                mam_messages_limit_start: 1,
                 mam_messages_limit: 20,
-                ping_interval: 180
+                ping_interval: 60,
+                reconnect_interval: 120
             }
         }),
 
