@@ -139,8 +139,9 @@ define("xabber-views", function () {
         },
 
         updateScrollBar: function () {
+            // let start_scrolled_bottom = this.getScrollBottom();
             if (this.ps_container && this.isVisible()) {
-                var scroll_top = this.data.get('scroll_top');
+                let scroll_top = this.data.get('scroll_top');
                 if (typeof scroll_top === "undefined") {
                     this.ps_container.perfectScrollbar('update');
                 } else {
@@ -148,6 +149,7 @@ define("xabber-views", function () {
                     this.scrollTo(scroll_top);
                 }
             }
+            // this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - start_scrolled_bottom);
             return this;
         },
 
@@ -168,13 +170,20 @@ define("xabber-views", function () {
 
         scrollToChild: function ($child) {
             var scrollTop = _.reduce($child.prevAll(), function (sum, el) {
-                return sum + el.offsetHeight;
+                return sum + el.offsetHeight + 2;
             }, 0);
             this.scrollTo(scrollTop);
         },
 
         getScrollTop: function () {
             return this.ps_container[0].scrollTop;
+        },
+
+        getScrollBottom: function () {
+            let scrollTop = this.ps_container[0].scrollTop,
+                scrollHeight = this.ps_container[0].scrollHeight,
+                offsetHeight = this.ps_container[0].offsetHeight;
+            return scrollHeight - (scrollTop + offsetHeight);
         },
 
         getPercentScrolled: function () {
@@ -309,23 +318,10 @@ define("xabber-views", function () {
                 var query = this.$('.search-input').val();
                 this.$('.search-form').switchClass('active', query);
                 this.clearSearchSelection();
-                if (query) {
-                   this.search(query.toLowerCase());
-                } else {
-                    if (xabber.toolbar_view.$('.active').hasClass('archive-chats')) {
-                        this.showArchiveChats();
-                    }
-                    if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
-                        this.showAllChats();
-                    }
-                    if (xabber.toolbar_view.$('.active').hasClass('group-chats')) {
-                        this.showGroupChats();
-                    }
-                    if (xabber.toolbar_view.$('.active').hasClass('chats')) {
-                        this.showChats();
-                    }
-                   //this.searchAll();
-                }
+                if (query)
+                    this.search(query.toLowerCase());
+                else
+                    this.$('.list-item').removeClass('hidden');
                 this.updateScrollBar();
                 this.query = false;
                 this._update_search_timeout = setTimeout(function () {
@@ -354,15 +350,7 @@ define("xabber-views", function () {
 
         search: function () {},
 
-        onEnterPressed: function () {},
-
-        showGroupChats: function () {},
-
-        showChats: function () {},
-
-        showArchiveChats: function () {},
-
-        showAllChats: function () {}
+        onEnterPressed: function () {}
     });
 
     xabber.InputWidget = Backbone.View.extend({
@@ -396,6 +384,7 @@ define("xabber-views", function () {
 
         showInput: function () {
             this.data.set('input_mode', true);
+            this.updateValue();
         },
 
         onChangedInputMode: function () {
@@ -432,8 +421,6 @@ define("xabber-views", function () {
             var value = this.getValue(),
                 new_value = this.$input.removeClass('changed').val();
             new_value !== value && this.setValue(new_value);
-            if ((new_value == "")&&(this.$el.hasClass('name-wrap')))
-                this.setValue(this.model.attributes.vcard.nickname);
             this.data.set('input_mode', false);
         },
 
@@ -546,11 +533,11 @@ define("xabber-views", function () {
         },
 
         onUpdatedScreen: function (name) {
-            if ((name === 'all-chats') &&
-                    (this.$('.toolbar-item.all-chats').hasClass('active') ||
+            if ((name === 'account_settings') || ((name === 'all-chats') &&
+                (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
                     this.$('.toolbar-item.chats').hasClass('active')||
-                    this.$('.toolbar-item.archive-chats').hasClass('active'))) {
+                    this.$('.toolbar-item.archive-chats').hasClass('active')))) {
                 return;
             }
             this.$('.toolbar-item').removeClass('active');
@@ -560,27 +547,27 @@ define("xabber-views", function () {
             }
         },
 
-        showAllChats: function (ev) {
+        showAllChats: function () {
             this.$('.toolbar-item').removeClass('active')
                 .filter('.all-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
         },
 
-        showChats: function (ev) {
+        showChats: function () {
             this.$('.toolbar-item').removeClass('active')
                 .filter('.chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_chats');
         },
 
-        showGroupChats: function (ev) {
+        showGroupChats: function () {
             this.$('.toolbar-item').removeClass('active')
                 .filter('.group-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_group_chats');
         },
 
-        showArchive: function (ev) {
+        showArchive: function () {
             this.$('.toolbar-item').removeClass('active')
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
@@ -620,9 +607,7 @@ define("xabber-views", function () {
             xabber.accounts.each(function(idx) {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
                     var $chat = xabber.accounts.get(idx).chats.get(idx1);
-                    if (($chat.contact.get('archived'))&&($chat.contact.get('muted'))) {
-                    }
-                    else {
+                    if (!$chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
                         count_all_msg += $chat.get('unread');
                         if ($chat.contact.get('group_chat'))
                             count_group_msg += $chat.get('unread');
@@ -635,7 +620,7 @@ define("xabber-views", function () {
         },
 
         recountAllMessageCounter: function () {
-            var unread_messages = this.setAllMessageCounter();
+            let unread_messages = this.setAllMessageCounter();
             this.data.set('all_msg_counter', unread_messages.all_msgs);
             this.data.set('msg_counter', unread_messages.msgs);
             this.data.set('group_msg_counter', unread_messages.group_msgs);
@@ -726,8 +711,7 @@ define("xabber-views", function () {
         },
 
         deleteAllAccounts: function (ev) {
-            utils.dialogs.ask("Quit Xabber Web", "Do you want to delete all accounts from Xabber Web? "+
-                    "Accounts will not be deleted from the server.").done(function (res) {
+            utils.dialogs.ask("Quit Xabber Web", "Do you really want to quit Xabber? You will quit from all currently logged in XMPP accounts.", null, { ok_button_text: 'quit'}).done(function (res) {
                 res && xabber.trigger('quit');
             });
         }
@@ -941,11 +925,11 @@ define("xabber-views", function () {
         },
 
         setAllMessageCounter: function () {
-            var count_msg = 0;
+            let count_msg = 0;
             xabber.accounts.each(function(idx) {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
-                    var $chat = xabber.accounts.get(idx).chats.get(idx1);
-                    if (!$chat.contact.get('archived'))
+                    let $chat = xabber.accounts.get(idx).chats.get(idx1);
+                    if (!$chat.contact.get('muted'))
                         count_msg += $chat.get('unread');
                 }.bind(this));
             }.bind(this));

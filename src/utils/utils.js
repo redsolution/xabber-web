@@ -108,6 +108,19 @@ define([
             }
         },
 
+        pretty_short_month_date: function (timestamp) {
+            var datetime = timestamp ? moment(timestamp) : moment(),
+                day = moment(datetime).startOf('day'),
+                year = moment(datetime).startOf('year');
+            if (day.isSame(moment().startOf('day'))) {
+                return datetime.format('HH:mm:ss');
+            } else if (year.isSame(moment().startOf('year'))) {
+                return datetime.format('MMM D, YYYY HH:mm:ss');
+            } else {
+                return datetime.format('DD/MM/gg, HH:mm:ss');
+            }
+        },
+
         pretty_timedelta: function (seconds) {
             if (seconds < 60) {
                 return 'just now';
@@ -133,8 +146,46 @@ define([
             }
         },
 
+        pretty_duration: function (duration) {
+            if (_.isUndefined(duration))
+                return undefined;
+            if (duration < 10)
+                return ("0:0" + duration);
+            if (duration < 60)
+                return ("0:" + duration);
+            if (duration > 60)
+                return (Math.trunc(duration/60) + ":" + ((duration%60 < 10) ? ("0" + (duration%60)) : duration%60));
+        },
+
+        copyTextToClipboard: function(text, callback_msg, errback_msg) {
+            if (!window.navigator.clipboard) {
+                return;
+            }
+            window.navigator.clipboard.writeText(text).then(function() {
+                if (callback_msg) {
+                    let info_msg = callback_msg;
+                    this.callback_popup_message(info_msg, 1500);
+                }
+            }.bind(this), function() {
+                if (errback_msg) {
+                    let info_msg = errback_msg;
+                    this.callback_popup_message(info_msg, 1500);
+                }
+            }.bind(this));
+        },
+
+        callback_popup_message: function (info_msg, time) {
+            let $body = $(document.body),
+                $popup_msg = $('<div class="callback-popup-message"/>').text(info_msg);
+            $body.find('.callback-popup-message').remove();
+            $body.append($popup_msg);
+            setTimeout( function() {
+                $popup_msg.remove();
+            }, time);
+        },
+
         openWindow: function (url, errback) {
-            var win = window.open(url, '_blank');
+            let win = window.open(url, '_blank');
             if (win) {
                 win.focus();
             } else {

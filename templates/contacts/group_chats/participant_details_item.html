@@ -1,0 +1,42 @@
+<div class="member-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
+    <div class="member-item">
+        <div class="circle-avatar">
+            <input title="Change avatar" type="file">
+            <img>
+            <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+            </svg>
+            <div class="preloader-wrap"><div class="preloader-wrapper preloader-16px visible">
+                <div class="spinner-layer">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="member-info">
+            <div class="insert-emoticon">
+                <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>
+            </div>
+            <div class="emoticons-panel-wrap">
+                <div class="emoticons-panel"></div>
+            </div>
+            <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>
+            <label for="edit-nickname">set nickname</label>
+            <div id="edit-badge" class="rich-textarea" tabindex="2" contenteditable></div>
+            <label for="edit-badge">set badge</label>
+            <div class="nickname-with-badge"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div data-badge="{{badge}}" class="badge one-line">{{badge}}</div>{[} else {]}<div data-badge="" class="badge default-value one-line">set badge</div>{[}]}</div>{[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}
+        </div>
+</div>
+</div>
+<div class="btn-escape">
+    <i class="mdi mdi-24px mdi-close"></i>
+    <span class="btn-text">Esc</span>
+</div>

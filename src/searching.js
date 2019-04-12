@@ -12,10 +12,9 @@ define("xabber-searching", function () {
             _ = env._,
             moment = env.moment,
             uuid = env.uuid,
-            Images = utils.images,
-            Emoji = utils.emoji;
+            Images = utils.images;
 
-        xabber.SearchingMainView = xabber.BasicView.extend({
+        xabber.DiscoveringView = xabber.BasicView.extend({
             className: 'searching-main noselect',
             template: templates.searching_wide,
             ps_selector: '.chats-list-wrap',
@@ -42,7 +41,7 @@ define("xabber-searching", function () {
             },
 
             render: function (options) {
-                this.endSearching();
+                this.endDiscovering();
                 this.data.set('color','#9E9E9E');
                 options || (options = {});
                 var accounts = xabber.accounts.connected,
@@ -54,7 +53,8 @@ define("xabber-searching", function () {
                     this.$('.account-field .dropdown-content').append(
                         this.renderAccountItem(account));
                 }.bind(this));
-                this.bindAccount(accounts[0]);
+                if (accounts.length)
+                    this.bindAccount(accounts[0]);
                 this.$('#select-searching-properties .account-field .dropdown-button').dropdown({
                     inDuration: 100,
                     outDuration: 100,
@@ -79,7 +79,7 @@ define("xabber-searching", function () {
                     return true;
             },
 
-            search: function () {
+            discover: function () {
                 var domain = _.escape(this.$('.search-input.simple-input-field').val());
                 if (domain) {
                     if (this.isPropertiesVisible())
@@ -110,20 +110,20 @@ define("xabber-searching", function () {
                 else
                     this.$('.btn-search').removeClass('none-active');
                 if (ev.keyCode === constants.KEY_ENTER)
-                    this.search();
+                    this.discover();
             },
 
             searchExistingGroupChats: function (domain) {
-                this.account.connection.disco.items((domain), null, this.getGroupchatService.bind(this), this.onSearchingError.bind(this));
+                this.account.connection.disco.items((domain), null, this.getGroupchatService.bind(this), this.onDiscoveringError.bind(this));
             },
 
-            onSearchingError: function (error) {
-                this.endSearching();
+            onDiscoveringError: function (error) {
+                this.endDiscovering();
                 this.$('.chats-list').html("");
                 this.$('.result-string').text('No matches for "' + $(error).attr('from') + '"');
             },
 
-            endSearching: function () {
+            endDiscovering: function () {
                 this.$('.searching-result-wrap .preloader-wrapper').hide();
             },
 
@@ -134,13 +134,13 @@ define("xabber-searching", function () {
                         this.getGroupchatFeatures(jid);
                     }
                 }.bind(this));
-                this.endSearching();
+                this.endDiscovering();
             },
 
             getGroupchatFeatures: function (jid) {
                 var iq = $iq({type: 'get', to: jid})
                     .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
-                this.account.sendIQ(iq, this.getServerInfo.bind(this), this.onSearchingError.bind(this));
+                this.account.sendIQ(iq, this.getServerInfo.bind(this), this.onDiscoveringError.bind(this));
             },
 
             getServerInfo: function (stanza) {
@@ -211,21 +211,133 @@ define("xabber-searching", function () {
             template: templates.existing_groupchat_details_view,
 
             events: {
-
+                "click .btn-join-chat": "joinChat"
             },
 
             _initialize: function (options) {
-                this.$el.html(this.template(options.chat_properties));
+                this.account = this.model.account;
+                this.chat_properties = options.chat_properties;
+                this.$el.html(this.template(this.chat_properties));
             },
 
             render: function (options) {
 
+            },
+
+            joinChat: function () {
+                let contact = this.account.contacts.mergeContact(this.chat_properties.jid);
+                contact.set('group_chat', true);
+                contact.invitation.joinGroupChat();
             }
         });
 
-            xabber.once("start", function () {
-            this.searching = this.wide_panel.addChild('searching_main',
-                this.SearchingMainView);
+        xabber.Searching = Backbone.Model.extend({
+
+            initialize: function (options) {
+                this.account = options.account;
+            },
+
+            getSearchingFields: function () {
+                let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
+                    iq_get = $iq({from: this.account.get('jid'), type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
+                this.account.sendIQ(iq_get, this.parseSearchingFields);
+            },
+
+            parseSearchingFields: function (iq_result) {
+                let $result = $(iq_result),
+                    $fields = $result.find('x[xmlns = "' + Strophe.NS.XDATA + '"] field'),
+                    supported_fields = [];
+                $fields.each(function (idx, field) {
+                    let $field = $(field);
+                    if ($field.attr('type') !== 'hidden')
+                        supported_fields.push({var: $field.attr('var'), label: $field.attr('label')});
+                }.bind(this));
+            },
+        });
+
+        xabber.LocalSearchingView = xabber.BasicView.extend({
+            className: '',
+            // template:,
+
+            events: {
+
+            },
+
+            _initialize: function (options) {
+                this.account = options.account;
+            },
+
+            render: function () {
+
+            },
+
+            search: function (query) {
+            }
+        });
+
+        xabber.GlobalSearchingView = xabber.BasicView.extend({
+            className: '',
+            // template:,
+
+            events: {
+
+            },
+
+            _initialize: function (options) {
+                this.account = options.account;
+                this.indexed_chats = [];
+            },
+
+            render: function () {
+
+            },
+
+            search: function (query) {
+                this.indexed_chats = [];
+                let iq_search = $iq({to:'index.xabber.com', type: 'set', from: this.account.get('jid')})
+                    .c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'})
+                    .c('x', {xmlns: Strophe.NS.XDATA, type: 'form'})
+                    .c('field', {var: 'FORM_TYPE', type:'hidden'})
+                    .c('value').t(Strophe.NS.INDEX + '#groupchat').up().up();
+                if (query.description)
+                    iq_search.c('field', {var: 'description'})
+                        .c('value').t(query.description).up().up();
+                if (query.name)
+                    iq_search.c('field', {var: 'name'})
+                        .c('value').t(query.name).up().up();
+                if (query.model)
+                    iq_search.c('field', {var: 'model'})
+                        .c('value').t(query.model).up().up();
+                if (query.anywhere)
+                    iq_search.c('field', {var: 'anywhere'})
+                        .c('value').t(query.anywhere).up().up();
+                this.account.sendIQ(iq_search, this.onSearched.bind(this));
+            },
+
+            onSearched: function (result) {
+                let $result = $(result),
+                    $chats = $($result.find('query item groupchat'));
+                $chats.each(function (idx, chat) {
+                    let $chat = $(chat),
+                        chat_jid = $chat.attr('jid'),
+                        attrs = {jid: chat_jid},
+                        $properties = $chat.children();
+                    $properties.each(function (idx, property) {
+                        let $property = $(property),
+                            property_name = $property[0].tagName.replace(/-/g, '_'),
+                            property_value = $property.text();
+                        _.extend(attrs, {[property_name]: property_value});
+                    }.bind(this));
+                    this.indexed_chats.push(attrs);
+                }.bind(this));
+            }
+        });
+
+        xabber.once("start", function () {
+            this.discovering = this.wide_panel.addChild('discovering_main',
+                this.DiscoveringView);
+            /*this.local_searching = new xabber.LocalSearching;
+            this.global_searching = new xabber.GlobalSearching;*/
         }, xabber);
 
         return xabber;

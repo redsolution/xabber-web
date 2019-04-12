@@ -1,2 +1,9 @@
-<div class="one-file-wrap link-file"><div class="file-in-circle">{[ if (!is_audio) { ]}<i class="mdi mdi-24px mdi-file"></i>{[} if (is_audio) { ]}<i class="mdi mdi-24px mdi-play no-uploaded"></i><i class="mdi mdi-24px mdi-pause hidden"></i>{[ } ]}</div><div class="file-container"><b>{{name}}</b>{[ if (is_audio && duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span><a href="{{url}}" class="file-link-download">
-Download</a>{[ if (is_audio) { ]}<a class="voice-message-play">Play</a>{[ } ]}</div></div>
+<div class="one-file-wrap link-file">
+    <i class="mdi mdi-file"></i>
+    <div class="file-container">
+        <div class="file-info one-line">
+            <span class="file-name">{{name}}</span>{[ if (is_audio && duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span>
+        </div>
+        <a href="{{url}}" class="file-link-download">Download</a>
+    </div>
+</div>

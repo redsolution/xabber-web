@@ -48,26 +48,30 @@ define("xabber-templates", [
     "text!templates/contacts/contact_left_item.html",
     "text!templates/contacts/contact_blocked_item.html",
     "text!templates/contacts/contact_details.html",
-    "text!templates/contacts/group_chat_details.html",
     "text!templates/contacts/roster_settings.html",
     "text!templates/contacts/group_settings.html",
     "text!templates/contacts/groups_checkbox_list.html",
     "text!templates/contacts/add_contact_account_item.html",
     "text!templates/contacts/contact_placeholder.html",
-    "text!templates/contacts/group_chat_invitation.html",
-    "text!templates/contacts/group_info.html",
-    "text!templates/contacts/group_info_edit.html",
-    "text!templates/contacts/group_member_item.html",
-    "text!templates/contacts/invited_member_item.html",
-    "text!templates/contacts/permissions_and_restrictions.html",
-    "text!templates/contacts/restriction_item.html",
-    "text!templates/contacts/permission_item.html",
-    "text!templates/contacts/edit_badge.html",
-    "text!templates/contacts/pinned_message.html",
+    "text!templates/contacts/groups.html",
+    "text!templates/contacts/preloader.html",
+    "text!templates/contacts/group_chats/group_chat_details.html",
+    "text!templates/contacts/group_chats/group_chat_invitation.html",
+    "text!templates/contacts/group_chats/group_info.html",
+    "text!templates/contacts/group_chats/default_restrictions.html",
+    "text!templates/contacts/group_chats/group_member_item.html",
+    "text!templates/contacts/group_chats/invited_member_item.html",
+    "text!templates/contacts/group_chats/participant_rights.html",
+    "text!templates/contacts/group_chats/restriction_item.html",
+    "text!templates/contacts/group_chats/permission_item.html",
+    "text!templates/contacts/group_chats/right_expire_variants.html",
+    "text!templates/contacts/group_chats/pinned_message.html",
+    "text!templates/contacts/group_chats/participant_details_item.html",
+    "text!templates/contacts/group_chats/participant_placeholder.html",
+    "text!templates/contacts/group_chats/participants.html",
 
     "text!templates/chats/chats_panel.html",
-    "text!templates/chats/groupchats/add_group_chat.html",
-    "text!templates/chats/groupchats/add_user_group_chat.html",
+
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
@@ -75,12 +79,13 @@ define("xabber-templates", [
     "text!templates/chats/chat_bottom.html",
     "text!templates/chats/forward_panel.html",
     "text!templates/chats/chat_placeholder.html",
-    "text!templates/chats/groupchats/group_chat_placeholder.html",
     "text!templates/chats/messages/main.html",
     "text!templates/chats/messages/forwarded.html",
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
     "text!templates/chats/messages/file.html",
+    "text!templates/chats/messages/audio_file.html",
+    "text!templates/chats/messages/audio_file_waveform.html",
     "text!templates/chats/messages/auth_request.html",
     "text!templates/chats/messages/group_request.html",
     "text!templates/chats/messages/template-for-2.html",
@@ -89,7 +94,10 @@ define("xabber-templates", [
     "text!templates/chats/messages/template-for-5.html",
     "text!templates/chats/messages/template-for-6.html",
     "text!templates/chats/archive_placeholder.html",
-    "text!templates/chats/pinned_message_panel.html",
+    "text!templates/chats/group_chats/pinned_message_panel.html",
+    "text!templates/chats/group_chats/add_group_chat.html",
+    "text!templates/chats/group_chats/invitation_panel_view.html",
+    "text!templates/chats/group_chats/group_chat_placeholder.html",
 
     "text!templates/svg/ic-jabber.html",
     "text!templates/svg/xmpp.html",
@@ -191,26 +199,29 @@ define("xabber-templates", [
     addTemplate('contacts.contact_left_item');
     addTemplate('contacts.contact_blocked_item');
     addTemplate('contacts.contact_details');
-    addTemplate('contacts.group_chat_details');
     addTemplate('contacts.roster_settings');
     addTemplate('contacts.group_settings');
     addTemplate('contacts.groups_checkbox_list');
     addTemplate('contacts.add_contact_account_item');
     addTemplate('contacts.contact_placeholder');
-    addTemplate('contacts.group_chat_invitation');
-    addTemplate('contacts.group_info');
-    addTemplate('contacts.group_info_edit');
-    addTemplate('contacts.group_member_item');
-    addTemplate('contacts.invited_member_item');
-    addTemplate('contacts.permissions_and_restrictions');
-    addTemplate('contacts.restriction_item');
-    addTemplate('contacts.permission_item')
-    addTemplate('contacts.edit_badge');
-    addTemplate('contacts.pinned_message');
+    addTemplate('contacts.groups');
+    addTemplate('contacts.preloader');
+    addTemplate('contacts.group_chats.group_chat_details');
+    addTemplate('contacts.group_chats.group_chat_invitation');
+    addTemplate('contacts.group_chats.group_info');
+    addTemplate('contacts.group_chats.default_restrictions');
+    addTemplate('contacts.group_chats.group_member_item');
+    addTemplate('contacts.group_chats.invited_member_item');
+    addTemplate('contacts.group_chats.participant_rights');
+    addTemplate('contacts.group_chats.restriction_item');
+    addTemplate('contacts.group_chats.permission_item');
+    addTemplate('contacts.group_chats.right_expire_variants');
+    addTemplate('contacts.group_chats.pinned_message');
+    addTemplate('contacts.group_chats.participant_details_item');
+    addTemplate('contacts.group_chats.participant_placeholder');
+    addTemplate('contacts.group_chats.participants');
 
     addTemplate('chats.chats_panel');
-    addTemplate('chats.groupchats.add_group_chat');
-    addTemplate('chats.groupchats.add_user_group_chat');
     addTemplate('chats.add_chat_account_item');
     addTemplate('chats.chat_item');
     addTemplate('chats.chat_head');
@@ -218,12 +229,13 @@ define("xabber-templates", [
     addTemplate('chats.chat_bottom');
     addTemplate('chats.forward_panel');
     addTemplate('chats.chat_placeholder');
-    addTemplate('chats.groupchats.group_chat_placeholder');
     addTemplate('chats.messages.main');
     addTemplate('chats.messages.forwarded');
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
     addTemplate('chats.messages.file');
+    addTemplate('chats.messages.audio_file');
+    addTemplate('chats.messages.audio_file_waveform');
     addTemplate('chats.messages.auth_request');
     addTemplate('chats.messages.group_request');
     addTemplate('chats.messages.template-for-2');
@@ -232,8 +244,10 @@ define("xabber-templates", [
     addTemplate('chats.messages.template-for-5');
     addTemplate('chats.messages.template-for-6');
     addTemplate('chats.archive_placeholder');
-    addTemplate('chats.pinned_message_panel');
-
+    addTemplate('chats.group_chats.pinned_message_panel');
+    addTemplate('chats.group_chats.add_group_chat');
+    addTemplate('chats.group_chats.invitation_panel_view');
+    addTemplate('chats.group_chats.group_chat_placeholder');
 
     addSvgTemplate('svg.ic-jabber');
     addSvgTemplate('svg.xmpp');

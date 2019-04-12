@@ -1,0 +1,119 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>Create group chat</span>
+    </div>
+    <div class="modal-content">
+        <div class="row account-field">
+            <i class="field-icon mdi mdi-24px mdi-account-circle"></i>
+            <div class="multiple-acc">
+                <div class="account-dropdown-wrap">
+                    <div class="dropdown-button" data-activates="select-account-for-creating-groupchat">
+                        <div class="account-item-wrap">
+                        </div>
+                        <div class="caret">
+                            <i class="mdi mdi-20px mdi-menu-down"></i>
+                        </div>
+                    </div>
+                    <div id="select-account-for-creating-groupchat" class="dropdown-content noselect">
+                    </div>
+                </div>
+            </div>
+            <div class="single-acc">
+                <div class="dropdown-button">
+                    <div class="account-item-wrap">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row name-field">
+            <i class="field-icon mdi mdi-24px mdi-pencil"></i>
+            <div class="input-field input-group-chat-name">
+                <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group chat name" required>
+            </div>
+        </div>
+        <div class="row jid-field">
+            <svg class="field-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>
+            <div class="property-field xmpp-server-dropdown-wrap">
+                <div class="select-xmpp-server">
+                    <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
+                    <div class="input-field input-group-chat-domain hidden">
+                        <input id="new_chat_domain" type="text" placeholder="domain" name="chat_domain">
+                    </div>
+                    <div data-activates="select-xmpp-server" class="caret">
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-xmpp-server" class="dropdown-content noselect">
+                    <!--<div class="field-jid property-variant set-default-domain"></div>-->
+                    <div class="property-variant set-custom-domain">custom server...</div>
+                </div>
+            </div>
+            <div class="input-field input-group-chat-jid">
+                <input id="new_chat_jid" type="text" placeholder="jid" name="chat_jid">
+            </div>
+        </div>
+        <div class="row incognito-field">
+            <i class="field-icon mdi mdi-24px mdi-incognito"></i>
+            <div class="property-field incognito-dropdown-wrap">
+                <div class="dropdown-button" data-activates="select-incognito">
+                    <div class="incognito-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>
+                    <div class="caret">
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-incognito" class="dropdown-content noselect">
+                    <div data-value="public" class="property-variant">Public</div>
+                    <div data-value="incognito" class="property-variant">Incognito</div>
+                </div>
+            </div>
+        </div>
+        <div class="row global-field">
+            <svg class="field-icon toolbar-icon mdi mdi-24px" viewBox="0 0 24 24">
+                <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z"></path>
+            </svg>
+            <div class="property-field global-dropdown-wrap">
+                <div class="dropdown-button" data-activates="select-global">
+                    <div class="global-item-wrap property-wrap"><div data-value="none" class="property-value">Not indexed</div></div>
+                    <div class="caret">
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-global" class="dropdown-content noselect">
+                    <div data-value="none" class="property-variant">Not indexed</div>
+                    <div data-value="local" class="property-variant">Local index</div>
+                    <div data-value="global" class="property-variant">Global index</div>
+                </div>
+            </div>
+        </div>
+        <div class="row membership-field">
+            <i class="field-icon mdi mdi-24px mdi-lock"></i>
+            <div class="property-field membership-dropdown-wrap">
+                <div class="dropdown-button" data-activates="select-membership">
+                    <div class="membership-item-wrap property-wrap"><div data-value="open" class="property-value">Open membership</div></div>
+                    <div class="caret">
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-membership" class="dropdown-content noselect">
+                    <div data-value="open" class="property-variant variant-open">Open membership</div>
+                    <div data-value="member-only" class="property-variant variant-member-only">Member-only</div>
+                </div>
+            </div>
+        </div>
+        <div class="row description-field">
+            <i class="field-icon mdi mdi-24px mdi-sort-variant"></i>
+            <div class="input-field input-message">
+                <div class="rich-textarea-wrap">
+                    <div class="rich-textarea" tabindex="2" contenteditable=""></div>
+                    <div class="placeholder">Write a description...</div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <span class="errors"></span>
+        <button class="btn-flat btn-main text-color-700 non-active btn-add">Create</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    </div>
+</div>

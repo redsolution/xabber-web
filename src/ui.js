@@ -11,7 +11,7 @@ define("xabber-ui", function () {
         $(window).on("keydown", function (ev) {
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 var attrs = xabber.body.screen.attributes;
-                if (attrs.name === 'chats' && attrs.right === 'contact_details') {
+                if (attrs.name === 'all-chats' && attrs.right === 'contact_details') {
                     attrs.contact.trigger('open_chat', attrs.contact);
                 }
             }
@@ -144,7 +144,9 @@ define("xabber-ui", function () {
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_contact_details = new this.ViewPath('contact.details_view'),
-            path_group_invitation = new this.ViewPath('contact.invitation');
+            path_group_invitation = new this.ViewPath('contact.invitation'),
+            path_participant_messages = new this.ViewPath('contact.messages_view'),
+            path_details_participants = new this.ViewPath('contact.details_view.participants');
 
         this.body.addScreen('contacts', {
             toolbar: null,
@@ -158,7 +160,7 @@ define("xabber-ui", function () {
         this.body.addScreen('search', {
             toolbar: null,
             main: {
-                wide: { searching_main: null}
+                wide: { discovering_main: null}
             },
             roster: null
         });
@@ -180,7 +182,16 @@ define("xabber-ui", function () {
             if (options.right === 'contact_details') {
                 return { details: path_contact_details };
             }
-            if ((options.name === 'chats' || options.name === 'all-chats') && options.chat_item) {
+            if (options.right === 'participant_messages') {
+                return {
+                    chat_head: path_chat_head,
+                    chat_body: path_participant_messages,
+                    chat_bottom: path_chat_bottom
+                };
+            }
+            if (options.details_content === 'participants')
+                return { details_content: path_details_participants };
+            if ((options.name === 'all-chats') && options.chat_item) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,

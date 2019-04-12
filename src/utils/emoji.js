@@ -243,6 +243,17 @@ define(["jquery", "underscore"], function ($, _) {
         });
     };
 
+    String.prototype.removeEmoji = function () {
+        return this.replace(emoji_regexp, function (emoji) {
+            var data = emoji_data[emoji];
+            if (data) {
+                return "";
+            } else {
+                return emoji;
+            }
+        });
+    };
+
     $.fn.emojify = function (selector, options) {
         this.find(selector).each(function () {
             var text = $(this).html();

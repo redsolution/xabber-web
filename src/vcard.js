@@ -274,6 +274,18 @@ define("xabber-vcard", function () {
             this.parent.updateScrollBar();
         },
 
+        onClickIcon: function (ev) {
+            let $target_info = $(ev.target).closest('.info-wrap'),
+                $target_value = $target_info.find('.value'), copied_text = "";
+            $target_value.each(function (idx, item) {
+                let $item = $(item),
+                    value_text = $item.text();
+                value_text && (copied_text != "") && (copied_text += '\n');
+                value_text && (copied_text += value_text);
+                copied_text && utils.copyTextToClipboard(copied_text, 'Copied in clipboard', 'ERROR: Not copied in clipboard');
+            }.bind(this));
+        },
+
         updateRefreshButton: function () {
             this.$('.btn-vcard-refresh .button').hideIf(this.data.get('refresh'));
             this.$('.btn-vcard-refresh .preloader-wrapper').showIf(this.data.get('refresh'));

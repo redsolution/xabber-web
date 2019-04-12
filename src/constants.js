@@ -52,7 +52,7 @@ var constants = {
 
     BAD_CONN_STATUSES: [0, 2, 4, 6, 10],
 
-    RECONNECTION_TIMEOUTS: [3000, 10000, 15000],
+    RECONNECTION_TIMEOUTS: [5000, 10000, 15000],
 
     STATUSES: {
         chat:           'Ready for chat',
@@ -74,8 +74,15 @@ var constants = {
         unavailable:    7
     },
 
+    CHATSTATE_INTERVAL_COMPOSING_AUDIO: 30000,
+    CHATSTATE_TIMEOUT_PAUSED_AUDIO: 35000,
     CHATSTATE_TIMEOUT_PAUSED:   5000,
     CHATSTATE_TIMEOUT_STOPPED:  5000,
+
+    JINGLE_MSG_RETRACT: -1,
+    JINGLE_MSG_REJECT: 0,
+    JINGLE_MSG_PROPOSE: 1,
+    JINGLE_MSG_ACCEPT: 2,
 
     MSG_ERROR: -1,
     MSG_PENDING: 0,
@@ -107,6 +114,7 @@ var constants = {
         ACCOUNT_VCARD_EDIT:             80,
         ROSTER_RIGHT_ACCOUNT_ITEM:      38,
         ROSTER_LEFT_ACCOUNT_ITEM:       40,
+        PARTICIPANT_DETAILS_ITEM:       48,
         CONTACT_RIGHT_ITEM:             32,
         GROUPCHAT_MEMBER_ITEM:          32,
         CONTACT_LEFT_ITEM:              32,
@@ -178,6 +186,8 @@ var constants = {
         }
     },
 
+    PARTICIPANT_ROLES: ['Member', 'Admin', 'Owner'],
+
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
     API_SERVICE_URL: 'https://api.xabber.com/api/v2',
     USE_SOCIAL_AUTH: true,
@@ -187,6 +197,12 @@ var constants = {
     GCM_API_KEY: 'AIzaSyC1JCBB3LLf_4DG_vRWMEEe0I4X5msEU-M',
     MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive'
 };
+
+constants.JINGLE_MSG_STATE = {};
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_RETRACT] = 'retract';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_REJECT] = 'reject';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_PROPOSE] = 'propose';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_ACCEPT] = 'accept';
 
 constants.MSG_STATE = {};
 constants.MSG_STATE[constants.MSG_ERROR] = 'error';

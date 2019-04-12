@@ -89,6 +89,7 @@
                 {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
+                    // window.localStorage.clear();
                     window.location.reload(true);
                 }
             });
@@ -129,7 +130,8 @@
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
                 'DEFAULT_LOGIN_SCREEN',
-                'STORAGE_NAME_ENDING'
+                'STORAGE_NAME_ENDING',
+                'DISABLE_LOOKUP_WS'
             ]));
 
             var log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];

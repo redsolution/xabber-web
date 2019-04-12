@@ -1,0 +1,10 @@
+<div class="list-item {{status}}-user" data-jid="{{jid}}">
+    <div class="member-item">
+        <div class="circle-avatar">
+            <img>
+        </div>
+        <p title="{{jid}}" class="one-line">{{jid}}</p>
+        {[if (status == 'invited') {]}<div title="Revoke invitation" class="revoke-invitation"><i class="mdi mdi-20px mdi-undo"></i></div>{[}]}
+        {[if (status == 'blocked') {]}<div title="Unblock user" class="unblock-user"><i class="mdi mdi-20px mdi-block-helper"></i></div>{[}]}
+    </div>
+</div>

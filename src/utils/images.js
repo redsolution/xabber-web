@@ -16,6 +16,7 @@ define(["xabber-dependencies"], function (deps) {
     ];
 
     var MAX_SIZE = 256;
+    var MAX_IMG_SIZE = 1280;
 
     var b64toBlob = function (b64Data, contentType, sliceSize) {
         contentType = contentType || '';
@@ -85,8 +86,53 @@ define(["xabber-dependencies"], function (deps) {
         return COLORS[color_index];
     };
 
-    var getCachedDefaultAvatar = function (name) {
-        return getCachedImage(getDefaultAvatar(name));
+    var getImageSize = function (size, max_size) {
+        if (size.width > size.height) {
+            if (size.width > max_size) {
+                size.height *= max_size / size.width;
+                size.width = max_size;
+            }
+        } else {
+            if (size.height > max_size) {
+                size.width *= max_size / size.height;
+                size.height = max_size;
+            }
+        }
+        return size;
+    };
+
+    var compressImage = function (file) {
+        var image_obj = new Image(),
+            src = window.URL.createObjectURL(file),
+            deferred = new $.Deferred();
+        image_obj.onload = function () {
+            image_obj.onload = null;
+            var canvas = document.createElement('canvas'),
+                ctx = canvas.getContext('2d'),
+                width = image_obj.naturalWidth,
+                height = image_obj.naturalHeight,
+                file_type = file.type,
+                file_name = file.name,
+                new_size = getImageSize({width: width, height: height}, MAX_IMG_SIZE);
+            canvas.width = new_size.width;
+            canvas.height = new_size.height;
+            ctx.drawImage(image_obj, 0, 0, new_size.width, new_size.height);
+            canvas.toBlob((blob) => {
+                const file = new File([blob], file_name, {
+                    type: file_type,
+                    lastModified: Date.now()
+                });
+                deferred.resolve(file);
+            }, file_type, 0.8);
+            window.URL.revokeObjectURL(src);
+        };
+        image_obj.onerror = function() {
+            image_obj.onerror = null;
+            window.URL.revokeObjectURL(src);
+            deferred.resolve(false);
+        };
+        image_obj.src = src;
+        return deferred.promise();
     };
 
     var setCss = function (image_el, cached_image, img_size) {
@@ -124,7 +170,7 @@ define(["xabber-dependencies"], function (deps) {
         $image_el.css(css);
     };
 
-    var getAvatarFromFile = function (file, max_size) {
+    var getAvatarFromFile = function (file) {
         var image_obj = new Image(),
             src = window.URL.createObjectURL(file),
             deferred = new $.Deferred();
@@ -134,21 +180,11 @@ define(["xabber-dependencies"], function (deps) {
                 ctx = canvas.getContext('2d'),
                 width = image_obj.naturalWidth,
                 height = image_obj.naturalHeight,
-                b64_image;
-            if (width > height) {
-                if (width > MAX_SIZE) {
-                    height *= MAX_SIZE / width;
-                    width = MAX_SIZE;
-                }
-            } else {
-                if (height > MAX_SIZE) {
-                    width *= MAX_SIZE / height;
-                    height = MAX_SIZE;
-                }
-            }
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(image_obj, 0, 0, width, height);
+                b64_image,
+                new_size = getImageSize({width: width, height: height}, MAX_SIZE);
+            canvas.width = new_size.width;
+            canvas.height = new_size.height;
+            ctx.drawImage(image_obj, 0, 0, new_size.width, new_size.height);
             b64_image = canvas.toDataURL('image/jpeg')
                     .replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
             window.URL.revokeObjectURL(src);
@@ -180,12 +216,14 @@ define(["xabber-dependencies"], function (deps) {
             }
         }
         elem.src = cached_image.url;
-    }
+    };
 
     return {
         getCachedImage: getCachedImage,
+        getBlobImage: b64toBlob,
         getDefaultAvatar: getDefaultAvatar,
         getAvatarFromFile: getAvatarFromFile,
-        getDefaultColor: getAccountColor
+        getDefaultColor: getAccountColor,
+        compressImage: compressImage
     };
 });

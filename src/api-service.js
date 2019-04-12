@@ -980,8 +980,8 @@ define("xabber-api-service", function () {
             this.$el.appendTo(this.parent.$('.settings-block-wrap.xabber-account'));
             this.$tab = this.parent.$('.xabber-account-tab');
             this.updateForConnectedStatus();
-            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
-            this.model.on("change:name", this.updateName, this);
+            this.default_color = utils.images.getDefaultColor(this.model.get('username'));
+            this.model.on("change:username", this.updateName, this);
             this.model.on("change:name", this.updateAvatar, this);
             this.model.on("change:connected", this.updateForConnectedStatus, this);
             this.model.on("change:last_sync", this.updateLastSyncInfo, this);
@@ -1139,8 +1139,8 @@ define("xabber-api-service", function () {
         },
 
         updateName: function () {
-            this.$('.account-info-wrap .name').text(this.model.get('name'));
-            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
+            this.$('.account-info-wrap .name').text(this.model.get('username'));
+            this.default_color = utils.images.getDefaultColor(this.model.get('username'));
         },
 
         updateAvatar: function () {

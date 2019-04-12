@@ -24,6 +24,108 @@
         this.records = this.from_string(data, []);
     };
 
+    var IndexedDB = function (options) {
+        this.version = options.version || 1;
+        this.name = options.name;
+        var request = indexedDB.open(this.name, this.version);
+        request.onupgradeneeded = function() {
+            let db = request.result;
+            this.createStore(db);
+        }.bind(this);
+        request.onsuccess = function() {
+            this.db = request.result;
+        }.bind(this);
+
+        this.createStore = function (db) {
+            db.createObjectStore(options.objStoreName, { keyPath: options.primKey });
+        }
+    };
+
+    _.extend(IndexedDB.prototype, {
+        put: function(objStoreName, obj,callback) {
+            if (!this.db) {
+                callback && callback(false);
+                return;
+            }
+            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName),
+                request = db_writer.put(obj);
+            request.onsuccess = function () {
+                callback && callback(true);
+            }.bind(this);
+            request.onerror = function () {
+                callback && callback(false);
+            }.bind(this);
+        },
+
+        get_all: function (objStoreName, value, callback) {
+            if (!this.db) {
+                callback && callback(null);
+                return;
+            }
+            let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
+                request;
+            if (_.isNull(value))
+                request = db_reader.getAll();
+            else
+                request = db_reader.getAll(value);
+            request.onsuccess = function(event) {
+                var matching = event.target.result;
+                if (matching !== undefined) {
+                    callback && callback(matching);
+                } else {
+                    callback && callback(null);
+                }
+            }.bind(this);
+        },
+
+        get: function (objStoreName, value, callback) {
+            if (!this.db) {
+                callback && callback(null);
+                return;
+            }
+            let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
+                request = db_reader.get(value);
+            request.onsuccess = function(event) {
+                var matching = event.target.result;
+                if (matching !== undefined) {
+                    callback && callback(matching);
+                } else {
+                    callback && callback(null);
+                }
+            }.bind(this);
+        },
+
+        remove: function (objStoreName, value, callback) {
+            if (!this.db) {
+                callback && callback(false);
+                return;
+            }
+            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
+            var request = db_writer.delete(value);
+            request.onsuccess = function () {
+                callback && callback(true);
+            }.bind(this);
+            request.onerror = function () {
+                callback && callback(false);
+            }.bind(this);
+        },
+
+        clear_database: function (objStoreName, callback) {
+            if (!this.db) {
+                callback && callback(false);
+                return;
+            }
+            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
+            var request = db_writer.clear();
+            request.onsuccess = function () {
+                callback && callback(true);
+            }.bind(this);
+            request.onerror = function () {
+                callback && callback(false);
+            }.bind(this);
+        }
+    });
+
     _.extend(DataStorage.prototype, {
         from_string: function (string, default_value) {
             if (!string) { return default_value; }
@@ -128,6 +230,17 @@
 
         clearStorage: function () {
             this.storage.clear();
+        }
+    });
+
+    Backbone.ModelWithDataBase = Backbone.Model.extend({
+        initialize: function (attrs, options) {
+            this.database = new IndexedDB(options);
+            this._initialize && this._initialize(attrs, options);
+        },
+
+        clearDataBase: function () {
+            this.database.clear();
         }
     });
 

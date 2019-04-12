@@ -27,7 +27,6 @@ require.config({
         "materialize":              "src/lib/materialize",
         "strophe.caps":             "src/lib/strophe.caps",
         "strophe.pubsub":           "src/lib/strophe.pubsub",
-        "strophe.stream_management":"src/lib/strophe.stream-management",
         "sha1_hasher":              "src/lib/sha1.min",
 
         // Xabber sources

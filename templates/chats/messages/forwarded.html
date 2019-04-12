@@ -8,9 +8,9 @@
             <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>
             {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
             {[ } if ((role)&&(role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
-            <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
+            <div class="msg-time selectable-text one-line" title="{{time}}">{{short_time}}</div>
         </div>
-        <div class="chat-msg-content chat-text-content">{{message}}</div>
         <div class="fwd-msgs-block"></div>
+        <div class="chat-msg-content chat-text-content">{{message}}</div>
     </div>
 </div>
