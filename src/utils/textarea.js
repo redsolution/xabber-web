@@ -25,22 +25,23 @@ define(["xabber-dependencies"], function (deps) {
     };
 
     $.fn.updateRichTextarea = function () {
-        var $placeholder = this.siblings('.placeholder'),
-            text = this.getTextFromRichTextarea();
+        var text = this.getTextFromRichTextarea();
         if (!text) {
             this.html('');
         }
-        $placeholder.hideIf(text);
         return this;
     };
 
     $.fn.flushRichTextarea = function () {
-        this.html('').siblings('.placeholder').removeClass('hidden');
+        this.html('');
         return this;
     };
 
     $.fn.getTextFromRichTextarea = function () {
         var $div = $('<div>').html(this.html());
+        $div.find('p').each(function () {
+            $(this).replaceWith($(this).html() + '\n');
+        });
         $div.find('.emoji').each(function () {
             $(this).replaceWith($(this).data('emoji'));
         });

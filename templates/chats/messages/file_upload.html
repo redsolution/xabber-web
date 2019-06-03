@@ -29,7 +29,8 @@
 
     <div class="right-side noselect">
         <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
-        <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}"></i>
+        <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
+        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>
         <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>
     </div>
 </div>

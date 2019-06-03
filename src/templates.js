@@ -55,9 +55,11 @@ define("xabber-templates", [
     "text!templates/contacts/contact_placeholder.html",
     "text!templates/contacts/groups.html",
     "text!templates/contacts/preloader.html",
+    "text!templates/contacts/group_chats/group_chat_properties.html",
     "text!templates/contacts/group_chats/group_chat_details.html",
     "text!templates/contacts/group_chats/group_chat_invitation.html",
-    "text!templates/contacts/group_chats/group_info.html",
+    "text!templates/contacts/group_chats/private_invitation.html",
+    "text!templates/contacts/group_chats/group_chat_properties_edit.html",
     "text!templates/contacts/group_chats/default_restrictions.html",
     "text!templates/contacts/group_chats/group_member_item.html",
     "text!templates/contacts/group_chats/invited_member_item.html",
@@ -69,9 +71,9 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/participant_details_item.html",
     "text!templates/contacts/group_chats/participant_placeholder.html",
     "text!templates/contacts/group_chats/participants.html",
+    "text!templates/contacts/group_chats/badge_edit_view.html",
 
     "text!templates/chats/chats_panel.html",
-
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
@@ -98,6 +100,7 @@ define("xabber-templates", [
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
     "text!templates/chats/group_chats/group_chat_placeholder.html",
+    "text!templates/chats/group_chats/mention_item.html",
 
     "text!templates/svg/ic-jabber.html",
     "text!templates/svg/xmpp.html",
@@ -206,9 +209,11 @@ define("xabber-templates", [
     addTemplate('contacts.contact_placeholder');
     addTemplate('contacts.groups');
     addTemplate('contacts.preloader');
+    addTemplate('contacts.group_chats.group_chat_properties');
     addTemplate('contacts.group_chats.group_chat_details');
     addTemplate('contacts.group_chats.group_chat_invitation');
-    addTemplate('contacts.group_chats.group_info');
+    addTemplate('contacts.group_chats.private_invitation');
+    addTemplate('contacts.group_chats.group_chat_properties_edit');
     addTemplate('contacts.group_chats.default_restrictions');
     addTemplate('contacts.group_chats.group_member_item');
     addTemplate('contacts.group_chats.invited_member_item');
@@ -220,6 +225,7 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.participant_details_item');
     addTemplate('contacts.group_chats.participant_placeholder');
     addTemplate('contacts.group_chats.participants');
+    addTemplate('contacts.group_chats.badge_edit_view');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');
@@ -248,6 +254,7 @@ define("xabber-templates", [
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
     addTemplate('chats.group_chats.group_chat_placeholder');
+    addTemplate('chats.group_chats.mention_item');
 
     addSvgTemplate('svg.ic-jabber');
     addSvgTemplate('svg.xmpp');

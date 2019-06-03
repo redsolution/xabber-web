@@ -9,13 +9,43 @@ define("xabber-ui", function () {
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
+            let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
-                var attrs = xabber.body.screen.attributes;
-                if (attrs.name === 'all-chats' && attrs.right === 'contact_details') {
+                if (xabber.body.$el.siblings('#modals').children().length)
+                    return;
+                if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);
+            }
+            if (attrs.name === 'all-chats' &&
+                (attrs.right === 'chat' || attrs.right === 'participant_messages')) {
+                if (!window.$('.message-actions-panel').hasClass('hidden')) {
+                    switch (ev.keyCode) {
+                        case 67:
+                            attrs.chat_item.contact.trigger('copy_selected_messages');
+                            break;
+                        case 68:
+                            attrs.chat_item.contact.trigger('delete_selected_messages');
+                            break;
+                        case 69:
+                            attrs.chat_item.contact.trigger('edit_selected_message');
+                            break;
+                        case 70:
+                            attrs.chat_item.contact.trigger('forward_selected_messages');
+                            break;
+                        case 80:
+                            attrs.chat_item.contact.trigger('pin_selected_message');
+                            break;
+                        case 82:
+                            attrs.chat_item.contact.trigger('reply_selected_messages');
+                            break;
+                        case constants.KEY_ESCAPE:
+                            attrs.chat_item.contact.trigger('reset_selected_messages');
+                            break;
+                    }
+                    ev.preventDefault();
                 }
             }
-        }.bind(this));
+            }.bind(this));
 
         this.updateLayout = function (options) {
             options || (options = {});
@@ -81,7 +111,7 @@ define("xabber-ui", function () {
                 'margin-left': panel_margin
             });
             this.roster_view.setCustomCss({width: roster_width});
-        }
+        };
 
         this.on("update_layout", this.updateLayout, this);
 
@@ -145,6 +175,7 @@ define("xabber-ui", function () {
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
+            path_private_invitation = new this.ViewPath('contact.private_invitation'),
             path_participant_messages = new this.ViewPath('contact.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
@@ -176,6 +207,9 @@ define("xabber-ui", function () {
 
 
         this.right_panel.patchTree = function (tree, options) {
+            if (options.right === 'private_invitation') {
+                return { details: path_private_invitation };
+            }
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };
             }

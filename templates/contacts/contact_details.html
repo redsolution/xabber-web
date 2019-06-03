@@ -1,41 +1,60 @@
-    <div class="panel-content-wrap noselect">
-        <div class="main-info">
+<div class="panel-content-wrap noselect">
+    <div class="main-info">
+        <div class="avatar-wrap">
             <div class="circle-avatar"><img></div>
             <div class="status hide-offline"></div>
-            <div class="text-info">
-                <div class="name-wrap"></div>
-                <div class="status-message one-line"></div>
-            </div>
-            <div class="btn-escape">
-                <i class="mdi mdi-24px mdi-close"></i>
-                <span class="btn-text">Esc</span>
-            </div>
         </div>
-        <div class="panel-content private-chat">
-            <div class="left-column">
-                <div class="block-wrap vcard">
-                </div>
-            </div>
-            <div class="right-column">
-                <div class="block-wrap resources-block-wrap hidden">
-                    <div class="block-header">
-                        <span class="block-name">Resources</span>
-                    </div>
-
-                    <div class="resources-wrap">
-                    </div>
-                </div>
-                <div class="block-wrap groups-block-wrap"></div>
-            </div>
+        <div class="text-info">
+            <div class="name-wrap"></div>
+            <div class="status-message one-line"></div>
         </div>
-    </div>
-    <div class="panel-footer noselect">
+        <div class="btn-escape">
+            <i class="mdi mdi-24px mdi-close"></i>
+            <span class="btn-text">Esc</span>
+        </div>
+        <div class="btn-more  dropdown-button" data-activates="{{view.cid}}-buttons-wrap">
+            <i class="mdi mdi-24px mdi-dots-vertical"></i>
+        </div>
+        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">
+            <li class="btn-auth-request"><span class="one-line">Request authorization</span></li>
+            <li class="btn-add"><span class="one-line">Add</span></li>
+            <li class="btn-delete"><span class="one-line">Delete</span></li>
+            <li class="btn-block"><span class="one-line">Block</span></li>
+            <li class="btn-unblock"><span class="one-line">Unblock</span></li>
+        </ul>
         <div class="buttons-wrap">
-            <button class="btn-add btn-flat btn-main">Add</button>
-            <button class="btn-auth-request btn-flat btn-main">Request authorization</button>
-            <button class="btn-chat btn-flat btn-main">Chat</button>
-            <button class="btn-block btn-flat btn-main">Block</button>
-            <button class="btn-unblock btn-flat btn-main">Unblock</button>
-            <button class="btn-delete btn-flat btn-main">Delete</button>
+            <div class="button-wrap btn-chat-wrap">
+                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
+                <div class="btn-name">Chat</div>
+            </div>
+            <div class="button-wrap non-active btn-voice-call-wrap">
+                <i class="mdi mdi-24px mdi-phone btn-voice-call"></i>
+                <div class="btn-name">Voice Call</div>
+            </div>
+            <div class="button-wrap non-active btn-video-call-wrap">
+                <i class="mdi mdi-24px mdi-video btn-video-call"></i>
+                <div class="btn-name">Video Call</div>
+            </div>
+            <div class="button-wrap btn-mute-wrap">
+                <i class="mdi mdi-24px mdi-bell btn-mute"></i>
+                <div class="btn-name">Mute</div>
+            </div>
         </div>
     </div>
+    <div class="panel-content private-chat">
+        <div class="left-column">
+            <div class="block-wrap vcard">
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="block-wrap resources-block-wrap hidden">
+                <div class="block-header">
+                    <span class="block-name">Connected devices</span>
+                </div>
+                <div class="resources-wrap">
+                </div>
+            </div>
+            <div class="block-wrap groups-block-wrap"></div>
+        </div>
+    </div>
+</div>

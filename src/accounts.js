@@ -429,9 +429,16 @@ define("xabber-accounts", function () {
                     this.enableCarbons();
                     this.getVCard();
                     this.sendPendingStanzas();
+                    // this.activateXabberRewrite();
                     /*setTimeout(function () {
                         this.sendPendingMessages();
                     }.bind(this), 15000);*/
+                },
+
+                activateXabberRewrite: function () {
+                    var retractions_query = $iq({from: this.get('jid'), type: 'set', to: this.get('jid')})
+                        .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE});
+                    this.sendIQ(retractions_query);
                 },
 
                 sendPendingStanzas: function () {
@@ -585,6 +592,7 @@ define("xabber-accounts", function () {
                     xabber.body.setScreen('account_settings', {
                         account: this, right: right, block_name: block_name
                     });
+                    this.trigger('open_settings');
                 },
 
                 updateColorScheme: function () {
@@ -896,6 +904,7 @@ define("xabber-accounts", function () {
             avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
             events: {
+                'click .filter-chats': 'filterChats',
                 'click': 'showSettings'
             },
 
@@ -905,12 +914,14 @@ define("xabber-accounts", function () {
                 this.updateStatus();
                 this.updateAvatar();
                 this.updateColorScheme();
+                this.$el.attr('data-jid', this.model.get('jid'));
                 this.model.session.on("change:auth_failed", this.updateAuthState, this);
                 this.model.session.on("change:connected", this.updateConnected, this);
                 this.model.on("change:status", this.updateStatus, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.settings.on("change:color", this.updateColorScheme, this);
                 this.model.on("filter_chats", this.setActive, this);
+                this.model.on("open_settings", this.setActive, this);
             },
 
             updateConnected: function () {
@@ -937,6 +948,11 @@ define("xabber-accounts", function () {
             },
 
             showSettings: function () {
+                this.model.showSettings();
+            },
+
+            filterChats: function (ev) {
+                ev.stopPropagation();
                 xabber.chats_view.showChatsByAccount(this.model);
                 this.model.trigger('filter_chats');
             },
@@ -1138,8 +1154,8 @@ define("xabber-accounts", function () {
                 "change .main-info-wrap .circle-avatar input": "changeAvatar",
                 "click .main-info-wrap .status": "openChangeStatus",
                 "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
-                "click .settings-tab.delete-account": "deleteAccount",
-                "click .back-to-settings": "backToSettings"
+                "click .settings-tab.delete-account": "deleteAccount"
+                // "click .back-to-settings": "backToSettings"
             },
 
             _initialize: function () {
@@ -1243,9 +1259,9 @@ define("xabber-accounts", function () {
                 xabber.change_status_view.open(this.model);
             },
 
-            backToSettings: function () {
+            /*backToSettings: function () {
                 xabber.toolbar_view.showSettings();
-            },
+            },*/
 
             jumpToBlock: function (ev) {
                 var $tab = $(ev.target).closest('.settings-tab'),
@@ -1824,7 +1840,7 @@ define("xabber-accounts", function () {
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
-                this.authFeedback({password: 'Authentication with new password...'});
+                this.authFeedback({password: 'Authentication with password...'});
                 if (this.model.connection.connected) {
                     this.model.once('deactivate', function () {
                         this.setPassword(password);

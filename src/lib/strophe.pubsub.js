@@ -96,7 +96,7 @@
     };
 
 // TODO Ideas Adding possible conf values?
-    /* Extend Strophe.Connection to have member 'pubsub'.
+    /* Extend Strophe.Connection to have participant 'pubsub'.
      */
     Strophe.addConnectionPlugin('pubsub', {
         /*

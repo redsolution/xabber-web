@@ -94,6 +94,10 @@ define("xabber-strophe", function () {
                     if ((child.nodeName === 'x-token') && (child.namespaceURI === Strophe.NS.AUTH_TOKENS)) {
                         this.x_token_auth = true;
                     }
+
+                    if ((child.nodeName === 'synchronization') && (child.namespaceURI === Strophe.NS.SYNCHRONIZATION)) {
+                        this.do_synchronization = true;
+                    }
                 }
 
                 if (!this.do_bind) {
@@ -178,6 +182,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
         Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
         Strophe.addNamespace('RETRACTIONS', 'http://xabber.com/protocol/retract');
+        Strophe.addNamespace('SYNCHRONIZATION', 'http://xabber.com/protocol/synchronization');
         Strophe.addNamespace('DELIVERY', 'http://xabber.com/protocol/delivery');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
@@ -196,6 +201,8 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
+        Strophe.addNamespace('XABBER_REWRITE', 'http://xabber.com/protocol/rewrite');
+        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0');
 
         return xabber;
     };

@@ -29,6 +29,7 @@ var constants = {
     KEY_ARROW_DOWN: 40,
     KEY_DELETE: 46,
     KEY_FORWARD_SLASH: 47,
+    KEY_AT: 50,
 
     VOICE_MSG_TIME: 120,
 
@@ -108,8 +109,9 @@ var constants = {
     AVATAR_SIZES: {
         TOOLBAR_ACCOUNT_ITEM:           32,
         SETTINGS_ACCOUNT_ITEM:          32,
-        SYNCHRONIZE_ACCOUNT_ITEM:       36,
         XABBER_ACCOUNT:                 32,
+        SYNCHRONIZE_ACCOUNT_ITEM:       36,
+        MENTION_ITEM:                   36,
         ACCOUNT_SETTINGS_LEFT:          96,
         ACCOUNT_VCARD_EDIT:             80,
         ROSTER_RIGHT_ACCOUNT_ITEM:      38,
@@ -119,7 +121,7 @@ var constants = {
         GROUPCHAT_MEMBER_ITEM:          32,
         CONTACT_LEFT_ITEM:              32,
         CONTACT_BLOCKED_ITEM:           32,
-        CONTACT_DETAILS:                96,
+        CONTACT_DETAILS:                192,
         GROUP_SETTINGS:                 96,
         CHAT_ITEM:                      40,
         CHAT_HEAD:                      40,

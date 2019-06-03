@@ -1,4 +1,5 @@
-<div class="group-chat-properties-wrap"><div class="groupchat-info selectable-text group-info-editor">
+<div class="modal-header"><div class="panel-header black-text">Group chat properties</div></div>
+<div class="modal-content group-chat-properties-wrap selectable-text">
     <div class="property-wrap jid-info-wrap">
         <div class="property-header">XMPP ID</div>
         <div class="jabber-id">
@@ -10,12 +11,12 @@
     <div class="property-wrap name-field">
         <div class="property-header">Chat Name</div>
         <div class="input-field input-group-chat-name">
-            <input id="new_name_value" type="text" name="chat_name" placeholder="Input Chat Name">
+            <input id="new_name_value" type="text" name="chat_name" placeholder="Input Chat Name" class="text-field">
         </div>
     </div>
     <div class="property-wrap description-field">
         <div class="property-header">Description</div>
-        <textarea placeholder="Input description" id="" cols="30" rows="10" class="materialize-textarea"></textarea>
+        <textarea placeholder="Input description" id="" cols="30" rows="10" class="text-field materialize-textarea"></textarea>
     </div>
     <div class="property-wrap global-field">
         <div class="property-header">Indexation</div>
@@ -48,9 +49,9 @@
         <p class="property-description">Member only chats can be joined by invitation</p>
     </div>
 </div>
+<div class="modal-footer">
     <div class="buttons-wrap">
-        <!--<button class="btn-group-info-cancel btn-flat btn-main btn-dark">Cancel</button>
-        <button class="btn-group-info-update btn-flat btn-main">Update</button>-->
-        <button class="btn-submit btn-flat btn-main-filled">Submit</button>
+        <button class="btn-save btn-flat btn-main non-active">Save</button>
+        <button class="btn-cancel btn-flat btn-dark btn-main">Cancel</button>
     </div>
 </div>

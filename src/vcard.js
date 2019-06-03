@@ -196,6 +196,7 @@ define("xabber-vcard", function () {
         },
 
         render: function () {
+            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : 'Contact details');
             this.data.set('refresh', false);
             this.update();
         },

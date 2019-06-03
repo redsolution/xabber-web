@@ -192,7 +192,7 @@ define("xabber-contacts", function () {
                 var seconds = $(iq).children('query').attr('seconds'),
                     message_time = moment.now() - 1000*seconds;
                 this.set({ last_seen: message_time });
-                return this.lastSeenNewFormat(seconds, message_time);
+                return utils.pretty_last_seen(seconds);
             },
 
             pres: function (type) {
@@ -380,13 +380,14 @@ define("xabber-contacts", function () {
                 return info;
             },
 
-            getAllRights: function () {
+            getAllRights: function (callback) {
                 let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') })
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights' });
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
                     var all_permissions = $(iq_all_rights).find('permission'),
                         all_restrictions = $(iq_all_rights).find('restriction');
                     this.all_rights = {permissions: all_permissions, restrictions: all_restrictions};
+                    callback && callback();
                 }.bind(this));
             },
 
@@ -442,11 +443,12 @@ define("xabber-contacts", function () {
                         fwd_msg_author = null,
                         msg_text = message.get('message');
                     if (fwd_message) {
+                        let user_info = fwd_message[0].get('user_info') || {};
                         if (fwd_message.length > 1)
                             msg_text = fwd_message.length + ' forwarded messages';
                         else {
                             msg_text = _.escape(fwd_message[0].get('message')) || (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
-                            fwd_msg_author = fwd_message[0].get('from_nickname') || fwd_message[0].get('from_jid') || fwd_message[0].get('from_id');
+                            fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
                     if (images) {
@@ -462,9 +464,10 @@ define("xabber-contacts", function () {
                             msg_text = '<span class=text-color-500>' + files.length + ' files</span>';
                     }
 
-                    var chat_content = this.account.chats.get(this.hash_id).item_view.content,
+                    let user_info = message.get('user_info') || {},
+                        chat_content = this.account.chats.get(this.hash_id).item_view.content,
                         is_scrolled = chat_content.isScrolledToBottom(),
-                        msg_author = message.get('from_nickname') || message.get('from_jid') || message.get('from_id'),
+                        msg_author = user_info.nickname || message.get('from_jid') || user_info.id,
                         pinned_msg = {
                             author: msg_author,
                             time: utils.pretty_datetime(message.get('time')),
@@ -494,17 +497,21 @@ define("xabber-contacts", function () {
                 }.bind(this), timeout || 5000);
             },
 
-            lastSeenNewFormat: function (seconds) {
-                if ((seconds >= 0)&&(seconds < 60))
-                    return 'last seen just now';
-                if ((seconds > 60)&&(seconds < 3600))
-                    return ('last seen ' + Math.trunc(seconds/60) + ((seconds < 120) ? ' minute ago' : ' minutes ago'));
-                if ((seconds >= 3600)&&(seconds < 7200))
-                    return ('last seen hour ago');
-                if ((seconds >= 3600*48*2))
-                    return ('last seen '+ moment().subtract(seconds, 'seconds').format('LL'));
-                else
-                    return ('last seen '+ (moment().subtract(seconds, 'seconds').calendar()).toLowerCase());
+            searchByParticipants: function (query, callback) {
+                let participants_list = [];
+                this.participants.forEach(function (participant) {
+                    let jid = participant.get('jid');
+                    // if (jid !== this.account.get('jid')) {
+                        if (query) {
+                            let nickname = participant.get('nickname'),
+                                id = participant.get('id');
+                            if (jid && !jid.toLowerCase().indexOf(query) || id && !id.toLowerCase().indexOf(query) || nickname && !nickname.toLowerCase().indexOf(query))
+                                participants_list.push(participant);
+                        } else
+                            participants_list.push(participant);
+                    // }
+                }.bind(this));
+                callback && callback(participants_list);
             },
 
             showDetails: function (screen) {
@@ -555,7 +562,7 @@ define("xabber-contacts", function () {
                 this.model.get('group_chat') ? this.$('.status-message').text(group_text) : this.$('.status-message').text(this.model.getStatusMessage());
                 if ((this.model.get('status') == 'offline')&&(this.model.get('last_seen'))) {
                     var seconds = (moment.now() - this.model.get('last_seen'))/1000,
-                        new_status = this.model.lastSeenNewFormat(seconds, this.model.get('last_seen'));
+                        new_status = utils.pretty_last_seen(seconds);
                     this.model.set({ status_message: new_status });
                 }
             },
@@ -571,7 +578,7 @@ define("xabber-contacts", function () {
                 if ((this.model.get('status') == 'offline')&&(this.model.get('last_seen'))&&(_.isUndefined(this.interval_last))) {
                     this.interval_last = setInterval(function() {
                         var seconds = (moment.now() - this.model.get('last_seen'))/1000,
-                            new_status = this.model.lastSeenNewFormat(seconds, this.model.get('last_seen'));
+                            new_status = utils.pretty_last_seen(seconds);
                         this.model.set({ status_message: new_status });
                     }.bind(this), 60000);
                 }
@@ -742,7 +749,7 @@ define("xabber-contacts", function () {
         xabber.ContactDetailsView = xabber.BasicView.extend({
             className: 'details-panel contact-details-panel',
             template: templates.contact_details,
-            ps_selector: '.panel-content',
+            ps_selector: '.panel-content-wrap',
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
             events: {
@@ -752,6 +759,7 @@ define("xabber-contacts", function () {
                 "click .btn-delete": "deleteContact",
                 "click .btn-block": "blockContact",
                 "click .btn-unblock": "unblockContact",
+                "click .btn-mute": "changeNotifications",
                 "click .btn-auth-request": "requestAuthorization"
             },
 
@@ -779,7 +787,15 @@ define("xabber-contacts", function () {
                 if (!this.model.get('vcard_updated')) {
                     this.vcard_view.refresh();
                 }
-                this.$('.btn-escape').showIf(options.name === 'all-chats');
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+                // this.$('.btn-escape').showIf(options.name === 'all-chats');
                 this.updateName();
             },
 
@@ -792,6 +808,7 @@ define("xabber-contacts", function () {
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
                 if (_.has(changed, 'status_updated')) this.updateStatus();
+                if (_.has(changed, 'muted')) this.updateNotifications();
                 if (_.has(changed, 'status_message')) this.updateStatusMsg();
                 if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
                     _.has(changed, 'subscription')) {
@@ -832,12 +849,21 @@ define("xabber-contacts", function () {
                 this.$('.btn-unblock').showIf(is_blocked);
                 this.$('.btn-auth-request').showIf(!is_server && in_roster && !is_blocked &&
                     subscription !== 'both' && subscription !== 'to');
-                this.$('.buttons-wrap button').addClass('btn-dark')
-                    .filter(':not(.hidden)').first().removeClass('btn-dark');
+            },
+
+            updateNotifications: function () {
+                this.$('.btn-mute').switchClass('mdi-bell-off', this.model.get('muted'));
+                this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
             openChat: function () {
                 this.model.trigger("open_chat", this.model);
+            },
+
+            changeNotifications: function () {
+                var muted = !this.model.get('muted');
+                this.model.set('muted', muted);
+                this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
             },
 
             addContact: function () {
@@ -886,18 +912,22 @@ define("xabber-contacts", function () {
         xabber.GroupChatDetailsView = xabber.BasicView.extend({
             className: 'details-panel groupchat-details-panel',
             template: templates.group_chats.group_chat_details,
-            ps_selector: '.panel-content',
+            ps_selector: '.panel-content-wrap',
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             events: {
                 "click .btn-join": "joinChat",
-                "click .btn-delete": "deleteContact",
+                "click .btn-block": "blockContact",
+                "click .btn-leave": "leaveGroupChat",
+                "click .btn-invite": "inviteUser",
+                "click .btn-settings": "editProperties",
+                "click .btn-default-restrictions": "editDefaultRestrictions",
                 "click .btn-chat": "openChat",
                 "click .btn-escape": "openChat",
                 "click .btn-delete-all-messages": "retractAllMessages",
                 "change .circle-avatar input": "changeAvatar",
-                "click .nav-item-wrap": "onClickNav"
+                "click .list-variant": "changeList"
             },
 
             _initialize: function () {
@@ -906,7 +936,12 @@ define("xabber-contacts", function () {
                     el: this.$('.name-wrap')[0],
                     model: this.model
                 });
-                this.participants = this.addChild('participants', xabber.ParticipantsView, {model: this.model, el: this.$('.panel-content')[0]});
+                this.participants = this.addChild('participants', xabber.ParticipantsView, {model: this.model, el: this.$('.participants-wrap')[0]});
+                this.edit_groups_view = this.addChild('groups',
+                    xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
+                this.group_chat_properties = this.addChild('properties_view', xabber.GroupChatPropertiesView, {model:this.model, el: this.$('.group-chat-properties-wrap')[0]});
+                this.group_chat_properties_edit = new xabber.GroupChatPropertiesEditView({model: this.model});
+                this.default_restrictions_edit = new xabber.DefaultRestrictionsView({model: this.model});
                 this.model.my_rights = this.model.my_rights || {permissions: [], restrictions: []};
                 this.updateName();
                 this.updateStatus();
@@ -914,21 +949,26 @@ define("xabber-contacts", function () {
                 this.updateColorScheme();
                 this.account.settings.on("change:color", this.updateColorScheme, this);
                 this.model.on("change", this.update, this);
+                this.model.on("permissions_changed", this.updateButtons, this);
             },
 
             render: function (options) {
                 this.updateName();
-                this.$('.btn-escape').showIf(options.name === 'all-chats');
+                this.updateButtons();
+                // this.$('.btn-escape').showIf(options.name === 'all-chats');
                 this.$('.btn-delete').showIf(this.model.get('subscription') === "both");
                 this.$('.btn-join').showIf(this.model.get('subscription') !== "both");
-                this.updateActiveNav('participants');
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
+                this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+                this.updateList('participants');
                 return this;
-            },
-
-            onChangedVisibility: function () {
-                let is_visible = this.isVisible();
-                this.model.set('display', is_visible);
-                is_visible && this.updateDetailsContent('participants');
             },
 
             update: function () {
@@ -943,6 +983,12 @@ define("xabber-contacts", function () {
                 this.$el.attr('data-color', this.account.settings.get('color'));
             },
 
+            updateButtons: function () {
+                let has_permission = this.model.my_info && this.model.my_info.get('permissions').find(permission => (permission.name == 'owner' || permission.name == 'administrator'));
+                this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
+                this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
+            },
+
             updateName: function () {
                 this.$('.main-info .contact-name').text(this.model.get('name'));
                 if (this.model.get('name') != this.model.get('roster_name'))
@@ -955,7 +1001,28 @@ define("xabber-contacts", function () {
                 this.model.invitation.joinGroupChat();
             },
 
-            deleteContact: function (ev) {
+            blockContact: function (    ) {
+                var contact = this.model;
+                utils.dialogs.ask("Block group chat", "Do you want to block group chat "+
+                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
+                    if (result) {
+                        contact.blockRequest();
+                        xabber.trigger("clear_search");
+                    }
+                });
+            },
+
+            editProperties: function (ev) {
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    this.group_chat_properties_edit.open();
+            },
+
+            editDefaultRestrictions: function (ev) {
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    this.default_restrictions_edit.open();
+            },
+
+            leaveGroupChat: function (ev) {
                 var contact = this.model;
                 utils.dialogs.ask("Leave groupchat", "Do you want to leave groupchat "+
                     contact.get('name')+"?", null, { ok_button_text: 'leave'}).done(function (result) {
@@ -969,46 +1036,35 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            onClickNav: function (ev) {
+            inviteUser: function () {
+                xabber.invite_panel.open(this.account, this.model);
+            },
+
+            changeList: function (ev) {
                 let $target = $(ev.target),
-                    section_name = $target.data('section');
-                this.updateActiveNav(section_name);
-                this.updateDetailsContent(section_name);
+                    list_name = $target.data('value');
+                this.updateList(list_name);
             },
 
-            updateActiveNav: function (name) {
-                this.$('.nav-item-wrap').removeClass('active');
-                this.$('.nav-item-wrap[data-section="' + name + '"]').addClass('active');
-            },
-
-            updateDetailsContent: function (name) {
+            updateList: function (name) {
                 let view = this.child(name);
-                !view && (view = this.addDetailsContent(name));
+                !view && (view = this.addList(name));
                 this.$('.panel-footer').showIf(name == 'settings');
-                view && view._render();
+                view && this.$('.select-users-list-wrap .dropdown-button .list-value').data('value', name).text(utils.pretty_name(name)) && view._render();
             },
 
-            addDetailsContent: function (name) {
+            addList: function (name) {
                 let constructor_func;
                 switch (name) {
-                    case 'groups':
-                        constructor_func = xabber.ContactEditGroupsView;
-                        break;
-                    case 'settings':
-                        constructor_func = xabber.GroupChatProperties;
-                        break;
                     case 'blocked':
                         constructor_func = xabber.BlockedView;
                         break;
                     case 'invitations':
                         constructor_func = xabber.InvitationsView;
-                        break
-                    case 'default_restrictions':
-                        constructor_func = xabber.DefaultRestrictionsView;
                         break;
                 };
                 if (constructor_func)
-                    return this.addChild(name, constructor_func, {model: this.model, el: this.$('.panel-content')[0]});
+                    return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
                 else
                     return;
             },
@@ -1077,11 +1133,41 @@ define("xabber-contacts", function () {
                 }.bind(this));}
         });
 
-        xabber.GroupChatProperties = xabber.BasicView.extend({
-            template: templates.group_chats.group_info,
+        xabber.GroupChatPropertiesView = xabber.BasicView.extend({
+            template: templates.group_chats.group_chat_properties,
+
+            _initialize: function () {
+                this.$el.html(this.template());
+                this.contact = this.model;
+                this.account = this.model.account;
+                this.model.on("change:name", this.updateName, this);
+                this.model.on("change:group_info", this.update, this);
+            },
+
+            render: function () {
+                this.update();
+            },
+
+            update: function () {
+                let info = this.model.get('group_info') || {};
+                this.$('.jabber-id .value').text(info.jid);
+                this.$('.name .value').text(info.name);
+                this.$('.description .value').text(info.description);
+                this.$('.model .value').text(utils.pretty_name(info.model));
+                this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
+                this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
+            }
+        });
+
+        xabber.GroupChatPropertiesEditView = xabber.BasicView.extend({
+            className: 'modal dialog-modal group-chat-properties-edit',
+            template: templates.group_chats.group_chat_properties_edit,
+
             events: {
-                "click .btn-submit": "saveChanges",
-                "click .btn-group-info-cancel": "cancelChanges"
+                "click .btn-save": "saveChanges",
+                "click .btn-cancel": "close",
+                "change input": "updateSaveButton",
+                "keyup .property-wrap .text-field": "updateSaveButton"
             },
 
             _initialize: function () {
@@ -1092,17 +1178,33 @@ define("xabber-contacts", function () {
                 this.model.on("change:group_info", this.update, this);
             },
 
-            _render: function (options) {
-                this.$el.html(this.template()).removeClass('overflow-visible');
-                this.update();
+            open: function () {
+                this.$el.openModal({
+                    ready: function () {
+                        this.update();
+                        this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
+                        this.updateScrollBar();
+                    }.bind(this),
+                    complete: function () {
+                        this.update();
+                        this.$el.detach();
+                        this.$('.modal-content').css('height', '100%');
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            close: function () {
+                this.$el.closeModal({
+                    complete: function () {
+                        this.update();
+                        this.hide.bind(this);
+                    }.bind(this)
+                });
             },
 
             updateName: function () {
                 this.$('.name-info-wrap').find('.name').find('.value').text(this.model.get('name'));
-            },
-
-            cancelChanges: function () {
-                this.update();
             },
 
             update: function () {
@@ -1111,64 +1213,77 @@ define("xabber-contacts", function () {
                 this.$('.jid-info-wrap .jabber-id').find('.value').text(info.jid);
                 this.$('p[id="anonymous-' + info.anonymous + '"]').removeClass('hidden');
                 this.$('.name-field #new_name_value').val(info.name);
-                this.$('.description-field textarea').text(info.description);
+                this.$('.description-field textarea').val(info.description);
                 this.$('.global-field input[id="indexation-' + info.searchable +'"]').prop('checked', true);
                 this.$('.membership-field input[id="membership-' + info.model +'"]').prop('checked', true);
             },
 
             saveChanges: function() {
-                if (this.$('.btn-submit').hasClass('non-active'))
+                if (this.$('.btn-save').hasClass('non-active'))
                     return;
-                this.$('button').blur().addClass('non-active');
                 let new_name = this.$('input[name=chat_name]').val(),
                     new_searchable = this.$('.global-field input:checked').attr('id').substr(11),
                     new_description = this.$('.description-field textarea').val(),
                     new_model = this.$('.membership-field input:checked').attr('id').substr(11),
-                    info = this.contact.get('group_info') || {}, hasChanges = false,
+                    info = this.contact.get('group_info') || {}, has_changes = false,
                     iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                         .c('update', {xmlns: Strophe.NS.GROUP_CHAT});
                 if (info.name != new_name) {
-                    hasChanges = true;
+                    has_changes = true;
                     iq.c('name').t(new_name).up();
                 }
                 if (info.description != new_description) {
-                    hasChanges = true;
+                    has_changes = true;
                     iq.c('description').t(new_description).up();
                 }
                 if (info.searchable != new_searchable) {
-                    hasChanges = true;
+                    has_changes = true;
                     iq.c('index').t(new_searchable).up();
                 }
                 if (info.model != new_model) {
-                    hasChanges = true;
+                    has_changes = true;
                     iq.c('membership').t(new_model).up();
                 }
-                if (hasChanges)
+                if (has_changes)
                     this.account.sendIQ(iq, function () {
                         this.$('button').removeClass('non-active');
                     }.bind(this), function (error) {
                         this.$('button').removeClass('non-active');
                         let err_text = $(error).find('error text').text() || 'You have no permission to change chat properties';
-                        this.cancelChanges();
+                        this.close();
                         utils.dialogs.error(err_text);
                     }.bind(this));
                 else
                     this.$('button').removeClass('non-active');
+            },
+
+            updateSaveButton: function () {
+                let new_name = this.$('input[name=chat_name]').val(),
+                    new_searchable = this.$('.global-field input:checked').attr('id').substr(11),
+                    new_description = this.$('.description-field textarea').val(),
+                    new_model = this.$('.membership-field input:checked').attr('id').substr(11),
+                    info = this.contact.get('group_info') || {}, has_changes = false;
+                (info.name != new_name) && (has_changes = true);
+                (info.description != new_description) && (has_changes = true);
+                (info.searchable != new_searchable) && (has_changes = true);
+                (info.model != new_model) && (has_changes = true);
+                this.$('.btn-save').switchClass('non-active', !has_changes);
             }
+
         });
 
         xabber.InvitationsView = xabber.BasicView.extend({
             events: {
                 "click .revoke-invitation": "revokeInvitation"
             },
-            status: 'invited',
+            status: 'invitations',
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             _initialize: function (options) {
                 this.contact = options.model;
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
-                this.$navbar = this.$el.prev();
+                this.$current_list = this.$el.prev().find('.dropdown-button .list-value');
             },
 
             _render: function () {
@@ -1184,33 +1299,34 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
 
                 this.account.sendIQ(iq, function (response) {
-                    if (this.$navbar.find('.nav-item-wrap.active[data-section="' + this.vname + '"]').length) {
-                        this.$el.html($('<div class="invitations-list-wrap"/>'));
+                    if (this.$current_list.data('value') === this.status) {
+                        this.$el.html("");
                         $(response).find('query').find('user').each(function (idx, item) {
                             let user = {jid: $(item).attr('jid'), status: this.status},
                                 $item_view = $(templates.group_chats.invited_member_item(user)),
                                 avatar = Images.getDefaultAvatar(user.jid);
+                            this.$el.append($item_view);
                             $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
-                            this.$('.invitations-list-wrap').append($item_view);
                         }.bind(this));
                         if (!$(response).find('query').find('user').length)
                             this.$el.html(this.$error.text('No pending invitations'));
                     }
                     }.bind(this),
                     function(err) {
-                        if (this.$navbar.find('.nav-item-wrap.active[data-section="' + this.vname + '"]').length)
+                        if (this.$current_list.data('value') === this.status)
                             this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see invitations list'));
                     }.bind(this));
             },
 
             revokeInvitation: function (ev) {
-                let $member_item = $(ev.target).closest('.invited-user'),
+                let $member_item = $(ev.target).closest('.invitations-user'),
                     member_jid = $member_item.data('jid'),
                     iq = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                         .c('jid').t(member_jid);
                 this.account.sendIQ(iq, function () {
                     $member_item.remove();
+                    !this.$el.children().length && this.$el.html(this.$error.text('No pending invitations'));
                 }.bind(this));
             }
         });
@@ -1226,7 +1342,7 @@ define("xabber-contacts", function () {
                 this.contact = options.model;
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
-                this.$navbar = this.$el.prev();
+                this.$current_list = this.$el.prev().find('.dropdown-button .list-value');
             },
 
             _render: function () {
@@ -1241,21 +1357,21 @@ define("xabber-contacts", function () {
                     to: this.contact.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
                 this.account.sendIQ(iq, function (response) {
-                    if (this.$navbar.find('.nav-item-wrap.active[data-section="' + this.vname + '"]').length) {
-                        this.$el.html($('<div class="blocked-list-wrap"/>'));
+                   if (this.$current_list.data('value') === this.status) {
                         $(response).find('query').find('user').each(function (idx, item) {
+                            this.$el.html("");
                             let user = {jid: $(item).attr('jid'), status: this.status},
                                 $item_view = $(templates.group_chats.invited_member_item(user)),
                                 avatar = Images.getDefaultAvatar(user.jid);
+                            this.$el.append($item_view);
                             $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
-                            this.$('.blocked-list-wrap').append($item_view);
                         }.bind(this));
                         if (!$(response).find('query').find('user').length)
                             this.$el.html(this.$error.text('Block list is empty'));
                     }
                     }.bind(this),
                     function(err) {
-                        if (this.$navbar.find('.nav-item-wrap.active[data-section="' + this.vname + '"]').length)
+                        if (this.$current_list.data('value') === this.status)
                             this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see blocked list'));
                     }.bind(this));
             },
@@ -1268,6 +1384,7 @@ define("xabber-contacts", function () {
                         .c('jid').t(member_jid);
                 this.account.sendIQ(iq, function () {
                     $member_item.remove();
+                    !this.$el.children().length && this.$el.html(this.$error.text('Block list is empty'));
                 }.bind(this));
             }
         });
@@ -1280,34 +1397,48 @@ define("xabber-contacts", function () {
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             events: {
-                "click .group-chat-member": "showParticipantProperties",
+                "click .group-chat-participant": "showParticipantProperties",
                 "keyup .participants-search-form" : "keyUpSearch",
-                "click .btn-invite-user": "inviteUser",
                 "click .close-search-icon": "clearSearch",
-                "mouseover .group-chat-member": "showJid",
-                "mouseleave .group-chat-member": "hideJid"
+                "mouseover .group-chat-participant": "showJid",
+                "mouseleave .group-chat-participant": "hideJid"
             },
 
             _initialize: function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
-                this.participant_placeholder = $(templates.group_chats.participant_placeholder());
+                this.model.on("update_participants", this.updateParticipants, this);
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
             _render: function () {
-                this.$el.html(this.template()).addClass(this.className);
-                this.$('.left-column').addClass('request-waiting');
-                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this, el: this.$('.right-column')[0]});
-                this.participantsRequest();
-                this.$('.right-column').html(this.participant_placeholder);
+                this.$el.html(this.template()).addClass('request-waiting');
+                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this});
+                this.updateParticipants();
                 this.$('.members-list-wrap').perfectScrollbar({theme: 'item-list'});
                 if (!this.model.all_rights)
                     this.model.getAllRights();
                 return this;
             },
 
-            participantsRequest: function () {
+            updateParticipants: function () {
+                this.participantsRequest(function (version) {
+                    if (this.participants.length != this.model.get('group_info').members_num) {
+                        this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
+                        this.participants.resetParticipants();
+                        this.updateParticipants();
+                        return;
+                    }
+                    version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
+                    (this.participants.version < version) && this.participants.updateVersion();
+                    this.participants.each(function (participant) {
+                        this.renderMemberItem(participant);
+                    }.bind(this));
+                    this.$el.removeClass('request-waiting');
+                }.bind(this));
+            },
+
+            participantsRequest: function (callback) {
                 this.model.membersRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
@@ -1322,18 +1453,7 @@ define("xabber-contacts", function () {
                         else
                             this.participants.createFromStanza($item);
                     }.bind(this));
-                    if (this.participants.length != this.model.get('group_info').members_num) {
-                        this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
-                        this.participants.resetParticipants();
-                        this.participantsRequest();
-                        return;
-                    }
-                    version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
-                    (this.participants.version < version) && this.participants.updateVersion();
-                    this.participants.each(function (participant) {
-                        this.renderMemberItem(participant);
-                    }.bind(this));
-                    this.$el.find('.left-column').removeClass('request-waiting');
+                    callback && callback(version);
                 }.bind(this));
             },
 
@@ -1345,14 +1465,14 @@ define("xabber-contacts", function () {
                 if (view.length) {
                     view.hasClass('active') && $item_view.addClass('active');
                     if (attrs.jid == this.account.get('jid'))
-                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-member-item text-color-700">(this is you)</span>');
+                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-participant-item text-color-700">(this is you)</span>');
                     $item_view.insertBefore(view);
                     view.detach();
                 }
                 else {
                     if (attrs.jid == this.account.get('jid')) {
                         $item_view.prependTo(this.$('.members-list-wrap .owners'));
-                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-member-item text-color-700">(this is you)</span>');
+                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-participant-item text-color-700">(this is you)</span>');
                     }
                     else
                         $item_view.appendTo(this.$('.members-list-wrap .'+ attrs.role.toLowerCase() + 's'));
@@ -1382,34 +1502,28 @@ define("xabber-contacts", function () {
             },
 
             showParticipantProperties: function (ev) {
-                    var participant_item = $(ev.target).closest('.group-chat-member'),
+                    var participant_item = $(ev.target).closest('.group-chat-participant'),
                         participant_id = participant_item.attr('data-id'),
                         participant = this.model.participants.get(participant_id);
                     if (participant)
-                        this.participant_properties_panel.render(participant);
+                        this.participant_properties_panel.open(participant);
                     else
                         this.membersRequest({id: participant_id}, function (response) {
                             let $item = $($(response).find('query item'));
                             $item.length && this.model.participants && (participant = this.model.participants.createFromStanza($item));
-                            this.participant_properties_panel.render(participant);
+                            this.participant_properties_panel.open(participant);
                         }.bind(this));
-                    this.$('.group-chat-member.active').removeClass('active');
-                    this.$('.list-item[data-id="'+ this.participant_properties_panel.member.id +'"]').addClass('active');
-            },
-
-            inviteUser: function () {
-                xabber.invite_panel.open(this.account, this.model);
             },
 
             showJid: function (ev) {
-                var $target_item = $(ev.target).closest('.group-chat-member');
+                var $target_item = $(ev.target).closest('.group-chat-participant');
                 $target_item.find('.last-seen.one-line').addClass('hidden');
                 $target_item.find('.jid.one-line').removeClass('hidden');
                 $target_item.find('.id.one-line').removeClass('hidden');
             },
 
             hideJid: function (ev) {
-                var $target_item = $(ev.target).closest('.group-chat-member');
+                var $target_item = $(ev.target).closest('.group-chat-participant');
                 $target_item.find('.jid.one-line').addClass('hidden');
                 $target_item.find('.id.one-line').addClass('hidden');
                 $target_item.find('.last-seen.one-line').removeClass('hidden');
@@ -1424,7 +1538,7 @@ define("xabber-contacts", function () {
 
             searchParticipant: function () {
                 let query = this.$('.participants-search-form input').val().toLowerCase();
-                this.$('.members-list-wrap .group-chat-member').each(function (idx, item) {
+                this.$('.members-list-wrap .group-chat-participant').each(function (idx, item) {
                     let $this = $(item),
                         participant_id = $this.data('id'),
                         participant = this.model.participants.find(participant => participant.get('id') === participant_id);
@@ -1448,86 +1562,463 @@ define("xabber-contacts", function () {
         });
 
         xabber.ParticipantPropertiesView = xabber.BasicView.extend({
+            className: 'modal dialog-modal edit-rights',
             template: templates.group_chats.participant_rights,
             member_details_avatar_size: constants.AVATAR_SIZES.PARTICIPANT_DETAILS_ITEM,
+            ps_selector: '.modal-content',
+            ps_settings: {theme: 'item-list'},
 
             events: {
-                "click .btn-cancel-changes": "updateRightsView",
+                "click .btn-cancel-changes": "close",
                 "click .clickable-field input": "changeRights",
-                "click .btn-block-user": "blockMember",
                 "click .btn-save-user-rights": "saveRights",
                 "click .nickname": "editNickname",
-                "click .badge": "editBadge",
                 "change .circle-avatar input": "changeAvatar",
-                "click .btn-retract-user-message": "retractUserMessages",
-                "click .btn-request-messages": "getParticipantMessages",
+                "click .btn-block-participant": "blockParticipant",
+                "click .btn-set-badge": "editBadge",
+                "click .btn-participant-messages": "getParticipantMessages",
+                "click .btn-chat": "getPrivateChat",
                 "click .property-variant": "changeTimerValue",
                 "keydown .rich-textarea": "checkKeydown",
                 "keyup .rich-textarea": "checkKeyup"
             },
 
-            _initialize: function (options) {
+            _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model.model;
-                this.modal_window = options.modal_window;
             },
 
-            render: function (this_member) {
-                this.$el.html(this.template());
-                this.member = this_member;
+            open: function (participant) {
+                this.participant = participant;
+                this.render();
+                this.$el.openModal({
+                    ready: function () {
+                        this.$el.css('height', "");
+                        if (($(window).height() * 0.1 + this.$el.height()) > $(window).height())
+                            this.$el.css('height', $(window).height() * 0.9);
+                        this.$('.modal-content').css('max-height', 'calc(100% - ' + (56 + this.$('.header').height()) + 'px)');
+                        this.scrollToTop();
+                        this.updateSaveButton();
+                        let dropdown_settings = {
+                            inDuration: 100,
+                            outDuration: 100,
+                            constrainWidth: false,
+                            hover: false,
+                            alignment: 'left'
+                        };
+                        this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
+                    }.bind(this),
+                    complete: function () {
+                        this.render();
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            close: function () {
+                this.$el.closeModal({
+                    complete: function () {
+                        this.render();
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            render: function () {
                 this.new_avatar = "";
-                let attrs = this.member.attributes,
+                let attrs = this.participant.attributes,
                     $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
-                this.updateMemberAvatar(this.member);
+                this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
+                this.updateMemberAvatar(this.participant);
                 this.participant_messages = [];
                 this.actual_rights = [];
-                this.$('.btn-escape').showIf(this.$el.hasClass('modal participant-rights-panel') && this.modal_window);
-                /*if (this.contact.get('group_info'))
-                    if (this.contact.get('group_info').anonymous === 'incognito')
-                        this.$('.btn-request-messages').addClass('hidden');*/
                 this.renderAllRights();
                 this.setActualRights();
                 this.updateScrollBar();
-                let dropdown_settings = {
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    alignment: 'left',
-                    container: this.$el.find('.content')[0]
-                };
-                this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
-                this.$('.member-info #edit-nickname').on("focusout", function () {
+                this.$('.participant-info #edit-nickname').on("focusout", function () {
                     let new_nickname = _.escape(this.$('#edit-nickname').getTextFromRichTextarea().trim());
                     if (new_nickname === "")
-                        new_nickname = this.member.get('nickname');
-                    this.$('.member-info #edit-nickname').hide();
-                    this.showMemberInfo();
-                    this.$('label[for="edit-nickname"]').hide();
-                    this.$('.member-info .insert-emoticon').hide();
+                        new_nickname = this.participant.get('nickname');
+                    this.$('.participant-info #edit-nickname').hide();
+                    this.$('.participant-info .nickname').show();
                     this.updateNickname(new_nickname);
                 }.bind(this));
-                this.$('.member-info #edit-badge').on("focusout", function () {
-                    let new_badge = _.escape(this.$('#edit-badge').getTextFromRichTextarea().trim()),
-                        new_badge_length = new_badge.length;
-                    if (new_badge.removeEmoji().length !== new_badge.length) {
-                        new_badge_length = new_badge.removeEmoji().length + (new_badge.length - new_badge.removeEmoji().length)/2;
-                    }
-                    if (new_badge_length > 8) {
-                        utils.dialogs.error("Badge can't be longer than 8 symbols");
+                this.$('.content').perfectScrollbar({theme: 'item-list'});
+            },
+
+            updateMemberAvatar: function (member) {
+                let participant_id = member.get('id'),
+                    $avatar = this.$('.participant-details-item[data-id="'+ participant_id +'"] .circle-avatar');
+                member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
+                $avatar.setAvatar(member.image, this.member_details_avatar_size);
+                this.$('.participant-details-item[data-id="'+ member.id +'"]').emojify('.badge', {emoji_size: 18});
+                if (member.get('avatar')) {
+                    if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id))) {
+                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
                     }
                     else {
-                        this.$('.member-info #edit-badge').hide();
-                        this.showMemberInfo();
-                        this.$('label[for="edit-badge"]').hide();
-                        this.$('.member-info .insert-emoticon').hide();
-                        this.updateBadge(new_badge);
+                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
+                        this.contact.getAvatar(member.avatar, node, function (avatar) {
+                            this.$('.participant-details-item[data-id="'+ participant_id +'"] .circle-avatar').setAvatar(avatar, this.member_details_avatar_size);
+                        }.bind(this));
+                    }
+                }
+                else {
+                    if (this.account.chat_settings.getHashAvatar(participant_id))
+                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                }
+            },
+
+            updateRightsView: function (ev) {
+                !$(ev.target).hasClass('non-active') && this.render(this.participant);
+            },
+
+            getParticipantMessages: function (options, callback) {
+                this.contact.messages_view = new xabber.ParticipantMessagesView({contact: this.contact, model: this.participant.attributes });
+                this.contact.messages_view.messagesRequest(options, function () {
+                    this.close();
+                    xabber.body.setScreen('all-chats', {right: 'participant_messages', contact: this.contact});
+                }.bind(this));
+            },
+
+            changeAvatar: function (ev) {
+                var field = ev.target;
+                if (!field.files.length) {
+                    return;
+                }
+                var file = field.files[0];
+                field.value = '';
+                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                    utils.dialogs.error('File is too large');
+                } else if (!file.type.startsWith('image')) {
+                    utils.dialogs.error('Wrong image');
+                }
+
+                utils.images.getAvatarFromFile(file).done(function (image) {
+                    if (image) {
+                        file.base64 = image;
+                        this.new_avatar = file;
+                        this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size);
+                        this.updateSaveButton();
                     }
                 }.bind(this));
-                this.$('.content').perfectScrollbar({theme: 'item-list'});
+            },
 
+            changeTimerValue: function (ev) {
+                let $property_item = $(ev.target),
+                    $property_value = $property_item.closest('.select-timer').find('.property-value'),
+                    $input_item = $property_item.closest('.right-item').find('input');
+                if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
+                    $property_item.closest('.right-item').addClass('changed-timer changed');
+                    this.updateSaveButton();
+                }
+                $property_value.text($property_item.text());
+                $property_value.attr('data-value', $property_item.attr('data-value'));
+                if ($property_item.attr('data-value') === 'never') {
+                    $property_value.addClass('default-value').text('set timer');
+                } else if ($property_value.hasClass('default-value'))
+                    $property_value.removeClass('default-value');
+                if (!$input_item.prop('checked')) {
+                    $input_item.click();
+                }
+            },
 
+            updateBadge: function (badge) {
+                this.$('.badge').html(badge).switchClass('hidden', !badge);
+                this.$('.participant-info').emojify('.badge');
+            },
+
+            updateButtons: function (has_changes) {
+                this.$('.btn-save-user-rights').switchClass('non-active', !has_changes);
+            },
+
+            updateSaveButton: function () {
+                let has_changes = this.$('.changed').length;
+                this.updateButtons(has_changes);
+            },
+
+            updateNickname: function (nickname) {
+                let $member_item = this.$('.participant-details-item[data-id="' + this.participant.get('id') + '"]'),
+                    $member_item_nickname = $member_item.find('.nickname');
+                $member_item_nickname.html(nickname);
+                $member_item.emojify('.nickname');
+                if (nickname !== this.participant.get('nickname'))
+                    $member_item_nickname.addClass('changed');
+                else
+                    $member_item_nickname.removeClass('changed');
+                this.updateSaveButton();
+            },
+
+            editNickname: function () {
+                this.$('.participant-info .nickname').hide();
+                this.$('.participant-info #edit-nickname').text(this.$('.participant-info .nickname').text()).show().placeCaretAtEnd();
+            },
+
+            editBadge: function () {
+                this.edit_badge_panel = new xabber.EditBadgeView({model: this});
+            },
+
+            checkKeydown: function (ev) {
+                if (ev.keyCode === constants.KEY_ENTER) {
+                    ev.preventDefault();
+                    $(document.activeElement).blur();
+                }
+            },
+
+            checkKeyup: function (ev) {
+                let $richtextarea = $(ev.target),
+                    new_value = _.escape($richtextarea.getTextFromRichTextarea().trim());
+                if (ev.target.id === 'edit-nickname') {
+                    let has_changes = (new_value !== this.participant.get('nickname'));
+                    this.updateButtons(has_changes);
+                }
+            },
+
+            retractUserMessages: function () {
+                utils.dialogs.ask("User messages retraction", "Do you want to delete all messages of " + (this.participant.get('nickname') || this.participant.get('jid') || this.participant.get('id')) + " in this groupchat?", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        if (this.participant.get('id')) {
+                            let group_chat = this.account.chats.getChat(this.model.model);
+                            group_chat.retractMessagesByUser(this.participant.get('id'));
+                        }
+                    }
+                }.bind(this));
+            },
+
+            blockParticipant: function () {
+                utils.dialogs.ask("Block participant", "Do you want to block "+
+                    this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
+                    if (result) {
+                        let contact_id = this.participant.get('id'),
+                            jid = this.account.resources.connection.jid,
+                            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                                .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
+                                .c('id').t(contact_id);
+                        this.account.sendIQ(iq, function () {
+                                this.close();
+                                this.model.$el.find('.members-list-wrap .group-chat-participant[data-id="' + contact_id + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                            }.bind(this),
+                            function (error) {
+                                if ($(error).find('not-allowed').length)
+                                    utils.dialogs.error("You have no permission to block participants");
+                            });
+                    }
+                }.bind(this));
+            },
+
+            renderAllRights: function () {
+                if (this.contact.all_rights) {
+                    this.$('.restrictions-wrap').html("");
+                    this.$('.permissions-wrap').html("");
+                    this.contact.all_rights.restrictions.each(function (idx, restriction) {
+                        var name = $(restriction).attr('name'),
+                            pretty_name = $(restriction).attr('translation'),
+                            restriction_item = $(templates.group_chats.restriction_item({name: name, pretty_name: pretty_name})),
+                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
+                        restriction_item.append(restriction_expire);
+                        this.$('.restrictions-wrap').append(restriction_item);
+                        this.$('.right-item #' + name).prop('checked', false);
+                    }.bind(this));
+                    this.contact.all_rights.permissions.each(function (idx, permission) {
+                        var name = $(permission).attr('name'),
+                            pretty_name = $(permission).attr('translation'),
+                            permission_item = $(templates.group_chats.permission_item({name: name, pretty_name: pretty_name})),
+                            permission_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
+                        permission_item.append(permission_expire);
+                        this.$('.permissions-wrap').append(permission_item);
+                        this.$('.right-item #' + name).prop('checked', false);
+                    }.bind(this));
+                }
+            },
+
+            setActualRights: function () {
+                var permissions = this.participant.get('permissions'), restrictions = this.participant.get('restrictions');
+                permissions.forEach(
+                    function(permission) {
+                    let permission_name = permission.name,
+                        $current_permission = this.$('.right-item.permission-' + permission_name);
+                    this.actual_rights.push(permission_name);
+                    $current_permission.find('#' + permission_name).prop('checked', true);
+                    $current_permission.attr('data-switch', true);
+                    let expires_year = parseInt(moment(permission.expires_time).format('YYYY')),
+                        issued_at_year = parseInt(moment(permission.issued_time).format('YYYY'));
+                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
+                        if (expires_year - issued_at_year > 1)
+                            return;
+                    $current_permission.find('.select-timer .property-value').attr('data-value', permission.expires_time)
+                        .removeClass('default-value')
+                        .text(moment(permission.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
+                }.bind(this));
+                restrictions.forEach(function(restriction) {
+                    let restriction_name = restriction.name,
+                        $current_restriction = this.$('.right-item.restriction-' + restriction_name);
+                    this.actual_rights.push(restriction_name);
+                    $current_restriction.find('#' + restriction_name).prop('checked', true);
+                    $current_restriction.attr('data-switch', true);
+                    let expires_year = parseInt(moment(restriction.expires_time).format('YYYY')),
+                        issued_at_year = parseInt(moment(restriction.issued_time).format('YYYY'));
+                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
+                        if (expires_year - issued_at_year > 1)
+                            return;
+                    $current_restriction.find('.select-timer .property-value').attr('data-value', restriction.expires_time)
+                        .removeClass('default-value')
+                        .text(moment(restriction.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
+                }.bind(this));
+            },
+
+            getPrivateChat: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    return;
+                let participant_jid = this.participant.get('jid'),
+                    participant_in_roster = this.account.contacts.get(participant_jid);
+                if (!participant_jid) {
+                    let iq = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
+                        .c('disclosure', { xmlns: Strophe.NS.GROUP_CHAT, type: 'propose'})
+                        .c('recipient', { id: this.participant.get('id')});
+                    this.account.sendIQ(iq, function () {
+                        this.close();
+                        utils.dialogs.notify('Participant info', 'You sent your properties to participant. If participant wants, he/she will contact you.');
+                    }, function () {
+                        this.close();
+                        utils.dialogs.error('Function is not implemented yet');
+                    });
+                }
+                else {
+                    if (participant_in_roster)
+                        if (participant_in_roster.get('in_roster')) {
+                            this.close();
+                            participant_in_roster.trigger('open_chat', participant_in_roster);
+                            return;
+                        }
+                    this.close();
+                    xabber.add_contact_view.show({
+                        account: this.account,
+                        jid: participant_jid
+                    });
+                }
+            },
+
+            changeRights: function (ev) {
+                let $target = $(ev.target),
+                    $right_item = $target.closest('.right-item'),
+                    right_name = $target.prop('id');
+                if ($target.prop('checked')) {
+                    if (!this.actual_rights.find(right => right === right_name))
+                        $right_item.addClass('changed');
+                    else
+                        if ($right_item.hasClass('changed-timer'))
+                            $right_item.addClass('changed');
+                        else
+                            $right_item.removeClass('changed');
+                }
+                else {
+                    if (this.actual_rights.find(right => right === right_name))
+                        $right_item.addClass('changed');
+                    else {
+                        $right_item.removeClass('changed');
+                        if ($right_item.hasClass('changed-timer'))
+                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', 'never');
+                    }
+                }
+                this.updateSaveButton();
+            },
+
+            saveRights: function (ev) {
+                if ($(ev.target).hasClass('non-active'))
+                    return;
+                let $btn = $(ev.target),
+                    jid = this.account.get('jid'),
+                    member_id = this.participant.get('id'),
+                    $participant_avatar = this.$('.participant-details-item .circle-avatar'),
+                    nickname_value = _.escape(this.$('.participant-info .nickname').text()),
+                    changed_avatar = this.new_avatar,
+                    has_changes = false,
+                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
+                        .c('item', {id: member_id});
+                this.$('.buttons-wrap button').addClass('non-active');
+                changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
+                if (nickname_value != this.participant.get('nickname')) {
+                    has_changes = true;
+                    iq_changes.c('nickname').t(_.unescape(nickname_value)).up();
+                }
+                this.$('.right-item').each(function(idx, right_item) {
+                    if ($(right_item).hasClass('changed')) {
+                        var $right_item = $(right_item),
+                            right_type = $right_item.hasClass('restriction') ? 'restriction' : 'permission',
+                            right_name = $right_item.find('.field input')[0].id;
+                        if ($right_item.find('.field input:checked').val()) {
+                            let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value');
+                            iq_changes.c(right_type, {name: right_name, expires: right_expire}).up();
+                            has_changes = true;
+                        }
+                        else
+                            if ($right_item.attr('data-switch')) {
+                                iq_changes.c(right_type, {name: right_name, expires: 'now'}).up();
+                                has_changes = true;
+                            }
+                    }
+                }.bind(this));
+                if (changed_avatar)
+                    this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
+                        this.$('.buttons-wrap button').removeClass('non-active');
+                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
+                        this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                    }.bind(this), function (error) {
+                        this.$('.buttons-wrap button').removeClass('non-active');
+                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        let error_text = $(error).find('text').text() || 'You have no permissions to change avatar';
+                        !has_changes && utils.dialogs.error(error_text);
+                    });
+                if (has_changes)
+                    this.account.sendIQ(iq_changes,
+                        function () {
+                            this.$('.buttons-wrap button').removeClass('non-active');
+                            this.participant.set('nickname', nickname_value);
+                            this.close();
+                        }.bind(this),
+                        function (error) {
+                            this.$('.buttons-wrap button').removeClass('non-active');
+                            this.close();
+                            if ($(error).find('not-allowed').length) {
+                                utils.dialogs.error("You have no permission to change participant's info");
+                            }
+                        }.bind(this));
+                $btn.blur();
+            }
+        });
+
+        xabber.EditBadgeView = xabber.BasicView.extend({
+            className: 'modal edit-badge',
+            template: templates.group_chats.badge_edit_view,
+
+            events: {
+                "click .btn-cancel": "close",
+                "click .btn-save": "saveNewBadge",
+                "keydown .badge-text": "checkKey"
+            },
+
+            _initialize: function () {
+                this.account = this.model.account;
+                this.contact = this.model.contact;
+                this.participant = this.model.participant;
+                this.$el.openModal({
+                    ready: function () {
+                        if (this.participant.get('badge'))
+                            this.typeEmoticon(this.participant.get('badge'));
+                        else
+                            this.$('.badge-text').focus();
+                    }.bind(this),
+                    complete: function () {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
                 var $insert_emoticon = this.$('.insert-emoticon'),
                     $emoji_panel_wrap = this.$('.emoticons-panel-wrap'),
                     $emoji_panel = this.$('.emoticons-panel'),
@@ -1577,431 +2068,96 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
+            close: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            saveNewBadge: function () {
+                let new_badge = _.escape(this.$('.badge-text').getTextFromRichTextarea().trim());
+                if (new_badge.length > 32) {
+                    this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
+                }
+                else {
+                    if (new_badge != this.participant.get('badge')) {
+                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                            .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
+                            .c('item', {id: this.participant.get('id')})
+                            .c('badge').t(_.unescape(new_badge));
+                        this.account.sendIQ(iq_changes, function () {
+                                this.model.updateBadge(new_badge);
+                                this.close();
+                            }.bind(this),
+                            function () {
+                                this.$('.modal-content .error').text("You have no permission");
+                            }.bind(this))
+                    }
+                }
+            },
+
             typeEmoticon: function (emoji) {
-                var emoji_node = emoji.emojify({tag_name: 'img', emoji_size: 24}),
-                    $textarea = $(document.activeElement);
+                var emoji_node = emoji.emojify({tag_name: 'img'}),
+                    $textarea = this.$('.badge-text');
                 $textarea.focus();
                 window.document.execCommand('insertHTML', false, emoji_node);
-                $textarea.keyup();
             },
 
-            updateMemberAvatar: function (member) {
-                let participant_id = member.get('id'),
-                    $avatar = this.$('.member-details-item[data-id="'+ participant_id +'"] .circle-avatar');
-                member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
-                $avatar.setAvatar(member.image, this.member_details_avatar_size);
-                this.$('.member-details-item[data-id="'+ member.id +'"]').emojify('.badge', {emoji_size: 18});
-                if (member.get('avatar')) {
-                    if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id))) {
-                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
-                    }
-                    else {
-                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
-                        this.contact.getAvatar(member.avatar, node, function (avatar) {
-                            this.$('.member-details-item[data-id="'+ participant_id +'"] .circle-avatar').setAvatar(avatar, this.member_details_avatar_size);
-                        }.bind(this));
-                    }
-                }
-                else {
-                    if (this.account.chat_settings.getHashAvatar(participant_id))
-                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
-                }
-            },
-
-            updateRightsView: function (ev) {
-                !$(ev.target).hasClass('non-active') && this.render(this.member);
-            },
-
-            getParticipantMessages: function (options, callback) {
-                this.contact.messages_view = new xabber.ParticipantMessagesView({contact: this.contact, model: this.member.attributes });
-                this.contact.messages_view.messagesRequest(options, function () {
-                    if (this.modal_window && this.$el.hasClass('modal participant-rights-panel')) {
-                        this.modal_window.close();
-                    }
-                    xabber.body.setScreen('all-chats', {right: 'participant_messages', contact: this.contact});
-                }.bind(this));
-            },
-
-            changeAvatar: function (ev) {
-                var field = ev.target;
-                if (!field.files.length) {
-                    return;
-                }
-                var file = field.files[0];
-                field.value = '';
-                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
-                    utils.dialogs.error('File is too large');
-                } else if (!file.type.startsWith('image')) {
-                    utils.dialogs.error('Wrong image');
-                }
-
-                utils.images.getAvatarFromFile(file).done(function (image) {
-                    if (image) {
-                        file.base64 = image;
-                        this.new_avatar = file;
-                        this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size);
-                        this.updateSaveButton();
-                    }
-                }.bind(this));
-            },
-
-            changeTimerValue: function (ev) {
-                let $property_item = $(ev.target),
-                    $property_value = $property_item.closest('.select-timer').find('.property-value'),
-                    $input_item = $property_item.closest('.right-item').find('input');
-                if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
-                    $property_item.closest('.right-item').addClass('changed-timer changed');
-                    this.updateSaveButton();
-                }
-                $property_value.text($property_item.text());
-                $property_value.attr('data-value', $property_item.attr('data-value'));
-                if ($property_item.attr('data-value') === 'never') {
-                    $property_value.addClass('default-value').text('set timer');
-                } else if ($property_value.hasClass('default-value'))
-                    $property_value.removeClass('default-value');
-                if (!$input_item.prop('checked')) {
-                    $input_item.click();
-                }
-            },
-
-            updateBadge: function (badge) {
-                let $member_item = this.$('.member-details-item[data-id="' + this.member.get('id') + '"]'),
-                    $member_item_badge = $member_item.find('.badge');
-                $member_item_badge.attr('data-badge', badge);
-                if (badge === "") {
-                    $member_item_badge.addClass('default-value');
-                    $member_item_badge.text('set badge');
-                }
-                else {
-                    $member_item_badge.removeClass('default-value');
-                    $member_item_badge.html(badge);
-                    $member_item.emojify('.badge');
-                }
-                if (badge !== this.member.get('badge'))
-                    $member_item_badge.addClass('changed');
-                else
-                    $member_item_badge.removeClass('changed');
-                this.updateSaveButton();
-            },
-
-            activateButtons: function () {
-                this.$('.btn-save-user-rights').removeClass('hidden');
-                this.$('.btn-cancel-changes').removeClass('hidden');
-                this.$('.btn-block-user').addClass('hidden');
-                this.$('.btn-request-messages').addClass('hidden');
-            },
-
-            deactivateButtons: function () {
-                this.$('.btn-save-user-rights').addClass('hidden');
-                this.$('.btn-cancel-changes').addClass('hidden');
-                this.$('.btn-block-user').removeClass('hidden');
-                this.$('.btn-request-messages').removeClass('hidden');
-            },
-
-            updateSaveButton: function () {
-                if (this.$('.changed').length) {
-                    this.activateButtons();
-                }
-                else {
-                    this.deactivateButtons();
-                }
-            },
-
-            updateNickname: function (nickname) {
-                let $member_item = this.$('.member-details-item[data-id="' + this.member.get('id') + '"]'),
-                    $member_item_nickname = $member_item.find('.nickname');
-                $member_item_nickname.html(nickname);
-                $member_item.emojify('.nickname');
-                if (nickname !== this.member.get('nickname'))
-                    $member_item_nickname.addClass('changed');
-                else
-                    $member_item_nickname.removeClass('changed');
-                this.updateSaveButton();
-            },
-
-            showMemberInfo: function () {
-                this.$('.member-info .nickname').show();
-                this.$('.member-info .badge').show();
-                this.$('.member-info .jid').show();
-            },
-
-            hideMemberInfo: function () {
-                this.$('.member-info .nickname').hide();
-                this.$('.member-info .badge').hide();
-                this.$('.member-info .jid').hide();
-            },
-
-            showElements: function (element_id) {
-                this.$('label[for="' + element_id + '"]').show();
-                this.$('.member-info #' + element_id).html("").show().focus();
-            },
-
-            editNickname: function () {
-                this.hideMemberInfo();
-                this.showElements('edit-nickname');
-                this.typeEmoticon(this.$('.member-info .nickname').text());
-            },
-
-            editBadge: function () {
-                this.hideMemberInfo();
-                this.showElements('edit-badge');
-                this.$('.member-info .insert-emoticon').show();
-                this.typeEmoticon(this.$('.member-info .badge').attr('data-badge'));
-            },
-
-            checkKeydown: function (ev) {
+            checkKey: function (ev) {
                 if (ev.keyCode === constants.KEY_ENTER) {
                     ev.preventDefault();
-                    $(document.activeElement).blur();
+                    this.saveNewBadge();
                 }
-            },
-
-            checkKeyup: function (ev) {
-                let $richtextarea = $(ev.target),
-                    new_value = _.escape($richtextarea.getTextFromRichTextarea().trim());
-                if (ev.target.id === 'edit-badge') {
-                    if (new_value !== this.member.get('badge'))
-                        this.activateButtons();
-                    else
-                        this.deactivateButtons();
-                }
-                if (ev.target.id === 'edit-nickname') {
-                    if (new_value !== this.member.get('nickname'))
-                        this.activateButtons();
-                    else
-                        this.deactivateButtons();
-                }
-            },
-
-            retractUserMessages: function () {
-                utils.dialogs.ask("User messages retraction", "Do you want to delete all messages of " + (this.member.get('nickname') || this.member.get('jid') || this.member.get('id')) + " in this groupchat?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        if (this.member.get('id')) {
-                            let group_chat = this.account.chats.getChat(this.model.model);
-                            group_chat.retractMessagesByUser(this.member.get('id'));
-                        }
-                    }
-                }.bind(this));
-            },
-
-            blockMember: function () {
-                let contact_id = this.member.get('id'),
-                    jid = this.account.resources.connection.jid,
-                    iq = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
-                        .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
-                        .c('id').t(contact_id);
-                this.account.sendIQ(iq, function () {
-                        if (this.modal_window && this.$el.hasClass('modal participant-rights-panel')) {
-                            this.modal_window.close();
-                        }
-                        else
-                            this.$el.html("");
-                        this.model.$el.find('.members-list-wrap .group-chat-member[data-id="' + contact_id + '"]').remove();
-                        this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
-                    }.bind(this),
-                    function (error) {
-                        if ($(error).find('not-allowed').length)
-                            utils.dialogs.error("You have no permission to block participants");
-                    });
-            },
-
-            renderAllRights: function () {
-                if (this.contact.all_rights) {
-                    this.contact.all_rights.restrictions.each(function (idx, restriction) {
-                        var name = $(restriction).attr('name'),
-                            pretty_name = $(restriction).attr('translation'),
-                            restriction_item = $(templates.group_chats.restriction_item({name: name, pretty_name: pretty_name})),
-                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
-                        restriction_item.append(restriction_expire);
-                        this.$('.dialog-restrictions-edit').append(restriction_item);
-                        this.$('.right-item #' + name).prop('checked', false);
-                    }.bind(this));
-                    this.contact.all_rights.permissions.each(function (idx, permission) {
-                        var name = $(permission).attr('name'),
-                            pretty_name = $(permission).attr('translation'),
-                            permission_item = $(templates.group_chats.permission_item({name: name, pretty_name: pretty_name})),
-                            permission_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
-                        permission_item.append(permission_expire);
-                        this.$('.dialog-permissions-edit').append(permission_item);
-                        this.$('.right-item #' + name).prop('checked', false);
-                    }.bind(this));
-                }
-            },
-
-            setActualRights: function () {
-                var permissions = this.member.get('permissions'), restrictions = this.member.get('restrictions');
-                permissions.forEach(function(permission) {
-                    let permission_name = permission.name,
-                        $current_permission = this.$('.right-item.permission-' + permission_name);
-                    this.actual_rights.push(permission_name);
-                    $current_permission.find('#' + permission_name).prop('checked', true);
-                    $current_permission.attr('data-switch', true);
-                    let expires_year = parseInt(moment(permission.expires_time).format('YYYY')),
-                        issued_at_year = parseInt(moment(permission.issued_time).format('YYYY'));
-                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
-                        if (expires_year - issued_at_year > 1)
-                            return;
-                    $current_permission.find('.select-timer .property-value').attr('data-value', permission.expires_time)
-                        .removeClass('default-value')
-                        .text(moment(permission.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
-                }.bind(this));
-                restrictions.forEach(function(restriction) {
-                    let restriction_name = restriction.name,
-                        $current_restriction = this.$('.right-item.restriction-' + restriction_name);
-                    this.actual_rights.push(restriction_name);
-                    $current_restriction.find('#' + restriction_name).prop('checked', true);
-                    $current_restriction.attr('data-switch', true);
-                    let expires_year = parseInt(moment(restriction.expires_time).format('YYYY')),
-                        issued_at_year = parseInt(moment(restriction.issued_time).format('YYYY'));
-                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
-                        if (expires_year - issued_at_year > 1)
-                            return;
-                    $current_restriction.find('.select-timer .property-value').attr('data-value', restriction.expires_time)
-                        .removeClass('default-value')
-                        .text(moment(restriction.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
-                }.bind(this));
-            },
-
-            changeRights: function (ev) {
-                let $target = $(ev.target),
-                    $right_item = $target.closest('.right-item'),
-                    right_name = $target.prop('id');
-                if ($target.prop('checked')) {
-                    if (!this.actual_rights.find(right => right === right_name))
-                        $right_item.addClass('changed');
-                    else
-                        if ($right_item.hasClass('changed-timer'))
-                            $right_item.addClass('changed');
-                        else
-                            $right_item.removeClass('changed');
-                }
-                else {
-                    if (this.actual_rights.find(right => right === right_name))
-                        $right_item.addClass('changed');
-                    else {
-                        $right_item.removeClass('changed');
-                        if ($right_item.hasClass('changed-timer'))
-                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', 'never');
-                    }
-                }
-                this.updateSaveButton();
-            },
-
-            saveRights: function (ev) {
-                if ($(ev.target).hasClass('non-active'))
-                    return;
-                let $btn = $(ev.target),
-                    jid = this.account.get('jid'),
-                    member_id = this.member.get('id'),
-                    $participant_avatar = this.$('.member-details-item .circle-avatar'),
-                    nickname_value = _.escape(this.$('.member-info .nickname').text()),
-                    badge_value = _.escape(this.$('.member-info .badge').getTextFromRichTextarea().trim()),
-                    changed_avatar = this.new_avatar,
-                    has_changes = false,
-                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
-                        .c('item', {id: member_id});
-                this.$('.buttons-wrap button').addClass('non-active');
-                changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
-                if (nickname_value != this.member.get('nickname')) {
-                    has_changes = true;
-                    iq_changes.c('nickname').t(_.unescape(nickname_value)).up();
-                }
-                if (badge_value != this.member.get('badge')) {
-                    if (this.$('.member-info .badge.default-value').length) {
-                        if (this.member.get('badge')) {
-                            has_changes = true;
-                            iq_changes.c('badge').t("").up();
-                        }
-                    }
-                    else
-                    {
-                        has_changes = true;
-                        iq_changes.c('badge').t(_.unescape(badge_value)).up();
-                    }
-                }
-                this.$('.right-item').each(function(idx, right_item) {
-                    if ($(right_item).hasClass('changed')) {
-                        var $right_item = $(right_item),
-                            right_type = $right_item.hasClass('restriction') ? 'restriction' : 'permission',
-                            right_name = $right_item.find('.field input')[0].id;
-                        if ($right_item.find('.field input:checked').val()) {
-                            let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value');
-                            iq_changes.c(right_type, {name: right_name, expires: right_expire}).up();
-                            has_changes = true;
-                        }
-                        else
-                            if ($right_item.attr('data-switch')) {
-                                iq_changes.c(right_type, {name: right_name, expires: 'now'}).up();
-                                has_changes = true;
-                            }
-                    }
-                }.bind(this));
-                if (changed_avatar)
-                    this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
-                        this.$('.buttons-wrap button').removeClass('non-active');
-                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
-                        this.$('.member-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
-                    }.bind(this), function (error) {
-                        this.$('.buttons-wrap button').removeClass('non-active');
-                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        let error_text = $(error).find('text').text() || 'You have no permissions to change avatar';
-                        !has_changes && utils.dialogs.error(error_text);
-                    });
-                if (has_changes)
-                    this.account.sendIQ(iq_changes,
-                        function () {
-                            this.$('.buttons-wrap button').removeClass('non-active');
-                            if (this.modal_window && this.$el.hasClass('modal participant-rights-panel')) {
-                                this.modal_window.close();
-                            }
-                            else {
-                                this.$('.changed').removeClass('changed');
-                                $btn.blur();
-                                this.updateSaveButton();
-                                this.member.set('badge', badge_value);
-                                this.member.set('nickname', nickname_value);
-                            }
-                        }.bind(this),
-                        function (error) {
-                            this.$('.buttons-wrap button').removeClass('non-active');
-                            if (this.modal_window && this.$el.hasClass('modal participant-rights-panel')) {
-                                this.modal_window.close();
-                            }
-                            else {
-                                this.updateRightsView();
-                            }
-                            if ($(error).find('not-allowed').length) {
-                                utils.dialogs.error("You have no permission to change participant's info");
-                            }
-                        }.bind(this));
-                $btn.blur();
             }
+
         });
 
+
         xabber.DefaultRestrictionsView = xabber.BasicView.extend({
+            className: 'modal dialog-modal edit-default-restrictions',
             template: templates.group_chats.default_restrictions,
             events: {
-                "click .btn-default-restrictions-update": "saveChanges",
-                "click .btn-default-restrictions-cancel": "showDefaultRestrictions",
+                "click .btn-default-restrictions-save": "saveChanges",
+                "click .btn-default-restrictions-cancel": "close",
                 "change #default_restriction_expires": "changeExpiresTime",
                 "click .group-info-editor .property-variant": "changePropertyValue",
                 "click .select-timer .property-variant": "changeTimerValue",
                 "click .clickable-field input": "changeRestriction",
-                "keyup .clickable-field input": "keyUpInput"
+                "keyup .clickable-field input": "keyUpInput",
+                "change .clickable-field input": "updateSaveButton"
             },
 
-            _initialize: function (options) {
-                this.contact = options.model;
+            _initialize: function () {
+                this.contact = this.model;
                 this.account = this.contact.account;
                 this.model.on("change: name", this.updateName, this);
                 this.model.on("change: group_info", this.update, this);
             },
 
-            _render: function () {
+            open: function () {
+                this.$el.openModal({
+                    ready: function () {
+                        this.update();
+                        this.updateScrollBar();
+                    }.bind(this),
+                    complete: function () {
+                        this.showDefaultRestrictions();
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            close: function () {
+                this.$el.closeModal({
+                    complete: function () {
+                        this.showDefaultRestrictions();
+                        this.hide.bind(this);
+                    }.bind(this)
+                });
+            },
+
+            update: function () {
+                this.$('.btn-default-restrictions-save').addClass('non-active');
                 this.actual_default_restrictions = [];
-                this.$el.html(this.template()).addClass('request-waiting');
                 this.showDefaultRestrictions();
                 let dropdown_settings = {
                     inDuration: 100,
@@ -2011,6 +2167,23 @@ define("xabber-contacts", function () {
                     alignment: 'left'
                 };
                 this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
+            },
+
+            updateSaveButton: function () {
+                let has_changes = false;
+                this.$('.default-restrictions-list-wrap .right-item').each(function (idx, item) {
+                    let $item = $(item),
+                        restriction_name = $item.find('input').attr('id'),
+                        restriction_expires = $item.find('.select-timer .property-value').attr('data-value');
+                    restriction_name = restriction_name.slice(8, restriction_name.length);
+                    if (!this.actual_default_restrictions.find(restriction => ((restriction.name == restriction_name) && (restriction.expires == restriction_expires)))) {
+                        if ($item.find('input').prop('checked'))
+                            has_changes = true;
+                        else if (this.actual_default_restrictions.find(restriction => restriction.name == restriction_name))
+                            has_changes = true;
+                    }
+                }.bind(this));
+                this.$('.btn-default-restrictions-save').switchClass('non-active', !has_changes);
             },
 
             changeRestriction: function (ev) {
@@ -2046,6 +2219,7 @@ define("xabber-contacts", function () {
                     $property_value.removeClass('default-value');
                 if (!$input_item.prop('checked'))
                     $input_item.prop('checked', true);
+                this.updateSaveButton();
             },
 
             showDefaultRestrictions: function () {
@@ -2093,6 +2267,8 @@ define("xabber-contacts", function () {
             },
 
             saveChanges: function () {
+                if (this.$('.btn-default-restrictions-save').hasClass('non-active'))
+                    return;
                 this.$('button').blur();
                 let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}),
@@ -2110,20 +2286,20 @@ define("xabber-contacts", function () {
                             }).up();
                             has_new_default_restrictions = true;
                         }
-                    }
-                    else if (this.actual_default_restrictions.find(restriction => restriction.name == restriction_name)) {
-                        iq_change_default_rights.c('restriction', {name: restriction_name, expires: 'now'}).up();
-                        has_new_default_restrictions = true;
+                        else if (this.actual_default_restrictions.find(restriction => restriction.name == restriction_name)) {
+                            iq_change_default_rights.c('restriction', {name: restriction_name, expires: 'now'}).up();
+                            has_new_default_restrictions = true;
+                        }
                     }
                 }.bind(this));
 
                 if (has_new_default_restrictions)
                     this.account.sendIQ(iq_change_default_rights, function () {
-                        this.showDefaultRestrictions();
+                        this.close();
                     }.bind(this), function () {
                         let err_text = $(error).find('error text').text() || 'You have no permission to change default restrictions';
                         utils.dialogs.error(err_text);
-                        this.showDefaultRestrictions();
+                        this.close();
                     }.bind(this));
             },
 
@@ -2261,7 +2437,7 @@ define("xabber-contacts", function () {
                     };
 
                 let participant = this.mergeParticipant(attrs);
-                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant);
+                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('permissions_changed');
                 this.account.groupchat_settings.updateParticipant(this.contact.get('jid'), attrs);
                 return participant;
             }
@@ -2361,8 +2537,86 @@ define("xabber-contacts", function () {
             }
         });
 
+        xabber.PrivateInvitation =  xabber.BasicView.extend({
+            className: 'details-panel invitation-view',
+            template: templates.group_chats.private_invitation,
+            avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
+            ps_selector: '.panel-content',
+
+            events: {
+                "click .btn-accept": "acceptInvitation",
+                "click .btn-decline": "declineInvitation"
+            },
+
+            _initialize: function () {
+                this.accepted = false;
+                this.contact = this.model;
+                this.account = this.model.account;
+                this.chat = this.account.chats.getChat(this.model);
+            },
+
+            render: function () {
+                this.updateParticipantInfo();
+                this.updateAvatar();
+                this.updateMessage();
+            },
+
+            showInvitation: function (user_info) {
+                this.participant_info = user_info.participant_info;
+                this.group_chat_jid = user_info.group_chat_jid;
+                this.updateMessage();
+            },
+
+            updateMessage: function () {
+                this.$('.invite-msg .invite-msg-text')
+                    .text('Participant ' + this.participant_info.nickname + ' from group chat ' + this.group_chat_jid + ' wants to chat with you. If you accept, user will know your real info');
+            },
+
+            updateParticipantInfo: function () {
+                this.$('.name-wrap').text(this.participant_info.nickname);
+                this.$('.badge').switchClass('hidden', !this.participant_info.badge).text(this.participant_info.badge);
+                this.$('.main-info').emojify('.badge', {emoji_size: 18});
+                this.$('.jid').text(this.participant_info.jid);
+            },
+
+            updateAvatar: function () {
+                let avatar = Images.getDefaultAvatar(this.participant_info.nickname || this.participant_info.jid),
+                    participant = this.account.contacts.get(this.group_chat_jid).participants.get(this.participant_info.id);
+                if (participant)
+                    avatar = participant.get('b64_avatar') || avatar;
+                else {
+                    let cached_avatar = this.account.chat_settings.getAvatarInfoById(this.participant_info.id);
+                    cached_avatar && (cached_avatar.hash_id == this.participant_info.avatar) && (avatar = cached_avatar.avatar_b64);
+                }
+                this.$('.circle-avatar').setAvatar(avatar, this.avatar_size);
+            },
+
+            acceptInvitation: function () {
+                this.answerRequest();
+                let iq = $iq({from: this.account.get('jid'), to: this.group_chat_jid, type: 'set'})
+                    .c('disclosure', { xmlns: Strophe.NS.GROUP_CHAT, type: 'accept'})
+                    .c('recipient', { id: this.participant_info.id});
+                this.account.sendIQ(iq, function () {
+                    if (!this.contact.get('in_roster'))
+                        this.contact.pushInRoster();
+                }.bind(this));
+                this.contact.trigger('open_chat', this.contact);
+            },
+
+            declineInvitation: function () {
+                this.answerRequest();
+                this.contact.trigger('open_chat', this.contact);
+            },
+
+            answerRequest: function () {
+                this.chat.set('is_accepted', true);
+                this.chat.item_view.content.readMessages();
+                this.contact.private_invitation = null;
+            }
+        });
+
         xabber.ContactInvitationView = xabber.BasicView.extend({
-            className: 'details-panel contact-details-panel invitation',
+            className: 'details-panel invitation-view',
             template: templates.group_chats.group_chat_invitation,
             ps_selector: '.panel-content',
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
@@ -2385,7 +2639,6 @@ define("xabber-contacts", function () {
                 this.$('.invite-msg .invite-msg-text')
                     .text('User requests permission to add you to his contact list. If you accept, '+ this.model.get('jid') + ' will also be added to ' +  this.account.get('jid') + ' contacts');
                 this.model.on("change", this.update, this);
-                this.on("change:invite_message", this.onChangedInviteMessage, this);
             },
 
             render: function (options) {
@@ -2485,8 +2738,8 @@ define("xabber-contacts", function () {
             },
 
             changeInviteStatus: function() {
-                var contact = this.model;
-                var chat = this.account.chats.get(contact.hash_id);
+                let contact = this.model,
+                    chat = this.account.chats.get(contact.hash_id);
                 chat.set('is_accepted', true);
                 chat.item_view.content.readMessages();
                 var invites = chat.item_view.content.$('.auth-request');
@@ -2594,10 +2847,6 @@ define("xabber-contacts", function () {
                 this.account = this.parent.account;
                 this.model = this.parent.model;
                 this.model.on("change:in_roster update_groups", this.render, this);
-            },
-
-            _render: function () {
-                this.render();
             },
 
             render: function () {
@@ -2834,7 +3083,7 @@ define("xabber-contacts", function () {
 
             updateMembersCounter: function () {
                 var counter = this.model.get('counter');
-                this.$('.member-counter').text('('+counter.online+'/'+counter.all+')');
+                this.$('.participant-counter').text('('+counter.online+'/'+counter.all+')');
             },
 
             onContactAdded: function (contact) {
@@ -3237,10 +3486,12 @@ define("xabber-contacts", function () {
                     this.onRosterIQ(iq);
                     if (!$(iq).children('query').find('item').length)
                         this.account.cached_roster.getAllFromRoster(function (roster_items) {
-                            if (roster_items !== null) {
-                                $(roster_items).each(function (idx, roster_item) {
-                                    this.contacts.mergeContact(roster_item);
-                                }.bind(this));
+                            $(roster_items).each(function (idx, roster_item) {
+                                this.contacts.mergeContact(roster_item);
+                            }.bind(this));
+                            if (!roster_items.length) {
+                                this.roster_version = 0;
+                                this.getFromServer();
                             }
                         }.bind(this));
                     this.account.sendPresence();
@@ -3873,7 +4124,7 @@ define("xabber-contacts", function () {
                 }
             },
 
-            addContact: function (ev) {
+            addContact: function () {
                 this.$('span.errors').text('').addClass('hidden');
                 var jid = this.$('input[name=username]').removeClass('invalid').val().trim(),
                     name = this.$('input[name=contact_name]').removeClass('invalid').val(),
@@ -3983,7 +4234,7 @@ define("xabber-contacts", function () {
 
             getAllFromRoster: function (callback) {
                 this.database.get_all('roster_items', null, function (response_value) {
-                    callback && callback(response_value);
+                    callback && callback(response_value || []);
                 });
             },
 

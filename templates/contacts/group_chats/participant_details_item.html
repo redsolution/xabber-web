@@ -1,5 +1,4 @@
-<div class="member-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
-    <div class="member-item">
+<div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
         <div class="circle-avatar">
             <input title="Change avatar" type="file">
             <img>
@@ -21,22 +20,30 @@
             </div>
             </div>
         </div>
-        <div class="member-info">
-            <div class="insert-emoticon">
-                <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>
-            </div>
-            <div class="emoticons-panel-wrap">
-                <div class="emoticons-panel"></div>
-            </div>
+        <div class="participant-info">
             <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>
-            <label for="edit-nickname">set nickname</label>
-            <div id="edit-badge" class="rich-textarea" tabindex="2" contenteditable></div>
-            <label for="edit-badge">set badge</label>
-            <div class="nickname-with-badge"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div data-badge="{{badge}}" class="badge one-line">{{badge}}</div>{[} else {]}<div data-badge="" class="badge default-value one-line">set badge</div>{[}]}</div>{[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}
+            <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>
+            <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
+            {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}
         </div>
-</div>
-</div>
-<div class="btn-escape">
-    <i class="mdi mdi-24px mdi-close"></i>
-    <span class="btn-text">Esc</span>
+    <div class="buttons-wrap">
+        <div class="button-wrap non-active btn-chat-wrap">
+            <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
+            <div class="btn-name">Direct chat</div>
+        </div>
+        <div class="button-wrap btn-participant-messages-wrap">
+            <i class="mdi mdi-24px mdi-view-list btn-participant-messages"></i>
+            <div class="btn-name">Messages</div>
+        </div>
+        <div class="button-wrap btn-set-badge-wrap">
+            <svg class="btn-set-badge" viewBox="0 0 24 24">
+                <path d="M17,3H14V6H10V3H7A2,2 0 0,0 5,5V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V5A2,2 0 0,0 17,3M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M16,16H8V15C8,13.67 10.67,13 12,13C13.33,13 16,13.67 16,15V16M13,5H11V1H13V5M16,19H8V18H16V19M12,21H8V20H12V21Z" />
+            </svg>
+            <div class="btn-name">Set badge</div>
+        </div>
+        <div class="button-wrap btn-block-participant-wrap">
+            <i class="mdi mdi-24px mdi-account-off btn-block-participant"></i>
+            <div class="btn-name">Block</div>
+        </div>
+    </div>
 </div>

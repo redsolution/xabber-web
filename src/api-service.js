@@ -1048,7 +1048,7 @@ define("xabber-api-service", function () {
                 var social_elem = $(ev.target).closest('.social-linked-item-wrap'),
                     provider = social_elem.attr('id');
                 if (provider === 'email') {
-                    utils.dialogs.ask_enter_value("Add email", null, {input_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
+                    utils.dialogs.ask_enter_value("Add email", null, {input_placeholder_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
                         if (mail) {
                             this.model._call_method('POST', '/accounts/current/email_list/', {email: mail},
                                 function (mail_data) {
@@ -1073,7 +1073,7 @@ define("xabber-api-service", function () {
             var $target = $(ev.target),
                 $email_html = $target.closest('.social-linked-item-wrap'),
                 email_address = $email_html.data('email');
-            utils.dialogs.ask_enter_value("Confirm email", null, {input_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
+            utils.dialogs.ask_enter_value("Confirm email", null, {input_placeholder_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
                 if (code) {
                     if (code === email_address) {
                         this.model._call_method('POST', '/accounts/current/email_list/', {email: code});

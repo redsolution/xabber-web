@@ -146,6 +146,19 @@ define([
             }
         },
 
+        pretty_last_seen: function (seconds) {
+            if ((seconds >= 0)&&(seconds < 60))
+                return 'last seen just now';
+            if ((seconds > 60)&&(seconds < 3600))
+                return ('last seen ' + Math.trunc(seconds/60) + ((seconds < 120) ? ' minute ago' : ' minutes ago'));
+            if ((seconds >= 3600)&&(seconds < 7200))
+                return ('last seen hour ago');
+            if ((seconds >= 3600*48*2))
+                return ('last seen '+ moment().subtract(seconds, 'seconds').format('LL'));
+            else
+                return ('last seen '+ (moment().subtract(seconds, 'seconds').calendar()).toLowerCase());
+        },
+
         pretty_duration: function (duration) {
             if (_.isUndefined(duration))
                 return undefined;
@@ -155,6 +168,64 @@ define([
                 return ("0:" + duration);
             if (duration > 60)
                 return (Math.trunc(duration/60) + ":" + ((duration%60 < 10) ? ("0" + (duration%60)) : duration%60));
+        },
+
+        pretty_name: function (name) {
+            return name[0].toUpperCase() + name.replace(/-/,' ').substr(1);
+        },
+
+        slice_string: function (str, from, to) {
+            to = _.isNumber(to) ? to : [...str].length;
+            if (str.length === [...str].length)
+                return str.slice(from, to);
+            else
+                return Array.from(str).slice(from, to).join("");
+        },
+
+        slice_pretty_body: function (body, legacy_refs) {
+            let pretty_body = Array.from(body);
+            legacy_refs && legacy_refs.forEach(function (legacy_ref) {
+                for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
+                    pretty_body[idx] = "";
+            }.bind(this));
+            return pretty_body.join("");
+        },
+
+        markupBodyMessage: function (message) {
+            let attrs = _.clone(message.attributes),
+                body = attrs.original_message || attrs.message,
+                mentions = attrs.mentions || [],
+                markups = attrs.markups || [],
+                legacy_refs = attrs.legacy_content || [],
+                markup_body = Array.from(_.escape(_.unescape(body)));
+
+            mentions.concat(markups).forEach(function (markup) {
+                let start_idx = markup.start,
+                    end_idx = markup.end,
+                    mark_up = markup.markups || [],
+                    mention = markup.uri || "";
+                if (mark_up.length) {
+                    let start_tags = "",
+                        end_tags = "";
+                    mark_up.forEach(function (mark_up_style) {
+                        start_tags = '<' + mark_up_style[0].toLowerCase() + '>' + start_tags;
+                        end_tags += '</' + mark_up_style[0].toLowerCase() + '>';
+                    }.bind(this));
+                    markup_body[start_idx] = start_tags + markup_body[start_idx];
+                    markup_body[end_idx] += end_tags;
+                }
+                else {
+                    markup_body[start_idx] = '<span data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
+                    markup_body[end_idx] += '</span>';
+                }
+            }.bind(this));
+
+            legacy_refs.forEach(function (legacy) {
+                for (let idx = legacy.start; idx <= legacy.end; idx++)
+                    markup_body[idx] = "";
+            }.bind(this));
+
+            return markup_body.join("");
         },
 
         copyTextToClipboard: function(text, callback_msg, errback_msg) {

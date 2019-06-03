@@ -263,7 +263,8 @@ define("xabber-views", function () {
         events: {
             "keyup .search-input": "keyUpOnSearch",
             "focusout .search-input": "clearSearchSelection",
-            "click .close-search-icon": "clearSearch"
+            "click .close-search-icon": "clearSearch",
+            "click .list-item": "onClickItem"
         },
 
         keyUpOnSearch: function (ev) {
@@ -284,7 +285,10 @@ define("xabber-views", function () {
             }
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 ev.preventDefault();
-                return this.clearSearch();
+                if ($(ev.target).val())
+                    return this.clearSearch();
+                else
+                    this.close();
             }
             this.updateSearch();
         },
@@ -320,8 +324,10 @@ define("xabber-views", function () {
                 this.clearSearchSelection();
                 if (query)
                     this.search(query.toLowerCase());
-                else
+                else {
                     this.$('.list-item').removeClass('hidden');
+                    this.onEmptyQuery();
+                }
                 this.updateScrollBar();
                 this.query = false;
                 this._update_search_timeout = setTimeout(function () {
@@ -341,16 +347,22 @@ define("xabber-views", function () {
 
         clearSearchSelection: function (ev) {
             this.selection_id = null;
-            this.$('.item-list .selected').removeClass('selected');
+            this.$('.list-item.selected').removeClass('selected');
         },
 
         searchAll: function () {
             this.$('.list-item').removeClass('hidden');
         },
 
+        close: function () {},
+
         search: function () {},
 
-        onEnterPressed: function () {}
+        onEnterPressed: function () {},
+
+        onEmptyQuery: function () {},
+
+        onClickItem: function () {}
     });
 
     xabber.InputWidget = Backbone.View.extend({

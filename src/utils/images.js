@@ -67,15 +67,15 @@ define(["xabber-dependencies"], function (deps) {
             second_letter = (first_name.length > 1 ? first_name[1] : '');
         }
         // color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
-        canvas.width = 128;
-        canvas.height = 128;
-        ctx.rect(0, 0, 128, 128);
+        canvas.width = 256;
+        canvas.height = 256;
+        ctx.rect(0, 0, 256, 256);
         ctx.fillStyle = getAccountColor(name);//COLORS[color_index];
         ctx.fill();
-        ctx.font = "bold 50px sans-serif";
+        ctx.font = "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
-        ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 64, 80);
+        ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
         var image = canvas.toDataURL().replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
         return image;
     };

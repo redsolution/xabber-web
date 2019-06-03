@@ -48,13 +48,13 @@ define("xabber-discovery", function () {
             );
             this.addFeature(Strophe.NS.LAST, 'XEP-0012: Last Activity');
             this.addFeature(Strophe.NS.VCARD, 'XEP-0054: vCard-temp');
-            this.addFeature(Strophe.NS.CHATSTATES, 'XEP-0085: Chat State Notifications');
-            this.addFeature(Strophe.NS.RECEIPTS, 'XEP-0184: Message Delivery Receipts');
+            this.addFeature(Strophe.NS.RSM, 'XEP-0059: Result Set Management');
+            this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
-            this.addFeature(Strophe.NS.CHAT_MARKERS, 'XEP-0333: Chat Markers');
+            this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         },
 
