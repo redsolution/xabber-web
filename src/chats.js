@@ -328,7 +328,7 @@ define("xabber-chats", function () {
             if (options.context_message)
                 return this.account.context_messages.create(attrs);
 
-            if (options.echo_msg)
+            if (options.echo_msg && message)
                 message.set(attrs);
 
             message = this.create(attrs);
