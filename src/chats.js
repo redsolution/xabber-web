@@ -311,9 +311,13 @@ define("xabber-chats", function () {
             }
 
             $delay.length && (attrs.time = $delay.attr('stamp'));
-            attrs.carbon_copied && (attrs.state = constants.MSG_SENT);
+            (attrs.carbon_copied || options.synced_msg) && (attrs.state = constants.MSG_SENT);
             options.is_archived && (attrs.state = constants.MSG_ARCHIVED);
-            options.echo_msg && (attrs.state = constants.MSG_DELIVERED);
+            options.synced_msg && (attrs.is_archived = true);
+            if (options.echo_msg) {
+                attrs.state = constants.MSG_DELIVERED;
+                attrs.from_jid = this.account.get('jid');
+            }
             (options.context_message || options.participant_message || options.searched_message) && (attrs.state = constants.MSG_ARCHIVED);
 
             if (options.pinned_message)
@@ -328,8 +332,9 @@ define("xabber-chats", function () {
             if (options.context_message)
                 return this.account.context_messages.create(attrs);
 
-            if (options.echo_msg && message)
+            if (options.echo_msg && message) {
                 message.set(attrs);
+            }
 
             message = this.create(attrs);
             return message;
@@ -384,7 +389,7 @@ define("xabber-chats", function () {
 
         recountUnread: function () {
             this.set('unread', this.messages_unread.length);
-            if ((this.contact.get('archived'))&&(this.contact.get('muted'))) {
+            if (this.contact.get('archived') && this.contact.get('muted')) {
             }
             else {
                 xabber.toolbar_view.recountAllMessageCounter();
@@ -476,14 +481,14 @@ define("xabber-chats", function () {
                 return;
             }
 
-            if (!options.is_archived) {
+            if (!options.is_archived && !options.synced_msg) {
                 if ($message.find('invite').length)
                     return this.messages.createInvitationFromStanza($message, options);
                 else
                     return this.messages.createFromStanza($message, options);
             }
 
-            if (options.is_archived) {
+            if (options.is_archived || options.synced_msg) {
                 if ($message.find('invite').length) {
                     let group_jid = $message.find('invite').attr('jid') || $message.find('message').attr('from'),
                         contact = this.account.contacts.get(group_jid);
@@ -969,8 +974,8 @@ define("xabber-chats", function () {
 
         open: function (options) {
             options || (options = {clear_search: true});
-            if ((!this.model.get('history_loaded'))&&(this.model.messages.length < 20))
-                this.content.loadPreviousHistory();
+            /*if (!this.model.get('history_loaded') && (this.model.messages.length < 20))
+                this.content.loadPreviousHistory();*/
             xabber.chats_view.openChat(this, options);
         },
 
@@ -1445,7 +1450,7 @@ define("xabber-chats", function () {
             this.account.contacts.on("change:image", this.updateAvatar, this);
             this.account.on("change", this.updateMyInfo, this);
             this.account.dfd_presence.done(function () {
-                this.loadLastHistory();
+                !this.account.connection.do_synchronization && this.loadLastHistory();
             }.bind(this));
             return this;
         },
@@ -2589,19 +2594,19 @@ define("xabber-chats", function () {
                 });
 
             if (forwarded_message) {
-                let forward_node = $build('reference', {xmlns: Strophe.NS.REFERENCE, type: 'forward'});
+                stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, type: 'forward'});
                 $(forwarded_message).each(function (idx, fwd_msg) {
-                    forward_node.c('forwarded', {xmlns:'urn:xmpp:forward:0'})
+                    stanza.c('forwarded', {xmlns:'urn:xmpp:forward:0'})
                         .c('delay', {
                             xmlns: 'urn:xmpp:delay',
                             stamp: fwd_msg.get('time')
                         }).up().cnode(fwd_msg.get('xml')).up().up();
                 });
-                legacy_body = _.escape(_.unescape(this.bottom.createTextMessage([message], "", true).trim()));
-                legacy_body = legacy_body.slice(0, legacy_body.length - _.escape(body).length);
-                stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: 0, end: legacy_body.length - 1, type: 'legacy'})
-                    .cnode(forward_node.tree()).up().up();
-                body = _.unescape(legacy_body) + body;
+                stanza.up();
+                legacy_body = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([message], "", true).trim())));
+                legacy_body = legacy_body.slice(0, legacy_body.length - Array.from(_.escape(body)).length);
+                stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: 0, end: legacy_body.length - 1, type: 'legacy'}).up();
+                body = _.unescape(legacy_body.join("")) + body;
             }
 
             if (message.get('mentions') && message.get('mentions').length) {
@@ -3666,7 +3671,7 @@ define("xabber-chats", function () {
                 let $received_message = $stanza_received.children('forwarded').children('message'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id') || $received_message.children('origin-id').first().attr('id');
                 if ($received_message.length) {
-                    return this.receiveChatMessage($received_message[0], {echo_msg: true});
+                    this.receiveChatMessage($received_message[0], {echo_msg: true});
                     /*let msg = this.account.messages.get($received_message.children('origin-id').attr('id'));
                     if (!msg)
                         return this.receiveChatMessage($received_message[0], {echo_msg: true});
@@ -3690,6 +3695,13 @@ define("xabber-chats", function () {
                             this.setArchiveId($stanza_received);
                     }
                 }
+                return;
+            }
+
+            if ($message.children('revoke[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length) {
+                let token_uid = $message.children('revoke[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').children('token-uid');
+                this.account.x_tokens_list && this.account.x_tokens_list.splice(this.account.x_tokens_list.indexOf(this.account.x_tokens_list.find(token => token.token_uid == token_uid)), 1);
+                this.account.settings_right.updateXTokens();
                 return;
             }
 
@@ -3944,7 +3956,7 @@ define("xabber-chats", function () {
                     }));
                 }
                 let $forwarded_msgs = [];
-                $forwarded = $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"][type="legacy"]').children('reference[type="forward"]').children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
+                $forwarded = $message.children('reference[type="forward"]').children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
 
                 /* --- OLD FORMAT OF FORWARDED MESSAGES --- */
                 if (!$forwarded.length)
@@ -4368,6 +4380,8 @@ define("xabber-chats", function () {
             }
             else
             {
+                if (!view.model.get('history_loaded') && (view.model.messages.length < 20))
+                    view.content.loadPreviousHistory();
                 if (xabber.toolbar_view.$('.active').hasClass('contacts'))
                     this.updateScreenAllChats();
                 if (!view.model.get('displayed_sent') && view.model.messages.length) {

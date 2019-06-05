@@ -3480,6 +3480,53 @@ define("xabber-contacts", function () {
                 );
             },
 
+            syncFromServer: function () {
+                var iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.SYNCHRONIZATION});
+                this.account.sendIQ(iq, function (iq) {
+                    this.onSyncIQ(iq);
+                    if (!$(iq).children('conversation').length)
+                        this.account.cached_roster.getAllFromRoster(function (roster_items) {
+                            $(roster_items).each(function (idx, roster_item) {
+                                this.contacts.mergeContact(roster_item);
+                            }.bind(this));
+                        }.bind(this));
+                }.bind(this));
+            },
+
+            onSyncIQ: function (iq) {
+                $(iq).find('conversation').each(function (idx, item) {
+                    let $item = $(item),
+                        jid = $item.attr('jid');
+                    if (jid === this.account.get('jid')) {
+                        return;
+                    }
+                    let contact = this.contacts.mergeContact(jid),
+                        chat = this.account.chats.getChat(contact),
+                        message = $item.children('last-message').children('message'),
+                        $unread_messages = $item.children('unread'),
+                        last_delivered_msg = $item.children('delivered').attr('id'),
+                        last_displayed_msg = $item.children('displayed').attr('id'),
+                        msg, options = {};
+                    options.synced_msg = true;
+                    message && (msg = chat.receiveMessage(message, options));
+                    if (msg) {
+                        if (msg.isSenderMe()) {
+                            // msg.set('state', constants.MSG_SENT);
+                            (last_delivered_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DELIVERED);
+                            (last_displayed_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DISPLAYED);
+                        }
+                        else if ($unread_messages.attr('after') < msg.get('archive_id') && $unread_messages.attr('after') < msg.get('contact_archive_id'))
+                            msg.set('is_unread', true);
+                    }
+                    if (contact.get('archived') && contact.get('muted')) {}
+                    else {
+                        chat.set('unread', parseInt($unread_messages.attr('count')));
+                        xabber.toolbar_view.recountAllMessageCounter();
+                    }
+                }.bind(this));
+                return true;
+            },
+
             getFromServer: function () {
                 var iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
                 this.account.sendIQ(iq, function (iq) {
@@ -4283,6 +4330,8 @@ define("xabber-contacts", function () {
                 });
                 this.blocklist.getFromServer();
                 this.roster.getFromServer();
+                if (this.connection && this.connection.do_synchronization)
+                    this.roster.syncFromServer();
             }, this);
         });
 
