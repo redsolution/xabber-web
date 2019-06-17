@@ -54,9 +54,9 @@ define(["xabber-dependencies"], function (deps) {
             var html = $this.html();
             $this.replaceWith('\n'+html);
         });
-        $div.find('br').each(function () {
+        /*$div.find('br').each(function () {
             $(this).replaceWith('\n');
-        });
+        });*/
         return $div.text();
     };
 

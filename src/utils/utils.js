@@ -3,8 +3,9 @@ define([
     "xabber-emoji-utils",
     "xabber-image-utils",
     "xabber-modal-utils",
+    "xabber-constants",
     "xabber-textarea-utils"
-], function (deps, emoji, images, modals, textarea) {
+], function (deps, emoji, images, modals, constants, textarea) {
     var $ = deps.$,
         _ = deps._,
         moment = deps.moment;
@@ -134,7 +135,36 @@ define([
             return Math.floor(seconds / 86400) + ' days ago';
         },
 
+        pretty_file_type: function (mime_type) {
+            if (constants.MIME_TYPES.image.includes(mime_type))
+                return 'image';
+            if (constants.MIME_TYPES.audio.includes(mime_type))
+                return 'audio';
+            if (constants.MIME_TYPES.video.includes(mime_type))
+                return 'video';
+            if (constants.MIME_TYPES.document.includes(mime_type) || constants.MIME_TYPES.pdf.includes(mime_type))
+                return 'document';
+            if (constants.MIME_TYPES.presentation.includes(mime_type))
+                return 'presentation';
+            if (constants.MIME_TYPES.archive.includes(mime_type))
+                return 'archive';
+            if (constants.MIME_TYPES.table.includes(mime_type))
+                return 'electronic table';
+            return 'file';
+        },
+
+        pretty_file_type_with_article: function (mime_type) {
+            let type = utils.pretty_file_type(mime_type),
+                vowels = ["a", "e", "i", "o", "u"];
+            if (vowels.includes(type[0]))
+                return 'an ' + type;
+            else
+                return 'a ' + type;
+        },
+
         pretty_size: function (size) {
+            if (!size)
+                return "";
             if (size < 1024) {
                 return size+' B';
             } else if (size < 1048576) {
@@ -171,7 +201,7 @@ define([
         },
 
         pretty_name: function (name) {
-            return name[0].toUpperCase() + name.replace(/-/,' ').substr(1);
+            return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1)) : "";
         },
 
         slice_string: function (str, from, to) {

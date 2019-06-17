@@ -75,10 +75,10 @@ var constants = {
         unavailable:    7
     },
 
-    CHATSTATE_INTERVAL_COMPOSING_AUDIO: 30000,
-    CHATSTATE_TIMEOUT_PAUSED_AUDIO: 35000,
+    CHATSTATE_INTERVAL_COMPOSING_AUDIO: 5000,
     CHATSTATE_TIMEOUT_PAUSED:   5000,
     CHATSTATE_TIMEOUT_STOPPED:  5000,
+    CHATSTATE_TIMEOUT_PAUSED_AUDIO: 10000,
 
     JINGLE_MSG_RETRACT: -1,
     JINGLE_MSG_REJECT: 0,
@@ -186,6 +186,79 @@ var constants = {
             tip: 'Settings are not synchronized with cloud',
             icon: 'mdi-cloud'
         }
+    },
+
+    MIME_TYPES: {
+        image: [
+            'image/gif',
+            'image/jpeg',
+            'image/pjpeg',
+            'image/png',
+            'image/svg+xml',
+            'image/tiff',
+            'image/vnd.microsoft.icon',
+            'image/vnd.wap.wbmp',
+            'image/webp'
+        ],
+        audio: [
+            'audio/basic',
+            'audio/L24',
+            'audio/mp4',
+            'audio/aac',
+            'audio/mpeg',
+            'audio/ogg',
+            'audio/vorbis',
+            'audio/x-ms-wma',
+            'audio/x-ms-wax',
+            'audio/vnd.rn-realaudio',
+            'audio/vnd.wave',
+            'audio/webm'
+        ],
+        video: [
+            'video/mpeg',
+            'video/mp4',
+            'video/ogg',
+            'video/quicktime',
+            'video/webm',
+            'video/x-ms-wmv',
+            'video/x-flv',
+            'video/3gpp',
+            'video/3gpp2'
+        ],
+        document: [
+            'text/cmd',
+            'text/css',
+            'text/csv',
+            'text/html',
+            'text/javascript (Obsolete)',
+            'text/plain',
+            'text/php',
+            'text/xml',
+            'text/markdown',
+            'text/cache-manifestapplication/json',
+            'application/xml',
+            'application/vnd.oasis.opendocument.text',
+            'application/vnd.oasis.opendocument.graphics',
+            'application/msword'
+        ],
+        pdf: [
+            'application/pdf'
+        ],
+        table: [
+            'application/vnd.oasis.opendocument.spreadsheet',
+            'application/vnd.ms-excel'
+        ],
+        archive: [
+            'application/zip',
+            'application/gzip',
+            'application/x-rar-compressed',
+            'application/x-tar',
+            'application/x-7z-compressed'
+        ],
+        presentation: [
+            'application/vnd.ms-powerpoint',
+            'application/vnd.oasis.opendocument.presentation'
+        ]
     },
 
     PARTICIPANT_ROLES: ['Member', 'Admin', 'Owner'],

@@ -1198,8 +1198,10 @@ define("xabber-api-service", function () {
                 xabber.add_api_account_view.show();
             else {
                 var account = xabber.accounts.connected[0];
-                account.set('auto_login_xa', true);
-                account.authXabberAccount();
+                if (account) {
+                    account.set('auto_login_xa', true);
+                    account.authXabberAccount();
+                }
             }
         },
 

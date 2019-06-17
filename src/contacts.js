@@ -755,6 +755,8 @@ define("xabber-contacts", function () {
             events: {
                 "click .btn-escape": "openChat",
                 "click .btn-chat": "openChat",
+                "click .btn-voice-call": "voiceCall",
+                "click .btn-video-call": "videoCall",
                 "click .btn-add": "addContact",
                 "click .btn-delete": "deleteContact",
                 "click .btn-block": "blockContact",
@@ -858,6 +860,19 @@ define("xabber-contacts", function () {
 
             openChat: function () {
                 this.model.trigger("open_chat", this.model);
+            },
+
+            voiceCall: function () {
+                let call_settings = {
+                    audio: true
+                }
+            },
+
+            videoCall: function () {
+                let call_settings = {
+                    audio: true,
+                    video: true
+                }
             },
 
             changeNotifications: function () {
@@ -3481,19 +3496,16 @@ define("xabber-contacts", function () {
             },
 
             syncFromServer: function () {
-                var iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.SYNCHRONIZATION});
+                let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
+                this.account.last_msg_timestamp && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
+                let iq = $iq({type: 'get'}).c('query', request_attrs);
                 this.account.sendIQ(iq, function (iq) {
-                    this.onSyncIQ(iq);
-                    if (!$(iq).children('conversation').length)
-                        this.account.cached_roster.getAllFromRoster(function (roster_items) {
-                            $(roster_items).each(function (idx, roster_item) {
-                                this.contacts.mergeContact(roster_item);
-                            }.bind(this));
-                        }.bind(this));
+                    this.onSyncIQ(iq, request_attrs.stamp);
                 }.bind(this));
             },
 
-            onSyncIQ: function (iq) {
+            onSyncIQ: function (iq, request_with_stamp) {
+                this.account.last_msg_timestamp = moment.now();
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
                         jid = $item.attr('jid');
@@ -3506,23 +3518,28 @@ define("xabber-contacts", function () {
                         $unread_messages = $item.children('unread'),
                         last_delivered_msg = $item.children('delivered').attr('id'),
                         last_displayed_msg = $item.children('displayed').attr('id'),
-                        msg, options = {};
-                    options.synced_msg = true;
-                    message && (msg = chat.receiveMessage(message, options));
+                        unread_msgs_count = parseInt($unread_messages.attr('count')),
+                        msg_retraction_version = $item.children('retract').attr('version'),
+                        msg, options = {synced_msg: true};
+                    if (chat.message_retraction_version != msg_retraction_version) {
+                        chat.message_retraction_version = msg_retraction_version;
+                        request_with_stamp && chat.trigger("get_retractions_list");
+                    }
+                    unread_msgs_count && (options.is_unread = true);
+                    options.delay = message.children('time');
+                    unread_msgs_count && unread_msgs_count--;
+                    message.length && (msg = this.account.chats.receiveChatMessage(message, options));
+                    chat.set('const_unread', unread_msgs_count);
                     if (msg) {
                         if (msg.isSenderMe()) {
-                            // msg.set('state', constants.MSG_SENT);
                             (last_delivered_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DELIVERED);
                             (last_displayed_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DISPLAYED);
                         }
-                        else if ($unread_messages.attr('after') < msg.get('archive_id') && $unread_messages.attr('after') < msg.get('contact_archive_id'))
+                        else if ($unread_messages.attr('after') < msg.get('archive_id') || $unread_messages.attr('after') < msg.get('contact_archive_id'))
                             msg.set('is_unread', true);
+                        chat.set('first_archive_id', msg.get('archive_id'));
                     }
-                    if (contact.get('archived') && contact.get('muted')) {}
-                    else {
-                        chat.set('unread', parseInt($unread_messages.attr('count')));
-                        xabber.toolbar_view.recountAllMessageCounter();
-                    }
+                    xabber.toolbar_view.recountAllMessageCounter();
                 }.bind(this));
                 return true;
             },
@@ -4328,10 +4345,10 @@ define("xabber-contacts", function () {
                     contact.resources.reset();
                     contact.resetStatus();
                 });
-                this.blocklist.getFromServer();
-                this.roster.getFromServer();
                 if (this.connection && this.connection.do_synchronization)
                     this.roster.syncFromServer();
+                this.roster.getFromServer();
+                this.blocklist.getFromServer();
             }, this);
         });
 

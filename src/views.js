@@ -549,6 +549,7 @@ define("xabber-views", function () {
                 (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
                     this.$('.toolbar-item.chats').hasClass('active')||
+                    this.$('.toolbar-item.account-item').hasClass('active')||
                     this.$('.toolbar-item.archive-chats').hasClass('active')))) {
                 return;
             }
@@ -586,6 +587,13 @@ define("xabber-views", function () {
             xabber.trigger('show_archive_chats');
         },
 
+        showChatsByAccount: function (account) {
+            this.$('.toolbar-item').removeClass('active')
+                .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
+            xabber.body.setScreen('all-chats', {right: null});
+            xabber.trigger('show_account_chats', [account]);
+        },
+
         showSearch: function (ev) {
             xabber.body.setScreen('search');
         },
@@ -620,11 +628,11 @@ define("xabber-views", function () {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
                     var $chat = xabber.accounts.get(idx).chats.get(idx1);
                     if (!$chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
-                        count_all_msg += $chat.get('unread');
+                        count_all_msg += $chat.get('unread') + $chat.get('const_unread');
                         if ($chat.contact.get('group_chat'))
-                            count_group_msg += $chat.get('unread');
+                            count_group_msg += $chat.get('unread') + $chat.get('const_unread');
                         else
-                            count_msg += $chat.get('unread');
+                            count_msg += $chat.get('unread') + $chat.get('const_unread');
                     }
                 }.bind(this));
             }.bind(this));
@@ -942,7 +950,7 @@ define("xabber-views", function () {
                 xabber.accounts.get(idx).chats.each(function (idx1) {
                     let $chat = xabber.accounts.get(idx).chats.get(idx1);
                     if (!$chat.contact.get('muted'))
-                        count_msg += $chat.get('unread');
+                        count_msg += $chat.get('unread') + $chat.get('const_unread');
                 }.bind(this));
             }.bind(this));
             return count_msg;

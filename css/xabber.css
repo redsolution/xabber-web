@@ -381,6 +381,9 @@ input[type=text].simple-input-field:hover {
     position: relative;
     overflow: hidden;
     border-radius: 50%;
+
+    background-position: center center;
+    background-repeat: no-repeat no-repeat;
 }
 
 .circle-avatar.circle-image-fix {
@@ -2824,6 +2827,8 @@ body {
     top: 8px;
     width: 40px;
     height: 40px;
+    background-image: url(../images/loading.png);
+    background-size: 50%;
 }
 
 .chat-item p, .group-chat-participant .participant-info .jid {
@@ -2882,10 +2887,10 @@ body {
 }
 
 .chat-item .last-msg {
-    width: 100%;
+    width: calc(100% - 20px);
     height: 14px;
     margin-top: 2px;
-    padding-right: 20px;
+    /*padding-right: 20px;*/
     font-size: 11px;
     font-weight: 300;
     color: #757575;
@@ -5558,7 +5563,7 @@ input[type='range'].voice-message-volume:focus {
 /* ----------- GROUPCHAT DETAILS PANEL ------------ */
 
 .groupchat-details-panel .group-chat-properties {
-    margin: 4px 0 0 36px;
+    margin: 4px 6px 0 36px;
 }
 
 /* ----------- GROUPCHAT DETAILS EDIT PANEL (MODAL) ------------ */

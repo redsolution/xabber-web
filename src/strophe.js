@@ -147,7 +147,7 @@ define("xabber-strophe", function () {
                     id: uniq_id
                 }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('os').t(navigator.platform);
+                    .c('device').t('PC ' + navigator.platform);
 
                 handler = function (stanza) {
                     var iqtype = stanza.getAttribute('type');
@@ -179,6 +179,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('JINGLE_MSG', 'urn:xmpp:jingle-message:0');
         Strophe.addNamespace('JINGLE_RTP', 'urn:xmpp:jingle:apps:rtp:1');
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
+        Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extended-chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
         Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
         Strophe.addNamespace('RETRACTIONS', 'http://xabber.com/protocol/retract');

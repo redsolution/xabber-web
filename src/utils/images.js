@@ -137,36 +137,11 @@ define(["xabber-dependencies"], function (deps) {
 
     var setCss = function (image_el, cached_image, img_size) {
         var $image_el = $(image_el),
-            width = cached_image.width,
-            height = cached_image.height,
-            scale, css = {
-                minWidth: '',
-                maxWidth: '',
-                minHeight: '',
-                maxHeight: '',
-                left: 0,
-                top: 0
+            css = {
+                backgroundImage: 'url("' + cached_image.url + '")',
+                backgroundSize: 'cover',
+                backgroundColor: '#FFF'
             };
-        if (width < img_size) {
-            if (height < img_size) {
-                scale = (width > height) ? img_size/height : img_size/width;
-            } else {
-                scale = img_size/width;
-            }
-        } else if (height < img_size) {
-            scale = img_size/height;
-        }
-        if (scale) {
-            width *= scale;
-            height *= scale;
-        }
-        if (width > height) {
-            scale ? (css.minHeight = '100%') : (css.maxHeight = '100%');
-            css.left = -(img_size/2)*(width-height)/height+'px';
-        } else {
-            scale ? (css.minWidth = '100%') : (css.maxWidth = '100%');
-            css.top = -(img_size/2)*(height-width)/width+'px';
-        }
         $image_el.css(css);
     };
 
@@ -200,22 +175,8 @@ define(["xabber-dependencies"], function (deps) {
     };
 
     $.fn.setAvatar = function (image, size) {
-        var elem = this.find('img')[0];
-        if (!elem) return;
-        size || (size = this.width());
         var cached_image = getCachedImage(image);
-        if (cached_image.width && cached_image.height) {
-            elem.onload = null;
-            setCss(elem, cached_image, size);
-        } else {
-            elem.onload = function () {
-                elem.onload = null;
-                cached_image.width = elem.naturalWidth;
-                cached_image.height = elem.naturalHeight;
-                setCss(elem, cached_image, size);
-            }
-        }
-        elem.src = cached_image.url;
+        setCss(this, cached_image, size);
     };
 
     return {
