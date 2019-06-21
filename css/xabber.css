@@ -381,7 +381,6 @@ input[type=text].simple-input-field:hover {
     position: relative;
     overflow: hidden;
     border-radius: 50%;
-
     background-position: center center;
     background-repeat: no-repeat no-repeat;
 }
@@ -3252,7 +3251,9 @@ body {
     font-size: 12px;
     bottom: 24px;
     color: #9E9E9E;
-    margin: 0 0 0 calc(50% - 65px);
+    margin: 0;
+    width: 100%;
+    text-align: center;
 }
 
 .fixed-day-indicator-wrap {
@@ -5174,7 +5175,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .account-settings-panel .readonly-setting .setting-wrap .value,
-.account-settings-panel .token-wrap .description {
+.account-settings-panel .token-wrap .client {
     max-width: 100%;
     height: 16px;
     font-size: 14px;
@@ -5182,15 +5183,23 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
-.account-settings-panel .token-wrap .description {
-    display: inline-block;
-    vertical-align: bottom;
+.account-settings-panel .tokens-wrap .sessions-header {
+    padding: 8px 36px 11px;
+    font-weight: 500;
+}
+
+.account-settings-panel .token-wrap .device {
+    display: inline-flex;
+    vertical-align: baseline;
+    line-height: 15px;
+    font-size: 13px;
+    color: #616161;
 }
 
 .account-settings-panel .token-wrap .token-indicator {
-    display: inline-block;
-    vertical-align: bottom;
-    line-height: 16px;
+    display: inline-flex;
+    vertical-align: baseline;
+    line-height: 15px;
     font-size: 12px;
     margin-left: 4px;
 }
@@ -5212,21 +5221,20 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
-.account-settings-panel .token-wrap .expire,
 .account-settings-panel .token-wrap .ip-address,
-.account-settings-panel .token-wrap .last-auth,
-.account-settings-panel .token-wrap .token-uid {
+.account-settings-panel .token-wrap .last-auth {
     height: 14px;
     margin-top: 1px;
     font-size: 12px;
-    font-weight: 300;
+    /*font-weight: 300;*/
     line-height: 14px;
     color: #616161;
 }
 
-.account-settings-panel .tokens-wrap .token-uid {
-    font-size: 14px;
-    color: #9E9E9E;
+.account-settings-panel .token-wrap .last-auth {
+    position: absolute;
+    right: 36px;
+    top: 0;
 }
 
 .account-settings-panel .synchronization-wrap {
@@ -5475,12 +5483,18 @@ input[type='range'].voice-message-volume:focus {
     background-color: rgba(0,0,0,.6);
 }
 
-.account-main-info-wrap .circle-avatar .preloader-wrapper,
-.groupchat-details-panel .main-info .circle-avatar .preloader-wrapper {
+.account-main-info-wrap .circle-avatar .preloader-wrapper {
     position: absolute;
     margin: 0;
     top: 32px;
     left: 32px;
+}
+
+.groupchat-details-panel .main-info .circle-avatar .preloader-wrapper {
+    position: absolute;
+    margin: 0;
+    top: 80px;
+    left: 80px;
 }
 
 .groupchat-details-panel .edit-rights .circle-avatar .preloader-wrapper {
@@ -5490,10 +5504,6 @@ input[type='range'].voice-message-volume:focus {
     top: 16px;
     left: 16px;
     margin: 0;
-}
-
-.edit-rights .circle-avatar .set-groupchat-avatar {
-    padding: 12px !important;
 }
 
 .account-main-info-wrap .circle-avatar:hover .set-groupchat-avatar,
@@ -6052,10 +6062,15 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .btn-revoke-token {
     position: absolute;
-    top: calc((100% - 30px)/2);
+    top: calc((100% - 20px)/2);
     right: 36px;
     height: 24px;
-    font-size: 12px;
+    color: #9E9E9E;
+    cursor: pointer;
+}
+
+.details-panel .btn-revoke-all-tokens {
+    cursor: pointer;
 }
 
 .panel-footer {

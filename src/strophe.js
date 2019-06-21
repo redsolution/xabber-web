@@ -37,7 +37,7 @@ define("xabber-strophe", function () {
         };
 
         Strophe.SASLXTOKEN = function() {};
-        Strophe.SASLXTOKEN.prototype = new Strophe.SASLMechanism("X-TOKEN", true, 80);
+        Strophe.SASLXTOKEN.prototype = new Strophe.SASLMechanism("X-TOKEN", true, 100);
 
         Strophe.SASLXTOKEN.prototype.test = function (connection) {
             return true;

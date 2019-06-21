@@ -45,9 +45,8 @@ define("xabber-contacts", function () {
                 this.invitation = new xabber.ContactInvitationView({model: this});
                 this.on("change:photo_hash", this.getContactInfo, this);
                 this.account.dfd_presence.done(function () {
-                    if (!this.get('group_chat') && !this.get('blocked')) {
+                    if (!this.get('blocked'))
                         this.getContactInfo();
-                    }
                 }.bind(this));
             },
 
@@ -60,17 +59,20 @@ define("xabber-contacts", function () {
                     if (!_.isNull(contact_info)) {
                         if ((contact_info.hash === this.get('photo_hash')) || !this.get('photo_hash')) {
                             this.cached_image = Images.getCachedImage(contact_info.avatar);
+                            contact_info.avatar_priority && this.set('avatar_priority', contact_info.avatar_priority);
                             this.set('photo_hash', contact_info.hash);
                             this.set('image', contact_info.avatar);
                         }
                         else {
-                            this.getVCard();
+                            if (!this.get('group_chat'))
+                                this.getVCard();
                         }
                         if (!this.get('roster_name') && contact_info.name)
                             this.set('name', contact_info.name);
                         return;
                     }
-                    this.getVCard();
+                    if (!this.get('group_chat'))
+                        this.getVCard();
                 }.bind(this));
             },
 
@@ -90,11 +92,19 @@ define("xabber-contacts", function () {
                             else
                                 attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
                         }
-                        attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
-                        this.cached_image = Images.getCachedImage(attrs.image);
-                        if (vcard.photo.image)
-                            xabber.cached_contacts_info.putContactInfo({jid: this.get('jid'), hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar: vcard.photo.image, name: attrs.name});
+                        if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
+                            if (vcard.photo.image) {
+                                attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
+                                attrs.image = vcard.photo.image;
+                            }
+                            else
+                                attrs.image = Images.getDefaultAvatar(attrs.name);
+                            this.cached_image = Images.getCachedImage(attrs.image);
+                        }
                         this.set(attrs);
+                        if (this.get('photo_hash') || vcard.photo.image) {
+                            xabber.cached_contacts_info.putContactInfo({jid: this.get('jid'), hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar_priority: this.get('avatar_priority'), avatar: this.get('image'), name: this.get('name')});
+                        }
                         is_callback && callback(vcard);
                     }.bind(this),
                     function () {
@@ -183,9 +193,9 @@ define("xabber-contacts", function () {
                                 errback && errback(data_error);
                             });
                     }.bind(this),
-                    function (metadata_error) {
-                        errback && errback(metadata_error);
-                    });
+                    function (data_error) {
+                        errback && errback(data_error);
+                    }.bind(this));
             },
 
             getLastSeenStatus: function(iq) {
@@ -280,7 +290,7 @@ define("xabber-contacts", function () {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                if ($vcard_update.length)
+                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
                 if (type === 'subscribe') {
                     if (this.get('in_roster')) {
@@ -1104,7 +1114,7 @@ define("xabber-contacts", function () {
 
             updateAvatar: function () {
                 let image = this.model.cached_image;
-                this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size);
             },
 
             openChat: function () {
@@ -3545,20 +3555,21 @@ define("xabber-contacts", function () {
             },
 
             getFromServer: function () {
-                var iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
+                let request_ver = this.roster_version,
+                    iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: request_ver});
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
+                    this.account.sendPresence();
                     if (!$(iq).children('query').find('item').length)
                         this.account.cached_roster.getAllFromRoster(function (roster_items) {
                             $(roster_items).each(function (idx, roster_item) {
                                 this.contacts.mergeContact(roster_item);
                             }.bind(this));
-                            if (!roster_items.length) {
+                            if (!roster_items.length && request_ver != 0) {
                                 this.roster_version = 0;
                                 this.getFromServer();
                             }
                         }.bind(this));
-                    this.account.sendPresence();
                     this.account.dfd_presence.resolve();
                 }.bind(this));
             },

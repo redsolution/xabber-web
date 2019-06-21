@@ -106,6 +106,11 @@ var constants = {
 
     MAX_AVATAR_FILE_SIZE: 20000000,
 
+    AVATAR_PRIORITIES: {
+        VCARD_AVATAR: 0,
+        PUBSUB_AVATAR: 1
+    },
+
     AVATAR_SIZES: {
         TOOLBAR_ACCOUNT_ITEM:           32,
         SETTINGS_ACCOUNT_ITEM:          32,
@@ -207,6 +212,7 @@ var constants = {
             'audio/aac',
             'audio/mpeg',
             'audio/ogg',
+            'audio/ogg; codecs=opus',
             'audio/vorbis',
             'audio/x-ms-wma',
             'audio/x-ms-wax',

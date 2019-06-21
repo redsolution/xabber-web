@@ -55,6 +55,7 @@ define("xabber-discovery", function () {
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
+            this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         },
 

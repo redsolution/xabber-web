@@ -245,8 +245,10 @@ define([
                     markup_body[end_idx] += end_tags;
                 }
                 else {
-                    markup_body[start_idx] = '<span data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
-                    markup_body[end_idx] += '</span>';
+                    if (mention) {
+                        markup_body[start_idx] = '<span data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
+                        markup_body[end_idx] += '</span>';
+                    }
                 }
             }.bind(this));
 

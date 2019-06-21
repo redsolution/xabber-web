@@ -137,6 +137,46 @@ define("xabber-accounts", function () {
                     return res;
                 },
 
+                pubAvatar: function (image, callback, errback) {
+                    var avatar_hash = sha1(image.base64),
+                        iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
+                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                            .c('item', {id: avatar_hash})
+                            .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
+                        iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                            .c('item', {id: avatar_hash})
+                            .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                            .c('info', {bytes: image.size, id: avatar_hash, type: 'image/jpeg'});
+                    this.sendIQ(iq_pub_data, function () {
+                            this.sendIQ(iq_pub_metadata, function () {
+                                    callback && callback(avatar_hash);
+                                }.bind(this),
+                                function (data_error) {
+                                    errback && errback(data_error);
+                                });
+                        }.bind(this),
+                        function (data_error) {
+                            errback && errback(data_error);
+                        }.bind(this));
+                },
+
+                getAvatar: function (avatar, callback, errback) {
+                    var iq_request_avatar = $iq({from: this.get('jid'), type: 'get', to: this.get('jid')})
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                        .c('item', {id: avatar});
+                    this.sendIQ(iq_request_avatar, function (iq) {
+                        var pubsub_avatar = $(iq).find('data').text();
+                        if (pubsub_avatar == "")
+                            errback && errback("Node is empty");
+                        else
+                            callback && callback(pubsub_avatar);
+                    }.bind(this));
+                },
+
                 sendIQ: function () {
                     var res = this.connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
@@ -511,8 +551,15 @@ define("xabber-accounts", function () {
                                 vcard_updated: moment.now()
                             };
                             attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
-                            attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
-                            this.cached_image = Images.getCachedImage(attrs.image);
+                            if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
+                                if (vcard.photo.image) {
+                                    attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
+                                    attrs.image = vcard.photo.image;
+                                }
+                                else
+                                    attrs.image = Images.getDefaultAvatar(attrs.name);
+                                this.cached_image = Images.getCachedImage(attrs.image);
+                            }
                             this.save(attrs);
                             is_callback && callback(vcard);
                         }.bind(this),
@@ -524,7 +571,10 @@ define("xabber-accounts", function () {
 
                 setVCard: function (data, callback, errback) {
                     var vcard = _.extend(_.clone(this.get('vcard')), data);
-                    this.connection.vcard.set(this.get('jid'), vcard, callback, errback);
+                    this.connection.vcard.set(this.get('jid'), vcard, function () {
+                        this.vcardPhotoUpdated(vcard.photo.image);
+                        callback && callback();
+                    }.bind(this), errback);
                 },
 
                 getStatusMessage: function () {
@@ -572,6 +622,11 @@ define("xabber-accounts", function () {
                     }
                     else
                         return "";
+                },
+
+                vcardPhotoUpdated: function (photo) {
+                    let stanza = $pres().c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash(photo)).up().up();
+                    return this.sendPres(stanza);
                 },
 
                 sendPresence: function (type, message) {
@@ -747,7 +802,7 @@ define("xabber-accounts", function () {
                         status_message = $presence.find('status').text();
                     _.isNaN(priority) && (priority = 0);
                     var $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                    if ($vcard_update.length) {
+                    if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                         this.save('photo_hash', $vcard_update.find('photo').text());
                     }
                     if (resource && resource !== this.resource) {
@@ -1188,6 +1243,7 @@ define("xabber-accounts", function () {
             },
 
             render: function (options) {
+                this.$('.settings-tab[data-block-name="tokens"]').hideIf(this.model.get('auth_type') !== 'x-token');
                 this.$('.settings-tab').removeClass('active');
                 this.$('.settings-tab[data-block-name="'+options.block_name+'"]').addClass('active');
                 this.updateCSS();
@@ -1252,13 +1308,14 @@ define("xabber-accounts", function () {
                 }
                 utils.images.getAvatarFromFile(file).done(function (image) {
                     if (image) {
-                        let vcard = _.clone(this.model.get('vcard'));
-                        vcard.photo.image = image;
-                        this.model.setVCard(vcard, function () {
-                            this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                            this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                            this.model.getVCard();
-                        }.bind(this));
+                        this.model.pubAvatar({base64: image, size: file.size},
+                            function () {
+                                this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                                this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                            }.bind(this),
+                            function () {
+                                utils.dialogs.error('Wrong image');
+                            }.bind(this));
                     } else
                         utils.dialogs.error('Wrong image');
                 }.bind(this));
@@ -1271,10 +1328,6 @@ define("xabber-accounts", function () {
             openChangeStatus: function (ev) {
                 xabber.change_status_view.open(this.model);
             },
-
-            /*backToSettings: function () {
-                xabber.toolbar_view.showSettings();
-            },*/
 
             jumpToBlock: function (ev) {
                 var $tab = $(ev.target).closest('.settings-tab'),
@@ -1345,6 +1398,7 @@ define("xabber-accounts", function () {
             render: function (options) {
                 this.updateEnabled();
                 this.updateXTokens();
+                this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -1385,12 +1439,18 @@ define("xabber-accounts", function () {
             },
 
             updateXTokens: function () {
-                this.$('.panel-content-wrap .tokens .tokens-wrap').html("");
+                if (this.model.get('auth_type') !== 'x-token') {
+                    this.$('.panel-content-wrap .tokens').addClass('hidden');
+                    this.$('.panel-content-wrap .tokens .sessions-wrap').children().html("");
+                    return;
+                }
+                this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
                 if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                    this.$('.tokens .buttons-wrap').removeClass('hidden');
+                    this.$('.panel-content-wrap .tokens').removeClass('hidden');
                     $(this.model.x_tokens_list).each(function (idx, token) {
-                        var pretty_token = {
-                                description: token.device + " " + token.client,
+                        let pretty_token = {
+                                client: token.client,
+                                device: token.device,
                                 token_uid: token.token_uid,
                                 ip: token.ip,
                                 last_auth: utils.pretty_datetime(token.last_auth),
@@ -1398,15 +1458,16 @@ define("xabber-accounts", function () {
                             },
                             $token_html = $(templates.token_item(pretty_token));
                         if (this.model.get('x_token')) {
-                            if (this.model.get('x_token').token_uid == token.token_uid)
-                                $('<div class="token-indicator text-color-700">(this device)</div>').insertAfter($token_html.find('.description'));
+                            if (this.model.get('x_token').token_uid == token.token_uid) {
+                                $token_html.find('.btn-revoke-token').remove();
+                                $('<div class="token-indicator text-color-700">(this device)</div>').insertAfter($token_html.find('.device'));
+                                this.$('.panel-content-wrap .tokens .current-session').prepend($token_html);
+                                return;
+                            }
                         }
-                        this.$('.panel-content-wrap .tokens .tokens-wrap').prepend($token_html);
+                        this.$('.panel-content-wrap .tokens .all-sessions').prepend($token_html);
                     }.bind(this));
-                }
-                else {
-                    this.$('.tokens .buttons-wrap').addClass('hidden');
-                    this.$('.panel-content-wrap .tokens .tokens-wrap').html($('<p class="tokens-error">No tokens yet</p>'));
+                    !this.$('.panel-content-wrap .tokens .all-sessions').children().length && this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
                 }
             },
 

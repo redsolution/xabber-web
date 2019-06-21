@@ -139,7 +139,10 @@ define("xabber-chats", function () {
                     }
                 };
             x_element.attr('version') && (attrs.participants_version = x_element.attr('version'));
-            (x_element.attr('xmlns') && x_element.attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) && (attrs.type = 'system');
+            if (x_element.attr('xmlns') && x_element.attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
+                attrs.type = 'system';
+                attrs.from_jid = groupchat_jid;
+            }
             return attrs;
         },
 
@@ -149,7 +152,7 @@ define("xabber-chats", function () {
                 let $mention = $(mention),
                     start = parseInt($mention.attr('begin')),
                     end = parseInt($mention.attr('end')),
-                    mention_uri = $mention.attr('uri') || "";
+                    mention_uri = $mention.children('uri').text() || "";
                 mentions.push({start: start, end: end, uri: mention_uri});
             }.bind(this));
             return mentions;
@@ -686,7 +689,7 @@ define("xabber-chats", function () {
 
         getAllMessageRetractions: function () {
             var retractions_query = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
-                .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE, version: this.message_retraction_version, less_than: 10});
+                .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE, version: this.message_retraction_version, less_than: 4});
             this.account.sendIQ(retractions_query);
         },
 
@@ -2570,6 +2573,20 @@ define("xabber-chats", function () {
                     id: msg_id
                 });
 
+            if (message.get('jingle_message')) {
+                if (message.get('jingle_message_state') === constants.JINGLE_MSG_PROPOSE) {
+                    stanza.c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
+                        .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: message.get('media')}).up().up();
+                }
+                if (message.get('jingle_message_state') === constants.JINGLE_MSG_ACCEPT)
+                    stanza.c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')}).up();
+                if (message.get('jingle_message_state') === constants.JINGLE_MSG_REJECT)
+                    stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
+                        .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
+
+           return;
+            }
+
             if (forwarded_message) {
                 stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, type: 'forward'});
                 $(forwarded_message).each(function (idx, fwd_msg) {
@@ -2587,7 +2604,8 @@ define("xabber-chats", function () {
 
             if (message.get('mentions') && message.get('mentions').length) {
                 message.get('mentions').forEach(function (mention) {
-                    stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'mention', uri: mention.uri}).up();
+                    stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'mention'})
+                        .c('uri').t(mention.uri).up().up();
                 }.bind(this));
             }
 
@@ -2634,10 +2652,12 @@ define("xabber-chats", function () {
             stanza.c('body').t(body).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
-            let delivery_attrs = {xmlns: Strophe.NS.DELIVERY};
-            this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
-            (message.get('state') === constants.MSG_ERROR) && (delivery_attrs.retry = true) && message.set('state', constants.MSG_PENDING);
-            stanza.c('request', delivery_attrs).up();
+            if (!message.get('jingle_message')) {
+                let delivery_attrs = {xmlns: Strophe.NS.DELIVERY};
+                this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
+                (message.get('state') === constants.MSG_ERROR) && (delivery_attrs.retry = true) && message.set('state', constants.MSG_PENDING);
+                stanza.c('request', delivery_attrs).up();
+            }
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
             this.account.sendMsg(stanza, function () {
@@ -2677,20 +2697,19 @@ define("xabber-chats", function () {
                 return false;
         },
 
-        initJingleMessage: function () {
-            /*let $jingle_msg = $msg({to: this.contact.get('jid')})
-                .c('body', 'Voice call').up()
-                .c('propose', {xmlns: Strophe.NS.JINGLE_MSG, media: 'audio'})
-                .c('description', {xmlns:Strophe.NS.JINGLE_RTP});
-            this.model.messages.create({
+        initJingleMessage: function (media_type) {
+            let jingle_message = this.model.messages.create({
                 from_jid: this.account.get('jid'),
+                type: 'system',
                 message: 'Voice call',
+                media: media_type,
                 submitted_here: true,
                 jingle_message: true,
                 jingle_message_state: constants.JINGLE_MSG_PROPOSE,
+                jingle_msg_id: uuid(),
                 forwarded_message: null
             });
-            this.account.sendMsg($jingle_msg);*/
+            this.sendMessage(jingle_message);
         },
 
         saveForwardedMessage: function (msg) {
@@ -3019,6 +3038,7 @@ define("xabber-chats", function () {
         sendChatState: function (state, type) {
             clearTimeout(this._chatstate_timeout);
             clearTimeout(this._chatstate_send_timeout);
+            this.chat_state = false;
             let stanza = $msg({to: this.model.get('jid'), type: 'chat'}).c(state, {xmlns: Strophe.NS.CHATSTATES});
             type && stanza.c('subtype', {xmlns: Strophe.NS.EXTENDED_CHATSTATES, type: type});
             (state === 'composing') && (this.chat_state = true);
@@ -3592,9 +3612,10 @@ define("xabber-chats", function () {
 
         receivePubsubMessage: function ($message) {
             var photo_id =  $message.find('info').attr('id'),
+                from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 node = $message.find('items').attr('node'),
                 member_id = this.parsePubSubNode(node),
-                contact = this.account.contacts.get(Strophe.getBareJidFromJid($message.attr('from')));
+                contact = this.account.contacts.get(from_jid);
             if (contact) {
                 if (member_id) {
                     if (contact.my_info) {
@@ -3611,7 +3632,7 @@ define("xabber-chats", function () {
                                     contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar });
                                 }
                             }
-                            let participant = contact.participants.get(member_id);
+                            let participant = contact.participants && contact.participants.get(member_id);
                             if (participant) {
                                 participant.set({avatar: photo_id, b64_avatar: new_avatar});
                                 this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
@@ -3620,16 +3641,26 @@ define("xabber-chats", function () {
                     }
                 }
                 else {
-                    if ((photo_id !== "") && (contact.get('hash_avatar') === photo_id))
+                    if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
                         return;
-                    else {
-                        contact.set('hash_avatar', photo_id);
+                    else if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.PUBSUB_AVATAR) {
                         contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
                             contact.cached_image = Images.getCachedImage(data_avatar);
-                            contact.set('image', data_avatar);
-                        });
+                            xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: photo_id, avatar: data_avatar, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            // contact.set('image', data_avatar);
+                            contact.set('photo_hash', photo_id);
+                        }.bind(this));
                     }
                 }
+            }
+            else if (from_jid === this.account.get('jid')) {
+                this.account.getAvatar(photo_id, function (data_avatar) {
+                    this.account.cached_image = Images.getCachedImage(data_avatar);
+                    let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
+                    this.account.set(avatar_attrs);
+                    this.account.save(avatar_attrs);
+                }.bind(this));
             }
         },
 
@@ -3714,7 +3745,7 @@ define("xabber-chats", function () {
                         let $mention = $(mention),
                             start = parseInt($mention.attr('begin')),
                             end = parseInt($mention.attr('end')),
-                            mention_uri = $mention.attr('uri') || "";
+                            mention_uri = $mention.children('uri').text() || "";
                         mentions_list.push({start: start, end: end, uri: mention_uri});
                     }.bind(this));
                 }
@@ -4938,7 +4969,7 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
-            this.content.initJingleMessage();
+            /*this.content.initJingleMessage('audio');*/
         },
 
         getActiveScreen: function () {
@@ -5033,8 +5064,20 @@ define("xabber-chats", function () {
 
         _initialize: function (options) {
             let rich_textarea_wrap = this.$('.rich-textarea-wrap');
+            let bindings = {
+                enter: {
+                    key: 13,
+                    handler: function(range) {
+                        if (xabber.settings.hotkeys !== "enter")
+                            this.quill.insertText(range.index, "\n");
+                    }
+                }
+            };
             this.quill = new Quill(rich_textarea_wrap[0], {
                 modules: {
+                    keyboard: {
+                        bindings: bindings
+                    },
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
                         ['clean']
@@ -5220,7 +5263,7 @@ define("xabber-chats", function () {
                 let send_on_enter = xabber.settings.hotkeys === "enter";
                 if (    (send_on_enter && ev.keyCode === constants.KEY_ENTER && !ev.shiftKey) ||
                         (!send_on_enter && ev.ctrlKey)  ) {
-                    this.quill.deleteText(this.quill.selection.lastRange.index - 1, 1);
+                    // this.quill.deleteText(this.quill.selection.lastRange.index - 1, 1);
                     ev.preventDefault();
                     this.submit();
                     return;
@@ -5295,11 +5338,12 @@ define("xabber-chats", function () {
         },
 
         keyUp: function (ev) {
-            var $rich_textarea = $(ev.target).closest('.rich-textarea');
-            if ((this.$('.input-message .rich-textarea').getTextFromRichTextarea() != "") && !this.edit_message) {
+            let $rich_textarea = $(ev.target).closest('.rich-textarea'),
+                text = $rich_textarea.getTextFromRichTextarea();
+            if ((!text || text == "\n") && !this.edit_message)
+                this.displayMicrophone();
+            else
                 this.displaySend();
-            }
-            let text = $rich_textarea.getTextFromRichTextarea();
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 // clear input
                 ev.preventDefault();
@@ -5603,7 +5647,7 @@ define("xabber-chats", function () {
                         mentions.push({
                             start: start_idx,
                             end: end_idx,
-                            uri: 'xmpp:' + this.contact.get('jid') + '?id=' + $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
+                            uri: $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
                         });
                     }
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markups: content_attrs});
@@ -5613,6 +5657,7 @@ define("xabber-chats", function () {
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));
+            // text = content_concat.join("");
             $rich_textarea.flushRichTextarea().focus();
             this.displayMicrophone();
             if (this.edit_message) {
@@ -5730,9 +5775,10 @@ define("xabber-chats", function () {
             if (this.edit_message) {
                 $rich_textarea.flushRichTextarea();
             }
-            this.edit_message = null;
+            this.edit_message = null
             this.$('.fwd-messages-preview').addClass('hidden');
-            if ($rich_textarea.getTextFromRichTextarea() == "")
+            let text = $rich_textarea.getTextFromRichTextarea();
+            if (!text || text == "\n")
                 this.displayMicrophone();
             else
                 this.displaySend();

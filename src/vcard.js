@@ -353,7 +353,6 @@ define("xabber-vcard", function () {
             this.$('.last-name input').val(vcard.last_name);
             this.$('.middle-name input').val(vcard.middle_name);
 
-            this.avatar = vcard.photo.image;
             this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
 
             this.$('.birthday input').val(vcard.birthday);
@@ -401,7 +400,7 @@ define("xabber-vcard", function () {
             vcard.last_name = this.$('.last-name input').val();
             vcard.middle_name = this.$('.middle-name input').val();
 
-            this.avatar && (vcard.photo.image = this.avatar);
+            // this.avatar && (vcard.photo.image = this.avatar);
 
             vcard.birthday = this.$('.birthday input').val();
 
@@ -458,7 +457,7 @@ define("xabber-vcard", function () {
             }
             utils.images.getAvatarFromFile(file).done(function (image) {
                 if (image) {
-                    this.avatar = image;
+                    this.avatar = {base64: image, size: file.size};
                     this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                 } else {
                     utils.dialogs.error('Wrong image');
@@ -475,6 +474,7 @@ define("xabber-vcard", function () {
                 return;
             }
             this.data.set('saving', true);
+            this.avatar && this.model.pubAvatar(this.avatar);
             this.model.setVCard(this.getData(),
                 function () {
                     this.model.getVCard();

@@ -33,12 +33,21 @@
 
             <div class="settings-block-wrap tokens">
                 <div class="block-header">
-                    <span class="block-name">Tokens</span>
+                    <span class="block-name">Active sessions</span>
                 </div>
-                <div class="tokens-wrap selectable-text">
-                </div>
-                <div class="buttons-wrap hidden">
-                    <button class="btn-revoke-all-tokens btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Revoke all</button>
+                <div class="tokens-wrap">
+                    <div class="current-token-wrap">
+                        <div class="sessions-header">Current session</div>
+                        <div class="sessions-wrap current-session selectable-text"></div>
+                        <div class="buttons-wrap">
+<!--                            <button class="btn-revoke-all-tokens btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Revoke all</button>-->
+                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">Terminate all others sessions</p>
+                        </div>
+                    </div>
+                    <div class="all-sessions-wrap">
+                        <div class="sessions-header">Active session</div>
+                        <div class="sessions-wrap all-sessions selectable-text"></div>
+                    </div>
                 </div>
             </div>
 
