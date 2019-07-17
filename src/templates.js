@@ -27,6 +27,7 @@ define("xabber-templates", [
     "text!templates/accounts/global_settings_item.html",
     "text!templates/accounts/change_status.html",
     "text!templates/accounts/token_item.html",
+    "text!templates/accounts/current_token_item.html",
 
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
@@ -99,11 +100,16 @@ define("xabber-templates", [
     "text!templates/chats/group_chats/pinned_message_panel.html",
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
-    "text!templates/chats/group_chats/group_chat_placeholder.html",
     "text!templates/chats/group_chats/mention_item.html",
+
+    "text!templates/mentions/mentions_panel.html",
+    "text!templates/mentions/mentions_placeholder.html",
+    "text!templates/mentions/mention_item.html",
 
     "text!templates/svg/ic-jabber.html",
     "text!templates/svg/xmpp.html",
+    "text!templates/svg/ic-at.html",
+    "text!templates/svg/ic-searching.html",
     "text!templates/svg/volume-off-variant.html",
     "text!templates/svg/message-group.html",
     "text!templates/svg/xabber-offline.html",
@@ -182,6 +188,7 @@ define("xabber-templates", [
     addTemplate('accounts.global_settings_item');
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item');
+    addTemplate('accounts.current_token_item');
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');
@@ -253,11 +260,16 @@ define("xabber-templates", [
     addTemplate('chats.group_chats.pinned_message_panel');
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
-    addTemplate('chats.group_chats.group_chat_placeholder');
     addTemplate('chats.group_chats.mention_item');
+
+    addTemplate('mentions.mentions_panel');
+    addTemplate('mentions.mentions_placeholder');
+    addTemplate('mentions.mention_item');
 
     addSvgTemplate('svg.ic-jabber');
     addSvgTemplate('svg.xmpp');
+    addSvgTemplate('svg.ic-at');
+    addSvgTemplate('svg.ic-searching');
     addSvgTemplate('svg.volume-off-variant');
     addSvgTemplate('svg.message-group');
     addSvgTemplate('svg.xabber-offline');

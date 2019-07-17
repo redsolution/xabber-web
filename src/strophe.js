@@ -1,6 +1,7 @@
 define("xabber-strophe", function () {
     return function (xabber) {
         var env = xabber.env,
+            $iq = env.$iq,
             Strophe = env.Strophe,
             constants = env.constants;
 
@@ -67,12 +68,16 @@ define("xabber-strophe", function () {
                     this.connection.registerSASLMechanism(Strophe.SASLXTOKEN);
                 } else {
                     this.connection.registerSASLMechanisms([Strophe.SASLXOAuth2]);
-                    delete this.connection._sasl_data.server_signature;
+                    delete this.connection._sasl_data["server-signature"];
                 }
                 this.connection.connect(jid, password, callback);
             },
 
             reconnect: function (callback) {
+                if (this.auth_type === 'x-token' && !this.connection.mechanisms["X-TOKEN"]) {
+                    this.connection.registerSASLMechanism(Strophe.SASLXTOKEN);
+                    delete this.connection._sasl_data["server-signature"];
+                }
                 this.connection.connect(this.connection.jid, this.connection.pass, callback);
             }
         };
@@ -147,7 +152,7 @@ define("xabber-strophe", function () {
                     id: uniq_id
                 }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('device').t('PC ' + navigator.platform);
+                    .c('device').t('PC, ' + navigator.platform);
 
                 handler = function (stanza) {
                     var iqtype = stanza.getAttribute('type');
@@ -203,7 +208,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('XABBER_REWRITE', 'http://xabber.com/protocol/rewrite');
-        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0');
+        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0'); // https://xabber.com/protocol/reference
 
         return xabber;
     };

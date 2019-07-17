@@ -147,31 +147,44 @@ define(["xabber-dependencies"], function (deps) {
 
     var getAvatarFromFile = function (file) {
         var image_obj = new Image(),
-            src = window.URL.createObjectURL(file),
-            deferred = new $.Deferred();
-        image_obj.onload = function () {
-            image_obj.onload = null;
-            var canvas = document.createElement('canvas'),
-                ctx = canvas.getContext('2d'),
-                width = image_obj.naturalWidth,
-                height = image_obj.naturalHeight,
-                b64_image,
-                new_size = getImageSize({width: width, height: height}, MAX_SIZE);
-            canvas.width = new_size.width;
-            canvas.height = new_size.height;
-            ctx.drawImage(image_obj, 0, 0, new_size.width, new_size.height);
-            b64_image = canvas.toDataURL('image/jpeg')
-                    .replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
-            window.URL.revokeObjectURL(src);
-            deferred.resolve(b64_image);
-        };
-        image_obj.onerror = function() {
-            image_obj.onerror = null;
-            window.URL.revokeObjectURL(src);
-            deferred.resolve(false);
-        };
-        image_obj.src = src;
-        return deferred.promise();
+             src = window.URL.createObjectURL(file),
+             deferred = new $.Deferred();
+         image_obj.onload = function () {
+             image_obj.onload = null;
+             var canvas = document.createElement('canvas'),
+                 ctx = canvas.getContext('2d'),
+                 width = image_obj.naturalWidth,
+                 height = image_obj.naturalHeight,
+                 b64_image, hash,
+                 new_size = getImageSize({width: width, height: height}, MAX_SIZE);
+             canvas.width = new_size.width;
+             canvas.height = new_size.height;
+             ctx.drawImage(image_obj, 0, 0, canvas.width, canvas.height);
+             b64_image = canvas.toDataURL('image/jpeg').replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+             window.URL.revokeObjectURL(src);
+             canvas.toBlob((blob) => {
+                 var reader = new FileReader();
+                 reader.onload = function () {
+                     b64_image = reader.result.replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+                     let binary_file = atob(b64_image),
+                        bytes = new Uint8Array(binary_file.length);
+
+                     for (let i = 0; i < binary_file.length; i++)
+                         bytes[i] = binary_file.charCodeAt(i);
+
+                     hash = sha1(bytes);
+                     deferred.resolve(b64_image, hash, binary_file.length);
+                 }.bind(this);
+                 reader.readAsDataURL(blob);
+             }, 'image/jpeg', 0.8);
+         };
+         image_obj.onerror = function() {
+             image_obj.onerror = null;
+             window.URL.revokeObjectURL(src);
+             deferred.resolve(false, false, false);
+         };
+         image_obj.src = src;
+         return deferred.promise();
     };
 
     $.fn.setAvatar = function (image, size) {

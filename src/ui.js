@@ -115,7 +115,6 @@ define("xabber-ui", function () {
 
         this.on("update_layout", this.updateLayout, this);
 
-
         this.body.addScreen('blank', {});
 
         this.body.addScreen('login', {
@@ -192,6 +191,15 @@ define("xabber-ui", function () {
             toolbar: null,
             main: {
                 wide: { discovering_main: null}
+            },
+            roster: null
+        });
+
+        this.body.addScreen('mentions', {
+            toolbar: null,
+            main: {
+                left: { mentions: null },
+                right: { mentions_placeholder: null }
             },
             roster: null
         });

@@ -135,6 +135,27 @@ define([
             return Math.floor(seconds / 86400) + ' days ago';
         },
 
+        file_type_icon: function (mime_type) {
+            let filetype = utils.pretty_file_type(mime_type);
+            if (filetype === 'image')
+                return 'mdi-image';
+            if (filetype === 'audio')
+                return 'mdi-music-note';
+            if (filetype === 'video')
+                return 'mdi-filmstrip';
+            if (filetype === 'document')
+                return 'mdi-file-document-box';
+            if (filetype === 'presentation')
+                return 'mdi-presentation';
+            if (filetype === 'archive')
+                return 'mdi-zip-box';
+            if (filetype === 'file')
+                return 'mdi-file';
+            if (filetype === 'pdf')
+                return 'mdi-file-pdf';
+            return 'mdi-file'
+        },
+
         pretty_file_type: function (mime_type) {
             if (constants.MIME_TYPES.image.includes(mime_type))
                 return 'image';
@@ -142,8 +163,10 @@ define([
                 return 'audio';
             if (constants.MIME_TYPES.video.includes(mime_type))
                 return 'video';
-            if (constants.MIME_TYPES.document.includes(mime_type) || constants.MIME_TYPES.pdf.includes(mime_type))
+            if (constants.MIME_TYPES.document.includes(mime_type))
                 return 'document';
+            if (constants.MIME_TYPES.pdf.includes(mime_type))
+                return 'pdf';
             if (constants.MIME_TYPES.presentation.includes(mime_type))
                 return 'presentation';
             if (constants.MIME_TYPES.archive.includes(mime_type))
@@ -156,6 +179,7 @@ define([
         pretty_file_type_with_article: function (mime_type) {
             let type = utils.pretty_file_type(mime_type),
                 vowels = ["a", "e", "i", "o", "u"];
+            (type === 'pdf') && (type = 'document');
             if (vowels.includes(type[0]))
                 return 'an ' + type;
             else
@@ -223,10 +247,10 @@ define([
 
         markupBodyMessage: function (message) {
             let attrs = _.clone(message.attributes),
-                body = attrs.original_message || attrs.message,
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
                 legacy_refs = attrs.legacy_content || [],
+                body = legacy_refs.length ? attrs.original_message : attrs.message,
                 markup_body = Array.from(_.escape(_.unescape(body)));
 
             mentions.concat(markups).forEach(function (markup) {
@@ -253,8 +277,22 @@ define([
             }.bind(this));
 
             legacy_refs.forEach(function (legacy) {
-                for (let idx = legacy.start; idx <= legacy.end; idx++)
-                    markup_body[idx] = "";
+                if (legacy.type === 'quote') {
+                    for (let idx = legacy.start; idx < (legacy.start + legacy.marker.length); idx++)
+                        markup_body[idx] = "";
+                    for (let idx = legacy.start; idx < legacy.end; idx++) {
+                        if (markup_body[idx] === '\n') {
+                            for (let child_idx = idx + 1; child_idx <= (idx + legacy.marker.length); child_idx++)
+                                markup_body[child_idx] = "";
+                            idx+= legacy.marker.length - 1;
+                        }
+                    }
+                    markup_body[legacy.start] = '<div class="quote">';
+                    markup_body[legacy.end] = '</div>';
+                }
+                else
+                    for (let idx = legacy.start; idx <= legacy.end; idx++)
+                        markup_body[idx] = "";
             }.bind(this));
 
             return markup_body.join("");

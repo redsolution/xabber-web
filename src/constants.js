@@ -218,7 +218,8 @@ var constants = {
             'audio/x-ms-wax',
             'audio/vnd.rn-realaudio',
             'audio/vnd.wave',
-            'audio/webm'
+            'audio/webm',
+            'audio/x-wav'
         ],
         video: [
             'video/mpeg',
@@ -278,6 +279,12 @@ var constants = {
     GCM_API_KEY: 'AIzaSyC1JCBB3LLf_4DG_vRWMEEe0I4X5msEU-M',
     MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive'
 };
+
+constants.JINGLE_MSG_STATE = {};
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_RETRACT] = 'retract';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_REJECT] = 'reject';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_PROPOSE] = 'propose';
+constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_ACCEPT] = 'accept';
 
 constants.JINGLE_MSG_STATE = {};
 constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_RETRACT] = 'retract';

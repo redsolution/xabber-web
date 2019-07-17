@@ -513,9 +513,10 @@ define("xabber-contacts", function () {
                     let jid = participant.get('jid');
                     // if (jid !== this.account.get('jid')) {
                         if (query) {
+                            query = query.toLowerCase();
                             let nickname = participant.get('nickname'),
                                 id = participant.get('id');
-                            if (jid && !jid.toLowerCase().indexOf(query) || id && !id.toLowerCase().indexOf(query) || nickname && !nickname.toLowerCase().indexOf(query))
+                            if (jid && jid.toLowerCase().indexOf(query) > -1 || /*id && id.toLowerCase().indexOf(query) > -1 ||*/ nickname && nickname.toLowerCase().indexOf(query) > -1)
                                 participants_list.push(participant);
                         } else
                             participants_list.push(participant);
@@ -1161,6 +1162,10 @@ define("xabber-contacts", function () {
         xabber.GroupChatPropertiesView = xabber.BasicView.extend({
             template: templates.group_chats.group_chat_properties,
 
+            events: {
+                "click .group-chat-properties .details-icon": "onClickIcon"
+            },
+
             _initialize: function () {
                 this.$el.html(this.template());
                 this.contact = this.model;
@@ -1181,6 +1186,26 @@ define("xabber-contacts", function () {
                 this.$('.model .value').text(utils.pretty_name(info.model));
                 this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
                 this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
+            },
+
+            onClickIcon: function (ev) {
+                let $target_info = $(ev.target).closest('.info-wrap'),
+                    $target_value = $target_info.find('.value'), copied_text = "";
+                $target_value.each(function (idx, item) {
+                    let $item = $(item),
+                        value_text = $item.text();
+                    if ($target_info.hasClass('anonymous-info-wrap') || $target_info.hasClass('searchable-info-wrap')) {
+                        let label_name = $target_info.find('.label').first().text();
+                        if (value_text === 'No')
+                            value_text += ' ' + label_name.toLowerCase();
+                        else
+                            if (value_text === 'Yes')
+                                value_text = label_name;
+                    }
+                    value_text && (copied_text != "") && (copied_text += '\n');
+                    value_text && (copied_text += value_text);
+                    copied_text && utils.copyTextToClipboard(copied_text, 'Copied in clipboard', 'ERROR: Not copied in clipboard');
+                }.bind(this));
             }
         });
 
@@ -1271,9 +1296,9 @@ define("xabber-contacts", function () {
                 }
                 if (has_changes)
                     this.account.sendIQ(iq, function () {
-                        this.$('button').removeClass('non-active');
+                        this.$('button').addClass('non-active');
                     }.bind(this), function (error) {
-                        this.$('button').removeClass('non-active');
+                        this.$('button').addClass('non-active');
                         let err_text = $(error).find('error text').text() || 'You have no permission to change chat properties';
                         this.close();
                         utils.dialogs.error(err_text);

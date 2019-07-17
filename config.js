@@ -51,6 +51,7 @@ require.config({
         "xabber-contacts":          "src/contacts",
         "xabber-chats":             "src/chats",
         "xabber-searching":         "src/searching",
+        "xabber-mentions":          "src/mentions",
         "xabber-ui":                "src/ui",
 
         // main file

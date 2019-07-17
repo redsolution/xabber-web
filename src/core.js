@@ -14,7 +14,7 @@
             version_number: env.version_number,
             actual_version_number: env.version_number,
             client_id: uuid().substring(0, 8),
-            client_name: 'Xabber Web ' + env.version_number
+            client_name: 'Xabber for Web ' + env.version_number
         },
 
         initialize: function () {
@@ -29,6 +29,7 @@
             this.cache = this._cache.attributes;
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
+            this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         },
 
@@ -76,6 +77,10 @@
                 }
             }.bind(this);
             rawFile.send();
+        },
+
+        onQuit: function () {
+            window.localStorage.clear();
         },
 
         throwNewVersion: function () {

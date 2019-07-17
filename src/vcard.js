@@ -455,9 +455,9 @@ define("xabber-vcard", function () {
                 utils.dialogs.error('Wrong image');
                 return;
             }
-            utils.images.getAvatarFromFile(file).done(function (image) {
+            utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                 if (image) {
-                    this.avatar = {base64: image, size: file.size};
+                    this.avatar = {base64: image, hash: hash, size: size};
                     this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                 } else {
                     utils.dialogs.error('Wrong image');

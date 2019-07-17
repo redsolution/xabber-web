@@ -138,7 +138,7 @@ define("xabber-accounts", function () {
                 },
 
                 pubAvatar: function (image, callback, errback) {
-                    var avatar_hash = sha1(image.base64),
+                    var avatar_hash = image.hash || sha1(image.base64),
                         iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
                             .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                             .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
@@ -219,7 +219,7 @@ define("xabber-accounts", function () {
                     if (auth_type === 'token') {
                         password = this.settings.get('token');
                     } else if (auth_type === 'x-token') {
-                        if (this.get('x_token') && parseInt(this.get('x_token').expire)*1000 > moment.now())
+                        if (this.get('x_token') && (parseInt(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
                             password = this.get('x_token').token;
                         else
                             password = undefined;
@@ -263,8 +263,9 @@ define("xabber-accounts", function () {
 
                 connectionCallback: function (status, condition) {
                     if ((status === Strophe.Status.AUTHFAIL) && this.connection.x_token) {
-                        this.onAuthFailed();
-                        this.destroy();
+                        this.onTokenRevoked();
+                        /*this.onAuthFailed();
+                        this.destroy();*/
                         return;
                     }
                     if (this.session.get('reconnecting')) {
@@ -274,11 +275,20 @@ define("xabber-accounts", function () {
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
                     if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && (!this.session.get('delete'))) {
-                        this.onTokenRevoked();
-                        this.deleteAccount();
+                        if (this.get('auth_type') === 'x-token') {
+                            this.onTokenRevoked();
+                        }
+                        else {
+                            this.onAuthFailed();
+                            // this.deleteAccount();
+                        }
+                        // this.deleteAccount();
                     }
                     if (status === Strophe.Status.CONNECTED) {
-                        this.connection.x_token && this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
+                        if (this.connection.x_token) {
+                            this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
+                            this.conn_manager.auth_type = 'x-token';
+                        }
                         this.session.set({connected: true, reconnected: false});
                         if ((!xabber.api_account.get('connected'))&&(this.get('auto_login_xa'))&&(!xabber.api_account.get('token')))
                             this.connectXabberAccount();
@@ -373,6 +383,7 @@ define("xabber-accounts", function () {
                     if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
                         this.auth_view.successFeedback(this);
+                        this.auth_view = null;
                     } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
                         if (status === Strophe.Status.ERROR) {
                             status = 'Connection error';
@@ -396,8 +407,6 @@ define("xabber-accounts", function () {
                         utils.dialogs.error('Authentication failed for account ' +
                             this.get('jid'));
                     }
-                    if (this.get('x_token'))
-                        this.set({auth_type: 'password', x_token: undefined});
                     this.session.set({
                         auth_failed: true,
                         no_reconnect: true
@@ -431,15 +440,18 @@ define("xabber-accounts", function () {
 
                 onTokenRevoked: function () {
                     if (!this.auth_view) {
-                        utils.dialogs.error('Token was revoked for account ' +
+                        utils.dialogs.error('Token was invalidated for account ' +
                             this.get('jid'));
                     }
                     this.session.set({
                         auth_failed: true,
                         no_reconnect: true
                     });
+                    this.set({auth_type: 'password', password: null, x_token: null});
+                    this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback('Authentication failed');
+                    this.connect();
                 },
 
                 onChangedConnected: function () {
@@ -639,7 +651,7 @@ define("xabber-accounts", function () {
                         if (type !== 'online') {
                             stanza.c('show').t(type).up();
                         }
-                        stanza.c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash()).up().up();
+                        // stanza.c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash()).up().up();
                         stanza.c('status').t(status_message).up();
                         stanza.c('priority').t(this.get('priority')).up();
                     }
@@ -982,6 +994,14 @@ define("xabber-accounts", function () {
                 this.updateAvatar();
                 this.updateColorScheme();
                 this.$el.attr('data-jid', this.model.get('jid'));
+                /*this.$el.hover(function () {
+                    this.$el.parent().siblings('.account-actions-panel').css({opacity: 1, top: this.$el[0].offsetTop - this.$el.parent()[0].scrollTop});
+                }.bind(this),
+                    function (ev) {
+                    let $target = $(ev.target);
+                    if (!this.$el.parent().siblings('.account-actions-panel').is(":hover"))
+                        this.$el.parent().siblings('.account-actions-panel').css({opacity: 0});
+                    }.bind(this));*/
                 this.model.session.on("change:auth_failed", this.updateAuthState, this);
                 this.model.session.on("change:connected", this.updateConnected, this);
                 this.model.on("change:status", this.updateStatus, this);
@@ -1223,7 +1243,6 @@ define("xabber-accounts", function () {
                 "click .main-info-wrap .status": "openChangeStatus",
                 "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
                 "click .settings-tab.delete-account": "deleteAccount"
-                // "click .back-to-settings": "backToSettings"
             },
 
             _initialize: function () {
@@ -1306,14 +1325,15 @@ define("xabber-accounts", function () {
                     utils.dialogs.error('Wrong image');
                     return;
                 }
-                utils.images.getAvatarFromFile(file).done(function (image) {
+                utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                     if (image) {
-                        this.model.pubAvatar({base64: image, size: file.size},
+                        this.model.pubAvatar({base64: image, hash: hash, size: size},
                             function () {
                                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                                 this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                             }.bind(this),
                             function () {
+                                this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                                 utils.dialogs.error('Wrong image');
                             }.bind(this));
                     } else
@@ -1438,6 +1458,32 @@ define("xabber-accounts", function () {
                 this.updateDelSettingsButton();
             },
 
+            renderAllXTokens: function () {
+                $(this.model.x_tokens_list).each(function (idx, token) {
+                    let pretty_token = {
+                        client: token.client,
+                        device: token.device,
+                        token_uid: token.token_uid,
+                        ip: token.ip,
+                        last_auth: utils.pretty_datetime(token.last_auth),
+                        expire: utils.pretty_datetime(token.expire)
+                    };
+                    if (this.model.get('x_token')) {
+                        if (this.model.get('x_token').token_uid == token.token_uid) {
+                            let $cur_token_html = $(templates.current_token_item(pretty_token));
+                            this.$('.panel-content-wrap .tokens .current-session').prepend($cur_token_html);
+                            return;
+                        }
+                    }
+                    let $token_html = $(templates.token_item(pretty_token));
+                    this.$('.panel-content-wrap .tokens .all-sessions').prepend($token_html);
+                }.bind(this));
+                if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
+                    this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
+                else
+                    this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
+            },
+
             updateXTokens: function () {
                 if (this.model.get('auth_type') !== 'x-token') {
                     this.$('.panel-content-wrap .tokens').addClass('hidden');
@@ -1447,27 +1493,20 @@ define("xabber-accounts", function () {
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
                 if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
                     this.$('.panel-content-wrap .tokens').removeClass('hidden');
-                    $(this.model.x_tokens_list).each(function (idx, token) {
-                        let pretty_token = {
-                                client: token.client,
-                                device: token.device,
-                                token_uid: token.token_uid,
-                                ip: token.ip,
-                                last_auth: utils.pretty_datetime(token.last_auth),
-                                expire: utils.pretty_datetime(token.expire)
-                            },
-                            $token_html = $(templates.token_item(pretty_token));
-                        if (this.model.get('x_token')) {
-                            if (this.model.get('x_token').token_uid == token.token_uid) {
-                                $token_html.find('.btn-revoke-token').remove();
-                                $('<div class="token-indicator text-color-700">(this device)</div>').insertAfter($token_html.find('.device'));
-                                this.$('.panel-content-wrap .tokens .current-session').prepend($token_html);
-                                return;
-                            }
-                        }
-                        this.$('.panel-content-wrap .tokens .all-sessions').prepend($token_html);
-                    }.bind(this));
-                    !this.$('.panel-content-wrap .tokens .all-sessions').children().length && this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
+                    if (this.model.get('x_token') && !this.model.get('x_token').token_uid) {
+                        let iq_ask_token_uid = $iq({from: this.model.get('jid'), type: 'get'})
+                            .c('query', {xmlns: Strophe.NS.AUTH_TOKENS + '#items'})
+                            .c('token').t(this.model.get('x_token').token)
+                        this.model.sendIQ(iq_ask_token_uid, function (iq_response) {
+                            let token_uid = iq_response.find('token-uid').text(),
+                                expire = iq_response.find('expire').text();
+                            this.model.get('x_token').token_uid = token_uid;
+                            this.model.get('x_token').expire = expire;
+                            this.renderAllXTokens();
+                        }.bind(this));
+                    }
+                    else
+                        this.renderAllXTokens();
                 }
             },
 
