@@ -73,6 +73,10 @@ define("xabber-mentions", function () {
             ps_settings: {theme: 'item-list'},
             template: templates.mentions_panel,
 
+            events: {
+                'click .btn-read-all': 'readAllMentions'
+            },
+
             _initialize: function () {
                 this.active_mention = null;
                 this.model.on("add", this.onMentionAdded, this);
@@ -82,6 +86,10 @@ define("xabber-mentions", function () {
             },
 
             render: function (options) {
+                if (!options.right && this.active_mention) {
+                    this.active_mention.model.set('active', false);
+                    this.active_mention = null;
+                }
             },
 
             onMentionAdded: function (mention) {
@@ -108,7 +116,36 @@ define("xabber-mentions", function () {
                     } else {
                         this.$('.mention-item').eq(-index).before(view.$el);
                     }
+                    let $prev_el = view.$el.prev('.mention-item'),
+                        $next_el = view.$el.next('.mention-item'),
+                        contact_jid = view.$el.data('contact-jid');
+                        if ($prev_el.length) {
+                            let prev_contact_jid = $prev_el.data('contact-jid');
+                            if (prev_contact_jid !== contact_jid)
+                                view.$el.find('.group-chat-name').removeClass('hidden');
+                        }
+                        else
+                            view.$el.find('.group-chat-name').removeClass('hidden');
+                        if ($next_el.length) {
+                            let next_contact_jid = $next_el.data('contact-jid');
+                            if (next_contact_jid === contact_jid) {
+                                $next_el.find('.group-chat-name').addClass('hidden');
+                            }
+                            else
+                                $next_el.find('.group-chat-name').removeClass('hidden');
+                        }
+                        else
+                            view.$el.find('.group-chat-name').removeClass('hidden');
                 }
+            },
+
+            readAllMentions: function () {
+                xabber.accounts.connected.forEach(function (account) {
+                    account.unreaded_mentions.each(function (mention) {
+                        // mention.message.set('is_unread', false);
+                        // chat.sendMarker(mention, 'displayed', archive_id, contact_archive_id);
+                    }.bind(this));
+                }.bind(this));
             },
 
             updateLeftIndicator: function (accounts) {
@@ -144,14 +181,17 @@ define("xabber-mentions", function () {
                 this.account = this.model.account;
                 this.contact = this.model.contact;
                 this.$el.attr('data-id', this.model.id);
+                this.$el.attr('data-contact-jid', this.contact.get('jid'));
+                this.updateGroupChatName();
                 this.updateName();
                 this.updateLastMessage();
                 this.updateStatus();
                 this.updateAvatar();
                 this.updateColorScheme();
-                this.updateGroupChats();
                 this.updateCounter();
-                this.model.message.on("change:unread", this.updateCounter, this);
+                this.model.on("change:active", this.updateActiveStatus, this);
+                this.model.contact.on("change:name", this.updateGroupChatName, this);
+                this.model.message.on("change:is_unread", this.updateCounter, this);
             },
 
             updateName: function () {
@@ -162,9 +202,12 @@ define("xabber-mentions", function () {
                 this.$('.chat-title').text(contact_name);
             },
 
+            updateGroupChatName: function () {
+                this.$('.group-chat-name').text(this.contact.get('name'));
+            },
+
             updateStatus: function () {
-                var status = this.contact.get('status');
-                this.$('.status').attr('data-status', status);
+                this.$('.status').attr('data-status', 'offline');
             },
 
             updateCounter:function () {
@@ -186,8 +229,7 @@ define("xabber-mentions", function () {
                     forwarded_message = msg.get('forwarded_message'),
                     msg_files = msg.get('files'),
                     msg_images = msg.get('images'),
-                    msg_text = (forwarded_message) ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
-                    msg_user_info = msg.get('user_info') || {};
+                    msg_text = (forwarded_message) ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText();
                 this.model.set({timestamp: timestamp});
                 if (msg_files || msg_images) {
                     let $colored_span = $('<span class="text-color-500"/>');
@@ -230,7 +272,7 @@ define("xabber-mentions", function () {
             },
 
             updateActiveStatus: function () {
-                this.$el.switchClass('active', this.model.get('active'));
+                this.$el.find('.mention-info-wrap').switchClass('active', this.model.get('active'));
             },
 
             updateAvatar: function () {
@@ -253,23 +295,14 @@ define("xabber-mentions", function () {
                 }
             },
 
-            updateGroupChats: function () {
-                var is_group_chat = this.contact.get('group_chat');
-                this.$('.status').hideIf(is_group_chat);
-                this.$('.group-chat-icon').showIf(is_group_chat);
-                if (is_group_chat) {
-                    this.$el.addClass('group-chat');
-                    this.$('.chat-title').css('color', '#424242');
-                    this.model.set('group_chat', true);
-                }
-            },
-
             openByClick: function () {
                 let msgid = this.model.message.get('msgid'),
                     archive_id = this.model.message.get('archive_id'),
                     contact_archive_id = this.model.message.get('contact_archive_id'),
                     chat = this.account.chats.getChat(this.contact);
+                this.model.message.set('is_unread', false);
                 chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
+                this.model.set('active', true);
                 this.contact.trigger("open_mention", this.contact, msgid);
             },
 

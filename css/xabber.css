@@ -772,6 +772,32 @@ body {
 }
 
 
+/* ----------------- MENTIONS PANEL ---------------- */
+
+
+.mentions-panel .panel-head {
+    border-right: 1px solid #eee;
+}
+
+.mentions-panel .buttons-wrap {
+    color: #9E9E9E;
+    margin: 0 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+}
+
+.mentions-panel .buttons-wrap i {
+    cursor: pointer;
+}
+
+.mentions-panel .buttons-wrap i:hover {
+    color: #616161;
+}
+
 /* ------------------ TOOLBAR ---------------------- */
 
 .toolbar .toolbar-item,
@@ -2804,7 +2830,28 @@ body {
     border-right: 1px solid #F5F5F5;
 }
 
-.mention-item,
+.mention-item {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.mention-item .group-chat-name {
+    padding: 8px 16px;
+    line-height: 18px;
+    font-size: 16px;
+}
+
+.mention-item .mention-info-wrap {
+    padding: 11px 7px 11px 60px;
+    position: relative;
+}
+
+.mention-item .mention-info-wrap .group-chat-name {
+    position: relative;
+}
+
 .chat-item {
     position: relative;
     height: 56px;
@@ -2812,17 +2859,17 @@ body {
     cursor: pointer;
 }
 
-.mention-item:hover,
-.mention-item:hover .group-chat-icon,
+.mention-info-wrap:hover,
+.mention-info-wrap:hover .group-chat-icon,
 .chat-item:hover,
 .chat-item:hover .group-chat-icon {
     background-color: #F8F8F8;
 }
 
-.mention-item.active,
-.mention-item.active:hover,
-.mention-item.active .group-chat-icon,
-.mention-item.active:hover .group-chat-icon,
+.mention-info-wrap.active,
+.mention-info-wrap.active:hover,
+.mention-info-wrap.active .group-chat-icon,
+.mention-info-wrap.active:hover .group-chat-icon,
 .chat-item.active,
 .chat-item.active:hover,
 .chat-item.active .group-chat-icon,

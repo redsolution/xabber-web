@@ -534,12 +534,19 @@ define("xabber-chats", function () {
                 let stanza_id = message.get('archive_id');
                 this.contact.messages_view = new xabber.MessageContextView({
                     contact: this.contact,
+                    mention_context: is_mention,
                     model: this,
                     stanza_id_context: stanza_id
                 });
                 this.account.context_messages.add(message);
                 this.contact.messages_view.messagesRequest({after: stanza_id}, function () {
-                    xabber.body.setScreen('all-chats', {
+                    if (is_mention)
+                        xabber.body.setScreen('mentions', {
+                            right: 'participant_messages',
+                            contact: this.contact
+                        });
+                    else
+                        xabber.body.setScreen('all-chats', {
                         right: 'participant_messages',
                         contact: this.contact
                     });
@@ -1100,7 +1107,9 @@ define("xabber-chats", function () {
           },
 
           __initialize: function (options) {
+              options = options || {};
               this.stanza_id = options.stanza_id_context;
+              this.mention_context = options.mention_context;
               this.$history_feedback = this.$('.load-history-feedback');
               this.account.context_messages = new xabber.Messages(null, {account: this.account});
               this.account.context_messages.on("add", this.addMessage, this);
@@ -1203,14 +1212,14 @@ define("xabber-chats", function () {
           addMessage: function (message) {
               if (message.get('auth_request'))
                   return;
-              message.set('is_archived', true);
+              if (this.mention_context && (message.get('archive_id') === this.stanza_id)) {} else message.set('is_archived', true);
               let $message = this.chat_content.buildMessageHtml(message).addClass('context-message'),
                   index = this.account.context_messages.indexOf(message);
               if (message.get('archive_id') === this.stanza_id) {
                   $message.addClass('message-from-context');
                   setTimeout(function () {
                       $message.removeClass('message-from-context')
-                  }.bind(this), 5000);
+                  }.bind(this), 3000);
               }
               this.addMessageHTML($message, index, this.account.context_messages.findLastIndex());
           }
@@ -3599,6 +3608,7 @@ define("xabber-chats", function () {
 
         openMention: function (contact, msgid) {
             var chat = this.getChat(contact);
+            xabber.body.setScreen('mentions', {right: 'mentions', chat_item: chat.item_view});
             msgid && chat.getMessageContext(msgid, true);
         },
 
