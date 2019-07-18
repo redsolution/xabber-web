@@ -2837,10 +2837,17 @@ body {
     flex-direction: column;
 }
 
-.mention-item .group-chat-name {
-    padding: 8px 16px;
+.mention-item .group-chat-title-wrap {
+    padding: 8px;
     line-height: 18px;
     font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.mention-item .group-chat-icon {
+    margin-right: 4px;
 }
 
 .mention-item .mention-info-wrap {
@@ -2848,7 +2855,7 @@ body {
     position: relative;
 }
 
-.mention-item .mention-info-wrap .group-chat-name {
+.mention-item .mention-info-wrap .group-chat-title-wrap {
     position: relative;
 }
 
@@ -2905,22 +2912,18 @@ body {
     border-radius: 50%;
 }
 
-.mention-item:hover .status,
 .chat-item:hover .status {
     border-color: #F8F8F8;
 }
 
-.mention-item.active .status,
 .chat-item.active .status {
     border-color: #FFEBEE;
 }
 
-.mention-item .status .mdi-account-multiple,
 .chat-item .status .mdi-account-multiple {
     color: #FFF;
 }
 
-.mention-item .group-chat-icon,
 .chat-item .group-chat-icon,
 .chat-head-wrap .group-chat-icon {
     position: absolute;
@@ -3768,17 +3771,17 @@ img.fwd-img-preview {
     background-color: #EEEEEE;
 }
 
-.mdi-filmstrip,
-.mdi-file-pdf,
-.mdi-table-large,
-.mdi-file-document-box,
-.mdi-presentation,
-.mdi-zip-box,
-.mdi-image,
-.mdi-file,
-.mdi-music-note,
-.mdi-play,
-.mdi-pause {
+.msg-wrap .mdi-filmstrip,
+.msg-wrap .mdi-file-pdf,
+.msg-wrap .mdi-table-large,
+.msg-wrap .mdi-file-document-box,
+.msg-wrap .mdi-presentation,
+.msg-wrap .mdi-zip-box,
+.msg-wrap .mdi-image,
+.msg-wrap .mdi-file,
+.msg-wrap .mdi-music-note,
+.msg-wrap .mdi-play,
+.msg-wrap .mdi-pause {
     padding: 12px;
     height: 48px;
     width: 48px;
@@ -4327,7 +4330,11 @@ img.fwd-img-preview {
 }
 
 .message-input-panel .mentions-list .list-item:hover {
-    background-color: #F5F5F5;
+    background-color: #EEEEEE;
+}
+
+.message-input-panel .mentions-list .list-item.active {
+    background-color: #EEEEEE;
 }
 
 .message-input-panel .mentions-list .participant-info {
@@ -6458,6 +6465,7 @@ input[type='range'].voice-message-volume:focus {
 
 .dialog-modal .dialog-text {
     font-size: 16px;
+    white-space: pre-wrap;
 }
 
 .dialog-modal .dialog-options-wrap {

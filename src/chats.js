@@ -2810,6 +2810,7 @@ define("xabber-chats", function () {
             }
             var http_upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
             if (!http_upload_service) {
+                utils.dialogs.error(this.account.domain + ' server does not seem to support file transfer. This may happen because Xabber didn\'t yet receive server capabilities, or because of some glitch.\n\nRefresh server info in Account settings&nbsp;&rarr;&nbsp;Server info. If that does not help, consider using a server that definitely does support file transfer. One such server is xabber.org');
                 return;
             }
             var deferred_all = new $.Deferred();
@@ -5110,7 +5111,7 @@ define("xabber-chats", function () {
             "click .delete-message": "deleteMessages",
             "click .close-message-panel": "resetSelectedMessages",
             "click .mention-item": "inputMention"
-            // "click mention": "onclickMention"
+            // "click mention": "onClickMention"
         },
 
         _initialize: function (options) {
@@ -5121,6 +5122,16 @@ define("xabber-chats", function () {
                     handler: function(range) {
                         if (xabber.settings.hotkeys !== "enter")
                             this.quill.insertText(range.index, "\n");
+                    }
+                },
+                arrow_up: {
+                    key: constants.KEY_ARROW_UP,
+                    handler: function(range) {
+                    }
+                },
+                arrow_down: {
+                    key: constants.KEY_ARROW_DOWN,
+                    handler: function(range) {
                     }
                 }
             };
@@ -5277,7 +5288,7 @@ define("xabber-chats", function () {
                     this.$('.account-role').hide();
                 this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 14});
                 if (!avatar)
-                    this.$('.circle-avatar').setAvatar(Images.getDefaultAvatar(nickname), this.avatar_size);
+                    this.$('.my-avatar.circle-avatar').setAvatar(Images.getDefaultAvatar(nickname), this.avatar_size);
             }
             else {
                 this.$('.account-jid').show();
@@ -5294,7 +5305,7 @@ define("xabber-chats", function () {
                     if (this.contact.my_info.get('b64_avatar'))
                         image = this.contact.my_info.get('b64_avatar');
             }
-            this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+            this.$('.my-avatar.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
         focusOnInput: function () {
@@ -5311,10 +5322,15 @@ define("xabber-chats", function () {
                 return;
             }
             if (ev.keyCode === constants.KEY_ENTER || ev.keyCode === 10) {
+                if (this.$('.mentions-list').css('display') !== 'none') {
+                    let active_item = this.$('.mentions-list').children('.active.mention-item');
+                    active_item.length && active_item.click();
+                    ev.preventDefault();
+                    return;
+                }
                 let send_on_enter = xabber.settings.hotkeys === "enter";
                 if (    (send_on_enter && ev.keyCode === constants.KEY_ENTER && !ev.shiftKey) ||
                         (!send_on_enter && ev.ctrlKey)  ) {
-                    // this.quill.deleteText(this.quill.selection.lastRange.index - 1, 1);
                     ev.preventDefault();
                     this.submit();
                     return;
@@ -5358,7 +5374,7 @@ define("xabber-chats", function () {
                 });
         },
 
-        onclickMention: function (ev) {
+        onClickMention: function (ev) {
             let mention = $(ev.target);
             utils.dialogs.ask_enter_value("Edit mention", null, {input_value: mention.text()}, { ok_button_text: 'save'}).done(function (result) {
                 if (result) {
@@ -5400,9 +5416,31 @@ define("xabber-chats", function () {
                 ev.preventDefault();
                 this.displayMicrophone();
                 $rich_textarea.flushRichTextarea();
+                this.$('.mentions-list').hide();
                 this.unsetForwardedMessages();
                 this.view.sendChatState('active');
             } else {
+                if ((ev.keyCode === constants.KEY_ARROW_UP || ev.keyCode === constants.KEY_ARROW_DOWN) && (this.$('.mentions-list').css('display') !== 'none')) {
+                    ev.preventDefault();
+                    let active_item = this.$('.mentions-list').children('.active.mention-item');
+                    if (ev.keyCode === constants.KEY_ARROW_UP) {
+                        if (active_item.length)  {
+                            active_item.removeClass('active');
+                            active_item.prev('.mention-item').addClass('active');
+                        }
+                        else
+                            this.$('.mentions-list').children('.mention-item').last().addClass('active');
+                    }
+                    if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+                        if (active_item.length)  {
+                            active_item.removeClass('active');
+                            active_item.next('.mention-item').addClass('active');
+                        }
+                        else
+                            this.$('.mentions-list').children('.mention-item').first().addClass('active');
+                    }
+                    return;
+                }
                 if ((ev.keyCode === constants.KEY_BACKSPACE || ev.keyCode === constants.KEY_DELETE) && !this.edit_message) {
                     if (!text || text == "\n") {
                         if (this.$('.fwd-messages-preview').hasClass('hidden'))
@@ -5441,7 +5479,7 @@ define("xabber-chats", function () {
             xabber.chat_body.updateHeight();
         },
 
-        onCut: function (ev) {
+        onCut: function () {
             if (this.$('.fwd-messages-preview').hasClass('hidden'))
                 this.displayMicrophone();
             else {

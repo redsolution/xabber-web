@@ -122,29 +122,34 @@ define("xabber-mentions", function () {
                         if ($prev_el.length) {
                             let prev_contact_jid = $prev_el.data('contact-jid');
                             if (prev_contact_jid !== contact_jid)
-                                view.$el.find('.group-chat-name').removeClass('hidden');
+                                view.$el.find('.group-chat-title-wrap').removeClass('hidden');
                         }
                         else
-                            view.$el.find('.group-chat-name').removeClass('hidden');
+                            view.$el.find('.group-chat-title-wrap').removeClass('hidden');
                         if ($next_el.length) {
                             let next_contact_jid = $next_el.data('contact-jid');
                             if (next_contact_jid === contact_jid) {
-                                $next_el.find('.group-chat-name').addClass('hidden');
+                                $next_el.find('.group-chat-title-wrap').addClass('hidden');
                             }
                             else
-                                $next_el.find('.group-chat-name').removeClass('hidden');
+                                $next_el.find('.group-chat-title-wrap').removeClass('hidden');
                         }
                         else
-                            view.$el.find('.group-chat-name').removeClass('hidden');
+                            view.$el.find('.group-chat-title-wrap').removeClass('hidden');
                 }
             },
 
             readAllMentions: function () {
                 xabber.accounts.connected.forEach(function (account) {
-                    account.unreaded_mentions.each(function (mention) {
-                        // mention.message.set('is_unread', false);
-                        // chat.sendMarker(mention, 'displayed', archive_id, contact_archive_id);
-                    }.bind(this));
+                    let mentions = _.clone(account.unreaded_mentions.models);
+                    _.each(mentions, (function (mention) {
+                        let msgid = mention.message.get('msgid'),
+                            archive_id = mention.message.get('archive_id'),
+                            contact_archive_id = mention.message.get('contact_archive_id'),
+                            chat = account.chats.getChat(mention.contact);
+                        mention.message.set('is_unread', false);
+                        chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
+                    }.bind(this)));
                 }.bind(this));
             },
 
@@ -185,17 +190,18 @@ define("xabber-mentions", function () {
                 this.updateGroupChatName();
                 this.updateName();
                 this.updateLastMessage();
-                this.updateStatus();
                 this.updateAvatar();
                 this.updateColorScheme();
                 this.updateCounter();
                 this.model.on("change:active", this.updateActiveStatus, this);
-                this.model.contact.on("change:name", this.updateGroupChatName, this);
+                this.account.settings.on("change:color", this.updateColorScheme, this);
+                this.contact.on("change:name", this.updateGroupChatName, this);
                 this.model.message.on("change:is_unread", this.updateCounter, this);
             },
 
             updateName: function () {
-                let user_info = this.model.message.get('user_info'),
+                let message = this.model.message,
+                    user_info = message.get('user_info') || message.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes,
                     contact_name = this.contact.get('name');
                 if (user_info)
                     contact_name = user_info.nickname || user_info.jid || user_info.id || this.model.message.get('from_jid');
@@ -204,10 +210,6 @@ define("xabber-mentions", function () {
 
             updateGroupChatName: function () {
                 this.$('.group-chat-name').text(this.contact.get('name'));
-            },
-
-            updateStatus: function () {
-                this.$('.status').attr('data-status', 'offline');
             },
 
             updateCounter:function () {
@@ -276,17 +278,30 @@ define("xabber-mentions", function () {
             },
 
             updateAvatar: function () {
-                let user_info = this.model.message.get('user_info'),
+                let message = this.model.message,
+                    user_info = message.get('user_info') || message.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes,
                     image;
-                if (user_info && user_info.avatar) {
-                    image = this.account.chat_settings.getB64Avatar(user_info.avatar);
-                    if (!image) {
-                        var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + user_info.id;
-                        this.contact.getAvatar(user_info.avatar, node, function (data_avatar) {
-                            image = data_avatar;
-                            this.account.chat_settings.updateCachedAvatars(user_info.id, user_info.avatar, data_avatar);
+                if (user_info) {
+                    if (user_info.avatar) {
+                        image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.avatar);
+                        if (image) {
                             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                        }.bind(this));
+                        }
+                        else {
+                            var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + user_info.id;
+                            this.contact.getAvatar(user_info.avatar, node, function (data_avatar) {
+                                image = data_avatar;
+                                this.account.chat_settings.updateCachedAvatars(user_info.id, user_info.avatar, data_avatar);
+                                this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                            }.bind(this), function () {
+                                let default_avatar = Images.getDefaultAvatar(user_info.nickname || user_info.jid || user_info.id);
+                                this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                            }.bind(this));
+                        }
+                    }
+                    else {
+                        let default_avatar = Images.getDefaultAvatar(user_info.nickname || user_info.jid || user_info.id);
+                        this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
                     }
                 }
                 else {
