@@ -6052,6 +6052,7 @@ input[type='range'].voice-message-volume:focus {
 
 .invitation-view .main-info .text-info {
     text-align: center;
+    width: 100%;
 }
 
 .invitation-view .main-info .badge {

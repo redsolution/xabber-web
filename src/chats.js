@@ -78,10 +78,14 @@ define("xabber-chats", function () {
                 body = _.escape($message.children('body').text()),
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
-                message = msgid && this.get(msgid);
+                message = msgid && this.get(msgid),
+                is_private_invitation = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('privacy').length;
 
             if (message)
                 return message;
+
+            if (!from_jid)
+                return;
 
             let attrs = {
                 xml: options.xml || $message[0],
@@ -103,12 +107,13 @@ define("xabber-chats", function () {
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
-            let invite_msg_text = Strophe.getBareJidFromJid($message.attr('from')) + ' invites you to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants';
+            let invite_msg_text = is_private_invitation ? 'You are invited to join peer-to-peer chat. If you accept, your username will not be visible to chat participant' : ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
             contact.invitation.updateInviteMsg(invite_msg_text);
             chat.messages.createSystemMessage({
                 from_jid: from_jid,
                 auth_request: true,
-                invite: true,
+                invite: is_private_invitation ? false : true,
+                private_invite: is_private_invitation || false,
                 is_accepted: false,
                 silent: false,
                 message: invite_msg_text
@@ -926,7 +931,7 @@ define("xabber-chats", function () {
                             msg_text = 'Invitation to group chat';
                         else
                             if (msg.get('private_invite'))
-                                msg_text = 'Private invitation';
+                                msg_text = 'Invitation to peer-to-peer chat';
                             else
                                 msg_text = 'Authorization request';
                     }
@@ -5367,7 +5372,9 @@ define("xabber-chats", function () {
                     if (participants.length) {
                         this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
                         participants.forEach(function (participant) {
-                            let mention_item = $(templates.group_chats.mention_item(participant.attributes));
+                            let attrs = _.clone(participant.attributes);
+                            attrs.nickname = _.escape(attrs.nickname);
+                            let mention_item = $(templates.group_chats.mention_item(attrs));
                             mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
                             mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
                             this.$('.mentions-list').append(mention_item);

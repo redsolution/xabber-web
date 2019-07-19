@@ -1186,6 +1186,11 @@ define("xabber-contacts", function () {
                 this.$('.model .value').text(utils.pretty_name(info.model));
                 this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
                 this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
+                !info.name && this.$('.name-info-wrap').addClass('hidden');
+                !info.description && this.$('.description-info-wrap').addClass('hidden');
+                !info.model && this.$('.model-info-wrap').addClass('hidden');
+                !info.anonymous && this.$('.anonymous-info-wrap').addClass('hidden');
+                !info.searchable && this.$('.searchable-info-wrap').addClass('hidden');
             },
 
             onClickIcon: function (ev) {
@@ -1930,15 +1935,15 @@ define("xabber-contacts", function () {
                 let participant_jid = this.participant.get('jid'),
                     participant_in_roster = this.account.contacts.get(participant_jid);
                 if (!participant_jid) {
-                    let iq = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
-                        .c('disclosure', { xmlns: Strophe.NS.GROUP_CHAT, type: 'propose'})
-                        .c('recipient', { id: this.participant.get('id')});
+                    let iq = $iq({from: this.account.get('jid'), to: this.account.domain, type: 'set'})
+                        .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
+                        .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
                     this.account.sendIQ(iq, function () {
                         this.close();
-                        utils.dialogs.notify('Participant info', 'You sent your properties to participant. If participant wants, he/she will contact you.');
+                        utils.dialogs.notify('Private chat', 'You sent invitation to peer-to-peer chat to participant. If participant wants, he/she will accept your invitation.');
                     }, function () {
                         this.close();
-                        utils.dialogs.error('Function is not implemented yet');
+                        utils.dialogs.error('You have already sent an invitation to peer-to-peer chat');
                     });
                 }
                 else {
