@@ -2597,6 +2597,7 @@ define("xabber-chats", function () {
         sendMessage: function (message) {
             let body = _.unescape(message.get('message')),
                 legacy_body = '',
+                legacy_content = [],
                 forwarded_message = message.get('forwarded_message'),
                 msg_id = message.get('msgid'),
                 stanza = $msg({
@@ -2660,7 +2661,9 @@ define("xabber-chats", function () {
                     all_files = files.concat(images);
                 all_files.forEach(function(file, idx) {
                     legacy_body = file.url + ((idx != all_files.length - 1) ? '\n' : "");
-                    stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, type: (file.voice ? 'voice' : 'media'), begin: body.length, end: (body + legacy_body).length - 1})
+                    let start_idx = body.length,
+                        end_idx = (body + legacy_body).length - 1;
+                    stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, type: (file.voice ? 'voice' : 'media'), begin: start_idx, end: end_idx})
                         .c('media')
                         .c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
@@ -2672,8 +2675,9 @@ define("xabber-chats", function () {
                     file.description && stanza.c('description').t(file.description).up();
                     stanza.up().c('uri').t(file.url).up().up().up();
                     body += legacy_body;
+                    legacy_content.push({start: start_idx, end: end_idx});
                 }.bind(this));
-                message.set({type: 'main'});
+                message.set({type: 'main', legacy_content: legacy_content});
             }
 
             this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, msg_id: msg_id});

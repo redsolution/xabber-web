@@ -1508,8 +1508,10 @@ define("xabber-contacts", function () {
             },
 
             renderMemberItem: function (participant) {
-                let attrs = _.clone(participant.attributes),
-                    $item_view = $(templates.group_chats.group_member_item(attrs)),
+                let attrs = _.clone(participant.attributes);
+                attrs.nickname = _.escape(attrs.nickname);
+                attrs.badge = _.escape(attrs.badge);
+                let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
                 $item_view.emojify('.badge', {emoji_size: 14});
                 if (view.length) {
@@ -1678,8 +1680,10 @@ define("xabber-contacts", function () {
 
             render: function () {
                 this.new_avatar = "";
-                let attrs = this.participant.attributes,
-                    $member_info_view = $(templates.group_chats.participant_details_item(attrs));
+                let attrs = this.participant.attributes;
+                attrs.nickname = _.escape(attrs.nickname);
+                attrs.badge = _.escape(attrs.badge);
+                let $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
                 this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
                 this.updateMemberAvatar(this.participant);
