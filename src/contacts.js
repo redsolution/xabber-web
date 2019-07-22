@@ -149,12 +149,13 @@ define("xabber-contacts", function () {
                 });
             },
 
-            getMyInfo: function () {
+            getMyInfo: function (callback) {
                 this.membersRequest({id: ''}, function (response) {
                     let $item = $($(response).find('query item')),
                         cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
                     $item.length && this.participants && this.participants.createFromStanza($item);
                     cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
+                    callback && callback();
                 }.bind(this));
             },
 

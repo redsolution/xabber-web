@@ -1494,9 +1494,9 @@ define("xabber-accounts", function () {
                 if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
                     this.$('.panel-content-wrap .tokens').removeClass('hidden');
                     if (this.model.get('x_token') && !this.model.get('x_token').token_uid) {
-                        let iq_ask_token_uid = $iq({from: this.model.get('jid'), type: 'get'})
+                        let iq_ask_token_uid = $iq({from: this.model.get('jid'), to: this.model.domain, type: 'get'})
                             .c('query', {xmlns: Strophe.NS.AUTH_TOKENS + '#items'})
-                            .c('token').t(this.model.get('x_token').token)
+                            .c('token').t(this.model.get('x_token').token);
                         this.model.sendIQ(iq_ask_token_uid, function (iq_response) {
                             let token_uid = iq_response.find('token-uid').text(),
                                 expire = iq_response.find('expire').text();

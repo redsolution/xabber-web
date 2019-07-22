@@ -2043,6 +2043,11 @@ define("xabber-chats", function () {
                     let mention_uri = mention.uri && (mention.uri.lastIndexOf('?id=') > -1 ? mention.uri.slice(mention.uri.lastIndexOf('?id=') + 4) : mention.uri) || "";
                     if (this.contact.my_info)
                         (mention_uri === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                    else if (this.contact.get('group_chat')) {
+                        this.contact.getMyInfo(function () {
+                            (mention_uri === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                        }.bind(this));
+                    }
                     (mention_uri === this.account.get('jid')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                 }.bind(this));
             }

@@ -179,7 +179,7 @@ define("xabber-mentions", function () {
             avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
             events: {
-                'click': 'openByClick'
+                'click .mention-info-wrap': 'openByClick'
             },
 
             _initialize: function () {
