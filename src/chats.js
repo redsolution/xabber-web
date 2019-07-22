@@ -319,6 +319,7 @@ define("xabber-chats", function () {
 
             body && (attrs.message = body);
 
+            options.echo_msg && ($delay = $message.children('time'));
             $delay.length && (attrs.time = $delay.attr('stamp'));
             (attrs.carbon_copied || from_jid == this.account.get('jid') && options.synced_msg) && (attrs.state = constants.MSG_SENT);
             options.is_archived && (attrs.state = constants.MSG_ARCHIVED);
@@ -326,6 +327,7 @@ define("xabber-chats", function () {
             options.missed_history && (attrs.missed_msg = true);
             if (options.echo_msg) {
                 attrs.state = constants.MSG_DELIVERED;
+                attrs.timestamp = Number(moment(attrs.time));
                 attrs.from_jid = this.account.get('jid');
             }
             (options.context_message || options.participant_message || options.searched_message) && (attrs.state = constants.MSG_ARCHIVED);
@@ -1445,6 +1447,7 @@ define("xabber-chats", function () {
             this.model.messages.on("add", this.onMessage, this);
             this.model.messages.on("change:state", this.onChangedMessageState, this);
             this.model.messages.on("change:is_unread", this.onChangedReadState, this);
+            this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
             this.contact.on("change:group_chat", this.updateGroupChat, this);
@@ -3113,6 +3116,22 @@ define("xabber-chats", function () {
             }
         },
 
+        onChangedMessageTimestamp: function (message) {
+            var $message = this.$('.chat-message[data-msgid="' + message.get('msgid') + '"]');
+            $message.attr({
+                'data-time': message.get('timestamp')
+            });
+            $message.detach();
+            $message.children('.right-side').find('.msg-time').attr({title: utils.pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
+            this.model.messages.sort();
+            var index = this.model.messages.indexOf(message);
+            if (index === 0) {
+                $message.prependTo(this.$('.chat-content'));
+            } else {
+                $message.insertAfter(this.$('.chat-message').eq(index - 1));
+            }
+        },
+
         onChangedReadState: function (message) {
             var is_unread = message.get('is_unread');
             if (is_unread) {
@@ -3901,48 +3920,6 @@ define("xabber-chats", function () {
             return;
         },
 
-        receiveInvitationFromChat: function ($message) {
-            let $disclosed = $message.find('disclosed[xmlns="' + Strophe.NS.GROUP_CHAT + '"]'),
-                $participant_info = $disclosed.find('user'),
-                id = $participant_info.attr('id'),
-                jid = _.escape($participant_info.find('jid').text()),
-                nickname = _.escape($participant_info.find('nickname').text()),
-                badge = _.escape($participant_info.find('badge').text()),
-                role = _.escape($participant_info.find('role').text()),
-                avatar = _.escape($participant_info.find('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').text()),
-                group_chat_jid = Strophe.getBareJidFromJid($message.attr('from')),
-                contact = this.account.contacts.mergeContact(jid),
-                chat = this.account.chats.getChat(contact);
-            if ($disclosed.attr('type') === 'accept') {
-                if (contact.get('subscription') !== 'both')
-                    contact.askRequest();
-                return chat.messages.createSystemMessage({
-                    from_jid: jid,
-                    message: 'User has accepted private invitation'
-                });
-            }
-            contact.private_invitation = new xabber.PrivateInvitation({model: contact});
-            contact.private_invitation.showInvitation({
-                group_chat_jid: group_chat_jid,
-                participant_info: {
-                    id: id,
-                    jid: jid,
-                    nickname: nickname,
-                    badge: badge,
-                    role: role,
-                    avatar: avatar
-                }
-            });
-            chat.messages.createSystemMessage({
-                from_jid: jid,
-                auth_request: true,
-                private_invite: true,
-                is_accepted: false,
-                silent: false,
-                message: 'Participant ' + nickname + ' from group chat ' + group_chat_jid + ' wants to chat with you. If you accept, user will know your real info'
-            });
-        },
-
         receiveChatMessage: function (message, options) {
             options = options || {};
             var $message = $(message),
@@ -3956,13 +3933,6 @@ define("xabber-chats", function () {
             if ($message.find('invite').length) {
                 if (options.forwarded)
                     return;
-            }
-
-            if ($message.find('disclosed[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').length) {
-                if (options.forwarded || $forwarded.length)
-                    return;
-                else
-                    return this.receiveInvitationFromChat($message);
             }
 
             if (!from_jid) {
@@ -4274,8 +4244,8 @@ define("xabber-chats", function () {
             this.account.sendIQ(iq,
                 function (iq) {
                     if ($(iq).attr('type') === 'result'){
-                        var group_jid = $(iq).find('created jid').text();
-                        var contact = this.account.contacts.mergeContact(group_jid);
+                        let group_jid = $(iq).find('created jid').text(),
+                            contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
                         contact.pres('subscribed');
                         contact.pushInRoster(null, function () {

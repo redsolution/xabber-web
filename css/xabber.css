@@ -2579,6 +2579,7 @@ body {
     align-items: center;
     margin: 0 auto;
     text-align: center;
+    width: 100%;
 }
 
 .edit-rights .btn-escape {
@@ -5289,6 +5290,7 @@ input[type='range'].voice-message-volume:focus {
 .account-settings-panel .token-wrap .token-indicator {
     position: absolute;
     right: 36px;
+    color: #9E9E9E;
     top: 16px;
 }
 
@@ -6148,7 +6150,7 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .btn-revoke-token {
     position: absolute;
-    bottom: 16px;
+    bottom: 24px;
     right: 36px;
     height: 24px;
     color: #9E9E9E;

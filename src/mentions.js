@@ -67,7 +67,7 @@ define("xabber-mentions", function () {
             }
         });
 
-        xabber.MentionsView = xabber.BasicView.extend({
+        xabber.MentionsView = xabber.SearchView.extend({
             className: 'mentions-container container',
             ps_selector: '.mentions-list-wrap',
             ps_settings: {theme: 'item-list'},

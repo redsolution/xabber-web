@@ -1938,13 +1938,22 @@ define("xabber-contacts", function () {
                     let iq = $iq({from: this.account.get('jid'), to: this.account.domain, type: 'set'})
                         .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
-                    this.account.sendIQ(iq, function () {
-                        this.close();
-                        utils.dialogs.notify('Private chat', 'You sent invitation to peer-to-peer chat to participant. If participant wants, he/she will accept your invitation.');
-                    }, function () {
+                    this.account.sendIQ(iq, function (iq_response) {
+                        let group_jid = $(iq_response).find('created jid').text(),
+                            contact = this.account.contacts.mergeContact(group_jid);
+                        contact.set('group_chat', true);
+                        contact.pres('subscribed');
+                        contact.pushInRoster(null, function () {
+                            contact.pres('subscribe');
+                            contact.getMyInfo();
+                            this.close();
+                            utils.dialogs.notify('Private chat', 'You sent invitation to peer-to-peer chat to participant. If participant wants, he/she will accept your invitation.');
+                            contact.subGroupPres();
+                        }.bind(this));
+                    }.bind(this), function () {
                         this.close();
                         utils.dialogs.error('You have already sent an invitation to peer-to-peer chat');
-                    });
+                    }.bind(this));
                 }
                 else {
                     if (participant_in_roster)
@@ -2593,84 +2602,6 @@ define("xabber-contacts", function () {
                 }
                 all_participants_lists.push({jid: jid, participants_list: [], version: 0});
                 this.save('participants_lists', all_participants_lists);
-            }
-        });
-
-        xabber.PrivateInvitation =  xabber.BasicView.extend({
-            className: 'details-panel invitation-view',
-            template: templates.group_chats.private_invitation,
-            avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
-            ps_selector: '.panel-content',
-
-            events: {
-                "click .btn-accept": "acceptInvitation",
-                "click .btn-decline": "declineInvitation"
-            },
-
-            _initialize: function () {
-                this.accepted = false;
-                this.contact = this.model;
-                this.account = this.model.account;
-                this.chat = this.account.chats.getChat(this.model);
-            },
-
-            render: function () {
-                this.updateParticipantInfo();
-                this.updateAvatar();
-                this.updateMessage();
-            },
-
-            showInvitation: function (user_info) {
-                this.participant_info = user_info.participant_info;
-                this.group_chat_jid = user_info.group_chat_jid;
-                this.updateMessage();
-            },
-
-            updateMessage: function () {
-                this.$('.invite-msg .invite-msg-text')
-                    .text('Participant ' + this.participant_info.nickname + ' from group chat ' + this.group_chat_jid + ' wants to chat with you. If you accept, user will know your real info');
-            },
-
-            updateParticipantInfo: function () {
-                this.$('.name-wrap').text(this.participant_info.nickname);
-                this.$('.badge').switchClass('hidden', !this.participant_info.badge).text(this.participant_info.badge);
-                this.$('.main-info').emojify('.badge', {emoji_size: 18});
-                this.$('.jid').text(this.participant_info.jid);
-            },
-
-            updateAvatar: function () {
-                let avatar = Images.getDefaultAvatar(this.participant_info.nickname || this.participant_info.jid),
-                    participant = this.account.contacts.get(this.group_chat_jid).participants.get(this.participant_info.id);
-                if (participant)
-                    avatar = participant.get('b64_avatar') || avatar;
-                else {
-                    let cached_avatar = this.account.chat_settings.getAvatarInfoById(this.participant_info.id);
-                    cached_avatar && (cached_avatar.hash_id == this.participant_info.avatar) && (avatar = cached_avatar.avatar_b64);
-                }
-                this.$('.circle-avatar').setAvatar(avatar, this.avatar_size);
-            },
-
-            acceptInvitation: function () {
-                this.answerRequest();
-                let iq = $iq({from: this.account.get('jid'), to: this.group_chat_jid, type: 'set'})
-                    .c('disclosure', { xmlns: Strophe.NS.GROUP_CHAT, type: 'accept'})
-                    .c('recipient', { id: this.participant_info.id});
-                this.account.sendIQ(iq, function () {
-                    if (!this.contact.get('in_roster'))
-                        this.contact.pushInRoster();
-                }.bind(this));
-                this.contact.trigger('open_chat', this.contact);
-            },
-
-            declineInvitation: function () {
-                this.answerRequest();
-                this.contact.trigger('open_chat', this.contact);
-            },
-
-            answerRequest: function () {
-                this.chat.set('is_accepted', true);
-                this.chat.item_view.content.readMessages();
-                this.contact.private_invitation = null;
             }
         });
 
