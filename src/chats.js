@@ -434,14 +434,14 @@ define("xabber-chats", function () {
         },
 
         receiveMessage: function ($message, options) {
-            var carbon_copied = options.carbon_copied;
+            var from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                carbon_copied = options.carbon_copied;
             // searching chat marker message
             var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]'),
                 $receipt_request = $message.children('request[xmlns="'+Strophe.NS.RECEIPTS +'"]'),
                 $receipt_response = $message.children('received[xmlns="'+Strophe.NS.RECEIPTS +'"]');
             if (!options.is_archived) {
-                var from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
-                    $stanza_id, $contact_stanza_id,
+                var $stanza_id, $contact_stanza_id,
                     $archived = $message.find('archived');
                 $message.children('stanza-id').each(function (idx, stanza_id) {
                     stanza_id = $(stanza_id);
@@ -496,6 +496,8 @@ define("xabber-chats", function () {
             }
 
             if ($message.find('invite').length) {
+                if (from_bare_jid === this.account.get('jid'))
+                    return;
                 let group_jid = $message.find('invite').attr('jid') || $message.find('message').attr('from'),
                     contact = this.account.contacts.get(group_jid);
                 if (contact)
@@ -1988,7 +1990,7 @@ define("xabber-chats", function () {
             }
 
             if (message.get('participants_version')) { // update participants view, if participants list is visible
-                if ((this.contact.participants && this.contact.participants.version < message.get('participants_version')) && this.contact.details_view.isVisible())
+                if (this.contact.participants && this.contact.participants.version < message.get('participants_version'))
                     this.contact.trigger('update_participants');
             }
 

@@ -1948,8 +1948,8 @@ define("xabber-contacts", function () {
                             contact.pres('subscribe');
                             contact.getMyInfo();
                             this.close();
-                            utils.dialogs.notify('Private chat', 'You sent invitation to peer-to-peer chat to participant. If participant wants, he/she will accept your invitation.');
                             contact.subGroupPres();
+                            this.account.chats.openChat(contact);
                         }.bind(this));
                     }.bind(this), function () {
                         this.close();

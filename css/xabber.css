@@ -1297,6 +1297,24 @@ body {
     cursor: pointer;
 }
 
+.settings-panel .btn-social {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    margin: 0 8px;
+    padding: 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.settings-panel .github-logo {
+    padding: 0;
+    cursor: pointer;
+}
+
+.settings-panel .btn-social i,
 .social-auth-wrap .btn-social i {
     color: #FFFFFF;
 }
@@ -4702,6 +4720,11 @@ input[type='range'].voice-message-volume:focus {
     margin: auto;
 }
 
+.settings-panel .panel-content-wrap .logo {
+    height: 41px;
+    margin-right: 12px;
+}
+
 .settings-panel .xabber-info-wrap .name {
     width: 100%;
     min-height: 28px;
@@ -4819,6 +4842,11 @@ input[type='range'].voice-message-volume:focus {
 
 .settings-panel .block-content {
     padding: 0 48px;
+}
+
+.settings-panel .block-content.flex-content {
+    display: flex;
+    vertical-align: baseline;
 }
 
 .settings-panel .settings-block-wrap {
