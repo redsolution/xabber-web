@@ -5121,8 +5121,8 @@ define("xabber-chats", function () {
             "click .btn-save": "submit",
             "click .delete-message": "deleteMessages",
             "click .close-message-panel": "resetSelectedMessages",
-            "click .mention-item": "inputMention"
-            // "click mention": "onClickMention"
+            "click .mention-item": "inputMention",
+            "click .format-text": "updateMarkupPanel"
         },
 
         _initialize: function (options) {
@@ -5194,13 +5194,13 @@ define("xabber-chats", function () {
                         bindings: bindings
                     },
                     toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
+                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                         ['clean']
                     ]
                 },
                 placeholder: 'Write a message...',
                 scrollingContainer: '.rich-textarea',
-                theme: 'bubble'
+                theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
             this.view = options.content;
@@ -5411,6 +5411,19 @@ define("xabber-chats", function () {
             this.$('.attach-voice-message').addClass('hidden');
         },
 
+        updateMarkupPanel: function (ev) {
+            let $ic_markup = $(ev.target).closest('.format-text');
+            $ic_markup.toggleClass('active');
+            if ($ic_markup.hasClass('active')) {
+                this.$('.ql-toolbar.ql-snow').show();
+                this.$('.last-emoticons').hide();
+            }
+            else {
+                this.$('.ql-toolbar.ql-snow').hide();
+                this.$('.last-emoticons').show();
+            }
+        },
+
         updateMentions: function (mention_text) {
                 this.contact.searchByParticipants(mention_text, function (participants) {
                     if (participants.length) {
@@ -5427,16 +5440,6 @@ define("xabber-chats", function () {
                     else
                         this.$('.mentions-list').html("").hide();
                 });
-        },
-
-        onClickMention: function (ev) {
-            let mention = $(ev.target);
-            utils.dialogs.ask_enter_value("Edit mention", null, {input_value: mention.text()}, { ok_button_text: 'save'}).done(function (result) {
-                if (result) {
-                    this.quill.getLeaf(this.quill.selection.lastRange.index);
-                    mention.text(result);
-                }
-            }.bind(this));
         },
 
         inputMention: function (ev) {
@@ -5516,6 +5519,7 @@ define("xabber-chats", function () {
                         this.$('.mentions-list').hide();
                 }
             }
+            $rich_textarea.updateRichTextarea().focus();
             $rich_textarea.updateRichTextarea().focus();
             xabber.chat_body.updateHeight();
         },
