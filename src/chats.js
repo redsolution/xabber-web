@@ -71,6 +71,7 @@ define("xabber-chats", function () {
         },
 
         createInvitationFromStanza: function ($message, options) {
+            options = options || {};
             let $invite_item = $message.find('invite'),
                 full_jid = $invite_item.attr('jid'),
                 $delay = options.delay || $message.children('delay'),
@@ -96,6 +97,7 @@ define("xabber-chats", function () {
                 forwarded_message: options.forwarded_message || null,
                 from_jid: from_jid,
                 archive_id: options.archive_id,
+                contact_archive_id: options.contact_archive_id,
                 is_archived: options.is_archived
             };
 
@@ -109,7 +111,7 @@ define("xabber-chats", function () {
             contact.getVCard();
             let invite_msg_text = is_private_invitation ? 'You are invited to join peer-to-peer chat. If you accept, your username will not be visible to chat participant' : ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
             contact.invitation.updateInviteMsg(invite_msg_text);
-            chat.messages.createSystemMessage({
+            let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
                 from_jid: from_jid,
                 auth_request: true,
                 invite: is_private_invitation ? false : true,
@@ -117,7 +119,13 @@ define("xabber-chats", function () {
                 is_accepted: false,
                 silent: false,
                 message: invite_msg_text
-            });
+            }));
+            if (contact.invitation.message) {
+                if (contact.invitation.message.get('timestamp') < invite_msg.get('timestamp'))
+                    contact.invitation.message = invite_msg;
+            }
+            else
+                contact.invitation.message = invite_msg;
             return;
         },
 
@@ -507,7 +515,7 @@ define("xabber-chats", function () {
                 this.account.sendIQ(iq,
                     function (iq) {
                         var items = $(iq).find('item'),
-                            current_timestamp = $message.find('delay').attr('stamp') || (options.delay) ? Number(moment(options.delay.attr('stamp'))) : moment.now(),
+                            current_timestamp = $message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) ? Number(moment(options.delay.attr('stamp'))) : moment.now(),
                             has_blocking = false;
                         if (items.length > 0) {
                             items.each(function (idx, item) {

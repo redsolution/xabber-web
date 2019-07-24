@@ -2732,6 +2732,7 @@ define("xabber-contacts", function () {
                 let contact = this.model,
                     chat = this.account.chats.get(contact.hash_id);
                 chat.set('is_accepted', true);
+                this.message && chat.sendMarker(this.message.get('msgid'), 'displayed', this.message.get('archive_id'), this.message.get('contact_archive_id'));
                 chat.item_view.content.readMessages();
                 var invites = chat.item_view.content.$('.auth-request');
                 if (invites.length > 0) {
@@ -2744,10 +2745,10 @@ define("xabber-contacts", function () {
 
             joinGroupChat: function () {
                 var contact = this.model;
+                this.changeInviteStatus();
                 contact.acceptRequest();
                 contact.askRequest();
                 contact.pushInRoster();
-                this.changeInviteStatus();
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
                 contact.subGroupPres();
