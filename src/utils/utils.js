@@ -258,7 +258,7 @@ define([
                 let start_idx = markup.start,
                     end_idx = markup.end,
                     mark_up = markup.markups || [],
-                    mention = markup.uri || "";
+                    mention = (markup.type !== 'uri') && markup.uri || "";
                 if (mark_up.length) {
                     let start_tags = "",
                         end_tags = "";
@@ -273,6 +273,10 @@ define([
                     if (mention) {
                         markup_body[start_idx] = '<span data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
                         markup_body[end_idx] += '</span>';
+                    }
+                    else if (markup.type === 'uri') {
+                        markup_body[start_idx] = '<a target="_blank" class="msg-hyperlink" href="' + markup.uri + '">' + markup_body[start_idx];
+                        markup_body[end_idx] += '</a>';
                     }
                 }
             }.bind(this));

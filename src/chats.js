@@ -188,7 +188,10 @@ define("xabber-chats", function () {
                     }
                 }.bind(this));
                 markup_item = {start: start, end: end, markups: markup_styles};
-                // uri && (markup_item.uri = uri);
+                if (uri) {
+                    markup_item.uri = uri;
+                    markup_item.type = 'uri';
+                }
                 markups.push(markup_item);
             }.bind(this));
             return markups;
