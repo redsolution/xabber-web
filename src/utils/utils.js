@@ -250,6 +250,7 @@ define([
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
                 legacy_refs = attrs.legacy_content || [],
+                blockquotes = attrs.blockquotes || [],
                 body = legacy_refs.length ? attrs.original_message : attrs.message,
                 markup_body = Array.from(_.escape(_.unescape(body)));
 
@@ -277,22 +278,22 @@ define([
             }.bind(this));
 
             legacy_refs.forEach(function (legacy) {
-                if (legacy.type === 'quote') {
-                    for (let idx = legacy.start; idx < (legacy.start + legacy.marker.length); idx++)
-                        markup_body[idx] = "";
-                    for (let idx = legacy.start; idx < legacy.end; idx++) {
-                        if (markup_body[idx] === '\n') {
-                            for (let child_idx = idx + 1; child_idx <= (idx + legacy.marker.length); child_idx++)
-                                markup_body[child_idx] = "";
-                            idx+= legacy.marker.length - 1;
-                        }
+                for (let idx = legacy.start; idx <= legacy.end; idx++)
+                    markup_body[idx] = "";
+            }.bind(this));
+
+            blockquotes.forEach(function (quote) {
+                for (let idx = quote.start; idx < (quote.start + quote.marker.length); idx++)
+                    markup_body[idx] = "";
+                for (let idx = quote.start; idx < quote.end; idx++) {
+                    if (markup_body[idx] === '\n') {
+                        for (let child_idx = idx + 1; child_idx <= (idx + quote.marker.length); child_idx++)
+                            markup_body[child_idx] = "";
+                        idx+= quote.marker.length - 1;
                     }
-                    markup_body[legacy.start] = '<div class="quote">';
-                    markup_body[legacy.end] = '</div>';
                 }
-                else
-                    for (let idx = legacy.start; idx <= legacy.end; idx++)
-                        markup_body[idx] = "";
+                markup_body[quote.start] = '<div class="quote">';
+                markup_body[quote.end] += '</div>';
             }.bind(this));
 
             return markup_body.join("");

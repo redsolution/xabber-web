@@ -193,6 +193,8 @@ var constants = {
         }
     },
 
+    QUOTE_MARKER: '&gt;',
+
     MIME_TYPES: {
         image: [
             'image/gif',

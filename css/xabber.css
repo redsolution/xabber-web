@@ -213,6 +213,12 @@ input[type=checkbox].filled-in:checked + label:after {
     display: inline-block;
 }
 
+.ql-snow .ql-editor blockquote {
+    border-left: 2px solid #ccc !important;
+    padding-left: 8px !important;
+    margin: 0 !important;
+}
+
 /* ---------------------------------- */
 
 /* ---------- Perfect scrollbar themes ------------------ */
@@ -3486,7 +3492,9 @@ body {
 .chat-message .chat-msg-content .quote {
     border-left: 2px solid #E0E0E0;
     padding: 0 0 0 8px;
-    margin: 0 0 4px;
+    margin: 4px 0;
+    display: inline-block;
+    width: 100%;
 }
 
 .chat-message .chat-msg-content .mention:hover {
