@@ -5832,7 +5832,6 @@ define("xabber-chats", function () {
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));
-            // text = content_concat.join("");
             $rich_textarea.flushRichTextarea().focus();
             this.displayMicrophone();
             if (this.edit_message) {
