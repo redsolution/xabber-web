@@ -196,6 +196,29 @@ input[type=checkbox].filled-in:checked + label:after {
     font-style: inherit !important;
 }
 
+.ql-container.ql-snow {
+    border: none !important;
+}
+
+.ql-toolbar.ql-snow {
+    display: none;
+    position: absolute;
+    bottom: -40px;
+    left: 64px;
+    border: none !important;
+    z-index: 100;
+}
+
+.ql-toolbar.ql-snow.active {
+    display: inline-block;
+}
+
+.ql-snow .ql-editor blockquote {
+    border-left: 2px solid #ccc !important;
+    padding-left: 8px !important;
+    margin: 0 !important;
+}
+
 /* ---------------------------------- */
 
 /* ---------- Perfect scrollbar themes ------------------ */
@@ -3469,7 +3492,9 @@ body {
 .chat-message .chat-msg-content .quote {
     border-left: 2px solid #E0E0E0;
     padding: 0 0 0 8px;
-    margin: 0 0 4px;
+    margin: 4px 0;
+    display: inline-block;
+    width: 100%;
 }
 
 .chat-message .chat-msg-content .mention:hover {
@@ -4372,12 +4397,18 @@ img.fwd-img-preview {
     margin-right: 8px;
 }
 
+.input-toolbar .format-text,
 .input-toolbar .attach-file {
     position: absolute;
     top: 8px;
     left: 8px;
     width: 24px;
     height: 24px;
+}
+
+.input-toolbar .format-text {
+    left: 36px;
+    cursor: pointer;
 }
 
 .send-area .attach-voice-message {
@@ -4395,12 +4426,19 @@ img.fwd-img-preview {
     display: inline-block;
 }
 
-.input-toolbar .attach i {
+
+.input-toolbar .attach i,
+.input-toolbar .format-text i {
     position: absolute;
     bottom: 0px;
     left: 0px;
     display: inline-block;
     color: #757575;
+}
+
+.input-toolbar .format-text.active i,
+.input-toolbar .format-text:hover i {
+    color: #424242;
 }
 
 .input-toolbar .attach i:active {
@@ -4533,7 +4571,7 @@ input[type='range'].voice-message-volume:focus {
 
 .input-toolbar .last-emoticons {
     display: inline-block;
-    margin-left: 36px;
+    margin-left: 64px;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {

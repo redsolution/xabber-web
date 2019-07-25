@@ -308,11 +308,13 @@ define("xabber-chats", function () {
             }
 
             if ($quote_references.length) {
+                let blockquotes = [];
                 $quote_references.each(function (idx, quote) {
                     let $quote = $(quote),
                         marker = _.escape($quote.children('marker').text());
-                    legacy_content.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), type: 'quote', marker: marker});
+                    blockquotes.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), marker: marker});
                 }.bind(this));
+                blockquotes.length && (attrs.blockquotes = blockquotes);
             }
 
             legacy_content.length && (attrs.legacy_content = legacy_content);
@@ -2677,6 +2679,14 @@ define("xabber-chats", function () {
                 }.bind(this));
             }
 
+            if (message.get('blockquotes')) {
+                message.get('blockquotes').forEach(function (blockquote) {
+                    stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + legacy_body.length, end: blockquote.end + legacy_body.length, type: 'quote'})
+                        .c('marker').t(_.unescape(constants.QUOTE_MARKER)).up().up();
+                    legacy_content.push({start: blockquote.start + legacy_body.length, end: blockquote.end + legacy_body.length, type: 'quote', marker: constants.QUOTE_MARKER});
+                }.bind(this));
+            }
+
             if (message.get('type') == 'file_upload') {
                 body = "";
                 let files = message.get('files') || [],
@@ -2799,6 +2809,7 @@ define("xabber-chats", function () {
                     from_jid: this.account.get('jid'),
                     message: text,
                     mentions: options.mentions,
+                    blockquotes: options.blockquotes,
                     markups: options.markup_references,
                     submitted_here: true,
                     forwarded_message: new_fwd_messages
@@ -2809,6 +2820,7 @@ define("xabber-chats", function () {
                     from_jid: this.account.get('jid'),
                     message: text,
                     mentions: options.mentions,
+                    blockquotes: options.blockquotes,
                     markups: options.markup_references,
                     submitted_here: true,
                     forwarded_message: null
@@ -5124,8 +5136,8 @@ define("xabber-chats", function () {
             "click .btn-save": "submit",
             "click .delete-message": "deleteMessages",
             "click .close-message-panel": "resetSelectedMessages",
-            "click .mention-item": "inputMention"
-            // "click mention": "onClickMention"
+            "click .mention-item": "inputMention",
+            "click .format-text": "updateMarkupPanel"
         },
 
         _initialize: function (options) {
@@ -5197,13 +5209,13 @@ define("xabber-chats", function () {
                         bindings: bindings
                     },
                     toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
+                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                         ['clean']
                     ]
                 },
                 placeholder: 'Write a message...',
                 scrollingContainer: '.rich-textarea',
-                theme: 'bubble'
+                theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
             this.view = options.content;
@@ -5414,6 +5426,19 @@ define("xabber-chats", function () {
             this.$('.attach-voice-message').addClass('hidden');
         },
 
+        updateMarkupPanel: function (ev) {
+            let $ic_markup = $(ev.target).closest('.format-text');
+            $ic_markup.toggleClass('active');
+            if ($ic_markup.hasClass('active')) {
+                this.$('.ql-toolbar.ql-snow').show();
+                this.$('.last-emoticons').hide();
+            }
+            else {
+                this.$('.ql-toolbar.ql-snow').hide();
+                this.$('.last-emoticons').show();
+            }
+        },
+
         updateMentions: function (mention_text) {
                 this.contact.searchByParticipants(mention_text, function (participants) {
                     if (participants.length) {
@@ -5432,16 +5457,6 @@ define("xabber-chats", function () {
                 });
         },
 
-        onClickMention: function (ev) {
-            let mention = $(ev.target);
-            utils.dialogs.ask_enter_value("Edit mention", null, {input_value: mention.text()}, { ok_button_text: 'save'}).done(function (result) {
-                if (result) {
-                    this.quill.getLeaf(this.quill.selection.lastRange.index);
-                    mention.text(result);
-                }
-            }.bind(this));
-        },
-
         inputMention: function (ev) {
             ev.preventDefault();
             let $participant_item = $(ev.target).closest('.mention-item'),
@@ -5456,8 +5471,7 @@ define("xabber-chats", function () {
             this.$('.mentions-list').hide();
             this.quill.deleteText(at_position, ++mention_text.length);
             this.quill.insertEmbed(at_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + nickname);
-            this.quill.insertEmbed(at_position + nickname.length, " ");
-            this.quill.removeFormat(at_position + nickname.length, 1);
+            this.quill.pasteHTML(at_position + nickname.length, '<text> </text>');
             this.quill.setSelection(at_position + nickname.length + 1, 0);
             this.focusOnInput();
         },
@@ -5519,6 +5533,7 @@ define("xabber-chats", function () {
                         this.$('.mentions-list').hide();
                 }
             }
+            $rich_textarea.updateRichTextarea().focus();
             $rich_textarea.updateRichTextarea().focus();
             xabber.chat_body.updateHeight();
         },
@@ -5762,6 +5777,7 @@ define("xabber-chats", function () {
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 mentions = [],
                 markup_references = [],
+                blockquotes = [],
                 text = _.escape($rich_textarea.getTextFromRichTextarea().trim().replace(/`/g, "'"));
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = $(emoji_item).data('emoji');
@@ -5774,7 +5790,7 @@ define("xabber-chats", function () {
                         start_idx = content_concat.length,
                         end_idx = start_idx + ((content.insert && content.insert.quill_emoji) ? 1 : (_.escape(content.insert).length - 1));
                     for (let attr in content.attributes)
-                        (attr !== 'alt') && content_attrs.push(attr);
+                        (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
                     if (content_attrs.indexOf('mention') > -1) {
                         let mention_idx = content_attrs.indexOf('mention');
                         content_attrs.splice(mention_idx, mention_idx + 1);
@@ -5782,6 +5798,31 @@ define("xabber-chats", function () {
                             start: start_idx,
                             end: end_idx,
                             uri: $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
+                        });
+                    }
+                    if (content.attributes.blockquote) {
+                        let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
+                            quote_end_idx = content_concat.length - 1;
+                        blockquotes.push({marker: constants.QUOTE_MARKER, start: quote_start_idx, end: quote_end_idx + constants.QUOTE_MARKER.length});
+                        text = Array.from(text);
+                        text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                        text[quote_end_idx] += '\n';
+                        text = text.join("");
+
+                        content_concat[quote_start_idx] += constants.QUOTE_MARKER;
+                        content_concat = Array.from(content_concat.join(""));
+
+                        markup_references.forEach(function (markup_ref) {
+                            if (markup_ref.start >= quote_start_idx) {
+                                markup_ref.start += constants.QUOTE_MARKER.length;
+                                markup_ref.end += constants.QUOTE_MARKER.length;
+                            }
+                        }.bind(this));
+                        mentions.forEach(function (mention) {
+                            if (mention.start >= quote_start_idx) {
+                                mention.start += constants.QUOTE_MARKER.length;
+                                mention.end += constants.QUOTE_MARKER.length;
+                            }
                         });
                     }
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markups: content_attrs});
@@ -5795,11 +5836,11 @@ define("xabber-chats", function () {
             $rich_textarea.flushRichTextarea().focus();
             this.displayMicrophone();
             if (this.edit_message) {
-                this.editMessage(text, {mentions: mentions, markup_references: markup_references}, this.contact.get('group_chat'));
+                this.editMessage(text, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes}, this.contact.get('group_chat'));
                 return;
             }
             if (text || this.fwd_messages.length) {
-                this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references});
+                this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
             this.view.sendChatState('active');
