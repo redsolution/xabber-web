@@ -5161,9 +5161,13 @@ define("xabber-chats", function () {
                             if (active_item.length)  {
                                 active_item.removeClass('active');
                                 active_item.prev('.mention-item').addClass('active');
+                                if (active_item.prev('.mention-item').length && (active_item.prev('.mention-item')[0].offsetTop <= this.$('.mentions-list')[0].scrollTop))
+                                    this.$('.mentions-list')[0].scrollTop = active_item.prev('.mention-item')[0].offsetTop;
                             }
-                            else
+                            else {
+                                this.$('.mentions-list')[0].scrollTop = this.$('.mentions-list')[0].scrollHeight;
                                 this.$('.mentions-list').children('.mention-item').last().addClass('active');
+                            }
                             return false;
                         }
                         else
@@ -5178,9 +5182,13 @@ define("xabber-chats", function () {
                             if (active_item.length)  {
                                 active_item.removeClass('active');
                                 active_item.next('.mention-item').addClass('active');
+                                if (active_item.next('.mention-item').length && (active_item.next('.mention-item')[0].offsetTop + active_item.next('.mention-item')[0].clientHeight >= this.$('.mentions-list')[0].scrollTop + this.$('.mentions-list')[0].clientHeight))
+                                    this.$('.mentions-list')[0].scrollTop = active_item.next('.mention-item')[0].offsetTop - this.$('.mentions-list')[0].clientHeight + active_item.next('.mention-item')[0].clientHeight;
                             }
-                            else
+                            else {
+                                this.$('.mentions-list')[0].scrollTop = 0;
                                 this.$('.mentions-list').children('.mention-item').first().addClass('active');
+                            }
                             return false;
                         }
                         else
@@ -5380,8 +5388,6 @@ define("xabber-chats", function () {
         },
 
         focusOnInput: function () {
-            /*var $rich_textarea = this.$('.input-message .rich-textarea');
-            $rich_textarea.placeCaretAtEnd()*/
             this.quill.focus();
             return this;
         },
@@ -5446,6 +5452,7 @@ define("xabber-chats", function () {
                 this.contact.searchByParticipants(mention_text, function (participants) {
                     if (participants.length) {
                         this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
+                        this.$('.mentions-list')[0].scrollTop = 0;
                         participants.forEach(function (participant) {
                             let attrs = _.clone(participant.attributes);
                             attrs.nickname = _.escape(attrs.nickname);

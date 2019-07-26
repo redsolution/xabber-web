@@ -43,7 +43,7 @@ define([
         $query.each(function (i, obj) {
             var $obj = $(obj),
                 html_concat = "",
-                url_regexp = /(?<!=")(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
+                url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
             $obj[0].childNodes.forEach(function (node) {
                 let $node = $(node),
                     x = node.outerHTML;
