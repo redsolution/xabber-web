@@ -2987,12 +2987,14 @@ body {
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
     height: 19px;
+    padding-right: 40px;
     overflow: hidden;
 }
 
 .mention-item .chat-title,
 .chat-item .chat-title {
     font-size: 16px;
+    width: 100%;
     line-height: 19px;
     color: #212121;
     float: left;

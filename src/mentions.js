@@ -263,14 +263,6 @@ define("xabber-mentions", function () {
                 this.$el.emojify('.last-msg', {emoji_size: 14});
                 this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
                     .attr('title', utils.pretty_datetime(msg_time));
-                this.updateCSS();
-            },
-
-            updateCSS: function () {
-                var date_width = this.$('.last-msg-date').width();
-                this.$('.chat-title-wrap').css('padding-right', date_width + 5);
-                var title_width = this.$('.chat-title-wrap').width();
-                this.$('.chat-title').css('max-width', title_width);
             },
 
             updateActiveStatus: function () {
