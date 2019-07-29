@@ -4386,6 +4386,8 @@ img.fwd-img-preview {
 .message-input-panel .mentions-list .participant-info {
     padding: 0 10px;
     width: calc(100% - 36px);
+    display: flex;
+    flex-direction: column;
 }
 
 .message-input-panel .mentions-list span {

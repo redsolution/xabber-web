@@ -5088,7 +5088,6 @@ define("xabber-chats", function () {
         updateGroupChatHead: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.group-chat-icon').showIf(is_group_chat);
-            this.$('.btn-search-messages').showIf(is_group_chat);
             this.$('.btn-jingle-message').showIf(!is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },
