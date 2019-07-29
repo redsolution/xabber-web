@@ -207,7 +207,7 @@ define("xabber-chats", function () {
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid);
 
-            if (message && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg)
+            if (message && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
                 return message;
 
             let attrs = {
@@ -343,7 +343,7 @@ define("xabber-chats", function () {
                 attrs.timestamp = Number(moment(attrs.time));
                 attrs.from_jid = this.account.get('jid');
             }
-            (options.context_message || options.participant_message || options.searched_message) && (attrs.state = constants.MSG_ARCHIVED);
+            (options.context_message || options.participant_message || options.searched_message || options.is_searched) && (attrs.state = constants.MSG_ARCHIVED);
 
             if (options.pinned_message)
                 return this.account.pinned_messages.create(attrs);
@@ -361,9 +361,12 @@ define("xabber-chats", function () {
                 message.set(attrs);
             }
 
+            if (options.is_searched)
+                return this.account.all_searched_messages.create(attrs);
+
             message = this.create(attrs);
             return message;
-            },
+        },
 
         getFilename: function (url_media) {
             let idx = url_media.lastIndexOf("/");
@@ -4077,6 +4080,7 @@ define("xabber-chats", function () {
                         pinned_message: options.pinned_message,
                         participant_message: options.participant_message,
                         searched_message: options.searched_message,
+                        is_searched: options.is_searched,
                         context_message: options.context_message,
                         from_jid: from_jid,
                         delay: $forwarded_delay

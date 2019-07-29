@@ -75,6 +75,7 @@ define("xabber-mentions", function () {
 
             _initialize: function () {
                 this.active_mention = null;
+                this.keyup_timeout = null;
                 this.model.on("add", this.onMentionAdded, this);
                 this.model.on("change:active", this.onChangedActiveStatus, this);
                 this.model.on("destroy", this.onMentionRemoved, this);
@@ -83,14 +84,15 @@ define("xabber-mentions", function () {
 
             render: function (options) {
                 if (!options.right && this.active_mention) {
-                    this.clearSearch();
                     this.active_mention.model.set('active', false);
                     this.active_mention = null;
                 }
+                this.clearSearch();
             },
 
             search: function (query) {
-                // xabber.chats_view.search(query);
+                clearTimeout(this.keyup_timeout);
+                this.keyup_timeout = null;
                 this.$('.contact-list').html("");
                 var chats = xabber.opened_chats;
                 this.$('.chat-item').each(function () {
@@ -121,6 +123,60 @@ define("xabber-mentions", function () {
                 }.bind(this));
                 this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contact-list').children().length);
                 this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
+                if (query.length >= 2) {
+                    this.keyup_timeout = setTimeout(function () {
+                        this.searchMessages(query);
+                    }.bind(this), 1000);
+                }
+            },
+
+            searchMessages: function (query, options) {
+                options = options || {};
+                !options.max && (options.max = xabber.settings.mam_messages_limit);
+                let accounts = xabber.accounts.connected;
+                accounts.forEach(function (account) {
+                    account.all_searched_messages = new xabber.Messages(null, {account: account});
+                    options.account = account;
+                    this.MAMRequest(query, options, function (messages) {
+                        _.each(messages, function (message) {
+                            account.chats.receiveChatMessage(message,
+                                _.extend({is_searched: true}, options)
+                            );
+                        });
+                    }, function () {
+
+                    });
+                }.bind(this));
+            },
+
+            MAMRequest: function (query, options, callback, errback) {
+                let messages = [],
+                    account = options.account,
+                    queryid = uuid(),
+                    iq = $iq({from: account.get('jid'), type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
+                        .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                        .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+                        .c('value').t(Strophe.NS.MAM).up().up()
+                        .c('field', {'var': 'withtext'})
+                        .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
+                    handler = account.connection.addHandler(function (message) {
+                        let $msg = $(message);
+                        if ($msg.find('result').attr('queryid') === queryid) {
+                            messages.push(message);
+                        }
+                        return true;
+                    }.bind(this), Strophe.NS.MAM);
+                    account.sendIQ(iq,
+                        function () {
+                            account.connection.deleteHandler(handler);
+                            callback && callback(messages);
+                        },
+                        function () {
+                            account.connection.deleteHandler(handler);
+                            errback && errback();
+                        }
+                    );
             },
 
             onEmptyQuery: function () {
