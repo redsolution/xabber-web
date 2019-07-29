@@ -1049,24 +1049,29 @@ body {
 .toolbar .account-item .account-actions-panel {
     position: fixed;
     font-size: 16px;
-    left: 50px;
-    padding: 8px 12px;
+    left: 45px;
+    padding: 0 5px;
     height: 36px;
-    display: flex;
     opacity: 0;
+    z-index: 1000;
     visibility: hidden;
     margin: 6px 0;
     color: #C0C0C0;
-    border-radius: 18px;
-    background-color: rgba(0, 0, 0, 0.6);
     text-align: center;
     min-width: 134px;
-    justify-content: space-between;
     -moz-transition: opacity .4s;
     -webkit-transition: opacity .4s;
     -ms-transition: opacity .4s;
     -o-transition: opacity .4s;
     transition: opacity .4s;
+}
+
+.toolbar .account-item .filter-chats {
+    padding: 8px 12px;
+    border-radius: 18px;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.6);
 }
 
 .toolbar .account-actions-panel .text {

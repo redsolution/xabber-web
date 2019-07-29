@@ -83,6 +83,7 @@ define("xabber-mentions", function () {
 
             render: function (options) {
                 if (!options.right && this.active_mention) {
+                    this.clearSearch();
                     this.active_mention.model.set('active', false);
                     this.active_mention = null;
                 }

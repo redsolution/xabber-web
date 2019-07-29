@@ -1480,7 +1480,7 @@ define("xabber-contacts", function () {
 
             updateParticipants: function () {
                 this.participantsRequest(function (version) {
-                    if (this.participants.length != this.model.get('group_info').members_num) {
+                    if (this.model.get('group_info') && this.participants.length != this.model.get('group_info').members_num) {
                         this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
                         this.participants.resetParticipants();
                         this.updateParticipants();
