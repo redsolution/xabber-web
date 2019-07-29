@@ -73,10 +73,6 @@ define("xabber-mentions", function () {
             ps_settings: {theme: 'item-list'},
             template: templates.mentions_panel,
 
-            events: {
-                'click .btn-read-all': 'readAllMentions'
-            },
-
             _initialize: function () {
                 this.active_mention = null;
                 this.model.on("add", this.onMentionAdded, this);
@@ -90,6 +86,45 @@ define("xabber-mentions", function () {
                     this.active_mention.model.set('active', false);
                     this.active_mention = null;
                 }
+            },
+
+            search: function (query) {
+                // xabber.chats_view.search(query);
+                this.$('.contact-list').html("");
+                var chats = xabber.opened_chats;
+                this.$('.chat-item').each(function () {
+                    let $this = $(this),
+                        chat = chats.get($this.data('id'));
+                    if (!chat) return;
+                    let jid = chat.get('jid'),
+                        name = chat.contact.get('name').toLowerCase();
+                    $this.hideIf(name.indexOf(query) < 0 && jid.indexOf(query) < 0);
+                });
+                xabber.accounts.each(function (account) {
+                    account.contacts.each(function (contact) {
+                        let jid = contact.get('jid'),
+                            name = contact.get('name'),
+                            chat = account.chats.get(contact.hash_id),
+                            chat_id = chat && chat.id;
+                        if (chat_id)
+                            if (!this.$('.chat-item[data-id="' + chat_id + '"]').length)
+                                if (name.indexOf(query) > -1 && jid.indexOf(query) > -1) {
+                                    let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
+                                    item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
+                                    this.$('.contact-list').append(item_list);
+                                    item_list.click(function () {
+                                        contact.trigger('open_chat', contact);
+                                    }.bind(this));
+                                }
+                    }.bind(this));
+                }.bind(this));
+                this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contact-list').children().length);
+                this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
+            },
+
+            onEmptyQuery: function () {
+                this.$('.contacts-list-wrap').addClass('hidden');
+                this.$('.messages-list-wrap').addClass('hidden');
             },
 
             onMentionAdded: function (mention) {

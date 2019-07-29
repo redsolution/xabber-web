@@ -6723,7 +6723,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 /* ------------------ RECENT CHATS MODAL ------------------ */
-.left-panel-wrap .chat-list-wrap .contacts-title,
+.left-panel-wrap .left-panel-list-wrap .messages-title,
+.left-panel-wrap .left-panel-list-wrap .contacts-title,
 .forward-panel-modal .forward-panel-list-title {
     height: 32px;
     padding: 8px 0 3px 24px;
@@ -6731,7 +6732,8 @@ input[type='range'].voice-message-volume:focus {
     font-weight: 500;
 }
 
-.left-panel-wrap .chat-list-wrap .contacts-title {
+.left-panel-wrap .left-panel-list-wrap .messages-title,
+.left-panel-wrap .left-panel-list-wrap .contacts-title {
     padding: 8px 0 3px 16px;
 }
 

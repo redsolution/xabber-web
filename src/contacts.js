@@ -155,6 +155,7 @@ define("xabber-contacts", function () {
                         cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
                     $item.length && this.participants && this.participants.createFromStanza($item);
                     cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
+                    this.trigger('update_my_info');
                     callback && callback();
                 }.bind(this));
             },
@@ -2506,7 +2507,7 @@ define("xabber-contacts", function () {
                     };
 
                 let participant = this.mergeParticipant(attrs);
-                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('permissions_changed');
+                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('permissions_changed') && this.contact.trigger('update_my_info');
                 this.account.groupchat_settings.updateParticipant(this.contact.get('jid'), attrs);
                 return participant;
             }

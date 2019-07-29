@@ -4422,7 +4422,6 @@ define("xabber-chats", function () {
         },
 
         search: function (query) {
-            let active_toolbar = xabber.toolbar_view.$('.active');
             this.$('.contact-list').html("");
             var chats = this.model;
             this.$('.chat-item').each(function () {
@@ -4443,6 +4442,7 @@ define("xabber-chats", function () {
                         if (!this.$('.chat-item[data-id="' + chat_id + '"]').length)
                             if (name.indexOf(query) > -1 && jid.indexOf(query) > -1) {
                                 let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
+                                item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
                                 this.$('.contact-list').append(item_list);
                                 item_list.click(function () {
                                     contact.trigger('open_chat', contact);
@@ -4451,10 +4451,12 @@ define("xabber-chats", function () {
                 }.bind(this));
             }.bind(this));
             this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contact-list').children().length);
+            this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
         },
 
         onEmptyQuery: function () {
             this.$('.contacts-list-wrap').addClass('hidden');
+            this.$('.messages-list-wrap').addClass('hidden');
         },
 
         onEnterPressed: function (selection) {
@@ -5243,6 +5245,7 @@ define("xabber-chats", function () {
             this.contact.on("delete_selected_messages", this.deleteMessages, this);
             this.contact.on("edit_selected_message", this.showEditPanel, this);
             this.contact.on("pin_selected_message", this.pinMessage, this);
+            this.contact.on('update_my_info', this.updateInfoInBottom, this);
             this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
