@@ -82,6 +82,7 @@ define("xabber-templates", [
     "text!templates/chats/chat_bottom.html",
     "text!templates/chats/forward_panel.html",
     "text!templates/chats/chat_placeholder.html",
+    "text!templates/chats/message_item.html",
     "text!templates/chats/messages/main.html",
     "text!templates/chats/messages/forwarded.html",
     "text!templates/chats/messages/system.html",
@@ -242,6 +243,7 @@ define("xabber-templates", [
     addTemplate('chats.chat_bottom');
     addTemplate('chats.forward_panel');
     addTemplate('chats.chat_placeholder');
+    addTemplate('chats.message_item');
     addTemplate('chats.messages.main');
     addTemplate('chats.messages.forwarded');
     addTemplate('chats.messages.system');

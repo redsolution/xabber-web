@@ -53,7 +53,7 @@ define([
                 }
                 else {
                     if (node.nodeName === '#text')
-                        x = $node.text();
+                        x = _.escape($node.text());
                     let list = x && x.match(url_regexp);
                     if (!list) {
                         html_concat += x;

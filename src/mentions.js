@@ -91,6 +91,7 @@ define("xabber-mentions", function () {
             },
 
             search: function (query) {
+                this.$('.mentions-list').addClass('hidden');
                 clearTimeout(this.keyup_timeout);
                 this.keyup_timeout = null;
                 this.$('.contact-list').html("");
@@ -122,7 +123,7 @@ define("xabber-mentions", function () {
                     }.bind(this));
                 }.bind(this));
                 this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contact-list').children().length);
-                this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
+                this.$('.messages-list-wrap').addClass('hidden').find('.message-list').html("");
                 if (query.length >= 2) {
                     this.keyup_timeout = setTimeout(function () {
                         this.searchMessages(query);
@@ -139,11 +140,19 @@ define("xabber-mentions", function () {
                     options.account = account;
                     this.MAMRequest(query, options, function (messages) {
                         _.each(messages, function (message) {
-                            account.chats.receiveChatMessage(message,
+                            let message_from_stanza = account.chats.receiveChatMessage(message,
                                 _.extend({is_searched: true}, options)
-                            );
-                        });
-                    }, function () {
+                            ),
+                                msg_idx = account.all_searched_messages.indexOf(message_from_stanza),
+                                $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                            if (msg_idx === 0) {
+                                $message_item_view.$el.appendTo(this.$('.messages-list-wrap .message-list'));
+                            } else {
+                                $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                            }
+                        }.bind(this));
+                        this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
+                    }.bind(this), function () {
 
                     });
                 }.bind(this));
@@ -162,11 +171,12 @@ define("xabber-mentions", function () {
                         .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
                     handler = account.connection.addHandler(function (message) {
                         let $msg = $(message);
-                        if ($msg.find('result').attr('queryid') === queryid) {
+                        if ($msg.find('result').attr('queryid') === queryid && $msg.find('result').attr('queryid') === this.queryid) {
                             messages.push(message);
                         }
                         return true;
                     }.bind(this), Strophe.NS.MAM);
+                this.queryid = queryid;
                     account.sendIQ(iq,
                         function () {
                             account.connection.deleteHandler(handler);
@@ -180,6 +190,7 @@ define("xabber-mentions", function () {
             },
 
             onEmptyQuery: function () {
+                this.$('.mentions-list').removeClass('hidden');
                 this.$('.contacts-list-wrap').addClass('hidden');
                 this.$('.messages-list-wrap').addClass('hidden');
             },

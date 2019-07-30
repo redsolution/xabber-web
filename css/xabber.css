@@ -1992,10 +1992,10 @@ body {
     display: none !important;
 }
 
-.group-head:hover,
+/*.group-head:hover,
 .roster-contact:hover {
     background-color: rgba(183, 28, 28, 0.1);
-}
+}*/
 
 .roster-contact .circle-avatar {
     position: absolute;
@@ -2906,7 +2906,8 @@ body {
     position: relative;
 }
 
-.chat-item {
+.chat-item,
+.message-item {
     position: relative;
     height: 56px;
     padding: 11px 7px 11px 60px;
@@ -2916,6 +2917,8 @@ body {
 .mention-info-wrap:hover,
 .mention-info-wrap:hover .group-chat-icon,
 .chat-item:hover,
+.message-item:hover,
+.message-item:hover .group-chat-icon,
 .chat-item:hover .group-chat-icon {
     background-color: #F8F8F8;
 }
@@ -2931,7 +2934,7 @@ body {
     background-color: #FFEBEE;
 }
 
-
+.message-item .circle-avatar,
 .mention-item .circle-avatar,
 .chat-item .circle-avatar {
     position: absolute;
@@ -2943,12 +2946,13 @@ body {
     background-size: 50%;
 }
 
+
+.message-item p,
 .mention-item p,
 .chat-item p, .group-chat-participant .participant-info .jid {
     margin: 0;
 }
 
-.mention-item .status,
 .chat-item .status, .chat-head-wrap .contact-status {
     position: absolute;
     top: 38px;
@@ -2971,6 +2975,7 @@ body {
     color: #FFF;
 }
 
+.message-item .group-chat-icon,
 .chat-item .group-chat-icon,
 .chat-head-wrap .group-chat-icon {
     position: absolute;
@@ -2989,6 +2994,7 @@ body {
     width: 100%;
 }
 
+.message-item .chat-title-wrap,
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
     height: 19px;
@@ -2996,6 +3002,7 @@ body {
     overflow: hidden;
 }
 
+.message-item .chat-title,
 .mention-item .chat-title,
 .chat-item .chat-title {
     font-size: 16px;
@@ -3005,6 +3012,8 @@ body {
     float: left;
 }
 
+
+.message-item .last-msg,
 .mention-item .last-msg,
 .chat-item .last-msg {
     width: calc(100% - 20px);
@@ -3016,6 +3025,7 @@ body {
     line-height: 13px;
 }
 
+.message-item .last-msg-date,
 .mention-item .last-msg-date,
 .chat-item .last-msg-date {
     position: absolute;
