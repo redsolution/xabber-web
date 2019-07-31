@@ -2799,7 +2799,7 @@ body {
 }
 
 .chat-content-wrap.messages-context-wrap .message-from-context {
-    background-color: #F5F5F5;
+    background-color: #EEE;
 }
 /* -------------- BACK TO BOTTOM LABEL ---------------- */
 
@@ -2928,6 +2928,10 @@ body {
 .mention-info-wrap.active .group-chat-icon,
 .mention-info-wrap.active:hover .group-chat-icon,
 .chat-item.active,
+.message-item.active,
+.message-item.active:hover,
+.message-item.active .group-chat-icon,
+.message-item.active:hover .group-chat-icon,
 .chat-item.active:hover,
 .chat-item.active .group-chat-icon,
 .chat-item.active:hover .group-chat-icon {
@@ -3355,10 +3359,20 @@ body {
     width: 100%;
     padding: 8px 0;
     cursor: pointer;
+    -webkit-transition: background-color .5s;
+    -moz-transition: background-color .5s;
+    -ms-transition: background-color .5s;
+    -o-transition: background-color .5s;
+    transition: background-color .5s;
 }
 
 .chat-message.selected {
     background-color: #FFEBEE;
+    -webkit-transition: background-color 0s;
+    -moz-transition: background-color 0s;
+    -ms-transition: background-color 0s;
+    -o-transition: background-color 0s;
+    transition: background-color 0s;
 }
 
 .chat-day-indicator {

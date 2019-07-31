@@ -215,6 +215,13 @@ define("xabber-ui", function () {
 
 
         this.right_panel.patchTree = function (tree, options) {
+            if (options.right === 'message_context') {
+                return {
+                    chat_head: path_chat_head,
+                    chat_body: path_participant_messages,
+                    chat_bottom: path_chat_bottom
+                };
+            }
             if (options.right === 'private_invitation') {
                 return { details: path_private_invitation };
             }

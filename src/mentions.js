@@ -87,7 +87,7 @@ define("xabber-mentions", function () {
                     this.active_mention.model.set('active', false);
                     this.active_mention = null;
                 }
-                this.clearSearch();
+                (options.right !== 'message_context' && options.right !== 'participant_messages') && this.clearSearch();
             },
 
             search: function (query) {
@@ -126,7 +126,8 @@ define("xabber-mentions", function () {
                 this.$('.messages-list-wrap').addClass('hidden').find('.message-list').html("");
                 if (query.length >= 2) {
                     this.keyup_timeout = setTimeout(function () {
-                        this.searchMessages(query);
+                        this.queryid = uuid();
+                        this.searchMessages(query, {query_id: this.queryid});
                     }.bind(this), 1000);
                 }
             },
@@ -171,12 +172,11 @@ define("xabber-mentions", function () {
                         .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
                     handler = account.connection.addHandler(function (message) {
                         let $msg = $(message);
-                        if ($msg.find('result').attr('queryid') === queryid && $msg.find('result').attr('queryid') === this.queryid) {
+                        if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
                             messages.push(message);
                         }
                         return true;
                     }.bind(this), Strophe.NS.MAM);
-                this.queryid = queryid;
                     account.sendIQ(iq,
                         function () {
                             account.connection.deleteHandler(handler);

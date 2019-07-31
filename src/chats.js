@@ -557,21 +557,27 @@ define("xabber-chats", function () {
                 return this.messages.createFromStanza($message, options);
         },
 
-        getMessageContext: function (msgid, is_mention) {
-            let messages = is_mention ? this.account.messages : this.account.searched_messages,
+        getMessageContext: function (msgid, options) {
+            options = options || {};
+            let messages = options.mention && this.account.searched_messages || options.message && this.account.all_searched_messages || this.account.messages,
                 message = messages.get(msgid);
             if (message) {
                 let stanza_id = message.get('archive_id');
                 this.contact.messages_view = new xabber.MessageContextView({
                     contact: this.contact,
-                    mention_context: is_mention,
+                    mention_context: options.mention,
                     model: this,
                     stanza_id_context: stanza_id
                 });
                 this.account.context_messages.add(message);
                 this.contact.messages_view.messagesRequest({after: stanza_id}, function () {
-                    if (is_mention)
+                    if (options.mention)
                         xabber.body.setScreen('mentions', {
+                            right: 'participant_messages',
+                            contact: this.contact
+                        });
+                    else if (options.message)
+                        xabber.body.setScreen(xabber.body.screen.get('name'), {
                             right: 'participant_messages',
                             contact: this.contact
                         });
@@ -999,9 +1005,7 @@ define("xabber-chats", function () {
         },
 
         open: function (options) {
-            options || (options = {clear_search: true});
-            /*if (!this.model.get('history_loaded') && (this.model.messages.length < 20))
-                this.content.loadPreviousHistory();*/
+            options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
         },
 
@@ -2848,6 +2852,7 @@ define("xabber-chats", function () {
                 if (!this.contact.get('muted') && !this.contact.get('archived'))
                     xabber.chats_view.updateScreenAllChats();
             xabber.chats_view.scrollToTop();
+            xabber.chats_view.clearSearch();
         },
 
         addFileMessage: function (files) {
@@ -3688,15 +3693,17 @@ define("xabber-chats", function () {
             return chat;
         },
 
-            openChat: function (contact) {
+        openChat: function (contact, options) {
+            options = options || {};
+            _.isUndefined(options.clear_search) && (options.clear_search = true);
             var chat = this.getChat(contact);
-            chat.trigger('open', {clear_search: true});
+            chat.trigger('open', {clear_search: options.clear_search});
         },
 
         openMention: function (contact, msgid) {
             var chat = this.getChat(contact);
             xabber.body.setScreen('mentions', {right: 'mentions', chat_item: chat.item_view});
-            msgid && chat.getMessageContext(msgid, true);
+            msgid && chat.getMessageContext(msgid, {mention: true});
         },
 
         registerMessageHandler: function () {
@@ -4372,7 +4379,7 @@ define("xabber-chats", function () {
         },
 
         render: function (options) {
-            options.right !== 'chat' && this.clearSearch();
+            (options.right !== 'chat' && options.right !== 'message_context' && options.right !== 'participant_messages') && this.clearSearch();
             if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
                 this.showAllChats();
             }
@@ -4432,6 +4439,8 @@ define("xabber-chats", function () {
 
         search: function (query) {
             this.$('.contact-list').html("");
+            clearTimeout(this.keyup_timeout);
+            this.keyup_timeout = null;
             var chats = this.model;
             this.$('.chat-item').each(function () {
                 let $this = $(this),
@@ -4454,7 +4463,7 @@ define("xabber-chats", function () {
                                 item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
                                 this.$('.contact-list').append(item_list);
                                 item_list.click(function () {
-                                    contact.trigger('open_chat', contact);
+                                    contact.trigger('open_chat', contact, {clear_search: false});
                                 }.bind(this));
                             }
                 }.bind(this));
@@ -4463,7 +4472,8 @@ define("xabber-chats", function () {
             this.$('.messages-list-wrap').addClass('hidden').find('.message-list').html("");
             if (query.length >= 2) {
                 this.keyup_timeout = setTimeout(function () {
-                    this.searchMessages(query);
+                    this.queryid = uuid();
+                    this.searchMessages(query, {query_id: this.queryid});this.searchMessages(query);
                 }.bind(this), 1000);
             }
         },
@@ -4508,12 +4518,11 @@ define("xabber-chats", function () {
                     .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
                 handler = account.connection.addHandler(function (message) {
                     let $msg = $(message);
-                    if ($msg.find('result').attr('queryid') === queryid && $msg.find('result').attr('queryid') === this.queryid) {
+                    if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
                         messages.push(message);
                     }
                     return true;
                 }.bind(this), Strophe.NS.MAM);
-            this.queryid = queryid;
             account.sendIQ(iq,
                 function () {
                     account.connection.deleteHandler(handler);
@@ -4544,6 +4553,8 @@ define("xabber-chats", function () {
         },
 
         openChat: function (view, options) {
+            this.$('.message-list .message-item').removeClass('active');
+            view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
             options.clear_search && this.clearSearch();
             if (view.contact.private_invitation) {
@@ -4752,7 +4763,12 @@ define("xabber-chats", function () {
           },
 
           openByClick: function () {
-              this.contact.trigger("open_chat", this.contact);
+              let chat = this.account.chats.getChat(this.contact);
+              this.$el.closest('.left-panel-list-wrap').find('.list-item').removeClass('active');
+              this.$el.addClass('active');
+              // chat.trigger('open', {clear_search: false});
+              xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', chat_item: chat.item_view });
+              this.model.get('msgid') && chat.getMessageContext(this.model.get('msgid'), {message: true});
           }
       });
 
@@ -5706,9 +5722,11 @@ define("xabber-chats", function () {
                 if (ev.keyCode === constants.KEY_BACKSPACE && this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention')
                     this.focusOnInput();
                 if (this.contact.get('group_chat')) {
-                    let caret_position = this.quill.selection.lastRange.index,
+                    let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         to_caret_text = Array.from(text).slice(0, caret_position),
                         at_position = to_caret_text.lastIndexOf('@');
+                    if (!caret_position)
+                        return;
                     if (at_position > -1 && to_caret_text.slice(at_position, caret_position).indexOf(' ') === -1) {
                         if (!at_position || to_caret_text[at_position - 1].match(/\s/)) {
                             let mention_text = Array.from(text).slice(at_position + 1, caret_position).join("");
