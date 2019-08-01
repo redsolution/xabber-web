@@ -3717,7 +3717,7 @@ define("xabber-contacts", function () {
                 this.$info.find('.jid').text(this.account.get('jid'));
             },
 
-            search: function (query) {
+           search: function (query) {
                 this.$el.removeClass('shrank');
                 this.$('.group-head').addClass('hidden');
                 var count = 0, hashes = {};
@@ -3796,7 +3796,7 @@ define("xabber-contacts", function () {
             }
         });
 
-        xabber.RosterView = xabber.SearchView.extend({
+        xabber.RosterView = xabber.SearchPanelView.extend({
             ps_selector: '.contact-list-wrap',
 
             _initialize: function () {
@@ -3901,6 +3901,7 @@ define("xabber-contacts", function () {
             className: 'roster-left-container container',
             template: templates.roster_left,
             ps_settings: {theme: 'item-list'},
+            main_container: '.contact-list',
             account_roster_view: xabber.AccountRosterLeftView,
 
             __initialize: function () {
@@ -3923,11 +3924,11 @@ define("xabber-contacts", function () {
                 options.right !== 'contact_details' && this.clearSearch();
             },
 
-            search: function (query) {
+            /*search: function (query) {
                 _.each(this.children, function (view) {
                     view.search(query);
                 });
-            },
+            },*/
 
             searchAll: function () {
                 _.each(this.children, function (view) {

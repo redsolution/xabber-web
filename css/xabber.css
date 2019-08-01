@@ -1467,6 +1467,7 @@ body {
     display: inline-block;
     border: none;
 }
+
 .searching-main .search-form .account-indicator {
     height: 56px
 }
@@ -2865,6 +2866,9 @@ body {
     display: block;
 }
 
+.chats-list-wrap > div.account-indicator,
+.contacts-list-wrap > div.account-indicator,
+.messages-list-wrap > div.account-indicator,
 .search-form .account-indicator {
     background-color: #9E9E9E;
 }
@@ -6752,6 +6756,14 @@ input[type='range'].voice-message-volume:focus {
 }
 
 /* ------------------ RECENT CHATS MODAL ------------------ */
+
+.chats-list-wrap,
+.contacts-list-wrap,
+.messages-list-wrap {
+    position: relative;
+}
+
+.left-panel-wrap .left-panel-list-wrap .chats-title,
 .left-panel-wrap .left-panel-list-wrap .messages-title,
 .left-panel-wrap .left-panel-list-wrap .contacts-title,
 .forward-panel-modal .forward-panel-list-title {
@@ -6762,6 +6774,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .left-panel-wrap .left-panel-list-wrap .messages-title,
+.left-panel-wrap .left-panel-list-wrap .chats-title,
 .left-panel-wrap .left-panel-list-wrap .contacts-title {
     padding: 8px 0 3px 16px;
 }

@@ -67,9 +67,10 @@ define("xabber-mentions", function () {
             }
         });
 
-        xabber.MentionsView = xabber.SearchView.extend({
+        xabber.MentionsView = xabber.SearchPanelView.extend({
             className: 'mentions-container container',
             ps_selector: '.mentions-list-wrap',
+            main_container: '.mentions-list',
             ps_settings: {theme: 'item-list'},
             template: templates.mentions_panel,
 
@@ -87,112 +88,7 @@ define("xabber-mentions", function () {
                     this.active_mention.model.set('active', false);
                     this.active_mention = null;
                 }
-                (options.right !== 'message_context' && options.right !== 'participant_messages') && this.clearSearch();
-            },
-
-            search: function (query) {
-                this.$('.mentions-list').addClass('hidden');
-                clearTimeout(this.keyup_timeout);
-                this.keyup_timeout = null;
-                this.$('.contact-list').html("");
-                var chats = xabber.opened_chats;
-                this.$('.chat-item').each(function () {
-                    let $this = $(this),
-                        chat = chats.get($this.data('id'));
-                    if (!chat) return;
-                    let jid = chat.get('jid'),
-                        name = chat.contact.get('name').toLowerCase();
-                    $this.hideIf(name.indexOf(query) < 0 && jid.indexOf(query) < 0);
-                });
-                xabber.accounts.each(function (account) {
-                    account.contacts.each(function (contact) {
-                        let jid = contact.get('jid'),
-                            name = contact.get('name'),
-                            chat = account.chats.get(contact.hash_id),
-                            chat_id = chat && chat.id;
-                        if (chat_id)
-                            if (!this.$('.chat-item[data-id="' + chat_id + '"]').length)
-                                if (name.indexOf(query) > -1 && jid.indexOf(query) > -1) {
-                                    let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
-                                    item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
-                                    this.$('.contact-list').append(item_list);
-                                    item_list.click(function () {
-                                        contact.trigger('open_chat', contact);
-                                    }.bind(this));
-                                }
-                    }.bind(this));
-                }.bind(this));
-                this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contact-list').children().length);
-                this.$('.messages-list-wrap').addClass('hidden').find('.message-list').html("");
-                if (query.length >= 2) {
-                    this.keyup_timeout = setTimeout(function () {
-                        this.queryid = uuid();
-                        this.searchMessages(query, {query_id: this.queryid});
-                    }.bind(this), 1000);
-                }
-            },
-
-            searchMessages: function (query, options) {
-                options = options || {};
-                !options.max && (options.max = xabber.settings.mam_messages_limit);
-                let accounts = xabber.accounts.connected;
-                accounts.forEach(function (account) {
-                    account.all_searched_messages = new xabber.Messages(null, {account: account});
-                    options.account = account;
-                    this.MAMRequest(query, options, function (messages) {
-                        _.each(messages, function (message) {
-                            let message_from_stanza = account.chats.receiveChatMessage(message,
-                                _.extend({is_searched: true}, options)
-                            ),
-                                msg_idx = account.all_searched_messages.indexOf(message_from_stanza),
-                                $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
-                            if (msg_idx === 0) {
-                                $message_item_view.$el.appendTo(this.$('.messages-list-wrap .message-list'));
-                            } else {
-                                $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
-                            }
-                        }.bind(this));
-                        this.$('.messages-list-wrap').switchClass('hidden', !this.$('.message-list').children().length);
-                    }.bind(this), function () {
-
-                    });
-                }.bind(this));
-            },
-
-            MAMRequest: function (query, options, callback, errback) {
-                let messages = [],
-                    account = options.account,
-                    queryid = uuid(),
-                    iq = $iq({from: account.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                        .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
-                        .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
-                        .c('value').t(Strophe.NS.MAM).up().up()
-                        .c('field', {'var': 'withtext'})
-                        .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
-                    handler = account.connection.addHandler(function (message) {
-                        let $msg = $(message);
-                        if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
-                            messages.push(message);
-                        }
-                        return true;
-                    }.bind(this), Strophe.NS.MAM);
-                    account.sendIQ(iq,
-                        function () {
-                            account.connection.deleteHandler(handler);
-                            callback && callback(messages);
-                        },
-                        function () {
-                            account.connection.deleteHandler(handler);
-                            errback && errback();
-                        }
-                    );
-            },
-
-            onEmptyQuery: function () {
-                this.$('.mentions-list').removeClass('hidden');
-                this.$('.contacts-list-wrap').addClass('hidden');
-                this.$('.messages-list-wrap').addClass('hidden');
+                (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages') && this.clearSearch();
             },
 
             onMentionAdded: function (mention) {
