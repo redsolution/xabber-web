@@ -4380,9 +4380,11 @@ define("xabber-chats", function () {
         },
 
         render: function (options) {
-            (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages') && this.clearSearch();
-            if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
-                this.showAllChats();
+            if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
+                this.clearSearch();
+                if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
+                    this.showAllChats();
+                }
             }
         },
 
@@ -4451,6 +4453,7 @@ define("xabber-chats", function () {
         },
 
         openChat: function (view, options) {
+            options = options || {};
             this.$('.list-item.active').removeClass('active');
             view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
@@ -4482,7 +4485,7 @@ define("xabber-chats", function () {
                             view.model.set('displayed_sent', true);
                         }
                 }
-                xabber.body.setScreen('all-chats', {right: 'chat', chat_item: view});
+                xabber.body.setScreen((options.screen || 'all-chats'), {right: 'chat', clear_search: options.clear_search, chat_item: view});
             }
             xabber.chats_view.scrollTo(scrolled_top);
         },
@@ -5956,7 +5959,8 @@ define("xabber-chats", function () {
             xabber.chats_view.clearSearch();
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
-                    this.contact.messages_view.openChat();
+                    xabber.chats_view.openChat(this.model.item_view, {clear_search: true, screen: xabber.body.screen.get('name')});
+                    // this.contact.messages_view.openChat();
         },
 
         setEditedMessage: function (message) {

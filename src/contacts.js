@@ -3921,14 +3921,8 @@ define("xabber-contacts", function () {
             },
 
             render: function (options) {
-                options.right !== 'contact_details' && this.clearSearch();
+                (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search && options.right === 'chat') && this.clearSearch();
             },
-
-            /*search: function (query) {
-                _.each(this.children, function (view) {
-                    view.search(query);
-                });
-            },*/
 
             searchAll: function () {
                 _.each(this.children, function (view) {

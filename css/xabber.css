@@ -6093,6 +6093,10 @@ input[type='range'].voice-message-volume:focus {
     color: #80868B;
 }
 
+.details-panel .main-info .text-info {
+    width: 100%;
+}
+
 .details-panel .main-info .buttons-menu-wrap {
     right: 62px;
     min-width: 142px;

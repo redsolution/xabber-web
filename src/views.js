@@ -373,12 +373,22 @@ define("xabber-views", function () {
               this.$('.contacts-list').html("");
               this.$('.chats-list').html("");
               let chats = xabber.opened_chats;
-              xabber.opened_chats.each(function (chat) {
+              xabber.chats.each(function (chat) {
                   let jid = chat.get('jid'),
                       name = chat.contact.get('name');
-                  if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
-                      let chat_item = xabber.chats_view.child(chat.get('id'));
-                      chat_item && this.$('.chats-list').append(_.clone(chat_item.$el));
+                  if ((name.indexOf(query) > -1 || jid.indexOf(query) > -1) && chat.get('timestamp')) {
+                      let chat_item = xabber.chats_view.child(chat.get('id')).$el;
+                      chat_item && (chat_item = chat_item.clone());
+                      if (chat_item) {
+                          this.$('.chats-list-wrap').removeClass('hidden');
+                          this.$('.chats-list').append(chat_item);
+                          this.updateChatItem(chat_item);
+                          chat_item.click(function () {
+                              this.$('.list-item.active').removeClass('active');
+                              xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
+                              chat_item.addClass('active');
+                          }.bind(this));
+                      }
                   }
               }.bind(this));
               xabber.accounts.each(function (account) {
@@ -410,6 +420,13 @@ define("xabber-views", function () {
                       this.searchMessages(query, {query_id: this.queryid});
                   }.bind(this), 1000);
               }
+          },
+
+          updateChatItem: function (chat_item) {
+              var date_width = chat_item.find('.last-msg-date').width();
+              chat_item.find('.chat-title-wrap').css('padding-right', date_width + 5);
+              var title_width = chat_item.find('.chat-title-wrap').width();
+              chat_item.find('.chat-title').css('max-width', title_width);
           },
 
           searchMessages: function (query, options) {
@@ -470,6 +487,13 @@ define("xabber-views", function () {
                       errback && errback();
                   }
               );
+          },
+
+          clearSearch: function (ev) {
+              ev && ev.preventDefault();
+              this.$('.search-input').val('');
+              this.updateSearch();
+              this.onEmptyQuery();
           },
 
           onEmptyQuery: function () {

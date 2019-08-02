@@ -240,7 +240,7 @@ define("xabber-ui", function () {
             }
             if (options.details_content === 'participants')
                 return { details_content: path_details_participants };
-            if ((options.name === 'all-chats') && options.chat_item) {
+            if (options.chat_item) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,
