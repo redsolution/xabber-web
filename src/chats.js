@@ -58,7 +58,10 @@ define("xabber-chats", function () {
         },
 
         isSenderMe: function () {
-            return this.collection.account.get('jid') === this.get('from_jid');
+            if (this.account)
+                return this.account.get('jid') === this.get('from_jid');
+            else
+                return this.collection.account.get('jid') === this.get('from_jid');
         }
     });
 
@@ -388,8 +391,9 @@ define("xabber-chats", function () {
             if (options.is_searched) {
                 let msg_contact = Strophe.getBareJidFromJid($message.attr('from'));
                 (msg_contact === this.account.get('jid')) && (msg_contact = Strophe.getBareJidFromJid($message.attr('to')));
-                message = this.account.all_searched_messages.create(attrs);
+                message = xabber.all_searched_messages.create(attrs);
                 message.contact = this.account.contacts.mergeContact(msg_contact);
+                message.account = this.account;
                 return message;
             }
 
@@ -584,7 +588,7 @@ define("xabber-chats", function () {
         getMessageContext: function (msgid, options) {
             options = options || {};
             let messages = options.mention && this.account.searched_messages || options.message && this.account.all_searched_messages || this.account.messages,
-                message = messages.get(msgid);
+                message = messages. get(msgid);
             if (message) {
                 let stanza_id = message.get('archive_id');
                 this.contact.messages_view = new xabber.MessageContextView({
@@ -4401,6 +4405,7 @@ define("xabber-chats", function () {
             this.model.on("change:active", this.onChangedActiveStatus, this);
             this.model.on("change:timestamp", this.updateChatPosition, this);
             xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+            this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         },
 
         render: function (options) {

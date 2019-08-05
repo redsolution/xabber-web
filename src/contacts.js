@@ -3906,6 +3906,7 @@ define("xabber-contacts", function () {
 
             __initialize: function () {
                 this.model.on("list_changed", this.updateLeftIndicator, this);
+                this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
             },
 
             updateLeftIndicator: function () {

@@ -81,6 +81,7 @@ define("xabber-mentions", function () {
                 this.model.on("change:active", this.onChangedActiveStatus, this);
                 this.model.on("destroy", this.onMentionRemoved, this);
                 xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+                this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
             },
 
             render: function (options) {

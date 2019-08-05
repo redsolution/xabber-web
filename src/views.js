@@ -366,13 +366,54 @@ define("xabber-views", function () {
     });
 
       xabber.SearchPanelView = xabber.SearchView.extend({
+          onScrollY: function (options) {
+              if (xabber.all_searched_messages && xabber.all_searched_messages.length && this.queryid && !this._loading_messages && !this._messages_loaded && this.isScrolledToBottom()) {
+                  this._loading_messages = true;
+                  options = options || {};
+                  this.queryid = uuid();
+                  options.query_id = this.queryid;
+                  let accounts = xabber.accounts.connected;
+                  accounts.forEach(function (account) {
+                      let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
+                      if (!first_message || account.searched_msgs_loaded) {
+                          // this._loading_messages = false;
+                          return;
+                      }
+                      options.account = account;
+                      options.before = first_message.get('archive_id');
+                      this.MAMRequest(this.query_text, options, function (messages) {
+                          _.each(messages, function (message) {
+                              let message_from_stanza = account.chats.receiveChatMessage(message,
+                                  _.extend({is_searched: true}, options)
+                                  ),
+                                  msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                                  $message_item_view;
+                              if (!message_from_stanza)
+                                  return;
+                              else
+                                  $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                              if (msg_idx === 0) {
+                                  $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
+                              } else {
+                                  $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                              }
+                          }.bind(this));
+                          this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
+                          this.updateScrollBar();
+                          this._loading_messages = false;
+                      }.bind(this));
+                  }.bind(this));
+                  (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
+              }
+          },
+
           search: function (query) {
               this.$(this.main_container).addClass('hidden');
               clearTimeout(this.keyup_timeout);
               this.keyup_timeout = null;
+              this.query_text = query;
               this.$('.contacts-list').html("");
               this.$('.chats-list').html("");
-              let chats = xabber.opened_chats;
               xabber.chats.each(function (chat) {
                   let jid = chat.get('jid').toLowerCase(),
                       name = chat.contact.get('roster_name') || chat.contact.get('name');
@@ -431,18 +472,22 @@ define("xabber-views", function () {
           },
 
           searchMessages: function (query, options) {
+              this._loading_messages = true;
+              this._messages_loaded = false;
               options = options || {};
               !options.max && (options.max = xabber.settings.mam_messages_limit);
+              !options.before && (options.before = "");
+              xabber.all_searched_messages = new xabber.SearchedMessages();
               let accounts = xabber.accounts.connected;
               accounts.forEach(function (account) {
-                  account.all_searched_messages = new xabber.Messages(null, {account: account});
+                  account.searched_msgs_loaded = false;
                   options.account = account;
                   this.MAMRequest(query, options, function (messages) {
                       _.each(messages, function (message) {
                           let message_from_stanza = account.chats.receiveChatMessage(message,
                               _.extend({is_searched: true}, options)
                               ),
-                              msg_idx = account.all_searched_messages.indexOf(message_from_stanza), $message_item_view;
+                              msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza), $message_item_view;
                               if (!message_from_stanza)
                                   return;
                               else
@@ -454,10 +499,11 @@ define("xabber-views", function () {
                           }
                       }.bind(this));
                       this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
-                  }.bind(this), function () {
-
-                  });
+                      this.updateScrollBar();
+                      this._loading_messages = false;
+                  }.bind(this));
               }.bind(this));
+              (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
           },
 
           MAMRequest: function (query, options, callback, errback) {
@@ -479,8 +525,13 @@ define("xabber-views", function () {
                       return true;
                   }.bind(this), env.Strophe.NS.MAM);
               account.sendIQ(iq,
-                  function () {
+                  function (res) {
                       account.connection.deleteHandler(handler);
+                      var $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
+                      if ($fin.length && $fin.attr('queryid') === queryid) {
+                          var rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
+                          rsm_complete && (account.searched_msgs_loaded = true);
+                      }
                       callback && callback(messages);
                   },
                   function () {
@@ -498,6 +549,13 @@ define("xabber-views", function () {
           },
 
           onEmptyQuery: function () {
+              xabber.accounts.forEach(function (account) {
+                  account.searched_msgs_loaded = false;
+              });
+              this.query_text = null;
+              this.queryid = null;
+              this._messages_loaded = false;
+              this._loading_messages = false;
               this.$(this.main_container).removeClass('hidden');
               this.$('.chats-list-wrap').addClass('hidden');
               this.$('.contacts-list-wrap').addClass('hidden');
@@ -505,7 +563,7 @@ define("xabber-views", function () {
           }
       });
 
-          xabber.InputWidget = Backbone.View.extend({
+      xabber.InputWidget = Backbone.View.extend({
         field_type: 'text',
         template: templates.input_widget,
 
