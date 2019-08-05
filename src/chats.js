@@ -62,7 +62,31 @@ define("xabber-chats", function () {
         }
     });
 
-    xabber.Messages = Backbone.Collection.extend({
+    xabber.MessagesBase = Backbone.Collection.extend({
+        model: xabber.Message,
+    });
+
+      xabber.SearchedMessages = xabber.MessagesBase.extend({
+          comparator: 'timestamp',
+
+          initialize: function (models, options) {
+              this.collections = [];
+              this.on("add", _.bind(this.updateInCollections, this, 'add'));
+              this.on("change", _.bind(this.updateInCollections, this, 'change'));
+          },
+
+          addCollection: function (collection) {
+              this.collections.push(collection);
+          },
+
+          updateInCollections: function (event, contact) {
+              _.each(this.collections, function (collection) {
+                  collection.update(contact, event);
+              });
+          }
+      });
+
+      xabber.Messages = Backbone.Collection.extend({
         model: xabber.Message,
         comparator: 'timestamp',
 

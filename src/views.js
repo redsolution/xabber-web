@@ -374,11 +374,12 @@ define("xabber-views", function () {
               this.$('.chats-list').html("");
               let chats = xabber.opened_chats;
               xabber.chats.each(function (chat) {
-                  let jid = chat.get('jid'),
-                      name = chat.contact.get('name');
+                  let jid = chat.get('jid').toLowerCase(),
+                      name = chat.contact.get('roster_name') || chat.contact.get('name');
+                  name && (name = name.toLowerCase());
                   if ((name.indexOf(query) > -1 || jid.indexOf(query) > -1) && chat.get('timestamp')) {
-                      let chat_item = xabber.chats_view.child(chat.get('id')).$el;
-                      chat_item && (chat_item = chat_item.clone());
+                      let chat_item = xabber.chats_view.child(chat.get('id'));
+                      chat_item && (chat_item = chat_item.$el.clone());
                       if (chat_item) {
                           this.$('.chats-list-wrap').removeClass('hidden');
                           this.$('.chats-list').append(chat_item);
@@ -393,22 +394,22 @@ define("xabber-views", function () {
               }.bind(this));
               xabber.accounts.each(function (account) {
                   account.contacts.each(function (contact) {
-                      let jid = contact.get('jid'),
-                          name = contact.get('name'),
+                      let jid = contact.get('jid').toLowerCase(),
+                          name = contact.get('roster_name') || contact.get('name'),
                           chat = account.chats.get(contact.hash_id),
                           chat_id = chat && chat.id;
-                      if (chat_id)
-                          if (!this.$('.chat-item[data-id="' + chat_id + '"]').length)
-                              if (name.indexOf(query) > -1 && jid.indexOf(query) > -1) {
-                                  let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
-                                  item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
-                                  this.$('.contacts-list').append(item_list);
-                                  item_list.click(function () {
-                                      this.$('.list-item.active').removeClass('active');
-                                      item_list.addClass('active');
-                                      contact.showDetails(xabber.body.screen.get('name'));
-                                  }.bind(this));
-                              }
+                      name && (name = name.toLowerCase());
+                      if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
+                          if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
+                              let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
+                              item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
+                              this.$('.contacts-list').append(item_list);
+                              item_list.click(function () {
+                                  this.$('.list-item.active').removeClass('active');
+                                  item_list.addClass('active');
+                                  contact.showDetails(xabber.body.screen.get('name'));
+                              }.bind(this));
+                          }
                   }.bind(this));
               }.bind(this));
               this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children().length);

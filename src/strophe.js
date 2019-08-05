@@ -66,6 +66,7 @@ define("xabber-strophe", function () {
                         Strophe.SASLSHA1]);
                 } else if (this.auth_type === 'x-token') {
                     this.connection.registerSASLMechanism(Strophe.SASLXTOKEN);
+                    delete this.connection._sasl_data["server-signature"];
                 } else {
                     this.connection.registerSASLMechanisms([Strophe.SASLXOAuth2]);
                     delete this.connection._sasl_data["server-signature"];
