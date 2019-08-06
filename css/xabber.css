@@ -2866,6 +2866,7 @@ body {
     display: block;
 }
 
+.mentions-list .group-chat-title-wrap .account-indicator,
 .chats-list-wrap > div.account-indicator,
 .contacts-list-wrap > div.account-indicator,
 .messages-list-wrap > div.account-indicator,

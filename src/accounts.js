@@ -1459,7 +1459,7 @@ define("xabber-accounts", function () {
             },
 
             renderAllXTokens: function () {
-                $(this.model.x_tokens_list).each(function (idx, token) {
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each(function (idx, token) {
                     let pretty_token = {
                         client: token.client,
                         device: token.device,
@@ -1476,7 +1476,7 @@ define("xabber-accounts", function () {
                         }
                     }
                     let $token_html = $(templates.token_item(pretty_token));
-                    this.$('.panel-content-wrap .tokens .all-sessions').prepend($token_html);
+                    this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
                 }.bind(this));
                 if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
                     this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
