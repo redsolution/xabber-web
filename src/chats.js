@@ -5607,13 +5607,13 @@ define("xabber-chats", function () {
                 caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                 mention_at_regexp = /(^|\s)@(\w+)?/g,
                 mention_plus_regexp = /(^|\s)[+](\w+)?/g,
-                to_caret_text = text.slice(0, caret_position),
+                to_caret_text = Array.from(text).slice(0, caret_position).join(""),
                 mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
                 mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
                 at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
                 plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
                 mention_position = Math.max(at_position, plus_position),
-                mention_text = to_caret_text.slice(mention_position, caret_position);
+                mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("");
             (mention_text.length && mention_text[0].match(/\s/)) && mention_position++;
             mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
@@ -5663,7 +5663,7 @@ define("xabber-chats", function () {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         mention_at_regexp = /(^|\s)@(\w+)?/g,
                         mention_plus_regexp = /(^|\s)[+](\w+)?/g,
-                        to_caret_text = text.slice(0, caret_position),
+                        to_caret_text = Array.from(text).slice(0, caret_position).join(""),
                         mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
                         mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
                         at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
@@ -5674,7 +5674,7 @@ define("xabber-chats", function () {
                         return;
                     }
                     if (mention_position > -1) {
-                        let mention_text = to_caret_text.slice(mention_position, caret_position).replace(/\s?(@|[+])/, "");
+                        let mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("").replace(/\s?(@|[+])/, "");
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentions(mention_text);
                             } else {

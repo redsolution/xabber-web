@@ -196,7 +196,7 @@ define("xabber-mentions", function () {
                 this.updateCounter();
                 this.model.on("change:active", this.updateActiveStatus, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
-                this.contact.on("change:name", this.updateGroupChatName, this);
+                this.contact.on("change:name", this.updateGroupName, this);
                 this.contact.on("change:group_chat", this.updateGroupChat, this);
                 this.model.message.on("change:is_unread", this.updateCounter, this);
             },
