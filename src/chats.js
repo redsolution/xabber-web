@@ -976,7 +976,7 @@ define("xabber-chats", function () {
                     }
                 }
                 if (this.contact.get('group_chat')) {
-                    let msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
+                    let msg_from = msg_user_info.nickname || (msg.isSenderMe() ? (this.contact.get('my_info') && this.contact.get('my_info').nickname || this.account.get('name')) : msg.get('from_jid'));
                     this.$('.last-msg').text("").append($('<span class=text-color-700>' + msg_from + ': ' + '</span>')).append(msg_text);
                 }
                 else
@@ -5604,15 +5604,23 @@ define("xabber-chats", function () {
                 id = $participant_item.data('id'),
                 $rich_textarea = this.$('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea(),
-                caret_position = this.quill.selection.lastRange.index,
-                to_caret_text = Array.from(text).slice(0, caret_position),
-                at_position = to_caret_text.lastIndexOf('@'),
-                mention_text = Array.from(text).slice(at_position + 1, caret_position).join("");
+                caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
+                mention_at_regexp = /(^|\s)@(\w+)?/g,
+                mention_plus_regexp = /(^|\s)[+](\w+)?/g,
+                to_caret_text = text.slice(0, caret_position),
+                mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
+                mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
+                at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
+                plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
+                mention_position = Math.max(at_position, plus_position),
+                mention_text = to_caret_text.slice(mention_position, caret_position);
+            (mention_text.length && mention_text[0].match(/\s/)) && mention_position++;
+            mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
-            this.quill.deleteText(at_position, ++mention_text.length);
-            this.quill.insertEmbed(at_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + nickname);
-            this.quill.pasteHTML(at_position + nickname.length, '<text> </text>');
-            this.quill.setSelection(at_position + nickname.length + 1, 0);
+            this.quill.deleteText(mention_position, ++mention_text.length);
+            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + nickname);
+            this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
+            this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();
         },
 
@@ -5653,13 +5661,20 @@ define("xabber-chats", function () {
                     this.focusOnInput();
                 if (this.contact.get('group_chat')) {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
-                        to_caret_text = Array.from(text).slice(0, caret_position),
-                        at_position = to_caret_text.lastIndexOf('@');
-                    if (!caret_position)
+                        mention_at_regexp = /(^|\s)@(\w+)?/g,
+                        mention_plus_regexp = /(^|\s)[+](\w+)?/g,
+                        to_caret_text = text.slice(0, caret_position),
+                        mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
+                        mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
+                        at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
+                        plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
+                        mention_position = Math.max(at_position, plus_position);
+                    if (!(caret_position > -1) || mention_position === -1) {
+                        this.$('.mentions-list').hide();
                         return;
-                    if (at_position > -1 && to_caret_text.slice(at_position, caret_position).indexOf(' ') === -1) {
-                        if (!at_position || to_caret_text[at_position - 1].match(/\s/)) {
-                            let mention_text = Array.from(text).slice(at_position + 1, caret_position).join("");
+                    }
+                    if (mention_position > -1) {
+                        let mention_text = to_caret_text.slice(mention_position, caret_position).replace(/\s?(@|[+])/, "");
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentions(mention_text);
                             } else {
@@ -5667,9 +5682,6 @@ define("xabber-chats", function () {
                                     this.updateMentions(mention_text);
                                 }.bind(this));
                             }
-                        }
-                        else
-                            this.$('.mentions-list').hide();
                     }
                     else
                         this.$('.mentions-list').hide();
