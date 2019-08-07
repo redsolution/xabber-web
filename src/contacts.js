@@ -1516,8 +1516,8 @@ define("xabber-contacts", function () {
 
             renderMemberItem: function (participant) {
                 let attrs = _.clone(participant.attributes);
-                attrs.nickname = _.escape(attrs.nickname);
-                attrs.badge = _.escape(attrs.badge);
+                attrs.nickname = _.escape(_.unescape(attrs.nickname));
+                attrs.badge = _.escape(_.unescape(attrs.badge));
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
                 $item_view.emojify('.badge', {emoji_size: 14});
@@ -1688,8 +1688,8 @@ define("xabber-contacts", function () {
             render: function () {
                 this.new_avatar = "";
                 let attrs = this.participant.attributes;
-                attrs.nickname = _.escape(attrs.nickname);
-                attrs.badge = _.escape(attrs.badge);
+                attrs.nickname = _.escape(_.unescape(attrs.nickname));
+                attrs.badge = _.escape(_.unescape(attrs.badge));
                 let $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
                 this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
@@ -2049,7 +2049,7 @@ define("xabber-contacts", function () {
                     this.account.sendIQ(iq_changes,
                         function () {
                             this.$('.buttons-wrap button').removeClass('non-active');
-                            this.participant.set('nickname', nickname_value);
+                            this.participant.set('nickname', _.unescape(nickname_value));
                             this.close();
                         }.bind(this),
                         function (error) {
