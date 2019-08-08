@@ -269,6 +269,10 @@ define("xabber-views", function () {
 
         keyUpOnSearch: function (ev) {
             ev.stopPropagation();
+            if ($(ev.target).val()) {
+                this.keyUpOnSearchWithQuery(ev);
+                return;
+            }
             this.ids = this.$('.list-item:not(.hidden)').map(function () {
                 return $(this).data('id');
             }).toArray();
@@ -354,6 +358,8 @@ define("xabber-views", function () {
             this.$('.list-item').removeClass('hidden');
         },
 
+        keyUpOnSearchWithQuery: function () {},
+
         close: function () {},
 
         search: function () {},
@@ -407,6 +413,56 @@ define("xabber-views", function () {
               }
           },
 
+          keyUpOnSearchWithQuery: function (ev) {
+              ev.stopPropagation();
+              this.ids = this.$('.searched-lists-wrap .list-item:not(.hidden)').map(function () {
+                  return $(this).data('id');
+              }).toArray();
+              var $selection = this.getSelectedItemWithQuery();
+              if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+                  return this.selectNextItemWithQuery();
+              }
+              if (ev.keyCode === constants.KEY_ARROW_UP) {
+                  return this.selectPreviousItemWithQuery();
+              }
+              if (ev.keyCode === constants.KEY_ENTER && $selection.length) {
+                  ev.preventDefault();
+                  return this.onEnterPressed($selection);
+              }
+              if (ev.keyCode === constants.KEY_ESCAPE) {
+                  ev.preventDefault();
+                  if ($(ev.target).val())
+                      return this.clearSearch();
+                  else
+                      this.close();
+              }
+              this.updateSearch();
+          },
+
+          getSelectedItemWithQuery: function () {
+              return this.$('.searched-lists-wrap .list-item[data-id="'+this.selection_id+'"]');
+          },
+
+          selectItemWithQuery: function (id) {
+              this.clearSearchSelection();
+              var $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
+              if ($selection.length) {
+                  this.selection_id = id;
+              } else {
+                  $selection = this.$('.searched-lists-wrap .list-item:visible').first();
+                  this.selection_id = $selection.data('id');
+              }
+              $selection.addClass('selected');
+          },
+
+          selectNextItemWithQuery: function () {
+              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)+1]);
+          },
+
+          selectPreviousItemWithQuery: function () {
+              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)-1]);
+          },
+
           search: function (query) {
               this.$(this.main_container).addClass('hidden');
               clearTimeout(this.keyup_timeout);
@@ -443,7 +499,7 @@ define("xabber-views", function () {
                       if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
                           if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
                               let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
-                              item_list.attr('data-color', account.settings.get('color')).prepend($('<div class="account-indicator ground-color-700"/>'));
+                              item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).prepend($('<div class="account-indicator ground-color-700"/>'));
                               this.$('.contacts-list').append(item_list);
                               item_list.click(function () {
                                   this.$('.list-item.active').removeClass('active');

@@ -3932,8 +3932,27 @@ define("xabber-contacts", function () {
             },
 
             onEnterPressed: function (selection) {
-                var contact = this.getContactForItem(selection);
-                contact && contact.showDetails();
+                let view;
+                if (selection.closest('.searched-lists-wrap').length) {
+                    this.$('.list-item.active').removeClass('active');
+                    if (selection.hasClass('chat-item')) {
+                        view = xabber.chats_view.child(selection.data('id'));
+                        view && view.open({screen: xabber.body.screen.get('name'), clear_search: false});
+                        selection.addClass('active');
+                    }
+                    if (selection.hasClass('roster-contact')) {
+                        selection.addClass('active');
+                        view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
+                        view && view.showDetails(xabber.body.screen.get('name'));
+                    }
+                    if (selection.hasClass('message-item')) {
+                        selection.click();
+                    }
+                }
+                else {
+                    var contact = this.getContactForItem(selection);
+                    contact && contact.showDetails();
+                }
             },
 
             onListChanged: function () {

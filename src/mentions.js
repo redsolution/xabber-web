@@ -106,6 +106,47 @@ define("xabber-mentions", function () {
                 this.updateScrollBar();
             },
 
+            selectItem: function (id) {
+                this.clearSearchSelection();
+                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                if ($selection.length) {
+                    this.selection_id = id;
+                } else {
+                    $selection = this.$('.list-item:visible').first();
+                    this.selection_id = $selection.data('id');
+                }
+                $selection.find('.mention-info-wrap').addClass('selected');
+            },
+
+            clearSearchSelection: function (ev) {
+                this.selection_id = null;
+                this.$('.list-item.selected').removeClass('selected');
+                this.$('.list-item .selected').removeClass('selected');
+            },
+
+            onEnterPressed: function (selection) {
+                let view;
+                if (selection.closest('.searched-lists-wrap').length) {
+                    this.$('.list-item.active').removeClass('active');
+                    if (selection.hasClass('chat-item')) {
+                        view = xabber.chats_view.child(selection.data('id'));
+                        view && view.open({screen: xabber.body.screen.get('name'), clear_search: false});
+                        selection.addClass('active');
+                    }
+                    if (selection.hasClass('roster-contact')) {
+                        selection.addClass('active');
+                        view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
+                        view && view.showDetails(xabber.body.screen.get('name'));
+                    }
+                    if (selection.hasClass('message-item')) {
+                        selection.click();
+                    }
+                }
+                else {
+                    selection.find('.mention-info-wrap').click();
+                }
+            },
+
             replaceMentionItem: function (item, mentions) {
                 let view = this.child(item.id);
                 if (view && item.get('timestamp')) {

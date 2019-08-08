@@ -2124,6 +2124,7 @@ body {
 .roster-left-container .group-head:hover,
 .roster-left-container .roster-contact:hover,
 .roster-left-container .roster-contact.selected,
+.mention-item .mention-info-wrap.selected,
 .list-item.selected {
     background-color: #EEEEEE;
 }
