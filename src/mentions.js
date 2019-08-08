@@ -228,7 +228,7 @@ define("xabber-mentions", function () {
                 this.contact = this.model.contact;
                 this.$el.attr('data-id', this.model.id);
                 this.$el.attr('data-contact-jid', this.contact.get('jid'));
-                this.updateGroupChatName();
+                this.updateContactName();
                 this.updateGroupChat();
                 this.updateName();
                 this.updateLastMessage();
@@ -237,7 +237,7 @@ define("xabber-mentions", function () {
                 this.updateCounter();
                 this.model.on("change:active", this.updateActiveStatus, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
-                this.contact.on("change:name", this.updateGroupName, this);
+                this.contact.on("change:name", this.updateContactName, this);
                 this.contact.on("change:group_chat", this.updateGroupChat, this);
                 this.model.message.on("change:is_unread", this.updateCounter, this);
             },
@@ -251,8 +251,16 @@ define("xabber-mentions", function () {
                 this.$('.chat-title').text(contact_name);
             },
 
-            updateGroupChatName: function () {
-                this.$('.group-chat-name').text(this.contact.get('name'));
+            updateContactName: function () {
+                let contact_name = this.contact.get('name');
+                this.$('.group-chat-name').text(contact_name);
+                if (!this.contact.get('group_chat')) {
+                    this.updateName();
+                    if (!this.contact.get('photo_hash')) {
+                        let default_avatar = Images.getDefaultAvatar(contact_name);
+                        this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                    }
+                }
             },
 
             updateGroupChat: function () {
