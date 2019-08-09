@@ -44,6 +44,7 @@ define("xabber-contacts", function () {
                 this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
                 this.invitation = new xabber.ContactInvitationView({model: this});
                 this.on("change:photo_hash", this.getContactInfo, this);
+                this.on("change:roster_name", this.updateName, this);
                 this.account.dfd_presence.done(function () {
                     if (!this.get('blocked'))
                         this.getContactInfo();
@@ -525,6 +526,11 @@ define("xabber-contacts", function () {
                     // }
                 }.bind(this));
                 callback && callback(participants_list);
+            },
+
+            updateName: function () {
+                if (this.get('name') !== this.get('roster_name'))
+                    this.set('name', this.get('roster_name'));
             },
 
             showDetails: function (screen) {
