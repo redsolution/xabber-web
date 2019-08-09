@@ -235,6 +235,7 @@ define("xabber-mentions", function () {
                 this.updateAvatar();
                 this.updateColorScheme();
                 this.updateCounter();
+                this.updateIcon();
                 this.model.on("change:active", this.updateActiveStatus, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
                 this.contact.on("change:name", this.updateContactName, this);
@@ -251,6 +252,11 @@ define("xabber-mentions", function () {
                 this.$('.chat-title').text(contact_name);
             },
 
+            updateIcon: function () {
+                this.$('.contact-icon .mdi-account-multiple').hideIf(!this.contact.get('group_chat') && this.contact.get('jid') === this.account.domain);
+                this.$('.contact-icon .mdi-desktop-tower').hideIf(this.contact.get('jid') !== this.account.domain);
+            },
+
             updateContactName: function () {
                 let contact_name = this.contact.get('name');
                 this.$('.group-chat-name').text(contact_name);
@@ -264,7 +270,7 @@ define("xabber-mentions", function () {
             },
 
             updateGroupChat: function () {
-                // this.$('.group-chat-icon').hideIf(!this.contact.get('group_chat'));
+                this.updateIcon();
             },
 
             updateCounter:function () {
