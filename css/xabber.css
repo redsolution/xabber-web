@@ -5875,6 +5875,7 @@ input[type='range'].voice-message-volume:focus {
     font-size: 14px;
     line-height: 16px;
     color: #616161;
+    width: calc(100% - 56px - 24px);
 }
 
 .details-panel .resource-wrap .status-info .status {
