@@ -1498,8 +1498,9 @@ define("xabber-accounts", function () {
                             .c('query', {xmlns: Strophe.NS.AUTH_TOKENS + '#items'})
                             .c('token').t(this.model.get('x_token').token);
                         this.model.sendIQ(iq_ask_token_uid, function (iq_response) {
-                            let token_uid = iq_response.find('token-uid').text(),
-                                expire = iq_response.find('expire').text();
+                            let $iq_response = $(iq_response),
+                                token_uid = $iq_response.find('token-uid').text(),
+                                expire = $iq_response.find('expire').text();
                             this.model.get('x_token').token_uid = token_uid;
                             this.model.get('x_token').expire = expire;
                             this.renderAllXTokens();
