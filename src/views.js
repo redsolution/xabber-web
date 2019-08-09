@@ -965,6 +965,11 @@ define("xabber-views", function () {
         jumpToBlock: function (ev) {
             var $tab = $(ev.target).closest('.settings-tab'),
                 $elem = this.$('.settings-block-wrap.' + $tab.data('block-name'));
+            if ($tab.hasClass('link-button')) {
+                $tab.parent().siblings().removeClass('active');
+                this.scrollTo(0);
+                return;
+            }
             $tab.addClass('active').siblings().removeClass('active');
             this.scrollToChild($elem);
         },

@@ -129,6 +129,7 @@
             _.extend(constants, _.pick(config, [
                 'CONNECTION_URL',
                 'XMPP_SERVER_GROUPCHATS',
+                'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'DEBUG',
                 'XABBER_ACCOUNT_URL',
