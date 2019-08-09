@@ -529,7 +529,7 @@ define("xabber-contacts", function () {
             },
 
             updateName: function () {
-                if (this.get('name') !== this.get('roster_name'))
+                if (this.get('roster_name') && this.get('name') !== this.get('roster_name'))
                     this.set('name', this.get('roster_name'));
             },
 
