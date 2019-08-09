@@ -106,6 +106,47 @@ define("xabber-mentions", function () {
                 this.updateScrollBar();
             },
 
+            selectItem: function (id) {
+                this.clearSearchSelection();
+                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                if ($selection.length) {
+                    this.selection_id = id;
+                } else {
+                    $selection = this.$('.list-item:visible').first();
+                    this.selection_id = $selection.data('id');
+                }
+                $selection.find('.mention-info-wrap').addClass('selected');
+            },
+
+            clearSearchSelection: function (ev) {
+                this.selection_id = null;
+                this.$('.list-item.selected').removeClass('selected');
+                this.$('.list-item .selected').removeClass('selected');
+            },
+
+            onEnterPressed: function (selection) {
+                let view;
+                if (selection.closest('.searched-lists-wrap').length) {
+                    this.$('.list-item.active').removeClass('active');
+                    if (selection.hasClass('chat-item')) {
+                        view = xabber.chats_view.child(selection.data('id'));
+                        view && view.open({screen: xabber.body.screen.get('name'), clear_search: false});
+                        selection.addClass('active');
+                    }
+                    if (selection.hasClass('roster-contact')) {
+                        selection.addClass('active');
+                        view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
+                        view && view.showDetails(xabber.body.screen.get('name'));
+                    }
+                    if (selection.hasClass('message-item')) {
+                        selection.click();
+                    }
+                }
+                else {
+                    selection.find('.mention-info-wrap').click();
+                }
+            },
+
             replaceMentionItem: function (item, mentions) {
                 let view = this.child(item.id);
                 if (view && item.get('timestamp')) {
@@ -187,7 +228,7 @@ define("xabber-mentions", function () {
                 this.contact = this.model.contact;
                 this.$el.attr('data-id', this.model.id);
                 this.$el.attr('data-contact-jid', this.contact.get('jid'));
-                this.updateGroupChatName();
+                this.updateContactName();
                 this.updateGroupChat();
                 this.updateName();
                 this.updateLastMessage();
@@ -196,7 +237,7 @@ define("xabber-mentions", function () {
                 this.updateCounter();
                 this.model.on("change:active", this.updateActiveStatus, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
-                this.contact.on("change:name", this.updateGroupName, this);
+                this.contact.on("change:name", this.updateContactName, this);
                 this.contact.on("change:group_chat", this.updateGroupChat, this);
                 this.model.message.on("change:is_unread", this.updateCounter, this);
             },
@@ -210,8 +251,16 @@ define("xabber-mentions", function () {
                 this.$('.chat-title').text(contact_name);
             },
 
-            updateGroupChatName: function () {
-                this.$('.group-chat-name').text(this.contact.get('name'));
+            updateContactName: function () {
+                let contact_name = this.contact.get('name');
+                this.$('.group-chat-name').text(contact_name);
+                if (!this.contact.get('group_chat')) {
+                    this.updateName();
+                    if (!this.contact.get('photo_hash')) {
+                        let default_avatar = Images.getDefaultAvatar(contact_name);
+                        this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                    }
+                }
             },
 
             updateGroupChat: function () {

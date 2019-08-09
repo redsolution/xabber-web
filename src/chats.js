@@ -51,6 +51,12 @@ define("xabber-chats", function () {
 
         getVerboseState: function () {
             var state = constants.MSG_VERBOSE_STATE[this.get('state')];
+            if (this.account) {
+                if (!this.account.isOnline()) {
+                    state = 'Message will be sent when you get online.'
+                }
+            }
+            else
             if (!this.collection.account.isOnline()) {
                 state = 'Message will be sent when you get online.'
             }
@@ -587,8 +593,8 @@ define("xabber-chats", function () {
 
         getMessageContext: function (msgid, options) {
             options = options || {};
-            let messages = options.mention && this.account.searched_messages || options.message && this.account.all_searched_messages || this.account.messages,
-                message = messages. get(msgid);
+            let messages = options.mention && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
+                message = messages.get(msgid);
             if (message) {
                 let stanza_id = message.get('archive_id');
                 this.contact.messages_view = new xabber.MessageContextView({
@@ -747,8 +753,11 @@ define("xabber-chats", function () {
             $(msgs).each(function (idx, item) {
                 let stanza_id = item.get('archive_id');
                 if (stanza_id) {
-                    let iq_retraction = $iq({type: 'set', to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
-                        .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: symmetric || false });
+                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')});
+                    if (symmetric)
+                        iq_retraction.c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: true, by: this.account.get('jid')});
+                    else
+                        iq_retraction.c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: false});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
                         }.bind(this),
@@ -4471,13 +4480,25 @@ define("xabber-chats", function () {
 
         onEnterPressed: function (selection) {
             let view;
-            if (selection.hasClass('chat-item')) {
-                view = this.child(selection.data('id'));
-                view && view.open();
+            if (selection.closest('.searched-lists-wrap').length) {
+                this.$('.list-item.active').removeClass('active');
+                if (selection.hasClass('chat-item')) {
+                    view = this.child(selection.data('id'));
+                    view && view.open();
+                    selection.addClass('active');
+                }
+                if (selection.hasClass('roster-contact')) {
+                    selection.addClass('active');
+                    view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
+                    view && view.showDetails(xabber.body.screen.get('name'));
+                }
+                if (selection.hasClass('message-item')) {
+                    selection.click();
+                }
             }
             else {
-                view = xabber.accounts.get(selection.data('account-jid')).contacts.get(selection.data('jid'));
-                view && view.trigger('open_chat', view);
+                view = this.child(selection.data('id'));
+                view && view.open();
             }
         },
 
@@ -4696,7 +4717,6 @@ define("xabber-chats", function () {
               let chat = this.account.chats.getChat(this.contact);
               this.$el.closest('.left-panel-list-wrap').find('.list-item').removeClass('active');
               this.$el.addClass('active');
-              // chat.trigger('open', {clear_search: false});
               xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', chat_item: chat.item_view });
               this.model.get('msgid') && chat.getMessageContext(this.model.get('msgid'), {message: true});
           }
