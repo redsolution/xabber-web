@@ -127,11 +127,15 @@ define("xabber-contacts", function () {
 
             getLastSeen: function() {
                 if (this.get('status') == 'offline') {
+                    if (!Strophe.getNodeFromJid(this.get('jid'))) {
+                        this.set({status_message: 'Server'});
+                        return;
+                    }
                     var iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
                     this.account.sendIQ(iq, function (iq) {
                         var last_seen = this.getLastSeenStatus(iq);
                         if (this.get('status') == 'offline')
-                            this.set({status_message: last_seen });
+                            this.set({status_message: last_seen});
                         return this;
                     }.bind(this));
                 }
@@ -579,10 +583,16 @@ define("xabber-contacts", function () {
                         group_text += ' participant';
                 }
                 this.model.get('group_chat') ? this.$('.status-message').text(group_text) : this.$('.status-message').text(this.model.getStatusMessage());
-                if ((this.model.get('status') == 'offline')&&(this.model.get('last_seen'))) {
+                if (this.model.get('status') == 'offline') {
+                    if (!Strophe.getNodeFromJid(this.model.get('jid'))) {
+                        this.model.set({status_message: 'Server'});
+                        return;
+                    }
+                    if (this.model.get('last_seen')) {
                     var seconds = (moment.now() - this.model.get('last_seen'))/1000,
                         new_status = utils.pretty_last_seen(seconds);
                     this.model.set({ status_message: new_status });
+                    }
                 }
             },
 
