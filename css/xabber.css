@@ -2892,15 +2892,17 @@ body {
 
 .mention-item .group-chat-title-wrap {
     padding: 8px;
-    line-height: 20px;
+    line-height: 16px;
     font-size: 16px;
     display: flex;
+    align-items: center;
     flex-direction: row;
     flex-wrap: nowrap;
 }
 
 .mention-item .contact-icon img {
-    width: 16px;
+    width: 20px;
+    display: flex;
     margin-right: 8px;
 }
 

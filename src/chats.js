@@ -2419,7 +2419,7 @@ define("xabber-chats", function () {
                 $(attrs.forwarded_message).each(function(idx, fwd_msg) {
                     is_sender = fwd_msg.isSenderMe();
                     attrs = _.clone(fwd_msg.attributes);
-                    var is_image_forward = !_.isUndefined(attrs.images),
+                    var is_image_forward = attrs.images && attrs.images.length,
                         images_forward = is_image_forward ? _.clone(attrs.images) : undefined,
                         $img_html_forward,
                         is_forward_file = (attrs.files) ? true : false,

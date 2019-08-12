@@ -443,24 +443,29 @@ define("xabber-views", function () {
               return this.$('.searched-lists-wrap .list-item[data-id="'+this.selection_id+'"]');
           },
 
-          selectItemWithQuery: function (id) {
+          selectItemWithQuery: function (id, arrow) {
               this.clearSearchSelection();
               var $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
               if ($selection.length) {
                   this.selection_id = id;
               } else {
+                  this.ps_container[0].scrollTop = 0;
                   $selection = this.$('.searched-lists-wrap .list-item:visible').first();
                   this.selection_id = $selection.data('id');
               }
+              if (arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+                  this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
+              if (arrow === 'up' && $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop <= this.ps_container[0].scrollTop)
+                  this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
               $selection.addClass('selected');
           },
 
           selectNextItemWithQuery: function () {
-              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)+1]);
+              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)+1], 'down');
           },
 
           selectPreviousItemWithQuery: function () {
-              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)-1]);
+              this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
           },
 
           search: function (query) {

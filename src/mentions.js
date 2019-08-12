@@ -115,6 +115,8 @@ define("xabber-mentions", function () {
                     $selection = this.$('.list-item:visible').first();
                     this.selection_id = $selection.data('id');
                 }
+                console.log($selection[0].offsetTop);
+                console.log($selection);
                 $selection.find('.mention-info-wrap').addClass('selected');
             },
 
