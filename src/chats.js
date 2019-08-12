@@ -2700,7 +2700,7 @@ define("xabber-chats", function () {
             if (forwarded_message) {
                 legacy_body = [];
                 $(forwarded_message).each(function (idx, fwd_msg) {
-                    let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">").trim())) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
+                    let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
                         idx_begin = legacy_body.length,
                         idx_end = legacy_body.concat(legacy_fwd_msg).length - 1;
                     stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, type: 'forward', begin: idx_begin, end: idx_end})
@@ -6288,11 +6288,11 @@ define("xabber-chats", function () {
                     fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
                     let original_message = _.unescape(($msg.get('legacy_content') && $msg.get('legacy_content').find(legacy => legacy.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('legacy_content').find(legacy => legacy.type === 'groupchat').end + 1) : $msg.get('original_message'));
                     fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
-                    (original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
+                    (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
                     (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
                     text_message += _.escape(original_message) + '\n';
             }
-            return text_message;
+            return text_message.trim();
         },
 
         replyMessages: function () {
