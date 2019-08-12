@@ -253,8 +253,8 @@ define("xabber-mentions", function () {
             },
 
             updateIcon: function () {
-                this.$('.contact-icon .mdi-account-multiple').hideIf(!this.contact.get('group_chat') && this.contact.get('jid') === this.account.domain);
-                this.$('.contact-icon .mdi-desktop-tower').hideIf(this.contact.get('jid') !== this.account.domain);
+                this.$('.contact-icon .server-icon').hideIf(!this.contact.get('group_chat') && this.contact.get('jid') === this.account.domain);
+                this.$('.contact-icon .group-chat-icon').hideIf(this.contact.get('jid') !== this.account.domain);
             },
 
             updateContactName: function () {

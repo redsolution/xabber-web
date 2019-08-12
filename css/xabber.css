@@ -2899,9 +2899,9 @@ body {
     flex-wrap: nowrap;
 }
 
-.mention-item .contact-icon i {
-    color: #616161;
-    margin-right: 4px;
+.mention-item .contact-icon img {
+    width: 16px;
+    margin-right: 8px;
 }
 
 .mention-item .mention-info-wrap {

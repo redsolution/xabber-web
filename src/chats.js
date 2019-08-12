@@ -750,20 +750,30 @@ define("xabber-chats", function () {
         },
 
         retractMessages: function (msgs, group_chat, symmetric) {
+            let msgs_responses = 0, count = msgs.length, dfd = new $.Deferred();
+            dfd.done(function (num) {
+                if (num === 0) {
+                    utils.dialogs.error("You have no permission to delete messages");
+                }
+                else if (num !== msgs.length) {
+                    utils.dialogs.error("You have no permission to delete some messages");
+                }
+            }.bind(this));
             $(msgs).each(function (idx, item) {
                 let stanza_id = item.get('archive_id');
                 if (stanza_id) {
-                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')});
-                    if (symmetric)
-                        iq_retraction.c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: true, by: this.account.get('jid')});
-                    else
-                        iq_retraction.c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: false});
+                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
+                        .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
+                            msgs_responses++;
+                            (msgs_responses === msgs.length) && dfd.resolve(count);
                         }.bind(this),
                         function (error) {
+                            msgs_responses++;
                             if ($(error).find('not-allowed').length)
-                                utils.dialogs.error("You have no permission to delete message");
+                                count--;
+                            (msgs_responses === msgs.length) && dfd.resolve(count);
                         }.bind(this));
                 }
             }.bind(this));
@@ -5628,8 +5638,8 @@ define("xabber-chats", function () {
                 mention_at_regexp = /(^|\s)@(\w+)?/g,
                 mention_plus_regexp = /(^|\s)[+](\w+)?/g,
                 to_caret_text = Array.from(text).slice(0, caret_position).join("").replaceEmoji(),
-                mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
-                mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
+                mentions_at = to_caret_text && Array.from(to_caret_text.matchAll(mention_at_regexp)) || [],
+                mentions_plus = to_caret_text && Array.from(to_caret_text.matchAll(mention_plus_regexp)) || [],
                 at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
                 plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
                 mention_position = Math.max(at_position, plus_position),
