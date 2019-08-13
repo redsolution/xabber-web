@@ -2042,6 +2042,7 @@ body {
     top: 17px;
 }
 
+.roster-contact .bot-chat-icon,
 .roster-contact .group-chat-icon {
     position: absolute;
     right: 14px;
@@ -2216,12 +2217,14 @@ body {
     right: 10px;
 }
 
+.roster-left-container .roster-contact .bot-chat-icon,
 .roster-left-container .roster-contact .group-chat-icon,
 .forward-panel-modal .roster-contact .group-chat-icon {
     top: 19px;
     right: 10px;
 }
 
+.forward-panel-modal .roster-contact .bot-chat-icon,
 .forward-panel-modal .roster-contact .group-chat-icon {
     right: 16px;
 }
@@ -2928,22 +2931,26 @@ body {
 .chat-item:hover,
 .message-item:hover,
 .message-item:hover .group-chat-icon,
-.chat-item:hover .group-chat-icon {
+.message-item:hover .bot-chat-icon,
+.chat-item:hover .group-chat-icon,
+.chat-item:hover .bot-chat-icon {
     background-color: #F8F8F8;
 }
 
 .mention-info-wrap.active,
 .mention-info-wrap.active:hover,
-.mention-info-wrap.active .group-chat-icon,
-.mention-info-wrap.active:hover .group-chat-icon,
 .chat-item.active,
 .message-item.active,
 .message-item.active:hover,
 .message-item.active .group-chat-icon,
+.message-item.active .bot-chat-icon,
 .message-item.active:hover .group-chat-icon,
+.message-item.active:hover .bot-chat-icon,
 .chat-item.active:hover,
 .chat-item.active .group-chat-icon,
-.chat-item.active:hover .group-chat-icon {
+.chat-item.active .bot-chat-icon,
+.chat-item.active:hover .group-chat-icon,
+.chat-item.active:hover .bot-chat-icon {
     background-color: #FFEBEE;
 }
 
@@ -2989,8 +2996,11 @@ body {
 }
 
 .message-item .group-chat-icon,
+.message-item .bot-chat-icon,
 .chat-item .group-chat-icon,
-.chat-head-wrap .group-chat-icon {
+.chat-item .bot-chat-icon,
+.chat-head-wrap .group-chat-icon,
+.chat-head-wrap .bot-chat-icon {
     position: absolute;
     border-radius: 50%;
     top: 33px;
