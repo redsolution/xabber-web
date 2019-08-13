@@ -261,7 +261,7 @@ define("xabber-views", function () {
     xabber.SearchView = xabber.BasicView.extend({
 
         events: {
-            "keyup .search-input": "keyUpOnSearch",
+            "keydown .search-input": "keyUpOnSearch",
             "focusout .search-input": "clearSearchSelection",
             "click .close-search-icon": "clearSearch",
             "click .list-item": "onClickItem"
