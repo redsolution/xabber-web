@@ -3489,10 +3489,12 @@ define("xabber-contacts", function () {
                 );
             },
 
-            syncFromServer: function () {
+            syncFromServer: function (options) {
+                options = options || {max: xabber.settings.mam_messages_limit};
+                (!options.after || this.last_chat_msg_id) && (options.after = this.last_chat_msg_id);
                 let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
                 this.account.last_msg_timestamp && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
-                let iq = $iq({type: 'get'}).c('query', request_attrs);
+                let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
                 this.account.sendIQ(iq, function (iq) {
                     this.onSyncIQ(iq, request_attrs.stamp);
                 }.bind(this));
@@ -3500,6 +3502,7 @@ define("xabber-contacts", function () {
 
             onSyncIQ: function (iq, request_with_stamp) {
                 this.account.last_msg_timestamp = moment.now();
+                this.last_chat_msg_id = $(iq).find('set last').text();
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
                         jid = $item.attr('jid');

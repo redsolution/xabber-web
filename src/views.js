@@ -261,7 +261,7 @@ define("xabber-views", function () {
     xabber.SearchView = xabber.BasicView.extend({
 
         events: {
-            "keyup .search-input": "keyUpOnSearch",
+            "keydown .search-input": "keyUpOnSearch",
             "focusout .search-input": "clearSearchSelection",
             "click .close-search-icon": "clearSearch",
             "click .list-item": "onClickItem"
@@ -411,7 +411,11 @@ define("xabber-views", function () {
                   }.bind(this));
                   (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
               }
+              else
+                  this.onScroll();
           },
+
+          onScroll: function () {},
 
           keyUpOnSearchWithQuery: function (ev) {
               ev.stopPropagation();

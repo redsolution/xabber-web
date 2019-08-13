@@ -4436,6 +4436,15 @@ define("xabber-chats", function () {
             }
         },
 
+        onScroll: function () {
+            if (this.isScrolledToBottom()) {
+                let accounts = xabber.accounts.connected;
+                accounts.forEach(function (account) {
+                    account.roster.syncFromServer();
+                }.bind(this));
+            }
+        },
+
         updateLeftIndicator: function (accounts) {
             this.$el.attr('data-indicator', accounts.connected.length > 1);
         },
