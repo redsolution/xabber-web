@@ -29,7 +29,7 @@ define("xabber-contacts", function () {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
                 var attrs = _.clone(_attrs);
-                (this.account.connection.domain === attrs.jid) && (attrs.is_server = true);
+                (this.account && this.account.connection.domain === attrs.jid) && (attrs.is_server = true);
                 attrs.name = attrs.roster_name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
@@ -3490,10 +3490,9 @@ define("xabber-contacts", function () {
             },
 
             syncFromServer: function (options) {
-                options = options || {max: xabber.settings.mam_messages_limit};
-                (!options.after || this.last_chat_msg_id) && (options.after = this.last_chat_msg_id);
+                options = options || {};
                 let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
-                this.account.last_msg_timestamp && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
+                (!options.after && this.account.last_msg_timestamp) && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
                 this.account.sendIQ(iq, function (iq) {
                     this.onSyncIQ(iq, request_attrs.stamp);
@@ -3502,7 +3501,8 @@ define("xabber-contacts", function () {
 
             onSyncIQ: function (iq, request_with_stamp) {
                 this.account.last_msg_timestamp = moment.now();
-                this.last_chat_msg_id = $(iq).find('set last').text();
+                let last_chat_msg_id = $(iq).find('set last');
+                last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
                         jid = $item.attr('jid');
@@ -4358,8 +4358,11 @@ define("xabber-contacts", function () {
                     contact.resources.reset();
                     contact.resetStatus();
                 });
-                if (this.connection && this.connection.do_synchronization)
-                    this.roster.syncFromServer();
+                if (this.connection && this.connection.do_synchronization) {
+                    let options = {};
+                    !this.roster.last_chat_msg_id && (options.max = 20);
+                    this.roster.syncFromServer(options);
+                }
                 this.roster.getFromServer();
                 this.blocklist.getFromServer();
             }, this);
