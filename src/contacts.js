@@ -3522,6 +3522,8 @@ define("xabber-contacts", function () {
                         chat.message_retraction_version = msg_retraction_version;
                         request_with_stamp && chat.trigger("get_retractions_list");
                     }
+                    chat.set('last_delivered_id', last_delivered_msg);
+                    chat.set('last_displayed_id', last_displayed_msg);
                     unread_msgs_count && (options.is_unread = true);
                     options.delay = message.children('time');
                     unread_msgs_count && unread_msgs_count--;

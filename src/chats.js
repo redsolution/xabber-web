@@ -2099,8 +2099,13 @@ define("xabber-chats", function () {
                     }
                 }
             }
-            if (message.isSenderMe() && (!message.get('is_archived') || message.get('missed_msg'))) {
-                this.readMessages(message.get('timestamp'));
+            if (message.isSenderMe()) {
+                if (!message.get('is_archived') || message.get('missed_msg'))
+                    this.readMessages(message.get('timestamp'));
+                if (this.model.get('last_displayed_id') < message.get('archive_id'))
+                    message.set('state', constants.MSG_DISPLAYED);// && this.model.set('last_displayed_id', message.get('archive_id'));
+                else if (this.model.get('last_delivered_id') < message.get('archive_id'))
+                    message.set('state', constants.MSG_DELIVERED);// && this.model.set('last_delivered_id', message.get('archive_id'));
             }
 
             if (this.model.get('active')&&(message.get('private_invite') || message.get('invite') || message.get('auth_request'))) {
