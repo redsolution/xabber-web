@@ -35,7 +35,7 @@ define("xabber-contacts", function () {
                     attrs.photo_hash = "";
                     attrs.image = Images.getDefaultAvatar(attrs.name);
                 }
-                // (this.account.domain === attrs.jid) && ();
+                (this.account.domain === attrs.jid) && (attrs.bot = true);
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
@@ -557,6 +557,7 @@ define("xabber-contacts", function () {
                 this.updateAvatar();
                 this.selectView();
                 this.$('.group-chat-icon').showIf(this.model.get('group_chat'));
+                this.$('.bot-chat-icon').showIf(this.model.get('bot'));
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.on("change:status_updated", this.updateStatus, this);

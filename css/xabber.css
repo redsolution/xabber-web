@@ -2217,6 +2217,11 @@ body {
     right: 10px;
 }
 
+.roster-contact .bot-chat-icon>img {
+    width: 18px;
+    height: 18px;
+}
+
 .roster-left-container .roster-contact .bot-chat-icon,
 .roster-left-container .roster-contact .group-chat-icon,
 .forward-panel-modal .roster-contact .group-chat-icon {
@@ -2993,6 +2998,13 @@ body {
 
 .chat-item .status .mdi-account-multiple {
     color: #FFF;
+}
+
+.chat-head-wrap .bot-chat-icon>img,
+.chat-item .bot-chat-icon>img,
+.message-item .bot-chat-icon>img {
+    width: 18px;
+    height: 18px;
 }
 
 .message-item .group-chat-icon,
@@ -5649,6 +5661,7 @@ input[type='range'].voice-message-volume:focus {
     fill: #757575;
 }
 
+.contact-details-panel .bot-chat-icon,
 .groupchat-details-panel .group-chat-icon {
     position: absolute;
     border-radius: 50%;

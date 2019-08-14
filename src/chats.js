@@ -861,6 +861,7 @@ define("xabber-chats", function () {
             this.updateArchivedState();
             this.updateColorScheme();
             this.updateGroupChats();
+            this.updateBot();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
@@ -935,6 +936,10 @@ define("xabber-chats", function () {
                 this.$('.chat-title').css('color', '#424242');
                 this.model.set('group_chat', true);
             }
+        },
+
+        updateBot: function () {
+            this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
         },
 
         updateColorScheme: function () {
@@ -4642,6 +4647,7 @@ define("xabber-chats", function () {
               this.updateAvatar();
               this.updateColorScheme();
               this.updateGroupChats();
+              this.updateBot();
               this.account.settings.on("change:color", this.updateColorScheme, this);
               this.contact.on("change:name", this.updateName, this);
           },
@@ -4664,6 +4670,10 @@ define("xabber-chats", function () {
                   this.$('.chat-title').css('color', '#424242');
                   this.model.set('group_chat', true);
               }
+          },
+
+          updateBot: function () {
+              this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
           },
 
           updateColorScheme: function () {
@@ -5094,6 +5104,7 @@ define("xabber-chats", function () {
             this.updateMenu();
             this.updateNotifications();
             this.updateArchiveButton();
+            this.updateBot();
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
@@ -5255,6 +5266,10 @@ define("xabber-chats", function () {
             this.$('.group-chat-icon').showIf(is_group_chat);
             this.$('.btn-jingle-message').showIf(!is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
+        },
+
+        updateBot: function () {
+            this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
         },
 
         clearHistory: function () {
