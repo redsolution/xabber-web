@@ -2109,8 +2109,13 @@ define("xabber-chats", function () {
                     }
                 }
             }
-            if (message.isSenderMe() && (!message.get('is_archived') || message.get('missed_msg'))) {
-                this.readMessages(message.get('timestamp'));
+            if (message.isSenderMe()) {
+                if (!message.get('is_archived') || message.get('missed_msg'))
+                    this.readMessages(message.get('timestamp'));
+                if (this.model.get('last_displayed_id') < message.get('archive_id'))
+                    message.set('state', constants.MSG_DISPLAYED);// && this.model.set('last_displayed_id', message.get('archive_id'));
+                else if (this.model.get('last_delivered_id') < message.get('archive_id'))
+                    message.set('state', constants.MSG_DELIVERED);// && this.model.set('last_delivered_id', message.get('archive_id'));
             }
 
             if (this.model.get('active')&&(message.get('private_invite') || message.get('invite') || message.get('auth_request'))) {
@@ -4443,6 +4448,23 @@ define("xabber-chats", function () {
                 if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
                     this.showAllChats();
                 }
+            }
+        },
+
+        onScroll: function () {
+            if (this.isScrolledToBottom() && !this._load_chats_timeout) {
+                this._load_chats_timeout = setTimeout(function () {
+                    clearTimeout(this._load_chats_timeout);
+                    this._load_chats_timeout = null;
+                }.bind(this), 5000);
+                let accounts = xabber.accounts.connected;
+                accounts.forEach(function (account) {
+                    let options = {max: xabber.settings.mam_messages_limit};
+                    if (account.roster.conversations_loaded)
+                        return;
+                    account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
+                    account.roster.syncFromServer(options);
+                }.bind(this));
             }
         },
 
