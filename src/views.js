@@ -269,10 +269,6 @@ define("xabber-views", function () {
 
         keyUpOnSearch: function (ev) {
             ev.stopPropagation();
-            if ($(ev.target).val()) {
-                this.keyUpOnSearchWithQuery(ev);
-                return;
-            }
             this.ids = this.$('.list-item:not(.hidden)').map(function () {
                 return $(this).data('id');
             }).toArray();
@@ -372,6 +368,36 @@ define("xabber-views", function () {
     });
 
       xabber.SearchPanelView = xabber.SearchView.extend({
+          keyUpOnSearch: function (ev) {
+              ev.stopPropagation();
+              if ($(ev.target).val()) {
+                  this.keyUpOnSearchWithQuery(ev);
+                  return;
+              }
+              this.ids = this.$('.list-item:not(.hidden)').map(function () {
+                  return $(this).data('id');
+              }).toArray();
+              var $selection = this.getSelectedItem();
+              if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+                  return this.selectNextItem();
+              }
+              if (ev.keyCode === constants.KEY_ARROW_UP) {
+                  return this.selectPreviousItem();
+              }
+              if (ev.keyCode === constants.KEY_ENTER && $selection.length) {
+                  ev.preventDefault();
+                  return this.onEnterPressed($selection);
+              }
+              if (ev.keyCode === constants.KEY_ESCAPE) {
+                  ev.preventDefault();
+                  if ($(ev.target).val())
+                      return this.clearSearch();
+                  else
+                      this.close();
+              }
+              this.updateSearch();
+          },
+
           onScrollY: function (options) {
               if (xabber.all_searched_messages && xabber.all_searched_messages.length && this.queryid && !this._loading_messages && !this._messages_loaded && this.isScrolledToBottom()) {
                   this._loading_messages = true;
