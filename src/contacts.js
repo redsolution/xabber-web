@@ -1969,6 +1969,11 @@ define("xabber-contacts", function () {
                             this.close();
                             contact.subGroupPres();
                             this.account.chats.openChat(contact);
+                            let chat = this.account.chats.getChat(contact);
+                            chat.messages.createSystemMessage({
+                                from_jid: group_jid,
+                                message: 'Initiating private chat with ' + this.participant.get('nickname') + ' from ' + this.contact.get('jid') + '. If your invitation is accepted, you won\'t see each other\'s real XMPP IDs.'
+                            });
                         }.bind(this));
                     }.bind(this), function () {
                         this.close();
@@ -2771,6 +2776,7 @@ define("xabber-contacts", function () {
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
                 contact.subGroupPres();
+                contact.getMyInfo();
                 this.openChat();
             },
 
