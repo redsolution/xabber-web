@@ -298,6 +298,8 @@ define("xabber-views", function () {
         },
 
         selectItem: function (id) {
+            if (!id)
+                return;
             this.clearSearchSelection();
             var $selection = this.$('.list-item[data-id="'+id+'"]');
             if ($selection.length) {
@@ -474,6 +476,8 @@ define("xabber-views", function () {
           },
 
           selectItemWithQuery: function (id, arrow) {
+              if (!id)
+                  return;
               this.clearSearchSelection();
               var $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
               if ($selection.length) {
