@@ -2979,8 +2979,8 @@ body {
 
 .chat-item .status, .chat-head-wrap .contact-status {
     position: absolute;
-    top: 38px;
-    left: 40px;
+    top: 36px;
+    left: 38px;
     width: 12px;
     height: 12px;
     border: 2px solid #FFF;
