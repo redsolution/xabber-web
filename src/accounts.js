@@ -264,8 +264,6 @@ define("xabber-accounts", function () {
                 connectionCallback: function (status, condition) {
                     if ((status === Strophe.Status.AUTHFAIL) && this.connection.x_token) {
                         this.onTokenRevoked();
-                        /*this.onAuthFailed();
-                        this.destroy();*/
                         return;
                     }
                     if (this.session.get('reconnecting')) {
@@ -280,9 +278,7 @@ define("xabber-accounts", function () {
                         }
                         else {
                             this.onAuthFailed();
-                            // this.deleteAccount();
                         }
-                        // this.deleteAccount();
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         if (this.connection.x_token) {
@@ -293,7 +289,10 @@ define("xabber-accounts", function () {
                         if ((!xabber.api_account.get('connected'))&&(this.get('auto_login_xa'))&&(!xabber.api_account.get('token')))
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        this.onAuthFailed();
+                        if (this.get('auth_type') === 'x-token')
+                            this.onTokenRevoked();
+                        else
+                            this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
                         this.connection.flush();
                         this.session.set({connected: false});
