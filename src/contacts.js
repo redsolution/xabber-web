@@ -1975,9 +1975,10 @@ define("xabber-contacts", function () {
                                 message: 'Initiating private chat with ' + this.participant.get('nickname') + ' from ' + this.contact.get('jid') + '. If your invitation is accepted, you won\'t see each other\'s real XMPP IDs.'
                             });
                         }.bind(this));
-                    }.bind(this), function () {
+                    }.bind(this), function (iq_err_response) {
+                        let err_text = $(iq_err_response).find('text').text() || 'You have already sent an invitation to peer-to-peer chat';
                         this.close();
-                        utils.dialogs.error('You have already sent an invitation to peer-to-peer chat');
+                        utils.dialogs.error(err_text);
                     }.bind(this));
                 }
                 else {

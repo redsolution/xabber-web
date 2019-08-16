@@ -143,7 +143,7 @@ define("xabber-chats", function () {
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
-            let invite_msg_text = is_private_invitation ? 'You are invited to chat privately with ....  If you accept the invitation, you won\'t see each other\'s real XMPP IDs.' : ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+            let invite_msg_text = is_private_invitation ? $message.find('reason').text(): ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
             contact.invitation.updateInviteMsg(invite_msg_text);
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
                 from_jid: from_jid,
