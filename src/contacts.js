@@ -2632,7 +2632,7 @@ define("xabber-contacts", function () {
 
         xabber.ContactInvitationView = xabber.BasicView.extend({
             className: 'details-panel invitation-view',
-            template: templates.group_chats.group_chat_invitation,
+            template: templates.group_chats.invitation,
             ps_selector: '.panel-content',
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
@@ -2641,6 +2641,7 @@ define("xabber-contacts", function () {
                 "click .btn-accept": "addContact",
                 "click .btn-join": "joinGroupChat",
                 "click .btn-decline": "declineContact",
+                "click .btn-decline-all": "declineAll",
                 "click .btn-block": "blockContact",
                 "click .btn-escape": "closeInvitationView"
             },
@@ -2700,14 +2701,16 @@ define("xabber-contacts", function () {
             },
 
             renderButtons: function () {
-                this.$('.buttons-wrap .btn-accept').hideIf(this.model.get('group_chat'));
-                this.$('.buttons-wrap .btn-join').showIf(this.model.get('group_chat'));
+                this.$('.buttons-wrap .btn-accept').hideIf(this.model.get('group_chat') && !this.private_invite);
+                this.$('.buttons-wrap .btn-block').hideIf(this.model.get('group_chat') && this.private_invite);
+                this.$('.buttons-wrap .btn-join').showIf(this.model.get('group_chat') && !this.private_invite);
+                this.$('.buttons-wrap .btn-decline-all').showIf(this.model.get('group_chat') && this.private_invite);
             },
 
             updateGroupChat: function () {
                 this.renderButtons();
-                if (this.model.get('group_chat')) {
-                    this.updateInviteMsg('User invites you to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+                if (this.model.get('group_chat') && !this.private_invite) {
+                    this.updateInviteMsg('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
                 }
             },
 
@@ -2721,6 +2724,10 @@ define("xabber-contacts", function () {
             },
 
             addContact: function () {
+                if (this.model.get('private_invite')) {
+                    this.joinGroupChat();
+                    return;
+                }
                 var contact = this.model;
                 contact.acceptRequest();
                 this.changeInviteStatus();
@@ -2780,12 +2787,23 @@ define("xabber-contacts", function () {
                 this.openChat();
             },
 
-            declineContact: function (ev) {
+            declineContact: function () {
                 var contact = this.model;
                 this.changeInviteStatus();
                 contact.declineRequest();
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
+                var declined_chat =  xabber.chats_view.active_chat;
+                declined_chat.model.set('active', false);
+                declined_chat.content.head.closeChat();
+                xabber.body.setScreen('all-chats', {right: null});
+            },
+
+            declineAll: function () {
+                let pres = $pres({from: this.account.connection.jid, to: this.model.get('jid')})
+                    .c('peer-to-peer').t(false);
+                this.account.sendPres(pres);
+                this.model.trigger('remove_invite', this.model);
                 var declined_chat =  xabber.chats_view.active_chat;
                 declined_chat.model.set('active', false);
                 declined_chat.content.head.closeChat();

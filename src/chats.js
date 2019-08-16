@@ -139,6 +139,7 @@ define("xabber-chats", function () {
 
             let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
                 chat = this.account.chats.getChat(contact);
+            is_private_invitation && (contact.invitation.private_invite = true);
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
