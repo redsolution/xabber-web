@@ -297,7 +297,7 @@ define("xabber-views", function () {
             return this.$('.list-item[data-id="'+this.selection_id+'"]');
         },
 
-        selectItem: function (id) {
+        selectItem: function (id, arrow) {
             if (!id)
                 return;
             this.clearSearchSelection();
@@ -305,18 +305,23 @@ define("xabber-views", function () {
             if ($selection.length) {
                 this.selection_id = id;
             } else {
+                this.ps_container[0].scrollTop = 0;
                 $selection = this.$('.list-item:visible').first();
                 this.selection_id = $selection.data('id');
             }
+            if (arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+                this.ps_container[0].scrollTop = $selection[0].offsetTop;
+            if (arrow === 'up' && $selection[0].offsetTop <= this.ps_container[0].scrollTop)
+                this.ps_container[0].scrollTop = $selection[0].offsetTop;
             $selection.addClass('selected');
         },
 
         selectNextItem: function () {
-            this.selectItem(this.ids[this.ids.indexOf(this.selection_id)+1]);
+            this.selectItem(this.ids[this.ids.indexOf(this.selection_id)+1], 'down');
         },
 
         selectPreviousItem: function () {
-            this.selectItem(this.ids[this.ids.indexOf(this.selection_id)-1]);
+            this.selectItem(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
         },
 
         updateSearch: function () {

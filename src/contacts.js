@@ -3746,7 +3746,7 @@ define("xabber-contacts", function () {
                 this.$info.find('.jid').text(this.account.get('jid'));
             },
 
-           search: function (query) {
+            search: function (query) {
                 this.$el.removeClass('shrank');
                 this.$('.group-head').addClass('hidden');
                 var count = 0, hashes = {};
@@ -3958,6 +3958,27 @@ define("xabber-contacts", function () {
                 _.each(this.children, function (view) {
                     view.searchAll();
                 });
+            },
+
+            selectItem: function (id, arrow) {
+                if (!id) {
+                    (arrow === 'up') && (this.ps_container[0].scrollTop = 0);
+                    return;
+                }
+                this.clearSearchSelection();
+                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                if ($selection.length) {
+                    this.selection_id = id;
+                } else {
+                    this.ps_container[0].scrollTop = 0;
+                    $selection = this.$('.list-item:visible').first();
+                    this.selection_id = $selection.data('id');
+                }
+                if ($selection.length && arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+                    this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop;
+                if ($selection.length && arrow === 'up' && $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop <= this.ps_container[0].scrollTop)
+                    this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop;
+                $selection.addClass('selected');
             },
 
             onEnterPressed: function (selection) {
