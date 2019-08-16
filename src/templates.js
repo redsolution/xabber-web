@@ -58,8 +58,7 @@ define("xabber-templates", [
     "text!templates/contacts/preloader.html",
     "text!templates/contacts/group_chats/group_chat_properties.html",
     "text!templates/contacts/group_chats/group_chat_details.html",
-    "text!templates/contacts/group_chats/group_chat_invitation.html",
-    "text!templates/contacts/group_chats/private_invitation.html",
+    "text!templates/contacts/group_chats/invitation.html",
     "text!templates/contacts/group_chats/group_chat_properties_edit.html",
     "text!templates/contacts/group_chats/default_restrictions.html",
     "text!templates/contacts/group_chats/group_member_item.html",
@@ -219,8 +218,7 @@ define("xabber-templates", [
     addTemplate('contacts.preloader');
     addTemplate('contacts.group_chats.group_chat_properties');
     addTemplate('contacts.group_chats.group_chat_details');
-    addTemplate('contacts.group_chats.group_chat_invitation');
-    addTemplate('contacts.group_chats.private_invitation');
+    addTemplate('contacts.group_chats.invitation');
     addTemplate('contacts.group_chats.group_chat_properties_edit');
     addTemplate('contacts.group_chats.default_restrictions');
     addTemplate('contacts.group_chats.group_member_item');

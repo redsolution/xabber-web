@@ -139,10 +139,11 @@ define("xabber-chats", function () {
 
             let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
                 chat = this.account.chats.getChat(contact);
+            is_private_invitation && (contact.invitation.private_invite = true);
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
-            let invite_msg_text = is_private_invitation ? 'You are invited to join peer-to-peer chat. If you accept, your username will not be visible to chat participant' : ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+            let invite_msg_text = is_private_invitation ? $message.find('reason').text(): ('You are invited to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
             contact.invitation.updateInviteMsg(invite_msg_text);
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
                 from_jid: from_jid,
@@ -1014,7 +1015,7 @@ define("xabber-chats", function () {
                             msg_text = 'Invitation to group chat';
                         else
                             if (msg.get('private_invite'))
-                                msg_text = 'Invitation to peer-to-peer chat';
+                                msg_text = 'Invitation to private chat';
                             else
                                 msg_text = 'Authorization request';
                     }
@@ -4371,8 +4372,8 @@ define("xabber-chats", function () {
                     iq.c('localpart').t(chat_jid);
             this.account.sendIQ(iq,
                 function (iq) {
-                    if ($(iq).attr('type') === 'result'){
-                        let group_jid = $(iq).find('created jid').text(),
+                    if ($(iq).attr('type') === 'result') {
+                        let group_jid = $(iq).find('created jid').text().trim(),
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
                         contact.pres('subscribed');
@@ -4383,6 +4384,9 @@ define("xabber-chats", function () {
                             xabber.chats_view.updateScreenAllChats();
                             contact.subGroupPres();
                             contact.trigger("open_chat", contact);
+                            let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                                .c('item', {jid: group_jid + '/' + moment.now()});
+                            this.account.sendIQ(iq_set_blocking);
                         }.bind(this));
                     }
                 }.bind(this),

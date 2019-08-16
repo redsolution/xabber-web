@@ -1969,10 +1969,16 @@ define("xabber-contacts", function () {
                             this.close();
                             contact.subGroupPres();
                             this.account.chats.openChat(contact);
+                            let chat = this.account.chats.getChat(contact);
+                            chat.messages.createSystemMessage({
+                                from_jid: group_jid,
+                                message: 'Initiating private chat with ' + this.participant.get('nickname') + ' from ' + this.contact.get('jid') + '. If your invitation is accepted, you won\'t see each other\'s real XMPP IDs.'
+                            });
                         }.bind(this));
-                    }.bind(this), function () {
+                    }.bind(this), function (iq_err_response) {
+                        let err_text = $(iq_err_response).find('text').text() || 'You have already sent an invitation to peer-to-peer chat';
                         this.close();
-                        utils.dialogs.error('You have already sent an invitation to peer-to-peer chat');
+                        utils.dialogs.error(err_text);
                     }.bind(this));
                 }
                 else {
@@ -2627,7 +2633,7 @@ define("xabber-contacts", function () {
 
         xabber.ContactInvitationView = xabber.BasicView.extend({
             className: 'details-panel invitation-view',
-            template: templates.group_chats.group_chat_invitation,
+            template: templates.group_chats.invitation,
             ps_selector: '.panel-content',
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
@@ -2636,6 +2642,7 @@ define("xabber-contacts", function () {
                 "click .btn-accept": "addContact",
                 "click .btn-join": "joinGroupChat",
                 "click .btn-decline": "declineContact",
+                "click .btn-decline-all": "declineAll",
                 "click .btn-block": "blockContact",
                 "click .btn-escape": "closeInvitationView"
             },
@@ -2695,14 +2702,16 @@ define("xabber-contacts", function () {
             },
 
             renderButtons: function () {
-                this.$('.buttons-wrap .btn-accept').hideIf(this.model.get('group_chat'));
-                this.$('.buttons-wrap .btn-join').showIf(this.model.get('group_chat'));
+                this.$('.buttons-wrap .btn-accept').hideIf(this.model.get('group_chat') && !this.private_invite);
+                this.$('.buttons-wrap .btn-block').hideIf(this.model.get('group_chat') && this.private_invite);
+                this.$('.buttons-wrap .btn-join').showIf(this.model.get('group_chat') && !this.private_invite);
+                this.$('.buttons-wrap .btn-decline-all').showIf(this.model.get('group_chat') && this.private_invite);
             },
 
             updateGroupChat: function () {
                 this.renderButtons();
-                if (this.model.get('group_chat')) {
-                    this.updateInviteMsg('User invites you to join group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+                if (this.model.get('group_chat') && !this.private_invite) {
+                    this.updateInviteMsg('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
                 }
             },
 
@@ -2716,6 +2725,10 @@ define("xabber-contacts", function () {
             },
 
             addContact: function () {
+                if (this.model.get('private_invite')) {
+                    this.joinGroupChat();
+                    return;
+                }
                 var contact = this.model;
                 contact.acceptRequest();
                 this.changeInviteStatus();
@@ -2771,15 +2784,27 @@ define("xabber-contacts", function () {
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
                 contact.subGroupPres();
+                contact.getMyInfo();
                 this.openChat();
             },
 
-            declineContact: function (ev) {
+            declineContact: function () {
                 var contact = this.model;
                 this.changeInviteStatus();
                 contact.declineRequest();
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
+                var declined_chat =  xabber.chats_view.active_chat;
+                declined_chat.model.set('active', false);
+                declined_chat.content.head.closeChat();
+                xabber.body.setScreen('all-chats', {right: null});
+            },
+
+            declineAll: function () {
+                let pres = $pres({from: this.account.connection.jid, to: this.model.get('jid')})
+                    .c('peer-to-peer').t(false);
+                this.account.sendPres(pres);
+                this.model.trigger('remove_invite', this.model);
                 var declined_chat =  xabber.chats_view.active_chat;
                 declined_chat.model.set('active', false);
                 declined_chat.content.head.closeChat();
@@ -3740,7 +3765,7 @@ define("xabber-contacts", function () {
                 this.$info.find('.jid').text(this.account.get('jid'));
             },
 
-           search: function (query) {
+            search: function (query) {
                 this.$el.removeClass('shrank');
                 this.$('.group-head').addClass('hidden');
                 var count = 0, hashes = {};
@@ -3952,6 +3977,27 @@ define("xabber-contacts", function () {
                 _.each(this.children, function (view) {
                     view.searchAll();
                 });
+            },
+
+            selectItem: function (id, arrow) {
+                if (!id) {
+                    (arrow === 'up') && (this.ps_container[0].scrollTop = 0);
+                    return;
+                }
+                this.clearSearchSelection();
+                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                if ($selection.length) {
+                    this.selection_id = id;
+                } else {
+                    this.ps_container[0].scrollTop = 0;
+                    $selection = this.$('.list-item:visible').first();
+                    this.selection_id = $selection.data('id');
+                }
+                if ($selection.length && arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+                    this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop;
+                if ($selection.length && arrow === 'up' && $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop <= this.ps_container[0].scrollTop)
+                    this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent()[0].offsetTop + $selection.closest('.account-roster-wrap')[0].offsetTop;
+                $selection.addClass('selected');
             },
 
             onEnterPressed: function (selection) {
