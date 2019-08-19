@@ -5364,10 +5364,15 @@ define("xabber-chats", function () {
                         if (this.$('.mentions-list').css('display') !== 'none') {
                             let active_item = this.$('.mentions-list').children('.active.mention-item');
                             if (active_item.length)  {
+                                let $prev_elem = active_item.prev('.mention-item');
                                 active_item.removeClass('active');
-                                active_item.prev('.mention-item').addClass('active');
-                                if (active_item.prev('.mention-item').length && (active_item.prev('.mention-item')[0].offsetTop <= this.$('.mentions-list')[0].scrollTop))
-                                    this.$('.mentions-list')[0].scrollTop = active_item.prev('.mention-item')[0].offsetTop;
+                                if (!$prev_elem.length) {
+                                    $prev_elem = this.$('.mentions-list').children('.mention-item').last().addClass('active');
+                                    this.$('.mentions-list')[0].scrollTop = this.$('.mentions-list')[0].scrollHeight;
+                                }
+                                $prev_elem.addClass('active');
+                                if ($prev_elem.length && ($prev_elem[0].offsetTop <= this.$('.mentions-list')[0].scrollTop))
+                                    this.$('.mentions-list')[0].scrollTop = $prev_elem[0].offsetTop;
                             }
                             else {
                                 this.$('.mentions-list')[0].scrollTop = this.$('.mentions-list')[0].scrollHeight;
@@ -5384,11 +5389,16 @@ define("xabber-chats", function () {
                     handler: function(range) {
                         if (this.$('.mentions-list').css('display') !== 'none') {
                             let active_item = this.$('.mentions-list').children('.active.mention-item');
-                            if (active_item.length)  {
+                            if (active_item.length) {
+                                let $next_elem = active_item.next('.mention-item');
                                 active_item.removeClass('active');
-                                active_item.next('.mention-item').addClass('active');
-                                if (active_item.next('.mention-item').length && (active_item.next('.mention-item')[0].offsetTop + active_item.next('.mention-item')[0].clientHeight >= this.$('.mentions-list')[0].scrollTop + this.$('.mentions-list')[0].clientHeight))
-                                    this.$('.mentions-list')[0].scrollTop = active_item.next('.mention-item')[0].offsetTop - this.$('.mentions-list')[0].clientHeight + active_item.next('.mention-item')[0].clientHeight;
+                                if (!$next_elem.length) {
+                                    $next_elem = this.$('.mentions-list').children('.mention-item').first();
+                                    this.$('.mentions-list')[0].scrollTop = 0;
+                                }
+                                $next_elem.addClass('active');
+                                if ($next_elem.length && ($next_elem[0].offsetTop + $next_elem[0].clientHeight >= this.$('.mentions-list')[0].scrollTop + this.$('.mentions-list')[0].clientHeight))
+                                    this.$('.mentions-list')[0].scrollTop = $next_elem[0].offsetTop - this.$('.mentions-list')[0].clientHeight + $next_elem[0].clientHeight;
                             }
                             else {
                                 this.$('.mentions-list')[0].scrollTop = 0;
@@ -5655,22 +5665,23 @@ define("xabber-chats", function () {
         },
 
         updateMentions: function (mention_text) {
-                this.contact.searchByParticipants(mention_text, function (participants) {
-                    if (participants.length) {
-                        this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
-                        this.$('.mentions-list')[0].scrollTop = 0;
-                        participants.forEach(function (participant) {
-                            let attrs = _.clone(participant.attributes);
-                            attrs.nickname = _.escape(attrs.nickname);
-                            let mention_item = $(templates.group_chats.mention_item(attrs));
-                            mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
-                            mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
-                            this.$('.mentions-list').append(mention_item);
-                        }.bind(this));
-                    }
-                    else
-                        this.$('.mentions-list').html("").hide();
-                });
+            this.contact.searchByParticipants(mention_text, function (participants) {
+                if (participants.length) {
+                    this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
+                    this.$('.mentions-list')[0].scrollTop = 0;
+                    participants.forEach(function (participant) {
+                        let attrs = _.clone(participant.attributes);
+                        attrs.nickname = _.escape(attrs.nickname);
+                        let mention_item = $(templates.group_chats.mention_item(attrs));
+                        mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
+                        mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
+                        this.$('.mentions-list').append(mention_item);
+                    }.bind(this));
+                    this.$('.mentions-list').children('.mention-item').first().addClass('active');
+                }
+                else
+                    this.$('.mentions-list').html("").hide();
+            });
         },
 
         inputMention: function (ev) {
@@ -5735,6 +5746,14 @@ define("xabber-chats", function () {
                 }
                 if (ev.keyCode === constants.KEY_BACKSPACE && this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention')
                     this.focusOnInput();
+                if (ev.keyCode === constants.KEY_SPACE) {
+                    let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
+                        to_caret_text = Array.from(text).slice(0, caret_position).join("").replaceEmoji();
+                    if (to_caret_text[caret_position - 2].match(/@|[+]/)) {
+                        this.$('.mentions-list').hide();
+                        return;
+                    }
+                }
                 if (this.contact.get('group_chat')) {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         mention_at_regexp = /(^|\s)@(\w+)?/g,

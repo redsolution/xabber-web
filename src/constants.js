@@ -23,6 +23,7 @@ var constants = {
     KEY_TAB: 9,
     KEY_ENTER: 13,
     KEY_ESCAPE: 27,
+    KEY_SPACE: 32,
     KEY_ARROW_LEFT: 37,
     KEY_ARROW_UP: 38,
     KEY_ARROW_RIGHT: 39,
