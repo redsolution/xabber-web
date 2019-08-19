@@ -2516,19 +2516,20 @@ define("xabber-contacts", function () {
                     photo = $item.find('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').find('info').attr('id'),
                     permissions = this.getRights($item.find('permission')),
                     restrictions = this.getRights($item.find('restriction')),
-                    role = this.getRole(permissions),
+                    role = this.getRole(permissions);
+                !nickname.trim().length && (nickname = jid || id);
 
-                    attrs = {
-                        jid: jid,
-                        id: id,
-                        avatar: photo,
-                        nickname: nickname,
-                        badge: badge,
-                        present: present,
-                        role: role,
-                        permissions: permissions,
-                        restrictions: restrictions
-                    };
+                let attrs = {
+                    jid: jid,
+                    id: id,
+                    avatar: photo,
+                    nickname: nickname,
+                    badge: badge,
+                    present: present,
+                    role: role,
+                    permissions: permissions,
+                    restrictions: restrictions
+                };
 
                 let participant = this.mergeParticipant(attrs);
                 (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('permissions_changed') && this.contact.trigger('update_my_info');

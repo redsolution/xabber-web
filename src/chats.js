@@ -173,19 +173,20 @@ define("xabber-chats", function () {
                 nickname = user_info.children('nickname').text(),
                 jid = user_info.children('jid').text(),
                 badge = user_info.children('badge').text(),
-                user_id = user_info.attr('id'),
-                attrs = {
-                    from_jid: jid || user_id,
-                    groupchat_jid: groupchat_jid,
-                    user_info: {
-                        id: user_id,
-                        jid: jid,
-                        nickname: nickname,
-                        role: role[0].toUpperCase() + role.substr(1, role.length - 1),
-                        avatar: avatar.find('info').attr('id'),
-                        badge: badge
-                    }
-                };
+                user_id = user_info.attr('id');
+            !nickname.trim().length && (nickname = jid || id);
+            let attrs = {
+                from_jid: jid || user_id,
+                groupchat_jid: groupchat_jid,
+                user_info: {
+                    id: user_id,
+                    jid: jid,
+                    nickname: nickname,
+                    role: role[0].toUpperCase() + role.substr(1, role.length - 1),
+                    avatar: avatar.find('info').attr('id'),
+                    badge: badge
+                }
+            };
             x_element.attr('version') && (attrs.participants_version = x_element.attr('version'));
             if (x_element.attr('xmlns') && x_element.attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
                 attrs.type = 'system';
