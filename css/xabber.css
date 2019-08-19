@@ -6911,8 +6911,10 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .add-user-group-chat .list-item.selected,
-.add-user-group-chat .list-item.click-selected {
-    background-color: #F5F5F5;
+.add-user-group-chat .list-item.selected:hover,
+.add-user-group-chat .list-item.click-selected,
+.add-user-group-chat .list-item.click-selected:hover {
+    background-color: #ffebee;
 }
 
 .add-user-group-chat .list-item:hover,
