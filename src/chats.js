@@ -3828,6 +3828,7 @@ define("xabber-chats", function () {
                 if (member_id) {
                     if (contact.my_info) {
                         if ((member_id == contact.my_info.get('id')) && (photo_id == contact.my_info.get('avatar'))) {
+                            contact.trigger('update_my_info');
                             return;
                         }
                     }
@@ -3838,6 +3839,7 @@ define("xabber-chats", function () {
                             if (contact.my_info) {
                                 if (member_id == contact.my_info.id) {
                                     contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar });
+                                    contact.trigger('update_my_info');
                                 }
                             }
                             let participant = contact.participants && contact.participants.get(member_id);
@@ -3856,7 +3858,6 @@ define("xabber-chats", function () {
                             contact.cached_image = Images.getCachedImage(data_avatar);
                             xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: photo_id, avatar: data_avatar, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                             contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
-                            // contact.set('image', data_avatar);
                             contact.set('photo_hash', photo_id);
                         }.bind(this));
                     }
@@ -5583,8 +5584,8 @@ define("xabber-chats", function () {
                 else
                     this.$('.account-role').hide();
                 this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 14});
-                if (!avatar)
-                    this.$('.my-avatar.circle-avatar').setAvatar(Images.getDefaultAvatar(nickname), this.avatar_size);
+                !avatar && (avatar = Images.getDefaultAvatar(nickname));
+                this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size);
             }
             else {
                 this.$('.account-jid').show();

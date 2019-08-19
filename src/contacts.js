@@ -1571,8 +1571,10 @@ define("xabber-contacts", function () {
                         this.model.getAvatar(member.avatar, node, function (avatar) {
                             this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
                             this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
-                            if (this.account.get('jid') === member.jid)
+                            if (this.account.get('jid') === member.jid) {
                                 this.model.my_info.set('b64_avatar', avatar);
+                                this.model.trigger('update_my_info');
+                            }
                         }.bind(this));
                     }
                 }
