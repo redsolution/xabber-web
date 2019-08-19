@@ -2430,6 +2430,7 @@ define("xabber-contacts", function () {
                     if (cached_info) {
                         if (cached_info.avatar_hash == this.get('avatar')) {
                             this.set('b64_avatar', cached_info.avatar_b64);
+                            (this.get('jid') === this.account.get('jid')) && this.contact.trigger('update_my_info');
                             return;
                         }
                     }
@@ -2437,6 +2438,7 @@ define("xabber-contacts", function () {
                     this.contact.getAvatar(this.get('avatar'), node, function (avatar) {
                         this.account.chat_settings.updateCachedAvatars(this.get('id'), this.get('avatar'), avatar);
                         this.set('b64_avatar', avatar);
+                        (this.get('jid') === this.account.get('jid')) && this.contact.trigger('update_my_info');
                     }.bind(this));
                 }
             }
