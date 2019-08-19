@@ -2065,6 +2065,7 @@ define("xabber-contacts", function () {
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                         this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
                         this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                        this.close();
                     }.bind(this), function (error) {
                         this.$('.buttons-wrap button').removeClass('non-active');
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
