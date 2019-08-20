@@ -4668,7 +4668,7 @@ define("xabber-chats", function () {
           _initialize: function () {
               this.contact = this.model.contact;
               this.account = this.contact.account;
-              this.$el.attr('data-id', this.model.id);
+              this.$el.attr('data-id', this.model.id + '-' + this.cid);
               this.$el.attr('data-contact-jid', this.contact.get('jid'));
               this.updateName();
               this.updateLastMessage();

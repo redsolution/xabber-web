@@ -309,9 +309,9 @@ define("xabber-views", function () {
                 $selection = this.$('.list-item:visible').first();
                 this.selection_id = $selection.data('id');
             }
-            if (arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+            if (arrow === 'down' && ($selection[0].clientHeight + $selection[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop || $selection[0].clientHeight + $selection[0].offsetTop < this.ps_container[0].scrollTop))
                 this.ps_container[0].scrollTop = $selection[0].offsetTop;
-            if (arrow === 'up' && $selection[0].offsetTop <= this.ps_container[0].scrollTop)
+            if (arrow === 'up' && ($selection[0].offsetTop <= this.ps_container[0].scrollTop || $selection[0].offsetTop > this.ps_container[0].scrollTop + this.ps_container[0].clientHeight))
                 this.ps_container[0].scrollTop = $selection[0].offsetTop;
             $selection.addClass('selected');
         },
@@ -492,9 +492,11 @@ define("xabber-views", function () {
                   $selection = this.$('.searched-lists-wrap .list-item:visible').first();
                   this.selection_id = $selection.data('id');
               }
-              if (arrow === 'down' && $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop)
+              if (arrow === 'down' && ($selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop
+              || $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop < this.ps_container[0].scrollTop))
                   this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
-              if (arrow === 'up' && $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop <= this.ps_container[0].scrollTop)
+              if (arrow === 'up' && ($selection[0].offsetTop + $selection.parent().parent()[0].offsetTop <= this.ps_container[0].scrollTop
+              || $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop > this.ps_container[0].scrollTop + this.ps_container[0].clientHeight))
                   this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
               $selection.addClass('selected');
           },
