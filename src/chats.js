@@ -4971,7 +4971,7 @@ define("xabber-chats", function () {
             var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
-                .c('reason').t('You are invited to join group chat. If you accept, ' + contact_jid + ' username shall' + (this.contact.get('group_info').anonymous === 'incognito' ? ' not' : "") + ' be visible to group chat participants');
+                .c('reason').t('You are invited to join group chat. If you accept, ' + ((this.contact.get('group_info').anonymous === 'incognito') ? ('you won\'t see each other\'s real XMPP IDs') : (contact_jid + ' username shall be visible to group chat participants')));
             this.account.sendIQ(iq,
                 function () {
                     this.sendInviteMessage(contact_jid);
@@ -5001,7 +5001,7 @@ define("xabber-chats", function () {
                     to: jid_to,
                     type: 'chat'
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
-                    .c('reason').t('You are invited to join group chat. If you accept, ' + jid_to + ' username shall' + (this.contact.get('group_info').anonymous === 'incognito' ? ' not' : "") + ' be visible to group chat participants').up().up()
+                    .c('reason').t('You are invited to join group chat. If you accept, ' + ((this.contact.get('group_info').anonymous === 'incognito') ? ('you won\'t see each other\'s real XMPP IDs') : (jid_to + ' username shall be visible to group chat participants'))).up().up()
                     .c('body').t(body).up();
 
             this.account.sendMsg(stanza);
@@ -5673,7 +5673,7 @@ define("xabber-chats", function () {
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
-                        attrs.nickname = _.escape(attrs.nickname);
+                        attrs.nickname = _.escape(_.unescape(attrs.nickname));
                         let mention_item = $(templates.group_chats.mention_item(attrs));
                         mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
                         mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
@@ -5746,8 +5746,6 @@ define("xabber-chats", function () {
                         this.view.sendChatState('active');
                     }
                 }
-                if (ev.keyCode === constants.KEY_BACKSPACE && this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention')
-                    this.focusOnInput();
                 if (ev.keyCode === constants.KEY_SPACE) {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         to_caret_text = Array.from(text).slice(0, caret_position).join("").replaceEmoji();
@@ -5766,6 +5764,10 @@ define("xabber-chats", function () {
                         at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
                         plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
                         mention_position = Math.max(at_position, plus_position);
+                    if (this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention') {
+                        this.$('.mentions-list').hide();
+                        return;
+                    }
                     if (!(caret_position > -1) || mention_position === -1) {
                         this.$('.mentions-list').hide();
                         return;
