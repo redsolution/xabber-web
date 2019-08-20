@@ -2731,7 +2731,7 @@ define("xabber-contacts", function () {
             },
 
             addContact: function () {
-                if (this.model.get('private_invite')) {
+                if (this.private_invite) {
                     this.joinGroupChat();
                     return;
                 }
