@@ -1470,7 +1470,7 @@ define("xabber-accounts", function () {
                     if (this.model.get('x_token')) {
                         if (this.model.get('x_token').token_uid == token.token_uid) {
                             let $cur_token_html = $(templates.current_token_item(pretty_token));
-                            this.$('.panel-content-wrap .tokens .current-session').prepend($cur_token_html);
+                            this.$('.panel-content-wrap .tokens .current-session').append($cur_token_html);
                             return;
                         }
                     }

@@ -6139,11 +6139,19 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 auto;
 }
 
+.edit-rights .participant-details-item .buttons-wrap {
+    padding: 8px 0 0 0;
+}
+
 .edit-rights .participant-details-item .button-wrap,
 .details-panel .main-info .button-wrap {
     width: 64px;
     margin: 8px;
     text-align: center;
+}
+
+.edit-rights .participant-details-item {
+    padding: 0 0 8px 0;
 }
 
 .edit-rights .participant-details-item .buttons-wrap i,

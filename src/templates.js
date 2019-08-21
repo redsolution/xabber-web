@@ -72,6 +72,7 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/participant_placeholder.html",
     "text!templates/contacts/group_chats/participants.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
+    "text!templates/contacts/group_chats/private_participant_details.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
@@ -232,6 +233,7 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.participant_placeholder');
     addTemplate('contacts.group_chats.participants');
     addTemplate('contacts.group_chats.badge_edit_view');
+    addTemplate('contacts.group_chats.private_participant_details');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');

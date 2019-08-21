@@ -552,6 +552,7 @@ define("xabber-views", function () {
                               item_list.click(function () {
                                   this.$('.list-item.active').removeClass('active');
                                   item_list.addClass('active');
+                                  // account.chats.openChat(contact, {clear_search: false});
                                   contact.showDetails(xabber.body.screen.get('name'));
                               }.bind(this));
                           }

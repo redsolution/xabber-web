@@ -368,6 +368,7 @@ define("xabber-contacts", function () {
                     searchable = $group_chat.find('index').text(),
                     description = $group_chat.find('description').text(),
                     pinned_message = $group_chat.find('pinned-message').text(),
+                    private_chat = $group_chat.find('parent-chat').text() || false,
                     members_num = parseInt($group_chat.find('members').text()),
                     online_members_num = parseInt($group_chat.find('present').text()),
                     info = {
@@ -380,6 +381,7 @@ define("xabber-contacts", function () {
                         members_num: members_num,
                         online_members_num: online_members_num
                     };
+                private_chat && this.set('private_chat', true);
                 var chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
                 if (chat)
                     pinned_msg_elem = chat.item_view.content.$pinned_message;
@@ -1001,7 +1003,6 @@ define("xabber-contacts", function () {
             render: function (options) {
                 this.updateName();
                 this.updateButtons();
-                // this.$('.btn-escape').showIf(options.name === 'all-chats');
                 this.$('.btn-delete').showIf(this.model.get('subscription') === "both");
                 this.$('.btn-join').showIf(this.model.get('subscription') !== "both");
                 let dropdown_settings = {
@@ -1033,6 +1034,7 @@ define("xabber-contacts", function () {
                 let has_permission = this.model.my_info && this.model.my_info.get('permissions').find(permission => (permission.name == 'owner' || permission.name == 'administrator'));
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
+                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat'));
             },
 
             updateName: function () {
@@ -1082,8 +1084,9 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            inviteUser: function () {
-                xabber.invite_panel.open(this.account, this.model);
+            inviteUser: function (ev) {
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    xabber.invite_panel.open(this.account, this.model);
             },
 
             changeList: function (ev) {
@@ -1640,6 +1643,229 @@ define("xabber-contacts", function () {
             }
         });
 
+        xabber.PrivateParticipantPropertiesView = xabber.BasicView.extend({
+            className: 'modal dialog-modal edit-rights',
+            template: templates.group_chats.private_participant_details,
+            member_details_avatar_size: constants.AVATAR_SIZES.PARTICIPANT_DETAILS_ITEM,
+            ps_selector: '.modal-content',
+            ps_settings: {theme: 'item-list'},
+
+            events: {
+                "click .btn-cancel-changes": "close",
+                "click .btn-save": "saveChanges",
+                "click .nickname": "editNickname",
+                "change .circle-avatar input": "changeAvatar",
+                "keydown .rich-textarea": "checkKeydown",
+                "keyup .rich-textarea": "checkKeyup"
+            },
+
+            _initialize: function () {
+                this.account = this.model.account;
+                this.contact = this.model.model;
+            },
+
+            open: function (participant) {
+                this.participant = participant;
+                this.render();
+                this.$el.openModal({
+                    ready: function () {
+                        this.$el.css('height', "");
+                        if (($(window).height() * 0.1 + this.$el.height()) > $(window).height())
+                            this.$el.css('height', $(window).height() * 0.9);
+                        this.$('.modal-content').css('max-height', 'calc(100% - ' + (56 + this.$('.header').height()) + 'px)');
+                        this.scrollToTop();
+                        this.updateSaveButton();
+                    }.bind(this),
+                    complete: function () {
+                        this.render();
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            close: function () {
+                this.$el.closeModal({
+                    complete: function () {
+                        this.render();
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            render: function () {
+                this.new_avatar = "";
+                let attrs = this.participant.attributes;
+                attrs.nickname = _.escape(_.unescape(attrs.nickname));
+                attrs.badge = _.escape(_.unescape(attrs.badge));
+                let $member_info_view = $(templates.group_chats.participant_details_item(attrs));
+                this.$('.header').html($member_info_view);
+                this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
+                this.updateMemberAvatar(this.participant);
+                this.participant_messages = [];
+                this.actual_rights = [];
+                this.renderAllRights();
+                this.setActualRights();
+                this.updateScrollBar();
+                this.$('.participant-info #edit-nickname').on("focusout", function () {
+                    let new_nickname = _.escape(this.$('#edit-nickname').getTextFromRichTextarea().trim());
+                    if (new_nickname === "")
+                        new_nickname = this.participant.get('nickname');
+                    this.$('.participant-info #edit-nickname').hide();
+                    this.$('.participant-info .nickname').show();
+                    this.updateNickname(new_nickname);
+                }.bind(this));
+                this.$('.content').perfectScrollbar({theme: 'item-list'});
+            },
+
+            updateMemberAvatar: function (member) {
+                let participant_id = member.get('id'),
+                    $avatar = this.$('.participant-details-item[data-id="'+ participant_id +'"] .circle-avatar');
+                member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
+                $avatar.setAvatar(member.image, this.member_details_avatar_size);
+                this.$('.participant-details-item[data-id="'+ member.id +'"]').emojify('.badge', {emoji_size: 18});
+                if (member.get('avatar')) {
+                    if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id))) {
+                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                    }
+                    else {
+                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
+                        this.contact.getAvatar(member.avatar, node, function (avatar) {
+                            this.$('.participant-details-item[data-id="'+ participant_id +'"] .circle-avatar').setAvatar(avatar, this.member_details_avatar_size);
+                        }.bind(this));
+                    }
+                }
+                else {
+                    if (this.account.chat_settings.getHashAvatar(participant_id))
+                        $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                }
+            },
+
+            updateRightsView: function (ev) {
+                !$(ev.target).hasClass('non-active') && this.render(this.participant);
+            },
+
+            changeAvatar: function (ev) {
+                var field = ev.target;
+                if (!field.files.length) {
+                    return;
+                }
+                var file = field.files[0];
+                field.value = '';
+                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                    utils.dialogs.error('File is too large');
+                } else if (!file.type.startsWith('image')) {
+                    utils.dialogs.error('Wrong image');
+                }
+
+                utils.images.getAvatarFromFile(file).done(function (image) {
+                    if (image) {
+                        file.base64 = image;
+                        this.new_avatar = file;
+                        this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size);
+                        this.updateSaveButton();
+                    }
+                }.bind(this));
+            },
+
+            updateBadge: function (badge) {
+                this.$('.badge').html(badge).switchClass('hidden', !badge);
+                this.$('.participant-info').emojify('.badge');
+            },
+
+            updateButtons: function (has_changes) {
+                this.$('.btn-save').switchClass('non-active', !has_changes);
+            },
+
+            updateSaveButton: function () {
+                let has_changes = this.$('.changed').length;
+                this.updateButtons(has_changes);
+            },
+
+            updateNickname: function (nickname) {
+                let $member_item = this.$('.participant-details-item[data-id="' + this.participant.get('id') + '"]'),
+                    $member_item_nickname = $member_item.find('.nickname');
+                $member_item_nickname.html(nickname);
+                $member_item.emojify('.nickname');
+                if (nickname !== this.participant.get('nickname'))
+                    $member_item_nickname.addClass('changed');
+                else
+                    $member_item_nickname.removeClass('changed');
+                this.updateSaveButton();
+            },
+
+            editNickname: function () {
+                this.$('.participant-info .nickname').hide();
+                this.$('.participant-info #edit-nickname').text(this.$('.participant-info .nickname').text()).show().placeCaretAtEnd();
+            },
+
+            checkKeydown: function (ev) {
+                if (ev.keyCode === constants.KEY_ENTER) {
+                    ev.preventDefault();
+                    $(document.activeElement).blur();
+                }
+            },
+
+            checkKeyup: function (ev) {
+                let $richtextarea = $(ev.target),
+                    new_value = _.escape($richtextarea.getTextFromRichTextarea().trim());
+                if (ev.target.id === 'edit-nickname') {
+                    let has_changes = (new_value !== this.participant.get('nickname'));
+                    this.updateButtons(has_changes);
+                }
+            },
+
+            saveRights: function (ev) {
+                if ($(ev.target).hasClass('non-active'))
+                    return;
+                let $btn = $(ev.target),
+                    jid = this.account.get('jid'),
+                    member_id = this.participant.get('id'),
+                    $participant_avatar = this.$('.participant-details-item .circle-avatar'),
+                    nickname_value = _.escape(this.$('.participant-info .nickname').text()),
+                    changed_avatar = this.new_avatar,
+                    has_changes = false,
+                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
+                        .c('item', {id: member_id});
+                this.$('.buttons-wrap button').addClass('non-active');
+                changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
+                if (nickname_value != this.participant.get('nickname')) {
+                    has_changes = true;
+                    iq_changes.c('nickname').t(_.unescape(nickname_value)).up();
+                }
+                if (changed_avatar)
+                    this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
+                        this.$('.buttons-wrap button').removeClass('non-active');
+                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
+                        this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                        this.close();
+                    }.bind(this), function (error) {
+                        this.$('.buttons-wrap button').removeClass('non-active');
+                        $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        let error_text = $(error).find('text').text() || 'You have no permissions to change avatar';
+                        !has_changes && utils.dialogs.error(error_text);
+                    });
+                if (has_changes)
+                    this.account.sendIQ(iq_changes,
+                        function () {
+                            this.$('.buttons-wrap button').removeClass('non-active');
+                            this.participant.set('nickname', _.unescape(nickname_value));
+                            this.close();
+                        }.bind(this),
+                        function (error) {
+                            this.$('.buttons-wrap button').removeClass('non-active');
+                            this.close();
+                            if ($(error).find('not-allowed').length) {
+                                utils.dialogs.error("You have no permission to change participant's info");
+                            }
+                        }.bind(this));
+                $btn.blur();
+            }
+        });
+
         xabber.ParticipantPropertiesView = xabber.BasicView.extend({
             className: 'modal dialog-modal edit-rights',
             template: templates.group_chats.participant_rights,
@@ -1711,14 +1937,24 @@ define("xabber-contacts", function () {
                 attrs.nickname = _.escape(_.unescape(attrs.nickname));
                 attrs.badge = _.escape(_.unescape(attrs.badge));
                 attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').anonymous === 'incognito') ? true : false;
-                let $member_info_view = $(templates.group_chats.participant_details_item(attrs));
+                let $member_info_view;
+                if (this.contact.get('private_chat'))
+                    $member_info_view = $(templates.group_chats.private_participant_details(attrs));
+                else
+                    $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
                 this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
                 this.updateMemberAvatar(this.participant);
                 this.participant_messages = [];
                 this.actual_rights = [];
-                this.renderAllRights();
-                this.setActualRights();
+                if (!this.contact.get('private_chat')) {
+                    this.renderAllRights();
+                    this.setActualRights();
+                }
+                else {
+                    this.$('.modal-content').addClass('hidden');
+                    this.$('.modal-footer').switchClass('hidden', this.participant.get('jid') !== this.account.get('jid'));
+                }
                 this.updateScrollBar();
                 this.$('.participant-info #edit-nickname').on("focusout", function () {
                     let new_nickname = _.escape(this.$('#edit-nickname').getTextFromRichTextarea().trim());

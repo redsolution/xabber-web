@@ -4612,7 +4612,8 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
-            private_chats.forEach(function (chat) {
+
+            s.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
                 chat.item_view.updateCSS();
             });
@@ -4971,7 +4972,7 @@ define("xabber-chats", function () {
             var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
-                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you accept, you won\'t see each other\'s real XMPP IDs') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat participants'));
+                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat participants'));
             this.account.sendIQ(iq,
                 function () {
                     this.sendInviteMessage(contact_jid);
@@ -5001,7 +5002,7 @@ define("xabber-chats", function () {
                     to: jid_to,
                     type: 'chat'
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
-                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you accept, you won\'t see each other\'s real XMPP IDs') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
+                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
                     .c('body').t(body).up();
 
             this.account.sendMsg(stanza);
