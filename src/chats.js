@@ -4612,8 +4612,7 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
-
-            s.forEach(function (chat) {
+            private_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
                 chat.item_view.updateCSS();
             });
