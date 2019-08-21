@@ -84,6 +84,8 @@
         },
 
         throwNewVersion: function () {
+            if (!constants.CHECK_VERSION)
+                return;
             var version_number = this.get('actual_version_number'),
                 version_description = this.get('version_description');
             utils.dialogs.common(
@@ -135,6 +137,7 @@
                 'XABBER_ACCOUNT_URL',
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
+                'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',
                 'DISABLE_LOOKUP_WS'
