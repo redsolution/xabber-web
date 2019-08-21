@@ -2690,6 +2690,14 @@ body {
     border-bottom: 1px dotted #9E9E9E;
 }
 
+.edit-rights-private .participant-details-item .nickname.one-line:hover {
+    border: none;
+}
+
+.edit-rights-private .participant-details-item .is-myself.nickname:hover {
+    border-bottom: 1px dotted #9E9E9E;
+}
+
 .edit-rights .participant-details-item .badge.one-line,
 .edit-rights .participant-details-item .nickname.one-line {
     vertical-align: middle;
@@ -6139,19 +6147,11 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 auto;
 }
 
-.edit-rights .participant-details-item .buttons-wrap {
-    padding: 8px 0 0 0;
-}
-
 .edit-rights .participant-details-item .button-wrap,
 .details-panel .main-info .button-wrap {
     width: 64px;
     margin: 8px;
     text-align: center;
-}
-
-.edit-rights .participant-details-item {
-    padding: 0 0 8px 0;
 }
 
 .edit-rights .participant-details-item .buttons-wrap i,
@@ -6968,6 +6968,14 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
     width: 450px;
     box-shadow: 0 1px 5px -1px rgba(0,0,0,0.4);
+}
+
+.edit-rights-private {
+    width: 320px !important;
+}
+
+.edit-rights-private .participant-details-item {
+    padding: 28px 0 32px 0;
 }
 
 .edit-rights .modal-content {

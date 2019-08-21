@@ -1,7 +1,10 @@
 <div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
     <div class="circle-avatar">
+        {[ if (is_myself) {]}
         <input title="Change avatar" type="file">
+        {[}]}
         <img>
+        {[ if (is_myself) {]}
         <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
             <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
         </svg>
@@ -19,10 +22,13 @@
             </div>
         </div>
         </div>
+        {[}]}
     </div>
     <div class="participant-info">
+        {[ if (is_myself) {]}
         <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>
-        <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>
+        {[}]}
+        <div title="{{nickname}}" class="{{is_myself && 'is-myself'}} nickname one-line">{{nickname}}</div>
         <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
     </div>
 </div>
