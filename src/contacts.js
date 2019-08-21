@@ -1710,6 +1710,7 @@ define("xabber-contacts", function () {
                 let attrs = this.participant.attributes;
                 attrs.nickname = _.escape(_.unescape(attrs.nickname));
                 attrs.badge = _.escape(_.unescape(attrs.badge));
+                attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').anonymous === 'incognito') ? true : false;
                 let $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
                 this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));

@@ -27,10 +27,17 @@
             {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}
         </div>
     <div class="buttons-wrap">
+        {[if (incognito_chat) {]}
+        <div class="button-wrap non-active btn-chat-wrap">
+            <i class="mdi mdi-24px mdi-incognito btn-chat"></i>
+            <div class="btn-name">Private chat</div>
+        </div>
+        {[} else {]}
         <div class="button-wrap non-active btn-chat-wrap">
             <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
             <div class="btn-name">Direct chat</div>
         </div>
+        {[}]}
         <div class="button-wrap btn-participant-messages-wrap">
             <i class="mdi mdi-24px mdi-view-list btn-participant-messages"></i>
             <div class="btn-name">Messages</div>
