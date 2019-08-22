@@ -4373,7 +4373,7 @@ define("xabber-chats", function () {
                 anonymous = this.$('.incognito-field .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 searchable = this.$('.global-field .property-value').attr('data-value'),
-                description = this.$('.description-field .rich-textarea').text() || 'The best group chat',
+                description = this.$('.description-field .rich-textarea').text() || "",
                 model = this.$('.membership-field .property-value').attr('data-value'),
                 iq = $iq({from: my_jid, type: 'set', to: domain}).c('create', {xmlns: Strophe.NS.GROUP_CHAT})
                     .c('name').t(name).up()
