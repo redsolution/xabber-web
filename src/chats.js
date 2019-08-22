@@ -872,6 +872,8 @@ define("xabber-chats", function () {
             this.contact.on("remove_invite", this.removeInvite, this);
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status", this.updateStatus, this);
+            this.contact.on("change:private_chat", this.updatePrivateChat, this);
+            this.contact.on("change:incognito_chat", this.updateIncognitoChat, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
             this.contact.on("change:muted", this.updateMutedState, this);
@@ -932,7 +934,7 @@ define("xabber-chats", function () {
         updateGroupChats: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.status').hideIf(is_group_chat);
-            this.$('.group-chat-icon').showIf(is_group_chat);
+            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
             if (is_group_chat) {
                 this.$el.addClass('group-chat');
                 this.$('.chat-title').css('color', '#424242');
@@ -941,7 +943,16 @@ define("xabber-chats", function () {
         },
 
         updateBot: function () {
-            this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
+            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+        },
+
+        updatePrivateChat: function () {
+            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+        },
+
+        updateIncognitoChat: function () {
+            let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
+            this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
         },
 
         updateColorScheme: function () {
@@ -4676,6 +4687,8 @@ define("xabber-chats", function () {
               this.updateColorScheme();
               this.updateGroupChats();
               this.updateBot();
+              this.updatePrivateChat();
+              this.updateIncognitoChat();
               this.account.settings.on("change:color", this.updateColorScheme, this);
               this.contact.on("change:name", this.updateName, this);
           },
@@ -4692,7 +4705,7 @@ define("xabber-chats", function () {
           updateGroupChats: function () {
               var is_group_chat = this.contact.get('group_chat');
               this.$('.status').hideIf(is_group_chat);
-              this.$('.group-chat-icon').showIf(is_group_chat);
+              (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
               if (is_group_chat) {
                   this.$el.addClass('group-chat');
                   this.$('.chat-title').css('color', '#424242');
@@ -4701,7 +4714,15 @@ define("xabber-chats", function () {
           },
 
           updateBot: function () {
-              this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
+              this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+          },
+
+          updatePrivateChat: function () {
+              this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+          },
+
+          updateIncognitoChat: function () {
+              this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
           },
 
           updateColorScheme: function () {
@@ -5132,7 +5153,6 @@ define("xabber-chats", function () {
             this.updateMenu();
             this.updateNotifications();
             this.updateArchiveButton();
-            this.updateBot();
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
@@ -5140,6 +5160,8 @@ define("xabber-chats", function () {
             this.contact.on("change:blocked", this.updateMenu, this);
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
+            this.contact.on("change:private_chat", this.updatePrivateChat, this);
+            this.contact.on("change:incognito_chat", this.updateIncognitoChat, this);
         },
 
         render: function (options) {
@@ -5291,13 +5313,22 @@ define("xabber-chats", function () {
 
         updateGroupChatHead: function () {
             var is_group_chat = this.contact.get('group_chat');
-            this.$('.group-chat-icon').showIf(is_group_chat);
+            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
             this.$('.btn-jingle-message').showIf(!is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },
 
         updateBot: function () {
-            this.$('.bot-chat-icon').showIf(this.contact.get('bot'));
+            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+        },
+
+        updatePrivateChat: function () {
+            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+        },
+
+        updateIncognitoChat: function () {
+            let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
+            this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
         },
 
         clearHistory: function () {

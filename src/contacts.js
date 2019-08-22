@@ -382,6 +382,7 @@ define("xabber-contacts", function () {
                         online_members_num: online_members_num
                     };
                 private_chat && this.set('private_chat', true);
+                anonymous === 'incognito' && this.set('incognito_chat', true);
                 var chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
                 if (chat)
                     pinned_msg_elem = chat.item_view.content.$pinned_message;

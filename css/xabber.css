@@ -2939,13 +2939,11 @@ body {
 }
 
 .mention-info-wrap:hover,
-.mention-info-wrap:hover .group-chat-icon,
+.mention-info-wrap:hover .chat-icon,
 .chat-item:hover,
 .message-item:hover,
-.message-item:hover .group-chat-icon,
-.message-item:hover .bot-chat-icon,
-.chat-item:hover .group-chat-icon,
-.chat-item:hover .bot-chat-icon {
+.message-item:hover .chat-icon,
+.chat-item:hover .chat-icon {
     background-color: #F8F8F8;
 }
 
@@ -2954,15 +2952,11 @@ body {
 .chat-item.active,
 .message-item.active,
 .message-item.active:hover,
-.message-item.active .group-chat-icon,
-.message-item.active .bot-chat-icon,
-.message-item.active:hover .group-chat-icon,
-.message-item.active:hover .bot-chat-icon,
+.message-item.active .chat-icon,
+.message-item.active:hover .chat-icon,
 .chat-item.active:hover,
-.chat-item.active .group-chat-icon,
-.chat-item.active .bot-chat-icon,
-.chat-item.active:hover .group-chat-icon,
-.chat-item.active:hover .bot-chat-icon {
+.chat-item.active .chat-icon,
+.chat-item.active:hover .chat-icon {
     background-color: #FFEBEE;
 }
 
@@ -3007,19 +3001,16 @@ body {
     color: #FFF;
 }
 
-.chat-head-wrap .bot-chat-icon>img,
-.chat-item .bot-chat-icon>img,
-.message-item .bot-chat-icon>img {
+.chat-head-wrap .chat-icon>img,
+.chat-item .chat-icon>img,
+.message-item .chat-icon>img {
     width: 18px;
     height: 18px;
 }
 
-.message-item .group-chat-icon,
-.message-item .bot-chat-icon,
-.chat-item .group-chat-icon,
-.chat-item .bot-chat-icon,
-.chat-head-wrap .group-chat-icon,
-.chat-head-wrap .bot-chat-icon {
+.message-item .chat-icon,
+.chat-item .chat-icon,
+.chat-head-wrap .chat-icon {
     position: absolute;
     border-radius: 50%;
     top: 33px;
@@ -5668,8 +5659,8 @@ input[type='range'].voice-message-volume:focus {
     fill: #757575;
 }
 
-.contact-details-panel .bot-chat-icon,
-.groupchat-details-panel .group-chat-icon {
+.contact-details-panel .chat-icon,
+.groupchat-details-panel .chat-icon {
     position: absolute;
     border-radius: 50%;
     top: 90px;

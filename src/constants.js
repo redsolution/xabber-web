@@ -7,6 +7,14 @@ var constants = {
     FAVICON_DEFAULT: "images/favicon.png",
     FAVICON_MESSAGE: "images/favicon-message.png",
 
+    CHAT_ICONS: {
+        GROUP_CHAT_ICON: "images/circle-group-chat-icon.svg",
+        BOT_CHAT_ICON: "images/circle-bot-icon.png",
+        PRIVATE_CHAT_ICON: "images/circle-private-chat-icon.png",
+        INCOGNITO_CHAT_ICON_1: "images/circle-incognito-chat-icon-1.png",
+        INCOGNITO_CHAT_ICON_2: "images/circle-incognito-chat-icon-2.png",
+    },
+
     WIDTH_MEDIUM:   1420,
     WIDTH_NARROW:   1280,
     WIDTH_TINY:     1152,
