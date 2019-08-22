@@ -951,8 +951,7 @@ define("xabber-chats", function () {
         },
 
         updateIncognitoChat: function () {
-            let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
-            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
         },
 
         updateColorScheme: function () {
@@ -4723,8 +4722,7 @@ define("xabber-chats", function () {
           },
 
           updateIncognitoChat: function () {
-              let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
-              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
+              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
           },
 
           updateColorScheme: function () {
@@ -5329,8 +5327,7 @@ define("xabber-chats", function () {
         },
 
         updateIncognitoChat: function () {
-            let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
-            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
         },
 
         clearHistory: function () {

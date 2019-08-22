@@ -481,8 +481,11 @@ define("xabber-views", function () {
           },
 
           selectItemWithQuery: function (id, arrow) {
-              if (!id)
+              if (!id) {
+                  if (this.isScrolledToBottom())
+                      this.onScrollY();
                   return;
+              }
               this.clearSearchSelection();
               var $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
               if ($selection.length) {

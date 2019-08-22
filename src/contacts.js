@@ -559,11 +559,17 @@ define("xabber-contacts", function () {
                 this.updateStatus();
                 this.updateAvatar();
                 this.selectView();
-                this.$('.group-chat-icon').showIf(this.model.get('group_chat'));
+                this.updateGroupChat();
+                this.updateBot();
+                this.updatePrivateChat();
+                this.updateIncognitoChat();
                 this.$('.bot-chat-icon').showIf(this.model.get('bot'));
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
+                this.model.on("change:private_chat", this.updatePrivateChat, this);
+                this.model.on("change:incognito_chat", this.updateIncognitoChat, this);
+                this.model.on("change:bot", this.updateBot, this);
                 this.model.on("change:status_message", this.updateStatusMsg, this);
                 this.model.on("change:last_seen", this.lastSeenUpdated, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
@@ -634,8 +640,20 @@ define("xabber-contacts", function () {
             updateGroupChat: function () {
                 var is_group_chat = this.model.get('group_chat');
                 this.$('.status').hideIf(is_group_chat);
-                this.$('.group-chat-icon').showIf(is_group_chat);
+                (is_group_chat && !this.model.get('private_chat') && !this.model.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CONTACT_ICONS.GROUP_CHAT_ICON});
                 this.updateCSS();
+            },
+
+            updateBot: function () {
+                this.model.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CONTACT_ICONS.BOT_CHAT_ICON});
+            },
+
+            updatePrivateChat: function () {
+                this.model.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CONTACT_ICONS.PRIVATE_CHAT_ICON});
+            },
+
+            updateIncognitoChat: function () {
+                (this.model.get('incognito_chat') && !this.model.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CONTACT_ICONS.INCOGNITO_CHAT_ICON});
             },
 
             updateStatusMsg: function() {

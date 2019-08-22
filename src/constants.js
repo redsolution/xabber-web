@@ -11,8 +11,14 @@ var constants = {
         GROUP_CHAT_ICON: "images/circle-group-chat-icon.svg",
         BOT_CHAT_ICON: "images/circle-bot-icon.png",
         PRIVATE_CHAT_ICON: "images/circle-private-chat-icon.png",
-        INCOGNITO_CHAT_ICON_1: "images/circle-incognito-chat-icon-1.png",
-        INCOGNITO_CHAT_ICON_2: "images/circle-incognito-chat-icon-2.png",
+        INCOGNITO_CHAT_ICON: "images/circle-incognito-chat-icon.png",
+    },
+
+    CONTACT_ICONS: {
+        GROUP_CHAT_ICON: "images/circle-group-contact-icon.png",
+        BOT_CHAT_ICON: "images/circle-bot-contact-icon.png",
+        PRIVATE_CHAT_ICON: "images/circle-private-contact-icon.png",
+        INCOGNITO_CHAT_ICON: "images/circle-incognito-contact-icon.png",
     },
 
     WIDTH_MEDIUM:   1420,

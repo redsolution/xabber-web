@@ -2042,8 +2042,7 @@ body {
     top: 17px;
 }
 
-.roster-contact .bot-chat-icon,
-.roster-contact .group-chat-icon {
+.roster-contact .chat-icon {
     position: absolute;
     right: 14px;
     top: 14px;
@@ -2217,20 +2216,18 @@ body {
     right: 10px;
 }
 
-.roster-contact .bot-chat-icon>img {
+.roster-contact .chat-icon>img {
     width: 18px;
     height: 18px;
 }
 
-.roster-left-container .roster-contact .bot-chat-icon,
-.roster-left-container .roster-contact .group-chat-icon,
-.forward-panel-modal .roster-contact .group-chat-icon {
+.roster-left-container .roster-contact .chat-icon,
+.forward-panel-modal .roster-contact .chat-icon {
     top: 19px;
     right: 10px;
 }
 
-.forward-panel-modal .roster-contact .bot-chat-icon,
-.forward-panel-modal .roster-contact .group-chat-icon {
+.forward-panel-modal .roster-contact .chat-icon {
     right: 16px;
 }
 
@@ -6925,7 +6922,7 @@ input[type='range'].voice-message-volume:focus {
     left: 24px;
 }
 
-.forward-panel-modal .chat-item .group-chat-icon {
+.forward-panel-modal .chat-item .chat-icon {
     left: 49px;
 }
 
