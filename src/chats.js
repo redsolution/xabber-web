@@ -952,7 +952,7 @@ define("xabber-chats", function () {
 
         updateIncognitoChat: function () {
             let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
-            this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
         },
 
         updateColorScheme: function () {
@@ -4547,9 +4547,10 @@ define("xabber-chats", function () {
                     selection.addClass('active');
                 }
                 if (selection.hasClass('roster-contact')) {
+                    view = xabber.accounts.get(selection.data('account')).chats.get(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')).hash_id);
+                    view && (view = view.item_view);
+                    view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                     selection.addClass('active');
-                    view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
-                    view && view.showDetails(xabber.body.screen.get('name'));
                 }
                 if (selection.hasClass('message-item')) {
                     selection.click();
@@ -4687,8 +4688,8 @@ define("xabber-chats", function () {
               this.updateColorScheme();
               this.updateGroupChats();
               this.updateBot();
-              this.updatePrivateChat();
               this.updateIncognitoChat();
+              this.updatePrivateChat();
               this.account.settings.on("change:color", this.updateColorScheme, this);
               this.contact.on("change:name", this.updateName, this);
           },
@@ -4705,7 +4706,7 @@ define("xabber-chats", function () {
           updateGroupChats: function () {
               var is_group_chat = this.contact.get('group_chat');
               this.$('.status').hideIf(is_group_chat);
-              (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
+              (is_group_chat && !this.contact.get('private_chat') && !(this.contact.get('incognito_chat') && !this.contact.get('private_chat'))) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
               if (is_group_chat) {
                   this.$el.addClass('group-chat');
                   this.$('.chat-title').css('color', '#424242');
@@ -4722,7 +4723,8 @@ define("xabber-chats", function () {
           },
 
           updateIncognitoChat: function () {
-              this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
+              let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
+              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
           },
 
           updateColorScheme: function () {
@@ -5328,7 +5330,7 @@ define("xabber-chats", function () {
 
         updateIncognitoChat: function () {
             let rand_icon = eval("constants.CHAT_ICONS.INCOGNITO_CHAT_ICON_" + (Math.round(Math.random(0,1)) + 1));
-            this.contact.get('incognito_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: rand_icon});
         },
 
         clearHistory: function () {

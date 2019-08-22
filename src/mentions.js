@@ -134,9 +134,10 @@ define("xabber-mentions", function () {
                         selection.addClass('active');
                     }
                     if (selection.hasClass('roster-contact')) {
+                        view = xabber.accounts.get(selection.data('account')).chats.get(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')).hash_id);
+                        view && (view = view.item_view);
+                        view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                         selection.addClass('active');
-                        view = xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid'));
-                        view && view.showDetails(xabber.body.screen.get('name'));
                     }
                     if (selection.hasClass('message-item')) {
                         selection.click();
