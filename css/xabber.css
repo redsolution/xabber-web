@@ -3385,11 +3385,11 @@ body {
     width: 100%;
     padding: 8px 0;
     cursor: pointer;
-    -webkit-transition: background-color .5s;
-    -moz-transition: background-color .5s;
-    -ms-transition: background-color .5s;
-    -o-transition: background-color .5s;
-    transition: background-color .5s;
+    -webkit-transition: background-color .3s;
+    -moz-transition: background-color .3s;
+    -ms-transition: background-color .3s;
+    -o-transition: background-color .3s;
+    transition: background-color .3s;
 }
 
 .chat-message.selected {

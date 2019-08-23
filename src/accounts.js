@@ -1963,6 +1963,7 @@ define("xabber-accounts", function () {
             },
 
             setPassword: function (password) {
+                this.model.last_msg_timestamp = 0;
                 this.model.save({
                     auth_type: 'password',
                     password: utils.utoa(password),

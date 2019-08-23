@@ -381,7 +381,7 @@ define("xabber-contacts", function () {
                         members_num: members_num,
                         online_members_num: online_members_num
                     };
-                private_chat && this.set('private_chat', true);
+                private_chat && this.set('private_chat', private_chat);
                 anonymous === 'incognito' && this.set('incognito_chat', true);
                 var chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
                 if (chat)
@@ -1995,7 +1995,7 @@ define("xabber-contacts", function () {
                 let participant_jid = this.participant.get('jid'),
                     participant_in_roster = this.account.contacts.get(participant_jid);
                 if (!participant_jid) {
-                    let iq = $iq({from: this.account.get('jid'), to: this.account.domain, type: 'set'})
+                    let iq = $iq({from: this.account.get('jid'), to: this.account.domain/*Strophe.getDomainFromJid(this.contact.get('jid'))*/, type: 'set'})
                         .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
                     this.account.sendIQ(iq, function (iq_response) {
@@ -2016,7 +2016,7 @@ define("xabber-contacts", function () {
                             });
                         }.bind(this));
                     }.bind(this), function (iq_err_response) {
-                        let err_text = $(iq_err_response).find('text').text() || 'You have already sent an invitation to peer-to-peer chat';
+                        let err_text = $(iq_err_response).find('text[lang="en"]').text() || $(iq_err_response).find('text').first().text() || 'You have already sent an invitation to peer-to-peer chat';
                         this.close();
                         utils.dialogs.error(err_text);
                     }.bind(this));
@@ -2845,7 +2845,7 @@ define("xabber-contacts", function () {
             },
 
             declineAll: function () {
-                let pres = $pres({from: this.account.connection.jid, to: this.model.get('jid')})
+                let pres = $pres({from: this.account.connection.jid, to: this.model.get('private_chat')})
                     .c('peer-to-peer').t(false);
                 this.account.sendPres(pres);
                 this.model.trigger('remove_invite', this.model);

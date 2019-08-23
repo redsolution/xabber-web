@@ -113,7 +113,9 @@ define("xabber-chats", function () {
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid),
-                is_private_invitation = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('privacy').length;
+                $group_info = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]'),
+                is_private_invitation = $group_info.children('privacy').length,
+                group_info_attributes = {};
 
             if (message)
                 return message;
@@ -140,9 +142,26 @@ define("xabber-chats", function () {
             let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
                 chat = this.account.chats.getChat(contact);
             is_private_invitation && (contact.invitation.private_invite = true);
+            is_private_invitation && contact.set('private_chat', true);
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
+            if ($group_info.length) {
+                let name = $group_info.find('name').text(),
+                    model = $group_info.find('membership').text(),
+                    anonymous = $group_info.find('privacy').text(),
+                    searchable = $group_info.find('index').text(),
+                    parent_chat = $group_info.find('parent-chat').text(),
+                    description = $group_info.find('description').text();
+                name && (group_info_attributes.name = name);
+                model && (group_info_attributes.model = name);
+                anonymous && (group_info_attributes.anonymous = anonymous);
+                searchable && (group_info_attributes.searchable = searchable);
+                description && (group_info_attributes.description = description);
+                parent_chat && contact.set('private_chat', parent_chat);
+                contact.set('group_info', group_info_attributes);
+            }
+
             let invite_msg_text = $message.find('reason').text();
             contact.invitation.updateInviteMsg(invite_msg_text);
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
@@ -595,7 +614,7 @@ define("xabber-chats", function () {
 
         getMessageContext: function (msgid, options) {
             options = options || {};
-            let messages = options.mention && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
+            let messages = options.mention && this.account.messages || options.seached_messages && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
                 message = messages.get(msgid);
             if (message) {
                 let stanza_id = message.get('archive_id');
@@ -3503,7 +3522,7 @@ define("xabber-chats", function () {
             }
 
             if ($msg.hasClass('searched-message')) {
-                this.model.getMessageContext($msg.data('msgid'));
+                this.model.getMessageContext($msg.data('msgid'), {seached_messages: true});
                 return;
             }
 
@@ -4285,8 +4304,13 @@ define("xabber-chats", function () {
 
         },
 
+        setDefaultSettings: function () {
+
+        },
+
         bindAccount: function (account) {
             this.account = account;
+            this.$('.input-group-chat-domain').addClass('hidden');
             this.$el.attr('data-color', this.account.settings.get('color'));
             this.$('.account-field .dropdown-button .account-item-wrap')
                     .replaceWith(this.renderAccountItem(account));
@@ -5576,7 +5600,7 @@ define("xabber-chats", function () {
             this.updateAvatar();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
             this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
-            this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') ? this.account.participant_messages : this.model.messages;
+            this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
             this.renderLastEmoticons();
             this.$('.attach-file').showIf(http_upload);
             if (this.contact.get('group_chat')) {
@@ -5794,7 +5818,7 @@ define("xabber-chats", function () {
                         at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
                         plus_position = mentions_plus.length ? mentions_plus.slice(-1)[0].index : -1,
                         mention_position = Math.max(at_position, plus_position);
-                    if (this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention') {
+                    if (this.quill.selection.lastRange && this.quill.getLeaf(this.quill.selection.lastRange.index)[0].parent.domNode.tagName.toLowerCase() === 'mention') {
                         this.$('.mentions-list').hide();
                         return;
                     }
