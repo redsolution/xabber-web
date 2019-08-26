@@ -18,30 +18,32 @@ define("xabber-ui", function () {
             }
             if (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages') {
                 if (!window.$('.message-actions-panel').hasClass('hidden')) {
-                    switch (ev.keyCode) {
-                        case 67:
-                            attrs.chat_item.contact.trigger('copy_selected_messages');
-                            break;
-                        case 68:
-                            attrs.chat_item.contact.trigger('delete_selected_messages');
-                            break;
-                        case 69:
-                            attrs.chat_item.contact.trigger('edit_selected_message');
-                            break;
-                        case 70:
-                            attrs.chat_item.contact.trigger('forward_selected_messages');
-                            break;
-                        case 80:
-                            attrs.chat_item.contact.trigger('pin_selected_message');
-                            break;
-                        case 82:
-                            attrs.chat_item.contact.trigger('reply_selected_messages');
-                            break;
-                        case constants.KEY_ESCAPE:
-                            attrs.chat_item.contact.trigger('reset_selected_messages');
-                            break;
+                    if (!ev.ctrlKey && !ev.metaKey) {
+                        switch (ev.keyCode) {
+                            case 67:
+                                attrs.chat_item.contact.trigger('copy_selected_messages');
+                                break;
+                            case 68:
+                                attrs.chat_item.contact.trigger('delete_selected_messages');
+                                break;
+                            case 69:
+                                attrs.chat_item.contact.trigger('edit_selected_message');
+                                break;
+                            case 70:
+                                attrs.chat_item.contact.trigger('forward_selected_messages');
+                                break;
+                            case 80:
+                                attrs.chat_item.contact.trigger('pin_selected_message');
+                                break;
+                            case 82:
+                                attrs.chat_item.contact.trigger('reply_selected_messages');
+                                break;
+                            case constants.KEY_ESCAPE:
+                                attrs.chat_item.contact.trigger('reset_selected_messages');
+                                break;
+                        }
+                        ev.preventDefault();
                     }
-                    ev.preventDefault();
                 }
             }
             }.bind(this));
