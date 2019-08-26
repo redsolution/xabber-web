@@ -688,8 +688,14 @@ define("xabber-chats", function () {
             if (msg.isSenderMe()) {
                 if ($received.length) {
                     let msg_state = msg.get('state');
-                    if ((msg_state !== constants.MSG_ARCHIVED) && (msg_state !== constants.MSG_DISPLAYED))
+                    if ((msg_state !== constants.MSG_ARCHIVED) && (msg_state !== constants.MSG_DISPLAYED)) {
+                        let delivered_timestamp = $received.children('time').attr('stamp');
+                        if (delivered_timestamp) {
+                            msg.set('time', utils.pretty_datetime(delivered_timestamp));
+                            msg.set('timestamp', Number(moment(delivered_timestamp)));
+                        }
                         msg.set('state', constants.MSG_DELIVERED);
+                    }
                     return;
                 }
                 else
@@ -855,6 +861,17 @@ define("xabber-chats", function () {
                 from_jid: this.account.get('jid'),
                 system_last_message: 'Authorization denied',
                 message: this.get('jid') + ' was blocked'
+            });
+        },
+
+        deleteChatFromSynchronization: function (callback, errback) {
+            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
+                .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
+                .c('conversation', {jid: this.get('jid')});
+            this.account.sendIQ(iq, function (success) {
+                callback && callback(success);
+            }.bind(this), function (error) {
+                errback && errback(error);
             });
         }
     });
@@ -2145,10 +2162,10 @@ define("xabber-chats", function () {
             if (message.isSenderMe()) {
                 if (!message.get('is_archived') || message.get('missed_msg'))
                     this.readMessages(message.get('timestamp'));
-                if (this.model.get('last_displayed_id') < message.get('archive_id'))
-                    message.set('state', constants.MSG_DISPLAYED);// && this.model.set('last_displayed_id', message.get('archive_id'));
-                else if (this.model.get('last_delivered_id') < message.get('archive_id'))
-                    message.set('state', constants.MSG_DELIVERED);// && this.model.set('last_delivered_id', message.get('archive_id'));
+                if (this.model.get('last_displayed_id') >= message.get('archive_id'))
+                    message.set('state', constants.MSG_DISPLAYED);
+                else if (this.model.get('last_delivered_id') >= message.get('archive_id'))
+                    message.set('state', constants.MSG_DELIVERED);
             }
 
             if (this.model.get('active')&&(message.get('private_invite') || message.get('invite') || message.get('auth_request'))) {
@@ -3930,7 +3947,13 @@ define("xabber-chats", function () {
                 if ($received_message.length)
                     this.receiveChatMessage($received_message[0], {echo_msg: true});
                 if (origin_msg_id) {
-                    this.account.messages.get(origin_msg_id).set('state', constants.MSG_SENT);
+                    let msg = this.account.messages.get(origin_msg_id),
+                        delivered_timestamp = $stanza_received.children('time').attr('stamp');
+                    msg && msg.set('state', constants.MSG_SENT);
+                    if (msg && delivered_timestamp) {
+                        msg.set('time', utils.pretty_datetime(delivered_timestamp));
+                        msg.set('timestamp', Number(moment(delivered_timestamp)));
+                    }
                     let contact = this.account.contacts.get(msg_from);
                     if (contact) {
                         if (contact.get('group_chat')) {
@@ -5376,8 +5399,15 @@ define("xabber-chats", function () {
         },
 
         closeChat: function () {
-            this.model.set('opened', false);
-            xabber.chats_view.clearSearch();
+            if (this.account.connection && this.account.connection.do_synchronization) {
+                this.model.deleteChatFromSynchronization(function () {
+                    this.model.set('opened', false);
+                }.bind(this));
+            }
+            else {
+                this.model.set('opened', false);
+                xabber.chats_view.clearSearch();
+            }
         }
     });
 
