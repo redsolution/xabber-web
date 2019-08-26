@@ -1458,6 +1458,7 @@ define("xabber-accounts", function () {
             },
 
             renderAllXTokens: function () {
+                this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
                 $(_.sortBy(this.model.x_tokens_list), 'last_auth').each(function (idx, token) {
                     let pretty_token = {
                         client: token.client,

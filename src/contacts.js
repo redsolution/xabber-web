@@ -1228,11 +1228,11 @@ define("xabber-contacts", function () {
                 this.$('.model .value').text(utils.pretty_name(info.model));
                 this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
                 this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
-                !info.name && this.$('.name-info-wrap').addClass('hidden');
-                !info.description && this.$('.description-info-wrap').addClass('hidden');
-                !info.model && this.$('.model-info-wrap').addClass('hidden');
-                !info.anonymous && this.$('.anonymous-info-wrap').addClass('hidden');
-                !info.searchable && this.$('.searchable-info-wrap').addClass('hidden');
+                this.$('.name-info-wrap').switchClass('hidden', !info.name);
+                this.$('.description-info-wrap').switchClass('hidden', !info.description);
+                this.$('.model-info-wrap').switchClass('hidden', !info.model);
+                this.$('.anonymous-info-wrap').switchClass('hidden', !info.anonymous);
+                this.$('.searchable-info-wrap').switchClass('hidden', !info.searchable);
             },
 
             onClickIcon: function (ev) {
