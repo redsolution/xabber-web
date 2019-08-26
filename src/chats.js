@@ -5656,12 +5656,15 @@ define("xabber-chats", function () {
         },
 
         updateAvatar: function () {
-            let image = this.account.cached_image;
+            let image;
             if (this.contact.get('group_chat')) {
                 if (this.contact.my_info)
                     if (this.contact.my_info.get('b64_avatar'))
                         image = this.contact.my_info.get('b64_avatar');
+                !image && (image = Images.getDefaultAvatar(this.contact.my_info && this.contact.my_info.nickname || this.account.get('jid')));
             }
+            else
+                image = this.account.cached_image;
             this.$('.my-avatar.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
