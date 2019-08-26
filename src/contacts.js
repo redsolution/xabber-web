@@ -2806,7 +2806,7 @@ define("xabber-contacts", function () {
 
             changeInviteStatus: function() {
                 let contact = this.model,
-                    chat = this.account.chats.get(contact.hash_id);
+                    chat = this.account.chats.getChat(contact);
                 chat.set('is_accepted', true);
                 this.message && chat.sendMarker(this.message.get('msgid'), 'displayed', this.message.get('archive_id'), this.message.get('contact_archive_id'));
                 chat.item_view.content.readMessages();
@@ -2845,9 +2845,11 @@ define("xabber-contacts", function () {
             },
 
             declineAll: function () {
-                let pres = $pres({from: this.account.connection.jid, to: this.model.get('private_chat')})
-                    .c('peer-to-peer').t(false);
-                this.account.sendPres(pres);
+                if (this.model.get('private_chat') && this.model.get('private_chat') !== true) {
+                    let pres = $pres({from: this.account.connection.jid, to: this.model.get('private_chat')})
+                        .c('peer-to-peer').t(false);
+                    this.account.sendPres(pres);
+                }
                 this.model.trigger('remove_invite', this.model);
                 var declined_chat =  xabber.chats_view.active_chat;
                 declined_chat.model.set('active', false);

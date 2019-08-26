@@ -3534,6 +3534,8 @@ define("xabber-chats", function () {
             }.bind(this);
 
             if ($msg.hasClass('participant-message') || $msg.hasClass('context-message')) {
+                if ($msg.hasClass('system'))
+                    return;
                 processClick();
                 return;
             }
