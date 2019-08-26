@@ -1060,7 +1060,7 @@ define("xabber-chats", function () {
                 }
                 else {
                     if (this.contact.get('group_chat')) {
-                        msg_from = (msg.isSenderMe()) ? this.account.get('name') : msg_user_info.nickname || msg.get('from_jid');
+                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
                     }
                 }
                 this.$('.last-msg').text("").append(msg_text);
@@ -4804,7 +4804,7 @@ define("xabber-chats", function () {
               else {
                   let msg_from = "";
                   if (this.contact.get('group_chat')) {
-                      msg_from = (msg.isSenderMe()) ? this.account.get('name') : msg_user_info.nickname || msg.get('from_jid');
+                      msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
                   }
                   this.$('.last-msg').text("").append(msg_text);
                   if (msg_from)
