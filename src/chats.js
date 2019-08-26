@@ -503,7 +503,7 @@ define("xabber-chats", function () {
             });
             this.contact.messages_view.messagesRequest({}, function () {
                 xabber.body.setScreen('all-chats', {
-                    right: 'participant_messages',
+                    right: 'searched_messages',
                     contact: this.contact
                 });
             }.bind(this));
@@ -628,17 +628,17 @@ define("xabber-chats", function () {
                 this.contact.messages_view.messagesRequest({after: stanza_id}, function () {
                     if (options.mention)
                         xabber.body.setScreen('mentions', {
-                            right: 'participant_messages',
+                            right: 'message_context',
                             contact: this.contact
                         });
                     else if (options.message)
                         xabber.body.setScreen(xabber.body.screen.get('name'), {
-                            right: 'participant_messages',
+                            right: 'message_context',
                             contact: this.contact
                         });
                     else
                         xabber.body.setScreen('all-chats', {
-                        right: 'participant_messages',
+                        right: 'message_context',
                         contact: this.contact
                     });
                 }.bind(this));
@@ -1229,6 +1229,7 @@ define("xabber-chats", function () {
               this.mention_context = options.mention_context;
               this.$history_feedback = this.$('.load-history-feedback');
               this.account.context_messages = new xabber.Messages(null, {account: this.account});
+              this.account.context_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
               this.account.context_messages.on("add", this.addMessage, this);
           },
 
@@ -1355,6 +1356,7 @@ define("xabber-chats", function () {
           __initialize: function (options) {
               this.query_text = options.query_text;
               this.account.searched_messages = new xabber.Messages(null, {account: this.account});
+              this.account.searched_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
               this.account.searched_messages.on("add", this.addMessage, this);
               return this;
           },
@@ -3978,7 +3980,9 @@ define("xabber-chats", function () {
                     return;
                 let stanza_id = $message.find('replace').attr('id'),
                     msg_item = chat.messages.find(msg => msg.get('archive_id') == stanza_id),
-                    participant_msg_item = (this.account.participant_messages) ? (this.account.participant_messages.find(msg => msg.get('archive_id') == stanza_id)) : null,
+                    active_right_screen = xabber.body.screen.get('right'),
+                    participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
+                    participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id),
                     new_text = _.escape($message.find('replace message body').text()),
                     $mentions = $message.find('replace message reference[type="mention"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                     $markups = $message.find('replace message reference[type="markup"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
@@ -4485,7 +4489,7 @@ define("xabber-chats", function () {
         },
 
         render: function (options) {
-            if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
+            if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
                 this.clearSearch();
                 if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
                     this.showAllChats();

@@ -16,8 +16,7 @@ define("xabber-ui", function () {
                 if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);
             }
-            if (attrs.name === 'all-chats' &&
-                (attrs.right === 'chat' || attrs.right === 'participant_messages')) {
+            if (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages') {
                 if (!window.$('.message-actions-panel').hasClass('hidden')) {
                     switch (ev.keyCode) {
                         case 67:
@@ -215,7 +214,7 @@ define("xabber-ui", function () {
 
 
         this.right_panel.patchTree = function (tree, options) {
-            if (options.right === 'message_context') {
+            if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_participant_messages,
@@ -230,13 +229,6 @@ define("xabber-ui", function () {
             }
             if (options.right === 'contact_details') {
                 return { details: path_contact_details };
-            }
-            if (options.right === 'participant_messages') {
-                return {
-                    chat_head: path_chat_head,
-                    chat_body: path_participant_messages,
-                    chat_bottom: path_chat_bottom
-                };
             }
             if (options.details_content === 'participants')
                 return { details_content: path_details_participants };
