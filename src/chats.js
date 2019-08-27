@@ -189,9 +189,9 @@ define("xabber-chats", function () {
                 groupchat_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 avatar = user_info.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]'),
                 role = user_info.children('role').text(),
-                nickname = user_info.children('nickname').text(),
+                nickname = _.escape(user_info.children('nickname').text()),
                 jid = user_info.children('jid').text(),
-                badge = user_info.children('badge').text(),
+                badge = _.escape(user_info.children('badge').text()),
                 user_id = user_info.attr('id');
             !nickname.trim().length && (nickname = jid || id);
             let attrs = {
@@ -2395,7 +2395,7 @@ define("xabber-chats", function () {
             var attrs = _.clone(message.attributes),
                 is_sender = (message instanceof xabber.Message) ? message.isSenderMe() : false,
                 user_info = attrs.user_info || {},
-                username = (user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? this.contact.my_info.get('nickname') : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
+                username = (user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? _.escape(this.contact.my_info.get('nickname')) : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
                 images = attrs.images,
                 files =  attrs.files,
                 is_image = !_.isUndefined(images),
@@ -5810,7 +5810,7 @@ define("xabber-chats", function () {
             mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
             this.quill.deleteText(mention_position, ++mention_text.length);
-            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + nickname);
+            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + _.escape(nickname));
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();

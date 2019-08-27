@@ -259,7 +259,7 @@ define([
             return pretty_body.join("");
         },
 
-        markupBodyMessage: function (message) {
+        markupBodyMessage: function (message, mention_elem) {
             let attrs = _.clone(message.attributes),
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
@@ -267,6 +267,7 @@ define([
                 blockquotes = attrs.blockquotes || [],
                 body = legacy_refs.length ? attrs.original_message : attrs.message,
                 markup_body = Array.from(_.escape(_.unescape(body)));
+            !mention_elem && (mention_elem = 'span');
 
             mentions.concat(markups).forEach(function (markup) {
                 let start_idx = markup.start,
@@ -285,8 +286,8 @@ define([
                 }
                 else {
                     if (mention) {
-                        markup_body[start_idx] = '<span data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
-                        markup_body[end_idx] += '</span>';
+                        markup_body[start_idx] = '<' + mention_elem + ' data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
+                        markup_body[end_idx] += '</' + mention_elem + '>';
                     }
                     else if (markup.type === 'uri') {
                         markup_body[start_idx] = '<a target="_blank" class="msg-hyperlink" href="' + markup.uri + '">' + markup_body[start_idx];

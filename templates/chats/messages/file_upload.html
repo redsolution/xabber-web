@@ -7,7 +7,7 @@
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
             {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
-            {[ } if ((role)&&(role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
+            {[ } if (role && (role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
         </div>
         <div class="chat-msg-content chat-file-content">
             <div class="chat-file-info">
