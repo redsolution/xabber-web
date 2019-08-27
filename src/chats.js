@@ -388,8 +388,7 @@ define("xabber-chats", function () {
 
             options.echo_msg && ($delay = $message.children('time'));
             $delay.length && (attrs.time = $delay.attr('stamp'));
-            (attrs.carbon_copied || from_jid == this.account.get('jid') && options.synced_msg) && (attrs.state = constants.MSG_SENT);
-            options.is_archived && (attrs.state = constants.MSG_ARCHIVED);
+            (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
             options.synced_msg && (attrs.synced_from_server = true);
             options.missed_history && (attrs.missed_msg = true);
             if (options.echo_msg) {
@@ -3261,6 +3260,12 @@ define("xabber-chats", function () {
         },
 
         onChangedMessageState: function (message) {
+            if (message.get('state') === constants.MSG_DISPLAYED && this.model.get('last_displayed_id') < message.get('archive_id')) {
+                this.model.set('last_displayed_id', message.get('archive_id'));
+                this.model.set('last_delivered_id', message.get('archive_id'));
+            } else if (message.get('state') === constants.MSG_DELIVERED && this.model.get('last_delivered_id') < message.get('archive_id')) {
+                this.model.set('last_delivered_id', message.get('archive_id'));
+            }
             var $message = this.$('.chat-message[data-msgid="' + message.get('msgid') + '"]'),
                 $elem = $message.find('.msg-delivering-state');
             $elem.attr({
