@@ -3583,6 +3583,7 @@ define("xabber-contacts", function () {
                         return;
                     }
                     let contact = this.contacts.mergeContact(jid),
+                        is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
                         chat = this.account.chats.getChat(contact),
                         message = $item.children('last-message').children('message'),
                         $unread_messages = $item.children('unread'),
@@ -3591,6 +3592,11 @@ define("xabber-contacts", function () {
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
                         msg_retraction_version = $item.children('retract').attr('version'),
                         msg, options = {synced_msg: true};
+                    contact.set('group_chat', is_group_chat);
+                    if (!message.length) {
+                        chat.set('timestamp', Math.trunc(Number($item.attr('stamp')))/1000);
+                        chat.item_view.updateEmptyChat();
+                    }
                     if (chat.message_retraction_version != msg_retraction_version) {
                         chat.message_retraction_version = msg_retraction_version;
                         request_with_stamp && chat.trigger("get_retractions_list");

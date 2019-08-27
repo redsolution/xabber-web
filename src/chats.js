@@ -689,10 +689,10 @@ define("xabber-chats", function () {
                 if ($received.length) {
                     let msg_state = msg.get('state');
                     if ((msg_state !== constants.MSG_ARCHIVED) && (msg_state !== constants.MSG_DISPLAYED)) {
-                        let delivered_timestamp = $received.children('time').attr('stamp');
-                        if (delivered_timestamp) {
-                            msg.set('time', utils.pretty_datetime(delivered_timestamp));
-                            msg.set('timestamp', Number(moment(delivered_timestamp)));
+                        let delivered_time = $received.children('time').attr('stamp');
+                        if (delivered_time) {
+                            msg.set('time', utils.pretty_datetime(delivered_time));
+                            msg.set('timestamp', Number(moment(delivered_time)));
                         }
                         msg.set('state', constants.MSG_DELIVERED);
                     }
@@ -1010,6 +1010,14 @@ define("xabber-chats", function () {
                 this.model.last_message = last_message;
                 this.updateLastMessage();
             }
+        },
+
+        updateEmptyChat: function () {
+            let msg_time = this.model.get('timestamp');
+            this.$('.last-msg').html('No messages'.italics());
+            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+                .attr('title', utils.pretty_datetime(msg_time));
+            this.updateCSS();
         },
 
         updateLastMessage: function (msg) {
@@ -3948,11 +3956,11 @@ define("xabber-chats", function () {
                     this.receiveChatMessage($received_message[0], {echo_msg: true});
                 if (origin_msg_id) {
                     let msg = this.account.messages.get(origin_msg_id),
-                        delivered_timestamp = $stanza_received.children('time').attr('stamp');
+                        delivered_time = $stanza_received.children('time').attr('stamp');
                     msg && msg.set('state', constants.MSG_SENT);
-                    if (msg && delivered_timestamp) {
-                        msg.set('time', utils.pretty_datetime(delivered_timestamp));
-                        msg.set('timestamp', Number(moment(delivered_timestamp)));
+                    if (msg && delivered_time) {
+                        msg.set('time', delivered_time);
+                        msg.set('timestamp', Number(moment(delivered_time)));
                     }
                     let contact = this.account.contacts.get(msg_from);
                     if (contact) {
@@ -5401,6 +5409,8 @@ define("xabber-chats", function () {
         closeChat: function () {
             if (this.account.connection && this.account.connection.do_synchronization) {
                 this.model.deleteChatFromSynchronization(function () {
+                    this.model.set('opened', false);
+                }.bind(this), function () {
                     this.model.set('opened', false);
                 }.bind(this));
             }
