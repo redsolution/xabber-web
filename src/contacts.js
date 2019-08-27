@@ -2015,8 +2015,17 @@ define("xabber-contacts", function () {
                                 message: 'Initiating private chat with ' + this.participant.get('nickname') + ' from ' + this.contact.get('jid') + '. If your invitation is accepted, you won\'t see each other\'s real XMPP IDs.'
                             });
                         }.bind(this));
-                    }.bind(this), function (iq_err_response) {
-                        let err_text = $(iq_err_response).find('text[lang="en"]').text() || $(iq_err_response).find('text').first().text() || 'You have already sent an invitation to peer-to-peer chat';
+                    }.bind(this), function (error) {
+                        let $error = $(error),
+                            private_chat_jid = $error.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"] jid').text();
+                        if (private_chat_jid) {
+                            let contact = this.account.contacts.mergeContact(private_chat_jid),
+                                chat = this.account.chats.getChat(contact);
+                            this.close();
+                            chat && chat.trigger('open');
+                            return;
+                        }
+                        let err_text = $(error).find('text[lang="en"]').text() || $(error).find('text').first().text() || 'You have already sent an invitation to peer-to-peer chat';
                         this.close();
                         utils.dialogs.error(err_text);
                     }.bind(this));
