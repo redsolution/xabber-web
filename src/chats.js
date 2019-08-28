@@ -4995,8 +4995,15 @@ define("xabber-chats", function () {
                     if (contact_node.get('group_chat'))
                             list_item.remove();
                 }.bind(this));
-                if (group_node.children('.list-item').length)
+                if (group_node.children('.list-item').length) {
                     this.$('.contacts-list-wrap').append(group_node);
+                    group_node.find('.arrow').click(function (ev) {
+                        this.toggleContacts(ev);
+                    }.bind(this));
+                    group_node.find('.group-head').click(function (ev) {
+                        this.selectAllGroup(ev);
+                    }.bind(this));
+                }
             }.bind(this));
             this.data.set('visible', true);
             this.$el.openModal({
@@ -5007,6 +5014,7 @@ define("xabber-chats", function () {
                 complete: function () {
                     this.$el.detach();
                     this.data.set('visible', false);
+                    this.selected_contacts = [];
                 }.bind(this)
             });
         },
@@ -5035,12 +5043,6 @@ define("xabber-chats", function () {
             this.$('.btn-add').click(function () {
                 this.addSelectedUsers();
             }.bind(this));
-            this.$('.arrow').click(function (ev) {
-                this.toggleContacts(ev);
-            }.bind(this));
-            this.$('.group-head').click(function (ev) {
-                this.selectAllGroup(ev);
-            }.bind(this));
         },
 
         addUser: function (ev) {
@@ -5050,7 +5052,8 @@ define("xabber-chats", function () {
             let itemIdx = this.selected_contacts.indexOf(contact_jid);
             if (itemIdx > -1)
                 this.selected_contacts.splice(itemIdx, 1);
-            this.selected_contacts.push(contact_jid);
+            else
+                this.selected_contacts.push(contact_jid);
             this.updateCounter();
         },
 
@@ -5147,6 +5150,7 @@ define("xabber-chats", function () {
             }
             $(ev.target).switchClass('mdi-chevron-right', is_visible);
             $(ev.target).switchClass('mdi-chevron-down', !is_visible);
+            this.updateScrollBar();
         },
 
         selectAllGroup: function (ev) {
