@@ -210,7 +210,8 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                connect: function () {
+                connect: function (options) {
+                    options = options || {};
                     var jid = this.get('jid'),
                         auth_type = this.get('auth_type'),
                         password;
@@ -227,7 +228,9 @@ define("xabber-accounts", function () {
                         password = this.getPassword();
                     }
                     if (!password) {
-                        this.password_view.show({login: true});
+                        let attrs = {login: true};
+                        options.token_invalidated && (attrs.token_invalidated = true);
+                        this.password_view.show(attrs);
                         return;
                     }
                     this.session.set({
@@ -1908,6 +1911,7 @@ define("xabber-accounts", function () {
             render: function (options) {
                 options || (options = {});
                 this.is_login = options.login;
+                this.token_invalidated = options.token_invalidated;
                 this.$('.modal-header span').text(this.is_login ? 'Log In' : 'Set password');
                 this.$('.btn-cancel').text(this.is_login ? 'Skip' : 'Cancel');
                 this.$('.btn-change').text(this.is_login ? 'Log In': 'Set');
@@ -1997,6 +2001,9 @@ define("xabber-accounts", function () {
             close: function () {
                 if (this.is_login) {
                     this.model.save('enabled', false);
+                }
+                if (this.token_invalidated) {
+                    this.model.destroy();
                 }
                 this.cancel();
                 this.closeModal();
