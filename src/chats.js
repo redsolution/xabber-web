@@ -3318,6 +3318,11 @@ define("xabber-chats", function () {
                 else
                     this.hideMessageAuthor($message);
             }
+            let last_message = this.model.last_message;
+            if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
+                this.model.last_message = message;
+                this.chat_item.updateLastMessage();
+            }
         },
 
         onChangedReadState: function (message) {
