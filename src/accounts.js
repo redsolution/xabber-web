@@ -993,14 +993,6 @@ define("xabber-accounts", function () {
                 this.updateAvatar();
                 this.updateColorScheme();
                 this.$el.attr('data-jid', this.model.get('jid'));
-                /*this.$el.hover(function () {
-                    this.$el.parent().siblings('.account-actions-panel').css({opacity: 1, top: this.$el[0].offsetTop - this.$el.parent()[0].scrollTop});
-                }.bind(this),
-                    function (ev) {
-                    let $target = $(ev.target);
-                    if (!this.$el.parent().siblings('.account-actions-panel').is(":hover"))
-                        this.$el.parent().siblings('.account-actions-panel').css({opacity: 0});
-                    }.bind(this));*/
                 this.model.session.on("change:auth_failed", this.updateAuthState, this);
                 this.model.session.on("change:connected", this.updateConnected, this);
                 this.model.on("change:status", this.updateStatus, this);
