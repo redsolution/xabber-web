@@ -16,7 +16,7 @@ define("xabber-ui", function () {
                 if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);
             }
-            if (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages') {
+            if (attrs.chat_item && (attrs.name === 'mentions' || attrs.name === 'contacts' || attrs.name === 'all-chats') && (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages')) {
                 if (!window.$('.message-actions-panel').hasClass('hidden')) {
                     if (!ev.ctrlKey && !ev.metaKey) {
                         switch (ev.keyCode) {

@@ -908,11 +908,11 @@ define("xabber-views", function () {
         },
 
         showContacts: function () {
-            xabber.body.setScreen('contacts', {right: null});
+            xabber.body.setScreen('contacts');
         },
 
         showMentions: function () {
-            xabber.body.setScreen('mentions', {right: null});
+            xabber.body.setScreen('mentions');
         },
 
         showSettings: function () {
@@ -920,15 +920,15 @@ define("xabber-views", function () {
         },
 
         showAddContactView: function () {
-            xabber.trigger('add_contact');
+            xabber.trigger('add_contact', {right: null});
         },
 
         showAddAccountView: function () {
-            xabber.trigger('add_account');
+            xabber.trigger('add_account', {right: null});
         },
 
         showAddGroupChatView: function () {
-            xabber.trigger('add_group_chat');
+            xabber.trigger('add_group_chat', {right: null});
         },
 
         showAbout: function () {

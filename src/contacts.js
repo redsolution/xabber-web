@@ -3618,11 +3618,7 @@ define("xabber-contacts", function () {
                     message.length && (msg = this.account.chats.receiveChatMessage(message, options));
                     chat.set('const_unread', unread_msgs_count);
                     if (msg) {
-                        if (msg.isSenderMe()) {
-                            (last_delivered_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DELIVERED);
-                            (last_displayed_msg <= msg.get('archive_id')) && msg.set('state', constants.MSG_DISPLAYED);
-                        }
-                        else if ($unread_messages.attr('after') < msg.get('archive_id') || $unread_messages.attr('after') < msg.get('contact_archive_id'))
+                        if (!msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('archive_id') || $unread_messages.attr('after') < msg.get('contact_archive_id')))
                             msg.set('is_unread', true);
                         chat.set('first_archive_id', msg.get('archive_id'));
                     }
