@@ -453,7 +453,7 @@ define("xabber-accounts", function () {
                     this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback('Authentication failed');
-                    this.connect();
+                    this.connect({token_invalidated: true});
                 },
 
                 onChangedConnected: function () {
