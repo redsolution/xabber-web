@@ -6665,7 +6665,6 @@ input[type='range'].voice-message-volume:focus {
     white-space: pre-wrap;
 }
 
-
 .recent-chats-placeholder {
     max-height: 350px;
     margin: 40px 0;
@@ -6673,6 +6672,12 @@ input[type='range'].voice-message-volume:focus {
 
 .recent-chats-plaheholder .placeholder-text {
     max-width: 200px;
+}
+
+.chat-list-wrap .load-chats-feedback {
+    height: 28px;
+    line-height: 18px;
+    padding: 4px 16px;
 }
 
 .chatbox-placeholder,

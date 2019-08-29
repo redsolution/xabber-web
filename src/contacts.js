@@ -3585,6 +3585,7 @@ define("xabber-contacts", function () {
                 this.account.last_msg_timestamp = moment.now();
                 let last_chat_msg_id = $(iq).find('set last');
                 last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
+                (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) && xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
                         jid = $item.attr('jid');
@@ -3624,6 +3625,7 @@ define("xabber-contacts", function () {
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
                 }.bind(this));
+                xabber.chats_view.hideChatsFeedback();
                 return true;
             },
 

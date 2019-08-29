@@ -4538,12 +4538,22 @@ define("xabber-chats", function () {
             }
         },
 
+        hideChatsFeedback: function () {
+            clearTimeout(this._load_chats_timeout);
+            this.$('.load-chats-feedback').addClass('hidden');
+            this.updateScrollBar();
+            this._load_chats_timeout = null;
+        },
+
         onScroll: function () {
             if (this.isScrolledToBottom() && !this._load_chats_timeout) {
                 this._load_chats_timeout = setTimeout(function () {
-                    clearTimeout(this._load_chats_timeout);
-                    this._load_chats_timeout = null;
-                }.bind(this), 5000);
+                    this.hideChatsFeedback();
+                }.bind(this), 10000);
+                if (xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
+                    this.$('.load-chats-feedback').text('Loading...').removeClass('hidden');
+                    this.updateScrollBar();
+                }
                 let accounts = xabber.accounts.connected;
                 accounts.forEach(function (account) {
                     let options = {max: xabber.settings.mam_messages_limit};
