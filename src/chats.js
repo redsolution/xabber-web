@@ -4549,7 +4549,7 @@ define("xabber-chats", function () {
             if (this.isScrolledToBottom() && !this._load_chats_timeout) {
                 this._load_chats_timeout = setTimeout(function () {
                     this.hideChatsFeedback();
-                }.bind(this), 10000);
+                }.bind(this), 5000);
                 if (xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
                     this.$('.load-chats-feedback').text('Loading...').removeClass('hidden');
                     this.updateScrollBar();
