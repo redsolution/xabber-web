@@ -4311,15 +4311,8 @@ define("xabber-chats", function () {
                 return;
             }
             options || (options = {});
-            this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
-            this.$('#new_chat_domain').val("");
-            this.$('input[name=chat_name]').val("");
-            this.$('.description-field .rich-textarea').text("");
-            this.$('.btn-add').addClass('non-active');
-            this.showPlaceholder();
-            this.$('span.errors').text('').addClass('hidden');
-            var accounts = options.account ? [options.account] : xabber.accounts.connected,
-                jid = options.jid || '';
+            this.setDefaultSettings();
+            var accounts = options.account ? [options.account] : xabber.accounts.connected;
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
             this.$('.account-field .dropdown-content').empty();
@@ -4328,8 +4321,6 @@ define("xabber-chats", function () {
                         this.renderAccountItem(account));
             }.bind(this));
             this.bindAccount(accounts[0]);
-            var name = this.$('input[name=chat_name]').val(),
-                contact, error_text;
             this.$('.btn-cancel').text(this.is_login ? 'Skip' : 'Cancel');
             this.$el.openModal({
                 ready: function () {
@@ -4352,7 +4343,22 @@ define("xabber-chats", function () {
         },
 
         setDefaultSettings: function () {
-
+            this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
+            this.$('#new_chat_domain').val("");
+            this.$('input[name=chat_name]').val("");
+            this.$('.description-field .rich-textarea').text("");
+            this.$('.btn-add').addClass('non-active');
+            this.showPlaceholder();
+            this.$('span.errors').text('').addClass('hidden');
+            let $incognito_wrap = this.$('.incognito-dropdown-wrap'),
+                default_incognito_value = $incognito_wrap.find('.dropdown-content .default-value');
+            $incognito_wrap.find('.incognito-item-wrap .property-value').attr('data-value', default_incognito_value.attr('data-value')).text(default_incognito_value.text());
+            let $global_wrap = this.$('.global-dropdown-wrap'),
+                default_global_value = $global_wrap.find('.dropdown-content .default-value');
+            $global_wrap.find('.global-item-wrap .property-value').attr('data-value', default_global_value.attr('data-value')).text(default_global_value.text());
+            let $membership_wrap = this.$('.membership-dropdown-wrap'),
+                default_membership_value = $membership_wrap.find('.dropdown-content .default-value');
+            $membership_wrap.find('.membership-item-wrap .property-value').attr('data-value', default_membership_value.attr('data-value')).text(default_membership_value.text());
         },
 
         bindAccount: function (account) {
@@ -4415,25 +4421,18 @@ define("xabber-chats", function () {
                 this.$("label[for=new_chat_jid]").addClass('active');
                 this.$('.input-field #new_chat_jid').get(0).value = text;
             }
-            if (this.$('.input-group-chat-name input').get(0).value)
-                this.$('.btn-add').removeClass('non-active');
-            else
-                this.$('.btn-add').addClass('non-active');
+            this.$('.btn-add').switchClass('non-active', !this.$('.input-group-chat-name input').get(0).value);
         },
 
-        showPlaceholder: function (ev) {
+        showPlaceholder: function () {
             let textarea_is_empty = (this.$('.rich-textarea ').text() !== "") ? false : true;
             this.$('.rich-textarea-wrap .placeholder').hideIf(!textarea_is_empty);
         },
 
         fixJid: function () {
             let elem = this.$('input[name=chat_jid]');
-            if (!elem.hasClass('fixed-jid')) {
-                elem.addClass('fixed-jid');
-            }
-            if (elem.get(0).value == "") {
-                elem.removeClass('fixed-jid');
-            }
+            !elem.hasClass('fixed-jid') && elem.addClass('fixed-jid');
+            (elem.get(0).value == "") && elem.removeClass('fixed-jid');
         },
 
         createGroupChat: function () {
@@ -4501,7 +4500,7 @@ define("xabber-chats", function () {
                 if (group_chats_support)
                     this.createGroupChat();
             }.bind(this),
-                function (error) {
+                function () {
                     this.$('.modal-footer .errors').removeClass('hidden').text('Invalid domain');
                 }.bind(this));
             }
