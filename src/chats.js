@@ -5799,9 +5799,9 @@ define("xabber-chats", function () {
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
-                        attrs.nickname = _.escape(attrs.nickname);
+                        attrs.nickname = attrs.nickname ? Strophe.xmlescape(attrs.nickname) : attrs.id;
                         let mention_item = $(templates.group_chats.mention_item(attrs));
-                        mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
+                        mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname') || participant.get('jid') || participant.get('id')), this.mention_avatar_size);
                         mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
                         this.$('.mentions-list').append(mention_item);
                     }.bind(this));
@@ -5816,7 +5816,7 @@ define("xabber-chats", function () {
             ev.preventDefault();
             let $participant_item = $(ev.target).closest('.mention-item'),
                 nickname = $participant_item.data('nickname'),
-                id = $participant_item.data('id'),
+                id = $participant_item.data('id') || "",
                 $rich_textarea = this.$('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea(),
                 caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
@@ -5833,6 +5833,12 @@ define("xabber-chats", function () {
             mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
             this.quill.deleteText(mention_position, ++mention_text.length);
+            if (!nickname.length) {
+                if (id.length)
+                    nickname = id;
+                else
+                    return;
+            }
             this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + _.escape(nickname));
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);

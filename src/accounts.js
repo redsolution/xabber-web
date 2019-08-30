@@ -39,7 +39,7 @@ define("xabber-accounts", function () {
                     if (!this.settings) {
                         this.settings = xabber.account_settings_list.create({
                             jid: _attrs.jid,
-                            timestamp: 0,
+                            timestamp: utils.now(),
                             auto_login_xa: this.get('auto_login_xa'),
                             to_sync: xabber.api_account.get('sync_all')
                         });
