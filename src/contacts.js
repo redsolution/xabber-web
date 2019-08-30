@@ -468,7 +468,7 @@ define("xabber-contacts", function () {
                         if (fwd_message.length > 1)
                             msg_text = fwd_message.length + ' forwarded messages';
                         else {
-                            msg_text = _.escape(fwd_message[0].get('message')) || (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
+                            msg_text = fwd_message[0].get('message') || (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
                             fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
@@ -1556,8 +1556,8 @@ define("xabber-contacts", function () {
 
             renderMemberItem: function (participant) {
                 let attrs = _.clone(participant.attributes);
-                attrs.nickname = _.escape(_.unescape(attrs.nickname));
-                attrs.badge = _.escape(_.unescape(attrs.badge));
+                attrs.nickname = _.escape(attrs.nickname);
+                attrs.badge = _.escape(attrs.badge);
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
                 $item_view.emojify('.badge', {emoji_size: 14});
@@ -1729,9 +1729,9 @@ define("xabber-contacts", function () {
 
             render: function () {
                 this.new_avatar = "";
-                let attrs = this.participant.attributes;
-                attrs.nickname = _.escape(_.unescape(attrs.nickname));
-                attrs.badge = _.escape(_.unescape(attrs.badge));
+                let attrs = _.clone(this.participant.attributes);
+                attrs.nickname = _.escape(attrs.nickname);
+                attrs.badge = _.escape(attrs.badge);
                 attrs.is_myself = attrs.jid === this.account.get('jid');
                 attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').anonymous === 'incognito') ? true : false;
                 let $member_info_view;
@@ -1756,7 +1756,7 @@ define("xabber-contacts", function () {
                 }
                 this.updateScrollBar();
                 this.$('.participant-info #edit-nickname').on("focusout", function () {
-                    let new_nickname = _.escape(this.$('#edit-nickname').getTextFromRichTextarea().trim());
+                    let new_nickname = this.$('#edit-nickname').getTextFromRichTextarea().trim();
                     if (new_nickname === "")
                         new_nickname = this.participant.get('nickname');
                     this.$('.participant-info #edit-nickname').hide();
@@ -1889,7 +1889,7 @@ define("xabber-contacts", function () {
 
             checkKeyup: function (ev) {
                 let $richtextarea = $(ev.target),
-                    new_value = _.escape($richtextarea.getTextFromRichTextarea().trim());
+                    new_value = $richtextarea.getTextFromRichTextarea().trim();
                 if (ev.target.id === 'edit-nickname') {
                     let has_changes = (new_value !== this.participant.get('nickname'));
                     this.updateButtons(has_changes);
@@ -2077,7 +2077,7 @@ define("xabber-contacts", function () {
                     jid = this.account.get('jid'),
                     member_id = this.participant.get('id'),
                     $participant_avatar = this.$('.participant-details-item .circle-avatar'),
-                    nickname_value = _.escape(this.$('.participant-info .nickname').text()),
+                    nickname_value = this.$('.participant-info .nickname').text(),
                     changed_avatar = this.new_avatar,
                     has_changes = false,
                     iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
@@ -2087,7 +2087,7 @@ define("xabber-contacts", function () {
                 changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 if (nickname_value != this.participant.get('nickname')) {
                     has_changes = true;
-                    iq_changes.c('nickname').t(_.unescape(nickname_value)).up();
+                    iq_changes.c('nickname').t(nickname_value).up();
                 }
                 this.$('.right-item').each(function(idx, right_item) {
                     if ($(right_item).hasClass('changed')) {
@@ -2123,7 +2123,7 @@ define("xabber-contacts", function () {
                     this.account.sendIQ(iq_changes,
                         function () {
                             this.$('.buttons-wrap button').removeClass('non-active');
-                            this.participant.set('nickname', _.unescape(nickname_value));
+                            this.participant.set('nickname', nickname_value);
                             this.close();
                         }.bind(this),
                         function (error) {
@@ -2217,7 +2217,7 @@ define("xabber-contacts", function () {
             },
 
             saveNewBadge: function () {
-                let new_badge = _.escape(this.$('.badge-text').getTextFromRichTextarea().trim());
+                let new_badge = this.$('.badge-text').getTextFromRichTextarea().trim();
                 if (new_badge.length > 32) {
                     this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
                 }
@@ -2226,7 +2226,7 @@ define("xabber-contacts", function () {
                         let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                             .c('item', {id: this.participant.get('id')})
-                            .c('badge').t(_.unescape(new_badge));
+                            .c('badge').t(new_badge);
                         this.account.sendIQ(iq_changes, function () {
                                 this.model.updateBadge(new_badge);
                                 this.close();

@@ -251,7 +251,8 @@ define([
         },
 
         slice_pretty_body: function (body, legacy_refs) {
-            let pretty_body = Array.from(body);
+            body = body || "";
+            let pretty_body = Array.from(deps.Strophe.xmlescape(deps.Strophe.xmlunescape(body)));
             legacy_refs && legacy_refs.forEach(function (legacy_ref) {
                 for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
                     pretty_body[idx] = "";

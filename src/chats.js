@@ -109,7 +109,7 @@ define("xabber-chats", function () {
                 full_jid = $invite_item.attr('jid'),
                 $delay = options.delay || $message.children('delay'),
                 from_jid = Strophe.getBareJidFromJid(full_jid),
-                body = _.escape($message.children('body').text()),
+                body = $message.children('body').text(),
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid),
@@ -189,9 +189,9 @@ define("xabber-chats", function () {
                 groupchat_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 avatar = user_info.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]'),
                 role = user_info.children('role').text(),
-                nickname = _.escape(user_info.children('nickname').text()),
+                nickname = user_info.children('nickname').text(),
                 jid = user_info.children('jid').text(),
-                badge = _.escape(user_info.children('badge').text()),
+                badge = user_info.children('badge').text(),
                 user_id = user_info.attr('id');
             !nickname.trim().length && (nickname = jid || id);
             let attrs = {
@@ -256,7 +256,7 @@ define("xabber-chats", function () {
             let $delay = options.delay || $message.children('delay'),
                 full_jid = $message.attr('from') || options.from_jid,
                 from_jid = Strophe.getBareJidFromJid(full_jid),
-                body = _.escape($message.children('body').text()),
+                body = $message.children('body').text(),
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid);
@@ -381,7 +381,7 @@ define("xabber-chats", function () {
 
             /* ---------- OLD FORMAT OF FORWARDED MESSAGES --------- */
             if (attrs.forwarded_message)
-                body = _.escape($message.children('comment').text()) || body;
+                body = $message.children('comment').text() || body;
             /* ----------------------------------------------------- */
 
             body && (attrs.message = body);
@@ -1455,9 +1455,9 @@ define("xabber-chats", function () {
 
           __initialize: function (options) {
               this.participant = options.model;
-              this.member_jid = _.unescape(this.participant.jid);
+              this.member_jid = this.participant.jid;
               this.member_id = this.participant.id;
-              this.member_nickname = _.unescape(this.participant.nickname);
+              this.member_nickname = this.participant.nickname;
               this.account.participant_messages = new xabber.Messages(null, {account: this.account});
               this.account.participant_messages.on("add", this.addMessage, this);
               this.account.participant_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
@@ -2394,7 +2394,7 @@ define("xabber-chats", function () {
             var attrs = _.clone(message.attributes),
                 is_sender = (message instanceof xabber.Message) ? message.isSenderMe() : false,
                 user_info = attrs.user_info || {},
-                username = (user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? _.escape(this.contact.my_info.get('nickname')) : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
+                username = Strophe.xmlescape(user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? this.contact.my_info.get('nickname') : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
                 images = attrs.images,
                 files =  attrs.files,
                 is_image = !_.isUndefined(images),
@@ -2754,7 +2754,7 @@ define("xabber-chats", function () {
         },
 
         sendMessage: function (message) {
-            let body = _.unescape(message.get('message')),
+            let body = message.get('message'),
                 legacy_body = '',
                 legacy_content = [],
                 forwarded_message = message.get('forwarded_message'),
@@ -2816,7 +2816,7 @@ define("xabber-chats", function () {
             if (message.get('blockquotes')) {
                 message.get('blockquotes').forEach(function (blockquote) {
                     stanza.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + legacy_body.length, end: blockquote.end + legacy_body.length, type: 'quote'})
-                        .c('marker').t(_.unescape(constants.QUOTE_MARKER)).up().up();
+                        .c('marker').t(constants.QUOTE_MARKER).up().up();
                     legacy_content.push({start: blockquote.start + legacy_body.length, end: blockquote.end + legacy_body.length, type: 'quote', marker: constants.QUOTE_MARKER});
                 }.bind(this));
             }
@@ -4024,7 +4024,7 @@ define("xabber-chats", function () {
                     active_right_screen = xabber.body.screen.get('right'),
                     participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
                     participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id),
-                    new_text = _.escape($message.find('replace message body').text()),
+                    new_text = $message.find('replace message body').text(),
                     $mentions = $message.find('replace message reference[type="mention"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                     $markups = $message.find('replace message reference[type="markup"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                     mentions_list = [],
@@ -5688,8 +5688,8 @@ define("xabber-chats", function () {
 
         updateInfoInBottom: function () {
             if (this.contact.my_info) {
-                var nickname = _.unescape(this.contact.my_info.get('nickname')),
-                    badge = _.unescape(this.contact.my_info.get('badge')),
+                var nickname = this.contact.my_info.get('nickname'),
+                    badge = this.contact.my_info.get('badge'),
                     avatar = this.contact.my_info.get('b64_avatar'),
                     role = this.contact.my_info.get('role');
                 if (nickname) {
@@ -5799,7 +5799,7 @@ define("xabber-chats", function () {
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
-                        attrs.nickname = _.escape(_.unescape(attrs.nickname));
+                        attrs.nickname = _.escape(attrs.nickname);
                         let mention_item = $(templates.group_chats.mention_item(attrs));
                         mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname')), this.mention_avatar_size);
                         mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
@@ -6157,7 +6157,7 @@ define("xabber-chats", function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                text = _.escape($rich_textarea.getTextFromRichTextarea().trim().replace(/`/g, "'"));
+                text = $rich_textarea.getTextFromRichTextarea().trim();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = $(emoji_item).data('emoji');
                 this.account.chat_settings.updateLastEmoji(emoji);
@@ -6183,10 +6183,10 @@ define("xabber-chats", function () {
                         let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
                             quote_end_idx = content_concat.length - 1;
                         blockquotes.push({marker: constants.QUOTE_MARKER, start: quote_start_idx, end: quote_end_idx + constants.QUOTE_MARKER.length});
-                        text = Array.from(text);
+                        text = Array.from(_.escape(text));
                         text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
                         text[quote_end_idx] += '\n';
-                        text = text.join("");
+                        text = _.unescape(text.join(""));
 
                         content_concat[quote_start_idx] += constants.QUOTE_MARKER;
                         content_concat = Array.from(content_concat.join(""));
@@ -6230,21 +6230,22 @@ define("xabber-chats", function () {
         },
 
         setEditedMessage: function (message) {
+            let msg_text = message.get('message') || "";
             this.$('.fwd-messages-preview').showIf(this.edit_message);
             this.$('.fwd-messages-preview .msg-author').text('Edit message');
-            this.$('.fwd-messages-preview .msg-text').html(message.get('message'));
+            this.$('.fwd-messages-preview .msg-text').html(Strophe.xmlescape(msg_text));
             this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
             this.displaySaveButton();
             xabber.chat_body.updateHeight();
             let markup_body = utils.markupBodyMessage(message),
                 emoji_node = markup_body.emojify({tag_name: 'img'}),
-                $textarea = this.$('.input-message .rich-textarea'),
                 arr_text = Array.from(emoji_node);
             arr_text.forEach(function (item, idx) {
                 if (item == '\n')
                     arr_text[idx] = '<br>';
             }.bind(this));
             emoji_node = arr_text.join("");
+            this.quill.setText("");
             this.quill.pasteHTML(0, emoji_node, 'user');
             this.focusOnInput();
         },
@@ -6400,19 +6401,19 @@ define("xabber-chats", function () {
         },
 
         editMessage: function (text, text_markups, group_chat) {
-            text = _.unescape(text);
-            let old_body = this.edit_message.get('message'),
-                legacy_body = this.edit_message.get('original_message'),
+            text = text;
+            let old_body = this.edit_message.get('message') || "",
+                legacy_body = Strophe.xmlescape(this.edit_message.get('original_message') || ""),
                 groupchat_legacy = this.edit_message.get('legacy_content') && this.edit_message.get('legacy_content').find(item => item.type === 'groupchat'),
                 stanza_id = this.edit_message.get('archive_id'),
                 markups = text_markups.markup_references || [],
                 mentions = text_markups.mentions || [];
-            legacy_body.length && (legacy_body = legacy_body.slice(0, legacy_body.length - _.escape(old_body).length));
+            legacy_body.length && (legacy_body = legacy_body.slice(0, legacy_body.length - Strophe.xmlescape(old_body).length));
             groupchat_legacy && (legacy_body = legacy_body.slice(0, groupchat_legacy.start) + legacy_body.slice(groupchat_legacy.end + 1));
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
                 .c('replace', {xmlns: Strophe.NS.XABBER_REWRITE, id: stanza_id})
                 .c('message')
-                .c('body').t(_.unescape(legacy_body) + text).up();
+                .c('body').t(Strophe.xmlunescape(legacy_body) + text).up();
             markups.forEach(function (markup) {
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + legacy_body.length, end: markup.end + legacy_body.length, type: 'markup'});
                 for (let idx in markup.markups) {
