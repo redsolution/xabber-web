@@ -2119,6 +2119,9 @@ define("xabber-chats", function () {
         },
 
         onMessage: function (message) {
+            if (message.get('jingle_message')) {
+                return;
+            }
             let scrolled_from_bottom = this.getScrollBottom();
             this.account.messages.add(message);
             if (!_.isUndefined(message.get('is_accepted'))) {
@@ -2783,7 +2786,8 @@ define("xabber-chats", function () {
                 if (message.get('jingle_message_state') === constants.JINGLE_MSG_REJECT)
                     stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
                         .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
-                return;
+                stanza.c('store', {xmlns: Strophe.NS.HINTS}).up();
+                // return;
             }
 
             if (forwarded_message) {
@@ -2909,7 +2913,6 @@ define("xabber-chats", function () {
             let jingle_message = this.model.messages.create({
                 from_jid: this.account.get('jid'),
                 type: 'system',
-                message: 'Voice call',
                 media: media_type,
                 submitted_here: true,
                 jingle_message: true,
@@ -5367,7 +5370,7 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
-            /*this.content.initJingleMessage('audio');*/
+            this.content.initJingleMessage('audio');
         },
 
         getActiveScreen: function () {

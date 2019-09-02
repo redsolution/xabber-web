@@ -181,6 +181,7 @@ define("xabber-strophe", function () {
 
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+        Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE_MSG', 'urn:xmpp:jingle-message:0');
         Strophe.addNamespace('JINGLE_RTP', 'urn:xmpp:jingle:apps:rtp:1');
