@@ -515,6 +515,15 @@ define("xabber-chats", function () {
             var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]'),
                 $receipt_request = $message.children('request[xmlns="'+Strophe.NS.RECEIPTS +'"]'),
                 $receipt_response = $message.children('received[xmlns="'+Strophe.NS.RECEIPTS +'"]');
+            if ($message.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]').length) {
+                if (options.is_archived || options.synced_msg) {
+                    return;
+                }
+                else {
+                    xabber.current_voip_call = new xabber.JingleMessageView();
+                    xabber.current_voip_call.show();
+                }
+            }
             if (!options.is_archived) {
                 var $stanza_id, $contact_stanza_id,
                     $archived = $message.find('archived');

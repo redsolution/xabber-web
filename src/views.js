@@ -981,6 +981,50 @@ define("xabber-views", function () {
         },
     });
 
+    xabber.JingleMessageView = xabber.BasicView.extend({
+        className: 'modal main-modal jingle-message-view',
+        template: templates.jingle_message_dialog,
+
+        event: {
+            "click .btn-accept": "accept",
+            "click .btn-microphone": "toggleMicrophone",
+            "click .btn-video": "videoCall",
+            "click .btn-cancel": "cancel"
+
+        },
+
+        _initialize: function () {},
+
+        render: function (options) {
+            this.$el.openModal({
+                ready: function () {
+                }.bind(this),
+                complete: this.hide.bind(this)
+            });
+
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        accept: function () {
+
+        },
+
+        toggleMicrophone: function () {
+
+        },
+
+        videoCall: function () {
+
+        },
+
+        cancel: function () {
+
+        }
+    });
+
     xabber.SettingsView = xabber.BasicView.extend({
         className: 'settings-panel',
         template: templates.settings,

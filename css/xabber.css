@@ -2748,6 +2748,36 @@ body {
     width: calc(100% - 40px);
     margin: 0;
 }
+/* ----------------- JINGLE MESSAGE VIEW -------------------- */
+
+.jingle-message-view {
+    width: 360px;
+}
+
+.jingle-message-view .contact-info {
+}
+
+.jingle-message-view i {
+    cursor: pointer;
+    color: #FFF;
+    border-radius: 50%;
+    padding: 12px;
+    display: inline-block;
+    height: 48px !important;
+    width: 48px !important;
+    margin: 0;
+}
+
+.jingle-message-view .modal-content,
+.jingle-message-view .modal-footer {
+    text-align: center;
+    margin: 8px 0;
+}
+
+.jingle-message-view .modal-content i {
+    background-color: #9E9E9E;
+    margin: 0 8px;
+}
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */
 
