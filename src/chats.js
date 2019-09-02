@@ -582,7 +582,7 @@ define("xabber-chats", function () {
                 this.account.sendIQ(iq,
                     function (iq) {
                         var items = $(iq).find('item'),
-                            current_timestamp = $message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now(),
+                            current_timestamp = Number(moment($message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now())),
                             has_blocking = false;
                         if (items.length > 0) {
                             items.each(function (idx, item) {
