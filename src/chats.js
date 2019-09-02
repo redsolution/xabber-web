@@ -2798,7 +2798,7 @@ define("xabber-chats", function () {
                 if (message.get('jingle_message_state') === constants.JINGLE_MSG_REJECT)
                     stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
                         .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
-                // return;
+                return;
             }
 
             if (forwarded_message) {
@@ -5382,7 +5382,7 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
-            this.content.initJingleMessage('audio');
+            // this.content.initJingleMessage('audio');
         },
 
         getActiveScreen: function () {
