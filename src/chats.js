@@ -4129,7 +4129,7 @@ define("xabber-chats", function () {
                 $(all_messages).each(function (idx, item) {
                     chat.item_view.content.removeMessage(item);
                 }.bind(this));
-                chat.item_view.content.head.closeChat();
+                // chat.item_view.content.head.closeChat();
             }
             if ($message.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH + '"]').length) {
                 let code =  $message.find('confirm').attr('id');
