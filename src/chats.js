@@ -820,14 +820,15 @@ define("xabber-chats", function () {
                 }.bind(this));
         },
 
-        retractAllMessages: function () {
+        retractAllMessages: function (callback) {
             var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
                 .c('retract-all', {xmlns: Strophe.NS.XABBER_REWRITE, symmetric: true});
             this.account.sendIQ(iq_retraction, function (iq_response) {
-                var all_messages = this.messages.models;
-                $(all_messages).each(function (idx, msg) {
-                    this.item_view.content.removeMessage(msg);
-                }.bind(this));
+                    var all_messages = this.messages.models;
+                    $(all_messages).each(function (idx, msg) {
+                        this.item_view.content.removeMessage(msg);
+                    }.bind(this));
+                    callback && callback();
             }.bind(this),
                 function (error) {
                     if ($(error).find('not-allowed').length)
@@ -2323,9 +2324,15 @@ define("xabber-chats", function () {
 
         clearHistory: function () {
             this._clearing_history = true;
-            _.each(_.clone(this.model.messages.models), this.removeMessage.bind(this));
-            this._clearing_history = false;
-            this.updateScrollBar();
+            // _.each(_.clone(this.model.messages.models), this.removeMessage.bind(this));
+            utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?", null, { ok_button_text: 'delete'}).done(function (result) {
+                if (result) {
+                    this.model.retractAllMessages(function () {
+                        this._clearing_history = false;
+                        this.updateScrollBar();
+                    }.bind(this));
+                }
+            }.bind(this));
         },
 
         renderVoiceMessage: function (element, file_url) {
