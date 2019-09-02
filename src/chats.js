@@ -820,9 +820,12 @@ define("xabber-chats", function () {
                 }.bind(this));
         },
 
-        retractAllMessages: function (callback) {
-            var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
-                .c('retract-all', {xmlns: Strophe.NS.XABBER_REWRITE, symmetric: true});
+        retractAllMessages: function (symmetric, callback, errback) {
+            let is_group_chat = this.contact.get('group_chat'),
+                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? this.contact.get('jid') : this.account.get('jid')}),
+                retract_attrs = {xmlns: Strophe.NS.XABBER_REWRITE, symmetric: symmetric};
+            !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
+            iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
                     var all_messages = this.messages.models;
                     $(all_messages).each(function (idx, msg) {
@@ -833,6 +836,7 @@ define("xabber-chats", function () {
                 function (error) {
                     if ($(error).find('not-allowed').length)
                         utils.dialogs.error("You have no permission to clear message archive");
+                    errback && errback();
                 }.bind(this));
         },
 
@@ -2323,15 +2327,26 @@ define("xabber-chats", function () {
         },
 
         clearHistory: function () {
+            let dialog_options = [];
             this._clearing_history = true;
-            // _.each(_.clone(this.model.messages.models), this.removeMessage.bind(this));
-            utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?", null, { ok_button_text: 'delete'}).done(function (result) {
-                if (result) {
-                    this.model.retractAllMessages(function () {
-                        this._clearing_history = false;
-                        this.updateScrollBar();
-                    }.bind(this));
+            !this.contact.get('group_chat') && (dialog_options = [{
+                name: 'symmetric_deletion',
+                checked: false,
+                text: 'Delete for all'
+            }]);
+            utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?",
+                dialog_options, {ok_button_text: 'delete'}).done(function (res) {
+                if (!res) {
+                    this._clearing_history = false;
+                    return;
                 }
+                let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
+                this.model.retractAllMessages(symmetric, function () {
+                    this._clearing_history = false;
+                    this.updateScrollBar();
+                }.bind(this), function () {
+                    this._clearing_history = false;
+                }.bind(this));
             }.bind(this));
         },
 
@@ -2783,7 +2798,7 @@ define("xabber-chats", function () {
                 if (message.get('jingle_message_state') === constants.JINGLE_MSG_REJECT)
                     stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
                         .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
-                return;
+                // return;
             }
 
             if (forwarded_message) {
@@ -5367,7 +5382,7 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
-            /*this.content.initJingleMessage('audio');*/
+            this.content.initJingleMessage('audio');
         },
 
         getActiveScreen: function () {

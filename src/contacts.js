@@ -814,6 +814,7 @@ define("xabber-contacts", function () {
                 "click .btn-block": "blockContact",
                 "click .btn-unblock": "unblockContact",
                 "click .btn-mute": "changeNotifications",
+                "click .btn-clear-history": "retractAllMessages",
                 "click .btn-auth-request": "requestAuthorization"
             },
 
@@ -927,6 +928,22 @@ define("xabber-contacts", function () {
                 }
             },
 
+            retractAllMessages: function () {
+                let chat = this.account.chats.getChat(this.model),
+                    dialog_options = [{
+                    name: 'symmetric_deletion',
+                    checked: false,
+                    text: 'Delete for all'
+                }];
+                utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?",
+                    dialog_options, {ok_button_text: 'delete'}).done(function (res) {
+                    if (res) {
+                        let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
+                        chat.retractAllMessages(symmetric)
+                    }
+                }.bind(this));
+            },
+
             changeNotifications: function () {
                 var muted = !this.model.get('muted');
                 this.model.set('muted', muted);
@@ -992,7 +1009,7 @@ define("xabber-contacts", function () {
                 "click .btn-default-restrictions": "editDefaultRestrictions",
                 "click .btn-chat": "openChat",
                 "click .btn-escape": "openChat",
-                "click .btn-delete-all-messages": "retractAllMessages",
+                "click .btn-clear-history": "retractAllMessages",
                 "change .circle-avatar input": "changeAvatar",
                 "click .list-variant": "changeList"
             },
@@ -1196,9 +1213,10 @@ define("xabber-contacts", function () {
                 var group_chat = this.account.chats.getChat(this.model);
                 utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
-                        group_chat.retractAllMessages();
+                        group_chat.retractAllMessages(true);
                     }
-                }.bind(this));}
+                }.bind(this));
+            }
         });
 
         xabber.GroupChatPropertiesView = xabber.BasicView.extend({

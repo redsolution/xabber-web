@@ -6123,7 +6123,7 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .main-info .buttons-menu-wrap {
     right: 62px;
-    min-width: 142px;
+    min-width: 192px;
 }
 
 .edit-rights .participant-details-item .buttons-wrap,
