@@ -2754,7 +2754,34 @@ body {
     width: 360px;
 }
 
-.jingle-message-view .contact-info {
+.jingle-message-view .modal-header {
+    height: inherit;
+}
+
+.jingle-message-view .calling-status {
+    color: #424242
+}
+
+.jingle-message-view .panel-header {
+    text-transform: uppercase;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.jingle-message-view .circle-avatar {
+    width: 96px;
+    height: 96px;
+    margin: 8px auto 12px auto;
+}
+
+.jingle-message-view .contact-info .name {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.jingle-message-view .modal-header,
+.jingle-message-view .modal-footer .contact-info {
+    text-align: center;
 }
 
 .jingle-message-view i {
@@ -2765,18 +2792,29 @@ body {
     display: inline-block;
     height: 48px !important;
     width: 48px !important;
-    margin: 0;
+    margin: 0 12px;
 }
 
 .jingle-message-view .modal-content,
 .jingle-message-view .modal-footer {
     text-align: center;
-    margin: 8px 0;
 }
 
 .jingle-message-view .modal-content i {
     background-color: #9E9E9E;
-    margin: 0 8px;
+}
+
+.jingle-message-view .modal-content .buttons-wrap {
+    padding: 12px 0;
+}
+
+.jingle-message-view .modal-footer {
+    height: inherit;
+    padding: 4px 24px;
+}
+
+.jingle-message-view .contact-info .jid {
+    margin: 4px 0;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */

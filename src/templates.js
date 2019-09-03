@@ -3,7 +3,7 @@ define("xabber-templates", [
     "jquery",
 
     "text!templates/base/dialog.html",
-    "text!templates/base/jingle_message_dialog.html",
+    "text!templates/base/jingle_message_calling.html",
     "text!templates/base/input_widget.html",
     "text!templates/base/toolbar.html",
     "text!templates/base/settings.html",
@@ -166,7 +166,7 @@ define("xabber-templates", [
 
 
     addTemplate('base.dialog');
-    addTemplate('base.jingle_message_dialog');
+    addTemplate('base.jingle_message_calling');
     addTemplate('base.input_widget');
     addTemplate('base.toolbar');
     addTemplate('base.settings');

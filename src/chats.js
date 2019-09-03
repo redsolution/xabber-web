@@ -508,20 +508,43 @@ define("xabber-chats", function () {
             }.bind(this));
         },
 
+        getCallingAvailability: function (to, session_id, callback) {
+            let iq = $iq({from: this.account.get('jid'), to: to, type: 'get'})
+                .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
+                .c('session', {id: session_id});
+            this.account.sendIQ(iq, callback);
+        },
+
         receiveMessage: function ($message, options) {
             var from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 carbon_copied = options.carbon_copied;
             // searching chat marker message
             var $marker = $message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]'),
                 $receipt_request = $message.children('request[xmlns="'+Strophe.NS.RECEIPTS +'"]'),
-                $receipt_response = $message.children('received[xmlns="'+Strophe.NS.RECEIPTS +'"]');
-            if ($message.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]').length) {
+                $receipt_response = $message.children('received[xmlns="'+Strophe.NS.RECEIPTS +'"]'),
+                $jingle_msg_propose = $message.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                $jingle_msg_accept = $message.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                $jingle_msg_reject = $message.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
+            if ($jingle_msg_propose.length) {
                 if (options.is_archived || options.synced_msg) {
                     return;
                 }
                 else {
-                    xabber.current_voip_call = new xabber.JingleMessageView();
-                    xabber.current_voip_call.show();
+                    let session_id = $jingle_msg_propose.attr('id'),
+                        iq_to = $message.attr('from');
+                    this.getCallingAvailability(iq_to, session_id, function () {
+                        xabber.current_voip_call_view = new xabber.JingleMessageView({full_jid: iq_to, session_id: session_id});
+                        xabber.current_voip_call_view.show({contact: this.contact, status: 'in'});
+                    }.bind(this));
+                }
+            }
+            if ($jingle_msg_accept.length) {
+
+            }
+            if ($jingle_msg_reject.length) {
+                if (xabber.current_jingle_msg_id === $jingle_msg_reject.attr('id')) {
+                    xabber.current_voip_call_view && xabber.current_voip_call_view.close();
+                    xabber.current_jingle_msg_id = null;
                 }
             }
             if (!options.is_archived) {
@@ -2948,16 +2971,20 @@ define("xabber-chats", function () {
         },
 
         initJingleMessage: function (media_type) {
-            let jingle_message = this.model.messages.create({
+            let session_id = uuid(),
+                jingle_message = this.model.messages.create({
                 from_jid: this.account.get('jid'),
                 type: 'system',
                 media: media_type,
                 submitted_here: true,
                 jingle_message: true,
                 jingle_message_state: constants.JINGLE_MSG_PROPOSE,
-                jingle_msg_id: uuid(),
+                jingle_msg_id: session_id,
                 forwarded_message: null
             });
+            xabber.current_jingle_msg_id = session_id;
+            xabber.current_voip_call_view = new xabber.JingleMessageView({session_id: session_id});
+            xabber.current_voip_call_view.show({contact: this.contact, status: constants.JINGLE_MSG_PROPOSE});
             this.sendMessage(jingle_message);
         },
 

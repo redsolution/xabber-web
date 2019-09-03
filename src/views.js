@@ -983,9 +983,10 @@ define("xabber-views", function () {
 
     xabber.JingleMessageView = xabber.BasicView.extend({
         className: 'modal main-modal jingle-message-view',
-        template: templates.jingle_message_dialog,
+        template: templates.jingle_message_calling,
+        avatar_size: constants.AVATAR_SIZES.XABBER_VOICE_CALL_VIEW,
 
-        event: {
+        events: {
             "click .btn-accept": "accept",
             "click .btn-microphone": "toggleMicrophone",
             "click .btn-video": "videoCall",
@@ -993,15 +994,54 @@ define("xabber-views", function () {
 
         },
 
-        _initialize: function () {},
+        _initialize: function (options) {
+            this.full_jid = options.full_jid;
+            this.session_id = options.session_id;
+        },
 
         render: function (options) {
+            options = options || {};
+            this.contact = options.contact;
+            this.account = options.contact.account;
+            this.updateName();
+            this.updateCallingStatus(options.status);
+            this.updateAccountJid();
             this.$el.openModal({
                 ready: function () {
+                    this.updateAvatar();
                 }.bind(this),
-                complete: this.hide.bind(this)
+                complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
             });
 
+        },
+
+        updateAvatar: function () {
+            let image = this.contact.cached_image;
+            this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        },
+
+        updateCallingStatus: function (status) {
+            status = status || "";
+            this.$('.calling-status').text(constants.JINGLE_MSG_VERBOSE_STATE[status] || "");
+            if (status === constants.JINGLE_MSG_ACCEPT) {
+                this.$('.btn-accept').addClass('hidden');
+                this.$('.buttons-wrap').removeClass('hidden');
+            }
+            if (status === 'in') {
+                this.$('.btn-accept').removeClass('hidden');
+                this.$('.buttons-wrap').addClass('hidden');
+            }
+        },
+
+        updateName: function () {
+            this.$('.contact-info .name').text(this.contact.get('name'));
+        },
+
+        updateAccountJid: function () {
+            this.$('.modal-footer .contact-info .jid').text(this.contact.get('jid'));
         },
 
         close: function () {
@@ -1009,7 +1049,27 @@ define("xabber-views", function () {
         },
 
         accept: function () {
+            let $accept_iq = $msg({from: this.account.get('jid'), to: this.full_jid})
+                .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.session_id});
+            this.account.sendMsg($accept_iq);
+            this.updateStatus(constants.JINGLE_MSG_ACCEPT);
+            this.initSession();
+        },
 
+        initSession: function () {
+            const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+            var conn = new RTCPeerConnection({sdpSemantics: 'unified-plan'});
+            stream.getTracks().forEach(track => conn.addTrack(track, stream));
+            conn.createOffer().then(function(offer) {
+                let offer_sdp = offer.sdp;
+                let $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.full_jid, type: 'set'})
+                    .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.session_id})
+                    .c('content', {creator: 'initiator', name: 'voice'})
+                    .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                    .c('sdp').t(offer_sdp).up().up()
+                    .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                this.account.sendIQ($iq_offer_sdp);
+            });
         },
 
         toggleMicrophone: function () {
@@ -1021,7 +1081,10 @@ define("xabber-views", function () {
         },
 
         cancel: function () {
-
+            let $accept_iq = $msg({from: this.account.get('jid'), to: this.full_jid})
+                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.session_id});
+            this.account.sendMsg($accept_iq);
+            this.close();
         }
     });
 
