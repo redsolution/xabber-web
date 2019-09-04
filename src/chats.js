@@ -447,6 +447,143 @@ define("xabber-chats", function () {
         }
     });
 
+      xabber.JingleMessage = Backbone.Model.extend({
+          defaults: {
+              duration: 0,
+              contact_full_jid: "",
+              session_id: 0
+          },
+
+          initialize: function (attrs, options) {
+              attrs = attrs || {};
+              this.contact = options.contact;
+              this.account = this.contact.account;
+              this.registerIqHandler();
+              this.modal_view = new xabber.JingleMessageView({model: this});
+              this.conn = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}], sdpSemantics: 'unified-plan'});
+              this.set(attrs);
+              this.on('destroy', this.onDestroy, this);
+          },
+
+          registerIqHandler: function () {
+              this.account.connection.deleteHandler(this.iq_handler);
+              this.iq_handler = this.account.connection.addHandler(
+                  function (iq) {
+                      this.onIQ(iq);
+                      return true;
+                  }.bind(this), null, 'iq', 'set');
+
+          },
+
+          onDestroy: function () {
+              this.account.connection.deleteHandler(this.iq_handler);
+          },
+
+          onIQ: function (iq) {
+              let $incoming_iq = $(iq),
+                  $jingle_initiate = $incoming_iq.find('jingle[action="session-initiate"]'),
+                  $jingle_accept = $incoming_iq.find('jingle[action="session-accept"]'),
+                  $jingle_info = $incoming_iq.find('jingle[action="session-info"]'),
+                  from_jid = $incoming_iq.attr('from');
+              if ($jingle_initiate.length) {
+                  let offer_sdp = $jingle_initiate.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
+                  offer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'offer', sdp: offer_sdp}));
+                  this.acceptSession(offer_sdp);
+              }
+              if ($jingle_accept.length) {
+                  let answer_sdp = $jingle_accept.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
+                  answer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'answer', sdp: answer_sdp}));
+              }
+              if ($jingle_info.length) {
+                  let candidate = $jingle_info.find('candidate');
+                  candidate && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
+              }
+          },
+
+          propose: async function () {
+              this.set('initiator', this.contact.get('jid'));
+              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+              stream.getTracks().forEach(track => this.conn.addTrack(track, stream));
+          },
+
+          accept: function () {
+              let $accept_iq = $msg({from: this.account.get('jid'), to: this.get('contact_full_jid') || this.contact.get('jid')})
+                  .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
+              this.account.sendMsg($accept_iq);
+          },
+
+          reject: function () {
+              let $accept_iq = $msg({from: this.account.get('jid'), to: this.get('contact_full_jid') || this.contact.get('jid')})
+                  .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
+              this.account.sendMsg($accept_iq);
+          },
+
+          initSession: async function () {
+              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+              stream.getTracks().forEach(track => this.conn.addTrack(track, stream));
+              this.conn.onicecandidate = function(ice) {
+                  if (!ice || !ice.candidate || !ice.candidate.candidate)
+                      return;
+                  this.sendCandidate(ice.candidate);
+
+              }.bind(this);
+              this.conn.onaddstream = function (ev) {
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.stream;
+                  this.modal_view.$el.find('.webrtc-remote-video')[0].srcObject = ev.stream;
+              }.bind(this);
+              this.conn.createOffer().then(function(offer) {
+                  this.set('initiator', this.account.get('jid'));
+                  this.conn.setLocalDescription(offer);
+                  let offer_sdp = offer.sdp;
+                  let $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                      .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.get('session_id')})
+                      .c('content', {creator: 'initiator', name: 'voice'})
+                      .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                      .c('sdp').t(offer_sdp).up().up()
+                      .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                  this.account.sendIQ($iq_offer_sdp);
+              }.bind(this));
+          },
+
+          sendCandidate: function (candidate) {
+              let $iq_candidate = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                  .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-info', initiator: this.get('initiator'), sid: this.get('session_id')})
+                  .c('content', {creator: 'initiator', name: 'voice'})
+                  .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                  .c('transport', {xmlns: Strophe.NS.JINGLE_TRANSPORTS_ICE})
+                  .c('candidate', {sdpMLineIndex: candidate.sdpMLineIndex, sdpMid: candidate.sdpMid }).t(candidate.candidate);
+              this.account.sendIQ($iq_candidate);
+          },
+
+          acceptSession: async function (offer_sdp) {
+              this.set('initiator', this.contact.get('jid'));
+              this.conn.onicecandidate = function(ice) {
+                  if (!ice || !ice.candidate || !ice.candidate.candidate)
+                      return;
+                  this.sendCandidate(ice.candidate);
+              }.bind(this);
+              this.conn.onaddstream = function (ev) {
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.stream;
+                  this.modal_view.$el.find('.webrtc-remote-video')[0].srcObject = ev.stream;
+              }.bind(this);
+              this.conn.createAnswer().then(function(answer) {
+                  this.conn.setLocalDescription(answer);
+                  let answer_sdp = answer.sdp;
+                  let $iq_answer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                      .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-accept', initiator: this.contact.get('jid'), sid: this.get('session_id')})
+                      .c('content', {creator: 'initiator', name: 'voice'})
+                      .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                      .c('sdp').t(answer_sdp).up().up()
+                      .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                  this.account.sendIQ($iq_answer_sdp);
+              }.bind(this));
+          },
+
+          getIPFromStunServer: function () {
+
+          }
+      });
+
     xabber.Chat = Backbone.Model.extend({
         defaults: {
             opened: true,
@@ -533,8 +670,8 @@ define("xabber-chats", function () {
                     let session_id = $jingle_msg_propose.attr('id'),
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
-                        xabber.current_voip_call_view = new xabber.JingleMessageView({full_jid: iq_to, session_id: session_id});
-                        xabber.current_voip_call_view.show({contact: this.contact, status: 'in'});
+                        xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: iq_to, session_id: session_id}, {contact: this.contact});
+                        xabber.current_voip_call.modal_view.show({status: 'in'});
                     }.bind(this));
                 }
             }
@@ -542,9 +679,11 @@ define("xabber-chats", function () {
 
             }
             if ($jingle_msg_reject.length) {
-                if (xabber.current_jingle_msg_id === $jingle_msg_reject.attr('id')) {
-                    xabber.current_voip_call_view && xabber.current_voip_call_view.close();
-                    xabber.current_jingle_msg_id = null;
+                if (xabber.current_voip_call) {
+                    if (xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
+                        xabber.current_voip_call && xabber.current_voip_call.modal_view.close();
+                        xabber.current_voip_call.destroy();
+                    }
                 }
             }
             if (!options.is_archived) {
@@ -2983,8 +3122,9 @@ define("xabber-chats", function () {
                 forwarded_message: null
             });
             xabber.current_jingle_msg_id = session_id;
-            xabber.current_voip_call_view = new xabber.JingleMessageView({session_id: session_id});
-            xabber.current_voip_call_view.show({contact: this.contact, status: constants.JINGLE_MSG_PROPOSE});
+            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id}, {contact: this.contact});
+            xabber.current_voip_call.propose();
+            xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
             this.sendMessage(jingle_message);
         },
 
@@ -4951,7 +5091,8 @@ define("xabber-chats", function () {
           }
       });
 
-    xabber.ForwardPanelView = xabber.SearchView.extend({
+
+      xabber.ForwardPanelView = xabber.SearchView.extend({
         className: 'modal dialog-modal forward-panel-modal',
         template: templates.forward_panel,
         ps_selector: '.chat-list-wrap',

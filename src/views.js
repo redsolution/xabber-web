@@ -995,14 +995,14 @@ define("xabber-views", function () {
         },
 
         _initialize: function (options) {
-            this.full_jid = options.full_jid;
-            this.session_id = options.session_id;
+            this.model = options.model;
+            this.model.on('destroy', this.detach, this);
+            this.contact = this.model.contact;
+            this.account = this.contact.account;
         },
 
         render: function (options) {
             options = options || {};
-            this.contact = options.contact;
-            this.account = options.contact.account;
             this.updateName();
             this.updateCallingStatus(options.status);
             this.updateAccountJid();
@@ -1049,27 +1049,9 @@ define("xabber-views", function () {
         },
 
         accept: function () {
-            let $accept_iq = $msg({from: this.account.get('jid'), to: this.full_jid})
-                .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.session_id});
-            this.account.sendMsg($accept_iq);
-            this.updateStatus(constants.JINGLE_MSG_ACCEPT);
-            this.initSession();
-        },
-
-        initSession: function () {
-            const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-            var conn = new RTCPeerConnection({sdpSemantics: 'unified-plan'});
-            stream.getTracks().forEach(track => conn.addTrack(track, stream));
-            conn.createOffer().then(function(offer) {
-                let offer_sdp = offer.sdp;
-                let $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.full_jid, type: 'set'})
-                    .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.session_id})
-                    .c('content', {creator: 'initiator', name: 'voice'})
-                    .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
-                    .c('sdp').t(offer_sdp).up().up()
-                    .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
-                this.account.sendIQ($iq_offer_sdp);
-            });
+            this.model.accept();
+            this.updateCallingStatus(constants.JINGLE_MSG_ACCEPT);
+            this.model.initSession();
         },
 
         toggleMicrophone: function () {
@@ -1081,9 +1063,7 @@ define("xabber-views", function () {
         },
 
         cancel: function () {
-            let $accept_iq = $msg({from: this.account.get('jid'), to: this.full_jid})
-                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.session_id});
-            this.account.sendMsg($accept_iq);
+            this.model.reject();
             this.close();
         }
     });
