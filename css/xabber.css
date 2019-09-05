@@ -2795,6 +2795,20 @@ body {
     margin: 0 12px;
 }
 
+.jingle-message-view .modal-content video {
+    max-width: 310px;
+    max-height: 210px;
+    background-color: #424242;
+}
+
+.jingle-message-view .modal-content video.collapsed {
+    max-width: 100px;
+    max-height: 75px;
+    bottom: 78px;
+    position: absolute;
+    right: 25px;
+}
+
 .jingle-message-view .modal-content,
 .jingle-message-view .modal-footer {
     text-align: center;

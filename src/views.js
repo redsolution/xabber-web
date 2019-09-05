@@ -990,13 +990,14 @@ define("xabber-views", function () {
             "click .btn-accept": "accept",
             "click .btn-microphone": "toggleMicrophone",
             "click .btn-video": "videoCall",
+            "click .btn-volume": "toggleVolume",
             "click .btn-cancel": "cancel"
 
         },
 
         _initialize: function (options) {
             this.model = options.model;
-            this.model.on('destroy', this.detach, this);
+            this.model.on('destroy', this.complete, this);
             this.contact = this.model.contact;
             this.account = this.contact.account;
         },
@@ -1007,6 +1008,7 @@ define("xabber-views", function () {
             this.updateCallingStatus(options.status);
             this.updateAccountJid();
             this.$el.openModal({
+                dismissible: false,
                 ready: function () {
                     this.updateAvatar();
                 }.bind(this),
@@ -1060,6 +1062,11 @@ define("xabber-views", function () {
 
         videoCall: function () {
 
+        },
+
+        toggleVolume: function (ev) {
+            let $target = $(ev.target);
+            $target.switchClass(this.model.set('volume_on', !this.model.get('volume_on')));
         },
 
         cancel: function () {

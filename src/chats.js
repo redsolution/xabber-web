@@ -451,17 +451,34 @@ define("xabber-chats", function () {
           defaults: {
               duration: 0,
               contact_full_jid: "",
-              session_id: 0
+              session_id: 0,
+              volume_on: true
           },
 
           initialize: function (attrs, options) {
               attrs = attrs || {};
+              attrs.video = attrs.video || false;
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}], sdpSemantics: 'unified-plan'});
+              this.conn.onconnectionstatechange = this.onChangeConnectionState.bind(this);
+              this.conn.onaddstream = function (ev) {
+                  this.$remote_video[0].srcObject = ev.stream;
+                  this.get('video_in') && this.collapseLocalVideo();
+              }.bind(this);
+              this.conn.onicecandidate = function(ice) {
+                  if (!ice || !ice.candidate || !ice.candidate.candidate)
+                      return;
+                  this.sendCandidate(ice.candidate);
+              }.bind(this);
+              this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
+              this.$remote_video = this.modal_view.$el.find('.webrtc-remote-video');
               this.set(attrs);
+              this.onChangedMediaType();
+              this.on('change:video', this.onChangedMediaType, this);
+              this.on('change:volume_on', this.onChangedVolume, this);
               this.on('destroy', this.onDestroy, this);
           },
 
@@ -475,8 +492,43 @@ define("xabber-chats", function () {
 
           },
 
+          onChangeConnectionState: function (ev) {
+              (ev.target.connectionState === 'connected' && this.get('video')) && this.enableVideo();
+          },
+
+          onChangedMediaType: function () {
+              this.$local_video.switchClass('hidden', !this.get('video'));
+              this.$remote_video.switchClass('hidden', !this.get('video_in'));
+          },
+
+          onChangedVolume: function () {
+              if (this.get('volume_on'))
+                  this.$remote_video.removeAttr('muted');
+              else
+                  this.$remote_video.attr('muted', true);
+          },
+
           onDestroy: function () {
               this.account.connection.deleteHandler(this.iq_handler);
+          },
+
+          disableVideo: function () {
+              this.sendVideoStreamState('disable');
+          },
+
+          enableVideo: function () {
+              this.sendVideoStreamState('enable');
+          },
+
+          sendVideoStreamState: function (state) {
+              let $iq_video = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                  .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
+                  .c('video', {state: state, id: this.get('session_id')});
+              this.account.sendIQ($iq_video);
+          },
+
+          collapseLocalVideo: function () {
+              this.$local_video.addClass('collapsed');
           },
 
           onIQ: function (iq) {
@@ -484,6 +536,7 @@ define("xabber-chats", function () {
                   $jingle_initiate = $incoming_iq.find('jingle[action="session-initiate"]'),
                   $jingle_accept = $incoming_iq.find('jingle[action="session-accept"]'),
                   $jingle_info = $incoming_iq.find('jingle[action="session-info"]'),
+                  $jingle_video = $incoming_iq.find('query[xmlns="' + Strophe.NS.JINGLE_MSG + '"] video'),
                   from_jid = $incoming_iq.attr('from');
               if ($jingle_initiate.length) {
                   let offer_sdp = $jingle_initiate.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
@@ -498,12 +551,28 @@ define("xabber-chats", function () {
                   let candidate = $jingle_info.find('candidate');
                   candidate && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
               }
+              if ($jingle_video.length) {
+                  let session_id = $jingle_video.attr('id');
+                  if (session_id === this.get('session_id')) {
+                      let video_state = $jingle_video.attr('state');
+                      if (video_state === 'enable') {
+                          this.set('video_in', true);
+                      }
+                      if (video_state === 'disable') {
+                          this.set('video_in', false);
+                      }
+                      this.onChangedMediaType();
+                  }
+              }
           },
 
           propose: async function () {
               this.set('initiator', this.contact.get('jid'));
-              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-              stream.getTracks().forEach(track => this.conn.addTrack(track, stream));
+              navigator.mediaDevices.getUserMedia({audio: true, video: this.get('video')}).then(function (media_stream) {
+                  this.local_stream = media_stream;
+                  this.$local_video[0].srcObject = media_stream;
+                  media_stream.getTracks().forEach(track => this.conn.addTrack(track, media_stream));
+              }.bind(this));
           },
 
           accept: function () {
@@ -516,21 +585,19 @@ define("xabber-chats", function () {
               let $accept_iq = $msg({from: this.account.get('jid'), to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               this.account.sendMsg($accept_iq);
+              this.onRejected();
+          },
+
+          onRejected: function () {
+              this.local_stream && this.local_stream.getTracks().forEach(function (track) {
+                  track.stop();
+                  this.local_stream.removeTrack(track);
+              }.bind(this));
           },
 
           initSession: async function () {
-              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: this.get('video')});
               stream.getTracks().forEach(track => this.conn.addTrack(track, stream));
-              this.conn.onicecandidate = function(ice) {
-                  if (!ice || !ice.candidate || !ice.candidate.candidate)
-                      return;
-                  this.sendCandidate(ice.candidate);
-
-              }.bind(this);
-              this.conn.onaddstream = function (ev) {
-                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.stream;
-                  this.modal_view.$el.find('.webrtc-remote-video')[0].srcObject = ev.stream;
-              }.bind(this);
               this.conn.createOffer().then(function(offer) {
                   this.set('initiator', this.account.get('jid'));
                   this.conn.setLocalDescription(offer);
@@ -555,17 +622,8 @@ define("xabber-chats", function () {
               this.account.sendIQ($iq_candidate);
           },
 
-          acceptSession: async function (offer_sdp) {
+          acceptSession: async function () {
               this.set('initiator', this.contact.get('jid'));
-              this.conn.onicecandidate = function(ice) {
-                  if (!ice || !ice.candidate || !ice.candidate.candidate)
-                      return;
-                  this.sendCandidate(ice.candidate);
-              }.bind(this);
-              this.conn.onaddstream = function (ev) {
-                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.stream;
-                  this.modal_view.$el.find('.webrtc-remote-video')[0].srcObject = ev.stream;
-              }.bind(this);
               this.conn.createAnswer().then(function(answer) {
                   this.conn.setLocalDescription(answer);
                   let answer_sdp = answer.sdp;
@@ -577,10 +635,6 @@ define("xabber-chats", function () {
                       .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
                   this.account.sendIQ($iq_answer_sdp);
               }.bind(this));
-          },
-
-          getIPFromStunServer: function () {
-
           }
       });
 
@@ -681,7 +735,7 @@ define("xabber-chats", function () {
             if ($jingle_msg_reject.length) {
                 if (xabber.current_voip_call) {
                     if (xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
-                        xabber.current_voip_call && xabber.current_voip_call.modal_view.close();
+                        xabber.current_voip_call.onRejected();
                         xabber.current_voip_call.destroy();
                     }
                 }
@@ -3110,11 +3164,12 @@ define("xabber-chats", function () {
         },
 
         initJingleMessage: function (media_type) {
+            media_type = media_type || {};
             let session_id = uuid(),
                 jingle_message = this.model.messages.create({
                 from_jid: this.account.get('jid'),
                 type: 'system',
-                media: media_type,
+                media: media_type.video ? 'video' : 'audio',
                 submitted_here: true,
                 jingle_message: true,
                 jingle_message_state: constants.JINGLE_MSG_PROPOSE,
@@ -3122,7 +3177,7 @@ define("xabber-chats", function () {
                 forwarded_message: null
             });
             xabber.current_jingle_msg_id = session_id;
-            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id}, {contact: this.contact});
+            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video: jingle_message.get('media') === 'video'}, {contact: this.contact});
             xabber.current_voip_call.propose();
             xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
             this.sendMessage(jingle_message);
@@ -5576,7 +5631,7 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
-            this.content.initJingleMessage('audio');
+            this.content.initJingleMessage();
         },
 
         getActiveScreen: function () {
