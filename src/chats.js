@@ -587,7 +587,9 @@ define("xabber-chats", function () {
               navigator.mediaDevices.getUserMedia({audio: true}).then(function (media_stream) {
                   this.local_stream = media_stream;
                   this.$local_video[0].srcObject = media_stream;
-                  media_stream.getTracks().forEach(track => this.conn.addTrack(track), this.local_stream);
+                  let video_track = this.initVideoTrack();
+                  this.conn.addTrack(video_track);
+                  media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
               }.bind(this));
           },
 
@@ -597,22 +599,23 @@ define("xabber-chats", function () {
                   media_stream.getVideoTracks().forEach(function (track) {
                       this.local_stream.addTrack(track);
                       this.conn.addTrack(track, this.local_stream);
+                      this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
                   }.bind(this));
               }.bind(this));
           },
 
           stopAudioStream: function () {
-              this.local_stream && this.local_stream.getTracks().forEach(function (track) {
+              /*this.local_stream && this.local_stream.getTracks().forEach(function (track) {
                   track.stop();
                   this.local_stream.removeTrack(track);
-              }.bind(this));
+              }.bind(this));*/
           },
 
           stopVideoStream: function () {
-              this.local_video_stream && this.local_video_stream.getTracks().forEach(function (track) {
+              /*this.local_video_stream && this.local_video_stream.getTracks().forEach(function (track) {
                   track.stop();
                   this.local_video_stream.removeTrack(track);
-              }.bind(this));
+              }.bind(this));*/
           },
 
           accept: function () {
@@ -628,15 +631,26 @@ define("xabber-chats", function () {
               this.destroy();
           },
 
-          onCreateOffer: function () {
-
+          initVideoTrack: function () {
+              let canvas = Object.assign(document.createElement("canvas"), {width: 320, height: 240});
+              let ctx = canvas.getContext('2d');
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              let p = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              requestAnimationFrame(function draw(){
+                  for (var i = 0; i < p.data.length; i++) {
+                      p.data[i++] = p.data[i++] = p.data[i++] = Math.random() * 255;
+                  }
+                  ctx.putImageData(p, 0, 0);
+                  requestAnimationFrame(draw);
+              });
+              return canvas.captureStream(60).getTracks()[0];
           },
 
           initSession: function () {
               navigator.mediaDevices.getUserMedia({audio: true}).then(function (media_stream) {
                   this.local_stream = media_stream;
                   this.$local_video[0].srcObject = media_stream;
-                  media_stream.getTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
+                  media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
                   return this.conn.createOffer({offerToReceiveAudio:1, offerToReceiveVideo: 0});
               }.bind(this)).then(function(offer) {
                       this.set('initiator', this.account.get('jid'));
