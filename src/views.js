@@ -1061,7 +1061,15 @@ define("xabber-views", function () {
         },
 
         videoCall: function () {
-
+            this.model.set('video', !this.model.get('video'));
+            if (this.model.get('video')) {
+                this.model.enableVideo();
+                this.model.createVideoStream();
+            }
+            else {
+                this.model.disableVideo();
+                this.model.stopVideoStream();
+            }
         },
 
         toggleVolume: function (ev) {

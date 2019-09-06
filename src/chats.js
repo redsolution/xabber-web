@@ -463,9 +463,21 @@ define("xabber-chats", function () {
               this.registerIqHandler();
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}], sdpSemantics: 'unified-plan'});
+              this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
+              this.$remote_video = this.modal_view.$el.find('.webrtc-remote-video');
               this.conn.onconnectionstatechange = this.onChangeConnectionState.bind(this);
+              this.set(attrs);
+              this.onChangedMediaType();
               this.conn.onaddstream = function (ev) {
                   this.$remote_video[0].srcObject = ev.stream;
+                  this.get('video_in') && this.collapseLocalVideo();
+              }.bind(this);
+              this.conn.ontrack = function (ev) {
+                  /*remoteVideo.srcObject = null;
+                  remoteVideo.srcObject = e.streams[0];*/
+                  // this.modal_view.$el.find('audio')[0].srcObject = ev.streams[0];
+                  this.$remote_video[0].srcObject = null;
+                  this.$remote_video[0].srcObject = ev.streams[0];
                   this.get('video_in') && this.collapseLocalVideo();
               }.bind(this);
               this.conn.onicecandidate = function(ice) {
@@ -473,10 +485,6 @@ define("xabber-chats", function () {
                       return;
                   this.sendCandidate(ice.candidate);
               }.bind(this);
-              this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
-              this.$remote_video = this.modal_view.$el.find('.webrtc-remote-video');
-              this.set(attrs);
-              this.onChangedMediaType();
               this.on('change:video', this.onChangedMediaType, this);
               this.on('change:volume_on', this.onChangedVolume, this);
               this.on('destroy', this.onDestroy, this);
@@ -497,8 +505,8 @@ define("xabber-chats", function () {
           },
 
           onChangedMediaType: function () {
-              this.$local_video.switchClass('hidden', !this.get('video'));
-              this.$remote_video.switchClass('hidden', !this.get('video_in'));
+             /* this.$local_video.switchClass('hidden', !this.get('video'));
+              this.$remote_video.switchClass('hidden', !this.get('video_in'));*/
           },
 
           onChangedVolume: function () {
@@ -510,6 +518,9 @@ define("xabber-chats", function () {
 
           onDestroy: function () {
               this.account.connection.deleteHandler(this.iq_handler);
+              this.stopAudioStream();
+              this.stopVideoStream();
+              this.conn.close();
           },
 
           disableVideo: function () {
@@ -549,7 +560,7 @@ define("xabber-chats", function () {
               }
               if ($jingle_info.length) {
                   let candidate = $jingle_info.find('candidate');
-                  candidate && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
+                  candidate.length && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
               }
               if ($jingle_video.length) {
                   let session_id = $jingle_video.attr('id');
@@ -566,12 +577,41 @@ define("xabber-chats", function () {
               }
           },
 
-          propose: async function () {
+          propose: function () {
               this.set('initiator', this.contact.get('jid'));
-              navigator.mediaDevices.getUserMedia({audio: true, video: this.get('video')}).then(function (media_stream) {
+              this.createAudioStream();
+              this.get('video') && this.createVideoStream();
+          },
+
+          createAudioStream: function () {
+              navigator.mediaDevices.getUserMedia({audio: true}).then(function (media_stream) {
                   this.local_stream = media_stream;
                   this.$local_video[0].srcObject = media_stream;
-                  media_stream.getTracks().forEach(track => this.conn.addTrack(track, media_stream));
+                  media_stream.getTracks().forEach(track => this.conn.addTrack(track), this.local_stream);
+              }.bind(this));
+          },
+
+          createVideoStream: function () {
+              navigator.mediaDevices.getUserMedia({video: true}).then(function (media_stream) {
+                  this.$local_video[0].srcObject = media_stream;
+                  media_stream.getVideoTracks().forEach(function (track) {
+                      this.local_stream.addTrack(track);
+                      this.conn.addTrack(track, this.local_stream);
+                  }.bind(this));
+              }.bind(this));
+          },
+
+          stopAudioStream: function () {
+              this.local_stream && this.local_stream.getTracks().forEach(function (track) {
+                  track.stop();
+                  this.local_stream.removeTrack(track);
+              }.bind(this));
+          },
+
+          stopVideoStream: function () {
+              this.local_video_stream && this.local_video_stream.getTracks().forEach(function (track) {
+                  track.stop();
+                  this.local_video_stream.removeTrack(track);
               }.bind(this));
           },
 
@@ -585,30 +625,31 @@ define("xabber-chats", function () {
               let $accept_iq = $msg({from: this.account.get('jid'), to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               this.account.sendMsg($accept_iq);
-              this.onRejected();
+              this.destroy();
           },
 
-          onRejected: function () {
-              this.local_stream && this.local_stream.getTracks().forEach(function (track) {
-                  track.stop();
-                  this.local_stream.removeTrack(track);
-              }.bind(this));
+          onCreateOffer: function () {
+
           },
 
-          initSession: async function () {
-              const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: this.get('video')});
-              stream.getTracks().forEach(track => this.conn.addTrack(track, stream));
-              this.conn.createOffer().then(function(offer) {
-                  this.set('initiator', this.account.get('jid'));
-                  this.conn.setLocalDescription(offer);
-                  let offer_sdp = offer.sdp;
-                  let $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
-                      .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.get('session_id')})
-                      .c('content', {creator: 'initiator', name: 'voice'})
-                      .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
-                      .c('sdp').t(offer_sdp).up().up()
-                      .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
-                  this.account.sendIQ($iq_offer_sdp);
+          initSession: function () {
+              navigator.mediaDevices.getUserMedia({audio: true}).then(function (media_stream) {
+                  this.local_stream = media_stream;
+                  this.$local_video[0].srcObject = media_stream;
+                  media_stream.getTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
+                  return this.conn.createOffer({offerToReceiveAudio:1, offerToReceiveVideo: 0});
+              }.bind(this)).then(function(offer) {
+                      this.set('initiator', this.account.get('jid'));
+                      this.conn.setLocalDescription(offer).then(function () {
+                          let offer_sdp = offer.sdp,
+                              $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                              .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.get('session_id')})
+                              .c('content', {creator: 'initiator', name: 'voice'})
+                              .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                              .c('sdp').t(offer_sdp).up().up()
+                              .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                          this.account.sendIQ($iq_offer_sdp);
+                      }.bind(this));
               }.bind(this));
           },
 
@@ -625,15 +666,16 @@ define("xabber-chats", function () {
           acceptSession: async function () {
               this.set('initiator', this.contact.get('jid'));
               this.conn.createAnswer().then(function(answer) {
-                  this.conn.setLocalDescription(answer);
-                  let answer_sdp = answer.sdp;
-                  let $iq_answer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
-                      .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-accept', initiator: this.contact.get('jid'), sid: this.get('session_id')})
-                      .c('content', {creator: 'initiator', name: 'voice'})
-                      .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
-                      .c('sdp').t(answer_sdp).up().up()
-                      .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
-                  this.account.sendIQ($iq_answer_sdp);
+                  this.conn.setLocalDescription(answer).then(function () {
+                      let answer_sdp = answer.sdp,
+                          $iq_answer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                              .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-accept', initiator: this.contact.get('jid'), sid: this.get('session_id')})
+                              .c('content', {creator: 'initiator', name: 'voice'})
+                              .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
+                              .c('sdp').t(answer_sdp).up().up()
+                              .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                      this.account.sendIQ($iq_answer_sdp);
+                  }.bind(this));
               }.bind(this));
           }
       });
@@ -717,9 +759,8 @@ define("xabber-chats", function () {
                 $jingle_msg_accept = $message.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                 $jingle_msg_reject = $message.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
             if ($jingle_msg_propose.length) {
-                if (options.is_archived || options.synced_msg) {
+                if (options.is_archived || options.synced_msg)
                     return;
-                }
                 else {
                     let session_id = $jingle_msg_propose.attr('id'),
                         iq_to = $message.attr('from');
@@ -730,12 +771,17 @@ define("xabber-chats", function () {
                 }
             }
             if ($jingle_msg_accept.length) {
-
+                if (options.is_archived || options.synced_msg)
+                    return;
+                if (xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
+                    !xabber.current_voip_call.get('full_jid') && xabber.current_voip_call.set('full_jid', $message.attr('from'));
+                }
             }
             if ($jingle_msg_reject.length) {
+                if (options.is_archived || options.synced_msg)
+                    return;
                 if (xabber.current_voip_call) {
                     if (xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
-                        xabber.current_voip_call.onRejected();
                         xabber.current_voip_call.destroy();
                     }
                 }
@@ -3165,21 +3211,22 @@ define("xabber-chats", function () {
 
         initJingleMessage: function (media_type) {
             media_type = media_type || {};
-            let session_id = uuid(),
-                jingle_message = this.model.messages.create({
+            media_type = media_type.video ? 'video' : 'audio';
+            let session_id = uuid();
+            xabber.current_jingle_msg_id = session_id;
+            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video: media_type === 'video'}, {contact: this.contact});
+            xabber.current_voip_call.propose();
+            xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
+            let jingle_message = this.model.messages.create({
                 from_jid: this.account.get('jid'),
                 type: 'system',
-                media: media_type.video ? 'video' : 'audio',
+                media: media_type,
                 submitted_here: true,
                 jingle_message: true,
                 jingle_message_state: constants.JINGLE_MSG_PROPOSE,
                 jingle_msg_id: session_id,
                 forwarded_message: null
             });
-            xabber.current_jingle_msg_id = session_id;
-            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video: jingle_message.get('media') === 'video'}, {contact: this.contact});
-            xabber.current_voip_call.propose();
-            xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
             this.sendMessage(jingle_message);
         },
 
