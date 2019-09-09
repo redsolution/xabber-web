@@ -2796,9 +2796,9 @@ body {
 }
 
 .jingle-message-view .modal-content video {
-    max-width: 310px;
+    width: 312px;
     max-height: 210px;
-    background-color: #424242;
+    background-color: #000;
 }
 
 .jingle-message-view .modal-content video.collapsed {
@@ -2806,7 +2806,7 @@ body {
     max-height: 75px;
     bottom: 78px;
     position: absolute;
-    right: 25px;
+    right: 24px;
 }
 
 .jingle-message-view .modal-content,

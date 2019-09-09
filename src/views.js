@@ -997,7 +997,7 @@ define("xabber-views", function () {
 
         _initialize: function (options) {
             this.model = options.model;
-            this.model.on('destroy', this.complete, this);
+            this.model.on('destroy', this.onDestroy, this);
             this.contact = this.model.contact;
             this.account = this.contact.account;
         },
@@ -1006,6 +1006,7 @@ define("xabber-views", function () {
             options = options || {};
             this.updateName();
             this.updateCallingStatus(options.status);
+            this.updateStatusText('Call...');
             this.updateAccountJid();
             this.$el.openModal({
                 dismissible: false,
@@ -1027,7 +1028,6 @@ define("xabber-views", function () {
 
         updateCallingStatus: function (status) {
             status = status || "";
-            this.$('.calling-status').text(constants.JINGLE_MSG_VERBOSE_STATE[status] || "");
             if (status === constants.JINGLE_MSG_ACCEPT) {
                 this.$('.btn-accept').addClass('hidden');
                 this.$('.buttons-wrap').removeClass('hidden');
@@ -1036,6 +1036,10 @@ define("xabber-views", function () {
                 this.$('.btn-accept').removeClass('hidden');
                 this.$('.buttons-wrap').addClass('hidden');
             }
+        },
+
+        updateStatusText: function (status) {
+            this.$('.calling-status').text(status || "");
         },
 
         updateName: function () {
@@ -1057,19 +1061,16 @@ define("xabber-views", function () {
         },
 
         toggleMicrophone: function () {
+            this.model.set('audio', !this.model.get('audio'));
+        },
 
+        onDestroy: function () {
+            this.close();
+            this.$el.detach();
         },
 
         videoCall: function () {
             this.model.set('video', !this.model.get('video'));
-            if (this.model.get('video')) {
-                this.model.enableVideo();
-                this.model.createVideoStream();
-            }
-            else {
-                this.model.disableVideo();
-                this.model.stopVideoStream();
-            }
         },
 
         toggleVolume: function (ev) {

@@ -793,8 +793,7 @@ define("xabber-accounts", function () {
                     }
                     if ($session_availability.length) {
                         let session_id = $session_availability.children('session').attr('id'), $session_availability_response;
-                        if (session_id && session_id === xabber.current_jingle_msg_id) {
-                            xabber.current_voip_call.set('contact_full_jid', from_jid);
+                        if (session_id && xabber.current_voip_call && session_id === xabber.current_voip_call.get('session_id') && !xabber.current_voip_call.get('state')) {
                             $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
                                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
                                 .c('session', {id: session_id});
