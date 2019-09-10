@@ -454,6 +454,7 @@ define("xabber-chats", function () {
               session_id: 0,
               audio: true,
               volume_on: true,
+              video_in: false,
               state: 0
           },
 
@@ -464,19 +465,21 @@ define("xabber-chats", function () {
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
+              this.audio_notifiation = xabber.playAudio('call', true);
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}], sdpSemantics: 'unified-plan'});
-              this.$remote_video_el = $('<video autoplay class="webrtc-remote-video hidden"/>');
+              this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
               this.$remote_audio_el = $('<audio autoplay class="webrtc-remote-audio hidden"/>');
               this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
               this.$remote_video = this.modal_view.$el.find('.webrtc-remote-video');
               this.$remote_audio = this.modal_view.$el.find('.webrtc-remote-audio');
+              this.current_timer = 0;
               this.conn.onconnectionstatechange = this.onChangeConnectionState.bind(this);
               this.set(attrs);
               this.onChangedMediaType();
               this.conn.ontrack = function (ev) {
+                  this.remote_stream = ev.streams[0];
                   this.$remote_audio[0].srcObject = ev.streams[0];
-                  this.$remote_video[0].srcObject = ev.streams[0];
               }.bind(this);
               this.conn.onicecandidate = function(ice) {
                   if (!ice || !ice.candidate || !ice.candidate.candidate)
@@ -485,6 +488,7 @@ define("xabber-chats", function () {
               }.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
               this.on('change:video', this.setEnabledVideoTrack, this);
+              this.on('change:video_in', this.onChangedRemoteVideo, this);
               this.on('change:volume_on', this.onChangedVolume, this);
               this.on('destroy', this.onDestroy, this);
           },
@@ -499,23 +503,56 @@ define("xabber-chats", function () {
 
           },
 
+          updateTimer: function () {
+              this.modal_view.updateStatusText(utils.pretty_duration(++this.current_timer));
+          },
+
+          startTimer: function () {
+              this.updateTimer();
+              setInterval(function () {
+                  this.updateTimer();
+              }.bind(this), 1000);
+          },
+
           onChangeConnectionState: function (ev) {
-              if (ev.target.connectionState === 'connected')
-                  setTimeout(function () {this.modal_view.updateStatusText();}.bind(this), 500);
-              else
-                  this.modal_view.updateStatusText(utils.pretty_name(ev.target.connectionState) + '...');
+              let conn_state = ev.target.connectionState;
+              if (conn_state === 'connected') {
+                  this.get('video') && this.setEnabledVideoTrack();
+                  xabber.stopAudio(this.audio_notifiation);
+                  setTimeout(function () {
+                      this.modal_view.updateStatusText();
+                      this.startTimer();
+                  }.bind(this), 1000);
+              } else
+                  this.modal_view.updateStatusText(utils.pretty_name(conn_state) + '...');
           },
 
           onChangedMediaType: function () {
               this.$local_video.switchClass('hidden', !this.get('video'));
-              this.$remote_video.switchClass('hidden', !(this.get('video_in') || this.get('video')));
+              this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
+          },
+
+          onChangedRemoteVideo: function () {
+              if (this.get('video_in')) {
+                  this.$remote_video_el[0].srcObject = this.remote_stream;
+                  this.modal_view.$el.find('.webrtc-remote-audio').replaceWith(this.$remote_video_el);
+              }
+              else {
+                  this.$remote_audio_el[0].srcObject = this.remote_stream;
+                  this.modal_view.$el.find('.webrtc-remote-video').replaceWith(this.$remote_audio_el);
+              }
+              this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
           },
 
           onChangedVolume: function () {
-              if (this.get('volume_on'))
-                  this.$remote_video.removeAttr('muted');
-              else
-                  this.$remote_video.attr('muted', true);
+              if (this.get('volume_on')) {
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0] && (this.modal_view.$el.find('.webrtc-remote-audio')[0].muted = false);
+                  this.modal_view.$el.find('.webrtc-remote-video')[0] && (this.modal_view.$el.find('.webrtc-remote-video')[0].muted = false);
+              }
+              else {
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0] && (this.modal_view.$el.find('.webrtc-remote-audio')[0].muted = true);
+                  this.modal_view.$el.find('.webrtc-remote-video')[0] && (this.modal_view.$el.find('.webrtc-remote-video')[0].muted = true);
+              }
           },
 
           setEnabledAudioTrack: function () {
@@ -533,6 +570,7 @@ define("xabber-chats", function () {
           },
 
           onDestroy: function () {
+              xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
               this.stopTracks();
               this.conn.close();
@@ -573,13 +611,10 @@ define("xabber-chats", function () {
                   let session_id = $jingle_video.attr('id');
                   if (session_id === this.get('session_id')) {
                       let video_state = $jingle_video.attr('state');
-                      if (video_state === 'enable') {
+                      if (video_state === 'enable')
                           this.set('video_in', true);
-                      }
-                      if (video_state === 'disable') {
+                      if (video_state === 'disable')
                           this.set('video_in', false);
-                      }
-                      this.onChangedMediaType();
                   }
                   this.account.sendIQ($result_iq);
               }
@@ -624,6 +659,8 @@ define("xabber-chats", function () {
               let $accept_iq = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               this.account.sendMsg($accept_iq);
+              xabber.stopAudio(this.audio_notifiation);
+              this.audio_notifiation = xabber.playAudio('connecting');
           },
 
           reject: function () {
@@ -795,12 +832,19 @@ define("xabber-chats", function () {
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_accept.attr('id')) {
                     !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
                     !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
+                    xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
+                    xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
                 }
             }
             if ($jingle_msg_reject.length) {
                 if (options.is_archived || options.synced_msg)
                     return;
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
+                    xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
+                    let busy_audio = xabber.playAudio('busy');
+                    setTimeout(function () {
+                        xabber.stopAudio(busy_audio);
+                    }.bind(this), 1500);
                     xabber.current_voip_call.destroy();
                     xabber.current_voip_call = null;
                 }
@@ -3069,7 +3113,7 @@ define("xabber-chats", function () {
             if (message.get('jingle_message')) {
                 if (message.get('jingle_message_state') === constants.JINGLE_MSG_PROPOSE) {
                     stanza.c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
-                        .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: message.get('media')}).up().up();
+                        .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up();
                 }
                 if (message.get('jingle_message_state') === constants.JINGLE_MSG_ACCEPT)
                     stanza.c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')}).up();

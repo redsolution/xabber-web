@@ -2795,9 +2795,10 @@ body {
     margin: 0 12px;
 }
 
+.jingle-message-view .modal-content .video-wrap,
 .jingle-message-view .modal-content video {
     width: 312px;
-    max-height: 210px;
+    height: 210px;
     background-color: #000;
 }
 

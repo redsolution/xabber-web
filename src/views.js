@@ -1411,11 +1411,22 @@ define("xabber-views", function () {
             return notification;
         },
 
-        playAudio: function (name) {
+        playAudio: function (name, loop) {
+            loop = loop || false;
             var filename = constants.SOUNDS[name];
             if (filename) {
                 var audio = new window.Audio(filename);
+                audio.loop = loop;
                 audio.play();
+                return audio;
+            }
+            return;
+        },
+
+        stopAudio: function (audio) {
+            if (audio) {
+                audio.pause();
+                audio.remove();
             }
         },
 
