@@ -1532,7 +1532,7 @@ $(document).ready(function(){
   };
 
   var repositionWithinScreen = function(x, y, width, height) {
-    var newX = x
+    var newX = x;
     var newY = y;
 
     if (newX < 0) {

@@ -991,8 +991,8 @@ define("xabber-views", function () {
             "click .btn-microphone": "toggleMicrophone",
             "click .btn-video": "videoCall",
             "click .btn-volume": "toggleVolume",
+            "click .btn-collapse": "collapse",
             "click .btn-cancel": "cancel"
-
         },
 
         _initialize: function (options) {
@@ -1058,6 +1058,13 @@ define("xabber-views", function () {
             this.model.accept();
             this.updateCallingStatus(constants.JINGLE_MSG_ACCEPT);
             this.model.initSession();
+        },
+
+        collapse: function () {
+            let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
+            $overlay.toggle();
+            this.$el.children().toggle();
+            this.$el.toggleClass('collapsed');
         },
 
         toggleMicrophone: function () {

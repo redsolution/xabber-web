@@ -444,6 +444,20 @@ input[type=text].simple-input-field:hover {
     width: 400px;
 }
 
+.main-modal.collapsed {
+    width: 76px;
+    height: 48px;
+    top: 4px !important;
+    right: 0px !important;
+    left: inherit;
+    border-radius: 4px 0 0 4px;
+    background-color: #FAFAFA;
+    transition: width .5s;
+}
+.main-modal.collapsed:hover {
+    width: 86px;
+}
+
 .main-modal .modal-header {
     width: 100%;
     height: 56px;
@@ -2754,8 +2768,23 @@ body {
     width: 360px;
 }
 
+.jingle-message-view>.btn-collapse {
+    display: none;
+    position: absolute;
+    color: #424242;
+}
+
 .jingle-message-view .modal-header {
     height: inherit;
+}
+
+.jingle-message-view .modal-header .btn-collapse {
+    position: absolute;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    top: 8px;
+    right: 8px;
 }
 
 .jingle-message-view .calling-status {
@@ -2805,7 +2834,7 @@ body {
 .jingle-message-view .modal-content video.collapsed {
     max-width: 100px;
     max-height: 75px;
-    bottom: 78px;
+    bottom: 72px;
     position: absolute;
     right: 24px;
 }

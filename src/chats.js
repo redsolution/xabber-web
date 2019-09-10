@@ -471,15 +471,13 @@ define("xabber-chats", function () {
               this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
               this.$remote_audio_el = $('<audio autoplay class="webrtc-remote-audio hidden"/>');
               this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
-              this.$remote_video = this.modal_view.$el.find('.webrtc-remote-video');
-              this.$remote_audio = this.modal_view.$el.find('.webrtc-remote-audio');
               this.current_timer = 0;
               this.conn.onconnectionstatechange = this.onChangeConnectionState.bind(this);
               this.set(attrs);
               this.onChangedMediaType();
               this.conn.ontrack = function (ev) {
                   this.remote_stream = ev.streams[0];
-                  this.$remote_audio[0].srcObject = ev.streams[0];
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
               }.bind(this);
               this.conn.onicecandidate = function(ice) {
                   if (!ice || !ice.candidate || !ice.candidate.candidate)
@@ -2454,7 +2452,7 @@ define("xabber-chats", function () {
 
         onMessage: function (message) {
             if (message.get('jingle_message')) {
-                return;
+                // return;
             }
             let scrolled_from_bottom = this.getScrollBottom();
             this.account.messages.add(message);
@@ -3121,6 +3119,7 @@ define("xabber-chats", function () {
                     stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
                         .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
                 stanza.c('store', {xmlns: Strophe.NS.HINTS}).up();
+                body = undefined;
             } else {
                 if (forwarded_message) {
                     legacy_body = [];
@@ -3283,6 +3282,7 @@ define("xabber-chats", function () {
                 from_jid: this.account.get('jid'),
                 type: 'system',
                 media: media_type,
+                message: 'Initiating Xabber ' + media_type + ' call',
                 submitted_here: true,
                 jingle_message: true,
                 jingle_message_state: constants.JINGLE_MSG_PROPOSE,
