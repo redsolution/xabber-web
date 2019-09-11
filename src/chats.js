@@ -891,14 +891,14 @@ define("xabber-chats", function () {
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    return this.messages.createSystemMessage({
+                    this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
                         message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
                     });
                 }
                 else {
-                    return this.messages.createSystemMessage({
+                    this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
                         message: 'Cancelled call'
@@ -916,6 +916,7 @@ define("xabber-chats", function () {
                     xabber.current_voip_call.destroy();
                     xabber.current_voip_call = null;
                 }
+                return;
             }
             if (!options.is_archived) {
                 var $stanza_id, $contact_stanza_id,
