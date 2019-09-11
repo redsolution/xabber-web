@@ -452,7 +452,7 @@ input[type=text].simple-input-field:hover {
     left: inherit;
     border-radius: 4px 0 0 4px;
     background-color: #FAFAFA;
-    transition: width .5s;
+    transition: width .3s;
 }
 .main-modal.collapsed:hover {
     width: 86px;
@@ -2765,7 +2765,7 @@ body {
 /* ----------------- JINGLE MESSAGE VIEW -------------------- */
 
 .jingle-message-view {
-    width: 360px;
+    width: 420px;
 }
 
 .jingle-message-view>.btn-collapse {
@@ -2826,14 +2826,14 @@ body {
 
 .jingle-message-view .modal-content .video-wrap,
 .jingle-message-view .modal-content video {
-    width: 312px;
-    height: 210px;
+    width: 100%;
+    height: 256px;
     background-color: #000;
 }
 
 .jingle-message-view .modal-content video.collapsed {
-    max-width: 100px;
-    max-height: 75px;
+    width: initial;
+    height: 75px;
     bottom: 72px;
     position: absolute;
     right: 24px;
@@ -2846,6 +2846,10 @@ body {
 
 .jingle-message-view .modal-content i {
     background-color: #9E9E9E;
+}
+
+.jingle-message-view .modal-content i.non-active {
+    background-color: #e0e0e0;
 }
 
 .jingle-message-view .modal-content .buttons-wrap {

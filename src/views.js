@@ -1000,6 +1000,9 @@ define("xabber-views", function () {
             this.model.on('destroy', this.onDestroy, this);
             this.contact = this.model.contact;
             this.account = this.contact.account;
+            this.model.on('change:volume_on', this.updateButtons, this);
+            this.model.on('change:video', this.updateButtons, this);
+            this.model.on('change:audio', this.updateButtons, this);
         },
 
         render: function (options) {
@@ -1008,6 +1011,7 @@ define("xabber-views", function () {
             this.updateCallingStatus(options.status);
             this.updateStatusText('Call...');
             this.updateAccountJid();
+            this.updateButtons();
             this.$el.openModal({
                 dismissible: false,
                 ready: function () {
@@ -1019,6 +1023,12 @@ define("xabber-views", function () {
                 }.bind(this)
             });
 
+        },
+
+        updateButtons: function () {
+            this.$('.btn-video').switchClass('non-active', !this.model.get('video'));
+            this.$('.btn-volume').switchClass('non-active', !this.model.get('volume_on'));
+            this.$('.btn-microphone').switchClass('non-active', !this.model.get('audio'));
         },
 
         updateAvatar: function () {

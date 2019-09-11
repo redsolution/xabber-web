@@ -521,8 +521,12 @@ define("xabber-chats", function () {
                       this.modal_view.updateStatusText();
                       this.startTimer();
                   }.bind(this), 1000);
-              } else
+              } else {
                   this.modal_view.updateStatusText(utils.pretty_name(conn_state) + '...');
+                  if (conn_state === 'disconnected') {
+                      this.destroy();
+                  }
+              }
           },
 
           onChangedMediaType: function () {
@@ -618,10 +622,11 @@ define("xabber-chats", function () {
               }
           },
 
-          propose: function () {
-              this.set('initiator', this.contact.get('jid'));
+          startCall: function () {
+              this.set('call_initiator', this.account.get('jid'));
               this.createAudioStream();
               this.get('video') && this.createVideoStream();
+              this.propose();
           },
 
           createAudioStream: function () {
@@ -653,19 +658,62 @@ define("xabber-chats", function () {
               }.bind(this));
           },
 
+          propose: function () {
+              let $propose_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+                  .c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')})
+                  .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up()
+                  .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                  .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                  .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+              this.account.sendMsg($propose_msg);
+          },
+
           accept: function () {
-              let $accept_iq = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
-                  .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
-              this.account.sendMsg($accept_iq);
+              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+                  .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
+                  .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                  .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                  .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+              this.set('jingle_start', moment.now());
+              this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
               this.audio_notifiation = xabber.playAudio('connecting');
           },
 
           reject: function () {
-              let $accept_iq = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
-              this.account.sendMsg($accept_iq);
+              if (this.get('jingle_start')) {
+                  let end = moment.now(),
+                      duration = Math.round((end - this.get('jingle_start'))/1000);
+                  $reject_msg.c('call', {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration}).up();
+              }
+              $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
+                  .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                  .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+              this.account.sendMsg($reject_msg);
+              this.createSystemMessage($reject_msg);
               this.destroy();
+          },
+
+          createSystemMessage: function (message) {
+              let $message = $(message.nodeTree),
+                  chat = this.account.chats.getChat(this.contact),
+                  time = $message.find('call').attr('end');
+              if (time) {
+                  let duration = $message.find('call').attr('duration'),
+                      initiator = $message.find('call').attr('initiator');
+                  chat.messages.createSystemMessage({
+                      from_jid: this.account.get('jid'),
+                      message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
+                  });
+              }
+              else {
+                  chat.messages.createSystemMessage({
+                      from_jid: this.account.get('jid'),
+                      message: 'Cancelled call'
+                  });
+              }
           },
 
           initVideoTrack: function () {
@@ -693,7 +741,7 @@ define("xabber-chats", function () {
                   media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
                   return this.conn.createOffer({offerToReceiveAudio:true, offerToReceiveVideo: true});
               }.bind(this)).then(function(offer) {
-                      this.set('initiator', this.account.get('jid'));
+                      this.set('session_initiator', this.account.get('jid'));
                       this.conn.setLocalDescription(offer).then(function () {
                           let offer_sdp = offer.sdp,
                               $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
@@ -709,7 +757,7 @@ define("xabber-chats", function () {
 
           sendCandidate: function (candidate) {
               let $iq_candidate = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
-                  .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-info', initiator: this.get('initiator'), sid: this.get('session_id')})
+                  .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-info', initiator: this.get('session_initiator'), sid: this.get('session_id')})
                   .c('content', {creator: 'initiator', name: 'voice'})
                   .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up()
                   .c('transport', {xmlns: Strophe.NS.JINGLE_TRANSPORTS_ICE})
@@ -718,7 +766,7 @@ define("xabber-chats", function () {
           },
 
           acceptSession: async function () {
-              this.set('initiator', this.contact.get('jid'));
+              this.set('session_initiator', this.contact.get('jid'));
               this.conn.createAnswer().then(function(answer) {
                   this.conn.setLocalDescription(answer).then(function () {
                       let answer_sdp = answer.sdp,
@@ -821,6 +869,7 @@ define("xabber-chats", function () {
                     this.getCallingAvailability(iq_to, session_id, function () {
                         xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: iq_to, session_id: session_id}, {contact: this.contact});
                         xabber.current_voip_call.modal_view.show({status: 'in'});
+                        xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
                     }.bind(this));
                 }
             }
@@ -829,14 +878,35 @@ define("xabber-chats", function () {
                     return;
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_accept.attr('id')) {
                     !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
+                    let jingle_start = $jingle_msg_accept.find('time').attr('stamp');
+                    jingle_start = jingle_start ? Number(moment(jingle_start)) : moment.now();
+                    xabber.current_voip_call.set('jingle_start', jingle_start);
                     !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
                     xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                     xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
                 }
             }
             if ($jingle_msg_reject.length) {
-                if (options.is_archived || options.synced_msg)
+                let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp');
+                if ($jingle_msg_reject.children('call').length) {
+                    let duration = $jingle_msg_reject.children('call').attr('duration'),
+                        initiator = $jingle_msg_reject.children('call').attr('initiator');
+                    return this.messages.createSystemMessage({
+                        from_jid: this.account.get('jid'),
+                        time: time,
+                        message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
+                    });
+                }
+                else {
+                    return this.messages.createSystemMessage({
+                        from_jid: this.account.get('jid'),
+                        time: time,
+                        message: 'Cancelled call'
+                    });
+                }
+                if (options.is_archived || options.synced_msg) {
                     return;
+                }
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
                     xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                     let busy_audio = xabber.playAudio('busy');
@@ -2451,9 +2521,6 @@ define("xabber-chats", function () {
         },
 
         onMessage: function (message) {
-            if (message.get('jingle_message')) {
-                // return;
-            }
             let scrolled_from_bottom = this.getScrollBottom();
             this.account.messages.add(message);
             if (!_.isUndefined(message.get('is_accepted'))) {
@@ -3108,116 +3175,102 @@ define("xabber-chats", function () {
                     id: msg_id
                 });
 
-            if (message.get('jingle_message')) {
-                if (message.get('jingle_message_state') === constants.JINGLE_MSG_PROPOSE) {
-                    stanza.c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
-                        .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up();
-                }
-                if (message.get('jingle_message_state') === constants.JINGLE_MSG_ACCEPT)
-                    stanza.c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')}).up();
-                if (message.get('jingle_message_state') === constants.JINGLE_MSG_REJECT)
-                    stanza.c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: message.get('jingle_msg_id')})
-                        .c('call', {start: message.get('jingle_msg_start'), end: message.get('jingle_msg_end'), duration: message.get('jingle_msg_end') - message.get('jingle_msg_start')}).up().up();
-                stanza.c('store', {xmlns: Strophe.NS.HINTS}).up();
-                body = undefined;
-            } else {
-                if (forwarded_message) {
-                    legacy_body = [];
-                    $(forwarded_message).each(function (idx, fwd_msg) {
-                        let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
-                            idx_begin = legacy_body.length,
-                            idx_end = legacy_body.concat(legacy_fwd_msg).length - 1;
-                        stanza.c('reference', {
-                            xmlns: Strophe.NS.REFERENCE,
-                            type: 'forward',
-                            begin: idx_begin,
-                            end: idx_end
-                        })
-                            .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
-                            .c('delay', {
-                                xmlns: 'urn:xmpp:delay',
-                                stamp: fwd_msg.get('time')
-                            }).up().cnode(fwd_msg.get('xml')).up().up().up();
-                        legacy_body = legacy_body.concat(legacy_fwd_msg);
-                    }.bind(this));
-                    body = _.unescape(legacy_body.join("")) + body;
-                }
+            if (forwarded_message) {
+                legacy_body = [];
+                $(forwarded_message).each(function (idx, fwd_msg) {
+                    let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
+                        idx_begin = legacy_body.length,
+                        idx_end = legacy_body.concat(legacy_fwd_msg).length - 1;
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        type: 'forward',
+                        begin: idx_begin,
+                        end: idx_end
+                    })
+                        .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
+                        .c('delay', {
+                            xmlns: 'urn:xmpp:delay',
+                            stamp: fwd_msg.get('time')
+                        }).up().cnode(fwd_msg.get('xml')).up().up().up();
+                    legacy_body = legacy_body.concat(legacy_fwd_msg);
+                }.bind(this));
+                body = _.unescape(legacy_body.join("")) + body;
+            }
 
-                if (message.get('mentions') && message.get('mentions').length) {
-                    message.get('mentions').forEach(function (mention) {
-                        stanza.c('reference', {
-                            xmlns: Strophe.NS.REFERENCE,
-                            begin: mention.start + legacy_body.length,
-                            end: mention.end + legacy_body.length,
-                            type: 'mention'
-                        })
-                            .c('uri').t(mention.uri).up().up();
-                    }.bind(this));
-                }
+            if (message.get('mentions') && message.get('mentions').length) {
+                message.get('mentions').forEach(function (mention) {
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        begin: mention.start + legacy_body.length,
+                        end: mention.end + legacy_body.length,
+                        type: 'mention'
+                    })
+                        .c('uri').t(mention.uri).up().up();
+                }.bind(this));
+            }
 
-                if (message.get('markups')) {
-                    message.get('markups').forEach(function (markup) {
-                        stanza.c('reference', {
-                            xmlns: Strophe.NS.REFERENCE,
-                            begin: markup.start + legacy_body.length,
-                            end: markup.end + legacy_body.length,
-                            type: 'markup'
-                        });
-                        for (let idx in markup.markups) {
-                            stanza.c(markup.markups[idx]).up();
-                        }
-                        stanza.up();
-                    }.bind(this));
-                }
+            if (message.get('markups')) {
+                message.get('markups').forEach(function (markup) {
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        begin: markup.start + legacy_body.length,
+                        end: markup.end + legacy_body.length,
+                        type: 'markup'
+                    });
+                    for (let idx in markup.markups) {
+                        stanza.c(markup.markups[idx]).up();
+                    }
+                    stanza.up();
+                }.bind(this));
+            }
 
-                if (message.get('blockquotes')) {
-                    message.get('blockquotes').forEach(function (blockquote) {
-                        stanza.c('reference', {
-                            xmlns: Strophe.NS.REFERENCE,
-                            begin: blockquote.start + legacy_body.length,
-                            end: blockquote.end + legacy_body.length,
-                            type: 'quote'
-                        })
-                            .c('marker').t(constants.QUOTE_MARKER).up().up();
-                        legacy_content.push({
-                            start: blockquote.start + legacy_body.length,
-                            end: blockquote.end + legacy_body.length,
-                            type: 'quote',
-                            marker: constants.QUOTE_MARKER
-                        });
-                    }.bind(this));
-                }
+            if (message.get('blockquotes')) {
+                message.get('blockquotes').forEach(function (blockquote) {
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        begin: blockquote.start + legacy_body.length,
+                        end: blockquote.end + legacy_body.length,
+                        type: 'quote'
+                    })
+                        .c('marker').t(constants.QUOTE_MARKER).up().up();
+                    legacy_content.push({
+                        start: blockquote.start + legacy_body.length,
+                        end: blockquote.end + legacy_body.length,
+                        type: 'quote',
+                        marker: constants.QUOTE_MARKER
+                    });
+                }.bind(this));
+            }
 
-                if (message.get('type') == 'file_upload') {
-                    body = "";
-                    let files = message.get('files') || [],
-                        images = message.get('images') || [],
-                        all_files = files.concat(images);
-                    all_files.forEach(function (file, idx) {
-                        legacy_body = file.url + ((idx != all_files.length - 1) ? '\n' : "");
-                        let start_idx = body.length,
-                            end_idx = (body + legacy_body).length - 1;
-                        stanza.c('reference', {
-                            xmlns: Strophe.NS.REFERENCE,
-                            type: (file.voice ? 'voice' : 'media'),
-                            begin: start_idx,
-                            end: end_idx
-                        })
-                            .c('media')
-                            .c('file');
-                        file.type && stanza.c('media-type').t(file.type).up();
-                        file.name && stanza.c('name').t(file.name).up();
-                        file.size && stanza.c('size').t(file.size).up();
-                        file.height && stanza.c('height').t(file.height).up();
-                        file.width && stanza.c('width').t(file.width).up();
-                        file.duration && stanza.c('duration').t(file.duration).up();
-                        file.description && stanza.c('description').t(file.description).up();
-                        stanza.up().c('uri').t(file.url).up().up().up();
-                        body += legacy_body;
-                        legacy_content.push({start: start_idx, end: end_idx});
-                    }.bind(this));
-                    message.set({type: 'main', legacy_content: legacy_content});
-                }
+            if (message.get('type') == 'file_upload') {
+                body = "";
+                let files = message.get('files') || [],
+                    images = message.get('images') || [],
+                    all_files = files.concat(images);
+                all_files.forEach(function (file, idx) {
+                    legacy_body = file.url + ((idx != all_files.length - 1) ? '\n' : "");
+                    let start_idx = body.length,
+                        end_idx = (body + legacy_body).length - 1;
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        type: (file.voice ? 'voice' : 'media'),
+                        begin: start_idx,
+                        end: end_idx
+                    })
+                        .c('media')
+                        .c('file');
+                    file.type && stanza.c('media-type').t(file.type).up();
+                    file.name && stanza.c('name').t(file.name).up();
+                    file.size && stanza.c('size').t(file.size).up();
+                    file.height && stanza.c('height').t(file.height).up();
+                    file.width && stanza.c('width').t(file.width).up();
+                    file.duration && stanza.c('duration').t(file.duration).up();
+                    file.description && stanza.c('description').t(file.description).up();
+                    stanza.up().c('uri').t(file.url).up().up().up();
+                    body += legacy_body;
+                    legacy_content.push({start: start_idx, end: end_idx});
+                }.bind(this));
+                message.set({type: 'main', legacy_content: legacy_content});
             }
 
             this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, msg_id: msg_id});
@@ -3226,12 +3279,10 @@ define("xabber-chats", function () {
             body && stanza.c('body').t(body).up();
             stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
-            if (!message.get('jingle_message')) {
-                let delivery_attrs = {xmlns: Strophe.NS.DELIVERY};
-                this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
-                (message.get('state') === constants.MSG_ERROR) && (delivery_attrs.retry = true) && message.set('state', constants.MSG_PENDING);
-                stanza.c('request', delivery_attrs).up();
-            }
+            let delivery_attrs = {xmlns: Strophe.NS.DELIVERY};
+            this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
+            (message.get('state') === constants.MSG_ERROR) && (delivery_attrs.retry = true) && message.set('state', constants.MSG_PENDING);
+            stanza.c('request', delivery_attrs).up();
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
             this.account.sendMsg(stanza, function () {
@@ -3276,20 +3327,8 @@ define("xabber-chats", function () {
             media_type = media_type.video ? 'video' : 'audio';
             let session_id = uuid();
             xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video: media_type === 'video'}, {contact: this.contact});
-            xabber.current_voip_call.propose();
+            xabber.current_voip_call.startCall();
             xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
-            let jingle_message = this.model.messages.create({
-                from_jid: this.account.get('jid'),
-                type: 'system',
-                media: media_type,
-                message: 'Initiating Xabber ' + media_type + ' call',
-                submitted_here: true,
-                jingle_message: true,
-                jingle_message_state: constants.JINGLE_MSG_PROPOSE,
-                jingle_msg_id: session_id,
-                forwarded_message: null
-            });
-            this.sendMessage(jingle_message);
         },
 
         saveForwardedMessage: function (msg) {
@@ -3692,7 +3731,7 @@ define("xabber-chats", function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (!is_same_date || !is_same_sender)
+                if (!is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
@@ -4585,8 +4624,8 @@ define("xabber-chats", function () {
                     if ($message.find('invite').length) {
                         return;
                     }
-                    let $jingle_msg_accept = $carbons.children('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
-                        $jingle_msg_reject = $carbons.children('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
+                    let $jingle_msg_accept = $carbons.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                        $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
                     if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call) {
                         xabber.current_voip_call.destroy();
                         xabber.current_voip_call = null;
@@ -4934,17 +4973,15 @@ define("xabber-chats", function () {
                 this._load_chats_timeout = setTimeout(function () {
                     this.hideChatsFeedback();
                 }.bind(this), 5000);
-                if (xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
+                let accounts = xabber.accounts.connected.filter(account => !account.roster.conversations_loaded && account.connection && account.connection.do_synchronization);
+                if (accounts.length) {
                     this.$('.load-chats-feedback').text('Loading...').removeClass('hidden');
                     this.updateScrollBar();
                 }
-                let accounts = xabber.accounts.connected;
                 accounts.forEach(function (account) {
-                    let options = {max: xabber.settings.mam_messages_limit};
-                    if (account.roster.conversations_loaded)
-                        return;
-                    account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
-                    account.roster.syncFromServer(options);
+                        let options = {max: xabber.settings.mam_messages_limit};
+                        account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
+                        account.roster.syncFromServer(options);
                 }.bind(this));
             }
         },
