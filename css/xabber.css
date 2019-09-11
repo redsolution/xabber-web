@@ -5906,6 +5906,12 @@ input[type='range'].voice-message-volume:focus {
     margin: 4px 6px 0 36px;
 }
 
+.group-chat-properties .description .value {
+    height: initial !important;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+}
+
 /* ----------- GROUPCHAT DETAILS EDIT PANEL (MODAL) ------------ */
 
 .group-chat-properties-edit {
