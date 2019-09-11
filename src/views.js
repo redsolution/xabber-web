@@ -981,6 +981,126 @@ define("xabber-views", function () {
         },
     });
 
+    xabber.JingleMessageView = xabber.BasicView.extend({
+        className: 'modal main-modal jingle-message-view',
+        template: templates.jingle_message_calling,
+        avatar_size: constants.AVATAR_SIZES.XABBER_VOICE_CALL_VIEW,
+
+        events: {
+            "click .btn-accept": "accept",
+            "click .btn-microphone": "toggleMicrophone",
+            "click .btn-video": "videoCall",
+            "click .btn-volume": "toggleVolume",
+            "click .btn-collapse": "collapse",
+            "click .btn-cancel": "cancel"
+        },
+
+        _initialize: function (options) {
+            this.model = options.model;
+            this.model.on('destroy', this.onDestroy, this);
+            this.contact = this.model.contact;
+            this.account = this.contact.account;
+            this.model.on('change:volume_on', this.updateButtons, this);
+            this.model.on('change:video', this.updateButtons, this);
+            this.model.on('change:audio', this.updateButtons, this);
+        },
+
+        render: function (options) {
+            options = options || {};
+            this.updateName();
+            this.updateCallingStatus(options.status);
+            this.updateStatusText('Call...');
+            this.updateAccountJid();
+            this.updateButtons();
+            this.$el.openModal({
+                dismissible: false,
+                ready: function () {
+                    this.updateAvatar();
+                }.bind(this),
+                complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
+
+        },
+
+        updateButtons: function () {
+            this.$('.btn-video').switchClass('non-active', !this.model.get('video'));
+            this.$('.btn-volume').switchClass('non-active', !this.model.get('volume_on'));
+            this.$('.btn-microphone').switchClass('non-active', !this.model.get('audio'));
+        },
+
+        updateAvatar: function () {
+            let image = this.contact.cached_image;
+            this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        },
+
+        updateCallingStatus: function (status) {
+            status = status || "";
+            if (status === constants.JINGLE_MSG_ACCEPT) {
+                this.$('.btn-accept').addClass('hidden');
+                this.$('.buttons-wrap').removeClass('hidden');
+            }
+            if (status === 'in') {
+                this.$('.btn-accept').removeClass('hidden');
+                this.$('.buttons-wrap').addClass('hidden');
+            }
+        },
+
+        updateStatusText: function (status) {
+            this.$('.calling-status').text(status || "");
+        },
+
+        updateName: function () {
+            this.$('.contact-info .name').text(this.contact.get('name'));
+        },
+
+        updateAccountJid: function () {
+            this.$('.modal-footer .contact-info .jid').text(this.contact.get('jid'));
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        accept: function () {
+            this.model.accept();
+            this.updateCallingStatus(constants.JINGLE_MSG_ACCEPT);
+            this.model.initSession();
+        },
+
+        collapse: function () {
+            let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
+            $overlay.toggle();
+            this.$el.children().toggle();
+            this.$el.toggleClass('collapsed');
+        },
+
+        toggleMicrophone: function () {
+            this.model.set('audio', !this.model.get('audio'));
+        },
+
+        onDestroy: function () {
+            this.close();
+            this.$el.detach();
+        },
+
+        videoCall: function () {
+            this.model.set('video', !this.model.get('video'));
+        },
+
+        toggleVolume: function (ev) {
+            let $target = $(ev.target);
+            $target.switchClass(this.model.set('volume_on', !this.model.get('volume_on')));
+        },
+
+        cancel: function () {
+            this.model.reject();
+            this.close();
+        }
+    });
+
     xabber.SettingsView = xabber.BasicView.extend({
         className: 'settings-panel',
         template: templates.settings,
@@ -1308,11 +1428,22 @@ define("xabber-views", function () {
             return notification;
         },
 
-        playAudio: function (name) {
+        playAudio: function (name, loop) {
+            loop = loop || false;
             var filename = constants.SOUNDS[name];
             if (filename) {
                 var audio = new window.Audio(filename);
+                audio.loop = loop;
                 audio.play();
+                return audio;
+            }
+            return;
+        },
+
+        stopAudio: function (audio) {
+            if (audio) {
+                audio.pause();
+                audio.remove();
             }
         },
 

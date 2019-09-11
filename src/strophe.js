@@ -181,9 +181,13 @@ define("xabber-strophe", function () {
 
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+        Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
+        Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');
+        Strophe.addNamespace('JINGLE_SECURITY_STUB', 'urn:xmpp:jingle:security:stub:0');
         Strophe.addNamespace('JINGLE_MSG', 'urn:xmpp:jingle-message:0');
         Strophe.addNamespace('JINGLE_RTP', 'urn:xmpp:jingle:apps:rtp:1');
+        Strophe.addNamespace('JINGLE_TRANSPORTS_ICE', 'urn:xmpp:jingle:transports:ice-udp:1');
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
         Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extended-chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');

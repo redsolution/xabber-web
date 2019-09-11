@@ -444,6 +444,20 @@ input[type=text].simple-input-field:hover {
     width: 400px;
 }
 
+.main-modal.collapsed {
+    width: 76px;
+    height: 48px;
+    top: 4px !important;
+    right: 0px !important;
+    left: inherit;
+    border-radius: 4px 0 0 4px;
+    background-color: #FAFAFA;
+    transition: width .3s;
+}
+.main-modal.collapsed:hover {
+    width: 86px;
+}
+
 .main-modal .modal-header {
     width: 100%;
     height: 56px;
@@ -2747,6 +2761,108 @@ body {
 .blocked-user .member-item p.one-line {
     width: calc(100% - 40px);
     margin: 0;
+}
+/* ----------------- JINGLE MESSAGE VIEW -------------------- */
+
+.jingle-message-view {
+    width: 420px;
+}
+
+.jingle-message-view>.btn-collapse {
+    display: none;
+    position: absolute;
+    color: #424242;
+}
+
+.jingle-message-view .modal-header {
+    height: inherit;
+}
+
+.jingle-message-view .modal-header .btn-collapse {
+    position: absolute;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    top: 8px;
+    right: 8px;
+}
+
+.jingle-message-view .calling-status {
+    color: #424242
+}
+
+.jingle-message-view .panel-header {
+    text-transform: uppercase;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.jingle-message-view .circle-avatar {
+    width: 96px;
+    height: 96px;
+    margin: 8px auto 12px auto;
+}
+
+.jingle-message-view .contact-info .name {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.jingle-message-view .modal-header,
+.jingle-message-view .modal-footer .contact-info {
+    text-align: center;
+}
+
+.jingle-message-view i {
+    cursor: pointer;
+    color: #FFF;
+    border-radius: 50%;
+    padding: 12px;
+    display: inline-block;
+    height: 48px !important;
+    width: 48px !important;
+    margin: 0 12px;
+}
+
+.jingle-message-view .modal-content .video-wrap,
+.jingle-message-view .modal-content video {
+    width: 100%;
+    height: 256px;
+    background-color: #000;
+}
+
+.jingle-message-view .modal-content video.collapsed {
+    width: initial;
+    height: 75px;
+    bottom: 72px;
+    position: absolute;
+    right: 24px;
+}
+
+.jingle-message-view .modal-content,
+.jingle-message-view .modal-footer {
+    text-align: center;
+}
+
+.jingle-message-view .modal-content i {
+    background-color: #9E9E9E;
+}
+
+.jingle-message-view .modal-content i.non-active {
+    background-color: #e0e0e0;
+}
+
+.jingle-message-view .modal-content .buttons-wrap {
+    padding: 12px 0;
+}
+
+.jingle-message-view .modal-footer {
+    height: inherit;
+    padding: 4px 24px;
+}
+
+.jingle-message-view .contact-info .jid {
+    margin: 4px 0;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */

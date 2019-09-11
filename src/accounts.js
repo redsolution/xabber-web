@@ -756,15 +756,16 @@ define("xabber-accounts", function () {
                 },
 
                 onIQ: function (iq) {
-                    let $iq = $(iq),
-                        $confirm = $iq.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH +'"]'),
+                    let $incoming_iq = $(iq),
+                        $confirm = $incoming_iq.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH +'"]'),
+                        $session_availability = $incoming_iq.find('query[xmlns="' + Strophe.NS.JINGLE_MSG +'"]'),
                         request_code,
-                        from_jid = $iq.attr('from');
+                        from_jid = $incoming_iq.attr('from');
                     if ($confirm.length) {
                         request_code = $confirm.attr('id');
                         if (this._waiting_code && ($confirm.attr('url') === constants.XABBER_ACCOUNT_URL + '/auth/login/')) {
                             if (this.xabber_auth.api_jid && this.xabber_auth.request_id) {
-                                if (($iq.attr('id') === this.xabber_auth.request_id) && (from_jid === this.xabber_auth.api_jid))
+                                if (($incoming_iq.attr('id') === this.xabber_auth.request_id) && (from_jid === this.xabber_auth.api_jid))
                                     this.verifyXabberAccount(request_code, function (data) {
                                         this._waiting_code = false;
                                         if (this.get('auto_login_xa')) {
@@ -776,7 +777,7 @@ define("xabber-accounts", function () {
                             else {
                                 this.code_requests.push({
                                     jid: from_jid,
-                                    id: $iq.attr('id'),
+                                    id: $incoming_iq.attr('id'),
                                     code: request_code
                                 });
                             }
@@ -789,6 +790,20 @@ define("xabber-accounts", function () {
                                 };
                             this.createMessageFromIQ(msg_attr);
                         }
+                    }
+                    if ($session_availability.length) {
+                        let session_id = $session_availability.children('session').attr('id'), $session_availability_response;
+                        if (session_id && xabber.current_voip_call && session_id === xabber.current_voip_call.get('session_id') && !xabber.current_voip_call.get('state')) {
+                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
+                                .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
+                                .c('session', {id: session_id});
+                        }
+                        else {
+                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'error', id: $incoming_iq.attr('id')})
+                                .c('error', {xmlns: Strophe.NS.JINGLE_MSG});
+
+                        }
+                        this.sendIQ($session_availability_response);
                     }
                 },
 

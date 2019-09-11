@@ -95,9 +95,8 @@ var constants = {
     CHATSTATE_TIMEOUT_STOPPED:  5000,
     CHATSTATE_TIMEOUT_PAUSED_AUDIO: 10000,
 
-    JINGLE_MSG_RETRACT: -1,
-    JINGLE_MSG_REJECT: 0,
-    JINGLE_MSG_PROPOSE: 1,
+    JINGLE_MSG_PROPOSE: 0,
+    JINGLE_MSG_REJECT: 1,
     JINGLE_MSG_ACCEPT: 2,
 
     MSG_ERROR: -1,
@@ -146,7 +145,8 @@ var constants = {
         CHAT_ITEM:                      40,
         CHAT_HEAD:                      40,
         CHAT_MESSAGE:                   32,
-        CHAT_BOTTOM:                    48
+        CHAT_BOTTOM:                    48,
+        XABBER_VOICE_CALL_VIEW:         96,
     },
 
     SOUNDS: {
@@ -163,7 +163,10 @@ var constants = {
         ether:              'sounds/ether.ogg',
         pop:                'sounds/pop.ogg',
         computer_chime:     'sounds/computer_chime.ogg',
-        beep_a:             'sounds/beep_a.ogg'
+        beep_a:             'sounds/beep_a.ogg',
+        call:               'sounds/marching-band-dave-girtsman.mp3',
+        connecting:         'sounds/alien-bomb-timer.wav',
+        busy:               'sounds/phone_busy.wav'
     },
 
     SYNC_WAY_DATA: {
@@ -304,11 +307,9 @@ constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_REJECT] = 'reject';
 constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_PROPOSE] = 'propose';
 constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_ACCEPT] = 'accept';
 
-constants.JINGLE_MSG_STATE = {};
-constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_RETRACT] = 'retract';
-constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_REJECT] = 'reject';
-constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_PROPOSE] = 'propose';
-constants.JINGLE_MSG_STATE[constants.JINGLE_MSG_ACCEPT] = 'accept';
+constants.JINGLE_MSG_VERBOSE_STATE = {};
+constants.JINGLE_MSG_VERBOSE_STATE[constants.JINGLE_MSG_RETRACT] = 'retract';
+constants.JINGLE_MSG_VERBOSE_STATE[constants.JINGLE_MSG_PROPOSE] = 'Calling...';
 
 constants.MSG_STATE = {};
 constants.MSG_STATE[constants.MSG_ERROR] = 'error';

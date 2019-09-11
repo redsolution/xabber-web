@@ -850,7 +850,6 @@ define("xabber-contacts", function () {
                     alignment: 'right'
                 };
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
-                // this.$('.btn-escape').showIf(options.name === 'all-chats');
                 this.updateName();
             },
 
@@ -916,16 +915,18 @@ define("xabber-contacts", function () {
             },
 
             voiceCall: function () {
-                let call_settings = {
-                    audio: true
-                }
+                this.initCall();
             },
 
             videoCall: function () {
-                let call_settings = {
-                    audio: true,
-                    video: true
-                }
+                this.initCall({video: true});
+
+            },
+
+            initCall: function (type) {
+                this.openChat();
+                let chat = this.account.chats.getChat(this.model);
+                chat.item_view.content.initJingleMessage(type);
             },
 
             retractAllMessages: function () {
