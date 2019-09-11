@@ -252,12 +252,12 @@ define([
 
         slice_pretty_body: function (body, legacy_refs) {
             body = body || "";
-            let pretty_body = Array.from(deps.Strophe.xmlescape(deps.Strophe.xmlunescape(body)));
+            let pretty_body = Array.from(deps.Strophe.xmlescape(body));
             legacy_refs && legacy_refs.forEach(function (legacy_ref) {
                 for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
                     pretty_body[idx] = "";
             }.bind(this));
-            return pretty_body.join("");
+            return deps.Strophe.xmlunescape(pretty_body.join(""));
         },
 
         markupBodyMessage: function (message, mention_elem) {
@@ -267,7 +267,7 @@ define([
                 legacy_refs = attrs.legacy_content || [],
                 blockquotes = attrs.blockquotes || [],
                 body = legacy_refs.length ? attrs.original_message : attrs.message,
-                markup_body = Array.from(_.escape(_.unescape(body)));
+                markup_body = Array.from(deps.Strophe.xmlescape(body));
             !mention_elem && (mention_elem = 'span');
 
             mentions.concat(markups).forEach(function (markup) {

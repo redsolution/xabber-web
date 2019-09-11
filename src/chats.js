@@ -1495,7 +1495,7 @@ define("xabber-chats", function () {
                         msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
                     }
                 }
-                this.$('.last-msg').text("").append(msg_text);
+                this.$('.last-msg').text(msg_text);//.append(msg_text);
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
             }
