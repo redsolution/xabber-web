@@ -814,7 +814,6 @@ define("xabber-contacts", function () {
                 "click .btn-block": "blockContact",
                 "click .btn-unblock": "unblockContact",
                 "click .btn-mute": "changeNotifications",
-                "click .btn-clear-history": "retractAllMessages",
                 "click .btn-auth-request": "requestAuthorization"
             },
 
@@ -927,24 +926,6 @@ define("xabber-contacts", function () {
                 this.openChat();
                 let chat = this.account.chats.getChat(this.model);
                 chat.item_view.content.initJingleMessage(type);
-            },
-
-            retractAllMessages: function () {
-                let chat = this.account.chats.getChat(this.model),
-                    dialog_options = [{
-                    name: 'symmetric_deletion',
-                    checked: false,
-                    text: 'Delete for all'
-                }];
-                utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?",
-                    dialog_options, {ok_button_text: 'delete'}).done(function (res) {
-                    if (res) {
-                        let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                        chat.retractAllMessages(symmetric, function () {
-                            chat.item_view.updateLastMessage();
-                        }.bind(this));
-                    }
-                }.bind(this));
             },
 
             changeNotifications: function () {
@@ -1070,10 +1051,13 @@ define("xabber-contacts", function () {
             },
 
             updateButtons: function () {
-                let has_permission = this.model.my_info && this.model.my_info.get('permissions').find(permission => (permission.name == 'owner' || permission.name == 'administrator'));
+                let has_permission = this.model.my_info && this.model.my_info.get('permissions').find(permission => (permission.name == 'owner' || permission.name == 'administrator')),
+                    is_blocked = this.model.get('blocked');
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat'));
+                this.$('.btn-block').hideIf(is_blocked);
+                this.$('.btn-unblock').showIf(is_blocked);
             },
 
             updateName: function () {

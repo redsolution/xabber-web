@@ -5684,8 +5684,8 @@ define("xabber-chats", function () {
             "click .btn-notifications": "changeNotifications",
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
-            "click .btn-block-contact": "blockContact",
-            "click .btn-unblock-contact": "unblockContact",
+            "click .btn-invite-users": "inivteUsers",
+            "click .btn-retract-own-messages": "retractOwnMessages",
             "click .btn-close-chat": "closeChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-search-messages": "renderSearchPanel",
@@ -5759,9 +5759,9 @@ define("xabber-chats", function () {
         },
 
         updateMenu: function () {
-            var is_blocked = this.contact.get('blocked');
-            this.$('.btn-block-contact').hideIf(is_blocked);
-            this.$('.btn-unblock-contact').showIf(is_blocked);
+            var is_group_chat = this.contact.get('group_chat');
+            this.$('.btn-invite-users').showIf(is_group_chat);
+            this.$('.btn-retract-own-messages').showIf(is_group_chat);
         },
 
         renderSearchPanel: function () {
@@ -5880,32 +5880,72 @@ define("xabber-chats", function () {
             (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
         },
 
+        inivteUsers: function () {
+            xabber.invite_panel.open(this.account, this.contact);
+        },
+
+        retractOwnMessages: function () {
+            let my_id = this.contact.my_info && this.contact.my_info.get('id');
+            if (!my_id) {
+                this.contact.getMyInfo(function () {
+                    my_id = this.contact.my_info && this.contact.my_info.get('id');
+                    this.model.retractMessagesByUser(my_id);
+                });
+            }
+            else
+                this.model.retractMessagesByUser(my_id);
+        },
+
         clearHistory: function () {
             this.content.clearHistory();
             xabber.chats_view.clearSearch();
         },
 
-        blockContact: function () {
-            this.contact.block();
-            xabber.chats_view.clearSearch();
-        },
-
-        unblockContact: function () {
-            this.contact.unblock();
-            xabber.chats_view.clearSearch();
+        leaveGroupChat: function () {
+            this.contact.declineSubscription();
+            this.contact.removeFromRoster();
+            this.contact.set('in_roster', false);
         },
 
         closeChat: function () {
-            if (this.account.connection && this.account.connection.do_synchronization) {
-                this.model.deleteChatFromSynchronization(function () {
-                    this.model.set('opened', false);
-                }.bind(this), function () {
-                    this.model.set('opened', false);
+            if (this.contact.get('group_chat')) {
+                utils.dialogs.ask("Delete chat", "If you delete a group chat, you won't receive messages from it", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        if (this.account.connection && this.account.connection.do_synchronization) {
+                            this.model.deleteChatFromSynchronization(function () {
+                                this.leaveGroupChat();
+                                this.model.set('opened', false);
+                            }.bind(this), function () {
+                                this.leaveGroupChat();
+                                this.model.set('opened', false);
+                            }.bind(this));
+                        }
+                        else {
+                            this.leaveGroupChat();
+                            this.model.set('opened', false);
+                            xabber.chats_view.clearSearch();
+                        }
+                    }
                 }.bind(this));
             }
             else {
-                this.model.set('opened', false);
-                xabber.chats_view.clearSearch();
+                utils.dialogs.ask("Delete chat", "If you delete a chat, the message history on the server will also be deleted (if the server supports this)", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        if (this.account.connection && this.account.connection.do_synchronization) {
+                            this.model.deleteChatFromSynchronization(function () {
+                                this.leaveGroupChat();
+                                this.model.set('opened', false);
+                            }.bind(this), function () {
+                                this.leaveGroupChat();
+                                this.model.set('opened', false);
+                            }.bind(this));
+                        }
+                        else {
+                            this.clearHistory();
+                            this.model.set('opened', false);
+                        }
+                    }
+                }.bind(this));
             }
         }
     });
