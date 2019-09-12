@@ -459,7 +459,7 @@ define("xabber-chats", function () {
           },
 
           initialize: function (attrs, options) {
-              navigator.mediaDevices.getUserMedia = (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.mozGetUserMedia || navigator.mediaDevices.msGetUserMedia || navigator.mediaDevices.webkitGetUserMedia);
+              // navigator.mediaDevices.getUserMedia = (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.mozGetUserMedia || navigator.mediaDevices.msGetUserMedia || navigator.mediaDevices.webkitGetUserMedia);
               attrs = attrs || {};
               attrs.video = attrs.video || false;
               this.contact = options.contact;
@@ -512,15 +512,19 @@ define("xabber-chats", function () {
               }.bind(this), 1000);
           },
 
+          onConnected: function () {
+              this.get('video') && this.setEnabledVideoTrack();
+              xabber.stopAudio(this.audio_notifiation);
+              setTimeout(function () {
+                  this.modal_view.updateStatusText();
+                  this.startTimer();
+              }.bind(this), 1000);
+          },
+
           onChangeConnectionState: function (ev) {
               let conn_state = ev.target.connectionState;
               if (conn_state === 'connected') {
-                  this.get('video') && this.setEnabledVideoTrack();
-                  xabber.stopAudio(this.audio_notifiation);
-                  setTimeout(function () {
-                      this.modal_view.updateStatusText();
-                      this.startTimer();
-                  }.bind(this), 1000);
+                  this.onConnected();
               } else {
                   this.modal_view.updateStatusText(utils.pretty_name(conn_state) + '...');
                   if (conn_state === 'disconnected') {
@@ -594,20 +598,27 @@ define("xabber-chats", function () {
                   from_jid = $incoming_iq.attr('from'),
                   $result_iq = $iq({from: this.account.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')});
               if ($jingle_initiate.length) {
+                  if ($jingle_initiate.attr('sid') !== this.get('session_id'))
+                      return;
                   let offer_sdp = $jingle_initiate.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
                   offer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'offer', sdp: offer_sdp}));
                   this.acceptSession(offer_sdp);
                   this.account.sendIQ($result_iq);
               }
               if ($jingle_accept.length) {
+                  if ($jingle_accept.attr('sid') !== this.get('session_id'))
+                      return;
                   let answer_sdp = $jingle_accept.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
                   answer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'answer', sdp: answer_sdp}));
                   this.account.sendIQ($result_iq);
               }
               if ($jingle_info.length) {
+                  if ($jingle_info.attr('sid') !== this.get('session_id'))
+                      return;
                   let candidate = $jingle_info.find('candidate');
                   candidate.length && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
                   this.account.sendIQ($result_iq);
+                  !this.conn.connectionState && this.onConnected();
               }
               if ($jingle_video.length) {
                   let session_id = $jingle_video.attr('id');
@@ -677,7 +688,7 @@ define("xabber-chats", function () {
               this.set('jingle_start', moment.now());
               this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
-              this.audio_notifiation = xabber.playAudio('connecting');
+              this.audio_notifiation = xabber.playAudio('connecting', true);
           },
 
           reject: function () {
