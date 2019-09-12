@@ -563,7 +563,7 @@ define("xabber-chats", function () {
 
           setEnabledVideoTrack: function () {
               let value = this.get('video'),
-                  default_video = this.conn.getSenders().find(sender => sender.track && sender.track.canvas),
+                  default_video = this.conn.getSenders().find(sender => sender.track && sender.track.default),
                   video_state = value ? 'enable' : 'disable';
               (default_video && value) && this.createVideoStream();
               this.local_stream && (this.local_stream.getVideoTracks()[0].enabled = value);
@@ -728,7 +728,7 @@ define("xabber-chats", function () {
                   ctx.putImageData(p, 0, 0);
                   requestAnimationFrame(draw);
               });
-              return canvas.captureStream(60).getTracks()[0];
+              return _.extend(canvas.captureStream(60).getTracks()[0], {default: true});
           },
 
           initSession: function () {
@@ -1429,15 +1429,16 @@ define("xabber-chats", function () {
 
         updateLastMessage: function (msg) {
             msg || (msg = this.model.last_message);
-            if (!msg)
+            if (!msg) {
+                !this.model.messages.length && this.$('.last-msg').html('No messages'.italics());
                 return;
+            }
             let msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'),
                 forwarded_message = msg.get('forwarded_message'),
                 msg_files = msg.get('files'),
                 msg_images = msg.get('images'),
-                msg_text = (forwarded_message) ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
-                color = this.account.settings.get('color'),
+                msg_text = forwarded_message ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
                 msg_user_info = msg.get('user_info') || {};
             this.model.set({timestamp: timestamp});
             if (msg_files || msg_images) {
@@ -1464,10 +1465,10 @@ define("xabber-chats", function () {
                 }
                 if (this.contact.get('group_chat')) {
                     let msg_from = msg_user_info.nickname || (msg.isSenderMe() ? (this.contact.get('my_info') && this.contact.get('my_info').nickname || this.account.get('name')) : msg.get('from_jid'));
-                    this.$('.last-msg').text("").append($('<span class=text-color-700>' + msg_from + ': ' + '</span>')).append(msg_text);
+                    this.$('.last-msg').text("").append($('<span class=text-color-700/>').text(msg_from + ': ')).append(msg_text);
                 }
                 else
-                    this.$('.last-msg').text("").append(msg_text);
+                    this.$('.last-msg').html(msg_text);
             }
             else {
                 var msg_from = "";
@@ -1486,18 +1487,32 @@ define("xabber-chats", function () {
                             msg_text = msg.get('system_last_message');
                     }
                     if (this.contact.get('group_chat'))
-                        msg_text = msg_text.italics();
+                        msg_text = $('<i/>').text(msg_text);
                     else
-                        msg_text = $('<span class=text-color-700>' + msg_text + '</span>');
+                        msg_text = $('<span class=text-color-700/>').text(msg_text);
+                    this.$('.last-msg').html(msg_text);
                 }
                 else {
-                    if (this.contact.get('group_chat')) {
-                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
+                    if (forwarded_message) {
+                        if (msg.get('message')) {
+                            msg_text = msg.get('message');
+                            this.$('.last-msg').text(msg_text);
+                        }
+                        else {
+                            msg_text = $('<i/>').text((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message');
+                            this.$('.last-msg').html(msg_text);
+                        }
                     }
+                    else {
+                        msg_text = msg.getText();
+                        this.$('.last-msg').text(msg_text);
+                    }
+                    if (this.contact.get('group_chat'))
+                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
+                    // this.$('.last-msg').text(msg_text);
                 }
-                this.$('.last-msg').text(msg_text);//.append(msg_text);
                 if (msg_from)
-                    this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
+                    this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
             this.$el.emojify('.last-msg', {emoji_size: 14});
             this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
@@ -2746,6 +2761,7 @@ define("xabber-chats", function () {
                 let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
                 this.model.retractAllMessages(symmetric, function () {
                     this._clearing_history = false;
+                    this.chat_item.updateLastMessage();
                     this.updateScrollBar();
                 }.bind(this), function () {
                     this._clearing_history = false;

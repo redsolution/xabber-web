@@ -940,7 +940,9 @@ define("xabber-contacts", function () {
                     dialog_options, {ok_button_text: 'delete'}).done(function (res) {
                     if (res) {
                         let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                        chat.retractAllMessages(symmetric)
+                        chat.retractAllMessages(symmetric, function () {
+                            chat.item_view.updateLastMessage();
+                        }.bind(this));
                     }
                 }.bind(this));
             },
