@@ -363,7 +363,7 @@ define("xabber-vcard", function () {
 
             this.$('.url input').val(vcard.url);
 
-            this.$('.description input').val(vcard.description);
+            this.$('.description textarea').val(vcard.description);
 
             this.$('.phone-work input').val(vcard.phone.work);
             this.$('.phone-home input').val(vcard.phone.home);
@@ -410,7 +410,7 @@ define("xabber-vcard", function () {
 
             vcard.url = this.$('.url input').val();
 
-            vcard.description = this.$('.description input').val();
+            vcard.description = this.$('.description textarea').val();
 
             vcard.phone.work = this.$('.phone-work input').val();
             vcard.phone.home = this.$('.phone-home input').val();

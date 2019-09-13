@@ -28,7 +28,8 @@ input[type=date]:focus:not([readonly]) + label,
 input[type=datetime-local]:focus:not([readonly]) + label,
 input[type=tel]:focus:not([readonly]) + label,
 input[type=number]:focus:not([readonly]) + label,
-input[type=search]:focus:not([readonly]) + label {
+input[type=search]:focus:not([readonly]) + label,
+textarea.materialize-textarea:focus:not([readonly]) + label {
     color: #F44336 !important;
 }
 
@@ -6060,6 +6061,14 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
+.vcard .info.description .value {
+    height: inherit;
+    overflow: hidden;
+    white-space: pre;
+    text-overflow: ellipsis;
+    max-height: 128px;
+}
+
 .vcard .info .label {
     height: 14px;
     margin-top: 3px;
@@ -6166,6 +6175,12 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .vcard .input-field {
+}
+
+.vcard .input-field.description textarea {
+    max-height: 128px;
+    min-height: 29px;
+    padding: 0;
 }
 
 .vcard .input-field input {

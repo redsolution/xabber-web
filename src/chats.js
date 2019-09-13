@@ -611,6 +611,7 @@ define("xabber-chats", function () {
                   let answer_sdp = $jingle_accept.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
                   answer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'answer', sdp: answer_sdp}));
                   this.account.sendIQ($result_iq);
+                  !this.conn.connectionState && this.onConnected();
               }
               if ($jingle_info.length) {
                   if ($jingle_info.attr('sid') !== this.get('session_id'))
@@ -618,7 +619,6 @@ define("xabber-chats", function () {
                   let candidate = $jingle_info.find('candidate');
                   candidate.length && this.conn.addIceCandidate(new RTCIceCandidate({candidate: candidate.text(), sdpMLineIndex: candidate.attr('sdpMLineIndex'), sdpMid: candidate.attr('sdpMid')}));
                   this.account.sendIQ($result_iq);
-                  !this.conn.connectionState && this.onConnected();
               }
               if ($jingle_video.length) {
                   let session_id = $jingle_video.attr('id');

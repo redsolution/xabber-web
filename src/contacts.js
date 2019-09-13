@@ -940,7 +940,7 @@ define("xabber-contacts", function () {
 
             deleteContact: function (ev) {
                 var contact = this.model;
-                utils.dialogs.ask("Remove contact", "Do you want to remove "+
+                utils.dialogs.ask("Delete contact", "Do you want to delete "+
                     contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         contact.removeFromRoster();
@@ -986,7 +986,9 @@ define("xabber-contacts", function () {
 
             events: {
                 "click .btn-join": "joinChat",
+                "click .btn-delete": "deleteContact",
                 "click .btn-block": "blockContact",
+                "click .btn-unblock": "unblockContact",
                 "click .btn-leave": "leaveGroupChat",
                 "click .btn-invite": "inviteUser",
                 "click .btn-settings": "editProperties",
@@ -1072,17 +1074,6 @@ define("xabber-contacts", function () {
                 this.model.invitation.joinGroupChat();
             },
 
-            blockContact: function (    ) {
-                var contact = this.model;
-                utils.dialogs.ask("Block group chat", "Do you want to block group chat "+
-                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
-                    if (result) {
-                        contact.blockRequest();
-                        xabber.trigger("clear_search");
-                    }
-                });
-            },
-
             editProperties: function (ev) {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
                     this.group_chat_properties_edit.open();
@@ -1139,6 +1130,39 @@ define("xabber-contacts", function () {
                     return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
                 else
                     return;
+            },
+
+            deleteContact: function (ev) {
+                var contact = this.model;
+                utils.dialogs.ask("Delete contact", "Do you want to delete "+
+                    contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        contact.removeFromRoster();
+                        xabber.trigger("clear_search");
+                    }
+                });
+            },
+
+            blockContact: function () {
+                var contact = this.model;
+                utils.dialogs.ask("Block group chat", "Do you want to block "+
+                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
+                    if (result) {
+                        contact.blockRequest();
+                        xabber.trigger("clear_search");
+                    }
+                });
+            },
+
+            unblockContact: function () {
+                var contact = this.model;
+                utils.dialogs.ask("Unblock contact", "Do you want to unblock "+
+                    contact.get('name')+"?", null, { ok_button_text: 'unblock'}).done(function (result) {
+                    if (result) {
+                        contact.unblock();
+                        xabber.trigger("clear_search");
+                    }
+                });
             },
 
             updateStatus: function () {
