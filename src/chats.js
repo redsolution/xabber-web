@@ -2535,7 +2535,7 @@ define("xabber-chats", function () {
                     this._current_composing_msg = undefined;
                 }
                 else
-                    message += 'typing';
+                    message = name + ' has stopped typing';
                 this._chatstate_show_timeout = setTimeout(function () {
                     this.showChatState();
                 }.bind(this), constants.CHATSTATE_TIMEOUT_STOPPED);
