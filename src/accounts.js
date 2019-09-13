@@ -2099,7 +2099,6 @@ define("xabber-accounts", function () {
                         request = {
                             type: 'GET',
                             url: window.location.protocol + '//' + domain + '/.well-known/host-meta',
-                            contentType: "application/json",
                             dataType: 'xml',
                             success: function (success) {
                                 let socket_url = $(success).find('Link').attr('href');
