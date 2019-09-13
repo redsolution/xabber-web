@@ -944,12 +944,13 @@ define("xabber-contacts", function () {
                     contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         contact.removeFromRoster();
+                        contact.trigger('archive_chat');
                         xabber.trigger("clear_search");
                     }
                 });
             },
 
-            blockContact: function (ev) {
+            blockContact: function () {
                 var contact = this.model;
                 utils.dialogs.ask("Block contact", "Do you want to block "+
                     contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
@@ -960,7 +961,7 @@ define("xabber-contacts", function () {
                 });
             },
 
-            unblockContact: function (ev) {
+            unblockContact: function () {
                 var contact = this.model;
                 utils.dialogs.ask("Unblock contact", "Do you want to unblock "+
                     contact.get('name')+"?", null, { ok_button_text: 'unblock'}).done(function (result) {
@@ -1138,6 +1139,7 @@ define("xabber-contacts", function () {
                     contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         contact.removeFromRoster();
+                        contact.trigger('archive_chat');
                         xabber.trigger("clear_search");
                     }
                 });

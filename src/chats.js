@@ -1203,7 +1203,7 @@ define("xabber-chats", function () {
                 let stanza_id = item.get('archive_id');
                 if (stanza_id) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
-                        .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: symmetric, by: this.account.get('jid')});
+                        .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
                             msgs_responses++;
@@ -1221,7 +1221,7 @@ define("xabber-chats", function () {
 
         retractMessagesByUser: function (user_id) {
             var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
-                .c('retract-user', {id: user_id, xmlns: Strophe.NS.XABBER_REWRITE, symmetric: true});
+                .c('retract-user', {id: user_id, xmlns: Strophe.NS.REWRITE, symmetric: true});
             this.account.sendIQ(iq_retraction, function (success) {
                     var user_msgs = this.messages.filter(msg => msg.get('user_info') && (msg.get('user_info').id == user_id));
                     $(user_msgs).each(function (idx, msg) {
@@ -1237,7 +1237,7 @@ define("xabber-chats", function () {
         retractAllMessages: function (symmetric, callback, errback) {
             let is_group_chat = this.contact.get('group_chat'),
                 iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? this.contact.get('jid') : this.account.get('jid')}),
-                retract_attrs = {xmlns: Strophe.NS.XABBER_REWRITE, symmetric: symmetric};
+                retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
@@ -1256,7 +1256,7 @@ define("xabber-chats", function () {
 
         getAllMessageRetractions: function () {
             var retractions_query = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
-                .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE, version: this.message_retraction_version, less_than: 4});
+                .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version, less_than: 4});
             this.account.sendIQ(retractions_query);
         },
 
@@ -4568,7 +4568,7 @@ define("xabber-chats", function () {
                 $(all_messages).each(function (idx, item) {
                     chat.item_view.content.removeMessage(item);
                 }.bind(this));
-                // chat.item_view.content.head.closeChat();
+                chat.item_view.updateLastMessage();
             }
             if ($message.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH + '"]').length) {
                 let code =  $message.find('confirm').attr('id');
@@ -5686,7 +5686,7 @@ define("xabber-chats", function () {
             "click .btn-clear-history": "clearHistory",
             "click .btn-invite-users": "inivteUsers",
             "click .btn-retract-own-messages": "retractOwnMessages",
-            "click .btn-close-chat": "closeChat",
+            "click .btn-close-chat": "deleteChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-search-messages": "renderSearchPanel",
             "click .btn-jingle-message": "sendJingleMessage"
@@ -5703,6 +5703,7 @@ define("xabber-chats", function () {
             this.updateMenu();
             this.updateNotifications();
             this.updateArchiveButton();
+            this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
@@ -5820,6 +5821,7 @@ define("xabber-chats", function () {
             var archived = !this.contact.get('archived'),
                 is_archived = archived ? true : false;
             this.contact.set('archived', archived);
+            !this.model.messages.length && this.model.item_view.updateLastMessage();
             this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', is_archived);
             this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', !is_archived);
             this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
@@ -5908,42 +5910,38 @@ define("xabber-chats", function () {
         },
 
         closeChat: function () {
+            this.model.set('opened', false);
+            xabber.chats_view.clearSearch();
+        },
+
+        deleteChat: function () {
             if (this.contact.get('group_chat')) {
                 utils.dialogs.ask("Delete chat", "If you delete a group chat, you won't receive messages from it", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
-                        if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteChatFromSynchronization(function () {
-                                this.leaveGroupChat();
-                                this.model.set('opened', false);
-                            }.bind(this), function () {
-                                this.leaveGroupChat();
-                                this.model.set('opened', false);
-                            }.bind(this));
-                        }
-                        else {
-                            this.leaveGroupChat();
-                            this.model.set('opened', false);
-                            xabber.chats_view.clearSearch();
-                        }
+                        (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteChatFromSynchronization();
+                        this.leaveGroupChat();
+                        this.closeChat();
                     }
                 }.bind(this));
             }
             else {
-                utils.dialogs.ask("Delete chat", "If you delete a chat, the message history on the server will also be deleted (if the server supports this)", null, { ok_button_text: 'delete'}).done(function (result) {
+                let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
+                utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
+                (rewrite_support ? "" : "\nWarning! Your server doesn't support message deleting. Messages will deleted locally".fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
                         if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteChatFromSynchronization(function () {
-                                this.leaveGroupChat();
-                                this.model.set('opened', false);
-                            }.bind(this), function () {
-                                this.leaveGroupChat();
-                                this.model.set('opened', false);
-                            }.bind(this));
+                            this.model.deleteChatFromSynchronization();
+                        }
+                        if (rewrite_support) {
+                            this.model.retractAllMessages(false);
                         }
                         else {
-                            this.clearHistory();
-                            this.model.set('opened', false);
+                            let all_messages = this.model.messages.models;
+                            $(all_messages).each(function (idx, item) {
+                                this.model.item_view.content.removeMessage(item);
+                            }.bind(this));
                         }
+                        this.closeChat();
                     }
                 }.bind(this));
             }
@@ -6923,7 +6921,7 @@ define("xabber-chats", function () {
             legacy_body.length && (legacy_body = legacy_body.slice(0, legacy_body.length - Strophe.xmlescape(old_body).length));
             groupchat_legacy && (legacy_body = legacy_body.slice(0, groupchat_legacy.start) + legacy_body.slice(groupchat_legacy.end + 1));
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
-                .c('replace', {xmlns: Strophe.NS.XABBER_REWRITE, id: stanza_id})
+                .c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id})
                 .c('message')
                 .c('body').t(Strophe.xmlunescape(legacy_body) + text).up();
             markups.forEach(function (markup) {
@@ -6960,7 +6958,7 @@ define("xabber-chats", function () {
                     msg && msgs.push(msg);
                     msg.isSenderMe() && my_msgs++;
                 }.bind(this));
-                if (this.account.server_features.get(Strophe.NS.XABBER_REWRITE) || this.contact.get('group_chat')) {
+                if (this.account.server_features.get(Strophe.NS.REWRITE) || this.contact.get('group_chat')) {
                     !this.contact.get('group_chat') && (my_msgs === msgs.length) && (dialog_options = [{
                         name: 'symmetric_deletion',
                         checked: false,
