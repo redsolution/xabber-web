@@ -5927,7 +5927,7 @@ define("xabber-chats", function () {
             else {
                 let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
                 utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
-                (rewrite_support ? "" : "\nWarning! Your server doesn't support message deleting. Messages will deleted locally".fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
+                (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
                         if (this.account.connection && this.account.connection.do_synchronization) {
                             this.model.deleteChatFromSynchronization();
