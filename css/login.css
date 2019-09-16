@@ -1,0 +1,243 @@
+@font-face {
+    font-family: "HelveticaNeue";
+    src: url('../fonts/HelveticaNeue.ttf');
+}
+
+
+.login-page-wrap {
+    width: 100%;
+    height: 100%;
+    font-size: 12pt;
+    font-family: HelveticaNeue, serif;
+}
+
+.login-panel {
+    position: relative;
+    width: 100%;
+    /*height: 100%;*/
+    margin: 0 0 -60px 0;
+    font-family: "HelveticaNeue", serif !important;
+    /*min-height: 766px;*/
+}
+
+.login-panel .login-panel-header {
+    width: 100%;
+    text-align: center;
+    margin: 24px 0 18px;
+}
+
+.login-panel .login-panel-footer {
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    width: 100%;
+    height: 30px;
+    padding-top: 0;
+}
+
+.login-panel .login-panel-footer a {
+    text-decoration: none;
+    color: #fff;
+    background-color: transparent;
+}
+
+.login-panel .login-panel-body {
+    width: 464px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 4px;
+    margin: 18px auto;
+    padding: 44px 64px 0;
+    background-color: #fff;
+}
+
+.login-panel .login-panel-body .client-name {
+    color: #111;
+    width: 100%;
+    font-size: 30px;
+    font-weight: bold;
+    line-height: 30px;
+    text-align: center;
+    margin-bottom: .75rem;
+}
+
+.login-panel .login-panel-body .client-subtitle {
+    color: #000;
+    width: 100%;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    margin-top: -.350rem;
+    margin-bottom: 48px;
+}
+
+.login-panel .login-panel-body .login-form-field {
+    display: block;
+    width: 100%;
+    height: calc(1em + .5rem + 2px);
+    padding: .375rem .75rem;
+    /*margin-right: -16px;*/
+    /*margin-left: -16px;*/
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.login-panel .login-panel-body .login-button-row {
+    width: 100%;
+    text-align: center;
+    margin: calc(54px - 24px - 2rem) auto 32px;
+    padding: 7px 24px;
+}
+
+.login-panel .login-panel-body .login-button {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border: 1px solid #007bff;
+    padding: 7px 24px;
+    /*font-size: 1rem;*/
+    line-height: 1.5;
+    border-radius: .25rem;
+    font-size: 1.1rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    color: #fff;
+    background-color: #007bff;
+}
+
+.login-panel .login-panel-body .login-button:hover {
+    color: #fff;
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.login-panel .login-panel-body .login-button:focus, .login-panel .login-panel-body .login-button.focus {
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+}
+
+.login-panel .login-panel-body .login-button.disabled, .login-panel .login-panel-body .login-button:disabled {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.login-panel .login-panel-body .login-button:not(:disabled):not(.disabled):active, .login-panel .login-panel-body .login-button:not(:disabled):not(.disabled).active,
+.show > .login-panel .login-panel-body .login-button.dropdown-toggle {
+    color: #fff;
+    background-color: #0062cc;
+    border-color: #005cbf;
+}
+
+.login-panel .login-panel-body .login-button:not(:disabled):not(.disabled):active:focus, .login-panel .login-panel-body .login-button:not(:disabled):not(.disabled).active:focus,
+.show > .login-panel .login-panel-body .login-button.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5);
+}
+
+.login-panel .login-panel-body .login-error {
+    height: 24px;
+    margin-top: 1rem;
+    display: block;
+    font-size: 80%;
+    /*color: #dc3545;*/
+}
+
+.login-panel input[type=text]:focus:not([readonly]),
+.login-panel input[type=password]:focus:not([readonly]) {
+    color: #495057;
+    background-color: #fff;
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(0,123,255,.25);
+}
+.login-panel input[type=text]:focus:not([readonly]) + label,
+.login-panel input[type=password]:focus:not([readonly]) + label {
+    color: #fff !important;
+}
+
+.login-panel input[type=text].invalid:not([readonly]),
+.login-panel input[type=password].invalid:not([readonly]) {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dc3545;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+.login-panel input[type=text].invalid:not([readonly]) + label,
+.login-panel input[type=password].invalid:not([readonly]) + label {
+    color: #fff !important;
+}
+
+.login-panel-clients-wrap {
+    width: 100%;
+    text-align: center;
+}
+
+.login-panel .login-panel-clients {
+    width: 416px;
+    margin: 8px auto;
+    text-align: center;
+}
+.login-panel .login-panel-clients .lp-client-item {
+    margin: 8px 16px;
+    width: 176px;
+    height: 128px;
+    text-align: center;
+    color: #fff;
+    line-height: 24px;
+}
+.login-panel .login-panel-clients .lp-client-item img {
+    margin: 19px 0 8px;
+}
+.login-panel .login-panel-clients .lp-client-item a {
+    text-decoration: none;
+    color: #fff;
+}
+@media screen and ( max-height: 768px ) {
+
+    .login-panel .login-panel-body {
+        padding: 20px 64px 0;
+        margin: 0 auto;
+    }
+    .login-panel .login-panel-body .client-subtitle {
+        margin-bottom: 20px;
+    }
+
+    .login-panel .login-panel-header {
+        margin: 0px 0 0px;
+    }
+    .login-panel .login-panel-body .login-error {
+        margin-top: -12px;
+    }
+    .login-panel .login-panel-body .login-button-row {
+        margin: calc(54px - 24px - 2rem) auto 24px;
+    }
+    .login-panel .login-panel-clients {
+        margin: 0 auto;
+    }
+    .login-panel {
+	    position: relative;
+        width: 100%;
+        margin: 0;
+        font-family: "HelveticaNeue", serif !important;
+        min-height: 100%;
+        min-height: calc(100% - 36px);
+        min-height: calc(100vh - 36px);
+    }
+}
+
+@media screen and ( min-height: 768px ) {
+    .login-panel {
+        height: 100%;
+    }
+}

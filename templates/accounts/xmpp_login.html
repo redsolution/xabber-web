@@ -1,44 +1,61 @@
-    <div class="login-panel-head noselect">
-        <img src="images/xabber-logo.png" class="client-logo">
-        <span class="client-name">Xabber</span>
-    </div>
-    <div class="login-panel-form xmpp-login-form noselect">
-        <div class="input-field">
-            <input id="jid" type="text" name="jid">
-            <label for="jid">XMPP ID</label>
-            <span class="errors fixed one-line"></span>
-        </div>
-        <div class="input-field">
-            <input id="password" type="password" name="password">
-            <label for="password">Password</label>
-            <span class="errors fixed one-line"></span>
-        </div>
-        <div class="input-field buttons-wrap">
-            <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/" target="_blank" class="btn-flat btn-main btn-forgot-password">Register an XMPP account</a>
-            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>
-        </div>
-        <div class="clearfix"></div>
-        <div class="social-auth-wrap">
-            <div class="social-header">
-                <div class="divider"></div>
-                <div class="social-header-tip">Social Login</div>
-            </div>
-            <div class="social-buttons">
-                <div class="btn-social google-color" data-provider="google">
-                    <i class="mdi mdi-28px mdi-google-plus"></i>
-                </div>
-                <div class="btn-social facebook-color" data-provider="facebook">
-                    <i class="mdi mdi-28px mdi-facebook"></i>
-                </div>
-                <div class="btn-social twitter-color" data-provider="twitter">
-                    <i class="mdi mdi-28px mdi-twitter"></i>
-                </div>
-                <div class="btn-social xabber-color" data-provider="email">
-                    <i class="mdi mdi-28px mdi-at"></i>
-                </div>
+<div class="login-panel">
+    <div class="login-panel-container">
+        <div class="login-panel-header">
+            <div class="logo">
+                <img src="/static/xmppserverui/img/logo.png" alt="xabber-logo" class="client-logo"/>
             </div>
         </div>
+
+        <div class="login-panel-body">
+            <div class="client-name">Xabber for Web</div>
+            <div class="client-subtitle">Online team chat right in your browser</div>
+
+            <input class="login-form-field" id="jid" placeholder="username@example.com" type="text" name="jid">
+            <label for="jid"></label>
+
+            <input class="login-form-field" id="password" placeholder="Password" type="password" name="password">
+            <label for="password"></label>
+
+            <span class="login-error errors"></span>
+
+            <div class="login-button-row">
+                <button class="login-button btn-log-in">Login</button>
+            </div>
+
+        </div>
+
+        <div class="login-panel-clients-wrap">
+            <div class="row login-panel-clients">
+                <div class="col lp-client-item">
+                    <a target="_blank" href="https://play.google.com/store/apps/details?id=com.xabber.android">
+                        <div class="lp-client-logo">
+                            <img src="images/client_android.svg" alt="">
+                        </div>
+                        <div class="lp-client-title">
+                            Xabber for Android
+                        </div>
+                    </a>
+                </div>
+                <div class="col lp-client-item">
+                    <a target="_blank" href="https://testflight.apple.com/join/8AVdKqCK">
+                        <div class="lp-client-logo">
+                            <img src="images/client_iphone.svg" alt="">
+                        </div>
+                        <div class="lp-client-title">
+                            Xabber for iOS
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="login-panel-footer">
-        <div class="footer-text">Connection to XMPP server is done via auxiliary websocket server maintained by <a class="redsolution-src" href="http://www.redsolution.com" target="_blank"><span class="red-part">red</span>solution</a>. Theoretically we can intercept your XMPP passwords, however, we don’t do that. This won’t be a problem when more servers will support OAuth2 authentication and allow token-based connectivity.</div>
+
+</div>
+
+<div class="login-panel-footer">
+    <div class="col">
+        <div class="login-page-footer-link">
+            <a href="https://www.xabber.com/">www.xabber.com</a>
+        </div>
     </div>
+</div>
