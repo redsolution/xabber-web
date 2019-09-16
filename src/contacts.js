@@ -39,6 +39,7 @@ define("xabber-contacts", function () {
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
+                this.domain = Strophe.getDomainFromJid(this.get('jid'));
                 this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
@@ -46,6 +47,7 @@ define("xabber-contacts", function () {
                 this.invitation = new xabber.ContactInvitationView({model: this});
                 this.on("change:photo_hash", this.getContactInfo, this);
                 this.on("change:roster_name", this.updateName, this);
+                !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
                 this.account.dfd_presence.done(function () {
                     if (!this.get('blocked'))
                         this.getContactInfo();
@@ -3630,6 +3632,7 @@ define("xabber-contacts", function () {
                         is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
                         chat = this.account.chats.getChat(contact),
                         message = $item.children('last-message').children('message'),
+                        current_call = $item.children('call'),
                         $unread_messages = $item.children('unread'),
                         last_delivered_msg = $item.children('delivered').attr('id'),
                         last_displayed_msg = $item.children('displayed').attr('id'),
@@ -3637,6 +3640,12 @@ define("xabber-contacts", function () {
                         msg_retraction_version = $item.children('retract').attr('version'),
                         msg, options = {synced_msg: true};
                     contact.set('group_chat', is_group_chat);
+                    if (current_call.length) {
+                        let $jingle_message = current_call.children('message'),
+                            full_jid = $jingle_message.attr('from'),
+                            session_id = $jingle_message.children('propose').attr('id');
+                        chat.initIncomingCall(full_jid, session_id);
+                    }
                     if (!message.length) {
                         chat.set('timestamp', Math.trunc(Number($item.attr('stamp')))/1000);
                         chat.item_view.updateEmptyChat();

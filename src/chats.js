@@ -861,6 +861,12 @@ define("xabber-chats", function () {
             this.account.sendIQ(iq, callback);
         },
 
+        initIncomingCall: function (full_jid, session_id) {
+            xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
+            xabber.current_voip_call.modal_view.show({status: 'in'});
+            xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
+        },
+
         receiveMessage: function ($message, options) {
             var from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 carbon_copied = options.carbon_copied;
@@ -878,9 +884,7 @@ define("xabber-chats", function () {
                     let session_id = $jingle_msg_propose.attr('id'),
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
-                        xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: iq_to, session_id: session_id}, {contact: this.contact});
-                        xabber.current_voip_call.modal_view.show({status: 'in'});
-                        xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
+                        this.initIncomingCall(iq_to, session_id);
                     }.bind(this));
                 }
             }
@@ -2758,26 +2762,39 @@ define("xabber-chats", function () {
         clearHistory: function () {
             let dialog_options = [];
             this._clearing_history = true;
-            !this.contact.get('group_chat') && (dialog_options = [{
-                name: 'symmetric_deletion',
-                checked: false,
-                text: 'Delete for all'
-            }]);
-            utils.dialogs.ask("Clear message archive", "Do you want to delete all messages from archive?",
-                dialog_options, {ok_button_text: 'delete'}).done(function (res) {
-                if (!res) {
-                    this._clearing_history = false;
-                    return;
-                }
-                let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                this.model.retractAllMessages(symmetric, function () {
-                    this._clearing_history = false;
-                    this.chat_item.updateLastMessage();
-                    this.updateScrollBar();
-                }.bind(this), function () {
-                    this._clearing_history = false;
+            if (this.account.server_features.get(Strophe.NS.REWRITE)) {
+                (!this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
+                    name: 'symmetric_deletion',
+                    checked: false,
+                    text: 'Delete for all'
+                }]);
+                utils.dialogs.ask("Clear message archive", "Are you sure you want to <b>delete all message history</b> for this chat?",
+                    dialog_options, {ok_button_text: 'delete'}).done(function (res) {
+                    if (!res) {
+                        this._clearing_history = false;
+                        return;
+                    }
+                    let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
+                    this.model.retractAllMessages(symmetric, function () {
+                        this._clearing_history = false;
+                        this.chat_item.updateLastMessage();
+                        this.updateScrollBar();
+                    }.bind(this), function () {
+                        this._clearing_history = false;
+                    }.bind(this));
                 }.bind(this));
-            }.bind(this));
+            }
+            else {
+                utils.dialogs.ask("Clear message archive", "Are you sure you want to <b>delete all message history</b> for this chat?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935'),
+                    dialog_options, {ok_button_text: 'delete locally'}).done(function (res) {
+                    if (!res) {
+                        this._clearing_history = false;
+                        return;
+                    }
+                    let msgs = this.model.messages;
+                    msgs.forEach(function (item) { this.removeMessage(item); }.bind(this))
+                }.bind(this));
+            }
         },
 
         renderVoiceMessage: function (element, file_url) {
@@ -6950,37 +6967,42 @@ define("xabber-chats", function () {
         },
 
         deleteMessages: function () {
-                let $msgs = this.content_view.$('.chat-message.selected'),
-                    msgs = [],
-                    my_msgs = 0,
-                    dialog_options = [];
-                $msgs.each(function (idx, item) {
-                    let msg = this.messages_arr.get(item.dataset.msgid);
-                    msg && msgs.push(msg);
-                    msg.isSenderMe() && my_msgs++;
+            let $msgs = this.content_view.$('.chat-message.selected'),
+                msgs = [],
+                my_msgs = 0,
+                dialog_options = [];
+            $msgs.each(function (idx, item) {
+                let msg = this.messages_arr.get(item.dataset.msgid);
+                msg && msgs.push(msg);
+                msg.isSenderMe() && my_msgs++;
+            }.bind(this));
+            if (this.account.server_features.get(Strophe.NS.REWRITE) || this.contact.get('group_chat')) {
+                (!this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
+                    name: 'symmetric_deletion',
+                    checked: false,
+                    text: 'Delete for all'
+                }]);
+                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?",
+                    dialog_options, {ok_button_text: 'delete'}).done(function (res) {
+                    if (!res) {
+                        this._clearing_history = false;
+                        return;
+                    }
+                    let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
+                    this.resetSelectedMessages();
+                    this.model.retractMessages(msgs, this.contact.get('group_chat'), symmetric);
                 }.bind(this));
-                if (this.account.server_features.get(Strophe.NS.REWRITE) || this.contact.get('group_chat')) {
-                    !this.contact.get('group_chat') && (my_msgs === msgs.length) && (dialog_options = [{
-                        name: 'symmetric_deletion',
-                        checked: false,
-                        text: 'Delete for all'
-                    }]);
-                    utils.dialogs.ask("Delete messages", ("Do you want to delete " + msgs.length + " message" + ((msgs.length > 1) ? 's?' : '?')),
-                        dialog_options, {ok_button_text: 'delete'}).done(function (res) {
-                        if (!res)
-                            return;
-                        let symmetric = (this.contact.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                        this.resetSelectedMessages();
-                        this.model.retractMessages(msgs, this.contact.get('group_chat'), symmetric);
-                    }.bind(this));
-                }
-                else
-                    utils.dialogs.ask("Delete messages", ("Do you want to delete " + msgs.length + " message" + ((msgs.length > 1) ? 's?' : '?') + ' Messages will not be deleted from server, only locally.'),
-                        dialog_options, {ok_button_text: 'delete'}).done(function (res) {
-                        if (!res)
-                            return;
-                        msgs.forEach(function (item) { this.view.removeMessage(item); }.bind(this))
-                    }.bind(this));
+            }
+            else {
+                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Message" + (msgs.length > 1) ? "s" : "" +" will be deleted only locally.").fontcolor('#E53935'),
+                    dialog_options, {ok_button_text: 'delete locally'}).done(function (res) {
+                    if (!res) {
+                        this._clearing_history = false;
+                        return;
+                    }
+                    msgs.forEach(function (item) { this.view.removeMessage(item); }.bind(this))
+                }.bind(this));
+            }
         },
 
         pushMessagesToClipboard: function (messages) {
