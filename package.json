@@ -1,8 +1,15 @@
 {
   "name": "xabber.web",
-  "version": "1.0.79",
+  "version": "1.0.164",
   "description": "Open-source XMPP messenger for web browsers",
-  "keywords": ["xmpp", "jabber", "messenger", "chat", "web", "javascript"],
+  "keywords": [
+    "xmpp",
+    "jabber",
+    "messenger",
+    "chat",
+    "web",
+    "javascript"
+  ],
   "bugs": {
     "url": ""
   },
@@ -29,6 +36,7 @@
     "underscore": "~1.8.3",
     "wavesurfer": ">0.0.0",
     "slug": ">0.0.0",
-    "magnific-popup": ">0.0.0"
+    "magnific-popup": ">0.0.0",
+    "babel-minify": "~0.5.1"
   }
 }
