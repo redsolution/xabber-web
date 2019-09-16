@@ -6064,9 +6064,11 @@ input[type='range'].voice-message-volume:focus {
 .vcard .info.description .value {
     height: inherit;
     overflow: hidden;
-    white-space: pre;
-    text-overflow: ellipsis;
-    max-height: 128px;
+    margin-right: 8px;
+    word-break: break-word;
+    overflow-wrap: normal;
+    white-space: pre-line;
+    /*max-height: 128px;*/
 }
 
 .vcard .info .label {

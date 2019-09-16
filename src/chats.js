@@ -5724,6 +5724,7 @@ define("xabber-chats", function () {
                 hover: false
             });
             this.$('.chat-head-menu').hide();
+            this.updateMenu();
             this.updateGroupChatHead();
             return this;
         },
