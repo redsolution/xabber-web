@@ -2766,58 +2766,105 @@ body {
 /* ----------------- JINGLE MESSAGE VIEW -------------------- */
 
 .jingle-message-view {
-    width: 420px;
+    width: 80vh;
+    height: 60vh;
 }
 
-.jingle-message-view>.btn-collapse {
-    display: none;
-    position: absolute;
-    color: #424242;
-}
-
-.jingle-message-view .modal-header {
-    height: inherit;
-}
-
-.jingle-message-view .modal-header .btn-collapse {
-    position: absolute;
-    cursor: pointer;
-    height: 24px;
-    width: 24px;
-    top: 8px;
-    right: 8px;
+.jingle-message-view .call-header {
+    text-align: center;
+    margin: 16px;
+    font-weight: 500;
+    font-size: 16px;
 }
 
 .jingle-message-view .calling-status {
-    color: #424242
+    font-weight: 400;
+    font-size: 14px;
 }
 
-.jingle-message-view .panel-header {
-    text-transform: uppercase;
+.jingle-message-view .video-wrap {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.jingle-message-view .video-wrap .webrtc-remote-video {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.jingle-message-view .video-wrap .webrtc-local-video {
+    width: 100px;
+    height: 75px;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border-radius: 8px;
+}
+
+.jingle-message-view .default-screen {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.jingle-message-view .buttons-wrap .btn-accept,
+.jingle-message-view .buttons-wrap.incoming .btn-volume,
+.jingle-message-view .buttons-wrap.incoming .btn-microphone,
+.jingle-message-view .buttons-wrap.incoming .btn-video {
+    display: none;
+}
+
+.jingle-message-view .buttons-wrap.incoming .btn-accept {
+    display: block;
+}
+
+.jingle-message-view .buttons-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    position: absolute;
+    bottom: 16px;
+    z-index: 1;
+}
+
+.jingle-message-view .contact-info {
+    width: calc(100% - 136px);
+    margin: 8px 0px 0 16px;
+    z-index: 1;
+    position: absolute;
+}
+
+.jingle-message-view .name {
     font-size: 16px;
     font-weight: 500;
 }
 
 .jingle-message-view .circle-avatar {
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
     margin: 8px auto 12px auto;
 }
 
-.jingle-message-view .contact-info .name {
-    font-size: 16px;
-    font-weight: 500;
-}
-
-.jingle-message-view .modal-header,
-.jingle-message-view .modal-footer .contact-info {
-    text-align: center;
-}
-
-.jingle-message-view i {
+.jingle-message-view i,
+.jingle-message-view .buttons-wrap svg,
+.jingle-message-view .buttons-wrap i {
     cursor: pointer;
-    color: #FFF;
+    background-color: #BDBDBD;
     border-radius: 50%;
+    color: #FFF;
+    fill: #FFF;
     padding: 12px;
     display: inline-block;
     height: 48px !important;
@@ -2825,45 +2872,25 @@ body {
     margin: 0 12px;
 }
 
-.jingle-message-view .modal-content .video-wrap,
-.jingle-message-view .modal-content video {
-    width: 100%;
-    height: 256px;
-    background-color: #000;
+.jingle-message-view.collapsed>i.btn-collapse {
+    display: block;
 }
 
-.jingle-message-view .modal-content video.collapsed {
-    width: initial;
-    height: 75px;
-    bottom: 72px;
+.jingle-message-view>i.btn-collapse {
     position: absolute;
-    right: 24px;
+    background-color: inherit;
+    color: #424242;
 }
 
-.jingle-message-view .modal-content,
-.jingle-message-view .modal-footer {
-    text-align: center;
+.jingle-message-view.collapsed svg.btn-collapse,
+.jingle-message-view>i.btn-collapse {
+    display: none;
 }
 
-.jingle-message-view .modal-content i {
-    background-color: #9E9E9E;
-}
-
-.jingle-message-view .modal-content i.non-active {
-    background-color: #e0e0e0;
-}
-
-.jingle-message-view .modal-content .buttons-wrap {
-    padding: 12px 0;
-}
-
-.jingle-message-view .modal-footer {
-    height: inherit;
-    padding: 4px 24px;
-}
-
-.jingle-message-view .contact-info .jid {
-    margin: 4px 0;
+.jingle-message-view svg.btn-collapse {
+    left: 8px;
+    position: absolute;
+    z-index: 1;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */

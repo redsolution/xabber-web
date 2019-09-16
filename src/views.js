@@ -1037,15 +1037,10 @@ define("xabber-views", function () {
         },
 
         updateCallingStatus: function (status) {
-            status = status || "";
-            if (status === constants.JINGLE_MSG_ACCEPT) {
-                this.$('.btn-accept').addClass('hidden');
-                this.$('.buttons-wrap').removeClass('hidden');
-            }
-            if (status === 'in') {
-                this.$('.btn-accept').removeClass('hidden');
-                this.$('.buttons-wrap').addClass('hidden');
-            }
+            this.$('.buttons-wrap').switchClass('incoming', (status === 'in'));
+            this.$('.contact-info').switchClass('hidden', (status === 'in' || status === constants.JINGLE_MSG_PROPOSE));
+            this.$('.default-screen .name').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
+            this.$('.call-header').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
         },
 
         updateStatusText: function (status) {
@@ -1053,7 +1048,7 @@ define("xabber-views", function () {
         },
 
         updateName: function () {
-            this.$('.contact-info .name').text(this.contact.get('name'));
+            this.$('.name').text(this.contact.get('name'));
         },
 
         updateAccountJid: function () {

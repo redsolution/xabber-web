@@ -459,7 +459,6 @@ define("xabber-chats", function () {
           },
 
           initialize: function (attrs, options) {
-              // navigator.mediaDevices.getUserMedia = (navigator.mediaDevices.getUserMedia || navigator.mediaDevices.mozGetUserMedia || navigator.mediaDevices.msGetUserMedia || navigator.mediaDevices.webkitGetUserMedia);
               attrs = attrs || {};
               attrs.video = attrs.video || false;
               this.contact = options.contact;
@@ -485,6 +484,7 @@ define("xabber-chats", function () {
                   this.sendCandidate(ice.candidate);
               }.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
+              this.on('change:state', this.modal_view.updateCallingStatus, this.modal_view);
               this.on('change:video', this.setEnabledVideoTrack, this);
               this.on('change:video_in', this.onChangedRemoteVideo, this);
               this.on('change:volume_on', this.onChangedVolume, this);
@@ -535,11 +535,12 @@ define("xabber-chats", function () {
 
           onChangedMediaType: function () {
               this.$local_video.switchClass('hidden', !this.get('video'));
-              this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
+              // this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
           },
 
           onChangedRemoteVideo: function () {
-              if (this.get('video_in')) {
+              let incoming_video = this.get('video_in');
+              if (incoming_video) {
                   this.$remote_video_el[0].srcObject = this.remote_stream;
                   this.modal_view.$el.find('.webrtc-remote-audio').replaceWith(this.$remote_video_el);
               }
@@ -547,7 +548,7 @@ define("xabber-chats", function () {
                   this.$remote_audio_el[0].srcObject = this.remote_stream;
                   this.modal_view.$el.find('.webrtc-remote-video').replaceWith(this.$remote_audio_el);
               }
-              this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
+              this.modal_view.$el.find('.default-screen').switchClass('hidden', incoming_video);
           },
 
           onChangedVolume: function () {

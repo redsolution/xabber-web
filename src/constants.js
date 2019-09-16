@@ -146,7 +146,7 @@ var constants = {
         CHAT_HEAD:                      40,
         CHAT_MESSAGE:                   32,
         CHAT_BOTTOM:                    48,
-        XABBER_VOICE_CALL_VIEW:         96,
+        XABBER_VOICE_CALL_VIEW:         128,
     },
 
     SOUNDS: {
