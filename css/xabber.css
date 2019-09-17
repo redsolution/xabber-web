@@ -2818,6 +2818,7 @@ body {
 }
 
 .jingle-message-view .buttons-wrap .btn-accept,
+.jingle-message-view .buttons-wrap.incoming .btn-share-screen,
 .jingle-message-view .buttons-wrap.incoming .btn-volume,
 .jingle-message-view .buttons-wrap.incoming .btn-microphone,
 .jingle-message-view .buttons-wrap.incoming .btn-video {

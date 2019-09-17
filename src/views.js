@@ -988,6 +988,7 @@ define("xabber-views", function () {
 
         events: {
             "click .btn-accept": "accept",
+            "click .btn-share-screen": "shareScreen",
             "click .btn-microphone": "toggleMicrophone",
             "click .btn-video": "videoCall",
             "click .btn-volume": "toggleVolume",
@@ -1057,6 +1058,10 @@ define("xabber-views", function () {
 
         close: function () {
             this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        shareScreen: function () {
+            this.model.set('video_screen', !this.model.get('video_screen'));
         },
 
         accept: function () {

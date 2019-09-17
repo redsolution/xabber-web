@@ -455,6 +455,7 @@ define("xabber-chats", function () {
               audio: true,
               volume_on: true,
               video_in: false,
+              video_screen: false,
               state: 0
           },
 
@@ -486,6 +487,7 @@ define("xabber-chats", function () {
               this.on('change:audio', this.setEnabledAudioTrack, this);
               this.on('change:state', this.modal_view.updateCallingStatus, this.modal_view);
               this.on('change:video', this.setEnabledVideoTrack, this);
+              this.on('change:video_screen', this.setEnabledScreenShareVideoTrack, this);
               this.on('change:video_in', this.onChangedRemoteVideo, this);
               this.on('change:volume_on', this.onChangedVolume, this);
               this.on('destroy', this.onDestroy, this);
@@ -534,8 +536,7 @@ define("xabber-chats", function () {
           },
 
           onChangedMediaType: function () {
-              this.$local_video.switchClass('hidden', !this.get('video'));
-              // this.modal_view.$el.find('.video-wrap').switchClass('hidden', !(this.get('video_in') || this.get('video')));
+              this.$local_video.switchClass('hidden', !(this.get('video') || this.get('video_screen')));
           },
 
           onChangedRemoteVideo: function () {
@@ -568,7 +569,7 @@ define("xabber-chats", function () {
 
           setEnabledVideoTrack: function () {
               let value = this.get('video'),
-                  default_video = this.conn.getSenders().find(sender => sender.track && sender.track.default),
+                  default_video = this.conn.getSenders().find(sender => sender.track && (sender.track.default || sender.track.screen)),
                   video_state = value ? 'enable' : 'disable';
               (default_video && value) && this.createVideoStream();
               this.local_stream && (this.local_stream.getVideoTracks()[0].enabled = value);
@@ -581,6 +582,27 @@ define("xabber-chats", function () {
               this.account.connection.deleteHandler(this.iq_handler);
               this.stopTracks();
               this.conn.close();
+          },
+
+          setEnabledScreenShareVideoTrack:  function () {
+              let value = this.get('video_screen'),
+                  default_video = this.conn.getSenders().find(sender => sender.track && !sender.track.screen),
+                  video_state = value ? 'enable' : 'disable';
+              (default_video && value) && this.createScreenShareVideoStream();
+              this.local_stream && (this.local_stream.getVideoTracks()[0].enabled = value);
+              this.sendVideoStreamState(video_state);
+              this.onChangedMediaType();
+          },
+
+          createScreenShareVideoStream: function () {
+              navigator.mediaDevices.getDisplayMedia({video: true}).then(function (media_stream) {
+                  this.$local_video[0].srcObject = media_stream;
+                  media_stream.getVideoTracks().forEach(function (track) {
+                      this.local_stream.addTrack(track);
+                      this.conn.addTrack(track, this.local_stream);
+                      this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
+                  }.bind(this));
+              }.bind(this));
           },
 
           sendVideoStreamState: function (state) {
