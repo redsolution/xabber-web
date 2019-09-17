@@ -461,7 +461,8 @@ define("xabber-chats", function () {
 
           initialize: function (attrs, options) {
               attrs = attrs || {};
-              attrs.video = attrs.video || false;
+              attrs.video_live = attrs.video_live || false;
+              attrs.video = attrs.video_live;
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
@@ -485,8 +486,9 @@ define("xabber-chats", function () {
                   this.sendCandidate(ice.candidate);
               }.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
+              this.on('change:video', this.onChangedVideoValue, this);
               this.on('change:state', this.modal_view.updateCallingStatus, this.modal_view);
-              this.on('change:video', this.setEnabledVideoTrack, this);
+              this.on('change:video_live', this.setEnabledVideoTrack, this);
               this.on('change:video_screen', this.setEnabledScreenShareVideoTrack, this);
               this.on('change:video_in', this.onChangedRemoteVideo, this);
               this.on('change:volume_on', this.onChangedVolume, this);
@@ -515,7 +517,7 @@ define("xabber-chats", function () {
           },
 
           onConnected: function () {
-              this.get('video') && this.setEnabledVideoTrack();
+              this.get('video_live') && this.onChangedVideoValue();
               xabber.stopAudio(this.audio_notifiation);
               setTimeout(function () {
                   this.modal_view.updateStatusText();
@@ -536,7 +538,7 @@ define("xabber-chats", function () {
           },
 
           onChangedMediaType: function () {
-              this.$local_video.switchClass('hidden', !(this.get('video') || this.get('video_screen')));
+              this.$local_video.switchClass('hidden', !this.get('video'));
           },
 
           onChangedRemoteVideo: function () {
@@ -568,13 +570,12 @@ define("xabber-chats", function () {
           },
 
           setEnabledVideoTrack: function () {
-              let value = this.get('video'),
-                  default_video = this.conn.getSenders().find(sender => sender.track && (sender.track.default || sender.track.screen)),
-                  video_state = value ? 'enable' : 'disable';
+              let value = this.get('video_live'),
+                  default_video = this.conn.getSenders().find(sender => sender.track && (sender.track.default || sender.track.screen));
+              value && this.set('video_screen', false);
               (default_video && value) && this.createVideoStream();
-              this.local_stream && (this.local_stream.getVideoTracks()[0].enabled = value);
-              this.sendVideoStreamState(video_state);
-              this.onChangedMediaType();
+              (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+              this.set('video', value || this.get('video_screen'));
           },
 
           onDestroy: function () {
@@ -586,10 +587,15 @@ define("xabber-chats", function () {
 
           setEnabledScreenShareVideoTrack:  function () {
               let value = this.get('video_screen'),
-                  default_video = this.conn.getSenders().find(sender => sender.track && !sender.track.screen),
-                  video_state = value ? 'enable' : 'disable';
+                  default_video = this.conn.getSenders().find(sender => sender.track && !sender.track.screen);
+              value && this.set('video_live', false);
               (default_video && value) && this.createScreenShareVideoStream();
-              this.local_stream && (this.local_stream.getVideoTracks()[0].enabled = value);
+              (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+              this.set('video', value || this.get('video_live'));
+          },
+
+          onChangedVideoValue: function () {
+              let video_state = this.get('video') ? 'enable' : 'disable';
               this.sendVideoStreamState(video_state);
               this.onChangedMediaType();
           },
@@ -598,6 +604,7 @@ define("xabber-chats", function () {
               navigator.mediaDevices.getDisplayMedia({video: true}).then(function (media_stream) {
                   this.$local_video[0].srcObject = media_stream;
                   media_stream.getVideoTracks().forEach(function (track) {
+                      _.extend(track, {screen: true});
                       this.local_stream.addTrack(track);
                       this.conn.addTrack(track, this.local_stream);
                       this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
@@ -659,7 +666,7 @@ define("xabber-chats", function () {
           startCall: function () {
               this.set('call_initiator', this.account.get('jid'));
               this.createAudioStream();
-              this.get('video') && this.createVideoStream();
+              this.get('video_live') && this.createVideoStream();
               this.propose();
           },
 
@@ -712,6 +719,7 @@ define("xabber-chats", function () {
               this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
               this.audio_notifiation = xabber.playAudio('connecting', true);
+              !this.conn.connectionState && this.onConnected();
           },
 
           reject: function () {
@@ -3409,7 +3417,7 @@ define("xabber-chats", function () {
             media_type = media_type || {};
             media_type = media_type.video ? 'video' : 'audio';
             let session_id = uuid();
-            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video: media_type === 'video'}, {contact: this.contact});
+            xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video_live: media_type === 'video'}, {contact: this.contact});
             xabber.current_voip_call.startCall();
             xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
         },
