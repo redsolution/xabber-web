@@ -719,7 +719,6 @@ define("xabber-chats", function () {
               this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
               this.audio_notifiation = xabber.playAudio('connecting', true);
-              !this.conn.connectionState && this.onConnected();
           },
 
           reject: function () {
@@ -819,6 +818,7 @@ define("xabber-chats", function () {
                               .c('sdp').t(answer_sdp).up().up()
                               .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
                       this.account.sendIQ($iq_answer_sdp);
+                      !this.conn.connectionState && this.onConnected();
                   }.bind(this));
               }.bind(this));
           }
