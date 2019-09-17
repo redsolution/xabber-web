@@ -2640,7 +2640,7 @@ define("xabber-chats", function () {
                     this.readMessages(message.get('timestamp'));
                 if (this.model.get('last_displayed_id') >= message.get('archive_id'))
                     message.set('state', constants.MSG_DISPLAYED);
-                else if (this.model.get('last_delivered_id') >= message.get('archive_id'))
+                else if (this.model.get('last_delivered_id') >= message.get('archive_id') || message.get('is_archived'))
                     message.set('state', constants.MSG_DELIVERED);
             }
 
