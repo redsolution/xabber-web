@@ -106,7 +106,7 @@ define("xabber-chats", function () {
         createInvitationFromStanza: function ($message, options) {
             options = options || {};
             let $invite_item = $message.find('invite'),
-                full_jid = $invite_item.attr('jid'),
+                full_jid = $invite_item.attr('jid') || $message.attr('from'),
                 $delay = options.delay || $message.children('delay'),
                 from_jid = Strophe.getBareJidFromJid(full_jid),
                 body = $message.children('body').text(),
@@ -5575,6 +5575,7 @@ define("xabber-chats", function () {
             $(this.selected_contacts).each(function (idx, item) {
                 this.sendInvite(item);
             }.bind(this));
+            this.close();
         },
 
         clearPanel: function () {
@@ -5606,16 +5607,17 @@ define("xabber-chats", function () {
         },
 
         sendInvite: function (contact_jid) {
-            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            let is_member_only = this.contact.get('group_info').model === 'member-only',
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
+                .c('send').t(is_member_only).up()
                 .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat participants'));
             this.account.sendIQ(iq,
                 function () {
-                    this.sendInviteMessage(contact_jid);
+                    !is_member_only && this.sendInviteMessage(contact_jid);
                     this.close();
                 }.bind(this),
-
                 function(iq) {
                     this.onInviteError(iq);
                 }.bind(this));
@@ -5637,7 +5639,8 @@ define("xabber-chats", function () {
                 stanza = $msg({
                     from: this.account.get('jid'),
                     to: jid_to,
-                    type: 'chat'
+                    type: 'chat',
+                    id: uuid()
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
                     .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
                     .c('body').t(body).up();
