@@ -127,6 +127,7 @@ define("xabber-mentions", function () {
             onEnterPressed: function (selection) {
                 let view;
                 if (selection.closest('.searched-lists-wrap').length) {
+                    this.clearSearch();
                     this.$('.list-item.active').removeClass('active');
                     if (selection.hasClass('chat-item')) {
                         view = xabber.chats_view.child(selection.data('id'));
@@ -320,7 +321,7 @@ define("xabber-mentions", function () {
                     this.$('.last-msg').text("").append(msg_text);
                 }
                 else {
-                    this.$('.last-msg').text("").append(msg_text);
+                    this.$('.last-msg').text(msg_text);
                 }
                 this.$el.emojify('.last-msg', {emoji_size: 14});
                 this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))

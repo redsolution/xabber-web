@@ -4107,6 +4107,7 @@ define("xabber-contacts", function () {
             onEnterPressed: function (selection) {
                 let view;
                 if (selection.closest('.searched-lists-wrap').length) {
+                    this.clearSearch();
                     this.$('.list-item.active').removeClass('active');
                     if (selection.hasClass('chat-item')) {
                         view = xabber.chats_view.child(selection.data('id'));
