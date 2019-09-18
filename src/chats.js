@@ -5041,7 +5041,10 @@ define("xabber-chats", function () {
             this.model.on("change:active", this.onChangedActiveStatus, this);
             this.model.on("change:timestamp", this.updateChatPosition, this);
             xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+            let wheel_ev = this.defineMouseWheelEvent();
+            this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+            this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
         },
 
         render: function (options) {
@@ -5051,6 +5054,21 @@ define("xabber-chats", function () {
                     this.showAllChats();
                 }
             }
+        },
+
+        defineMouseWheelEvent: function () {
+            if (!_.isUndefined(window.onwheel)) {
+                return "wheel";
+            } else if (!_.isUndefined(window.onmousewheel)) {
+                return "mousewheel";
+            } else {
+                return "MozMousePixelScroll";
+            }
+        },
+
+        onMouseWheel: function (ev) {
+            if (ev.originalEvent.deltaY > 0)
+                this.onScroll();
         },
 
         hideChatsFeedback: function () {

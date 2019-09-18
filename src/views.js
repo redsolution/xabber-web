@@ -444,8 +444,6 @@ define("xabber-views", function () {
                   }.bind(this));
                   (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
               }
-              else
-                  this.onScroll();
           },
 
           onScroll: function () {},
