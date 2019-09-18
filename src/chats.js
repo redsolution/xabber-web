@@ -368,7 +368,8 @@ define("xabber-chats", function () {
                 let blockquotes = [];
                 $quote_references.each(function (idx, quote) {
                     let $quote = $(quote),
-                        marker = _.escape($quote.children('marker').text());
+                        marker = $quote.children('marker').text();
+                    marker && (marker = Strophe.xmlescape(marker));
                     blockquotes.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), marker: marker});
                 }.bind(this));
                 blockquotes.length && (attrs.blockquotes = blockquotes);
@@ -6392,7 +6393,7 @@ define("xabber-chats", function () {
                 else
                     return;
             }
-            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + _.escape(nickname));
+            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + Strophe.xmlescape(nickname));
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();

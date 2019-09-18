@@ -179,6 +179,25 @@ define("xabber-strophe", function () {
             }
         });
 
+        Strophe.xmlunescape = function (text) {
+            let reg_exp = {
+                '&amp;': '&',
+                '&lt;': '<',
+                '&gt;': '>',
+                '&quot;': '"',
+                '&apos;': "'"
+            };
+            var escaper = function(match) {
+                return reg_exp[match];
+            };
+            // Regexes for identifying a key that needs to be escaped
+            let source = '(?:' + _.keys(reg_exp).join('|') + ')',
+                testRegexp = RegExp(source),
+                replaceRegexp = RegExp(source, 'g');
+            text = text == null ? '' : '' + text;
+            return testRegexp.test(text) ? text.replace(replaceRegexp, escaper) : text;
+        };
+
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
