@@ -454,6 +454,7 @@ input[type=text].simple-input-field:hover {
     border-radius: 4px 0 0 4px;
     background-color: #FAFAFA;
     transition: width .3s;
+    z-index: 500;
 }
 
 .main-modal.collapsed-video {
