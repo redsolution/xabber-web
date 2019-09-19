@@ -1073,6 +1073,15 @@ define("xabber-views", function () {
             $overlay.toggle();
             this.$el.children().toggle();
             this.$el.toggleClass('collapsed');
+
+            if (this.$el.find('.webrtc-remote-video').length) {
+                this.$('.video-wrap').toggle();
+            }
+            else {
+                this.$('i.btn-collapse').css('display', 'block');
+            }
+
+            this.$el.css('right', parseInt(xabber.main_panel.$el.css('margin-right')) + 8 + 'px');
         },
 
         toggleMicrophone: function () {

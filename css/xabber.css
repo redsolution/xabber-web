@@ -455,8 +455,13 @@ input[type=text].simple-input-field:hover {
     background-color: #FAFAFA;
     transition: width .3s;
 }
-.main-modal.collapsed:hover {
-    width: 86px;
+
+.main-modal.collapsed-video {
+    width: 16vh;
+    height: 12vh;
+    top: 64px !important;
+    left: inherit;
+    transition: width .3s;
 }
 
 .main-modal .modal-header {
@@ -2871,10 +2876,6 @@ body {
     height: 48px !important;
     width: 48px !important;
     margin: 0 12px;
-}
-
-.jingle-message-view.collapsed>i.btn-collapse {
-    display: block;
 }
 
 .jingle-message-view>i.btn-collapse {
