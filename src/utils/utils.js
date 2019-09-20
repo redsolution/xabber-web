@@ -239,7 +239,7 @@ define([
         },
 
         pretty_name: function (name) {
-            return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1)) : "";
+            return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
         },
 
         slice_string: function (str, from, to) {

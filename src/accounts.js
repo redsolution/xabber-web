@@ -265,38 +265,35 @@ define("xabber-accounts", function () {
                 },
 
                 connectionCallback: function (status, condition) {
-                    if ((status === Strophe.Status.AUTHFAIL) && this.connection.x_token) {
-                        this.onTokenRevoked();
-                        return;
-                    }
                     if (this.session.get('reconnecting')) {
                         xabber.info('ignore connection callback for status: '+constants.CONN_STATUSES[status]);
                         return;
                     }
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
-                    if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && (!this.session.get('delete'))) {
-                        if (this.get('auth_type') === 'x-token') {
+                    if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
+                        if (this.get('auth_type') === 'x-token')
                             this.onTokenRevoked();
-                        }
-                        else {
+                        else
                             this.onAuthFailed();
-                        }
                     }
                     if (status === Strophe.Status.CONNECTED) {
+                        this.session.set('on_token_revoked', false);
                         if (this.connection.x_token) {
                             this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
                             this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
-                        if ((!xabber.api_account.get('connected'))&&(this.get('auto_login_xa'))&&(!xabber.api_account.get('token')))
+                        if (!xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token'))
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        if (this.get('auth_type') === 'x-token')
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
                             this.onTokenRevoked();
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
+                        if (this.session.get('on_token_revoked'))
+                            return;
                         this.connection.flush();
                         this.session.set({connected: false});
                     }
@@ -365,12 +362,18 @@ define("xabber-accounts", function () {
                     }
                     this.session.set({conn_status: status, conn_condition: condition});
                     if (status === Strophe.Status.CONNECTED) {
+                        this.session.set('on_token_revoked', false);
                         this.connection.connect_callback = this.connectionCallback.bind(this);
                         this.session.set({connected: true, reconnected: true,
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        this.onAuthFailed();
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
+                            this.onTokenRevoked();
+                        else
+                            this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
+                        if (this.session.get('on_token_revoked'))
+                            return;
                         this.connection.flush();
                         var max_retries = xabber.settings.max_connection_retries;
                         if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
@@ -446,7 +449,9 @@ define("xabber-accounts", function () {
                             this.get('jid'));
                     }
                     this.session.set({
+                        on_token_revoked: true,
                         auth_failed: true,
+                        connected: false,
                         no_reconnect: true
                     });
                     this.set({auth_type: 'password', password: null, x_token: null});
@@ -470,6 +475,7 @@ define("xabber-accounts", function () {
                     this.resource = Strophe.getResourceFromJid(this.jid);
                     this.domain = Strophe.getDomainFromJid(this.jid);
                     this.trigger('activate', this);
+                    this.session.get('no_reconnect') && this.session.set('no_reconnect', false);
                     this.afterConnected();
                     _.each(this._after_connected_plugins, function (plugin) {
                         plugin.call(this);
@@ -2165,7 +2171,7 @@ define("xabber-accounts", function () {
             },
 
             updateButtons: function () {
-                var authentication = this.data.get('authentication');
+                                var authentication = this.data.get('authentication');
                 this.$('.btn-log-in').switchClass('disabled', authentication);
                 this.$('.btn-cancel').showIf(authentication);
             },
