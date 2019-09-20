@@ -831,6 +831,8 @@ define("xabber-chats", function () {
             active: false,
             display: false,
             displayed_sent: false,
+            last_displayed_id: 0,
+            last_delivered_id: 0,
             unread: 0,
             timestamp: 0,
             const_unread: 0
