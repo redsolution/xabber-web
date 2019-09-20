@@ -46,6 +46,7 @@ define("xabber-views", function () {
             this.data.on("change:visible", this.onChangedVisibility, this);
             xabber.on("update_css", function (options) {
                 this.updateCSS && this.updateCSS();
+                (options && options.size_changed && this.windowResized) && this.windowResized();
             }, this);
             this._initialize && this._initialize(options);
             this.__initialize && this.__initialize(options);
@@ -985,6 +986,7 @@ define("xabber-views", function () {
         avatar_size: constants.AVATAR_SIZES.XABBER_VOICE_CALL_VIEW,
 
         events: {
+            "click": "clickOnWindow",
             "click .btn-accept": "accept",
             "click .btn-share-screen": "shareScreen",
             "click .btn-microphone": "toggleMicrophone",
@@ -1001,6 +1003,7 @@ define("xabber-views", function () {
             this.account = this.contact.account;
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
+            this.model.on('change:video_in', this.updateCollapsedWindow, this);
             this.model.on('change:audio', this.updateButtons, this);
         },
 
@@ -1022,6 +1025,10 @@ define("xabber-views", function () {
                 }.bind(this)
             });
 
+        },
+
+        windowResized: function () {
+            this.$el.css('right', parseInt(xabber.main_panel.$el.css('margin-right')) + 8 + 'px');
         },
 
         updateButtons: function () {
@@ -1068,20 +1075,23 @@ define("xabber-views", function () {
             this.model.initSession();
         },
 
+        clickOnWindow: function () {
+            (this.$el.hasClass('collapsed') && this.$el.hasClass('collapsed-video')) && this.collapse();
+        },
+
         collapse: function () {
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
             this.$el.children().toggle();
             this.$el.toggleClass('collapsed');
+            (this.$el.hasClass('collapsed') && this.model.get('video_in')) && this.$el.addClass('collapsed-video');
+            this.windowResized();
+        },
 
-            if (this.$el.find('.webrtc-remote-video').length) {
-                this.$('.video-wrap').toggle();
+        updateCollapsedWindow: function () {
+            if (this.$el.hasClass('collapsed')) {
+                this.$el.switchClass('collapsed-video',this.model.get('video_in'));
             }
-            else {
-                this.$('i.btn-collapse').css('display', 'block');
-            }
-
-            this.$el.css('right', parseInt(xabber.main_panel.$el.css('margin-right')) + 8 + 'px');
         },
 
         toggleMicrophone: function () {

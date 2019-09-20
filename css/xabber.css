@@ -446,23 +446,19 @@ input[type=text].simple-input-field:hover {
 }
 
 .main-modal.collapsed {
-    width: 76px;
+    width: 64px;
     height: 48px;
-    top: 4px !important;
-    right: 0px !important;
-    left: inherit;
-    border-radius: 4px 0 0 4px;
-    background-color: #FAFAFA;
-    transition: width .3s;
-    z-index: 500;
-}
-
-.main-modal.collapsed-video {
-    width: 16vh;
-    height: 12vh;
     top: 64px !important;
     left: inherit;
-    transition: width .3s;
+    transition: width .1s;
+    z-index: 500 !important;
+    border-radius: 8px;
+}
+
+.main-modal.collapsed.collapsed-video {
+    width: 16vh;
+    height: 12vh;
+    cursor: pointer;
 }
 
 .main-modal .modal-header {
@@ -2879,16 +2875,58 @@ body {
     margin: 0 12px;
 }
 
+@keyframes slidein {
+    from {
+        line-height: 24px;
+        height: 24px;
+        width: 24px;
+        font-size: 24px;
+        margin: 12px 20px;
+    }
+
+    to {
+        line-height: 28px;
+        height: 28px;
+        width: 28px;
+        font-size: 28px;
+        margin: 10px 18px;
+    }
+}
+
+.jingle-message-view>i {
+    border-radius: inherit;
+    padding: 0;
+
+
+    animation-duration: 1.5s;
+    animation-name: slidein;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
 .jingle-message-view>i.btn-collapse {
     position: absolute;
     background-color: inherit;
     color: #424242;
 }
 
+.jingle-message-view.collapsed-video>i.btn-collapse,
 .jingle-message-view.collapsed svg.btn-collapse,
 .jingle-message-view>i.btn-collapse {
     display: none;
 }
+
+.jingle-message-view.collapsed-video .video-wrap {
+    display: block !important;
+}
+
+.jingle-message-view.collapsed.collapsed-video .webrtc-remote-video,
+.jingle-message-view.collapsed.collapsed-video .webrtc-local-video {
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+}
+
 
 .jingle-message-view svg.btn-collapse {
     left: 8px;
