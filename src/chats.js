@@ -476,6 +476,7 @@ define("xabber-chats", function () {
               this.current_timer = 0;
               this.conn.onconnectionstatechange = this.onChangeConnectionState.bind(this);
               this.set(attrs);
+              this.get('in') && this.updateStatus('Calling...');
               this.onChangedMediaType();
               this.conn.ontrack = function (ev) {
                   this.remote_stream = ev.streams[0];
@@ -506,8 +507,12 @@ define("xabber-chats", function () {
 
           },
 
+          updateStatus: function (status) {
+              this.modal_view.updateStatusText(status);
+          },
+
           updateTimer: function () {
-              this.modal_view.updateStatusText(utils.pretty_duration(++this.current_timer));
+              this.updateStatus(utils.pretty_duration(++this.current_timer));
           },
 
           startTimer: function () {
@@ -521,7 +526,7 @@ define("xabber-chats", function () {
               this.get('video_live') && this.onChangedVideoValue();
               xabber.stopAudio(this.audio_notifiation);
               setTimeout(function () {
-                  this.modal_view.updateStatusText();
+                  this.updateStatus();
                   this.startTimer();
               }.bind(this), 1000);
           },
@@ -531,7 +536,7 @@ define("xabber-chats", function () {
               if (conn_state === 'connected') {
                   this.onConnected();
               } else {
-                  this.modal_view.updateStatusText(utils.pretty_name(conn_state) + '...');
+                  this.updateStatus(utils.pretty_name(conn_state) + '...');
                   if (conn_state === 'disconnected') {
                       this.destroy();
                   }
@@ -553,6 +558,7 @@ define("xabber-chats", function () {
                   this.modal_view.$el.find('.webrtc-remote-video').replaceWith(this.$remote_audio_el);
               }
               this.modal_view.$el.find('.default-screen').switchClass('hidden', incoming_video);
+              this.onChangedVolume();
           },
 
           onChangedVolume: function () {
@@ -701,6 +707,7 @@ define("xabber-chats", function () {
           },
 
           propose: function () {
+              this.updateStatus('Search...');
               let $propose_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')})
                   .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up()
@@ -719,6 +726,7 @@ define("xabber-chats", function () {
               this.set('jingle_start', moment.now());
               this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
+              this.updateStatus('Connecting...');
               this.audio_notifiation = xabber.playAudio('connecting', true);
           },
 
@@ -736,6 +744,7 @@ define("xabber-chats", function () {
               this.account.sendMsg($reject_msg);
               this.createSystemMessage($reject_msg);
               this.destroy();
+              xabber.current_voip_call = null;
           },
 
           createSystemMessage: function (message) {
@@ -918,6 +927,19 @@ define("xabber-chats", function () {
                     let session_id = $jingle_msg_propose.attr('id'),
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
+                        if (xabber.current_voip_call) {
+                            let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+                                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
+                                .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                                .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                                .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+                            this.account.sendMsg($reject_msg);
+                            this.messages.createSystemMessage({
+                                from_jid: this.account.get('jid'),
+                                message: 'Cancelled call'
+                            });
+                            return;
+                        }
                         this.initIncomingCall(iq_to, session_id);
                     }.bind(this));
                 }
@@ -932,6 +954,7 @@ define("xabber-chats", function () {
                     xabber.current_voip_call.set('jingle_start', jingle_start);
                     !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
                     xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
+                    xabber.current_voip_call.updateStatus('Connecting...');
                     xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
                 }
             }
@@ -3420,6 +3443,7 @@ define("xabber-chats", function () {
         },
 
         initJingleMessage: function (media_type) {
+            xabber.current_voip_call && xabber.current_voip_call.destroy();
             media_type = media_type || {};
             media_type = media_type.video ? 'video' : 'audio';
             let session_id = uuid();

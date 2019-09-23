@@ -46,6 +46,7 @@ define("xabber-views", function () {
             this.data.on("change:visible", this.onChangedVisibility, this);
             xabber.on("update_css", function (options) {
                 this.updateCSS && this.updateCSS();
+                (options && options.size_changed && this.windowResized) && this.windowResized();
             }, this);
             this._initialize && this._initialize(options);
             this.__initialize && this.__initialize(options);
@@ -985,13 +986,15 @@ define("xabber-views", function () {
         avatar_size: constants.AVATAR_SIZES.XABBER_VOICE_CALL_VIEW,
 
         events: {
+            "click": "clickOnWindow",
             "click .btn-accept": "accept",
             "click .btn-share-screen": "shareScreen",
             "click .btn-microphone": "toggleMicrophone",
             "click .btn-video": "videoCall",
             "click .btn-volume": "toggleVolume",
             "click .btn-collapse": "collapse",
-            "click .btn-cancel": "cancel"
+            "click .btn-cancel": "cancel",
+            "click .btn-full-screen": "toggleFullScreen"
         },
 
         _initialize: function (options) {
@@ -1001,6 +1004,8 @@ define("xabber-views", function () {
             this.account = this.contact.account;
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
+            this.model.on('change:video_live', this.updateButtons, this);
+            this.model.on('change:video_in', this.updateCollapsedWindow, this);
             this.model.on('change:audio', this.updateButtons, this);
         },
 
@@ -1008,7 +1013,7 @@ define("xabber-views", function () {
             options = options || {};
             this.updateName();
             this.updateCallingStatus(options.status);
-            this.updateStatusText('Call...');
+            (options.status === 'in') && this.updateStatusText('Calling...');
             this.updateAccountJid();
             this.updateButtons();
             this.$el.openModal({
@@ -1024,10 +1029,34 @@ define("xabber-views", function () {
 
         },
 
+        toggleFullScreen: function () {
+            var video = this.$el.find('.webrtc-remote-video')[0];
+            if (!video)
+                return;
+            if (video.requestFullScreen) {
+                video.requestFullScreen();
+            }
+            else if (video.webkitRequestFullScreen) {
+                video.webkitRequestFullScreen();
+            }
+            else if (video.mozRequestFullScreen) {
+                video.mozRequestFullScreen();
+            }
+        },
+
+        windowResized: function () {
+            this.$el.hasClass('collapsed') && this.$el.css('right', parseInt(xabber.main_panel.$el.css('margin-right')) + 8 + 'px');
+        },
+
         updateButtons: function () {
-            this.$('.btn-video').switchClass('non-active', !this.model.get('video'));
-            this.$('.btn-volume').switchClass('non-active', !this.model.get('volume_on'));
-            this.$('.btn-microphone').switchClass('non-active', !this.model.get('audio'));
+            this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
+            this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
+            this.$('.btn-video').switchClass('mdi-video', this.model.get('video_live'))
+                .switchClass('mdi-video-off', !this.model.get('video_live'));
+            this.$('.btn-volume').switchClass('mdi-volume-high', this.model.get('volume_on'))
+                .switchClass('mdi-volume-off', !this.model.get('volume_on'));
+            this.$('.btn-microphone').switchClass('mdi-microphone', this.model.get('audio'))
+                .switchClass('mdi-microphone-off', !this.model.get('audio'));
         },
 
         updateAvatar: function () {
@@ -1068,11 +1097,28 @@ define("xabber-views", function () {
             this.model.initSession();
         },
 
-        collapse: function () {
+        clickOnWindow: function () {
+            (this.$el.hasClass('collapsed') && this.$el.hasClass('collapsed-video')) && this.collapse();
+        },
+
+        collapse: function (ev) {
+            ev && ev.stopPropagation();
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
             this.$el.children().toggle();
             this.$el.toggleClass('collapsed');
+            if (this.$el.hasClass('collapsed'))
+                (this.model.get('video') || this.model.get('video_in')) && this.$el.addClass('collapsed-video');
+            else
+                this.$el.css('right', "");
+            this.windowResized();
+        },
+
+        updateCollapsedWindow: function () {
+            this.updateButtons();
+            if (this.$el.hasClass('collapsed')) {
+                this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
+            }
         },
 
         toggleMicrophone: function () {

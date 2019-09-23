@@ -446,17 +446,19 @@ input[type=text].simple-input-field:hover {
 }
 
 .main-modal.collapsed {
-    width: 76px;
+    width: 64px;
     height: 48px;
-    top: 4px !important;
-    right: 0px !important;
+    top: 64px !important;
     left: inherit;
-    border-radius: 4px 0 0 4px;
-    background-color: #FAFAFA;
-    transition: width .3s;
+    transition: width .1s;
+    z-index: 500 !important;
+    border-radius: 8px;
 }
-.main-modal.collapsed:hover {
-    width: 86px;
+
+.main-modal.collapsed.collapsed-video {
+    width: 16vh;
+    height: 12vh;
+    cursor: pointer;
 }
 
 .main-modal .modal-header {
@@ -2862,7 +2864,7 @@ body {
 .jingle-message-view .buttons-wrap svg,
 .jingle-message-view .buttons-wrap i {
     cursor: pointer;
-    background-color: #BDBDBD;
+    background-color: rgba(189, 189, 189, .6);
     border-radius: 50%;
     color: #FFF;
     fill: #FFF;
@@ -2873,8 +2875,33 @@ body {
     margin: 0 12px;
 }
 
-.jingle-message-view.collapsed>i.btn-collapse {
-    display: block;
+@keyframes slidein {
+    from {
+        line-height: 24px;
+        height: 24px;
+        width: 24px;
+        font-size: 24px;
+        margin: 12px 20px;
+    }
+
+    to {
+        line-height: 28px;
+        height: 28px;
+        width: 28px;
+        font-size: 28px;
+        margin: 10px 18px;
+    }
+}
+
+.jingle-message-view>i {
+    border-radius: inherit;
+    padding: 0;
+
+
+    animation-duration: 1.5s;
+    animation-name: slidein;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
 }
 
 .jingle-message-view>i.btn-collapse {
@@ -2883,15 +2910,59 @@ body {
     color: #424242;
 }
 
-.jingle-message-view.collapsed svg.btn-collapse,
+.jingle-message-view.collapsed>i.btn-collapse,
+.jingle-message-view.collapsed-video .video-wrap {
+    display: block !important;
+}
+
+.jingle-message-view.collapsed .default-screen,
+.jingle-message-view.collapsed-video>i.btn-collapse,
+.jingle-message-view.collapsed svg.btn-collapse {
+    display: none !important;
+}
+
 .jingle-message-view>i.btn-collapse {
     display: none;
+}
+
+.jingle-message-view.collapsed.collapsed-video .webrtc-remote-video,
+.jingle-message-view.collapsed.collapsed-video .webrtc-local-video {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.jingle-message-view svg.btn-full-screen {
+    left: 64px;
+    position: absolute;
+    z-index: 1;
 }
 
 .jingle-message-view svg.btn-collapse {
     left: 8px;
     position: absolute;
     z-index: 1;
+}
+
+.jingle-message-view video::-webkit-media-controls {
+    display:none !important;
+}
+
+.jingle-message-view video.webrtc-remote-video:fullscreen {
+    z-index: 1000;
+}
+
+.jingle-message-view .btn-accept {
+    background-color: rgba(27, 94, 32, 0.6) !important;
+}
+
+.jingle-message-view .btn-cancel {
+    background-color: rgba(183, 28, 28, 0.6) !important;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */
