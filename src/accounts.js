@@ -797,6 +797,7 @@ define("xabber-accounts", function () {
                             $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
                                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
                                 .c('session', {id: session_id});
+                            xabber.current_voip_call.updateStatus('Calling...');
                         }
                         else {
                             $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'error', id: $incoming_iq.attr('id')})

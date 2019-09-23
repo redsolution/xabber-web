@@ -2864,7 +2864,7 @@ body {
 .jingle-message-view .buttons-wrap svg,
 .jingle-message-view .buttons-wrap i {
     cursor: pointer;
-    background-color: #BDBDBD;
+    background-color: rgba(189, 189, 189, .6);
     border-radius: 50%;
     color: #FFF;
     fill: #FFF;
@@ -2910,28 +2910,61 @@ body {
     color: #424242;
 }
 
-.jingle-message-view.collapsed-video>i.btn-collapse,
-.jingle-message-view.collapsed svg.btn-collapse,
-.jingle-message-view>i.btn-collapse {
-    display: none;
-}
-
+.jingle-message-view.collapsed>i.btn-collapse,
 .jingle-message-view.collapsed-video .video-wrap {
     display: block !important;
 }
 
-.jingle-message-view.collapsed.collapsed-video .webrtc-remote-video,
-.jingle-message-view.collapsed.collapsed-video .webrtc-local-video {
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
+.jingle-message-view.collapsed .default-screen,
+.jingle-message-view.collapsed-video>i.btn-collapse,
+.jingle-message-view.collapsed svg.btn-collapse {
+    display: none !important;
 }
 
+.jingle-message-view>i.btn-collapse {
+    display: none;
+}
+
+.jingle-message-view.collapsed.collapsed-video .webrtc-remote-video,
+.jingle-message-view.collapsed.collapsed-video .webrtc-local-video {
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.jingle-message-view svg.btn-full-screen {
+    left: 64px;
+    position: absolute;
+    z-index: 1;
+}
 
 .jingle-message-view svg.btn-collapse {
     left: 8px;
     position: absolute;
     z-index: 1;
+}
+
+.jingle-message-view video::-webkit-media-controls {
+    display:none !important;
+}
+
+.jingle-message-view video.webrtc-remote-video:fullscreen {
+    z-index: 1000;
+}
+
+.jingle-message-view .btn-accept,
+.jingle-message-view .btn-cancel {
+    opacity: .6;
+}
+
+.jingle-message-view .btn-accept::before,
+.jingle-message-view .btn-cancel::before {
+    opacity: 1;
 }
 
 /* ----------------- GROUPS CHECKBOX LIST -------------------- */
