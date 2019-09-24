@@ -994,7 +994,7 @@ define("xabber-views", function () {
             "click .btn-volume": "toggleVolume",
             "click .btn-collapse": "collapse",
             "click .btn-cancel": "cancel",
-            "click .btn-full-screen": "toggleFullScreen"
+            "click .btn-full-screen": "setFullScreen"
         },
 
         _initialize: function (options) {
@@ -1029,18 +1029,52 @@ define("xabber-views", function () {
 
         },
 
-        toggleFullScreen: function () {
-            var video = this.$el.find('.webrtc-remote-video')[0];
+        setFullScreen: function () {
+            let video = this.$el.find('.webrtc-remote-video')[0],
+                local_video = this.$el.find('.webrtc-local-video')[0],
+                buttons = this.$el.find('.buttons-panel')[0];
             if (!video)
                 return;
             if (video.requestFullScreen) {
                 video.requestFullScreen();
+                local_video.requestFullScreen();
+                buttons.requestFullScreen();
             }
             else if (video.webkitRequestFullScreen) {
                 video.webkitRequestFullScreen();
+                local_video.webkitRequestFullScreen();
+                buttons.webkitRequestFullScreen();
             }
             else if (video.mozRequestFullScreen) {
                 video.mozRequestFullScreen();
+                local_video.mozRequestFullScreen();
+                buttons.mozRequestFullScreen();
+            }
+            else if (video.msRequestFullScreen) {
+                video.msRequestFullScreen();
+                local_video.msRequestFullScreen();
+                buttons.msRequestFullScreen();
+            }
+        },
+
+        cancelFullScreen: function () {
+            if (document.exitFullscreen) {
+                let full_screen_el = document.fullscreenElement;
+                full_screen_el && document.exitFullscreen().then(function () {
+                    document.fullscreenElement && this.cancelFullScreen();
+                }.bind(this));
+            } else if (document.mozCancelFullScreen) { /* Firefox */
+                let full_screen_el = document.mozFullScreenElement;
+                full_screen_el && document.mozCancelFullScreen();
+                document.mozFullScreenElement && this.cancelFullScreen();
+            } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                let full_screen_el = document.webkitCurrentFullScreenElement;
+                full_screen_el && document.webkitExitFullscreen();
+                document.webkitCurrentFullScreenElement && this.cancelFullScreen();
+            } else if (document.msExitFullscreen) { /* IE/Edge */
+                let full_screen_el = document.msFullscreenElement;
+                full_screen_el && document.msExitFullscreen();
+                document.msFullscreenElement && this.cancelFullScreen();
             }
         },
 
@@ -1091,6 +1125,16 @@ define("xabber-views", function () {
             this.model.set('video_screen', !this.model.get('video_screen'));
         },
 
+        isFullScreen: function () {
+            if (document.fullscreenElement)
+                return true;
+            else if (document.webkitFullscreenElement)
+                return true;
+            else if (document.mozFullScreenElement)
+                return true;
+            else return false;
+        },
+
         accept: function () {
             this.model.accept();
             this.updateCallingStatus(constants.JINGLE_MSG_ACCEPT);
@@ -1103,6 +1147,10 @@ define("xabber-views", function () {
 
         collapse: function (ev) {
             ev && ev.stopPropagation();
+            if (this.isFullScreen()) {
+                this.cancelFullScreen();
+                return;
+            }
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
             this.$el.children().toggle();

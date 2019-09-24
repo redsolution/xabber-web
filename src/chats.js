@@ -539,6 +539,7 @@ define("xabber-chats", function () {
                   this.updateStatus(utils.pretty_name(conn_state) + '...');
                   if (conn_state === 'disconnected') {
                       this.destroy();
+                      xabber.current_voip_call = null;
                   }
               }
           },

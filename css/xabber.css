@@ -2793,6 +2793,7 @@ body {
 }
 
 .jingle-message-view .video-wrap .webrtc-remote-video {
+    background-color: #000;
     width: 100%;
     height: 100%;
     position: absolute;
@@ -2954,7 +2955,39 @@ body {
 }
 
 .jingle-message-view video.webrtc-remote-video:fullscreen {
-    z-index: 1000;
+    background-color: rgba(1, 1, 1, 1);
+    z-index: -100;
+}
+.jingle-message-view video.webrtc-remote-video:-webkit-full-screen {
+    background-color: rgba(1, 1, 1, 1);
+    z-index: -100;
+}
+
+.jingle-message-view video.webrtc-remote-video:-moz-full-screen {
+    background-color: rgba(1, 1, 1, 1);
+    z-index: -100;
+}
+
+
+
+
+.jingle-message-view .buttons-panel:fullscreen .btn-full-screen {
+    display: none;
+}
+.jingle-message-view .buttons-panel:-webkit-full-screen .btn-full-screen {
+    display: none;
+}
+
+.jingle-message-view .buttons-panel:-moz-full-screen .btn-full-screen {
+    display: none;
+}
+
+
+
+
+.jingle-message-view .webrtc-local-video::backdrop,
+.jingle-message-view .buttons-panel::backdrop {
+    opacity: 0;
 }
 
 .jingle-message-view .btn-accept {
