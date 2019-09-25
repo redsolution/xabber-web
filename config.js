@@ -3,7 +3,7 @@ require.config({
 
     include: "xabber",
 
-    out: "dist/xabber.min.js",
+    out: "dist/xabber.js",
 
     paths: {
         // external libs

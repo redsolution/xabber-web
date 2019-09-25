@@ -29,6 +29,7 @@
     "underscore": "~1.8.3",
     "wavesurfer": ">0.0.0",
     "slug": ">0.0.0",
-    "magnific-popup": ">0.0.0"
+    "magnific-popup": ">0.0.0",
+    "babel-minify": "~0.5.1"
   }
 }
