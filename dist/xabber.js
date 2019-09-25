@@ -44171,7 +44171,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.0.0","version_description":"Implemented group chats, client synchronization, VoIP-calls"}'
+'{"version_number":"2.0.1","version_description":"Implemented group chats, client synchronization, VoIP-calls"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
