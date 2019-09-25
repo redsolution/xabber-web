@@ -23,7 +23,8 @@ define("xabber-accounts", function () {
                     status: "online",
                     status_message: "",
                     priority: 0,
-                    auto_login_xa: true
+                    auto_login_xa: true,
+                    groupchat_servers_list: []
                 },
 
                 initialize: function (_attrs, options) {
@@ -33,11 +34,12 @@ define("xabber-accounts", function () {
                         this.on("destroy", this.onDestroy, this);
                         return;
                     }
+                    this.last_msg_timestamp = 0;
                     this.settings = xabber.account_settings_list.get(_attrs.jid);
                     if (!this.settings) {
                         this.settings = xabber.account_settings_list.create({
                             jid: _attrs.jid,
-                            timestamp: 0,
+                            timestamp: utils.now(),
                             auto_login_xa: this.get('auto_login_xa'),
                             to_sync: xabber.api_account.get('sync_all')
                         });
@@ -61,14 +63,18 @@ define("xabber-accounts", function () {
                         conn_retries: 0,
                         conn_feedback: 'Disconnected'
                     });
+                    this._waiting_code = false;
+                    this.code_requests = [];
+                    this.xabber_auth = {};
                     this.session.on("change:connected", this.onChangedConnected, this);
-                    this.conn_manager = new Strophe.ConnectionManager();
+                    this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
+                    this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                     this.connection = this.conn_manager.connection;
+                    this.get('x_token') && (this.connection.x_token = this.get('x_token'));
                     this.on("destroy", this.onDestroy, this);
                     this._added_pres_handlers = [];
                     this._pending_stanzas = [];
                     this._pending_messages = [];
-                    this.xabber_auth = {};
                     this.dfd_presence = new $.Deferred();
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
@@ -131,6 +137,46 @@ define("xabber-accounts", function () {
                     return res;
                 },
 
+                pubAvatar: function (image, callback, errback) {
+                    var avatar_hash = image.hash || sha1(image.base64),
+                        iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
+                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                            .c('item', {id: avatar_hash})
+                            .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
+                        iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                            .c('item', {id: avatar_hash})
+                            .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                            .c('info', {bytes: image.size, id: avatar_hash, type: 'image/jpeg'});
+                    this.sendIQ(iq_pub_data, function () {
+                            this.sendIQ(iq_pub_metadata, function () {
+                                    callback && callback(avatar_hash);
+                                }.bind(this),
+                                function (data_error) {
+                                    errback && errback(data_error);
+                                });
+                        }.bind(this),
+                        function (data_error) {
+                            errback && errback(data_error);
+                        }.bind(this));
+                },
+
+                getAvatar: function (avatar, callback, errback) {
+                    var iq_request_avatar = $iq({from: this.get('jid'), type: 'get', to: this.get('jid')})
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                        .c('item', {id: avatar});
+                    this.sendIQ(iq_request_avatar, function (iq) {
+                        var pubsub_avatar = $(iq).find('data').text();
+                        if (pubsub_avatar == "")
+                            errback && errback("Node is empty");
+                        else
+                            callback && callback(pubsub_avatar);
+                    }.bind(this));
+                },
+
                 sendIQ: function () {
                     var res = this.connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
@@ -164,15 +210,17 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                connect: function () {
+                connect: function (options) {
+                    options = options || {};
                     var jid = this.get('jid'),
                         auth_type = this.get('auth_type'),
                         password;
                     jid += '/xabber-web-' + xabber.get('client_id');
+                    this.connection.x_token = this.get('x_token');
                     if (auth_type === 'token') {
                         password = this.settings.get('token');
                     } else if (auth_type === 'x-token') {
-                        if (this.get('x_token'))
+                        if (this.get('x_token') && (parseInt(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
                             password = this.get('x_token').token;
                         else
                             password = undefined;
@@ -180,7 +228,9 @@ define("xabber-accounts", function () {
                         password = this.getPassword();
                     }
                     if (!password) {
-                        this.password_view.show({login: true});
+                        let attrs = {login: true};
+                        options.token_invalidated && (attrs.token_invalidated = true);
+                        this.password_view.show(attrs);
                         return;
                     }
                     this.session.set({
@@ -221,17 +271,29 @@ define("xabber-accounts", function () {
                     }
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
-                    if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && (!this.session.get('delete'))) {
-                        this.onTokenRevoked();
-                        this.deleteAccount();
+                    if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
+                        if (this.get('auth_type') === 'x-token')
+                            this.onTokenRevoked();
+                        else
+                            this.onAuthFailed();
                     }
                     if (status === Strophe.Status.CONNECTED) {
+                        this.session.set('on_token_revoked', false);
+                        if (this.connection.x_token) {
+                            this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
+                            this.conn_manager.auth_type = 'x-token';
+                        }
                         this.session.set({connected: true, reconnected: false});
-                        if ((!xabber.api_account.get('connected'))&&(this.get('auto_login_xa'))&&(!xabber.api_account.get('token')))
+                        if (!xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token'))
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        this.onAuthFailed();
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
+                            this.onTokenRevoked();
+                        else
+                            this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
+                        if (this.session.get('on_token_revoked'))
+                            return;
                         this.connection.flush();
                         this.session.set({connected: false});
                     }
@@ -245,24 +307,36 @@ define("xabber-accounts", function () {
                         }
                     }.bind(this));
                 },
+
                 authXabberAccount: function (callback) {
                     this.requestPassword(function(data) {
                         this.xabber_auth = { api_jid: data.api_jid, request_id: data.request_id };
-                        if (this.chats.code_requests.length > 0) {
-                            var verifying_code = this.chats.code_requests.find(verifying_mess => (verifying_mess.jid === this.xabber_auth.api_jid && verifying_mess.id === this.xabber_auth.request_id));
+                        if (this.code_requests.length > 0) {
+                            let verifying_code = this.code_requests.find(verifying_mess => (verifying_mess.jid === this.xabber_auth.api_jid && verifying_mess.id === this.xabber_auth.request_id));
                             if (verifying_code) {
+                                let idx_verifying_code = this.code_requests.indexOf(verifying_code);
+                                (idx_verifying_code > -1) && this.code_requests.splice(idx_verifying_code, 1);
                                 this.verifyXabberAccount(verifying_code.code, function (data) {
+                                    this._waiting_code = false;
+                                    let iq_send_auth_mark = $iq({type: 'set'})
+                                        .c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE})
+                                        .c('storage', {xmlns:'xabber:options'})
+                                        .c('option', {type: 'bind'}).t(1);
                                     xabber.api_account.save('token', data);
                                     xabber.api_account.login_by_token();
+                                    this.sendIQ(iq_send_auth_mark);
                                     callback && callback();
                                 }.bind(this));
                             }
+                            if (this.code_requests.length) {
+                                let msg_attrs = {
+                                    from_jid: this.code_requests[0].jid,
+                                    message: 'Verification code is ' + this.code_requests[0].code,
+                                    is_archived: false
+                                };
+                                this.createMessageFromIQ(msg_attr);
+                            }
                         }
-                        var iq_send_auth_mark = $iq({type: 'set'})
-                            .c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE})
-                            .c('storage', {xmlns:'xabber:options'})
-                            .c('option', {type: 'bind'}).t(1);
-                        this.sendIQ(iq_send_auth_mark);
                     }.bind(this));
                 },
 
@@ -272,11 +346,12 @@ define("xabber-accounts", function () {
                         url: constants.API_SERVICE_URL + '/accounts/xmpp_code_request/',
                         contentType: "application/json",
                         dataType: 'json',
-                        data: JSON.stringify({ jid: this.connection.jid }),
+                        data: JSON.stringify({ jid: this.connection.jid, type: 'iq'}),
                         success: function (data, textStatus, jqXHR) {
                             callback && callback(data);
                         }
                     };
+                    this._waiting_code = true;
                     $.ajax(request);
                 },
 
@@ -287,12 +362,18 @@ define("xabber-accounts", function () {
                     }
                     this.session.set({conn_status: status, conn_condition: condition});
                     if (status === Strophe.Status.CONNECTED) {
+                        this.session.set('on_token_revoked', false);
                         this.connection.connect_callback = this.connectionCallback.bind(this);
                         this.session.set({connected: true, reconnected: true,
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        this.onAuthFailed();
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
+                            this.onTokenRevoked();
+                        else
+                            this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
+                        if (this.session.get('on_token_revoked'))
+                            return;
                         this.connection.flush();
                         var max_retries = xabber.settings.max_connection_retries;
                         if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
@@ -307,6 +388,7 @@ define("xabber-accounts", function () {
                     if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
                         this.auth_view.successFeedback(this);
+                        this.auth_view = null;
                     } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
                         if (status === Strophe.Status.ERROR) {
                             status = 'Connection error';
@@ -338,17 +420,45 @@ define("xabber-accounts", function () {
                     this.connFeedback('Authentication failed');
                 },
 
+                getAllXTokens: function () {
+                    var tokens_list = [],
+                        iq = $iq({
+                            from: this.get('jid'),
+                            type: 'get',
+                            to: this.connection.domain
+                        }).c('query', {xmlns:Strophe.NS.AUTH_TOKENS + '#items'});
+                    this.sendIQ(iq, function (tokens) {
+                        $(tokens).find('field').each(function (idx, token) {
+                            var $token = $(token),
+                                client = $token.find('client').text(),
+                                device = $token.find('device').text(),
+                                token_uid = $token.find('token-uid').text(),
+                                expire = parseInt($token.find('expire').text())*1000,
+                                last_auth = parseInt($token.find('last-auth').text())*1000,
+                                ip_address = $token.find('ip').text();
+                            tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
+                        }.bind(this));
+                        this.x_tokens_list = tokens_list;
+                        this.settings_right.updateXTokens();
+                    }.bind(this));
+                },
+
                 onTokenRevoked: function () {
                     if (!this.auth_view) {
-                        utils.dialogs.error('Token was revoked for account ' +
+                        utils.dialogs.error('Token was invalidated for account ' +
                             this.get('jid'));
                     }
                     this.session.set({
+                        on_token_revoked: true,
                         auth_failed: true,
+                        connected: false,
                         no_reconnect: true
                     });
+                    this.set({auth_type: 'password', password: null, x_token: null});
+                    this.connection.pass = "";
                     this.trigger('deactivate', this);
-                    this.connFeedback('Authentication failed');
+                    this.connFeedback('Token was invalidated');
+                    this.connect({token_invalidated: true});
                 },
 
                 onChangedConnected: function () {
@@ -365,6 +475,7 @@ define("xabber-accounts", function () {
                     this.resource = Strophe.getResourceFromJid(this.jid);
                     this.domain = Strophe.getDomainFromJid(this.jid);
                     this.trigger('activate', this);
+                    this.session.get('no_reconnect') && this.session.set('no_reconnect', false);
                     this.afterConnected();
                     _.each(this._after_connected_plugins, function (plugin) {
                         plugin.call(this);
@@ -384,6 +495,16 @@ define("xabber-accounts", function () {
                     this.enableCarbons();
                     this.getVCard();
                     this.sendPendingStanzas();
+                    // this.activateXabberRewrite();
+                    /*setTimeout(function () {
+                        this.sendPendingMessages();
+                    }.bind(this), 15000);*/
+                },
+
+                activateXabberRewrite: function () {
+                    var retractions_query = $iq({from: this.get('jid'), type: 'set', to: this.get('jid')})
+                        .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE});
+                    this.sendIQ(retractions_query);
                 },
 
                 sendPendingStanzas: function () {
@@ -398,10 +519,19 @@ define("xabber-accounts", function () {
                     this._pending_stanzas = [];
                 },
 
+                sendPendingMessages: function () {
+                    _.each(this._pending_messages, function (item) {
+                        let msg = this.messages.get(item.msg_id), $msg_iq;
+                        msg && ($msg_iq = msg.get('xml')) && msg.set('state', constants.MSG_PENDING);
+                        $msg_iq && this.sendMsg($msg_iq);
+                    }.bind(this));
+                },
+
                 _after_connected_plugins: [],
                 _after_reconnected_plugins: [],
 
                 onDisconnected: function () {
+                    this.disconnected_timestamp = this.last_stanza_timestamp;
                     if (this.session.get('delete')) {
                         this.destroy();
                         return;
@@ -441,8 +571,15 @@ define("xabber-accounts", function () {
                                 vcard_updated: moment.now()
                             };
                             attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
-                            attrs.image = vcard.photo.image || Images.getDefaultAvatar(attrs.name);
-                            this.cached_image = Images.getCachedImage(attrs.image);
+                            if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
+                                if (vcard.photo.image) {
+                                    attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
+                                    attrs.image = vcard.photo.image;
+                                }
+                                else
+                                    attrs.image = Images.getDefaultAvatar(attrs.name);
+                                this.cached_image = Images.getCachedImage(attrs.image);
+                            }
                             this.save(attrs);
                             is_callback && callback(vcard);
                         }.bind(this),
@@ -454,7 +591,10 @@ define("xabber-accounts", function () {
 
                 setVCard: function (data, callback, errback) {
                     var vcard = _.extend(_.clone(this.get('vcard')), data);
-                    this.connection.vcard.set(this.get('jid'), vcard, callback, errback);
+                    this.connection.vcard.set(this.get('jid'), vcard, function () {
+                        this.vcardPhotoUpdated(vcard.photo.image);
+                        callback && callback();
+                    }.bind(this), errback);
                 },
 
                 getStatusMessage: function () {
@@ -491,6 +631,24 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                getAvatarHash: function (avatar) {
+                    var from_avatar = avatar || this.get('vcard').photo.image;
+                    if (from_avatar) {
+                        var decoded_raw = atob(from_avatar),
+                            bin = Uint8Array.from(Array.prototype.map.call(decoded_raw,function(x) {
+                                return x.charCodeAt(0);
+                            }));
+                        return sha1(bin);
+                    }
+                    else
+                        return "";
+                },
+
+                vcardPhotoUpdated: function (photo) {
+                    let stanza = $pres().c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash(photo)).up().up();
+                    return this.sendPres(stanza);
+                },
+
                 sendPresence: function (type, message) {
                     var type = type || this.get('status'),
                         status_message = message || this.get('status_message');
@@ -501,6 +659,7 @@ define("xabber-accounts", function () {
                         if (type !== 'online') {
                             stanza.c('show').t(type).up();
                         }
+                        // stanza.c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash()).up().up();
                         stanza.c('status').t(status_message).up();
                         stanza.c('priority').t(this.get('priority')).up();
                     }
@@ -518,7 +677,7 @@ define("xabber-accounts", function () {
                 },
 
                 updateColorScheme: function () {
-                    var color = this.settings.get('color');
+                    let color = this.settings.get('color');
                     this.settings_left.$el.attr('data-color', color);
                     this.settings_right.$el.attr('data-color', color);
                     this.settings_right.$('.account-color .current-color-name').text(color);
@@ -526,10 +685,10 @@ define("xabber-accounts", function () {
                 },
 
                 revokeXToken: function (token_uid, callback) {
-                    var iq = $iq({
+                    let iq = $iq({
                         from: this.get('jid'),
                         type: 'set',
-                        to: Strophe.getDomainFromJid(this.get('jid'))
+                        to: this.connection.domain
                     }).c('revoke', {xmlns:Strophe.NS.AUTH_TOKENS});
                     for (var token_num = 0; token_num < token_uid.length; token_num++) {
                         iq.c('token-uid').t(token_uid[token_num]).up();
@@ -537,6 +696,20 @@ define("xabber-accounts", function () {
                     this.sendIQ(iq, function () {
                         callback && callback();
                     }.bind(this));
+                },
+
+                revokeAllXTokens: function (callback, errback) {
+                    let iq = $iq({
+                        from: this.get('jid'),
+                        type: 'set',
+                        to: this.connection.domain
+                    }).c('revoke-all', {xmlns:Strophe.NS.AUTH_TOKENS});
+                    this.sendIQ(iq, function (success) {
+                            callback & callback(success);
+                        }.bind(this),
+                        function (error) {
+                            errback && errback(error);
+                        });
                 },
 
                 deleteAccount: function (show_settings) {
@@ -570,6 +743,15 @@ define("xabber-accounts", function () {
                     this.settings.destroy();
                 },
 
+                registerIQHandler: function () {
+                    this.connection.deleteHandler(this._stanza_handler);
+                    this._stanza_handler = this.connection.addHandler(
+                        function (iq) {
+                            this.onIQ(iq);
+                            return true;
+                        }.bind(this), null, 'iq', "get");
+                },
+
                 registerPresenceHandler: function () {
                     this.connection.deleteHandler(this._pres_handler);
                     this._pres_handler = this.connection.addHandler(
@@ -579,13 +761,69 @@ define("xabber-accounts", function () {
                         }.bind(this), null, 'presence', null);
                 },
 
+                onIQ: function (iq) {
+                    let $incoming_iq = $(iq),
+                        $confirm = $incoming_iq.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH +'"]'),
+                        $session_availability = $incoming_iq.find('query[xmlns="' + Strophe.NS.JINGLE_MSG +'"]'),
+                        request_code,
+                        from_jid = $incoming_iq.attr('from');
+                    if ($confirm.length) {
+                        request_code = $confirm.attr('id');
+                        if (this._waiting_code && ($confirm.attr('url') === constants.XABBER_ACCOUNT_URL + '/auth/login/')) {
+                            if (this.xabber_auth.api_jid && this.xabber_auth.request_id) {
+                                if (($incoming_iq.attr('id') === this.xabber_auth.request_id) && (from_jid === this.xabber_auth.api_jid))
+                                    this.verifyXabberAccount(request_code, function (data) {
+                                        this._waiting_code = false;
+                                        if (this.get('auto_login_xa')) {
+                                            xabber.api_account.save('token', data);
+                                            xabber.api_account.login_by_token();
+                                        }
+                                    }.bind(this));
+                            }
+                            else {
+                                this.code_requests.push({
+                                    jid: from_jid,
+                                    id: $incoming_iq.attr('id'),
+                                    code: request_code
+                                });
+                            }
+                        }
+                        else {
+                            let msg_attrs = {
+                                    from_jid: from_jid,
+                                    message: 'Verification code is ' + request_code,
+                                    is_archived: false
+                                };
+                            this.createMessageFromIQ(msg_attr);
+                        }
+                    }
+                    if ($session_availability.length) {
+                        let session_id = $session_availability.children('session').attr('id'), $session_availability_response;
+                        if (session_id && xabber.current_voip_call && session_id === xabber.current_voip_call.get('session_id') && !xabber.current_voip_call.get('state')) {
+                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
+                                .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
+                                .c('session', {id: session_id});
+                            xabber.current_voip_call.updateStatus('Calling...');
+                        }
+                        else {
+                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'error', id: $incoming_iq.attr('id')})
+                                .c('error', {xmlns: Strophe.NS.JINGLE_MSG});
+
+                        }
+                        this.sendIQ($session_availability_response);
+                    }
+                },
+
+                createMessageFromIQ: function (attrs) {
+                    let contact = this.contacts.mergeContact(attrs.from_jid),
+                        chat = this.chats.getChat(contact);
+                    chat.messages.create(attrs);
+                },
+
                 onPresence: function (presence) {
                     var $presence = $(presence),
                         type = presence.getAttribute('type');
                     if (type === 'error') { return; }
-                    if (($presence.find('x').attr('xmlns') || '').indexOf(Strophe.NS.GROUP_CHAT) === 0) {
-                        chat_type = 'group_chat';
-                    }
                     var jid = presence.getAttribute('from'),
                         bare_jid = Strophe.getBareJidFromJid(jid);
                     if (bare_jid !== this.get('jid')) {
@@ -600,7 +838,7 @@ define("xabber-accounts", function () {
                         status_message = $presence.find('status').text();
                     _.isNaN(priority) && (priority = 0);
                     var $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                    if ($vcard_update.length) {
+                    if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                         this.save('photo_hash', $vcard_update.find('photo').text());
                     }
                     if (resource && resource !== this.resource) {
@@ -649,6 +887,7 @@ define("xabber-accounts", function () {
                 this.on("change:enabled", this.getEnabledList, this);
                 this.on("update_order", this.onUpdatedOrder, this);
                 this.on("add destroy activate deactivate", this.onListChanged, this);
+                this.on("destroy deactivate", this.onAccountDisconnected, this);
                 xabber.on("quit", this.onQuit, this);
                 this.settings_list.on("add_settings", this.onSettingsAdded, this);
                 xabber.api_account.on("settings_result", function (result) {
@@ -658,6 +897,7 @@ define("xabber-accounts", function () {
 
             onQuit: function () {
                 xabber.api_account.revoke_token();
+                (!this.models.length) && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     account.deleteAccount();
                 });
@@ -696,8 +936,14 @@ define("xabber-accounts", function () {
                         xabber.body.setScreen('settings');
                     } else {
                         xabber.body.setScreen('all-chats');
+                        xabber.chats_view.showAllChats();
                     }
                 }
+            },
+
+            onAccountDisconnected: function () {
+                xabber.toolbar_view.recountAllMessageCounter();
+                xabber.recountAllMessageCounter();
             },
 
             onSettingsAdded: function (settings) {
@@ -761,6 +1007,7 @@ define("xabber-accounts", function () {
             avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
             events: {
+                'click .filter-chats': 'filterChats',
                 'click': 'showSettings'
             },
 
@@ -770,11 +1017,13 @@ define("xabber-accounts", function () {
                 this.updateStatus();
                 this.updateAvatar();
                 this.updateColorScheme();
+                this.$el.attr('data-jid', this.model.get('jid'));
                 this.model.session.on("change:auth_failed", this.updateAuthState, this);
                 this.model.session.on("change:connected", this.updateConnected, this);
                 this.model.on("change:status", this.updateStatus, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.settings.on("change:color", this.updateColorScheme, this);
+                this.model.on("filter_chats", this.setActive, this);
                 this.model.on("open_settings", this.setActive, this);
             },
 
@@ -805,7 +1054,14 @@ define("xabber-accounts", function () {
                 this.model.showSettings();
             },
 
+            filterChats: function (ev) {
+                ev.stopPropagation();
+                xabber.chats_view.showChatsByAccount(this.model);
+                this.model.trigger('filter_chats');
+            },
+
             setActive: function () {
+                xabber.toolbar_view.$('.toolbar-item').removeClass('active');
                 this.$el.addClass('active');
             }
         });
@@ -847,6 +1103,7 @@ define("xabber-accounts", function () {
                         this.$('.account-item').eq(index - 1).after(view.$el);
                     }
                 } else {
+                    account.last_msg_timestamp = 0;
                     this.removeChild(jid);
                 }
                 this.parent.updateScrollBar();
@@ -899,8 +1156,19 @@ define("xabber-accounts", function () {
                     if ($identity.length) {
                         resource.set('client', $identity.attr('name'));
                     }
+                    this.isFeatureSupported(iq, Strophe.NS.CHAT_MARKERS) && (this.chat_markers_support = true);
+                }.bind(this));
+            },
+
+            isFeatureSupported: function (stanza, ns) {
+                let $stanza = $(stanza), is_supported = false;
+                $stanza.find('feature').each(function () {
+                    let namespace = $(this).attr('var');
+                    if (namespace === ns)
+                        is_supported = true;
                 });
-            }
+                return is_supported;
+            },
         });
 
         xabber.ResourcesView = xabber.BasicView.extend({
@@ -961,7 +1229,8 @@ define("xabber-accounts", function () {
         xabber.AccountVCardView = xabber.VCardView.extend({
             events: {
                 "click .btn-vcard-refresh": "refresh",
-                "click .btn-vcard-edit": "showEditView"
+                "click .btn-vcard-edit": "showEditView",
+                "click .details-icon": "onClickIcon"
             },
 
             __initialize: function () {
@@ -986,6 +1255,7 @@ define("xabber-accounts", function () {
             avatar_size: constants.AVATAR_SIZES.ACCOUNT_SETTINGS_LEFT,
 
             events: {
+                "change .main-info-wrap .circle-avatar input": "changeAvatar",
                 "click .main-info-wrap .status": "openChangeStatus",
                 "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
                 "click .settings-tab.delete-account": "deleteAccount"
@@ -1008,6 +1278,7 @@ define("xabber-accounts", function () {
             },
 
             render: function (options) {
+                this.$('.settings-tab[data-block-name="tokens"]').hideIf(this.model.get('auth_type') !== 'x-token');
                 this.$('.settings-tab').removeClass('active');
                 this.$('.settings-tab[data-block-name="'+options.block_name+'"]').addClass('active');
                 this.updateCSS();
@@ -1055,6 +1326,37 @@ define("xabber-accounts", function () {
                 $name.css({'margin-left': (wrap_width - width) / 2});
             },
 
+            changeAvatar: function (ev) {
+                this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
+                var field = ev.target;
+                if (!field.files.length) {
+                    return;
+                }
+                var file = field.files[0];
+                field.value = '';
+                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                    utils.dialogs.error('File is too large');
+                    return;
+                } else if (!file.type.startsWith('image')) {
+                    utils.dialogs.error('Wrong image');
+                    return;
+                }
+                utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
+                    if (image) {
+                        this.model.pubAvatar({base64: image, hash: hash, size: size},
+                            function () {
+                                this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                                this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                            }.bind(this),
+                            function () {
+                                this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                                utils.dialogs.error('Wrong image');
+                            }.bind(this));
+                    } else
+                        utils.dialogs.error('Wrong image');
+                }.bind(this));
+            },
+
             updateCSS: function () {
                 this.updateNameCSS();
             },
@@ -1066,18 +1368,7 @@ define("xabber-accounts", function () {
             jumpToBlock: function (ev) {
                 var $tab = $(ev.target).closest('.settings-tab'),
                     block_name = $tab.data('block-name');
-                if (block_name == 'existing-group-chats-info') {
-                    this.model.showSettings(null, block_name);
-                    this.model.settings_right.$('.panel-content-wrap').addClass('hidden');
-                    this.model.settings_right.$('.existing-group-chats-info').removeClass('hidden').perfectScrollbar({theme: 'item-list'});
-
-                    // this.getExistingGroupchats();
-                }
-                else {
-                    this.model.settings_right.$('.panel-content-wrap').removeClass('hidden');
-                    this.model.settings_right.$('.existing-group-chats-info').addClass('hidden');
-                    this.model.showSettings(null, block_name);
-                }
+                this.model.showSettings(null, block_name);
             },
 
             deleteAccount: function (ev) {
@@ -1087,9 +1378,9 @@ define("xabber-accounts", function () {
                         checked: this.model.settings.get('to_sync'),
                         text: 'Delete synced settings'}];
                 }
-                utils.dialogs.ask("Delete account", "Do you want to delete this account from Xabber Web? "+
+                utils.dialogs.ask("Quit account", "Do you want to quit this account from Xabber Web? "+
                     "Account will not be deleted from the server.",
-                    dialog_options, { ok_button_text: 'delete'}).done(function (res) {
+                    dialog_options, { ok_button_text: 'quit'}).done(function (res) {
                     if (!res) {
                         return;
                     }
@@ -1114,12 +1405,7 @@ define("xabber-accounts", function () {
                 "click .btn-delete-settings": "deleteSettings",
                 "click .color-values .color-value": "changeColor",
                 "click .token-wrap .btn-revoke-token": "revokeXToken",
-                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
-                "click .btn-join-existing-chat": "joinExistingChat",
-                "click .existing-chat-wrap": "getMoreInfo",
-                "keyup .find-existing-chats-by-domain input": "keyUpFind",
-                "click .find-existing-chats-by-domain .search-icon": "clickFind"
-
+                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens"
             },
 
             _initialize: function () {
@@ -1132,7 +1418,7 @@ define("xabber-accounts", function () {
                 this.updateView();
                 this.showConnectionStatus();
                 this.updateSynchronizationBlock();
-                this.getAllXTokens();
+                // this.model.getAllXTokens();
                 this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
                 this.model.settings.on("change:to_sync", this.updateSyncOption, this);
@@ -1148,6 +1434,7 @@ define("xabber-accounts", function () {
             render: function (options) {
                 this.updateEnabled();
                 this.updateXTokens();
+                this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -1159,6 +1446,7 @@ define("xabber-accounts", function () {
                 });
                 this.$('.account-color .dropdown-content').hide();
                 this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
+                this.$('.panel-content-wrap').removeClass('hidden');
                 return this;
             },
 
@@ -1186,128 +1474,57 @@ define("xabber-accounts", function () {
                 this.updateDelSettingsButton();
             },
 
-            keyUpFind: function (ev) {
-                this.$('.search-icon').hasClass('active') && (ev.keyCode === constants.KEY_ENTER) && this.getExistingGroupchats(this.$('.search-input.simple-input-field').val());
-            },
-
-            clickFind: function () {
-                this.getExistingGroupchats(this.$('.search-input.simple-input-field').val());
-            },
-
-            getExistingGroupchats: function (domain) {
-                this.model.connection.disco.items((domain || constants.XMPP_SERVER_GROUPCHATS), null, this.getGroupchatService.bind(this));
-            },
-
-            getGroupchatService: function (stanza) {
-                $(stanza).find('query item').each(function (idx, item) {
-                    if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
-                        var jid = $(item).attr('jid');
-                        this.getGroupchatFeature(jid);
+            renderAllXTokens: function () {
+                this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each(function (idx, token) {
+                    let pretty_token = {
+                        client: token.client,
+                        device: token.device,
+                        token_uid: token.token_uid,
+                        ip: token.ip,
+                        last_auth: utils.pretty_datetime(token.last_auth),
+                        expire: utils.pretty_datetime(token.expire)
+                    };
+                    if (this.model.get('x_token')) {
+                        if (this.model.get('x_token').token_uid == token.token_uid) {
+                            let $cur_token_html = $(templates.current_token_item(pretty_token));
+                            this.$('.panel-content-wrap .tokens .current-session').append($cur_token_html);
+                            return;
+                        }
                     }
+                    let $token_html = $(templates.token_item(pretty_token));
+                    this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
                 }.bind(this));
-            },
-
-            getGroupchatFeature: function (jid) {
-                var iq = $iq({type: 'get', to: jid})
-                    .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
-                this.model.sendIQ(iq, this.getServerInfo.bind(this));
-            },
-
-            getServerInfo: function (stanza) {
-                $(stanza).find('query identity').each(function (idx, item) {
-                    var $item = $(item);
-                    if (($item.attr('category') === 'conference') && ($item.attr('type') === 'server')) {
-                        var jid = $(stanza).attr('from');
-                        this.getChatsFromSever(jid);
-                    }
-                }.bind(this));
-            },
-
-            getChatsFromSever: function (jid) {
-                this.model.settings_right.$('.existing-group-chats-info .groupchats').html("");
-                var iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
-                this.model.sendIQ(iq, function (stanza) {
-                    $(stanza).find('query item').each(function (idx, item) {
-                        var $item = $(item),
-                            name = $item.attr('name'),
-                            jid = $item.attr('jid'),
-                            $chat_item_html = $(templates.existing_groupchat_item({name: name, jid: jid})),
-                            avatar = Images.getDefaultAvatar(name);
-                        $chat_item_html.find('.circle-avatar').setAvatar(avatar, 32);
-                        $chat_item_html.appendTo(this.model.settings_right.$('.existing-group-chats-info .groupchats'));
-                    }.bind(this));
-                }.bind(this));
-            },
-
-            joinExistingChat: function (ev) {
-                var $target = $(ev.target).closest('.existing-chat-wrap'),
-                    group_jid = $target.data('jid'),
-                    contact = this.model.contacts.mergeContact(group_jid);
-                contact.set('group_chat', true);
-                contact.pres('subscribed');
-                contact.pres('subscribe');
-                contact.pushInRoster({name: group_jid}, function () {
-                    contact.showDetails();
-                }.bind(this));
-            },
-
-            getMoreInfo: function (ev) {
-                var $target = $(ev.target);
-                if (!$target.hasClass('btn-join-existing-chat')) {
-                    $target = $target.closest('.existing-chat-wrap');
-                    var group_jid = $target.data('jid'),
-                        iq = $iq({type: 'get', to: group_jid}).c('query', {xmlns: Strophe.NS.DISCO_INFO});
-                    this.model.sendIQ(iq, function (stanza) {
-
-                    }.bind(this));
-                }
-            },
-
-            getAllXTokens: function () {
-                var tokens_list = [],
-                    iq = $iq({
-                        from: this.model.get('jid'),
-                        type: 'get',
-                        to: Strophe.getDomainFromJid(this.model.get('jid'))
-                    }).c('query', {xmlns:Strophe.NS.AUTH_TOKENS + '#items'});
-                this.model.sendIQ(iq, function (tokens) {
-                    $(tokens).find('field').each(function (idx, token) {
-                        var $token = $(token),
-                            description = $token.find('description').text(),
-                            token_uid = $token.find('token-uid').text(),
-                            expire = parseInt($token.find('expire').text())*1000,
-                            last_auth = parseInt($token.find('last-auth').text())*1000,
-                            ip_address = $token.find('ip').text();
-                        tokens_list.push({description: description, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
-                    }.bind(this));
-                    this.model.x_tokens_list = tokens_list;
-                    this.updateXTokens();
-                }.bind(this));
+                if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
+                    this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
+                else
+                    this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
             },
 
             updateXTokens: function () {
-                this.$('.panel-content-wrap .tokens .tokens-wrap').html("");
-                if (this.model.x_tokens_list) {
-                    this.$('.tokens .buttons-wrap').removeClass('hidden');
-                    $(this.model.x_tokens_list).each(function (idx, token) {
-                        var pretty_token = {
-                                description: token.description,
-                                token_uid: token.token_uid,
-                                ip: token.ip,
-                                last_auth: utils.pretty_datetime(token.last_auth),
-                                expire: utils.pretty_datetime(token.expire)
-                            },
-                            $token_html = $(templates.token_item(pretty_token));
-                        if (this.model.get('x_token')) {
-                            if (this.model.get('x_token').token_uid == token.token_uid)
-                                $('<div class="token-indicator text-color-700">(this device)</div>').insertAfter($token_html.find('.description'));
-                        }
-                        this.$('.panel-content-wrap .tokens .tokens-wrap').prepend($token_html);
-                    }.bind(this));
+                if (this.model.get('auth_type') !== 'x-token') {
+                    this.$('.panel-content-wrap .tokens').addClass('hidden');
+                    this.$('.panel-content-wrap .tokens .sessions-wrap').children().html("");
+                    return;
                 }
-                else {
-                    this.$('.tokens .buttons-wrap').addClass('hidden');
-                    this.$('.panel-content-wrap .tokens .tokens-wrap').html($('<p class="tokens-error">No tokens yet</p>'));
+                this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+                if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                    this.$('.panel-content-wrap .tokens').removeClass('hidden');
+                    if (this.model.get('x_token') && !this.model.get('x_token').token_uid) {
+                        let iq_ask_token_uid = $iq({from: this.model.get('jid'), to: this.model.domain, type: 'get'})
+                            .c('query', {xmlns: Strophe.NS.AUTH_TOKENS + '#items'})
+                            .c('token').t(this.model.get('x_token').token);
+                        this.model.sendIQ(iq_ask_token_uid, function (iq_response) {
+                            let $iq_response = $(iq_response),
+                                token_uid = $iq_response.find('token-uid').text(),
+                                expire = $iq_response.find('expire').text();
+                            this.model.get('x_token').token_uid = token_uid;
+                            this.model.get('x_token').expire = expire;
+                            this.renderAllXTokens();
+                        }.bind(this));
+                    }
+                    else
+                        this.renderAllXTokens();
                 }
             },
 
@@ -1315,29 +1532,16 @@ define("xabber-accounts", function () {
                 var $target = $(ev.target).closest('.token-wrap'),
                     token_uid = $target.data('token-uid');
                 this.model.revokeXToken([token_uid], function () {
-                    $target.remove();
-                    if (this.model.x_tokens_list)
-                        this.model.x_tokens_list.splice(this.model.x_tokens_list.indexOf(this.model.x_tokens_list.find(token => token.token_uid == token_uid)), 1);
                     if (this.model.get('x_token'))
                         if (this.model.get('x_token').token_uid === token_uid)
-                            this.model.deleteAccount();
+                            // this.model.deleteAccount();
+                            this.model.destroy();
                 }.bind(this));
             },
 
             revokeAllXTokens: function () {
-                if (this.model.x_tokens_list) {
-                    var all_tokens_uid = [];
-                    for (var i = 0; i < this.model.x_tokens_list.length; i++) {
-                        all_tokens_uid[i] = this.model.x_tokens_list[i].token_uid;
-                    }
-                    this.model.revokeXToken(all_tokens_uid, function () {
-                        for (var z = 0; z < all_tokens_uid.length; z++) {
-                            this.model.x_tokens_list.splice(this.model.x_tokens_list.indexOf(this.model.x_tokens_list.find(token => token.token_uid == all_tokens_uid[z])), 1);
-                        }
-                        if (all_tokens_uid.indexOf(this.model.get('x_token').token_uid) !== -1)
-                            this.model.deleteAccount();
-                    }.bind(this));
-                }
+                if (this.model.x_tokens_list)
+                    this.model.revokeAllXTokens(function () {}.bind(this));
             },
 
             updateSyncState: function () {
@@ -1729,6 +1933,7 @@ define("xabber-accounts", function () {
             render: function (options) {
                 options || (options = {});
                 this.is_login = options.login;
+                this.token_invalidated = options.token_invalidated;
                 this.$('.modal-header span').text(this.is_login ? 'Log In' : 'Set password');
                 this.$('.btn-cancel').text(this.is_login ? 'Skip' : 'Cancel');
                 this.$('.btn-change').text(this.is_login ? 'Log In': 'Set');
@@ -1765,7 +1970,7 @@ define("xabber-accounts", function () {
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
-                this.authFeedback({password: 'Authentication with new password...'});
+                this.authFeedback({password: 'Authentication with password...'});
                 if (this.model.connection.connected) {
                     this.model.once('deactivate', function () {
                         this.setPassword(password);
@@ -1777,6 +1982,7 @@ define("xabber-accounts", function () {
             },
 
             setPassword: function (password) {
+                this.model.last_msg_timestamp = 0;
                 this.model.save({
                     auth_type: 'password',
                     password: utils.utoa(password),
@@ -1817,6 +2023,9 @@ define("xabber-accounts", function () {
             close: function () {
                 if (this.is_login) {
                     this.model.save('enabled', false);
+                }
+                if (this.token_invalidated) {
+                    this.model.destroy();
                 }
                 this.cancel();
                 this.closeModal();
@@ -1879,13 +2088,40 @@ define("xabber-accounts", function () {
                     this.errorFeedback({jid: 'This account already added to Xabber web'});
                 } else {
                     this.authFeedback({password: 'Authentication...'});
-                    this.account = xabber.accounts.create({
-                        jid: jid,
-                        password: utils.utoa(password),
-                        is_new: true
-                    }, {auth_view: this});
-                    this.account.trigger('start');
+                    this.getWebsocketURL(jid, function (response) {
+                        this.account = xabber.accounts.create({
+                            jid: jid,
+                            websocket_connection_url: response || constants.CONNECTION_URL,
+                            password: utils.utoa(password),
+                            is_new: true
+                        }, {auth_view: this});
+                        this.account.trigger('start');
+                    }.bind(this));
                 }
+            },
+
+            getWebsocketURL: function (jid, callback) {
+                if (!constants.DISABLE_LOOKUP_WS) {
+                    let domain = Strophe.getDomainFromJid(jid),
+                        request = {
+                            type: 'GET',
+                            url: window.location.protocol + '//' + domain + '/.well-known/host-meta',
+                            dataType: 'xml',
+                            success: function (success) {
+                                let socket_url = $(success).find('Link').attr('href');
+                                if (socket_url)
+                                    callback && callback(socket_url);
+                                else
+                                    callback && callback(null);
+                            }.bind(this),
+                            error: function () {
+                                callback && callback(null);
+                            }.bind(this)
+                        };
+                    $.ajax(request);
+                }
+                else
+                    callback && callback(null);
             },
 
             cancel: function () {
@@ -1936,7 +2172,7 @@ define("xabber-accounts", function () {
             },
 
             updateButtons: function () {
-                var authentication = this.data.get('authentication');
+                                var authentication = this.data.get('authentication');
                 this.$('.btn-log-in').switchClass('disabled', authentication);
                 this.$('.btn-cancel').showIf(authentication);
             },
@@ -1944,7 +2180,7 @@ define("xabber-accounts", function () {
             successFeedback: function (account) {
                 account.auth_view = null;
                 this.data.set('authentication', false);
-                xabber.body.setScreen('all-chats');
+                xabber.body.setScreen('all-chats', {right: null});
             }
         });
 
@@ -1984,7 +2220,7 @@ define("xabber-accounts", function () {
                 } else {
                     account.settings.save('to_sync', false);
                 }
-                xabber.body.setScreen('all-chats');
+                xabber.body.setScreen('all-chats', {right: null});
                 this.closeModal();
             },
 
@@ -2038,6 +2274,8 @@ define("xabber-accounts", function () {
                 var login_screen = options.login_screen || constants.DEFAULT_LOGIN_SCREEN;
                 return login_screen === 'xmpp' ? { xmpp_login: null } : { xabber_login: null };
             };
+
+            this.servers = new xabber.Servers();
         }, xabber);
 
         return xabber;

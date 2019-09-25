@@ -1,9 +1,0 @@
-<div class="chat-item list-item group-chat-members" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
-    <div class="member-item">
-        <div class="circle-avatar"><img></div>
-        <div class="member-info"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div><div class="badge one-line">{{badge}}</div>{[if (jid) {]}<p title="{{jid}}" class="jid one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id one-line">{{id}}</p>{[}]}
-        <div class="last-seen one-line">{[if (present !== 'now') { ]}Last seen: {{present}} {[} else {]}Online{[}]}</div></div>
-        {[ if (role == 'Owner') {]}<div title="Owner" class="role-star"><i class="mdi mdi-20px mdi-star"></i></div>{[}]}
-        {[ if (role == 'Admin') {]}<div title="Admin" class="role-star"><i class="mdi mdi-20px mdi-star-outline"></i></div>{[}]}
-    </div>
-</div>

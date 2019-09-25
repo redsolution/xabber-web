@@ -1,9 +1,28 @@
     <div class="left-column ground-color-900 noselect">
         <div class="main-info-wrap account-main-info-wrap">
+            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->
             <div class="picture-wrap">
                 <div class="avatar-wrap">
                     <div class="circle-avatar">
                         <img/>
+                        <input type="file"/>
+                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                        </svg>
+                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                     <div class="status"></div>
                 </div>
@@ -20,7 +39,7 @@
             </div>
             <div class="settings-tab" data-block-name="tokens">
                 <i class="mdi mdi-24px mdi-key"></i>
-                <div class="settings-block-name one-line">Tokens</div>
+                <div class="settings-block-name one-line">Active sessions</div>
             </div>
             <div class="settings-tab" data-block-name="synchronization">
                 <i class="mdi mdi-24px mdi-sync"></i>
@@ -50,15 +69,11 @@
                 <i class="mdi mdi-24px mdi-account-multiple"></i>
                 <div class="settings-block-name one-line">Groups</div>
             </div>
-            <!--<div class="settings-tab" data-block-name="existing-group-chats-info">
-                <i class="mdi mdi-24px mdi-forum"></i>
-                <div class="settings-block-name one-line">Existing group chats</div>
-            </div>-->
         </div>
         <div class="settings-tabs-bottom-wrap ground-color-900">
             <div class="settings-tab delete-account">
                 <i class="mdi mdi-24px mdi-logout-variant"></i>
-                <div class="settings-block-name">Delete account</div>
+                <div class="settings-block-name">Quit account</div>
             </div>
         </div>
     </div>

@@ -460,6 +460,7 @@ if ($) {
       hover: false,
       gutter: 0, // Spacing from edge
       belowOrigin: false,
+      closeOnClick: true,
       alignment: 'left'
     };
 
@@ -484,6 +485,8 @@ if ($) {
         options.gutter = origin.data('gutter');
       if (origin.data('beloworigin') !== undefined)
         options.belowOrigin = origin.data('beloworigin');
+      if (origin.data('closeOnClick') !== undefined)
+          options.closeOnClick = origin.data('closeOnClick');
       if (origin.data('alignment') !== undefined)
         options.alignment = origin.data('alignment');
     }
@@ -519,10 +522,11 @@ if ($) {
       }
 
       // Offscreen detection
-      var windowHeight = window.innerHeight;
+      var windowHeight = options.container ? options.container.clientHeight : window.innerHeight;
       var originHeight = origin.innerHeight();
       var offsetLeft = origin.offset().left;
-      var offsetTop = origin.offset().top - $(window).scrollTop();
+      var offsetTopContainer = options.container ? $(options.container).offset().top : $(window).scrollTop()
+      var offsetTop = origin.offset().top - offsetTopContainer;
       var currAlignment = options.alignment;
       var gutterSpacing = 0;
       var leftPosition = 0;
@@ -537,7 +541,7 @@ if ($) {
       var scrollOffset = 0;
       var wrapper = origin.parent();
       if (!wrapper.is('body') && wrapper[0].scrollHeight > wrapper[0].clientHeight) {
-        scrollOffset = wrapper[0].scrollTop;
+          scrollOffset = wrapper[0].scrollTop;
       }
 
 
@@ -1528,7 +1532,7 @@ $(document).ready(function(){
   };
 
   var repositionWithinScreen = function(x, y, width, height) {
-    var newX = x
+    var newX = x;
     var newY = y;
 
     if (newX < 0) {
@@ -1539,8 +1543,8 @@ $(document).ready(function(){
 
     if (newY < 0) {
       newY = 4;
-    } else if (newY + height > window.innerHeight + $(window).scrollTop) {
-      newY -= newY + height - window.innerHeight;
+    } else if (newY + height > (options.container ? options.container.clientHeight : window.innerHeight) + $(window).scrollTop) {
+      newY -= newY + height - (options.container ? options.container.clientHeight : window.innerHeight);
     }
 
     return {x: newX, y: newY};

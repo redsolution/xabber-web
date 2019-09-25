@@ -16,6 +16,12 @@
     <span class="group-msg-indicator"></span>
 </div>
 
+<div class="toolbar-item mentions" title="Mentions">
+    <div class="border"></div>
+    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-at"></svg>
+    <span class="mentions-indicator"></span>
+</div>
+
 <div class="toolbar-item archive-chats" title="Archive chats">
     <div class="border"></div>
     <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>
@@ -27,21 +33,21 @@
     <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>
 </div>
 
-<div class="toolbar-item settings" title="Settings">
+<div class="toolbar-item search" title="Search">
     <div class="border"></div>
-    <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>
+    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-searching"></svg>
 </div>
 
 <div class="add-something-wrap">
-    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add contact or account"> <!--title="Add group chat, contact or account"-->
+    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add group chat, contact or account">
         <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>
     </div>
 
     <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">
-        <!--<div class="add-variant groupchat">
+        <div class="add-variant groupchat">
             <i class="mdi mdi-20px mdi-account-multiple-plus"></i>
-            <span class="text">Add group chat</span>
-        </div>-->
+            <span class="text">Create group chat</span>
+        </div>
         <div class="add-variant contact">
             <i class="mdi mdi-20px mdi-account-plus"></i>
             <span class="text">Add contact</span>
@@ -64,5 +70,9 @@
     <div class="toolbar-item about" title="About">
         <div class="border"></div>
         <i class="toolbar-icon mdi mdi-24px mdi-information"></i>
+    </div>
+    <div class="toolbar-item settings" title="Settings">
+        <div class="border"></div>
+        <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>
     </div>
 </div>

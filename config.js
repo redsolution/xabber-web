@@ -3,7 +3,7 @@ require.config({
 
     include: "xabber",
 
-    out: "dist/xabber.min.js",
+    out: "dist/xabber.js",
 
     paths: {
         // external libs
@@ -50,6 +50,8 @@ require.config({
         "xabber-vcard":             "src/vcard",
         "xabber-contacts":          "src/contacts",
         "xabber-chats":             "src/chats",
+        "xabber-searching":         "src/searching",
+        "xabber-mentions":          "src/mentions",
         "xabber-ui":                "src/ui",
 
         // main file

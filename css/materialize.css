@@ -423,7 +423,7 @@
   background-color: #673ab7 !important;
 }
 
-.deep-purple-text {
+                                                            .deep-purple-text {
   color: #673ab7 !important;
 }
 
@@ -4374,9 +4374,9 @@ em {
   font-style: italic;
 }
 
-strong {
+/*strong {
   font-weight: 500;
-}
+}*/
 
 small {
   font-size: 75%;

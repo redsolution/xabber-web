@@ -14,7 +14,7 @@
             version_number: env.version_number,
             actual_version_number: env.version_number,
             client_id: uuid().substring(0, 8),
-            client_name: 'Xabber Web ' + env.version_number
+            client_name: 'Xabber for Web ' + env.version_number
         },
 
         initialize: function () {
@@ -29,6 +29,7 @@
             this.cache = this._cache.attributes;
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
+            this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         },
 
@@ -78,7 +79,13 @@
             rawFile.send();
         },
 
+        onQuit: function () {
+            window.localStorage.clear();
+        },
+
         throwNewVersion: function () {
+            if (!constants.CHECK_VERSION)
+                return;
             var version_number = this.get('actual_version_number'),
                 version_description = this.get('version_description');
             utils.dialogs.common(
@@ -89,6 +96,7 @@
                 {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
+                    // window.localStorage.clear();
                     window.location.reload(true);
                 }
             });
@@ -105,8 +113,10 @@
                 hotkeys: 'enter',
                 load_history: true,
                 mam_requests_limit: 200,
+                mam_messages_limit_start: 1,
                 mam_messages_limit: 20,
-                ping_interval: 180
+                ping_interval: 60,
+                reconnect_interval: 120
             }
         }),
 
@@ -121,13 +131,16 @@
             _.extend(constants, _.pick(config, [
                 'CONNECTION_URL',
                 'XMPP_SERVER_GROUPCHATS',
+                'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'DEBUG',
                 'XABBER_ACCOUNT_URL',
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
+                'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
-                'STORAGE_NAME_ENDING'
+                'STORAGE_NAME_ENDING',
+                'DISABLE_LOOKUP_WS'
             ]));
 
             var log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];

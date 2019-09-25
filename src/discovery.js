@@ -46,11 +46,17 @@ define("xabber-discovery", function () {
                 xabber.get('client_name'),
                 'en'
             );
+            this.addFeature(Strophe.NS.LAST, 'XEP-0012: Last Activity');
             this.addFeature(Strophe.NS.VCARD, 'XEP-0054: vCard-temp');
+            this.addFeature(Strophe.NS.RSM, 'XEP-0059: Result Set Management');
+            this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
+            this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
+            // this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA);
+            this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         },
 
@@ -83,7 +89,13 @@ define("xabber-discovery", function () {
         },
 
         onItems: function (stanza) {
+            let groupchat_servers_list = [];
             $(stanza).find('query item').each(function (idx, item) {
+                if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
+                    let server_name = $(item).attr('jid');
+                    groupchat_servers_list.push(server_name);
+                    this.account.set('groupchat_servers_list', groupchat_servers_list);
+                }
                 this.connection.disco.info(
                     $(item).attr('jid'),
                     null,
@@ -101,44 +113,9 @@ define("xabber-discovery", function () {
                     'var': namespace,
                     from: from
                 });
-                if (namespace === Strophe.NS.AUTH_TOKENS) {
-                    self.account.settings_right.getAllXTokens();
-                    if (self.account.get('x_token'))
-                        if ((self.account.get('x_token').token) && (moment(moment.now()).startOf('seconds').format('x') < self.account.get('x_token').expire*1000))
-                            return;
-                    self.getXToken();
-                }
+                if (namespace === Strophe.NS.AUTH_TOKENS)
+                    self.account.getAllXTokens();
             });
-        },
-
-        getXToken: function () {
-            var iq = $iq({
-                from: this.account.get('jid'),
-                type: 'set',
-                to: Strophe.getDomainFromJid(this.account.get('jid'))
-            }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
-                .c('client').t(xabber.get('client_name')).up()
-                .c('os').t(navigator.platform);
-            this.account.sendIQ(iq,
-                function (callback_iq) {
-                var token = $(callback_iq).find('token').text(),
-                    expires_at = $(callback_iq).find('expire').text(),
-                    token_uid = $(callback_iq).find('token-uid').text();
-                    this.account.save('auth_type', 'x-token');
-                    this.account.save('x_token', {token: token, expire: expires_at, token_uid: token_uid });
-                    this.account.save('password', null);
-                    this.connection.x_token = {token: token, expire: expires_at, token_uid: token_uid };
-                    this.connection.pass = token;
-                    this.connection._sasl_data["server-signature"] = null;
-                    /*this.account.deactivate();
-                    this.account.activate();*/
-                    this.account.session.set('deactivate', 'set_off');
-                    this.connection.disconnect();
-                    setTimeout(function () {
-                        this.account.connect();
-                    }.bind(this), 1000);
-                    this.account.settings_right.getAllXTokens();
-                }.bind(this));
         },
 
         onFeatureAdded: function (feature) {
@@ -173,6 +150,51 @@ define("xabber-discovery", function () {
         }
     });
 
+    xabber.ServerInfo = Backbone.Collection.extend({
+        model: xabber.ServerFeature,
+
+        initialize: function (options) {
+            this.domain = options.domain;
+            this.account = options.account;
+            this.connection = this.account.connection;
+        },
+
+        request: function () {
+            this.connection.disco.info(this.domain, null, this.onInfo.bind(this));
+        },
+
+        onInfo: function (stanza) {
+            var $stanza = $(stanza),
+                from = $stanza.attr('from'),
+                self = this;
+            $stanza.find('feature').each(function () {
+                var namespace = $(this).attr('var');
+                self.create({
+                    'var': namespace,
+                    from: from
+                });
+            });
+        }
+    });
+
+      xabber.Server = Backbone.Model.extend({
+          idAttribute: 'domain',
+          initialize: function (models) {
+              this.account = models.account;
+              this.set('domain', models.domain || this.account.domain);
+              this.server_features = new xabber.ServerInfo({account: this.account, domain: this.get('domain')});
+              this.getServerInfo();
+          },
+
+          getServerInfo: function () {
+              this.server_features.request();
+          }
+      });
+
+      xabber.Servers = Backbone.Collection.extend({
+          model: xabber.Server
+      });
+
     xabber.Account.addInitPlugin(function () {
         this.client_features = new xabber.ClientFeatures(null, {account: this});
         this.server_features = new xabber.ServerFeatures(null, {account: this});
@@ -195,10 +217,16 @@ define("xabber-discovery", function () {
         }.bind(this));
 
         this.connection.deleteTimedHandler(this._ping_handler);
-        this._ping_handler = this.connection.addTimedHandler(10000, function () {
+        this._ping_handler = this.connection.addTimedHandler(30000, function () {
             var downtime = moment.now() - this.last_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.ping_interval || 180)) {
-                this.last_stanza_timestamp = moment.now();
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                if (this.connection.connected)
+                    this.connection.disconnect();
+                else
+                    this.connect();
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
                 this.connection.ping.ping(this.get('jid'));
             }
             return true;

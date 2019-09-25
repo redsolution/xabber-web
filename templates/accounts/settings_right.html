@@ -33,12 +33,18 @@
 
             <div class="settings-block-wrap tokens">
                 <div class="block-header">
-                    <span class="block-name">Tokens</span>
+                    <span class="block-name">Active sessions</span>
                 </div>
                 <div class="tokens-wrap">
-                </div>
-                <div class="buttons-wrap hidden">
-                    <button class="btn-revoke-all-tokens btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Revoke all</button>
+                    <div class="current-token-wrap">
+                        <div class="sessions-wrap current-session selectable-text"></div>
+                        <div class="buttons-wrap">
+                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">Terminate all others sessions</p>
+                        </div>
+                    </div>
+                    <div class="all-sessions-wrap">
+                        <div class="sessions-wrap all-sessions selectable-text"></div>
+                    </div>
                 </div>
             </div>
 
@@ -211,20 +217,6 @@
                     <div class="groups">
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="settings-block-wrap existing-group-chats-info hidden">
-        <div class="block-header">
-            <span class="block-name">Existing group chats</span>
-        </div>
-        <div class="find-existing-chats-by-domain search-form panel-head">
-            <i class="search-icon mdi mdi-20px mdi-magnify"></i>
-            <input type="text" name="search-chats-by-domain " class="search-input simple-input-field" tabindex="1" placeholder="Search existing chats by domain">
-            <span class="errors"></span>
-        </div>
-        <div class="groupchats-wrap">
-            <div class="groupchats">
             </div>
         </div>
     </div>

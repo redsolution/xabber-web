@@ -9,13 +9,44 @@ define("xabber-ui", function () {
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
+            let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
-                var attrs = xabber.body.screen.attributes;
-                if (attrs.name === 'chats' && attrs.right === 'contact_details') {
+                if (xabber.body.$el.siblings('#modals').children().length)
+                    return;
+                if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);
+            }
+            if (attrs.chat_item && (attrs.name === 'mentions' || attrs.name === 'contacts' || attrs.name === 'all-chats') && (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages')) {
+                if (!window.$('.message-actions-panel').hasClass('hidden')) {
+                    if (!ev.ctrlKey && !ev.metaKey) {
+                        switch (ev.keyCode) {
+                            case 67:
+                                attrs.chat_item.contact.trigger('copy_selected_messages');
+                                break;
+                            case 68:
+                                attrs.chat_item.contact.trigger('delete_selected_messages');
+                                break;
+                            case 69:
+                                attrs.chat_item.contact.trigger('edit_selected_message');
+                                break;
+                            case 70:
+                                attrs.chat_item.contact.trigger('forward_selected_messages');
+                                break;
+                            case 80:
+                                attrs.chat_item.contact.trigger('pin_selected_message');
+                                break;
+                            case 82:
+                                attrs.chat_item.contact.trigger('reply_selected_messages');
+                                break;
+                            case constants.KEY_ESCAPE:
+                                attrs.chat_item.contact.trigger('reset_selected_messages');
+                                break;
+                        }
+                        ev.preventDefault();
+                    }
                 }
             }
-        }.bind(this));
+            }.bind(this));
 
         this.updateLayout = function (options) {
             options || (options = {});
@@ -81,10 +112,9 @@ define("xabber-ui", function () {
                 'margin-left': panel_margin
             });
             this.roster_view.setCustomCss({width: roster_width});
-        }
+        };
 
         this.on("update_layout", this.updateLayout, this);
-
 
         this.body.addScreen('blank', {});
 
@@ -144,13 +174,33 @@ define("xabber-ui", function () {
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_contact_details = new this.ViewPath('contact.details_view'),
-            path_group_invitation = new this.ViewPath('contact.invitation');
+            path_group_invitation = new this.ViewPath('contact.invitation'),
+            path_private_invitation = new this.ViewPath('contact.private_invitation'),
+            path_participant_messages = new this.ViewPath('contact.messages_view'),
+            path_details_participants = new this.ViewPath('contact.details_view.participants');
 
         this.body.addScreen('contacts', {
             toolbar: null,
             main: {
                 left: { contacts: null },
                 right: { contact_placeholder: null }
+            },
+            roster: null
+        });
+
+        this.body.addScreen('search', {
+            toolbar: null,
+            main: {
+                wide: { discovering_main: null}
+            },
+            roster: null
+        });
+
+        this.body.addScreen('mentions', {
+            toolbar: null,
+            main: {
+                left: { mentions: null },
+                right: { mentions_placeholder: null }
             },
             roster: null
         });
@@ -164,41 +214,27 @@ define("xabber-ui", function () {
             roster: null
         });
 
-        this.body.addScreen('chats', {
-            toolbar: null,
-            main: {
-                left: { chats: null },
-                right: { chat_placeholder: null }
-            },
-            roster: null
-        });
-
-        this.body.addScreen('group-chats', {
-            toolbar: null,
-            main: {
-                left: { group_chats: null },
-                right: { group_chat_placeholder: null }
-            },
-            roster: null
-        });
-
-        this.body.addScreen('archive-chats', {
-            toolbar: null,
-            main: {
-                left: { archive_chats: null },
-                right: { archive_placeholder: null }
-            },
-            roster: null
-        });
 
         this.right_panel.patchTree = function (tree, options) {
+            if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
+                return {
+                    chat_head: path_chat_head,
+                    chat_body: path_participant_messages,
+                    chat_bottom: path_chat_bottom
+                };
+            }
+            if (options.right === 'private_invitation') {
+                return { details: path_private_invitation };
+            }
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };
             }
             if (options.right === 'contact_details') {
                 return { details: path_contact_details };
             }
-            if ((options.name === 'chats' || options.name === 'all-chats') && options.chat_item) {
+            if (options.details_content === 'participants')
+                return { details_content: path_details_participants };
+            if (options.chat_item) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,

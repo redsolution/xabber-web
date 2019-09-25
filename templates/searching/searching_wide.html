@@ -1,0 +1,70 @@
+<div class="searching-panel">
+    <div class="search-form">
+        <div class="account-indicator ground-color-500"></div>
+        <i class="search-icon mdi mdi-20px mdi-magnify"></i>
+        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search by domain">
+        <i class="close-search-icon mdi mdi-20px mdi-close"></i>
+    </div>
+    <div class="searching-properties-field">
+        <div class="dropdown-button" data-visible="false">
+            <i class="mdi mdi-24px mdi-chevron-down arrow"></i>
+        </div>
+    </div>
+    <ul id="select-searching-properties" class="selectable-text">
+        <div class="account-property">
+            <p class="property-name">Account</p>
+            <div class="account-field">
+                <div class="multiple-acc">
+                    <div class="account-dropdown-wrap">
+                        <div class="dropdown-button" data-activates="select-account-for-searching">
+                            <div class="account-item-wrap">
+                            </div>
+                            <div class="caret">
+                                <i class="mdi mdi-20px mdi-menu-down"></i>
+                            </div>
+                        </div>
+                        <div id="select-account-for-searching" class="dropdown-content">
+                        </div>
+                    </div>
+                </div>
+                <div class="single-acc">
+                    <div class="dropdown-button">
+                        <div class="account-item-wrap">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="title-property">
+            <p class="property-name">Title</p>
+            <div class="input-field">
+                <input id="searching_property_title" type="text" name="title">
+            </div>
+        </div>
+        <div class="sorting-property">
+            <p class="property-name">Sort by</p>
+            <div class="input-field">
+                <input id="searching_property_sort_by" type="text" name="title">
+            </div>
+        </div>
+        <button class="btn-search btn btn-main-filled ground-color-700">Search</button>
+    </ul>
+</div>
+<div class="searching-result-wrap">
+    <div class="chats-list-wrap">
+        <div class="result-string"></div>
+        <div class="preloader-wrapper preloader-17px active">
+            <div class="spinner-layer">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div></div>
+        <div class="chats-list"></div></div>
+    <div class="searching-more"></div>
+</div>

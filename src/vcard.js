@@ -196,6 +196,7 @@ define("xabber-vcard", function () {
         },
 
         render: function () {
+            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : 'Contact details');
             this.data.set('refresh', false);
             this.update();
         },
@@ -274,6 +275,18 @@ define("xabber-vcard", function () {
             this.parent.updateScrollBar();
         },
 
+        onClickIcon: function (ev) {
+            let $target_info = $(ev.target).closest('.info-wrap'),
+                $target_value = $target_info.find('.value'), copied_text = "";
+            $target_value.each(function (idx, item) {
+                let $item = $(item),
+                    value_text = $item.text();
+                value_text && (copied_text != "") && (copied_text += '\n');
+                value_text && (copied_text += value_text);
+                copied_text && utils.copyTextToClipboard(copied_text, 'Copied in clipboard', 'ERROR: Not copied in clipboard');
+            }.bind(this));
+        },
+
         updateRefreshButton: function () {
             this.$('.btn-vcard-refresh .button').hideIf(this.data.get('refresh'));
             this.$('.btn-vcard-refresh .preloader-wrapper').showIf(this.data.get('refresh'));
@@ -340,7 +353,6 @@ define("xabber-vcard", function () {
             this.$('.last-name input').val(vcard.last_name);
             this.$('.middle-name input').val(vcard.middle_name);
 
-            this.avatar = vcard.photo.image;
             this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
 
             this.$('.birthday input').val(vcard.birthday);
@@ -351,7 +363,7 @@ define("xabber-vcard", function () {
 
             this.$('.url input').val(vcard.url);
 
-            this.$('.description input').val(vcard.description);
+            this.$('.description textarea').val(vcard.description);
 
             this.$('.phone-work input').val(vcard.phone.work);
             this.$('.phone-home input').val(vcard.phone.home);
@@ -388,7 +400,7 @@ define("xabber-vcard", function () {
             vcard.last_name = this.$('.last-name input').val();
             vcard.middle_name = this.$('.middle-name input').val();
 
-            this.avatar && (vcard.photo.image = this.avatar);
+            // this.avatar && (vcard.photo.image = this.avatar);
 
             vcard.birthday = this.$('.birthday input').val();
 
@@ -398,7 +410,7 @@ define("xabber-vcard", function () {
 
             vcard.url = this.$('.url input').val();
 
-            vcard.description = this.$('.description input').val();
+            vcard.description = this.$('.description textarea').val();
 
             vcard.phone.work = this.$('.phone-work input').val();
             vcard.phone.home = this.$('.phone-home input').val();
@@ -443,9 +455,9 @@ define("xabber-vcard", function () {
                 utils.dialogs.error('Wrong image');
                 return;
             }
-            utils.images.getAvatarFromFile(file).done(function (image) {
+            utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                 if (image) {
-                    this.avatar = image;
+                    this.avatar = {base64: image, hash: hash, size: size};
                     this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                 } else {
                     utils.dialogs.error('Wrong image');
@@ -462,6 +474,7 @@ define("xabber-vcard", function () {
                 return;
             }
             this.data.set('saving', true);
+            this.avatar && this.model.pubAvatar(this.avatar);
             this.model.setVCard(this.getData(),
                 function () {
                     this.model.getVCard();

@@ -1,0 +1,88 @@
+<div class="panel-content-wrap noselect">
+    <div class="main-info">
+        <div class="avatar-wrap">
+            <div class="circle-avatar">
+                <input title="Change avatar" type="file"/>
+                <img>
+                <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                    <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                </svg>
+                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-info">
+            <div class="name-wrap"></div>
+            <div class="status-message one-line"></div>
+        </div>
+        <div class="btn-more  dropdown-button" data-activates="{{view.cid}}-buttons-wrap">
+            <i class="mdi mdi-24px mdi-dots-vertical"></i>
+        </div>
+        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">
+            <li class="btn-join"><span class="one-line">Join group chat</span></li>
+            <li class="btn-delete"><span class="one-line">Delete group chat</span></li>
+            <li class="btn-block"><span class="one-line">Block group chat</span></li>
+            <li class="btn-unblock"><span class="one-line">Unlock group chat</span></li>
+        </ul>
+        <div class="btn-escape">
+            <i class="mdi mdi-24px mdi-close"></i>
+            <span class="btn-text">Esc</span>
+        </div>
+        <div class="buttons-wrap">
+            <div class="button-wrap btn-invite-wrap">
+                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>
+                <div class="btn-name">Invite</div>
+            </div>
+            <div class="button-wrap btn-settings-wrap">
+                <i class="mdi mdi-24px mdi-settings btn-settings"></i>
+                <div class="btn-name">Settings</div>
+            </div>
+            <div class="button-wrap btn-default-restrictions-wrap">
+                <i class="mdi mdi-24px mdi-sign-caution btn-default-restrictions"></i>
+                <div class="btn-name">Default restrictions</div>
+            </div>
+            <div class="button-wrap btn-leave-wrap">
+                <div class="btn-leave"><svg viewBox="0 0 24 24">
+                    <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />
+                </svg>
+                </div>
+                <div class="btn-name">Leave</div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-content">
+        <div class="left-column">
+            <div class="select-users-list-wrap lists-dropdown-wrap">
+                <div class="dropdown-button" data-activates="select-users-list">
+                    <div class="list-item-wrap"><div data-value="participants" class="list-value">Participants</div></div>
+                    <div class="caret">
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-users-list" class="dropdown-content noselect">
+                    <div data-value="participants" class="list-variant">Participants</div>
+                    <div data-value="invitations" class="list-variant">Invitations</div>
+                    <div data-value="blocked" class="list-variant">Blocked</div>
+                </div>
+            </div>
+            <div class="block-wrap participants-wrap"></div>
+            <div class="block-wrap participant-wrap"></div>
+        </div>
+        <div class="right-column">
+            <div class="block-wrap group-chat-properties-wrap"></div>
+            <div class="block-wrap groups-block-wrap"></div>
+        </div>
+    </div>
+</div>

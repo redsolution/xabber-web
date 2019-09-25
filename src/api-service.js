@@ -980,8 +980,8 @@ define("xabber-api-service", function () {
             this.$el.appendTo(this.parent.$('.settings-block-wrap.xabber-account'));
             this.$tab = this.parent.$('.xabber-account-tab');
             this.updateForConnectedStatus();
-            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
-            this.model.on("change:name", this.updateName, this);
+            this.default_color = utils.images.getDefaultColor(this.model.get('username'));
+            this.model.on("change:username", this.updateName, this);
             this.model.on("change:name", this.updateAvatar, this);
             this.model.on("change:connected", this.updateForConnectedStatus, this);
             this.model.on("change:last_sync", this.updateLastSyncInfo, this);
@@ -1048,7 +1048,7 @@ define("xabber-api-service", function () {
                 var social_elem = $(ev.target).closest('.social-linked-item-wrap'),
                     provider = social_elem.attr('id');
                 if (provider === 'email') {
-                    utils.dialogs.ask_enter_value("Add email", null, {input_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
+                    utils.dialogs.ask_enter_value("Add email", null, {input_placeholder_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
                         if (mail) {
                             this.model._call_method('POST', '/accounts/current/email_list/', {email: mail},
                                 function (mail_data) {
@@ -1073,7 +1073,7 @@ define("xabber-api-service", function () {
             var $target = $(ev.target),
                 $email_html = $target.closest('.social-linked-item-wrap'),
                 email_address = $email_html.data('email');
-            utils.dialogs.ask_enter_value("Confirm email", null, {input_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
+            utils.dialogs.ask_enter_value("Confirm email", null, {input_placeholder_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
                 if (code) {
                     if (code === email_address) {
                         this.model._call_method('POST', '/accounts/current/email_list/', {email: code});
@@ -1139,8 +1139,8 @@ define("xabber-api-service", function () {
         },
 
         updateName: function () {
-            this.$('.account-info-wrap .name').text(this.model.get('name'));
-            this.default_color = utils.images.getDefaultColor(this.model.get('name'));
+            this.$('.account-info-wrap .name').text(this.model.get('username'));
+            this.default_color = utils.images.getDefaultColor(this.model.get('username'));
         },
 
         updateAvatar: function () {
@@ -1198,8 +1198,10 @@ define("xabber-api-service", function () {
                 xabber.add_api_account_view.show();
             else {
                 var account = xabber.accounts.connected[0];
-                account.set('auto_login_xa', true);
-                account.authXabberAccount();
+                if (account) {
+                    account.set('auto_login_xa', true);
+                    account.authXabberAccount();
+                }
             }
         },
 

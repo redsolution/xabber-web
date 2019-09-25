@@ -234,9 +234,31 @@ define(["jquery", "underscore"], function ($, _) {
         return this.replace(emoji_regexp, function (emoji) {
             var data = emoji_data[emoji];
             if (data) {
-                return '<'+tag_name+img_src+' class="emoji emoji-w'+emoji_size+' emoji-spritesheet-0" '+
+                return '<'+tag_name+img_src+' class="emoji emoji-w'+emoji_size+' emoji-spritesheet-0" '+ 'alt="' + emoji + '" ' +
                 'style="background-position: '+'-'+(emoji_size*data.x)+'px '+'-'+(emoji_size*data.y)+'px;" '+
                 'data-emoji="'+emoji+'"/>';
+            } else {
+                return emoji;
+            }
+        });
+    };
+
+    String.prototype.removeEmoji = function () {
+        return this.replace(emoji_regexp, function (emoji) {
+            var data = emoji_data[emoji];
+            if (data) {
+                return "";
+            } else {
+                return emoji;
+            }
+        });
+    };
+
+    String.prototype.replaceEmoji = function () {
+        return this.replace(emoji_regexp, function (emoji) {
+            var data = emoji_data[emoji];
+            if (data) {
+                return " ";
             } else {
                 return emoji;
             }

@@ -1,9 +1,9 @@
     <div class="left-column noselect">
         <div class="main-info-wrap xabber-info-wrap">
             <div class="picture-wrap">
-                <img class="logo" src="images/xabber-logo-76.png"/>
+                <img class="logo" src="images/xabber-logo-96.png"/>
             </div>
-            <div class="name">Xabber.Web</div>
+            <div class="name">Xabber for Web</div>
             <div class="version"></div>
         </div>
         <div class="settings-tabs-wrap">
@@ -32,6 +32,13 @@
                 <i class="mdi mdi-24px mdi-volume-high"></i>
                 <div class="settings-block-name one-line">Sounds</div>
             </div>
+            {[if (xabber.env.constants.PERSONAL_AREA_URL) {]}
+            <a href="{{xabber.env.constants.PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{xabber.env.constants.PERSONAL_AREA_URL.label}}">
+                <i class="mdi mdi-24px mdi-{{xabber.env.constants.PERSONAL_AREA_URL.icon_name}}"></i>
+                <div class="settings-block-name one-line">{{xabber.env.constants.PERSONAL_AREA_URL.label}}</div>
+            </div>
+            </a>
+            {[}]}
         </div>
         <div class="settings-tabs-bottom-wrap">
             <div class="settings-tab delete-all-accounts">
