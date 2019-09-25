@@ -1,6 +1,7 @@
 define("xabber-strophe", function () {
     return function (xabber) {
         var env = xabber.env,
+            uuid = env.uuid,
             $iq = env.$iq,
             Strophe = env.Strophe,
             constants = env.constants;
