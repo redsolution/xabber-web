@@ -2865,7 +2865,7 @@ body {
 .jingle-message-view .buttons-wrap svg,
 .jingle-message-view .buttons-wrap i {
     cursor: pointer;
-    background-color: rgba(189, 189, 189, .6);
+    background-color: rgba(189, 189, 189, .2);
     border-radius: 50%;
     color: #FFF;
     fill: #FFF;
@@ -2968,9 +2968,6 @@ body {
     z-index: -100;
 }
 
-
-
-
 .jingle-message-view .buttons-panel:fullscreen .btn-full-screen {
     display: none;
 }
@@ -2982,8 +2979,14 @@ body {
     display: none;
 }
 
+.jingle-message-view .btn-share-screen {
+    position: absolute;
+    right: 16px;
+}
 
-
+.jingle-message-view .btn-share-screen.active {
+    background-color: rgba(3, 169, 244, .6);
+}
 
 .jingle-message-view .webrtc-local-video::backdrop,
 .jingle-message-view .buttons-panel::backdrop {

@@ -1084,6 +1084,7 @@ define("xabber-views", function () {
 
         updateButtons: function () {
             this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
+            this.$('.btn-share-screen').switchClass('active', this.model.get('video_screen'));
             this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
             this.$('.btn-video').switchClass('mdi-video', this.model.get('video_live'))
                 .switchClass('mdi-video-off', !this.model.get('video_live'));
