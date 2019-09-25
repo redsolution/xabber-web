@@ -1,6 +1,6 @@
 {
   "name": "xabber.web",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Open-source XMPP messenger for web browsers",
   "keywords": ["xmpp", "jabber", "messenger", "chat", "web", "javascript"],
   "bugs": {
