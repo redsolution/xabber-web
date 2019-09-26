@@ -1002,6 +1002,8 @@ define("xabber-views", function () {
             this.model.on('destroy', this.onDestroy, this);
             this.contact = this.model.contact;
             this.account = this.contact.account;
+            this.model.on('change:state', this.updateCallingStatus, this);
+            this.model.on('change:status', this.updateBackground, this);
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
             this.model.on('change:video_live', this.updateButtons, this);
@@ -1013,7 +1015,12 @@ define("xabber-views", function () {
             options = options || {};
             this.updateName();
             this.updateCallingStatus(options.status);
-            (options.status === 'in') && this.updateStatusText('Calling...');
+            if (options.status === 'in') {
+                this.updateStatusText('Calling...');
+            }
+            else {
+                this.set('status', 'calling');
+            }
             this.updateAccountJid();
             this.updateButtons();
             this.$el.openModal({
@@ -1099,6 +1106,11 @@ define("xabber-views", function () {
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
+        updateBackground: function () {
+            let status = this.model.get('status');
+            this.$el.attr('data-state', status);
+        },
+
         updateCallingStatus: function (status) {
             this.$('.buttons-wrap').switchClass('incoming', (status === 'in'));
             this.$('.contact-info').switchClass('hidden', (status === 'in' || status === constants.JINGLE_MSG_PROPOSE));
@@ -1175,8 +1187,11 @@ define("xabber-views", function () {
         },
 
         onDestroy: function () {
-            this.close();
-            this.$el.detach();
+            this.updateStatusText("Disconnected");
+            setTimeout(function () {
+                this.close();
+                this.$el.detach();
+            }.bind(this), 3000);
         },
 
         videoCall: function () {

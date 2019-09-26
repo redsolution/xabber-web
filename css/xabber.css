@@ -2770,6 +2770,26 @@ body {
 .jingle-message-view {
     width: 80vh;
     height: 60vh;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background-color: rgba(255, 255, 255, .8);
+}
+
+.jingle-message-view[data-state=search],
+.jingle-message-view[data-state=calling] {
+    background-color: rgba(2, 119, 189, .6);
+}
+
+.jingle-message-view[data-state=connecting] {
+    background-color: rgba(0, 131, 143, .6);
+}
+
+.jingle-message-view[data-state=connected] {
+    background-color: rgba(46, 125, 50, .6);
+}
+
+.jingle-message-view[data-state=disconnected] {
+    background-color: rgba(198, 40, 40, .6);
 }
 
 .jingle-message-view .call-header {
@@ -2907,7 +2927,7 @@ body {
 
 .jingle-message-view>i.btn-collapse {
     position: absolute;
-    background-color: inherit;
+    background-color: initial;
     color: #424242;
 }
 
@@ -2936,6 +2956,7 @@ body {
     position: relative;
     top: 0;
     left: 0;
+    background: #424242;
 }
 
 .jingle-message-view svg.btn-full-screen {
