@@ -180,6 +180,9 @@ define("xabber-chats", function () {
             }
             else
                 contact.invitation.message = invite_msg;
+            contact.invitation.invite_msgs.push({
+                stanza_id: $message.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id')
+            });
             return;
         },
 
@@ -5258,6 +5261,7 @@ define("xabber-chats", function () {
                     view.content.removeMessage($(item));
                 }.bind(this));
             }
+            view.contact.invitation.retractInvitation();
         },
 
         showGroupChats: function () {

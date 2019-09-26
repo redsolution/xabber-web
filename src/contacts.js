@@ -2736,6 +2736,7 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.name_field = this.model.get('name');
+                this.invite_msgs = [];
                 this.updateName();
                 this.updateStatus();
                 this.updateAvatar();
@@ -2859,6 +2860,16 @@ define("xabber-contacts", function () {
                         msg.set('is_accepted', true);
                     }.bind(this));
                 }
+            },
+
+            retractInvitation: function () {
+                let invite_msgs = _.clone(this.invite_msgs);
+                invite_msgs.forEach(function (msg) {
+                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: this.account.get('jid')})
+                        .c('retract-message', {id: msg.stanza_id, xmlns: Strophe.NS.REWRITE, symmetric: false, by: this.account.get('jid')});
+                    this.account.sendIQ(iq_retraction);
+                    this.invite_msgs.splice(this.invite_msgs.indexOf(msg), 1);
+                }.bind(this));
             },
 
             joinGroupChat: function () {
