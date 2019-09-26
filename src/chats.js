@@ -114,7 +114,7 @@ define("xabber-chats", function () {
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid),
                 $group_info = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]'),
-                is_private_invitation = $group_info.children('privacy').length,
+                is_private_invitation,
                 group_info_attributes = {};
 
             if (message)
@@ -141,8 +141,6 @@ define("xabber-chats", function () {
 
             let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
                 chat = this.account.chats.getChat(contact);
-            is_private_invitation && (contact.invitation.private_invite = true);
-            is_private_invitation && contact.set('private_chat', true);
             contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
@@ -158,7 +156,10 @@ define("xabber-chats", function () {
                 anonymous && (group_info_attributes.anonymous = anonymous);
                 searchable && (group_info_attributes.searchable = searchable);
                 description && (group_info_attributes.description = description);
-                parent_chat && contact.set('private_chat', parent_chat);
+                parent_chat.length && (is_private_invitation = true);
+                is_private_invitation && (contact.invitation.private_invite = true);
+                is_private_invitation && contact.set('private_chat', true);
+                anonymous === 'incognito' && contact.set('incognito_chat', true);
                 contact.set('group_info', group_info_attributes);
             }
 
@@ -167,7 +168,7 @@ define("xabber-chats", function () {
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
                 from_jid: from_jid,
                 auth_request: true,
-                invite: is_private_invitation ? false : true,
+                invite: true,
                 private_invite: is_private_invitation || false,
                 is_accepted: false,
                 silent: false,
@@ -5680,8 +5681,9 @@ define("xabber-chats", function () {
                     id: uuid()
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
                     .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
+                    .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
+                    .c('privacy').t(this.contact.get('group_info').anonymous).up().up()
                     .c('body').t(body).up();
-
             this.account.sendMsg(stanza);
         },
 
