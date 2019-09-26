@@ -520,7 +520,7 @@ define("xabber-chats", function () {
 
           startTimer: function () {
               this.updateTimer();
-              setInterval(function () {
+              this.call_timer = setInterval(function () {
                   this.updateTimer();
               }.bind(this), 1000);
           },
@@ -592,6 +592,7 @@ define("xabber-chats", function () {
           },
 
           onDestroy: function () {
+              clearInterval(this.call_timer);
               xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
               this.stopTracks();
