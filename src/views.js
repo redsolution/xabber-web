@@ -1019,7 +1019,7 @@ define("xabber-views", function () {
                 this.updateStatusText('Calling...');
             }
             else {
-                this.set('status', 'calling');
+                this.model.set('status', 'calling');
             }
             this.updateAccountJid();
             this.updateButtons();
