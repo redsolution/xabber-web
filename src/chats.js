@@ -493,7 +493,6 @@ define("xabber-chats", function () {
               }.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
               this.on('change:video', this.onChangedVideoValue, this);
-              this.on('change:state', this.modal_view.updateCallingStatus, this.modal_view);
               this.on('change:video_live', this.setEnabledVideoTrack, this);
               this.on('change:video_screen', this.setEnabledScreenShareVideoTrack, this);
               this.on('change:video_in', this.onChangedRemoteVideo, this);
@@ -521,7 +520,7 @@ define("xabber-chats", function () {
 
           startTimer: function () {
               this.updateTimer();
-              setInterval(function () {
+              this.call_timer = setInterval(function () {
                   this.updateTimer();
               }.bind(this), 1000);
           },
@@ -530,6 +529,7 @@ define("xabber-chats", function () {
               this.get('video_live') && this.onChangedVideoValue();
               xabber.stopAudio(this.audio_notifiation);
               setTimeout(function () {
+                  this.set('status', 'connected');
                   this.updateStatus();
                   this.startTimer();
               }.bind(this), 1000);
@@ -542,6 +542,7 @@ define("xabber-chats", function () {
               } else {
                   this.updateStatus(utils.pretty_name(conn_state) + '...');
                   if (conn_state === 'disconnected') {
+                      this.set('status', conn_state);
                       this.destroy();
                       xabber.current_voip_call = null;
                   }
@@ -591,6 +592,7 @@ define("xabber-chats", function () {
           },
 
           onDestroy: function () {
+              clearInterval(this.call_timer);
               xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
               this.stopTracks();
@@ -731,6 +733,7 @@ define("xabber-chats", function () {
               this.set('jingle_start', moment.now());
               this.account.sendMsg($accept_msg);
               xabber.stopAudio(this.audio_notifiation);
+              this.set('status', 'connecting');
               this.updateStatus('Connecting...');
               this.audio_notifiation = xabber.playAudio('connecting', true);
           },
@@ -748,6 +751,7 @@ define("xabber-chats", function () {
                   .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
               this.account.sendMsg($reject_msg);
               this.createSystemMessage($reject_msg);
+              this.set('status', 'disconnected');
               this.destroy();
               xabber.current_voip_call = null;
           },
@@ -959,6 +963,7 @@ define("xabber-chats", function () {
                     xabber.current_voip_call.set('jingle_start', jingle_start);
                     !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
                     xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
+                    xabber.current_voip_call.set('status', 'connecting');
                     xabber.current_voip_call.updateStatus('Connecting...');
                     xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
                 }
@@ -990,6 +995,7 @@ define("xabber-chats", function () {
                     setTimeout(function () {
                         xabber.stopAudio(busy_audio);
                     }.bind(this), 1500);
+                    xabber.current_voip_call.set('status', 'disconnected');
                     xabber.current_voip_call.destroy();
                     xabber.current_voip_call = null;
                 }
@@ -4758,10 +4764,45 @@ define("xabber-chats", function () {
                         return;
                     }
                     let $jingle_msg_accept = $carbons.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                        $jingle_msg_propose = $carbons.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                         $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
-                    if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call) {
+                    if ($jingle_msg_propose.length) {
+                        if (xabber.current_voip_call) {
+                            let msg_to = $jingle_msg_propose.parent('message').attr('to'),
+                                session_id = $jingle_msg_propose.attr('id'),
+                                $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: msg_to})
+                                    .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
+                                    .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                                    .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                                    .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+                            this.account.sendMsg($reject_msg);
+                        }
+                        return;
+                    }
+                    if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call && xabber.current_voip_call.get('session_id')) {
+                        xabber.current_voip_call.set('status', 'disconnected');
                         xabber.current_voip_call.destroy();
                         xabber.current_voip_call = null;
+                    }
+                    if ($jingle_msg_reject.length) {
+                        let msg_to = $jingle_msg_reject.parent('message').attr('to'),
+                            time = $message.find('call').attr('end'),
+                            contact = this.account.contacts.mergeContact(msg_to),
+                            chat = this.account.chats.getChat(contact);
+                        if (time) {
+                            let duration = $message.find('call').attr('duration'),
+                                initiator = $message.find('call').attr('initiator');
+                            return chat.messages.createSystemMessage({
+                                from_jid: this.account.get('jid'),
+                                message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
+                            });
+                        }
+                        else {
+                            return chat.messages.createSystemMessage({
+                                from_jid: this.account.get('jid'),
+                                message: 'Cancelled call'
+                            });
+                        }
                     }
                     $forwarded = $carbons.children('forwarded');
                     if ($forwarded.length) {
