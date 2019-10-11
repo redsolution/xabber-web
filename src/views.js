@@ -4,6 +4,7 @@ define("xabber-views", function () {
         constants = env.constants,
         templates = env.templates.base,
         utils = env.utils,
+        uuid = env.uuid,
         $ = env.$,
         _ = env._;
 
