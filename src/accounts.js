@@ -718,6 +718,9 @@ define("xabber-accounts", function () {
                         this.revokeXToken([this.get('x_token').token_uid]);
                     this.session.set('delete', true);
                     this.deactivate();
+                    if (xabber.api_account.get('xmpp_binding') === this.get('jid')) {
+                        xabber.api_account.logoutXabberAccount(true);
+                    }
                 },
 
                 activate: function () {
