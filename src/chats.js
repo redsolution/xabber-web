@@ -4764,11 +4764,15 @@ define("xabber-chats", function () {
                         return;
                     }
                     let $jingle_msg_accept = $carbons.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                        $jingle_msg_propose = $carbons.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                         $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
+                    if ($jingle_msg_propose.length)
+                        return;
                     if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call) {
                         xabber.current_voip_call.set('status', 'disconnected');
-                        xabber.current_voip_call = null;
                         xabber.current_voip_call.destroy();
+                        xabber.current_voip_call = null;
+                        return;
                     }
                     $forwarded = $carbons.children('forwarded');
                     if ($forwarded.length) {
