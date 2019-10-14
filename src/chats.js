@@ -486,11 +486,8 @@ define("xabber-chats", function () {
                   this.remote_stream = ev.streams[0];
                   this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
               }.bind(this);
-              this.conn.onicecandidate = function(ice) {
-                  if (!ice || !ice.candidate || !ice.candidate.candidate)
-                      return;
-                  this.sendCandidate(ice.candidate);
-              }.bind(this);
+              this.conn.onicecandidate = this.onIceCandidate.bind(this);
+              this.conn.oniceconnectionstatechange = this.onChangeIceConnectionState.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
               this.on('change:video', this.onChangedVideoValue, this);
               this.on('change:video_live', this.setEnabledVideoTrack, this);
@@ -546,6 +543,26 @@ define("xabber-chats", function () {
                       this.destroy();
                       xabber.current_voip_call = null;
                   }
+              }
+          },
+
+          onIceCandidate: function (ice) {
+              if (!ice || !ice.candidate || !ice.candidate.candidate)
+                  return;
+              this.sendCandidate(ice.candidate);
+          },
+
+          onChangeIceConnectionState: function (ev) {
+              let conn_state = ev.target.iceConnectionState;
+              if (conn_state === "failed" || conn_state === "disconnected") {
+                  this.set('status', conn_state);
+                  this.reject();
+                  this.destroy();
+                  this.updateStatus('Network error...');
+                  xabber.current_voip_call = null;
+              }
+              if (conn_state === "connected") {
+                  !this.conn.connectionState && this.onConnected();
               }
           },
 
@@ -655,7 +672,6 @@ define("xabber-chats", function () {
                   let answer_sdp = $jingle_accept.find('description[xmlns="' + Strophe.NS.JINGLE_RTP + '"]').text();
                   answer_sdp && this.conn.setRemoteDescription(new RTCSessionDescription({type: 'answer', sdp: answer_sdp}));
                   this.account.sendIQ($result_iq);
-                  !this.conn.connectionState && this.onConnected();
               }
               if ($jingle_info.length) {
                   if ($jingle_info.attr('sid') !== this.get('session_id'))
@@ -837,7 +853,6 @@ define("xabber-chats", function () {
                               .c('sdp').t(answer_sdp).up().up()
                               .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
                       this.account.sendIQ($iq_answer_sdp);
-                      !this.conn.connectionState && this.onConnected();
                   }.bind(this));
               }.bind(this));
           }
@@ -4768,8 +4783,9 @@ define("xabber-chats", function () {
                         $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
                     if ($jingle_msg_propose.length) {
                         if (xabber.current_voip_call) {
-                            let msg_to = $jingle_msg_propose.parent('message').attr('to'),
-                                session_id = $jingle_msg_propose.attr('id'),
+                            let msg_to = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('to'));
+                            (msg_to === this.account.get('jid')) && (msg_to = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('from')));
+                            let session_id = $jingle_msg_propose.attr('id'),
                                 $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: msg_to})
                                     .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
                                     .c('store', {xmlns: Strophe.NS.HINTS}).up()
@@ -4780,13 +4796,17 @@ define("xabber-chats", function () {
                         return;
                     }
                     if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call && xabber.current_voip_call.get('session_id')) {
-                        xabber.current_voip_call.set('status', 'disconnected');
-                        xabber.current_voip_call.destroy();
-                        xabber.current_voip_call = null;
+                        let msg_from = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('from'));
+                        if (xabber.current_voip_call.account.get('jid') === msg_from) {
+                            xabber.current_voip_call.set('status', 'disconnected');
+                            xabber.current_voip_call.destroy();
+                            xabber.current_voip_call = null;
+                        }
                     }
                     if ($jingle_msg_reject.length) {
-                        let msg_to = $jingle_msg_reject.parent('message').attr('to'),
-                            time = $message.find('call').attr('end'),
+                        let msg_to = Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('to'));
+                        (msg_to === this.account.get('jid')) && (msg_to = Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('from')));
+                        let time = $message.find('call').attr('end'),
                             contact = this.account.contacts.mergeContact(msg_to),
                             chat = this.account.chats.getChat(contact);
                         if (time) {
