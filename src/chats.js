@@ -4776,7 +4776,8 @@ define("xabber-chats", function () {
                 let $carbons = $message.find('[xmlns="'+Strophe.NS.CARBONS+'"]');
                 if ($carbons.length) {
                     if ($message.find('invite').length) {
-                        return;
+                        if ($carbons.tagName === 'sent')
+                            return;
                     }
                     let $jingle_msg_accept = $carbons.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                         $jingle_msg_propose = $carbons.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
