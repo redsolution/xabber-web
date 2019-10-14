@@ -4784,17 +4784,20 @@ define("xabber-chats", function () {
                         $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
                     if ($jingle_msg_propose.length) {
                         if (xabber.current_voip_call) {
-                            let msg_to = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('to'));
-                            (msg_to === this.account.get('jid')) && (msg_to = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('from')));
-                            let session_id = $jingle_msg_propose.attr('id'),
-                                $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: msg_to})
-                                    .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
-                                    .c('store', {xmlns: Strophe.NS.HINTS}).up()
-                                    .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
-                                    .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
-                            this.account.sendMsg($reject_msg);
+                            let msg_to = ($carbons.tagName === 'sent') ? Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('to')) : this.account.get('jid');
+                            if ($carbons.tagName === 'sent') {
+                                let session_id = $jingle_msg_propose.attr('id'),
+                                    $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: msg_to})
+                                        .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
+                                        .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                                        .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                                        .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+                                this.account.sendMsg($reject_msg);
+                            }
+                            return;
                         }
-                        return;
+                        else if ($carbons.tagName === 'sent')
+                            return;
                     }
                     if (($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call && xabber.current_voip_call.get('session_id')) {
                         let msg_from = Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('from'));
@@ -4805,8 +4808,7 @@ define("xabber-chats", function () {
                         }
                     }
                     if ($jingle_msg_reject.length) {
-                        let msg_to = Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('to'));
-                        (msg_to === this.account.get('jid')) && (msg_to = Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('from')));
+                        let msg_to = ($carbons.tagName === 'sent') ? Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('to')) : this.account.get('jid');
                         let time = $message.find('call').attr('end'),
                             contact = this.account.contacts.mergeContact(msg_to),
                             chat = this.account.chats.getChat(contact);
