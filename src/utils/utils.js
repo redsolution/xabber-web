@@ -110,6 +110,22 @@ define([
             return datetime.format('MMMM D, YYYY HH:mm:ss');
         },
 
+        pretty_short_datetime_recent_chat: function (timestamp) {
+            timestamp = Number(timestamp ? moment(timestamp) : moment());
+            if (moment(timestamp).startOf('day').isSame(moment().startOf('day')) || Number(moment().subtract(12, 'hours') < timestamp)) {
+                return moment(timestamp).format("HH:mm:ss");
+            }
+            if (Number(moment().subtract(12, 'hours')) > timestamp && Number(moment().subtract(7, 'days')) <= timestamp) {
+                return moment(timestamp).format("ddd");
+            }
+            if (Number(moment().subtract(7, 'days')) > timestamp && Number(moment().subtract(1, 'year')) <= timestamp) {
+                return moment(timestamp).format("MMM D");
+            }
+            if (timestamp && Number(moment().subtract(1, 'year')) > timestamp) {
+                return moment(timestamp).format("D MMM YYYY");
+            }
+        },
+
         pretty_short_datetime: function (timestamp) {
             var datetime = timestamp ? moment(timestamp) : moment(),
                 day = moment(datetime).startOf('day'),
