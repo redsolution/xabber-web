@@ -6896,6 +6896,8 @@ input[type='range'].voice-message-volume:focus {
 .dialog-modal .dialog-text {
     font-size: 16px;
     white-space: pre-wrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .dialog-modal .dialog-options-wrap {
