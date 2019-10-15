@@ -1593,29 +1593,39 @@ define("xabber-chats", function () {
                     this.$('.last-msg').html(msg_text);
                 }
                 else {
+                    if (this.contact.get('group_chat'))
+                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
                     if (forwarded_message) {
                         if (msg.get('message')) {
                             msg_text = msg.get('message');
                             this.$('.last-msg').text(msg_text);
                         }
                         else {
-                            msg_text = $('<i/>').text((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message');
-                            this.$('.last-msg').html(msg_text);
+                            let first_forwarded_msg = forwarded_message[0];
+                            if (first_forwarded_msg.get('message')) {
+                                let fist_msg_user_info = first_forwarded_msg.get('user_info') || {};
+                                msg_from = fist_msg_user_info.nickname
+                                    || (first_forwarded_msg.isSenderMe() ? this.account.get('name') : this.account.contacts.get(first_forwarded_msg.get('from_jid')) && this.account.contacts.get(first_forwarded_msg.get('from_jid')).get('name'))
+                                    || first_forwarded_msg.get('from_jid');
+                                msg_text = first_forwarded_msg.get('message');
+                                this.$('.last-msg').text(msg_text);
+                            }
+                            else {
+                                msg_text = $('<i/>').text((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message');
+                                this.$('.last-msg').html(msg_text);
+                            }
                         }
                     }
                     else {
                         msg_text = msg.getText();
                         this.$('.last-msg').text(msg_text);
                     }
-                    if (this.contact.get('group_chat'))
-                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
-                    // this.$('.last-msg').text(msg_text);
                 }
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
             this.$el.emojify('.last-msg', {emoji_size: 14});
-            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+            this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                 .attr('data-state', msg.getState());
@@ -5500,7 +5510,7 @@ define("xabber-chats", function () {
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
               }
               this.$el.emojify('.last-msg', {emoji_size: 14});
-              this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+              this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                   .attr('title', utils.pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                   .attr('data-state', msg.getState());
