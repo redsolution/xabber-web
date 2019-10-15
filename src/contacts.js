@@ -4527,7 +4527,7 @@ define("xabber-contacts", function () {
                 });
                 if (this.connection && this.connection.do_synchronization) {
                     let options = {};
-                    !this.roster.last_chat_msg_id && (options.max = 20);
+                    !this.roster.last_chat_msg_id && (options.max = Math.ceil(xabber.chats_view.$el[0].clientHeight/56));
                     this.roster.syncFromServer(options);
                 }
                 this.roster.getFromServer();
