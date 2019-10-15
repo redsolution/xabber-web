@@ -3068,9 +3068,9 @@ define("xabber-chats", function () {
                         from_id = user_info.id,
                         from_jid = attrs.from_jid;
                     if (is_sender) {
-                        username = user_info.nickname || this.account.get('name');
+                        username = Strophe.xmlescape(user_info.nickname || this.account.get('name'));
                     } else {
-                        username = user_info.nickname || user_info.id || this.account.contacts.mergeContact({jid: from_jid}).get('name');
+                        username = Strophe.xmlescape(user_info.nickname || user_info.id || this.account.contacts.mergeContact({jid: from_jid}).get('name'));
                     }
 
                     let fwd_markup_body = utils.markupBodyMessage(fwd_msg);
