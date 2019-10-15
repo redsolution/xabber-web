@@ -4106,6 +4106,13 @@ define("xabber-chats", function () {
             }
 
             if ($elem.hasClass('msg-hyperlink')) {
+                ev && ev.preventDefault();
+                let link = $elem.attr('href');
+                utils.dialogs.ask("", ("Open this link?\n\n<b>" + link + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
+                    if (result) {
+                        utils.openWindow(link);
+                    }
+                });
                 return;
             }
 
@@ -4224,7 +4231,8 @@ define("xabber-chats", function () {
         ps_settings: {theme: 'item-list'},
 
         events: {
-            "click .collapsed-forwarded-message": "expandFwdMessage"
+            "click .collapsed-forwarded-message": "expandFwdMessage",
+            "click .chat-message": "onClickPinnedMessage"
         },
 
         _initialize: function (options) {
@@ -4250,6 +4258,20 @@ define("xabber-chats", function () {
 
         close: function () {
             this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        onClickPinnedMessage: function (ev) {
+            let $elem = $(ev.target);
+            if ($elem.hasClass('msg-hyperlink')) {
+                ev && ev.preventDefault();
+                let link = $elem.attr('href');
+                utils.dialogs.ask("", ("Open this link?\n\n<b>" + link + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
+                    if (result) {
+                        utils.openWindow(link);
+                    }
+                });
+                return;
+            }
         },
 
         expandFwdMessage: function (ev) {
