@@ -273,7 +273,7 @@ define([
                 for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
                     pretty_body[idx] = "";
             }.bind(this));
-            return deps.Strophe.xmlunescape(pretty_body.join(""));
+            return deps.Strophe.xmlunescape(pretty_body.join("").trim());
         },
 
         markupBodyMessage: function (message, mention_elem) {
@@ -288,9 +288,11 @@ define([
 
             mentions.concat(markups).forEach(function (markup) {
                 let start_idx = markup.start,
-                    end_idx = markup.end,
+                    end_idx = markup.end > (markup_body.length - 1) ? (markup_body.length - 1) : markup.end,
                     mark_up = markup.markups || [],
                     mention = (markup.type !== 'uri') && markup.uri || "";
+                if (start_idx > markup_body.length - 1)
+                    return;
                 if (mark_up.length) {
                     let start_tags = "",
                         end_tags = "";
@@ -332,7 +334,7 @@ define([
                 markup_body[quote.end] += '</div>';
             }.bind(this));
 
-            return markup_body.join("");
+            return markup_body.join("").trim();
         },
 
         copyTextToClipboard: function(text, callback_msg, errback_msg) {
