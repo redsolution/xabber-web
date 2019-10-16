@@ -4118,7 +4118,7 @@ define("xabber-chats", function () {
             if ($elem.hasClass('msg-hyperlink')) {
                 ev && ev.preventDefault();
                 let link = $elem.attr('href');
-                utils.dialogs.ask("", ("Open this link?\n\n<b>" + link + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
+                utils.dialogs.ask("", ("Open this link?\n\n<b>" + decodeURI(link) + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
                     if (result) {
                         utils.openWindow(link);
                     }
