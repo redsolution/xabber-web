@@ -1715,6 +1715,8 @@ define("xabber-accounts", function () {
             },
 
             updateSyncState: function () {
+                var connected = xabber.api_account.get('connected');
+                this.$('.sync-marker-wrap').showIf(connected);
                 this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
             },
 
@@ -2028,7 +2030,7 @@ define("xabber-accounts", function () {
                     this.model.save('enabled', false);
                 }
                 if (this.token_invalidated) {
-                    this.model.destroy();
+                    this.model.deleteAccount();
                 }
                 this.cancel();
                 this.closeModal();
