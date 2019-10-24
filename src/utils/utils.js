@@ -33,8 +33,8 @@ define([
 
     var getHyperLink = function (url) {
         var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
-            escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
-        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
+                escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+decodeURI(url)+"</a>";
     };
 
     $.fn.hyperlinkify = function (options) {

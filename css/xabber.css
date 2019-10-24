@@ -6900,6 +6900,10 @@ input[type='range'].voice-message-volume:focus {
     overflow: hidden;
 }
 
+.dialog-modal .dialog-text .link {
+    word-break: break-all;
+}
+
 .dialog-modal .dialog-options-wrap {
     margin-top: 8px;
 }
