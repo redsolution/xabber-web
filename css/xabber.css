@@ -3819,6 +3819,11 @@ body {
     color: #212121;
     white-space: pre-wrap;
 }
+
+.chat-message .chat-msg-content .data-form {
+    padding: 4px 0;
+}
+
 .chat-message .chat-msg-content .quote {
     border-left: 2px solid #E0E0E0;
     padding: 0 0 0 8px;

@@ -255,6 +255,31 @@ define("xabber-chats", function () {
             return markups;
         },
 
+          parseDataForm: function ($dataform) {
+            let type = $dataform.attr('type'),
+                fields = [];
+              $dataform.children('field').each(function (idx, field) {
+                  let $field = $(field),
+                      field_var = $field.attr('var'),
+                      field_type = $field.attr('type'),
+                      field_label = $field.attr('label'),
+                      field_value = [];
+                  $field.find('value').each(function (i, value){
+                      field_value.push($(value).text());
+                  }.bind(this));
+                  fields.push({
+                      var: field_var,
+                      type: field_type,
+                      label: field_label,
+                      values: field_value
+                  });
+              }.bind(this));
+              return {
+                  type: type,
+                  fields: fields
+              };
+          },
+
         createFromStanza: function ($message, options) {
             options || (options = {});
             let $delay = options.delay || $message.children('delay'),
@@ -299,6 +324,9 @@ define("xabber-chats", function () {
                 legacy_content.push({start: parseInt($groupchat_reference.attr('begin')), end: parseInt($groupchat_reference.attr('end')), type: 'groupchat'});
                 body = "";
             }
+
+            if ($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]').length)
+                attrs.data_form = this.parseDataForm($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]'));
 
             if ($forward_references.length) {
                 $forward_references.each(function (idx, fwd_ref) {
@@ -3050,6 +3078,27 @@ define("xabber-chats", function () {
                         $message.find('.chat-msg-media-content').append(template_for_file_content);
                     }.bind(this));
                 }
+            }
+
+            if (message.get('data_form')) {
+                let $data_form = $('<div class="data-form"/>');
+                message.get('data_form').fields.forEach(function (field) {
+                    if (field.type === 'hidden')
+                        return;
+                    if (field.type === 'fixed') {
+                        return;
+                        /*field.label && $data_form.append($('<div class="data-form-field-label"/>').text(field.label));
+                        field.values.forEach(function (value) {
+                            let $input = $('<div class="data-form-field fixed-field"/>').text(value);
+                            $data_form.append($input);
+                        }.bind(this));*/
+                    }
+                    if (field.type === 'boolean') {
+                        let $input = $(`<button id=${field.var} class="data-form-field ground-color-100 btn-dark btn-flat btn-main boolean-field"/>`).text(field.label);
+                        $data_form.append($input);
+                    }
+                }.bind(this));
+                $message.find('.chat-msg-content').append($data_form);
             }
 
             if (attrs.forwarded_message) {
