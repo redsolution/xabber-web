@@ -4524,6 +4524,7 @@ define("xabber-chats", function () {
                             xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: photo_id, avatar: data_avatar, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                             contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
                             contact.set('photo_hash', photo_id);
+                            contact.set('image', data_avatar);
                         }.bind(this));
                     }
                 }
