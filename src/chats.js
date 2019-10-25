@@ -255,6 +255,33 @@ define("xabber-chats", function () {
             return markups;
         },
 
+          parseDataForm: function ($dataform, options) {
+              options = options || {};
+              let type = $dataform.attr('type'),
+                  fields = [];
+              $dataform.children('field').each(function (idx, field) {
+                  let $field = $(field),
+                      attrs = {},
+                      field_var = $field.attr('var'),
+                      field_type = $field.attr('type'),
+                      field_label = $field.attr('label'),
+                      field_value = [];
+                  $field.find('value').each(function (i, value) {
+                      field_value.push($(value).text());
+                  }.bind(this));
+                  field_var && (attrs.var = field_var);
+                  field_type && (attrs.type = field_type);
+                  field_label && (attrs.label = field_label);
+                  field_value && (attrs.values = field_value);
+                  fields.push(attrs);
+              }.bind(this));
+              return {
+                  type: type,
+                  addresses: options.addresses,
+                  fields: fields
+              };
+          },
+
         createFromStanza: function ($message, options) {
             options || (options = {});
             let $delay = options.delay || $message.children('delay'),
@@ -298,6 +325,15 @@ define("xabber-chats", function () {
                 _.extend(attrs, groupchat_attrs);
                 legacy_content.push({start: parseInt($groupchat_reference.attr('begin')), end: parseInt($groupchat_reference.attr('end')), type: 'groupchat'});
                 body = "";
+            }
+
+            if ($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]').length) {
+                let addresses = [];
+                $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address').each(function (idx, address) {
+                    let $address = $(address);
+                    addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
+                }.bind(this));
+                attrs.data_form = this.parseDataForm($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]'), {addresses: addresses});
             }
 
             if ($forward_references.length) {
@@ -918,6 +954,32 @@ define("xabber-chats", function () {
                     right: 'searched_messages',
                     contact: this.contact
                 });
+            }.bind(this));
+        },
+
+        sendDataForm: function (message) {
+            let data_form = message.get('data_form');
+            if (!data_form)
+                return;
+            let msg = $msg({type: 'chat'})
+                .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'});
+            data_form.fields.forEach(function (field) {
+                let values = field.values;
+                delete field.values;
+                msg.c('field', field);
+                values.forEach(function (value) {
+                    if (field.var === 'chat_id')
+                        value = message.get('message');
+                    msg.c('value', value).up();
+                }.bind(this));
+                field.values = values;
+                msg.up();
+            }.bind(this));
+            data_form.addresses.forEach(function (address) {
+                if (address.type === 'replyto') {
+                    $(msg.nodeTree).attr('to', address.jid);
+                }
+                this.account.sendMsg(msg);
             }.bind(this));
         },
 
@@ -3052,6 +3114,27 @@ define("xabber-chats", function () {
                 }
             }
 
+            if (message.get('data_form')) {
+                let $data_form = $('<div class="data-form"/>');
+                message.get('data_form').fields.forEach(function (field) {
+                    if (field.type === 'hidden')
+                        return;
+                    if (field.type === 'fixed') {
+                        return;
+                        /*field.label && $data_form.append($('<div class="data-form-field-label"/>').text(field.label));
+                        field.values.forEach(function (value) {
+                            let $input = $('<div class="data-form-field fixed-field"/>').text(value);
+                            $data_form.append($input);
+                        }.bind(this));*/
+                    }
+                    if (field.type === 'boolean') {
+                        let $input = $(`<button id=${field.var} class="data-form-field ground-color-100 btn-dark btn-flat btn-main boolean-field"/>`).text(field.label);
+                        $data_form.append($input);
+                    }
+                }.bind(this));
+                $message.find('.chat-msg-content').append($data_form);
+            }
+
             if (attrs.forwarded_message) {
                 $(attrs.forwarded_message).each(function(idx, fwd_msg) {
                     is_sender = fwd_msg.isSenderMe();
@@ -3995,14 +4078,23 @@ define("xabber-chats", function () {
                 return;
             }
             if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
-            var $msg = $elem.closest('.chat-message'), msg,
-                $fwd_message = $elem.parents('.fwd-message').first(),
-                is_forwarded = $fwd_message.length > 0,
-                no_select_message = $msg.attr('data-no-select-on-mouseup');
-            $msg.attr('data-no-select-on-mouseup', '');
-            if (window.getSelection() != 0) {
-                return;
-            }
+                var $msg = $elem.closest('.chat-message'), msg,
+                    $fwd_message = $elem.parents('.fwd-message').first(),
+                    is_forwarded = $fwd_message.length > 0,
+                    no_select_message = $msg.attr('data-no-select-on-mouseup');
+                $msg.attr('data-no-select-on-mouseup', '');
+
+                if ($elem.hasClass('data-form-field')) {
+                    msg = this.model.messages.get($msg.data('msgid'));
+                    if (!msg) {
+                        return;
+                    }
+                    this.model.sendDataForm(msg);
+                }
+
+                if (window.getSelection() !== 0) {
+                    return;
+                }
 
                 if ($elem.hasClass('collapsed-forwarded-message')) {
                     let msg = this.buildMessageHtml(this.account.forwarded_messages.get($elem.data('msgid'))),
@@ -4014,41 +4106,64 @@ define("xabber-chats", function () {
                     return;
                 }
 
-            if ($elem.hasClass('chat-msg-author') || $elem.hasClass('fwd-msg-author')) {
-                let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from'),
-                    from_id = is_forwarded ? $fwd_message.data('fromId') : $msg.data('fromId');
-                if (this.contact.get('group_chat')) {
-                    if (this.contact.get('group_info')) {
-                        let participant = this.contact.participants.get(from_id),
-                            participant_attrs = ((participant && participant.attributes) || {jid: from_jid, id: from_id, nickname: $elem.text()});
-                        this.contact.messages_view = new xabber.ParticipantMessagesView({
-                            contact: this.contact,
-                            model: participant_attrs
-                        });
-                        this.contact.messages_view.messagesRequest({}, function () {
-                            xabber.body.setScreen('all-chats', {
-                                right: 'participant_messages',
-                                contact: this.contact
+                if ($elem.hasClass('chat-msg-author') || $elem.hasClass('fwd-msg-author')) {
+                    let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from'),
+                        from_id = is_forwarded ? $fwd_message.data('fromId') : $msg.data('fromId');
+                    if (this.contact.get('group_chat')) {
+                        if (this.contact.get('group_info')) {
+                            let participant = this.contact.participants.get(from_id),
+                                participant_attrs = ((participant && participant.attributes) || {jid: from_jid, id: from_id, nickname: $elem.text()});
+                            this.contact.messages_view = new xabber.ParticipantMessagesView({
+                                contact: this.contact,
+                                model: participant_attrs
                             });
-                        }.bind(this));
+                            this.contact.messages_view.messagesRequest({}, function () {
+                                xabber.body.setScreen('all-chats', {
+                                    right: 'participant_messages',
+                                    contact: this.contact
+                                });
+                            }.bind(this));
+                        }
                     }
+                    else if (from_jid === this.account.get('jid')) {
+                        this.account.showSettings();
+                    } else if (from_jid === this.model.get('jid')) {
+                        this.contact.showDetails('all-chats');
+                    } else {
+                        var contact = this.account.contacts.mergeContact(from_jid);
+                        contact.showDetails();
+                    }
+                    return;
                 }
-                else if (from_jid === this.account.get('jid')) {
-                    this.account.showSettings();
-                } else if (from_jid === this.model.get('jid')) {
-                    this.contact.showDetails('all-chats');
-                } else {
-                    var contact = this.account.contacts.mergeContact(from_jid);
-                    contact.showDetails();
-                }
-                return;
-            }
 
-            if ($elem.hasClass('circle-avatar')) {
-                let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
-                if (this.contact.get('group_chat')) {
-                    let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id');
-                    if (member_id) {
+                if ($elem.hasClass('circle-avatar')) {
+                    let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
+                    if (this.contact.get('group_chat')) {
+                        let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id');
+                        if (member_id) {
+                            if (!this.contact.all_rights)
+                                this.contact.getAllRights(function () {
+                                    this.showParticipantProperties(member_id)
+                                }.bind(this));
+                            else
+                                this.showParticipantProperties(member_id);
+                        }
+                        return;
+                    }
+                    else if (from_jid === this.account.get('jid')) {
+                        this.account.showSettings();
+                    } else if (from_jid === this.model.get('jid')) {
+                        this.contact.showDetails('all-chats');
+                    } else {
+                        let contact = this.account.contacts.mergeContact(from_jid);
+                        contact.showDetails();
+                    }
+                    return;
+                }
+
+                if ($elem.hasClass('mention')) {
+                    let member_id = $elem.data('id');
+                    if (this.contact.get('group_chat')) {
                         if (!this.contact.all_rights)
                             this.contact.getAllRights(function () {
                                 this.showParticipantProperties(member_id)
@@ -4056,168 +4171,149 @@ define("xabber-chats", function () {
                         else
                             this.showParticipantProperties(member_id);
                     }
+                    else {
+                        if (member_id === this.account.get('jid'))
+                            this.account.showSettings();
+                        else if (member_id === this.model.get('jid')) {
+                            this.contact.showDetails('all-chats');
+                        } else {
+                            let contact = this.account.contacts.mergeContact(from_jid);
+                            contact.showDetails();
+                        }
+                    }
                     return;
                 }
-                else if (from_jid === this.account.get('jid')) {
-                    this.account.showSettings();
-                } else if (from_jid === this.model.get('jid')) {
-                    this.contact.showDetails('all-chats');
-                } else {
-                    let contact = this.account.contacts.mergeContact(from_jid);
-                    contact.showDetails();
-                }
-                return;
-            }
 
-            if ($elem.hasClass('mention')) {
-                let member_id = $elem.data('id');
-                if (this.contact.get('group_chat')) {
-                    if (!this.contact.all_rights)
-                        this.contact.getAllRights(function () {
-                            this.showParticipantProperties(member_id)
+                if ($elem.hasClass('voice-message-play') || $elem.hasClass('no-uploaded')) {
+                    let $audio_elem = $elem.closest('.link-file'),
+                        f_url = $audio_elem.find('.file-link-download').attr('href');
+                    $audio_elem.find('.mdi-play').removeClass('no-uploaded');
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-play')) {
+                    let $audio_elem = $elem.closest('.link-file');
+                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    $audio_elem[0].voice_message.play();
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-pause')) {
+                    this.prev_audio_message.voice_message.pause();
+                    return;
+                }
+
+                if ($elem.hasClass('msg-hyperlink')) {
+                    ev && ev.preventDefault();
+                    let link = $elem.attr('href');
+                    utils.dialogs.ask("", ("Open this link?\n\n<b class='link'>" + decodeURI(link) + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
+                        if (result) {
+                            utils.openWindow(link);
+                        }
+                    });
+                    return;
+                }
+
+                if ($elem.hasClass('uploaded-img')||($elem.hasClass('uploaded-img-for-collage'))) {
+                    return;
+                }
+
+                if ($elem.hasClass('last-image')) {
+                    $elem.find('img')[0].click();
+                    return;
+                }
+
+                if ($elem.hasClass('image-counter')) {
+                    $elem.closest('.last-image').find('img')[0].click();
+                    return;
+                }
+
+                if ($msg.hasClass('searched-message')) {
+                    this.model.getMessageContext($msg.data('msgid'), {seached_messages: true});
+                    return;
+                }
+
+                let processClick = function () {
+                    if (!no_select_message) {
+                        $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        this.bottom.manageSelectedMessages();
+                    }
+                }.bind(this);
+
+                if ($msg.hasClass('participant-message') || $msg.hasClass('context-message')) {
+                    if ($msg.hasClass('system'))
+                        return;
+                    processClick();
+                    return;
+                }
+
+                msg = this.model.messages.get($msg.data('msgid'));
+                if (!msg) {
+                    return;
+                }
+
+                if ($elem.hasClass('data-form-field')) {
+                    this.model.sendDataForm(msg);
+                }
+
+                var type = msg.get('type');
+                if (type === 'file_upload') {
+                    return;
+                }
+
+                if (type === 'system') {
+                    if (!msg.get('auth_request')) {
+                        return;
+                    }
+                    if ($elem.hasClass('accept-request')) {
+                        this.contact.acceptRequest(function () {
+                            this.removeMessage($msg);
+                            this.contact.showDetails('all-chats');
                         }.bind(this));
-                    else
-                        this.showParticipantProperties(member_id);
-                }
-                else {
-                    if (member_id === this.account.get('jid'))
-                        this.account.showSettings();
-                    else if (member_id === this.model.get('jid')) {
-                        this.contact.showDetails('all-chats');
-                    } else {
-                        let contact = this.account.contacts.mergeContact(from_jid);
-                        contact.showDetails();
+                    } else if ($elem.hasClass('block-request')) {
+                        this.contact.blockRequest(function () {
+                            this.removeMessage($msg);
+                        }.bind(this));
+                    } else if ($elem.hasClass('decline-request')) {
+                        this.contact.declineRequest(function () {
+                            this.removeMessage($msg);
+                            this.model.set('active', false);
+                            this.head.closeChat();
+                            xabber.body.setScreen('all-chats', {right: null});
+                        }.bind(this));
                     }
-                }
-                return;
-            }
 
-            if ($elem.hasClass('voice-message-play') || $elem.hasClass('no-uploaded')) {
-                let $audio_elem = $elem.closest('.link-file'),
-                    f_url = $audio_elem.find('.file-link-download').attr('href');
-                $audio_elem.find('.mdi-play').removeClass('no-uploaded');
-                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
-                this.prev_audio_message && this.prev_audio_message.voice_message.pause();
-                this.prev_audio_message = $audio_elem[0];
-                return;
-            }
-
-            if ($elem.hasClass('mdi-play')) {
-                let $audio_elem = $elem.closest('.link-file');
-                this.prev_audio_message.voice_message.pause();
-                this.prev_audio_message = $audio_elem[0];
-                $audio_elem[0].voice_message.play();
-                return;
-            }
-
-            if ($elem.hasClass('mdi-pause')) {
-                this.prev_audio_message.voice_message.pause();
-                return;
-            }
-
-            if ($elem.hasClass('msg-hyperlink')) {
-                ev && ev.preventDefault();
-                let link = $elem.attr('href');
-                utils.dialogs.ask("", ("Open this link?\n\n<b class='link'>" + decodeURI(link) + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
-                    if (result) {
-                        utils.openWindow(link);
+                    if ($elem.hasClass('accept-request-group')) {
+                        this.contact.acceptGroupRequest(function () {
+                            this.removeMessage($msg);
+                            this.contact.set('in_roster', true);
+                            this.contact.trigger("open_chat", this.model);
+                        }.bind(this));
+                    } else if ($elem.hasClass('block-request-group')) {
+                        this.contact.blockRequest(function () {
+                            this.removeMessage($msg);
+                        }.bind(this));
+                    } else if ($elem.hasClass('decline-request-group')) {
+                        this.contact.declineRequest(function () {
+                            this.removeMessage($msg);
+                            this.model.set('active', false);
+                            this.head.closeChat();
+                            xabber.body.setScreen('all-chats', {right: null});
+                        }.bind(this));
                     }
-                });
-                return;
-            }
-
-            if ($elem.hasClass('uploaded-img')||($elem.hasClass('uploaded-img-for-collage'))) {
-                return;
-            }
-
-            if ($elem.hasClass('last-image')) {
-                $elem.find('img')[0].click();
-                return;
-            }
-
-            if ($elem.hasClass('image-counter')) {
-                $elem.closest('.last-image').find('img')[0].click();
-                return;
-            }
-
-            if ($msg.hasClass('searched-message')) {
-                this.model.getMessageContext($msg.data('msgid'), {seached_messages: true});
-                return;
-            }
-
-            let processClick = function () {
-                if (!no_select_message) {
-                    $msg.switchClass('selected', !$msg.hasClass('selected'));
-                    this.bottom.manageSelectedMessages();
+                } else if (is_forwarded) {
+                    var fwd_message = this.account.forwarded_messages.get($fwd_message.data('msgid'));
+                    if (!fwd_message) {
+                        return;
+                    }
+                    processClick();
+                } else {
+                    processClick();
                 }
-            }.bind(this);
-
-            if ($msg.hasClass('participant-message') || $msg.hasClass('context-message')) {
-                if ($msg.hasClass('system'))
-                    return;
-                processClick();
-                return;
-            }
-
-            msg = this.model.messages.get($msg.data('msgid'));
-            if (!msg) {
-                return;
-            }
-
-            var type = msg.get('type');
-            if (type === 'file_upload') {
-                return;
-            }
-
-            if (type === 'system') {
-                if (!msg.get('auth_request')) {
-                    return;
-                }
-                if ($elem.hasClass('accept-request')) {
-                    this.contact.acceptRequest(function () {
-                        this.removeMessage($msg);
-                        this.contact.showDetails('all-chats');
-                    }.bind(this));
-                } else if ($elem.hasClass('block-request')) {
-                    this.contact.blockRequest(function () {
-                        this.removeMessage($msg);
-                    }.bind(this));
-                } else if ($elem.hasClass('decline-request')) {
-                    this.contact.declineRequest(function () {
-                        this.removeMessage($msg);
-                        this.model.set('active', false);
-                        this.head.closeChat();
-                        xabber.body.setScreen('all-chats', {right: null});
-                    }.bind(this));
-                }
-
-                if ($elem.hasClass('accept-request-group')) {
-                    this.contact.acceptGroupRequest(function () {
-                        this.removeMessage($msg);
-                        this.contact.set('in_roster', true);
-                        this.contact.trigger("open_chat", this.model);
-                    }.bind(this));
-                } else if ($elem.hasClass('block-request-group')) {
-                    this.contact.blockRequest(function () {
-                        this.removeMessage($msg);
-                    }.bind(this));
-                } else if ($elem.hasClass('decline-request-group')) {
-                    this.contact.declineRequest(function () {
-                        this.removeMessage($msg);
-                        this.model.set('active', false);
-                        this.head.closeChat();
-                        xabber.body.setScreen('all-chats', {right: null});
-                    }.bind(this));
-                }
-            } else if (is_forwarded) {
-                var fwd_message = this.account.forwarded_messages.get($fwd_message.data('msgid'));
-                if (!fwd_message) {
-                    return;
-                }
-                processClick();
-            } else {
-                processClick();
-            }
             }
         },
 
