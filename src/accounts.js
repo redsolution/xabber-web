@@ -444,6 +444,10 @@ define("xabber-accounts", function () {
                 },
 
                 onTokenRevoked: function () {
+                    if (xabber.api_account.get('xmpp_binding') === this.get('jid')) {
+                        xabber.trigger('quit');
+                        return;
+                    }
                     if (!this.auth_view) {
                         utils.dialogs.error('Token was invalidated for account ' +
                             this.get('jid'));
@@ -718,9 +722,8 @@ define("xabber-accounts", function () {
                         this.revokeXToken([this.get('x_token').token_uid]);
                     this.session.set('delete', true);
                     this.deactivate();
-                    if (xabber.api_account.get('xmpp_binding') === this.get('jid')) {
-                        xabber.api_account.logoutXabberAccount(true);
-                    }
+                    if (xabber.api_account.get('xmpp_binding') === this.get('jid'))
+                        xabber.trigger('quit');
                 },
 
                 activate: function () {

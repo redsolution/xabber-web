@@ -418,25 +418,23 @@ define("xabber-api-service", function () {
             this.trigger('settings_result', null);
         },
 
-        logoutXabberAccount: function (delete_accounts) {
-            if (xabber.accounts.connected.length > 0)
-                _.each(xabber.accounts.connected, function (account){
-                    account.set('auto_login_xa', false);
-                    account.save('auto_login_xa', false);
-                }.bind(this));
-            this.revoke_token();
-            if (delete_accounts) {
-                _.each(this.list.where({to_sync: true}), function (settings) {
-                    settings.trigger('delete_account', true);
-                });
-            }
-        },
-
         logout: function () {
             utils.dialogs.ask("Quit", "You will quit from Xabber Account. You will not be able to use enhanced Xabber services, but basic XMPP will work as usual.",
                               [{name: 'delete_accounts', checked: true,
                                 text: 'Delete synced XMPP accounts'}], { ok_button_text: 'quit'}).done(function (res) {
-                res && this.logoutXabberAccount(res.delete_accounts);
+                if (res) {
+                    if (xabber.accounts.connected.length > 0)
+                        _.each(xabber.accounts.connected, function (account){
+                            account.set('auto_login_xa', false);
+                            account.save('auto_login_xa', false);
+                        }.bind(this));
+                    this.revoke_token();
+                    if (res.delete_accounts) {
+                        _.each(this.list.where({to_sync: true}), function (settings) {
+                            settings.trigger('delete_account', true);
+                        });
+                    }
+                }
             }.bind(this));
         },
 
