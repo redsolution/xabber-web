@@ -4086,10 +4086,10 @@ define("xabber-chats", function () {
 
                 if ($elem.hasClass('data-form-field')) {
                     msg = this.model.messages.get($msg.data('msgid'));
-                    if (!msg) {
-                        return;
+                    if (msg) {
+                        this.model.sendDataForm(msg);
                     }
-                    this.model.sendDataForm(msg);
+                    return;
                 }
 
                 if (window.getSelection() != 0) {
