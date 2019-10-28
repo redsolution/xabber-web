@@ -4092,7 +4092,7 @@ define("xabber-chats", function () {
                     this.model.sendDataForm(msg);
                 }
 
-                if (window.getSelection() !== 0) {
+                if (window.getSelection() != 0) {
                     return;
                 }
 
