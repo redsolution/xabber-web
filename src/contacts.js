@@ -94,7 +94,7 @@ define("xabber-contacts", function () {
                             if (this.get('group_chat'))
                                 attrs.name = vcard.nickname || this.get('name');
                             else
-                                attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
+                                attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
                         }
                         if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                             if (vcard.photo.image) {
@@ -2956,7 +2956,7 @@ define("xabber-contacts", function () {
                 }
                 else {
                     let vcard = this.model.get('vcard');
-                    name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || this.model.get('jid');
+                    name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || this.model.get('jid');
                 }
                 return name;
             },

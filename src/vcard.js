@@ -78,6 +78,7 @@ define("xabber-vcard", function () {
         $vcard.find('ADR').each(function () {
             var $this = $(this);
             var address = {
+                pobox: $this.find('POBOX').text().trim(),
                 extadd: $this.find('EXTADD').text().trim(),
                 street: $this.find('STREET').text().trim(),
                 locality: $this.find('LOCALITY').text().trim(),
@@ -141,6 +142,7 @@ define("xabber-vcard", function () {
         _.each(vcard.address, function (address, type) {
             $vcard.c("ADR");
             type !== 'default' && $vcard.c(type.toUpperCase()).up();
+            address.pobox && $vcard.c("POBOX").t(address.pobox).up();
             address.extadd && $vcard.c("EXTADD").t(address.extadd).up();
             address.street && $vcard.c("STREET").t(address.street).up();
             address.locality && $vcard.c("LOCALITY").t(address.locality).up();
@@ -221,10 +223,11 @@ define("xabber-vcard", function () {
             $info.showIf(vcard.birthday);
 
             $info = this.$('.job-info-wrap');
+            $info.find('.role').showIf(vcard.role).find('.value').text(vcard.role);
             $info.find('.job-title').showIf(vcard.job_title).find('.value').text(vcard.job_title);
             $info.find('.org-name').showIf(vcard.org.name).find('.value').text(vcard.org.name);
             $info.find('.org-unit').showIf(vcard.org.unit).find('.value').text(vcard.org.unit);
-            $info.showIf(vcard.job_title || vcard.org.name || vcard.org.unit);
+            $info.showIf(vcard.role || vcard.job_title || vcard.org.name || vcard.org.unit);
 
             $info = this.$('.site-info-wrap');
             $info.find('.url').showIf(vcard.url).find('.value').text(vcard.url).hyperlinkify();
@@ -240,13 +243,14 @@ define("xabber-vcard", function () {
             $addr_info.find('.info').addClass('hidden');
             _.each(address, function (addr, type) {
                 $info = $addr_info.find('.address-'+type);
+                $info.find('.pobox').showIf(addr.pobox).text(addr.pobox);
                 $info.find('.extadd').showIf(addr.extadd).text(addr.extadd);
                 $info.find('.street').showIf(addr.street).text(addr.street);
                 $info.find('.locality').showIf(addr.locality).text(addr.locality);
                 $info.find('.region').showIf(addr.region).text(addr.region);
                 $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
                 $info.find('.country').showIf(addr.country).text(addr.country);
-                var show = (addr.extadd || addr.street || addr.locality ||
+                var show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
                              addr.region || addr.pcode || addr.country);
                 show && (show_addr_block = true);
                 $info.showIf(show);
@@ -357,6 +361,7 @@ define("xabber-vcard", function () {
 
             this.$('.birthday input').val(vcard.birthday);
 
+            this.$('.role input').val(vcard.role);
             this.$('.job-title input').val(vcard.job_title);
             this.$('.org-name input').val(vcard.org.name);
             this.$('.org-unit input').val(vcard.org.unit);
@@ -374,6 +379,7 @@ define("xabber-vcard", function () {
 
             var addr = vcard.address.work || {},
                 $info = this.$('.address-work-wrap');
+            $info.find('.pobox input').val(addr.pobox);
             $info.find('.extadd input').val(addr.extadd);
             $info.find('.street input').val(addr.street);
             $info.find('.locality input').val(addr.locality);
@@ -383,6 +389,7 @@ define("xabber-vcard", function () {
 
             addr = vcard.address.home || {};
             $info = this.$('.address-home-wrap');
+            $info.find('.pobox input').val(addr.pobox);
             $info.find('.extadd input').val(addr.extadd);
             $info.find('.street input').val(addr.street);
             $info.find('.locality input').val(addr.locality);
@@ -404,6 +411,7 @@ define("xabber-vcard", function () {
 
             vcard.birthday = this.$('.birthday input').val();
 
+            vcard.role = this.$('.role input').val();
             vcard.job_title = this.$('.job-title input').val();
             vcard.org.name = this.$('.org-name input').val();
             vcard.org.unit = this.$('.org-unit input').val();
@@ -422,6 +430,7 @@ define("xabber-vcard", function () {
             vcard.address.work = {};
             var addr = vcard.address.work,
                 $info = this.$('.address-work-wrap');
+            addr.pobox = $info.find('.pobox input').val();
             addr.extadd = $info.find('.extadd input').val();
             addr.street = $info.find('.street input').val();
             addr.locality = $info.find('.locality input').val();
@@ -432,6 +441,7 @@ define("xabber-vcard", function () {
             vcard.address.home = {};
             addr = vcard.address.home;
             $info = this.$('.address-home-wrap');
+            addr.pobox = $info.find('.pobox input').val();
             addr.extadd = $info.find('.extadd input').val();
             addr.street = $info.find('.street input').val();
             addr.locality = $info.find('.locality input').val();
