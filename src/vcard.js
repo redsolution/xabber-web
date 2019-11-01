@@ -79,7 +79,7 @@ define("xabber-vcard", function () {
             var $this = $(this);
             var address = {
                 pobox: $this.find('POBOX').text().trim(),
-                extadd: $this.find('EXTADD').text().trim(),
+                extadd: $this.find('EXTADR').text().trim(),
                 street: $this.find('STREET').text().trim(),
                 locality: $this.find('LOCALITY').text().trim(),
                 region: $this.find('REGION').text().trim(),
@@ -143,7 +143,7 @@ define("xabber-vcard", function () {
             $vcard.c("ADR");
             type !== 'default' && $vcard.c(type.toUpperCase()).up();
             address.pobox && $vcard.c("POBOX").t(address.pobox).up();
-            address.extadd && $vcard.c("EXTADD").t(address.extadd).up();
+            address.extadd && $vcard.c("EXTADR").t(address.extadd).up();
             address.street && $vcard.c("STREET").t(address.street).up();
             address.locality && $vcard.c("LOCALITY").t(address.locality).up();
             address.region && $vcard.c("REGION").t(address.region).up();
