@@ -1391,7 +1391,10 @@ define("xabber-accounts", function () {
                         return;
                     }
                     if (res.delete_settings) {
-                        xabber.api_account.delete_settings(this.model.get('jid'));
+                        if (xabber.api_account.get('xmpp_binding') === this.model.get('jid'))
+                            xabber.api_account._call_method('DELETE', '/accounts/current/client-settings/', {jid: this.model.get('jid')});
+                        else
+                            xabber.api_account.delete_settings(this.model.get('jid'));
                     }
                     this.model.deleteAccount();
                 }.bind(this));
