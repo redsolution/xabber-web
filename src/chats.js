@@ -1686,7 +1686,7 @@ define("xabber-chats", function () {
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
-            this.$el.emojify('.last-msg', {emoji_size: 14});
+            this.$el.emojify('.last-msg', {emoji_size: 14}).decodelinkify();
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
@@ -5628,7 +5628,7 @@ define("xabber-chats", function () {
                   if (msg_from)
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
               }
-              this.$el.emojify('.last-msg', {emoji_size: 14});
+              this.$el.emojify('.last-msg', {emoji_size: 14}).decodelinkify();
               this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                   .attr('title', utils.pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
