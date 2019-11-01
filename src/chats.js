@@ -4088,6 +4088,7 @@ define("xabber-chats", function () {
                     msg = this.model.messages.get($msg.data('msgid'));
                     if (msg) {
                         this.model.sendDataForm(msg);
+                        this.model.retractMessages([msg], true, true);
                     }
                     return;
                 }
@@ -4254,10 +4255,6 @@ define("xabber-chats", function () {
                 msg = this.model.messages.get($msg.data('msgid'));
                 if (!msg) {
                     return;
-                }
-
-                if ($elem.hasClass('data-form-field')) {
-                    this.model.sendDataForm(msg);
                 }
 
                 var type = msg.get('type');
