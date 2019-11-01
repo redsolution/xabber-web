@@ -60,45 +60,10 @@ define([
                         return;
                     }
                     if (list.length === 1 && list[0] === x) {
-                        html_concat += getHyperLink(x);
+                        html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                     } else {
                         for (i = 0; i < list.length; i++) {
-                            x = x.replace(list[i], getHyperLink(list[i]));
-                        }
-                        html_concat += x;
-                    }
-                }
-            }.bind(this));
-            $obj.html(html_concat);
-        });
-        return this;
-    };
-
-    $.fn.decodelinkify = function () {
-        this.each(function (i, obj) {
-            var $obj = $(obj),
-                html_concat = "",
-                url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
-            $obj[0].childNodes.forEach(function (node) {
-                let $node = $(node),
-                    x = node.outerHTML;
-                if (node.tagName === 'A') {
-                    html_concat += x;
-                    return;
-                }
-                else {
-                    if (node.nodeName === '#text')
-                        x = _.escape($node.text());
-                    let list = x && x.match(url_regexp);
-                    if (!list) {
-                        html_concat += x;
-                        return;
-                    }
-                    if (list.length === 1 && list[0] === x) {
-                        html_concat += decodeURI(x);
-                    } else {
-                        for (i = 0; i < list.length; i++) {
-                            x = x.replace(list[i], decodeURI(list[i]));
+                            x = x.replace(list[i], options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
                         }
                         html_concat += x;
                     }
