@@ -574,7 +574,7 @@ define("xabber-accounts", function () {
                                 vcard: vcard,
                                 vcard_updated: moment.now()
                             };
-                            attrs.name = vcard.nickname || vcard.fullname || (vcard.first_name + ' ' + vcard.last_name).trim() || jid;
+                            attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
                             if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                                 if (vcard.photo.image) {
                                     attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
