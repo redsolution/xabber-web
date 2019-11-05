@@ -60,10 +60,10 @@ define([
                         return;
                     }
                     if (list.length === 1 && list[0] === x) {
-                        html_concat += getHyperLink(x);
+                        html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                     } else {
                         for (i = 0; i < list.length; i++) {
-                            x = x.replace(list[i], getHyperLink(list[i]));
+                            x = x.replace(list[i], options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
                         }
                         html_concat += x;
                     }

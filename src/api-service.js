@@ -353,6 +353,7 @@ define("xabber-api-service", function () {
                 this._call_method('delete', '/accounts/current/tokens/', {token: token});
             }
             this.save({connected: false, token: null});
+            this.storage.clear();
         },
 
         onLoginByToken: function (data, textStatus, request) {

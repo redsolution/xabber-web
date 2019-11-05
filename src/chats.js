@@ -1686,7 +1686,7 @@ define("xabber-chats", function () {
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
-            this.$el.emojify('.last-msg', {emoji_size: 14});
+            this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
@@ -4257,10 +4257,6 @@ define("xabber-chats", function () {
                     return;
                 }
 
-                if ($elem.hasClass('data-form-field')) {
-                    this.model.sendDataForm(msg);
-                }
-
                 var type = msg.get('type');
                 if (type === 'file_upload') {
                     return;
@@ -5629,7 +5625,7 @@ define("xabber-chats", function () {
                   if (msg_from)
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
               }
-              this.$el.emojify('.last-msg', {emoji_size: 14});
+              this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
               this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                   .attr('title', utils.pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))

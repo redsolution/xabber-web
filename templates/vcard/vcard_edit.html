@@ -54,20 +54,24 @@
                                 <input id="{{view.cid}}-job-title" type="text" name="job_title">
                                 <label for="{{view.cid}}-job-title">Job title</label>
                             </div>
-                            <div class="input-field org-name">
-                                <input id="{{view.cid}}-org-name" type="text" name="org_name">
-                                <label for="{{view.cid}}-org-name">Company</label>
+                            <div class="input-field role">
+                                <input id="{{view.cid}}-role" type="text" name="role">
+                                <label for="{{view.cid}}-role">Role</label>
                             </div>
                             <div class="input-field org-unit">
                                 <input id="{{view.cid}}-org-unit" type="text" name="org_unit">
                                 <label for="{{view.cid}}-org-unit">Unit</label>
+                            </div>
+                            <div class="input-field org-name">
+                                <input id="{{view.cid}}-org-name" type="text" name="org_name">
+                                <label for="{{view.cid}}-org-name">Company</label>
                             </div>
                         </div>
                         <div class="info-wrap site-info-wrap">
                             <i class="details-icon mdi mdi-24px mdi-web"></i>
                             <div class="input-field url">
                                 <input id="{{view.cid}}-url" type="text" name="url">
-                                <label for="{{view.cid}}-url">Site</label>
+                                <label for="{{view.cid}}-url">Website</label>
                             </div>
                         </div>
                         <div class="info-wrap description-info-wrap">
@@ -101,41 +105,18 @@
                             </div>
                             <div class="input-field email-home">
                                 <input id="{{view.cid}}-email-home" type="text" name="email_home">
-                                <label for="{{view.cid}}-email-home">Email (home)</label>
+                                <label for="{{view.cid}}-email-home">Email (personal)</label>
                             </div>
                         </div>
 
                         <div class="info-wrap address-info-wrap">
                             <i class="details-icon mdi mdi-24px mdi-map-marker"></i>
-                            <div class="input-wrap address-wrap address-work-wrap">
-                                <div class="input-label">Address (work)</div>
-                                <div class="input-field extadd">
-                                    <input id="{{view.cid}}-addr-work-extadd" type="text" name="addr_work_extadd">
-                                    <label for="{{view.cid}}-addr-work-extadd">Extended address</label>
-                                </div>
-                                <div class="input-field street">
-                                    <input id="{{view.cid}}-addr-work-street" type="text" name="addr_work_street">
-                                    <label for="{{view.cid}}-addr-work-street">Street</label>
-                                </div>
-                                <div class="input-field locality">
-                                    <input id="{{view.cid}}-addr-work-locality" type="text" name="addr_work_locality">
-                                    <label for="{{view.cid}}-addr-work-locality">Locality</label>
-                                </div>
-                                <div class="input-field region">
-                                    <input id="{{view.cid}}-addr-work-region" type="text" name="addr_work_region">
-                                    <label for="{{view.cid}}-addr-work-region">Region</label>
-                                </div>
-                                <div class="input-field pcode">
-                                    <input id="{{view.cid}}-addr-work-pcode" type="text" name="addr_work_pcode">
-                                    <label for="{{view.cid}}-addr-work-pcode">Post code</label>
-                                </div>
-                                <div class="input-field country">
-                                    <input id="{{view.cid}}-addr-work-country" type="text" name="addr_work_country">
-                                    <label for="{{view.cid}}-addr-work-country">Country</label>
-                                </div>
-                            </div>
                             <div class="input-wrap address-wrap address-home-wrap">
-                                <div class="input-label">Address (home)</div>
+                                <div class="input-label">Home address</div>
+                                <div class="input-field pobox">
+                                    <input id="{{view.cid}}-po-home-box" type="text" name="po_home_box">
+                                    <label for="{{view.cid}}-po-home-box">PO Box</label>
+                                </div>
                                 <div class="input-field extadd">
                                     <input id="{{view.cid}}-addr-home-extadd" type="text" name="addr_home_extadd">
                                     <label for="{{view.cid}}-addr-home-extadd">Extended address</label>
@@ -154,11 +135,42 @@
                                 </div>
                                 <div class="input-field pcode">
                                     <input id="{{view.cid}}-addr-home-pcode" type="text" name="addr_home_pcode">
-                                    <label for="{{view.cid}}-addr-home-pcode">Post code</label>
+                                    <label for="{{view.cid}}-addr-home-pcode">Postal code</label>
                                 </div>
                                 <div class="input-field country">
                                     <input id="{{view.cid}}-addr-home-country" type="text" name="addr_home_country">
-                                    <label for="{{view.cid}}-addr-home-country">Country</label>
+                                    <label for="{{view.cid}}-addr-home-country">Country name</label>
+                                </div>
+                            </div>
+                            <div class="input-wrap address-wrap address-work-wrap">
+                                <div class="input-label">Work address</div>
+                                <div class="input-field pobox">
+                                    <input id="{{view.cid}}-po-work-box" type="text" name="po_work_box">
+                                    <label for="{{view.cid}}-po-work-box">PO Box</label>
+                                </div>
+                                <div class="input-field extadd">
+                                    <input id="{{view.cid}}-addr-work-extadd" type="text" name="addr_work_extadd">
+                                    <label for="{{view.cid}}-addr-work-extadd">Extended address</label>
+                                </div>
+                                <div class="input-field street">
+                                    <input id="{{view.cid}}-addr-work-street" type="text" name="addr_work_street">
+                                    <label for="{{view.cid}}-addr-work-street">Street</label>
+                                </div>
+                                <div class="input-field locality">
+                                    <input id="{{view.cid}}-addr-work-locality" type="text" name="addr_work_locality">
+                                    <label for="{{view.cid}}-addr-work-locality">Locality</label>
+                                </div>
+                                <div class="input-field region">
+                                    <input id="{{view.cid}}-addr-work-region" type="text" name="addr_work_region">
+                                    <label for="{{view.cid}}-addr-work-region">Region</label>
+                                </div>
+                                <div class="input-field pcode">
+                                    <input id="{{view.cid}}-addr-work-pcode" type="text" name="addr_work_pcode">
+                                    <label for="{{view.cid}}-addr-work-pcode">Postal code</label>
+                                </div>
+                                <div class="input-field country">
+                                    <input id="{{view.cid}}-addr-work-country" type="text" name="addr_work_country">
+                                    <label for="{{view.cid}}-addr-work-country">Country name</label>
                                 </div>
                             </div>
                         </div>
