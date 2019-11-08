@@ -467,10 +467,11 @@ define("xabber-contacts", function () {
                         msg_text = message.get('message');
                     if (fwd_message) {
                         let user_info = fwd_message[0].get('user_info') || {};
-                        if (fwd_message.length > 1)
+                        if (msg_text) {
+                        } else if (fwd_message.length > 1)
                             msg_text = fwd_message.length + ' forwarded messages';
                         else {
-                            msg_text = fwd_message[0].get('message') || (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
+                            msg_text = fwd_message[0].get('message') || fwd_message[0].get('forwarded_message') && (fwd_message[0].get('forwarded_message').length + ' forwarded messages');
                             fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
