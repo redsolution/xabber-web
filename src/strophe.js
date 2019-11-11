@@ -228,6 +228,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
         Strophe.addNamespace('LAST', 'jabber:iq:last');
         Strophe.addNamespace('GROUP_CHAT', 'http://xabber.com/protocol/groupchat');
+        Strophe.addNamespace('WEBCHAT', 'http://xabber.com/protocol/webchat');
         Strophe.addNamespace('INDEX', 'http://xabber.com/protocol/index');
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');

@@ -3103,6 +3103,25 @@ body {
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.55);
 }
 
+/* -------------- DATA FORM IN MESSAGE ------------------ */
+
+.chat-message .chat-msg-content .data-form {
+    padding: 4px 0;
+}
+
+.chat-message .chat-msg-content .data-form button {
+    margin: 0 8px 0 0;
+}
+
+.chat-message .chat-msg-content .data-form div.data-form-field {
+    padding: 2px 0;
+}
+
+.chat-message .chat-msg-content .data-form .label {
+    font-weight: 500;
+    font-size: 14px;
+}
+
 /* -------------- RECENT CHATS PANEL ------------------ */
 
 .search-form {
@@ -3818,10 +3837,6 @@ body {
     line-height: 16px;
     color: #212121;
     white-space: pre-wrap;
-}
-
-.chat-message .chat-msg-content .data-form {
-    padding: 4px 0;
 }
 
 .chat-message .chat-msg-content .quote {

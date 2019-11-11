@@ -327,7 +327,8 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-            if ($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]').length) {
+            if ($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]').length &&
+                $message.find('x[xmlns="' + Strophe.NS.XDATA + '"] field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
                 let addresses = [];
                 $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address').each(function (idx, address) {
                     let $address = $(address);
@@ -957,7 +958,7 @@ define("xabber-chats", function () {
             }.bind(this));
         },
 
-        sendDataForm: function (message) {
+        sendDataForm: function (message, variable) {
             let data_form = message.get('data_form');
             if (!data_form)
                 return;
@@ -968,9 +969,13 @@ define("xabber-chats", function () {
                 delete field.values;
                 msg.c('field', field);
                 values.forEach(function (value) {
-                    if (field.var === 'chat_id')
-                        value = message.get('message');
-                    msg.c('value', value).up();
+                    if (field.type  === 'boolean') {
+                        if (field.var === variable)
+                            value = true;
+                        else
+                            value = false;
+                    }
+                    msg.c('value').t(value).up();
                 }.bind(this));
                 field.values = values;
                 msg.up();
@@ -3120,12 +3125,13 @@ define("xabber-chats", function () {
                     if (field.type === 'hidden')
                         return;
                     if (field.type === 'fixed') {
-                        return;
-                        /*field.label && $data_form.append($('<div class="data-form-field-label"/>').text(field.label));
+                        let $fixed_field = $('<div class="data-form-field fixed-field"/>');
+                        field.label && $fixed_field.append($('<div class="label"/>').text(field.label));
                         field.values.forEach(function (value) {
-                            let $input = $('<div class="data-form-field fixed-field"/>').text(value);
-                            $data_form.append($input);
-                        }.bind(this));*/
+                            let $input = $('<div class="value"/>').text(value);
+                            $fixed_field.append($input);
+                        }.bind(this));
+                        $data_form.append($fixed_field);
                     }
                     if (field.type === 'boolean') {
                         let $input = $(`<button id=${field.var} class="data-form-field ground-color-100 btn-dark btn-flat btn-main boolean-field"/>`).text(field.label);
@@ -4087,7 +4093,7 @@ define("xabber-chats", function () {
                 if ($elem.hasClass('data-form-field')) {
                     msg = this.model.messages.get($msg.data('msgid'));
                     if (msg)
-                        this.model.sendDataForm(msg);
+                        this.model.sendDataForm(msg, $elem.attr('id'));
                     return;
                 }
 
