@@ -2558,10 +2558,10 @@ define("xabber-chats", function () {
         },
 
         requestMissedMessages: function () {
-            if (!this.account.disconnected_timestamp)
+            if (!this.account.disconnected_timestamp && !this.account.last_msg_timestamp)
                 return;
             let query = {},
-                start_timestamp = moment(this.account.disconnected_timestamp).format();
+                start_timestamp = moment(this.account.disconnected_timestamp || this.account.last_msg_timestamp).format();
             query.var = [{var: 'start', value: start_timestamp}];
             this.getMessageArchive(query, {missed_history: true});
         },
