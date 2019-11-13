@@ -1489,8 +1489,8 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
                 this.account.sendIQ(iq, function (response) {
                    if (this.$current_list.data('value') === this.status) {
-                        $(response).find('query').find('user').each(function (idx, item) {
-                            this.$el.html("");
+                       this.$el.html("");
+                       $(response).find('query').find('user').each(function (idx, item) {
                             let user = {jid: $(item).attr('jid'), status: this.status},
                                 $item_view = $(templates.group_chats.invited_member_item(user)),
                                 avatar = Images.getDefaultAvatar(user.jid);
