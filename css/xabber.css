@@ -4089,6 +4089,7 @@ body {
 
 img.uploaded-img {
     max-height: 256px;
+    min-height: 48px;
     max-width: 300px;
     display: block;
 }

@@ -3876,7 +3876,7 @@ define("xabber-chats", function () {
             imgContent.src = image.url;
             $(imgContent).addClass('uploaded-img popup-img');
             $(imgContent).attr('data-mfp-src', image.url);
-            if ((imgContent.height)&&(imgContent.width)) {
+            if (imgContent.height && imgContent.width) {
                 if (imgContent.width > maxWidth) {
                     imgContent.height = imgContent.height * (maxWidth/imgContent.width);
                     imgContent.width = maxWidth;
