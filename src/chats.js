@@ -4223,7 +4223,8 @@ define("xabber-chats", function () {
                     return;
                 }
 
-                if ($elem.hasClass('uploaded-img')||($elem.hasClass('uploaded-img-for-collage'))) {
+                if ($elem.hasClass('uploaded-img')||$elem.hasClass('img-content')||($elem.hasClass('uploaded-img-for-collage'))) {
+                    $elem.hasClass('img-content') && $elem.children('img').click();
                     return;
                 }
 

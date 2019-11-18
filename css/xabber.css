@@ -3881,7 +3881,12 @@ body {
     background-position: center center;
     background-repeat: no-repeat;
     border: 0.5px solid #E0E0E0;
-    display: inline-block;
+    min-height: 48px;
+    min-width: 48px;
+    display: inline-flex;
+    background-color: #FFF;
+    justify-content: center;
+    align-items: center;
     max-height: 256px;
     padding: 0.5px;
     box-sizing: content-box;
@@ -4089,7 +4094,6 @@ body {
 
 img.uploaded-img {
     max-height: 256px;
-    min-height: 48px;
     max-width: 300px;
     display: block;
 }
