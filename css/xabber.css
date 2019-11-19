@@ -6385,7 +6385,10 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .vcard .avatar-wrap {
-    padding-bottom: 20px;
+    padding: 0 0 6px 16px;
+    width: 50%;
+    display: flex;
+    align-items: center;
 }
 
 .vcard .avatar-wrap .circle-avatar {
@@ -6403,6 +6406,15 @@ input[type='range'].voice-message-volume:focus {
     font-size: 14px;
     line-height: 16px;
     color: #616161;
+}
+
+.vcard .avatar-and-names-info-wrap {
+    display: flex;
+}
+
+.vcard .label-wrap {
+    padding: 8px 0;
+    color: #424242;
 }
 
 /* ---------------- CONTACT DETAILS ------------------- */

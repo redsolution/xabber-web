@@ -10,6 +10,29 @@
                     <div class="vcard-edit-wrap">
                         <div class="info-wrap personal-info-wrap">
                             <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+                            <div class="avatar-and-names-info-wrap">
+                                <div class="info-wrap avatar-wrap">
+                                    <!--<i class="details-icon mdi mdi-24px mdi-camera"></i>-->
+                                    <div class="circle-avatar circle-image-fix">
+                                        <img/>
+                                        <input type="file"/>
+                                    </div>
+                                </div>
+                                <div class="info-wrap name-info-wrap">
+                                    <div class="input-field first-name">
+                                        <input id="{{view.cid}}-first-name" type="text" name="first_name">
+                                        <label for="{{view.cid}}-first-name">First name</label>
+                                    </div>
+                                    <div class="input-field middle-name">
+                                        <input id="{{view.cid}}-middle-name" type="text" name="middle_name">
+                                        <label for="{{view.cid}}-middle-name">Middle name</label>
+                                    </div>
+                                    <div class="input-field last-name">
+                                        <input id="{{view.cid}}-last-name" type="text" name="last_name">
+                                        <label for="{{view.cid}}-last-name">Surname</label>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="input-field nickname">
                                 <input id="{{view.cid}}-nickname" type="text" name="nickname">
                                 <label for="{{view.cid}}-nickname">Nickname</label>
@@ -18,25 +41,10 @@
                                 <input id="{{view.cid}}-fullname" type="text" name="fullname">
                                 <label for="{{view.cid}}-fullname">Full name</label>
                             </div>
-                            <div class="input-field first-name">
-                                <input id="{{view.cid}}-first-name" type="text" name="first_name">
-                                <label for="{{view.cid}}-first-name">First name</label>
-                            </div>
-                            <div class="input-field middle-name">
-                                <input id="{{view.cid}}-middle-name" type="text" name="middle_name">
-                                <label for="{{view.cid}}-middle-name">Middle name</label>
-                            </div>
-                            <div class="input-field last-name">
-                                <input id="{{view.cid}}-last-name" type="text" name="last_name">
-                                <label for="{{view.cid}}-last-name">Last name</label>
-                            </div>
-                        </div>
-
-                        <div class="info-wrap avatar-wrap">
-                            <i class="details-icon mdi mdi-24px mdi-camera"></i>
-                            <div class="circle-avatar circle-image-fix">
-                                <img/>
-                                <input type="file"/>
+                            <div class="label-wrap">
+                                <p>
+                                    Your name and an optional profile picture
+                                </p>
                             </div>
                         </div>
 
@@ -50,21 +58,21 @@
 
                         <div class="info-wrap job-info-wrap">
                             <i class="details-icon mdi mdi-24px mdi-briefcase"></i>
+                            <div class="input-field org-name">
+                                <input id="{{view.cid}}-org-name" type="text" name="org_name">
+                                <label for="{{view.cid}}-org-name">Company</label>
+                            </div>
                             <div class="input-field job-title">
                                 <input id="{{view.cid}}-job-title" type="text" name="job_title">
                                 <label for="{{view.cid}}-job-title">Job title</label>
-                            </div>
-                            <div class="input-field role">
-                                <input id="{{view.cid}}-role" type="text" name="role">
-                                <label for="{{view.cid}}-role">Role</label>
                             </div>
                             <div class="input-field org-unit">
                                 <input id="{{view.cid}}-org-unit" type="text" name="org_unit">
                                 <label for="{{view.cid}}-org-unit">Unit</label>
                             </div>
-                            <div class="input-field org-name">
-                                <input id="{{view.cid}}-org-name" type="text" name="org_name">
-                                <label for="{{view.cid}}-org-name">Company</label>
+                            <div class="input-field role">
+                                <input id="{{view.cid}}-role" type="text" name="role">
+                                <label for="{{view.cid}}-role">Role</label>
                             </div>
                         </div>
                         <div class="info-wrap site-info-wrap">
