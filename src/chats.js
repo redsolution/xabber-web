@@ -198,9 +198,9 @@ define("xabber-chats", function () {
                 badge = user_info.children('badge').text(),
                 user_id = user_info.attr('id');
             !nickname.trim().length && (nickname = jid || id);
+            (groupchat_jid === this.account.get('jid')) && (Strophe.getBareJidFromJid($message.attr('to')));
             let attrs = {
                 from_jid: jid || user_id,
-                groupchat_jid: groupchat_jid,
                 user_info: {
                     id: user_id,
                     jid: jid,
@@ -292,7 +292,15 @@ define("xabber-chats", function () {
                 msgid = $message.attr('id'),
                 message = msgid && this.get(msgid);
 
-            if (message && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
+            if (options.replaced) {
+                $message = $message.find('replace message');
+                body = $message.children('body').text();
+                message = this.find(m => m.get('archive_id') === $message.children('stanza-id').attr('id'));
+                from_jid = message.get('from_jid');
+                msgid = message.get('msgid');
+            }
+
+            if (message && !options.replaced && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
                 return message;
 
             let attrs = {
@@ -452,8 +460,9 @@ define("xabber-chats", function () {
             if (options.context_message)
                 return this.account.context_messages.create(attrs);
 
-            if (options.echo_msg && message) {
+            if (options.echo_msg || options.replaced && message) {
                 message.set(attrs);
+                return;
             }
 
             if (options.is_searched) {
@@ -4735,47 +4744,12 @@ define("xabber-chats", function () {
                     msg_item = chat.messages.find(msg => msg.get('archive_id') == stanza_id),
                     active_right_screen = xabber.body.screen.get('right'),
                     participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
-                    participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id),
-                    new_text = $message.find('replace message body').text(),
-                    $mentions = $message.find('replace message reference[type="mention"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                    $markups = $message.find('replace message reference[type="markup"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                    mentions_list = [],
-                    markups_list = [];
-                if ($mentions.length) {
-                    $mentions.each(function (idx, mention) {
-                        let $mention = $(mention),
-                            start = parseInt($mention.attr('begin')),
-                            end = parseInt($mention.attr('end')),
-                            mention_uri = $mention.children('uri').text() || "";
-                        mentions_list.push({start: start, end: end, uri: mention_uri});
-                    }.bind(this));
-                }
-                if ($markups.length) {
-                    $markups.each(function (idx, markup) {
-                        let $markup = $(markup),
-                            start = parseInt($markup.attr('begin')),
-                            end = parseInt($markup.attr('end')),
-                            markup_styles = [];
-                        $markup.children().each(function (idx, child) {
-                            markup_styles.push(child.tagName);
-                        }.bind(this));
-                        markups_list.push({start: start, end: end, markups: markup_styles});
-                    }.bind(this));
-                }
+                    participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id);
+                this.receiveChatMessage($message, {replaced: true});
                 if (participant_msg_item) {
-                    let pretty_text = utils.slice_pretty_body(new_text, participant_msg_item.get('legacy_content'));
-                    participant_msg_item.set('mentions', mentions_list);
-                    participant_msg_item.set('markups', markups_list);
-                    participant_msg_item.set('original_message', new_text);
-                    participant_msg_item.set('message', pretty_text);
                     participant_msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
                 }
                 if (msg_item) {
-                    let pretty_text = utils.slice_pretty_body(new_text, msg_item.get('legacy_content'));
-                    msg_item.set('mentions', mentions_list);
-                    msg_item.set('markups', markups_list);
-                    msg_item.set('original_message', new_text);
-                    msg_item.set('message', pretty_text);
                     msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
                     if (contact.get('pinned_message'))
                         if (contact.get('pinned_message').get('msgid') === msg_item.get('msgid')) {
@@ -4866,6 +4840,7 @@ define("xabber-chats", function () {
                     is_forwarded: true,
                     forwarded_message: options.forwarded_message || null,
                     delay: $delay,
+                    replaced: options.replaced,
                     from_jid: from_jid,
                     xml: options.xml
                 });
