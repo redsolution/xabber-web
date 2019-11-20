@@ -4614,8 +4614,17 @@ define("xabber-chats", function () {
                     }
                 }
                 else {
-                    if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
+                    if ((photo_id !== "") && (contact.get('photo_hash') === photo_id)) {
+                        if (!photo_id) {
+                            let image = Images.getDefaultAvatar(contact.get('name'));
+                            contact.cached_image = Images.getCachedImage(image);
+                            xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: "", avatar: image, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            contact.set('photo_hash', "");
+                            contact.set('image', image);
+                        }
                         return;
+                    }
                     else if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.PUBSUB_AVATAR) {
                         contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
                             contact.cached_image = Images.getCachedImage(data_avatar);
