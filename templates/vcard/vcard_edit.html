@@ -9,37 +9,18 @@
                 <div class="settings-block-wrap vcard">
                     <div class="vcard-edit-wrap">
                         <div class="info-wrap personal-info-wrap">
-                            <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
-                            <div class="avatar-and-names-info-wrap">
-                                <div class="info-wrap avatar-wrap">
-                                    <!--<i class="details-icon mdi mdi-24px mdi-camera"></i>-->
-                                    <div class="circle-avatar circle-image-fix">
-                                        <img/>
-                                        <input type="file"/>
-                                    </div>
-                                </div>
-                                <div class="info-wrap name-info-wrap">
-                                    <div class="input-field first-name">
-                                        <input id="{{view.cid}}-first-name" type="text" name="first_name">
-                                        <label for="{{view.cid}}-first-name">First name</label>
-                                    </div>
-                                    <div class="input-field middle-name">
-                                        <input id="{{view.cid}}-middle-name" type="text" name="middle_name">
-                                        <label for="{{view.cid}}-middle-name">Middle name</label>
-                                    </div>
-                                    <div class="input-field last-name">
-                                        <input id="{{view.cid}}-last-name" type="text" name="last_name">
-                                        <label for="{{view.cid}}-last-name">Surname</label>
-                                    </div>
-                                </div>
+                            <i class="details-icon mdi mdi-24px mdi-account-card-details"></i>
+                            <div class="input-field first-name">
+                                <input id="{{view.cid}}-first-name" placeholder="First name" type="text" name="first_name">
                             </div>
-                            <div class="input-field nickname">
-                                <input id="{{view.cid}}-nickname" type="text" name="nickname">
-                                <label for="{{view.cid}}-nickname">Nickname</label>
+                            <div class="input-field middle-name">
+                                <input id="{{view.cid}}-middle-name" placeholder="Middle name" type="text" name="middle_name">
+                            </div>
+                            <div class="input-field last-name">
+                                <input id="{{view.cid}}-last-name" placeholder="Surname" type="text" name="last_name">
                             </div>
                             <div class="input-field fullname">
-                                <input id="{{view.cid}}-fullname" type="text" name="fullname">
-                                <label for="{{view.cid}}-fullname">Full name</label>
+                                <input id="{{view.cid}}-fullname" placeholder="Full name" type="text" name="fullname">
                             </div>
                             <div class="label-wrap">
                                 <p>
@@ -48,72 +29,74 @@
                             </div>
                         </div>
 
+                        <div class="info-wrap nickname-info-wrap">
+                            <div class="input-label">Nickname</div>
+                            <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+                            <div class="input-field nickname">
+                                <input id="{{view.cid}}-nickname" placeholder="Nickname" type="text" name="nickname">
+                            </div>
+                        </div>
+
                         <div class="info-wrap birthday-info-wrap">
+                            <div class="input-label">Birthday</div>
                             <i class="details-icon mdi mdi-24px mdi-cake-variant"></i>
                             <div class="input-field birthday">
-                                <input id="{{view.cid}}-birthday" type="text" class="datepicker">
-                                <label for="{{view.cid}}-birthday">Birthdate</label>
+                                <input id="{{view.cid}}-birthday" placeholder="YYYYY-MM-DD" type="text" class="datepicker">
                             </div>
                         </div>
 
                         <div class="info-wrap job-info-wrap">
+                            <div class="input-label">Job</div>
                             <i class="details-icon mdi mdi-24px mdi-briefcase"></i>
                             <div class="input-field org-name">
-                                <input id="{{view.cid}}-org-name" type="text" name="org_name">
-                                <label for="{{view.cid}}-org-name">Company</label>
+                                <input id="{{view.cid}}-org-name" placeholder="Company" type="text" name="org_name">
                             </div>
                             <div class="input-field job-title">
-                                <input id="{{view.cid}}-job-title" type="text" name="job_title">
-                                <label for="{{view.cid}}-job-title">Job title</label>
+                                <input id="{{view.cid}}-job-title" placeholder="Job title" type="text" name="job_title">
                             </div>
                             <div class="input-field org-unit">
-                                <input id="{{view.cid}}-org-unit" type="text" name="org_unit">
-                                <label for="{{view.cid}}-org-unit">Unit</label>
+                                <input id="{{view.cid}}-org-unit" placeholder="Unit" type="text" name="org_unit">
                             </div>
                             <div class="input-field role">
-                                <input id="{{view.cid}}-role" type="text" name="role">
-                                <label for="{{view.cid}}-role">Role</label>
+                                <input id="{{view.cid}}-role" placeholder="Role" type="text" name="role">
                             </div>
                         </div>
                         <div class="info-wrap site-info-wrap">
+                            <div class="input-label">Website</div>
                             <i class="details-icon mdi mdi-24px mdi-web"></i>
                             <div class="input-field url">
-                                <input id="{{view.cid}}-url" type="text" name="url">
-                                <label for="{{view.cid}}-url">Website</label>
+                                <input id="{{view.cid}}-url" placeholder="www.example.com" type="text" name="url">
                             </div>
                         </div>
                         <div class="info-wrap description-info-wrap">
+                            <div class="input-label">Description</div>
                             <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>
                             <div class="input-field description">
-                                <textarea id="{{view.cid}}-description" type="text" cols="30" rows="10" class="text-field materialize-textarea" name="description"></textarea>
-                                <label for="{{view.cid}}-description">Description</label>
+                                <textarea id="{{view.cid}}-description" placeholder="Some text field, 3-5 rows" type="text" cols="30" rows="10" class="text-field materialize-textarea" name="description"></textarea>
                             </div>
                         </div>
 
                         <div class="info-wrap phone-info-wrap">
+                            <div class="input-label">Phone</div>
                             <i class="details-icon mdi mdi-24px mdi-phone"></i>
                             <div class="input-field phone-work">
-                                <input id="{{view.cid}}-phone-work" type="text" name="phone_work">
-                                <label for="{{view.cid}}-phone-work">Phone (work)</label>
+                                <input id="{{view.cid}}-phone-work" placeholder="Work" type="text" name="phone_work">
                             </div>
                             <div class="input-field phone-home">
-                                <input id="{{view.cid}}-phone-home" type="text" name="phone_home">
-                                <label for="{{view.cid}}-phone-home">Phone (home)</label>
+                                <input id="{{view.cid}}-phone-home" placeholder="Home" type="text" name="phone_home">
                             </div>
                             <div class="input-field phone-mobile">
-                                <input id="{{view.cid}}-phone-mobile" type="text" name="phone_mobile">
-                                <label for="{{view.cid}}-phone-mobile">Phone (mobile)</label>
+                                <input id="{{view.cid}}-phone-mobile" placeholder="Mobile" type="text" name="phone_mobile">
                             </div>
                         </div>
                         <div class="info-wrap email-info-wrap">
+                            <div class="input-label">Email</div>
                             <i class="details-icon mdi mdi-24px mdi-email"></i>
                             <div class="input-field email-work">
-                                <input id="{{view.cid}}-email-work" type="text" name="email_work">
-                                <label for="{{view.cid}}-email-work">Email (work)</label>
+                                <input id="{{view.cid}}-email-work" placeholder="Work" type="text" name="email_work">
                             </div>
                             <div class="input-field email-home">
-                                <input id="{{view.cid}}-email-home" type="text" name="email_home">
-                                <label for="{{view.cid}}-email-home">Email (personal)</label>
+                                <input id="{{view.cid}}-email-home" placeholder="Personal" type="text" name="email_home">
                             </div>
                         </div>
 
@@ -122,63 +105,49 @@
                             <div class="input-wrap address-wrap address-home-wrap">
                                 <div class="input-label">Home address</div>
                                 <div class="input-field pobox">
-                                    <input id="{{view.cid}}-po-home-box" type="text" name="po_home_box">
-                                    <label for="{{view.cid}}-po-home-box">PO Box</label>
+                                    <input id="{{view.cid}}-po-home-box" placeholder="PO Box" type="text" name="po_home_box">
                                 </div>
                                 <div class="input-field extadd">
-                                    <input id="{{view.cid}}-addr-home-extadd" type="text" name="addr_home_extadd">
-                                    <label for="{{view.cid}}-addr-home-extadd">Extended address</label>
+                                    <input id="{{view.cid}}-addr-home-extadd" placeholder="Extended address" type="text" name="addr_home_extadd">
                                 </div>
                                 <div class="input-field street">
-                                    <input id="{{view.cid}}-addr-home-street" type="text" name="addr_home_street">
-                                    <label for="{{view.cid}}-addr-home-street">Street</label>
+                                    <input id="{{view.cid}}-addr-home-street" placeholder="Street" type="text" name="addr_home_street">
                                 </div>
                                 <div class="input-field locality">
-                                    <input id="{{view.cid}}-addr-home-locality" type="text" name="addr_home_locality">
-                                    <label for="{{view.cid}}-addr-home-locality">Locality</label>
+                                    <input id="{{view.cid}}-addr-home-locality" placeholder="Locality" type="text" name="addr_home_locality">
                                 </div>
                                 <div class="input-field region">
-                                    <input id="{{view.cid}}-addr-home-region" type="text" name="addr_home_region">
-                                    <label for="{{view.cid}}-addr-home-region">Region</label>
+                                    <input id="{{view.cid}}-addr-home-region" placeholder="Region" type="text" name="addr_home_region">
                                 </div>
                                 <div class="input-field pcode">
-                                    <input id="{{view.cid}}-addr-home-pcode" type="text" name="addr_home_pcode">
-                                    <label for="{{view.cid}}-addr-home-pcode">Postal code</label>
+                                    <input id="{{view.cid}}-addr-home-pcode" placeholder="Postal code" type="text" name="addr_home_pcode">
                                 </div>
                                 <div class="input-field country">
-                                    <input id="{{view.cid}}-addr-home-country" type="text" name="addr_home_country">
-                                    <label for="{{view.cid}}-addr-home-country">Country name</label>
+                                    <input id="{{view.cid}}-addr-home-country" placeholder="Country name" type="text" name="addr_home_country">
                                 </div>
                             </div>
                             <div class="input-wrap address-wrap address-work-wrap">
                                 <div class="input-label">Work address</div>
                                 <div class="input-field pobox">
-                                    <input id="{{view.cid}}-po-work-box" type="text" name="po_work_box">
-                                    <label for="{{view.cid}}-po-work-box">PO Box</label>
+                                    <input id="{{view.cid}}-po-work-box" placeholder="PO Box" type="text" name="po_work_box">
                                 </div>
                                 <div class="input-field extadd">
-                                    <input id="{{view.cid}}-addr-work-extadd" type="text" name="addr_work_extadd">
-                                    <label for="{{view.cid}}-addr-work-extadd">Extended address</label>
+                                    <input id="{{view.cid}}-addr-work-extadd" placeholder="Extended address" type="text" name="addr_work_extadd">
                                 </div>
                                 <div class="input-field street">
-                                    <input id="{{view.cid}}-addr-work-street" type="text" name="addr_work_street">
-                                    <label for="{{view.cid}}-addr-work-street">Street</label>
+                                    <input id="{{view.cid}}-addr-work-street" placeholder="Street" type="text" name="addr_work_street">
                                 </div>
                                 <div class="input-field locality">
-                                    <input id="{{view.cid}}-addr-work-locality" type="text" name="addr_work_locality">
-                                    <label for="{{view.cid}}-addr-work-locality">Locality</label>
+                                    <input id="{{view.cid}}-addr-work-locality" placeholder="Locality" type="text" name="addr_work_locality">
                                 </div>
                                 <div class="input-field region">
-                                    <input id="{{view.cid}}-addr-work-region" type="text" name="addr_work_region">
-                                    <label for="{{view.cid}}-addr-work-region">Region</label>
+                                    <input id="{{view.cid}}-addr-work-region" placeholder="Region" type="text" name="addr_work_region">
                                 </div>
                                 <div class="input-field pcode">
-                                    <input id="{{view.cid}}-addr-work-pcode" type="text" name="addr_work_pcode">
-                                    <label for="{{view.cid}}-addr-work-pcode">Postal code</label>
+                                    <input id="{{view.cid}}-addr-work-pcode" placeholder="Postal code" type="text" name="addr_work_pcode">
                                 </div>
                                 <div class="input-field country">
-                                    <input id="{{view.cid}}-addr-work-country" type="text" name="addr_work_country">
-                                    <label for="{{view.cid}}-addr-work-country">Country name</label>
+                                    <input id="{{view.cid}}-addr-work-country" placeholder="Country name" type="text" name="addr_work_country">
                                 </div>
                             </div>
                         </div>

@@ -6217,6 +6217,7 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
     width: 100%;
     padding: 0 0 6px 38px;
+    margin: 16px 0;
 }
 
 .vcard .details-icon {
@@ -6347,7 +6348,7 @@ input[type='range'].voice-message-volume:focus {
 /* ------------------ VCARD EDIT ---------------------- */
 
 .account-vcard-edit-wrap .panel-content-wrap {
-    top: 70px;
+    top: 64px;
     bottom: 54px;
 }
 
@@ -6358,6 +6359,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .vcard .input-field {
+    margin-top: 8px;
 }
 
 .vcard .input-field.description textarea {
@@ -6381,7 +6383,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .vcard .input-field .datepicker {
-    width: 80px;
+    width: 100px;
 }
 
 .vcard .avatar-wrap {
@@ -6402,7 +6404,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .vcard .input-label {
-    height: 16px;
+    height: 26px;
+    padding-top: 6px;
     font-size: 14px;
     line-height: 16px;
     color: #616161;
