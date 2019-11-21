@@ -337,6 +337,28 @@ define([
             return markup_body.join("").trim();
         },
 
+        render_data_form: function (data_form) {
+            let $data_form = $('<div class="data-form"/>');
+            data_form.fields.forEach(function (field) {
+                if (field.type === 'hidden')
+                    return;
+                if (field.type === 'fixed') {
+                    let $fixed_field = $('<div class="data-form-field fixed-field"/>');
+                    field.label && $fixed_field.append($('<div class="label"/>').text(field.label));
+                    field.values.forEach(function (value) {
+                        let $input = $('<div class="value"/>').text(value);
+                        $fixed_field.append($input);
+                    }.bind(this));
+                    $data_form.append($fixed_field);
+                }
+                if (field.type === 'boolean') {
+                    let $input = $(`<button id=${field.var} class="data-form-field ground-color-100 btn-dark btn-flat btn-main boolean-field"/>`).text(field.label);
+                    $data_form.append($input);
+                }
+            }.bind(this));
+            return $data_form;
+        },
+
         copyTextToClipboard: function(text, callback_msg, errback_msg) {
             if (!window.navigator.clipboard) {
                 return;
