@@ -3826,11 +3826,6 @@ define("xabber-chats", function () {
             }.bind(this));
             message.set('message', body_message.trim());
             //  loaded and send image
-            if (is_image) {
-                if (images.length > 1) {
-                    template_for_images = this.createImageGrid(attrs);
-                }
-            }
             if (images.length > 0) {
                 if (images.length > 1) {
                     if (images.length > 6) {
