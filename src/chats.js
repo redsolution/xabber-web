@@ -5015,6 +5015,7 @@ define("xabber-chats", function () {
             }
 
             var contact_jid = is_sender ? to_bare_jid : from_bare_jid;
+            options.replaced && (contact_jid = $message.children('replace').attr('conversation'));
 
             if (contact_jid === this.account.get('jid')) {
                 xabber.warn('Message from me to me');
