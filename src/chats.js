@@ -293,11 +293,11 @@ define("xabber-chats", function () {
                 message = msgid && this.get(msgid);
 
             if (options.replaced) {
-                if (!message)
-                    return;
                 $message = $message.find('replace message');
                 body = $message.children('body').text();
                 message = this.find(m => m.get('archive_id') === $message.children('stanza-id').attr('id'));
+                if (!message)
+                    return;
                 from_jid = message.get('from_jid');
                 msgid = message.get('msgid');
                 let xml = message.get('xml');
