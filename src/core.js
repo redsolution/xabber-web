@@ -80,7 +80,12 @@
         },
 
         onQuit: function () {
-            window.localStorage.clear();
+            var full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            for (var key in window.localStorage) {
+                if (key.startsWith(full_storage_name)) {
+                    window.localStorage.removeItem(key);
+                }
+            }
         },
 
         throwNewVersion: function () {
@@ -96,7 +101,6 @@
                 {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
-                    // window.localStorage.clear();
                     window.location.reload(true);
                 }
             });
