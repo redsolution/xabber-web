@@ -938,7 +938,6 @@ define("xabber-chats", function () {
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
             this.contact.on("destroy", this.destroy, this);
-            this.on("get_retractions_list", this.getAllMessageRetractions, this);
         },
 
         recountUnread: function () {
@@ -1423,12 +1422,6 @@ define("xabber-chats", function () {
                         utils.dialogs.error("You have no permission to clear message archive");
                     errback && errback();
                 }.bind(this));
-        },
-
-        getAllMessageRetractions: function () {
-            var retractions_query = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
-                .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version, less_than: 4});
-            this.account.sendIQ(retractions_query);
         },
 
         showAcceptedRequestMessage: function () {
@@ -2533,7 +2526,6 @@ define("xabber-chats", function () {
                         if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
                             this.getMessageArchive({after: rsm.last}, {missed_history: true});
                         if (this.contact.get('group_chat')) {
-                            options.last_history && this.model.trigger("get_retractions_list");
                             if (!this.contact.my_info)
                                 this.contact.getMyInfo();
                         }
@@ -4765,7 +4757,7 @@ define("xabber-chats", function () {
                 if (participant_version && contact.participants && contact.participants.version < participant_version)
                     contact.trigger('update_participants');
             }
-            if ($message.find('replace').length) {
+            if ($message.find('replace[xmlns="'+ Strophe.NS.REWRITE +'#notify"]').length) {
                 !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
                 if (!chat)
                     return;
