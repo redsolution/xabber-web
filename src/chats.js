@@ -3378,6 +3378,10 @@ define("xabber-chats", function () {
                 }.bind(this));
                 return;
             }
+            if ($msg.find('.data-form').length) {
+                this.showMessageAuthor($msg);
+                return;
+            }
             var is_system = $prev_msg.hasClass('system'),
                 is_same_sender = ($msg.data('from') === $prev_msg.data('from')),
                 is_same_date = moment($msg.data('time')).startOf('day')
@@ -4007,7 +4011,7 @@ define("xabber-chats", function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (!is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
+                if (message.get('data_form') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
