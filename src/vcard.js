@@ -353,7 +353,7 @@ define("xabber-vcard", function () {
         },
 
         changePlaceholder: function () {
-            let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim()
+            let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim() || this.model.get('jid');
             this.$('.nickname input').attr('placeholder', nickname_placeholder);
         },
 
