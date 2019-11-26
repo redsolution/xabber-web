@@ -1284,6 +1284,7 @@ define("xabber-accounts", function () {
             },
 
             render: function (options) {
+                this.$el.switchClass('vcard-edit', options.right == 'vcard_edit');
                 this.$('.settings-tab[data-block-name="tokens"]').hideIf(this.model.get('auth_type') !== 'x-token');
                 this.$('.settings-tab').removeClass('active');
                 this.$('.settings-tab[data-block-name="'+options.block_name+'"]').addClass('active');

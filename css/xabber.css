@@ -5981,6 +5981,15 @@ input[type='range'].voice-message-volume:focus {
     display: none;
 }
 
+.vcard-edit .circle-avatar .set-groupchat-avatar {
+    opacity: 0.6;
+    display: block;
+}
+
+.vcard-edit .circle-avatar:hover .set-groupchat-avatar {
+    opacity: 0.8;
+}
+
 .groupchat-details-panel .circle-avatar .set-groupchat-avatar {
     padding: 48px;
 }
@@ -6220,6 +6229,11 @@ input[type='range'].voice-message-volume:focus {
     margin: 16px 0;
 }
 
+.groupchat-details-panel .vcard .info-wrap,
+.contact-details-panel .vcard .info-wrap {
+    margin: 0;
+}
+
 .vcard .details-icon {
     top: 2px;
 }
@@ -6413,11 +6427,6 @@ input[type='range'].voice-message-volume:focus {
 
 .vcard .avatar-and-names-info-wrap {
     display: flex;
-}
-
-.vcard .label-wrap {
-    padding: 8px 0;
-    color: #424242;
 }
 
 /* ---------------- CONTACT DETAILS ------------------- */

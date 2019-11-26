@@ -313,6 +313,9 @@ define("xabber-vcard", function () {
         avatar_size: constants.AVATAR_SIZES.ACCOUNT_VCARD_EDIT,
 
         events: {
+            "input .first-name input": "changePlaceholder",
+            "input .middle-name input": "changePlaceholder",
+            "input .last-name input": "changePlaceholder",
             "change .circle-avatar input": "changeAvatar",
             "click .btn-vcard-save": "save",
             "click .btn-vcard-back": "back"
@@ -345,7 +348,15 @@ define("xabber-vcard", function () {
             this.data.set('saving', false);
             this.setData();
             Materialize.updateTextFields();
+            this.changePlaceholder();
             this.updateScrollBar();
+        },
+
+        changePlaceholder: function () {
+            if (!this.$('.nickname input').val()) {
+                let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim()
+                this.$('.nickname input').attr('placeholder', nickname_placeholder);
+            }
         },
 
         setData: function () {
