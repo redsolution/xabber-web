@@ -353,10 +353,8 @@ define("xabber-vcard", function () {
         },
 
         changePlaceholder: function () {
-            if (!this.$('.nickname input').val()) {
-                let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim()
-                this.$('.nickname input').attr('placeholder', nickname_placeholder);
-            }
+            let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim()
+            this.$('.nickname input').attr('placeholder', nickname_placeholder);
         },
 
         setData: function () {
