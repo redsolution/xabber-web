@@ -149,7 +149,7 @@ define("xabber-accounts", function () {
                             .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                             .c('item', {id: avatar_hash})
                             .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                            .c('info', {bytes: image.size, id: avatar_hash});
+                            .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
                     this.sendIQ(iq_pub_data, function () {
                             this.sendIQ(iq_pub_metadata, function () {
                                     callback && callback(avatar_hash);
@@ -1350,7 +1350,7 @@ define("xabber-accounts", function () {
                 }
                 utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                     if (image) {
-                        this.model.pubAvatar({base64: image, hash: hash, size: size},
+                        this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type},
                             function () {
                                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                                 this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');

@@ -194,7 +194,7 @@ define("xabber-contacts", function () {
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA + node})
                         .c('item', {id: avatar_hash})
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                        .c('info', {bytes: image.size, id: avatar_hash, type: 'image/jpeg'});
+                        .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
                 this.account.sendIQ(iq_pub_data, function () {
                         this.account.sendIQ(iq_pub_metadata, function () {
                                 callback && callback(avatar_hash);

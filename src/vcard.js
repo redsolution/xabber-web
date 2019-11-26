@@ -310,13 +310,11 @@ define("xabber-vcard", function () {
         className: 'account-vcard-edit-wrap',
         template: templates.vcard_edit,
         ps_selector: '.panel-content',
-        avatar_size: constants.AVATAR_SIZES.ACCOUNT_VCARD_EDIT,
 
         events: {
             "input .first-name input": "changePlaceholder",
             "input .middle-name input": "changePlaceholder",
             "input .last-name input": "changePlaceholder",
-            "change .circle-avatar input": "changeAvatar",
             "click .btn-vcard-save": "save",
             "click .btn-vcard-back": "back"
         },
@@ -366,8 +364,6 @@ define("xabber-vcard", function () {
             this.$('.last-name input').val(vcard.last_name);
             this.$('.middle-name input').val(vcard.middle_name);
 
-            this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
-
             this.$('.birthday input').val(vcard.birthday);
 
             this.$('.role input').val(vcard.role);
@@ -416,8 +412,6 @@ define("xabber-vcard", function () {
             vcard.last_name = this.$('.last-name input').val();
             vcard.middle_name = this.$('.middle-name input').val();
 
-            // this.avatar && (vcard.photo.image = this.avatar);
-
             vcard.birthday = this.$('.birthday input').val();
 
             vcard.role = this.$('.role input').val();
@@ -460,30 +454,6 @@ define("xabber-vcard", function () {
             return vcard;
         },
 
-        changeAvatar: function (ev) {
-            var field = ev.target;
-            if (!field.files.length) {
-                return;
-            }
-            var file = field.files[0];
-            field.value = '';
-            if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
-                utils.dialogs.error('File is too large');
-                return;
-            } else if (!file.type.startsWith('image')) {
-                utils.dialogs.error('Wrong image');
-                return;
-            }
-            utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
-                if (image) {
-                    this.avatar = {base64: image, hash: hash, size: size};
-                    this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                } else {
-                    utils.dialogs.error('Wrong image');
-                }
-            }.bind(this));
-        },
-
         updateSaveButton: function () {
             this.$('.btn-vcard-save').text(this.data.get('saving') ? 'Saving...' : 'Save');
         },
@@ -493,7 +463,6 @@ define("xabber-vcard", function () {
                 return;
             }
             this.data.set('saving', true);
-            this.avatar && this.model.pubAvatar(this.avatar);
             this.model.setVCard(this.getData(),
                 function () {
                     this.model.getVCard();
