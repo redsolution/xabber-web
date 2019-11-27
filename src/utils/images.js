@@ -76,7 +76,7 @@ define(["xabber-dependencies"], function (deps) {
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
         ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
-        var image = canvas.toDataURL().replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+        var image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
         return image;
     };
 

@@ -3332,7 +3332,7 @@ define("xabber-chats", function () {
                     if (this.contact.my_info) {
                         image = this.contact.my_info.get('b64_avatar');
                         if (!image)
-                            image = Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
+                            image = this.account.cached_image || Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
                         else
                             image = Images.getCachedImage(image);
                     }
@@ -3340,13 +3340,7 @@ define("xabber-chats", function () {
                 if (!image)
                     image = this.account.cached_image;
             } else if (contact) {
-                if (this.contact.get('group_chat')) {
-                    var author = $fwd_message.find('.msg-wrap .fwd-msg-author').text();
-                    image = Images.getDefaultAvatar(author);
-                }
-                else {
-                    image = contact.cached_image || Images.getDefaultAvatar(contact);
-                }
+                image = contact.cached_image || (this.contact.get('group_chat') ? Images.getDefaultAvatar($fwd_message.find('.msg-wrap .fwd-msg-author').text()) : Images.getDefaultAvatar(contact));
             }
             $avatar.setAvatar(image, this.avatar_size);
             $avatar.removeClass('hidden');
@@ -4011,7 +4005,7 @@ define("xabber-chats", function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (message.get('data_form') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
+                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
