@@ -218,6 +218,10 @@ define("xabber-vcard", function () {
             $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
             $info.showIf(vcard.nickname || vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
 
+            $info = this.$('.nickname-info-wrap');
+            $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
+            $info.showIf(vcard.nickname);
+
             $info = this.$('.birthday-info-wrap');
             $info.find('.birthday').showIf(vcard.birthday).find('.value').text(vcard.birthday);
             $info.showIf(vcard.birthday);
