@@ -138,6 +138,10 @@ define("xabber-accounts", function () {
                 },
 
                 pubAvatar: function (image, callback, errback) {
+                    if (!image) {
+                        this.removeAvatar(callback, errback);
+                        return;
+                    }
                     var avatar_hash = image.hash || sha1(image.base64),
                         iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
                             .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
@@ -161,6 +165,20 @@ define("xabber-accounts", function () {
                         function (data_error) {
                             errback && errback(data_error);
                         }.bind(this));
+                },
+
+                removeAvatar: function (callback, errback) {
+                    let  iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                        .c('item')
+                        .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA});
+                    this.sendIQ(iq_pub_metadata, function () {
+                            callback && callback();
+                        }.bind(this),
+                        function () {
+                            errback && errback();
+                        });
                 },
 
                 getAvatar: function (avatar, callback, errback) {
