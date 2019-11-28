@@ -3880,16 +3880,14 @@ body {
     background-image: url(../images/loading.png);
     background-position: center center;
     background-repeat: no-repeat;
-    border: 0.5px solid #E0E0E0;
     min-height: 48px;
     min-width: 48px;
-    display: inline-flex;
-    background-color: #FFF;
-    justify-content: center;
-    align-items: center;
-    max-height: 256px;
-    padding: 0.5px;
-    box-sizing: content-box;
+    border: 1px solid #E0E0E0;
+    margin: 1px;
+    display: inline-block !important;
+    overflow: hidden;
+    width: 55%;
+    max-height: 300px;
 }
 
 .img-content-wrap {
@@ -4093,9 +4091,10 @@ body {
 }
 
 img.uploaded-img {
-    max-height: 256px;
-    max-width: 300px;
-    display: block;
+    display: inline-block;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
 }
 
 img.fwd-img-preview {
