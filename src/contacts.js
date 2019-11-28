@@ -418,7 +418,7 @@ define("xabber-contacts", function () {
                 var queryid = uuid(),
                     iq = $iq({type: 'set', to: this.get('jid')})
                         .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                        .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                        .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                         .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                         .c('value').t(Strophe.NS.MAM).up().up()
                         .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})

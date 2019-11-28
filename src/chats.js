@@ -255,33 +255,6 @@ define("xabber-chats", function () {
             return markups;
         },
 
-          parseDataForm: function ($dataform, options) {
-              options = options || {};
-              let type = $dataform.attr('type'),
-                  fields = [];
-              $dataform.children('field').each(function (idx, field) {
-                  let $field = $(field),
-                      attrs = {},
-                      field_var = $field.attr('var'),
-                      field_type = $field.attr('type'),
-                      field_label = $field.attr('label'),
-                      field_value = [];
-                  $field.find('value').each(function (i, value) {
-                      field_value.push($(value).text());
-                  }.bind(this));
-                  field_var && (attrs.var = field_var);
-                  field_type && (attrs.type = field_type);
-                  field_label && (attrs.label = field_label);
-                  field_value && (attrs.values = field_value);
-                  fields.push(attrs);
-              }.bind(this));
-              return {
-                  type: type,
-                  addresses: options.addresses,
-                  fields: fields
-              };
-          },
-
         createFromStanza: function ($message, options) {
             options || (options = {});
             let $delay = options.delay || $message.children('delay'),
@@ -340,14 +313,14 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-            if ($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]').length &&
-                $message.find('x[xmlns="' + Strophe.NS.XDATA + '"] field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
+            if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
+                $message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"] field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
                 let addresses = [];
                 $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address').each(function (idx, address) {
                     let $address = $(address);
                     addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
                 }.bind(this));
-                attrs.data_form = this.parseDataForm($message.find('x[xmlns="' + Strophe.NS.XDATA + '"]'), {addresses: addresses});
+                attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
             }
 
             if ($forward_references.length) {
@@ -976,24 +949,16 @@ define("xabber-chats", function () {
             let data_form = message.get('data_form');
             if (!data_form)
                 return;
-            let msg = $msg({type: 'chat'})
-                .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'});
+            let msg = $msg({type: 'chat'});
             data_form.fields.forEach(function (field) {
-                let values = field.values;
-                delete field.values;
-                msg.c('field', field);
-                values.forEach(function (value) {
-                    if (field.type  === 'boolean') {
-                        if (field.var === variable)
-                            value = true;
-                        else
-                            value = false;
-                    }
-                    msg.c('value').t(value).up();
-                }.bind(this));
-                field.values = values;
-                msg.up();
+                if (field.type  === 'boolean') {
+                    if (field.var === variable)
+                        field.values = [true];
+                    else
+                        field.values = [false];
+                }
             }.bind(this));
+            msg = this.account.addDataFormToStanza(msg, data_form);
             data_form.addresses.forEach(function (address) {
                 if (address.type === 'replyto') {
                     $(msg.nodeTree).attr('to', address.jid);
@@ -2455,7 +2420,7 @@ define("xabber-chats", function () {
             else
                 iq = $iq({type: 'set'});
             iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                    .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                    .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                     .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                     .c('value').t(Strophe.NS.MAM).up().up();
             if (!is_groupchat)
@@ -5997,9 +5962,10 @@ define("xabber-chats", function () {
             "click .btn-notifications": "changeNotifications",
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
-            "click .btn-invite-users": "inivteUsers",
+            "click .btn-invite-users": "inviteUsers",
             "click .btn-retract-own-messages": "retractOwnMessages",
-            "click .btn-close-chat": "deleteChat",
+            "click .btn-delete-chat": "deleteChat",
+            "click .btn-close-chat": "deactivateChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-search-messages": "renderSearchPanel",
             "click .btn-jingle-message": "sendJingleMessage"
@@ -6076,6 +6042,7 @@ define("xabber-chats", function () {
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
+            this.$('.btn-close-chat').showIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
         },
 
@@ -6196,7 +6163,7 @@ define("xabber-chats", function () {
             (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
         },
 
-        inivteUsers: function () {
+        inviteUsers: function () {
             xabber.invite_panel.open(this.account, this.contact);
         },
 
@@ -6221,6 +6188,26 @@ define("xabber-chats", function () {
             this.contact.declineSubscription();
             this.contact.removeFromRoster();
             this.contact.set('in_roster', false);
+        },
+
+        deactivateChat: function () {
+            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
+            this.account.sendIQ(iq_get_properties, function (properties) {
+                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')),
+                    status_field = data_form.fields.find(field => field.var == 'status' && field.type !== 'fixed');
+                if (status_field) {
+                    let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
+                        idx = data_form.fields.indexOf(status_field);
+                    status_field.values = ['inactive'];
+                    data_form.fields[idx] = status_field;
+                    iq_set_status = this.account.addDataFormToStanza(iq_set_status, data_form);
+                    this.account.sendIQ(iq_set_status);
+                }
+                else
+                    utils.dialogs.error('You have no permission to close chat');
+            }.bind(this));
         },
 
         closeChat: function () {

@@ -205,6 +205,52 @@ define("xabber-accounts", function () {
                     return res;
                 },
 
+                parseDataForm: function ($dataform, options) {
+                    options = options || {};
+                    let type = $dataform.attr('type'),
+                        title = $dataform.children('title').text(),
+                        instructions = $dataform.children('instructions').text(),
+                        fields = [],
+                        data_form = {};
+                    $dataform.children('field').each(function (idx, field) {
+                        let $field = $(field),
+                            attrs = {},
+                            field_var = $field.attr('var'),
+                            field_type = $field.attr('type'),
+                            field_label = $field.attr('label'),
+                            field_value = [];
+                        $field.children('value').each(function (i, value) {
+                            field_value.push($(value).text());
+                        }.bind(this));
+                        field_var && (attrs.var = field_var);
+                        field_type && (attrs.type = field_type);
+                        field_label && (attrs.label = field_label);
+                        field_value && (attrs.values = field_value);
+                        fields.push(attrs);
+                    }.bind(this));
+                    type && (data_form.type = type);
+                    title && (data_form.title = title);
+                    instructions && (data_form.instructions = instructions);
+                    fields.length && (data_form.fields = fields);
+                    return data_form;
+                },
+
+            addDataFormToStanza: function ($stanza, data_form) {
+                $stanza.c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'});
+                data_form.title && $stanza.c('title').t(data_form.title).up();
+                data_form.instructions && $stanza.c('instructions').t(data_form.instructions).up();
+                data_form.fields.forEach(function (field) {
+                    let field_attrs = _.clone(field);
+                    delete field_attrs.values;
+                    $stanza.c('field', field_attrs);
+                    field.values.forEach(function (value) {
+                        $stanza.c('value').t(value).up();
+                    }.bind(this));
+                    $stanza.up();
+                }.bind(this));
+                return $stanza;
+            },
+
                 sendPres: function (stanza) {
                     if (this.connection.authenticated) {
                         this.connection.send(stanza);
