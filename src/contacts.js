@@ -346,7 +346,8 @@ define("xabber-contacts", function () {
                         }
                     }
                 }
-                if (($(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]').length > 0)&&!($(presence).attr('type') == 'unavailable')) {
+                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
                     if (!this.get('group_chat')) {
                         this.set('group_chat', true);
                         this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
@@ -366,6 +367,7 @@ define("xabber-contacts", function () {
                 var $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
                     name = $group_chat.find('name').text(),
                     model = $group_chat.find('membership').text(),
+                    status = $group_chat.find('status').text(),
                     anonymous = $group_chat.find('privacy').text(),
                     searchable = $group_chat.find('index').text(),
                     description = $group_chat.find('description').text(),
@@ -379,6 +381,7 @@ define("xabber-contacts", function () {
                         anonymous: anonymous,
                         searchable: searchable,
                         model: model,
+                        status: status,
                         description: description,
                         members_num: members_num,
                         online_members_num: online_members_num
@@ -1554,13 +1557,19 @@ define("xabber-contacts", function () {
 
             updateParticipants: function () {
                 this.participantsRequest(function (version) {
-                    if (this.model.get('group_info') && this.participants.length != this.model.get('group_info').members_num) {
-                        this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
-                        this.participants.resetParticipants();
-                        this.updateParticipants();
+                    if (this.model.get('group_info')) {
+                        if (this.model.get('group_info').status === 'inactive')
+                            return;
+                        if (this.participants.length != this.model.get('group_info').members_num) {
+                            this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
+                            this.participants.resetParticipants();
+                            this.model.get('group_info').members_num = 0;
+                            this.updateParticipants();
+                        }
                         return;
                     }
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
+                    (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                     (this.participants.version < version) && this.participants.updateVersion();
                     this.participants.each(function (participant) {
                         this.renderMemberItem(participant);
