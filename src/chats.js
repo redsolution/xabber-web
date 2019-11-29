@@ -4594,7 +4594,7 @@ define("xabber-chats", function () {
                             this.account.chat_settings.updateCachedAvatars(member_id, photo_id, new_avatar);
                             if (contact.my_info) {
                                 if (member_id == contact.my_info.id) {
-                                    contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar });
+                                    contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar});
                                     contact.trigger('update_my_info');
                                 }
                             }
@@ -4613,7 +4613,7 @@ define("xabber-chats", function () {
                             contact.cached_image = Images.getCachedImage(image);
                             xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: "", avatar: image, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                             contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
-                            contact.set('photo_hash', "");
+                            contact.set('photo_hash', null);
                             contact.set('image', image);
                         }
                         return;
@@ -4630,6 +4630,14 @@ define("xabber-chats", function () {
                 }
             }
             else if (from_jid === this.account.get('jid')) {
+                if (!photo_id) {
+                    let image = Images.getDefaultAvatar(this.account.get('name'));
+                    this.account.cached_image = Images.getCachedImage(image);
+                    let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: image};
+                    this.account.set(avatar_attrs);
+                    this.account.save(avatar_attrs);
+                    return;
+                }
                 this.account.getAvatar(photo_id, function (data_avatar) {
                     this.account.cached_image = Images.getCachedImage(data_avatar);
                     let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};

@@ -61,7 +61,7 @@ define("xabber-contacts", function () {
             getContactInfo: function () {
                 xabber.cached_contacts_info.getContactInfo(this.get('jid'), function (contact_info) {
                     if (!_.isNull(contact_info)) {
-                        if ((contact_info.hash === this.get('photo_hash')) || !this.get('photo_hash')) {
+                        if ((contact_info.hash === this.get('photo_hash')) || !this.get('photo_hash') && !_.isNull(this.get('photo_hash'))) {
                             this.cached_image = Images.getCachedImage(contact_info.avatar);
                             contact_info.avatar_priority && this.set('avatar_priority', contact_info.avatar_priority);
                             this.set('photo_hash', contact_info.hash);
