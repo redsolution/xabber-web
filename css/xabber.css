@@ -3830,6 +3830,10 @@ body {
     cursor: pointer;
 }
 
+.chat-message .chat-msg-media-content {
+    display: flex;
+}
+
 .chat-message .chat-msg-media-content,
 .chat-message .chat-msg-content {
     width: 100%;
@@ -3884,9 +3888,11 @@ body {
     min-width: 48px;
     border: 1px solid #E0E0E0;
     margin: 1px;
-    display: inline-block !important;
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
-    width: 55%;
+    max-width: 55%;
     max-height: 300px;
 }
 
@@ -4091,10 +4097,10 @@ body {
 }
 
 img.uploaded-img {
-    display: inline-block;
-    object-fit: cover;
+    /*display: inline-block;*/
+    /*object-fit: cover;
     width: 100%;
-    height: 100%;
+    height: 100%;*/
 }
 
 img.fwd-img-preview {

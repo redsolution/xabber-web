@@ -3860,16 +3860,16 @@ define("xabber-chats", function () {
 
         createImage: function(image) {
             var imgContent = new Image();
-                /*maxHeight = 256,
+                maxHeight = 256,
                 maxWidth = 300;
             if (image.height)
                 imgContent.height = image.height;
             if (image.width)
-                imgContent.width = image.width;*/
+                imgContent.width = image.width;
             imgContent.src = image.url;
             $(imgContent).addClass('uploaded-img popup-img');
             $(imgContent).attr('data-mfp-src', image.url);
-            /*if (imgContent.height && imgContent.width) {
+            if (imgContent.height && imgContent.width) {
                 if (imgContent.width > maxWidth) {
                     imgContent.height = imgContent.height * (maxWidth/imgContent.width);
                     imgContent.width = maxWidth;
@@ -3878,7 +3878,7 @@ define("xabber-chats", function () {
                     imgContent.width = imgContent.width * (maxHeight/imgContent.height);
                     imgContent.height = maxHeight;
                 }
-            }*/
+            }
             return imgContent;
         },
 
