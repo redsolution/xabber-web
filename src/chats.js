@@ -6375,6 +6375,7 @@ define("xabber-chats", function () {
                         ['clean']
                     ]
                 },
+                formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'quill_emoji', 'mention'],
                 placeholder: 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
