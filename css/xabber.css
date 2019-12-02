@@ -3892,8 +3892,8 @@ body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    max-width: 55%;
-    max-height: 300px;
+    max-width: 70%;
+    max-height: 400px;
 }
 
 .img-content-wrap {

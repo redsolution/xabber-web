@@ -3860,8 +3860,8 @@ define("xabber-chats", function () {
 
         createImage: function(image) {
             var imgContent = new Image();
-                maxHeight = 256,
-                maxWidth = 300;
+                maxHeight = 400,
+                maxWidth = (xabber.main_panel.$el.width() * 0.715 - 176) * 0.7;
             if (image.height)
                 imgContent.height = image.height;
             if (image.width)
