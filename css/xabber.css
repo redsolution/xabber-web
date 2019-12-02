@@ -6989,6 +6989,11 @@ input[type='range'].voice-message-volume:focus {
     margin: 6px 0 6px 6px;
 }
 
+.expanded-message .chat-text-content {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
 /* ------------------- PLACEHOLDERS ------------------- */
 
 .placeholder {

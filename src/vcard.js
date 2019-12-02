@@ -211,12 +211,11 @@ define("xabber-vcard", function () {
             $info.showIf(vcard.jabber_id);
 
             $info = this.$('.personal-info-wrap');
-            $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
             $info.find('.fullname').showIf(vcard.fullname).find('.value').text(vcard.fullname);
             $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
             $info.find('.middle-name').showIf(vcard.middle_name).find('.value').text(vcard.middle_name);
             $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
-            $info.showIf(vcard.nickname || vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
+            $info.showIf(vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
 
             $info = this.$('.nickname-info-wrap');
             $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
