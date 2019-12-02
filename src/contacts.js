@@ -1565,8 +1565,8 @@ define("xabber-contacts", function () {
                             this.participants.resetParticipants();
                             this.model.get('group_info').members_num = 0;
                             this.updateParticipants();
+                            return;
                         }
-                        return;
                     }
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
