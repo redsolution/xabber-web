@@ -6785,8 +6785,6 @@ define("xabber-chats", function () {
                         arr_text.forEach(function (item, idx) {
                             if (item == '\n')
                                 arr_text.splice(idx, 1, '<br>');
-                            if (item == ' ')
-                                arr_text.splice(idx, 1, '&nbsp');
                         }.bind(this));
                         text = "<p>" + arr_text.join("").emojify({tag_name: 'img'}) + "</p>";
                         window.document.execCommand('insertHTML', false, text);
