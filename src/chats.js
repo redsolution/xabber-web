@@ -4342,6 +4342,7 @@ define("xabber-chats", function () {
         },
 
         open: function ($message) {
+            this.$el.css('width', $message.find('.chat-text-content').text().length <= 60 ? 540 : xabber.main_panel.$el.width() * 0.715);
             this.$el.openModal({
                 ready: function () {
                     this.updateScrollBar();
