@@ -1558,6 +1558,7 @@ define("xabber-contacts", function () {
             updateParticipants: function () {
                 this.participantsRequest(function (version) {
                     if (this.model.get('group_info')) {
+                        (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                         if (this.model.get('group_info').status === 'inactive')
                             return;
                         if (this.participants.length != this.model.get('group_info').members_num) {
@@ -1569,7 +1570,6 @@ define("xabber-contacts", function () {
                         }
                     }
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
-                    (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                     (this.participants.version < version) && this.participants.updateVersion();
                     this.participants.each(function (participant) {
                         this.renderMemberItem(participant);
