@@ -188,32 +188,28 @@ define("xabber-chats", function () {
 
         parseGroupchat: function ($message) {
             let group_chat = $message.children('reference[type="groupchat"]').first(),
-                x_element = $message.children('x'),
                 user_info = group_chat.children('user'),
                 groupchat_jid = Strophe.getBareJidFromJid($message.attr('from')),
-                avatar = user_info.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]'),
-                role = user_info.children('role').text(),
-                nickname = user_info.children('nickname').text(),
-                jid = user_info.children('jid').text(),
-                badge = user_info.children('badge').text(),
-                user_id = user_info.attr('id');
-            !nickname.trim().length && (nickname = jid || id);
-            (groupchat_jid === this.account.get('jid')) && (Strophe.getBareJidFromJid($message.attr('to')));
-            let attrs = {
-                from_jid: jid || user_id,
-                user_info: {
+                attrs = {};
+            (groupchat_jid === this.account.get('jid')) && (groupchat_jid = Strophe.getBareJidFromJid($message.attr('to')));
+            if (user_info.length) {
+                let avatar = user_info.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]'),
+                    role = user_info.children('role').text(),
+                    nickname = user_info.children('nickname').text(),
+                    jid = user_info.children('jid').text(),
+                    badge = user_info.children('badge').text(),
+                    user_id = user_info.attr('id');
+                !nickname.trim().length && (nickname = jid || id);
+                attrs.user_info = {
                     id: user_id,
                     jid: jid,
                     nickname: nickname,
                     role: role[0].toUpperCase() + role.substr(1, role.length - 1),
                     avatar: avatar.find('info').attr('id'),
                     badge: badge
-                }
-            };
-            x_element.attr('version') && (attrs.participants_version = x_element.attr('version'));
-            if (x_element.attr('xmlns') && x_element.attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
-                attrs.type = 'system';
-                attrs.from_jid = groupchat_jid;
+                };
+                attrs.from_jid = jid || user_id;
+                attrs.groupchat_jid = groupchat_jid;
             }
             return attrs;
         },
@@ -311,6 +307,11 @@ define("xabber-chats", function () {
                 _.extend(attrs, groupchat_attrs);
                 legacy_content.push({start: parseInt($groupchat_reference.attr('begin')), end: parseInt($groupchat_reference.attr('end')), type: 'groupchat'});
                 body = "";
+            }
+
+
+            if ($message.find('x').length && $message.find('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
+                attrs.type = 'system';
             }
 
             if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
