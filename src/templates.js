@@ -74,6 +74,8 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/participants.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
     "text!templates/contacts/group_chats/private_participant_details.html",
+    "text!templates/contacts/group_chats/set_status.html",
+    "text!templates/contacts/group_chats/status_item.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
@@ -103,7 +105,6 @@ define("xabber-templates", [
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
     "text!templates/chats/group_chats/mention_item.html",
-    "text!templates/chats/group_chats/set_status.html",
 
     "text!templates/mentions/mentions_panel.html",
     "text!templates/mentions/mentions_placeholder.html",
@@ -237,6 +238,8 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.participants');
     addTemplate('contacts.group_chats.badge_edit_view');
     addTemplate('contacts.group_chats.private_participant_details');
+    addTemplate('contacts.group_chats.set_status');
+    addTemplate('contacts.group_chats.status_item');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');
@@ -266,7 +269,6 @@ define("xabber-templates", [
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
     addTemplate('chats.group_chats.mention_item');
-    addTemplate('chats.group_chats.set_status');
 
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');

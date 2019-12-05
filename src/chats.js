@@ -6120,19 +6120,8 @@ define("xabber-chats", function () {
         },
 
         setStatus: function () {
-            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-            this.account.sendIQ(iq_get_properties, function (properties) {
-                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')),
-                    options = data_form.fields.find(field => field.var == 'status').options || [],
-                    statuses_view = $(templates.group_chats.set_status({options: options}));
-                if (!options.length) {
-                    utils.dialogs.error("You have no permission to set group chat's status");
-                    return;
-                }
-                let set_status_view = new xabber.SetGroupchatStatusView({el: statuses_view});
-                set_status_view.open(this.contact, data_form);
-            }.bind(this));
+            let set_status_view = new xabber.SetGroupchatStatusView();
+            set_status_view.open(this.contact);
         },
 
         getActiveScreen: function () {

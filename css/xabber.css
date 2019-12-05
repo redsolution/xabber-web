@@ -2333,6 +2333,12 @@ body {
     display: block !important;
 }
 
+.status-values .loading-status {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
 .add-contact-modal .row {

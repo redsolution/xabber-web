@@ -554,23 +554,46 @@ define("xabber-contacts", function () {
 
         xabber.SetGroupchatStatusView = xabber.BasicView.extend({
             className: 'modal main-modal change-status-modal',
-            template: templates.set_status,
+            template: templates.group_chats.set_status,
 
             events: {
                 "click .status-values li": "changeStatus"
             },
 
-            open: function (contact, data_form) {
+            open: function (contact) {
                 this.contact = contact;
                 this.account = this.contact.account;
-                this.data_form = data_form;
-                this.highlightStatus(this.contact.get('group_info').status);
                 this.show();
+                this.getStatuses();
             },
 
             highlightStatus: function (status) {
                 this.$('.status-values li[data-value="'+status+'"]').addClass('active')
                     .siblings().removeClass('active');
+            },
+
+            getStatuses: function () {
+                let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
+                this.account.sendIQ(iq_get_properties, function (properties) {
+                    this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                    let options = this.data_form.fields.find(field => field.var == 'status').options || [];
+                    if (!options.length) {
+                        this.closeModal();
+                        utils.dialogs.error("You have no permission to set group chat's status");
+                        return;
+                    }
+                    this.renderStatuses(options);
+                }.bind(this));
+            },
+
+            renderStatuses: function (options) {
+                this.$('.status-values').html("");
+                options.forEach(function (option) {
+                    let $status_item = $(templates.group_chats.status_item({option: option}));
+                    this.$('.status-values').append($status_item);
+                }.bind(this));
+                this.highlightStatus(this.contact.get('group_info').status);
             },
 
             changeStatus: function (ev) {
@@ -592,7 +615,7 @@ define("xabber-contacts", function () {
             },
 
             setStatus: function (status) {
-                if (this.contact.get('group_info').status === status)
+                if (!this.data_form || this.contact.get('group_info').status === status)
                     return;
                 let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
