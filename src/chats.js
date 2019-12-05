@@ -3782,6 +3782,7 @@ define("xabber-chats", function () {
                 }
             }.bind(this));
             message.set('message', body_message.trim());
+            $message.find('.chat-msg-content').addClass('chat-msg-media-content').html();
             //  loaded and send image
             if (images.length > 0) {
                 if (images.length > 1) {
