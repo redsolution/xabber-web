@@ -1755,6 +1755,7 @@ body {
     background-color: #689F38;
 }
 
+[data-status=active],
 [data-status=online] {
     background-color: #388E3C;
 }
@@ -1768,6 +1769,7 @@ body {
 }
 
 [data-status=resolved],
+[data-status=inactive],
 [data-status=dnd] {
     background-color: #D32F2F;
 }
