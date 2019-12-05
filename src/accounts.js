@@ -218,14 +218,21 @@ define("xabber-accounts", function () {
                             field_var = $field.attr('var'),
                             field_type = $field.attr('type'),
                             field_label = $field.attr('label'),
-                            field_value = [];
+                            field_value = [], field_options = [];
                         $field.children('value').each(function (i, value) {
                             field_value.push($(value).text());
+                        }.bind(this));
+                        $field.children('option').each(function (i, option) {
+                            let $option = $(option),
+                                val = $option.children('value').text(),
+                                lbl = $option.attr('label');
+                            field_options.push({value: val, label: lbl});
                         }.bind(this));
                         field_var && (attrs.var = field_var);
                         field_type && (attrs.type = field_type);
                         field_label && (attrs.label = field_label);
-                        field_value && (attrs.values = field_value);
+                        field_value.length && (attrs.values = field_value);
+                        field_options.length && (attrs.options = field_options);
                         fields.push(attrs);
                     }.bind(this));
                     type && (data_form.type = type);
@@ -242,6 +249,7 @@ define("xabber-accounts", function () {
                 data_form.fields.forEach(function (field) {
                     let field_attrs = _.clone(field);
                     delete field_attrs.values;
+                    delete field_attrs.options;
                     $stanza.c('field', field_attrs);
                     field.values.forEach(function (value) {
                         $stanza.c('value').t(value).up();

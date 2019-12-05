@@ -6,7 +6,6 @@ define("xabber-contacts", function () {
             utils = env.utils,
             $ = env.$,
             $iq = env.$iq,
-            $msg = env.$msg,
             $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
@@ -550,6 +549,75 @@ define("xabber-contacts", function () {
             showDetails: function (screen) {
                 screen || (screen = 'contacts');
                 xabber.body.setScreen(screen, {right: 'contact_details', contact: this});
+            }
+        });
+
+        xabber.SetGroupchatStatusView = xabber.BasicView.extend({
+            className: 'modal main-modal change-status-modal',
+            template: templates.set_status,
+
+            events: {
+                "click .status-values li": "changeStatus"
+            },
+
+            open: function (contact, data_form) {
+                this.contact = contact;
+                this.account = this.contact.account;
+                this.data_form = data_form;
+                this.highlightStatus(this.contact.get('group_info').status);
+                this.show();
+            },
+
+            highlightStatus: function (status) {
+                this.$('.status-values li[data-value="'+status+'"]').addClass('active')
+                    .siblings().removeClass('active');
+            },
+
+            changeStatus: function (ev) {
+                var status = $(ev.target).closest('li').data('value');
+                this.highlightStatus(status);
+                this.do_change();
+                this.closeModal();
+            },
+
+            do_change: function () {
+                var status = this.$('.status-values li.active').data('value');
+                this.setStatus(status);
+            },
+
+            render: function () {
+                this.$el.openModal({
+                    complete: this.close.bind(this)
+                });
+            },
+
+            setStatus: function (status) {
+                if (this.contact.get('group_info').status === status)
+                    return;
+                let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
+                    status_field = this.data_form.fields.find(field => field.var === 'status'),
+                    idx = this.data_form.fields.indexOf(status_field);
+                status_field.values = [status];
+                this.data_form.fields[idx] = status_field;
+                iq_set_status = this.account.addDataFormToStanza(iq_set_status, this.data_form);
+                this.account.sendIQ(iq_set_status);
+            },
+
+            onHide: function () {
+                this.$el.detach();
+            },
+
+            close: function () {
+                var value = this.$('.status-message').val();
+                if (!value) {
+                    this.do_change();
+                }
+                this.closeModal();
+            },
+
+            closeModal: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
             }
         });
 
@@ -1174,7 +1242,7 @@ define("xabber-contacts", function () {
             },
 
             updateStatus: function () {
-                this.$('.status').attr('data-status', this.model.get('status'));
+                this.$('.main-info .status').attr('data-status', this.model.get('status'));
                 this.$('.status-message').text(this.model.getStatusMessage());
             },
 
@@ -1263,11 +1331,13 @@ define("xabber-contacts", function () {
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
                 this.$('.model .value').text(utils.pretty_name(info.model));
+                this.$('.status .value').text(utils.pretty_name(info.status));
                 this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
                 this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
                 this.$('.name-info-wrap').switchClass('hidden', !info.name);
                 this.$('.description-info-wrap').switchClass('hidden', !info.description);
                 this.$('.model-info-wrap').switchClass('hidden', !info.model);
+                this.$('.status-info-wrap').switchClass('hidden', !info.status);
                 this.$('.anonymous-info-wrap').switchClass('hidden', !info.anonymous);
                 this.$('.searchable-info-wrap').switchClass('hidden', !info.searchable);
             },

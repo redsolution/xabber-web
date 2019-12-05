@@ -5972,10 +5972,10 @@ define("xabber-chats", function () {
             "click .btn-invite-users": "inviteUsers",
             "click .btn-retract-own-messages": "retractOwnMessages",
             "click .btn-delete-chat": "deleteChat",
-            "click .btn-close-chat": "deactivateChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-search-messages": "renderSearchPanel",
-            "click .btn-jingle-message": "sendJingleMessage"
+            "click .btn-jingle-message": "sendJingleMessage",
+            "click .btn-set-status": "setStatus"
         },
 
         _initialize: function (options) {
@@ -6049,7 +6049,6 @@ define("xabber-chats", function () {
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
-            this.$('.btn-close-chat').showIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
         },
 
@@ -6119,6 +6118,22 @@ define("xabber-chats", function () {
             this.content.initJingleMessage();
         },
 
+        setStatus: function () {
+            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
+            this.account.sendIQ(iq_get_properties, function (properties) {
+                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')),
+                    options = data_form.fields.find(field => field.var == 'status').options || [],
+                    statuses_view = $(templates.group_chats.set_status({options: options}));
+                if (!options.length) {
+                    utils.dialogs.error("You have no permission to set group chat's status");
+                    return;
+                }
+                let set_status_view = new xabber.SetGroupchatStatusView({el: statuses_view});
+                set_status_view.open(this.contact, data_form);
+            }.bind(this));
+        },
+
         getActiveScreen: function () {
             var active_screen = xabber.toolbar_view.$('.active');
             if (active_screen.hasClass('archive-chats')) {
@@ -6155,6 +6170,7 @@ define("xabber-chats", function () {
             var is_group_chat = this.contact.get('group_chat');
             (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
             this.$('.btn-jingle-message').showIf(!is_group_chat);
+            this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },
 
@@ -6195,26 +6211,6 @@ define("xabber-chats", function () {
             this.contact.declineSubscription();
             this.contact.removeFromRoster();
             this.contact.set('in_roster', false);
-        },
-
-        deactivateChat: function () {
-            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-            this.account.sendIQ(iq_get_properties, function (properties) {
-                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')),
-                    status_field = data_form.fields.find(field => field.var == 'status' && field.type !== 'fixed');
-                if (status_field) {
-                    let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
-                        idx = data_form.fields.indexOf(status_field);
-                    status_field.values = ['inactive'];
-                    data_form.fields[idx] = status_field;
-                    iq_set_status = this.account.addDataFormToStanza(iq_set_status, data_form);
-                    this.account.sendIQ(iq_set_status);
-                }
-                else
-                    utils.dialogs.error('You have no permission to close chat');
-            }.bind(this));
         },
 
         closeChat: function () {
