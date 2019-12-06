@@ -326,7 +326,7 @@ define("xabber-contacts", function () {
                         status_message = $status_message.text();
                     _.isNaN(priority) && (priority = 0);
                     clearTimeout(this._reset_status_timeout);
-                    var resource_obj = this.resources.get(resource);
+                    let resource_obj = this.resources.get(resource);
                     if (type === 'unavailable') {
                         this.set({ last_seen: moment.now() });
                         resource_obj && resource_obj.destroy();
@@ -358,7 +358,7 @@ define("xabber-contacts", function () {
                     this.set('group_info', group_chat_info);
                     if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
                         this.set('name', group_chat_info.name);
-                    this.set('status_message', (group_chat_info.members_num + ' participants, ' + group_chat_info.online_members_num + ' online'));
+                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' participants, ' + group_chat_info.online_members_num + ' online')});
                 }
             },
 
@@ -682,6 +682,7 @@ define("xabber-contacts", function () {
 
             updateStatus: function () {
                 this.$('.status').attr('data-status', this.model.get('status'));
+                this.$('.chat-icon').attr('data-status', this.model.get('status'));
                 var group_text = 'Group chat';
                 if (this.model.get('group_info')) {
                     group_text = this.model.get('group_info').members_num;
@@ -1265,7 +1266,6 @@ define("xabber-contacts", function () {
             },
 
             updateStatus: function () {
-                this.$('.main-info .status').attr('data-status', this.model.get('status'));
                 this.$('.status-message').text(this.model.getStatusMessage());
             },
 

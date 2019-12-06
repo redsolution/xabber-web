@@ -1747,6 +1747,10 @@ body {
     background-color: #616161;
 }
 
+[data-status=offline] svg circle {
+    fill: #616161;
+}
+
 [data-status=offline].hide-offline {
     display: none;
 }
@@ -1755,23 +1759,46 @@ body {
     background-color: #689F38;
 }
 
+[data-status=chat] svg circle {
+    fill: #689F38;
+}
+
 [data-status=active],
 [data-status=online] {
     background-color: #388E3C;
+}
+
+[data-status=active] svg circle,
+[data-status=online] svg circle {
+    fill: #388E3C;
 }
 
 [data-status=away] {
     background-color: #FFA000;
 }
 
+[data-status=away] svg circle {
+    fill: #FFA000;
+}
+
 [data-status=xa] {
     background-color: #1976D2;
+}
+
+[data-status=xa] svg circle {
+    fill: #1976D2;
 }
 
 [data-status=resolved],
 [data-status=inactive],
 [data-status=dnd] {
     background-color: #D32F2F;
+}
+
+[data-status=resolved] svg circle,
+[data-status=inactive] svg circle,
+[data-status=dnd] svg circle {
+    fill: #D32F2F;
 }
 
 [data-status=eating] {
@@ -2068,6 +2095,7 @@ body {
     top: 14px;
     width: 16px;
     height: 16px;
+    background-color: unset !important;
 }
 
 .roster-account-info .circle-avatar {

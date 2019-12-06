@@ -1473,6 +1473,7 @@ define("xabber-chats", function () {
         updateStatus: function () {
             var status = this.contact.get('status');
             this.$('.status').attr('data-status', status);
+            this.$('.chat-icon').attr('data-status', status);
         },
 
         updateActiveStatus: function () {
@@ -6024,6 +6025,7 @@ define("xabber-chats", function () {
             var status = this.contact.get('status'),
                 status_message = this.contact.getStatusMessage();
             this.$('.contact-status').attr('data-status', status);
+            this.$('.chat-icon').attr('data-status', status);
             this.$('.contact-status-message').text(status_message);
         },
 
