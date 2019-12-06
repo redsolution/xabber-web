@@ -1517,7 +1517,7 @@ define("xabber-chats", function () {
         updateGroupChats: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.status').hideIf(is_group_chat);
-            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
+            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
             if (is_group_chat) {
                 this.$el.addClass('group-chat');
                 this.$('.chat-title').css('color', '#424242');
@@ -1526,15 +1526,15 @@ define("xabber-chats", function () {
         },
 
         updateBot: function () {
-            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-bot-chat"]());
         },
 
         updatePrivateChat: function () {
-            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-chat"]());
         },
 
         updateIncognitoChat: function () {
-            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-chat"]());
         },
 
         updateColorScheme: function () {
@@ -5532,7 +5532,7 @@ define("xabber-chats", function () {
           updateGroupChats: function () {
               var is_group_chat = this.contact.get('group_chat');
               this.$('.status').hideIf(is_group_chat);
-              (is_group_chat && !this.contact.get('private_chat') && !(this.contact.get('incognito_chat') && !this.contact.get('private_chat'))) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
+              (is_group_chat && !this.contact.get('private_chat') && !(this.contact.get('incognito_chat') && !this.contact.get('private_chat'))) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
               if (is_group_chat) {
                   this.$el.addClass('group-chat');
                   this.$('.chat-title').css('color', '#424242');
@@ -5541,15 +5541,15 @@ define("xabber-chats", function () {
           },
 
           updateBot: function () {
-              this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+              this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-bot-chat"]());
           },
 
           updatePrivateChat: function () {
-              this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+              this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-chat"]());
           },
 
           updateIncognitoChat: function () {
-              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
+              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-chat"]());
           },
 
           updateColorScheme: function () {
@@ -6158,22 +6158,22 @@ define("xabber-chats", function () {
 
         updateGroupChatHead: function () {
             var is_group_chat = this.contact.get('group_chat');
-            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.GROUP_CHAT_ICON});
+            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
             this.$('.btn-jingle-message').showIf(!is_group_chat);
             this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },
 
         updateBot: function () {
-            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.BOT_CHAT_ICON});
+            this.contact.get('bot') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-bot-chat"]());
         },
 
         updatePrivateChat: function () {
-            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.PRIVATE_CHAT_ICON});
+            this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-chat"]());
         },
 
         updateIncognitoChat: function () {
-            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('img').attr({src: constants.CHAT_ICONS.INCOGNITO_CHAT_ICON});
+            (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-chat"]());
         },
 
         inviteUsers: function () {

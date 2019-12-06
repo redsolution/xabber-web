@@ -7,20 +7,6 @@ var constants = {
     FAVICON_DEFAULT: "images/favicon.png",
     FAVICON_MESSAGE: "images/favicon-message.png",
 
-    CHAT_ICONS: {
-        GROUP_CHAT_ICON: "images/circle-group-chat-icon.svg",
-        BOT_CHAT_ICON: "images/circle-bot-icon.png",
-        PRIVATE_CHAT_ICON: "images/circle-private-chat-icon.png",
-        INCOGNITO_CHAT_ICON: "images/circle-incognito-chat-icon.png",
-    },
-
-    CONTACT_ICONS: {
-        GROUP_CHAT_ICON: "images/circle-group-contact-icon.png",
-        BOT_CHAT_ICON: "images/circle-bot-contact-icon.png",
-        PRIVATE_CHAT_ICON: "images/circle-private-contact-icon.png",
-        INCOGNITO_CHAT_ICON: "images/circle-incognito-contact-icon.png",
-    },
-
     WIDTH_MEDIUM:   1420,
     WIDTH_NARROW:   1280,
     WIDTH_TINY:     1152,
