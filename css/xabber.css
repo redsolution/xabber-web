@@ -2905,6 +2905,7 @@ body {
     margin: 8px 0px 0 16px;
     z-index: 1;
     position: absolute;
+    top: 0;
 }
 
 .jingle-message-view .name {
@@ -3869,6 +3870,7 @@ body {
 
 .chat-message .chat-msg-media-content {
     display: flex;
+    flex-direction: column;
 }
 
 .chat-message .chat-msg-media-content,
