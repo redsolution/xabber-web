@@ -3766,7 +3766,10 @@ define("xabber-contacts", function () {
                     }
                     if (chat.message_retraction_version != msg_retraction_version) {
                         chat.message_retraction_version = msg_retraction_version;
-                        request_with_stamp && chat.trigger("get_retractions_list");
+                        // request_with_stamp && chat.trigger("get_retractions_list");
+                    }
+                    if (request_with_stamp) {
+                        chat.trigger('get_missed_history', request_with_stamp/1000);
                     }
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);

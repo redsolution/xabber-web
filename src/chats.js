@@ -2530,12 +2530,11 @@ define("xabber-chats", function () {
                 );
         },
 
-        requestMissedMessages: function () {
-            if (!this.account.disconnected_timestamp && !this.account.last_msg_timestamp)
+        requestMissedMessages: function (timestamp) {
+            if (!timestamp)
                 return;
-            let query = {},
-                start_timestamp = moment(this.account.disconnected_timestamp || this.account.last_msg_timestamp).format();
-            query.var = [{var: 'start', value: start_timestamp}];
+            let query = {};
+            query.var = [{var: 'start', value: moment(timestamp).format()}];
             this.getMessageArchive(query, {missed_history: true});
         },
 
@@ -4533,8 +4532,6 @@ define("xabber-chats", function () {
             this.account.connection.deleteHandler(this._msg_handler);
             this._msg_handler = this.account.connection.addHandler(function (message) {
                 this.receiveMessage(message);
-                if (this.account.connection.do_synchronization && Strophe.getDomainFromJid($(message).attr('from')) == this.account.domain)
-                    this.account.last_msg_timestamp = moment.now();
                 return true;
             }.bind(this), null, 'message');
         },
@@ -4651,6 +4648,11 @@ define("xabber-chats", function () {
         receiveMessage: function (message) {
             let $message = $(message),
                 type = $message.attr('type');
+            if (this.account.connection.do_synchronization && Strophe.getDomainFromJid($(message).attr('from')) == this.account.domain) {
+                let time = $message.children('time').attr('stamp') || $message.children('delay').attr('stamp'),
+                    timestamp = Number(moment(time));
+                (timestamp > this.account.last_msg_timestamp) && (this.account.last_msg_timestamp = timestamp);
+            }
             if (type === 'headline') {
                 return this.receiveHeadlineMessage(message);
             }
@@ -7477,13 +7479,16 @@ define("xabber-chats", function () {
     });
 
     xabber.Account.addConnPlugin(function () {
+        let timestamp = this.last_msg_timestamp || this.disconnected_timestamp;
         this.chats.registerMessageHandler();
         this.chats.each(function (chat) {
-            if (chat.messages.length)
-                chat.trigger('get_missed_history');
-            else
-                chat.trigger('load_last_history');
-        });
+            if (!this.connection.do_synchronization) {
+                if (chat.messages.length)
+                    chat.trigger('get_missed_history', timestamp);
+                else
+                    chat.trigger('load_last_history');
+            }
+        }.bind(this));
         this.trigger('ready_to_get_roster');
     }, true, true);
 
