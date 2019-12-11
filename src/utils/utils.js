@@ -244,6 +244,8 @@ define([
         },
 
         pretty_duration: function (duration) {
+            if (_.isNaN(Number(duration)))
+                return duration;
             if (_.isUndefined(duration))
                 return undefined;
             if (duration < 10)

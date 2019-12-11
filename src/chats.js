@@ -1595,7 +1595,7 @@ define("xabber-chats", function () {
                         if (msg_files.length > 1)
                             msg_text = $colored_span.text(msg_files.length + ' files');
                         if (msg_files.length == 1)
-                            msg_text = $colored_span.text(msg_files[0].name + (msg_files[0].is_audio ? (", " + msg_files[0].duration) : ""));
+                            msg_text = $colored_span.text(msg_files[0].name + (msg_files[0].is_audio || msg_files[0].voice ? (", " + utils.pretty_duration(msg_files[0].duration)) : ""));
                     }
                     if (msg_images) {
                         if (msg_images.length > 1)
@@ -5585,7 +5585,7 @@ define("xabber-chats", function () {
                           if (msg_files.length > 1)
                               msg_text = $colored_span.text(msg_files.length + ' files');
                           if (msg_files.length == 1)
-                              msg_text = $colored_span.text(msg_files[0].name);
+                              msg_text = $colored_span.text(msg_files[0].name + (msg_files[0].is_audio || msg_files[0].voice ? (", " + utils.pretty_duration(msg_files[0].duration)) : ""));
                       }
                       if (msg_images) {
                           if (msg_images.length > 1)
