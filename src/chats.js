@@ -2999,7 +2999,7 @@ define("xabber-chats", function () {
                 let timerId = setInterval(function() {
                     let cur_time = Math.round(aud.getCurrentTime());
                     if (aud.isPlaying())
-                        $elem.find('.voice-msg-total-time').text(utils.pretty_duration(cur_time));
+                        $elem.find('.voice-msg-current-time').text(utils.pretty_duration(cur_time));
                     else
                         clearInterval(timerId);
                 }, 100);
