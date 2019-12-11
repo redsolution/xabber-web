@@ -3868,11 +3868,6 @@ body {
     cursor: pointer;
 }
 
-.chat-message .chat-msg-media-content {
-    display: flex;
-    flex-direction: column;
-}
-
 .chat-message .chat-msg-media-content,
 .chat-message .chat-msg-content {
     width: 100%;
@@ -4136,10 +4131,8 @@ body {
 }
 
 img.uploaded-img {
-    /*display: inline-block;*/
-    /*object-fit: cover;
-    width: 100%;
-    height: 100%;*/
+    max-width: 400px;
+    max-height: 400px;
 }
 
 img.fwd-img-preview {
