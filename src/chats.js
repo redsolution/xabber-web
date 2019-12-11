@@ -4648,7 +4648,7 @@ define("xabber-chats", function () {
         receiveMessage: function (message) {
             let $message = $(message),
                 type = $message.attr('type');
-            if (this.account.connection.do_synchronization && Strophe.getDomainFromJid($(message).attr('from')) == this.account.domain) {
+            if (this.account.connection.do_synchronization && Strophe.getBareJidFromJid($(message).attr('from')) !== this.account.get('jid')) {
                 let time = $message.children('time').attr('stamp') || $message.children('delay').attr('stamp'),
                     timestamp = Number(moment(time));
                 (timestamp > this.account.last_msg_timestamp) && (this.account.last_msg_timestamp = timestamp);

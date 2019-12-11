@@ -3723,13 +3723,13 @@ define("xabber-contacts", function () {
                 let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
                 (!options.after && this.account.last_msg_timestamp) && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
-                this.account.sendIQ(iq, function (iq) {
-                    this.onSyncIQ(iq, request_attrs.stamp);
+                this.account.sendIQ(iq, function (response) {
+                    this.onSyncIQ(response, request_attrs.stamp);
                 }.bind(this));
             },
 
             onSyncIQ: function (iq, request_with_stamp) {
-                this.account.last_msg_timestamp = moment.now();
+                this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
                 let last_chat_msg_id = $(iq).find('set last');
                 last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
