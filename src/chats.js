@@ -1595,7 +1595,7 @@ define("xabber-chats", function () {
                         if (msg_files.length > 1)
                             msg_text = $colored_span.text(msg_files.length + ' files');
                         if (msg_files.length == 1)
-                            msg_text = $colored_span.text(msg_files[0].name + (msg_files[0].is_audio || msg_files[0].voice ? (", " + utils.pretty_duration(msg_files[0].duration)) : ""));
+                            msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
                     }
                     if (msg_images) {
                         if (msg_images.length > 1)
@@ -3123,6 +3123,7 @@ define("xabber-chats", function () {
                             else
                                 is_audio = false;
                         }
+                        ((file_attrs.length === 1) && is_audio) && (file.name = 'Voice message');
                         let mdi_icon_class = utils.file_type_icon(file.type);
                         _.extend(file_attrs[idx], { is_audio: is_audio, duration: file_attrs[idx].duration, mdi_icon: mdi_icon_class });
                         template_for_file_content = is_audio ? $(templates.messages.audio_file(file_attrs[idx])) : $(templates.messages.file(file_attrs[idx]));
@@ -3205,6 +3206,7 @@ define("xabber-chats", function () {
                                     else
                                         is_audio = false;
                                 }
+                                ((file_attrs.length === 1) && is_audio) && (file.name = 'Voice message');
                                 let mdi_icon_class = utils.file_type_icon(file.type);
                                 _.extend(file_attrs[idx], { is_audio: is_audio, duration: file_attrs[idx].duration, mdi_icon: mdi_icon_class});
                                 template_for_file_content = is_audio ? $(templates.messages.audio_file(file_attrs[idx])) : $(templates.messages.file(file_attrs[idx]));
@@ -3814,7 +3816,7 @@ define("xabber-chats", function () {
             if (files_.length > 0) {
                 $message.removeClass('file-upload noselect');
                 $(files_).each(function (idx, item) {
-                    if ((idx == 0)&&(images.length == 0))
+                    if (!idx && !images.length)
                         $message.find('.chat-msg-content').removeClass('chat-file-content').html('');
                     if (item.type) {
                         if (item.voice)
@@ -3829,6 +3831,7 @@ define("xabber-chats", function () {
                         },
                         template_for_file_content,
                         mdi_icon_class = utils.file_type_icon(item.type);
+                    ((files_.length === 1) && is_audio) && (file_attrs.name = 'Voice message');
                     _.extend(file_attrs, {size: utils.pretty_size(item.size), is_audio: is_audio, duration: utils.pretty_duration(item.duration), mdi_icon: mdi_icon_class});
                     template_for_file_content = is_audio ? $(templates.messages.audio_file(file_attrs)) : $(templates.messages.file(file_attrs));
                     $message.find('.chat-msg-content').append(template_for_file_content);
@@ -5585,7 +5588,7 @@ define("xabber-chats", function () {
                           if (msg_files.length > 1)
                               msg_text = $colored_span.text(msg_files.length + ' files');
                           if (msg_files.length == 1)
-                              msg_text = $colored_span.text(msg_files[0].name + (msg_files[0].is_audio || msg_files[0].voice ? (", " + utils.pretty_duration(msg_files[0].duration)) : ""));
+                              msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
                       }
                       if (msg_images) {
                           if (msg_images.length > 1)
@@ -6894,7 +6897,7 @@ define("xabber-chats", function () {
                         this.view.sendChatState('paused');
                         end_time = moment.now();
                         if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
-                            let audio_name = "Voice message", audio_type = 'audio/ogg; codecs=opus',
+                            let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
                                 blob = new Blob(chunks, { 'type' : audio_type}),
                                 file = new File([blob], audio_name, {
                                     type: audio_type,
