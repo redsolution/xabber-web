@@ -5427,6 +5427,9 @@ define("xabber-chats", function () {
                         }
                 }
                 xabber.body.setScreen((options.screen || 'all-chats'), {right: 'chat', clear_search: options.clear_search, chat_item: view});
+                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                    view.contact.getVCard();
+                }
             }
             xabber.chats_view.scrollTo(scrolled_top);
         },
