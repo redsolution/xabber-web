@@ -114,6 +114,7 @@ define("xabber-templates", [
     "text!templates/svg/xmpp.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
+    "text!templates/svg/ic-invitation-chat.html",
     "text!templates/svg/ic-group-chat.html",
     "text!templates/svg/ic-incognito-chat.html",
     "text!templates/svg/ic-bot-chat.html",
@@ -286,6 +287,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
+    addSvgTemplate('svg.ic-invitation-chat');
     addSvgTemplate('svg.ic-group-chat');
     addSvgTemplate('svg.ic-incognito-chat');
     addSvgTemplate('svg.ic-bot-chat');
