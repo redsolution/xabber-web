@@ -1518,12 +1518,17 @@ define("xabber-chats", function () {
         updateGroupChats: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.status').hideIf(is_group_chat);
-            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
+            this.$('.chat-icon').showIf(is_group_chat);
+            (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').children('svg').html(env.templates.svg["ic-group-chat"]());
             if (is_group_chat) {
                 this.$el.addClass('group-chat');
                 this.$('.chat-title').css('color', '#424242');
                 this.model.set('group_chat', true);
             }
+        },
+
+        updateInvitation: function () {
+            this.contact.get('invitation') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-invitation-chat"]());
         },
 
         updateBot: function () {
@@ -1693,6 +1698,10 @@ define("xabber-chats", function () {
         removeInvite: function (options) {
             options || (options = {});
             xabber.chats_view.removeInvite(this, options);
+            delete this.contact.attributes.invitation;
+            this.updateGroupChats();
+            this.updateIncognitoChat();
+            this.updatePrivateChat();
         },
 
         onClosed: function () {
@@ -2705,8 +2714,8 @@ define("xabber-chats", function () {
                     this.contact.trigger('update_participants');
             }
 
-            var is_scrolled_to_bottom = this.isScrolledToBottom();
-            var $message = this.addMessage(message);
+            let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                $message = this.addMessage(message);
 
             if (message.get('type') === 'file_upload') {
                 this.startUploadFile(message, $message);
@@ -2748,8 +2757,10 @@ define("xabber-chats", function () {
                     message.set('state', constants.MSG_DELIVERED);
             }
 
-            if (this.model.get('active')&&(message.get('private_invite') || message.get('invite') || message.get('auth_request'))) {
-                this.model.contact.trigger('open_chat', this.model.contact);
+            if (message.get('private_invite') || message.get('invite') || message.get('auth_request')) {
+                this.model.contact.set('invitation', true);
+                this.model.get('active') && this.model.contact.trigger('open_chat', this.model.contact);
+                this.chat_item.updateInvitation();
             }
 
             let last_message = this.model.last_message;
@@ -5551,11 +5562,11 @@ define("xabber-chats", function () {
           },
 
           updatePrivateChat: function () {
-              this.contact.get('private_chat') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-chat"]());
+              (!this.contact.get('invitation') && this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-chat"]());
           },
 
           updateIncognitoChat: function () {
-              (this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-chat"]());
+              (!this.contact.get('invitation') && this.contact.get('incognito_chat') && !this.contact.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-chat"]());
           },
 
           updateColorScheme: function () {

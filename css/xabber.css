@@ -1768,6 +1768,7 @@ body {
     background-color: #388E3C;
 }
 
+.chat-icon svg circle,
 [data-status=active] svg circle,
 [data-status=online] svg circle {
     fill: #388E3C;
