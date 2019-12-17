@@ -863,6 +863,14 @@ define("xabber-contacts", function () {
         });
 
         xabber.ContactResourcesView = xabber.ResourcesView.extend({
+            onResourceAdded: function (resource) {
+                this.addChild(resource.get('resource'),
+                    xabber.ResourceView, {model: resource});
+                this.updatePosition(resource);
+                this.$el.removeClass('hidden');
+                this.parent.updateScrollBar();
+            },
+
             onResourceRemoved: function (resource) {
                 this.removeChild(resource.get('resource'));
                 this.$el.showIf(this.model.length);
@@ -948,6 +956,7 @@ define("xabber-contacts", function () {
                 };
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
                 this.updateName();
+                this.model.resources.models.forEach(function (resource) {this.model.resources.requestInfo(resource)}.bind(this));
             },
 
             onChangedVisibility: function () {

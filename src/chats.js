@@ -309,7 +309,6 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-
             if ($message.find('x').length && $message.find('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
                 attrs.type = 'system';
             }
