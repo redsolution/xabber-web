@@ -1673,7 +1673,7 @@ define("xabber-chats", function () {
             this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
-            this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
+            this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                 .attr('data-state', msg.getState());
             this.updateCSS();
         },
