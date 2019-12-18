@@ -2728,25 +2728,29 @@ define("xabber-chats", function () {
                 this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
             }
 
-            if (!(message.get('synced_from_server') || message.get('is_archived') || message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
-                message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
-                if (!message.get('is_unread'))
+            if (!(message.get('synced_from_server') || message.get('is_archived'))) {
+                if (message.get('type') === 'system' && this.model.get('display') && (xabber.get('focused') || !this.model.messages_unread.models.length))
                     this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
-                if (!xabber.get('focused')) {
-                    if (this.contact.get('muted')) {
-                        message.set('muted', true);
-                        if (this.contact.get('archived'))
-                            message.set('archived', true);
-                    }
-                    else {
-                        if (this.contact.get('archived')) {
-                            this.head.archiveChat();
-                            this.contact.set('archived', false);
+                if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
+                    message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
+                    if (!message.get('is_unread'))
+                        this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
+                    if (!xabber.get('focused')) {
+                        if (this.contact.get('muted')) {
+                            message.set('muted', true);
+                            if (this.contact.get('archived'))
+                                message.set('archived', true);
                         }
-                        this.notifyMessage(message);
+                        else {
+                            if (this.contact.get('archived')) {
+                                this.head.archiveChat();
+                                this.contact.set('archived', false);
+                            }
+                            this.notifyMessage(message);
+                        }
                     }
+                    this.model.setMessagesDisplayed(message.get('timestamp'));
                 }
-                this.model.setMessagesDisplayed(message.get('timestamp'));
             }
             if (message.isSenderMe()) {
                 if (!message.get('is_archived') || message.get('missed_msg'))
@@ -7543,6 +7547,9 @@ define("xabber-chats", function () {
                     view.content.readMessages();
                     if (view.model.get('is_accepted') != false)
                         view.content.bottom.focusOnInput();
+                    let last_msg = view.model.messages.last();
+                    if (last_msg.get('type') === 'system')
+                        view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('archive_id'), last_msg.get('contact_archive_id'));
                 }
             }
         }, this);
