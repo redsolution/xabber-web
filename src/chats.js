@@ -349,7 +349,7 @@ define("xabber-chats", function () {
                             file_description = $file_tag.find('description').text(),
                             file_height = $file_tag.find('height').text(),
                             file_width = $file_tag.find('width').text();
-                        uri && (file_attrs.url = uri);
+                        file_attrs.url = uri;
                         file_attrs.name = file_name ? file_name : this.getFilename(uri);
                         file_size && (file_attrs.size = file_size);
                         file_type && (file_attrs.type = file_type);
@@ -377,7 +377,7 @@ define("xabber-chats", function () {
                             file_type = $file_tag.find('media-type').text(),
                             file_duration = $file_tag.find('duration').text(),
                             file_description = $file_tag.find('description').text();
-                        uri && (file_attrs.url = uri);
+                        file_attrs.url = uri;
                         file_attrs.name = file_name ? file_name : this.getFilename(uri);
                         file_size && (file_attrs.size = file_size);
                         file_type && (file_attrs.type = file_type);
