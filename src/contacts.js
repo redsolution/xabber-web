@@ -3844,6 +3844,10 @@ define("xabber-contacts", function () {
                 }
                 var contact = this.contacts.mergeContact(jid);
                 var subscription = item.getAttribute("subscription");
+                if (contact.get('invitation') && (subscription === 'both' || subscription === 'to')) {
+                    contact.set('invitation', false);
+                    contact.trigger('remove_invite');
+                }
                 if (subscription === 'remove') {
                     contact.set({
                         in_roster: false,
