@@ -5273,6 +5273,8 @@ define("xabber-chats", function () {
             this.model.on("add", this.onChatAdded, this);
             this.model.on("destroy", this.onChatRemoved, this);
             this.model.on("change:active", this.onChangedActiveStatus, this);
+            this.model.on("change:unread", this.onChangedReadStatus, this);
+            this.model.on("change:const_unread", this.onChangedReadStatus, this);
             this.model.on("change:timestamp", this.updateChatPosition, this);
             xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
             let wheel_ev = this.defineMouseWheelEvent();
@@ -5357,6 +5359,16 @@ define("xabber-chats", function () {
             }
         },
 
+        onChangedReadStatus: function (item) {
+            let view = this.child(item.id),
+                active_toolbar = xabber.toolbar_view.$('.active');
+            if (!view)
+                return;
+            if (!active_toolbar.hasClass('unreaded') || (active_toolbar.hasClass('unreaded') && (item.get('unread') || item.get('const_unread'))))
+                return;
+            view.detach();
+        },
+
         replaceChatItem: function (item, chats) {
             let view = this.child(item.id);
             if (view && item.get('timestamp')) {
@@ -5374,6 +5386,8 @@ define("xabber-chats", function () {
             let view = this.child(item.id),
                 active_toolbar = xabber.toolbar_view.$('.active');
             if (!view)
+                return;
+            if (active_toolbar.hasClass('unreaded') && !(item.get('unread') || item.get('const_unread')))
                 return;
             active_toolbar.hasClass('group-chats') && view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => chat.contact.get('group_chat') && !chat.contact.get('archived')));
             active_toolbar.hasClass('chats') && !view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => !chat.contact.get('group_chat') && !chat.contact.get('archived')));
@@ -5463,6 +5477,11 @@ define("xabber-chats", function () {
         showGroupChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
+                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                group_chats = [];
+            if (is_unreaded)
+                group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+            else
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5473,6 +5492,11 @@ define("xabber-chats", function () {
         showChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
+                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                private_chats = [];
+            if (is_unreaded)
+                private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+            else
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
             private_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5504,6 +5528,11 @@ define("xabber-chats", function () {
         showAllChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
+                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                all_chats = [];
+            if (is_unreaded)
+                all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+            else
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived'));
             all_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -6126,9 +6155,7 @@ define("xabber-chats", function () {
                         next_contact.trigger("open_chat", next_contact);
                     }
                     else
-                    {
                         this.getActiveScreen();
-                    }
                 }
             }
             var archived = !this.contact.get('archived'),

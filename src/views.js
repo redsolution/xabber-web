@@ -862,42 +862,45 @@ define("xabber-views", function () {
                     this.$('.toolbar-item.archive-chats').hasClass('active')))) {
                 return;
             }
-            this.$('.toolbar-item').removeClass('active');
+            this.$('.toolbar-item').removeClass('active unreaded');
             if (_.contains(['all-chats', 'contacts', 'mentions',
                             'settings', 'search', 'about'], name)) {
                 this.$('.toolbar-item.'+name).addClass('active');
             }
         },
 
-        showAllChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.all-chats').addClass('active');
+        showAllChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
+            this.$('.toolbar-item').removeClass('active unreaded')
+                .filter('.all-chats').addClass('active').switchClass('unreaded', is_active);
             xabber.body.setScreen('all-chats', {right: null});
         },
 
-        showChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.chats').addClass('active');
+        showChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
+            this.$('.toolbar-item').removeClass('active unreaded')
+                .filter('.chats').addClass('active').switchClass('unreaded', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_chats');
         },
 
-        showGroupChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.group-chats').addClass('active');
+        showGroupChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
+            this.$('.toolbar-item').removeClass('active unreaded')
+                .filter('.group-chats').addClass('active').switchClass('unreaded', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_group_chats');
         },
 
         showArchive: function () {
-            this.$('.toolbar-item').removeClass('active')
+            this.$('.toolbar-item').removeClass('active unreaded')
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_archive_chats');
         },
 
         showChatsByAccount: function (account) {
-            this.$('.toolbar-item').removeClass('active')
+            this.$('.toolbar-item').removeClass('active unreaded')
                 .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_account_chats', [account]);
