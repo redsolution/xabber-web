@@ -825,9 +825,17 @@ define("xabber-accounts", function () {
                     this.connection.deleteHandler(this._stanza_handler);
                     this._stanza_handler = this.connection.addHandler(
                         function (iq) {
-                            this.onIQ(iq);
+                            this.onGetIQ(iq);
                             return true;
                         }.bind(this), null, 'iq', "get");
+                },
+
+
+                registerSyncedIQHandler: function () {
+                    this.connection.deleteHandler(this._stanza_handler);
+                    this._stanza_handler = this.connection.addHandler(
+                        this.onSyncedIQ.bind(this),
+                        Strophe.NS.SYNCHRONIZATION, 'iq', "set");
                 },
 
                 registerPresenceHandler: function () {
@@ -839,7 +847,20 @@ define("xabber-accounts", function () {
                         }.bind(this), null, 'presence', null);
                 },
 
-                onIQ: function (iq) {
+            onSyncedIQ: function (iq) {
+                    let $synced_iq = $(iq),
+                        $conversation = $synced_iq.find('conversation'),
+                        chat_jid = $conversation.attr('jid'),
+                        is_deleted = $conversation.children('deleted').length;
+                    if (is_deleted) {
+                        let contact = this.contacts.mergeContact(chat_jid),
+                            chat = this.chats.getChat(contact);
+                        chat.set('opened', false);
+                        xabber.chats_view.clearSearch();
+                    }
+            },
+
+                onGetIQ: function (iq) {
                     let $incoming_iq = $(iq),
                         $confirm = $incoming_iq.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH +'"]'),
                         $session_availability = $incoming_iq.find('query[xmlns="' + Strophe.NS.JINGLE_MSG +'"]'),

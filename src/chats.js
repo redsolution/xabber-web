@@ -6010,8 +6010,6 @@ define("xabber-chats", function () {
 
     });
 
-
-
     xabber.ChatHeadView = xabber.BasicView.extend({
         className: 'chat-head-wrap',
         template: templates.chat_head,

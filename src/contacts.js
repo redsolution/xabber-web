@@ -3763,6 +3763,12 @@ define("xabber-contacts", function () {
                         msg_retraction_version = $item.children('retract').attr('version'),
                         msg, options = {synced_msg: true};
                     contact.set('group_chat', is_group_chat);
+                    if ($item.children('deleted').length) {
+                        chat.set('opened', false);
+                        chat.set('const_unread', 0);
+                        xabber.toolbar_view.recountAllMessageCounter();
+                        xabber.chats_view.clearSearch();
+                    }
                     if (current_call.length) {
                         let $jingle_message = current_call.children('message'),
                             full_jid = $jingle_message.attr('from'),
@@ -4657,6 +4663,7 @@ define("xabber-contacts", function () {
 
         xabber.Account.addConnPlugin(function () {
             this.registerIQHandler();
+            this.registerSyncedIQHandler();
             this.roster.registerHandler();
             this.blocklist.registerHandler();
         }, true, true);
