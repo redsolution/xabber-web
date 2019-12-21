@@ -2514,9 +2514,10 @@ define("xabber-contacts", function () {
             showDefaultRestrictions: function () {
                 this.$('button').blur();
                 let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights' });
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
-                    var all_permissions = $(iq_all_rights).find('permission'),
+                    console.log(this.account.parseDataForm($(iq_all_rights).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')));
+                    /*var all_permissions = $(iq_all_rights).find('permission'),
                         all_restrictions = $(iq_all_rights).find('restriction');
                     this.contact.all_rights = {permissions: all_permissions, restrictions: all_restrictions};
                     this.contact.all_rights.restrictions.each(function (idx, restriction) {
@@ -2551,7 +2552,7 @@ define("xabber-contacts", function () {
                         constrainWidth: false,
                         hover: false,
                         alignment: 'left'
-                    });
+                    });*/
                 }.bind(this));
             },
 
