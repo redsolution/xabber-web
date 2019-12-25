@@ -2652,7 +2652,7 @@ define("xabber-chats", function () {
                         mime_type && (this._current_composing_msg.mime_type = mime_type);
                         message = 'sending ' + file_type;
                     } else {
-                        if (type === 'audio')
+                        if (type === 'voice')
                             message = 'recording a voice message...';
                         if (type === 'video')
                             message = 'recording a video message...';
@@ -2675,7 +2675,7 @@ define("xabber-chats", function () {
                         let file_type = this._current_composing_msg.mime_type ? utils.pretty_file_type_with_article(this._current_composing_msg.mime_type) : 'file';
                         message = 'sending ' + file_type;
                     }
-                    if (this._current_composing_msg.type === 'audio')
+                    if (this._current_composing_msg.type === 'voice')
                         message += 'recording a voice message';
                     if (this._current_composing_msg.type === 'video')
                         message += 'recording a video message';
@@ -6888,9 +6888,9 @@ define("xabber-chats", function () {
                         mic_hover = true;
                     mediaRecorder.start();
                     mediaRecorder.onstart = function() {
-                        this.view.sendChatState('composing', 'audio');
+                        this.view.sendChatState('composing', 'voice');
                         this._chatstate_send_timeout = setInterval(function () {
-                            this.view.sendChatState('composing', 'audio');
+                            this.view.sendChatState('composing', 'voice');
                         }.bind(this), constants.CHATSTATE_INTERVAL_COMPOSING_AUDIO);
                         start_time = moment.now();
                         let $bottom_panel = this.$('.message-input-panel'),
