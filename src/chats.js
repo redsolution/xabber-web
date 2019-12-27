@@ -5477,9 +5477,9 @@ define("xabber-chats", function () {
         showGroupChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
-                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                is_unread = xabber.toolbar_view.$('.active.unreaded').length,
                 group_chats = [];
-            if (is_unreaded)
+            if (is_unread)
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             else
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
@@ -5492,9 +5492,9 @@ define("xabber-chats", function () {
         showChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
-                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                is_unread = xabber.toolbar_view.$('.active.unreaded').length,
                 private_chats = [];
-            if (is_unreaded)
+            if (is_unread)
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             else
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
@@ -5528,9 +5528,9 @@ define("xabber-chats", function () {
         showAllChats: function () {
             this.$('.chat-item').detach();
             let chats = this.model,
-                is_unreaded = xabber.toolbar_view.$('.active.unreaded').length,
+                is_unread = xabber.toolbar_view.$('.active.unreaded').length,
                 all_chats = [];
-            if (is_unreaded)
+            if (is_unread)
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             else
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived'));

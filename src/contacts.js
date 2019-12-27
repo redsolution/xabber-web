@@ -3784,7 +3784,12 @@ define("xabber-contacts", function () {
                         // request_with_stamp && chat.trigger("get_retractions_list");
                     }
                     if (request_with_stamp) {
+                        let unread_messages = _.clone(chat.messages_unread.models);
                         chat.trigger('get_missed_history', request_with_stamp/1000);
+                        chat.set('unread', 0);
+                        _.each(unread_messages, function (unread_msg) {
+                            unread_msg.set('is_unread', false);
+                        }.bind(this));
                     }
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);
