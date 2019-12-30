@@ -7579,7 +7579,7 @@ define("xabber-chats", function () {
                     if (view.model.get('is_accepted') != false)
                         view.content.bottom.focusOnInput();
                     let last_msg = view.model.messages.last();
-                    if (last_msg.get('type') === 'system')
+                    if (last_msg && last_msg.get('type') === 'system')
                         view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('archive_id'), last_msg.get('contact_archive_id'));
                 }
             }
