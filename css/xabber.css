@@ -848,6 +848,12 @@ body {
     cursor: pointer;
 }
 
+.toolbar .toolbar-item.unread img,
+.toolbar .toolbar-item.unread svg,
+.toolbar .toolbar-item.unread i{
+    opacity: 0.5
+}
+
 .toolbar .toolbar-item .logo {
     position: absolute;
     width: 32px;
