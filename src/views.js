@@ -620,7 +620,7 @@ define("xabber-views", function () {
                   queryid = uuid(),
                   iq = $iq({from: account.get('jid'), type: 'set'})
                       .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                      .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                      .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                       .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                       .c('value').t(Strophe.NS.MAM).up().up()
                       .c('field', {'var': 'withtext'})
