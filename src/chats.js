@@ -5483,7 +5483,7 @@ define("xabber-chats", function () {
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             if (!group_chats.length) {
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
-                xabber.toolbar_view.$('.unread').removeClass('unread');
+                xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
             } 
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5500,7 +5500,7 @@ define("xabber-chats", function () {
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             if (!private_chats.length) {
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
-                xabber.toolbar_view.$('.unread').removeClass('unread');
+                xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
             }
             private_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5538,7 +5538,7 @@ define("xabber-chats", function () {
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
             if (!all_chats.length) {
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived'));
-                xabber.toolbar_view.$('.unread').removeClass('unread');
+                xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
             }
             all_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
