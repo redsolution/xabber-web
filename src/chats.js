@@ -2663,35 +2663,19 @@ define("xabber-chats", function () {
                 }
                 else {
                     this._current_composing_msg = undefined;
-                    message = name + ' is typing...';
+                    message = 'typing...';
                     this._chatstate_show_timeout = setTimeout(function () {
-                        this.showChatState('paused');
+                        this.showChatState();
                     }.bind(this), constants.CHATSTATE_TIMEOUT_PAUSED);
                 }
             } else if (state === 'paused') {
-                message = 'has stopped ';
-                if (this._current_composing_msg) {
-                    if (this._current_composing_msg.type === 'upload') {
-                        let file_type = this._current_composing_msg.mime_type ? utils.pretty_file_type_with_article(this._current_composing_msg.mime_type) : 'file';
-                        message = 'sending ' + file_type;
-                    }
-                    if (this._current_composing_msg.type === 'voice')
-                        message += 'recording a voice message';
-                    if (this._current_composing_msg.type === 'video')
-                        message += 'recording a video message';
-                    this._current_composing_msg = undefined;
-                }
-                else
-                    message = name + ' has stopped typing';
-                this._chatstate_show_timeout = setTimeout(function () {
-                    this.showChatState();
-                }.bind(this), constants.CHATSTATE_TIMEOUT_STOPPED);
+                this.showChatState();
             } else {
                 this.bottom.showChatNotification('');
                 this.chat_item.updateLastMessage();
                 return;
             }
-            this.bottom.showChatNotification(message);
+            this.bottom.showChatNotification(name + ' ' + message);
             this.chat_item.$('.last-msg').text(message);
             this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime())
                 .attr('title', utils.pretty_datetime());
