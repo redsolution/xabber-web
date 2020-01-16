@@ -5265,15 +5265,45 @@ define("xabber-chats", function () {
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
             this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
+            this.$('.read-all-button').click(this.readAllMessages.bind(this));
+            xabber.on("update_screen", this.onUpdatedScreen, this);
         },
 
         render: function (options) {
+            this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item.unread').length);
             if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
                 this.clearSearch();
                 if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
                     this.showAllChats();
                 }
             }
+        },
+
+        readAllMessages: function () {
+            let chats = this.model,
+                active_toolbar = xabber.toolbar_view.$('.active');
+            if (active_toolbar.hasClass('chats')) {
+                let private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+                private_chats.forEach(function (chat) {
+                    chat.item_view.content.readMessages();
+                }.bind(this));
+            }
+            if (active_toolbar.hasClass('all-chats')) {
+                let all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+                all_chats.forEach(function (chat) {
+                    chat.item_view.content.readMessages();
+                }.bind(this));
+            }
+            if (active_toolbar.hasClass('group-chats')) {
+                let group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived') && (chat.get('unread') || chat.get('const_unread')));
+                group_chats.forEach(function (chat) {
+                    chat.item_view.content.readMessages();
+                }.bind(this));
+            }
+        },
+
+        onUpdatedScreen: function (name) {
+            this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.unread').length);
         },
 
         defineMouseWheelEvent: function () {
@@ -5351,6 +5381,9 @@ define("xabber-chats", function () {
             if (!active_toolbar.hasClass('unread') || (active_toolbar.hasClass('unread') && (item.get('unread') || item.get('const_unread'))))
                 return;
             view.detach();
+            if (!this.$('.chat-item').length && active_toolbar.hasClass('unread')) {
+                active_toolbar.click();
+            }
         },
 
         replaceChatItem: function (item, chats) {

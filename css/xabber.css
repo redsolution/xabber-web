@@ -7082,10 +7082,27 @@ input[type='range'].voice-message-volume:focus {
     max-width: 200px;
 }
 
+.recent-chats-panel .read-all-button {
+    position: absolute;
+    bottom: 16px;
+    background-color: #F44336;
+    color: #FFF;
+    padding: 4px 8px;
+    width: 140px;
+    text-align: center;
+    border-radius: 128px;
+    margin: 0 calc((100% - 140px) / 2);
+    cursor: pointer;
+}
+
 .chat-list-wrap .load-chats-feedback {
     height: 28px;
     line-height: 18px;
     padding: 4px 16px;
+}
+
+.chat-list-wrap .chat-list-wrap.with-padding {
+    padding-bottom: 56px;
 }
 
 .chatbox-placeholder,
