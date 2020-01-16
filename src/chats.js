@@ -1271,7 +1271,7 @@ define("xabber-chats", function () {
                 this.set('const_unread', 0);
                 for (var i = msg_idx; i >= 0; i--) {
                     let message = this.messages.models[i];
-                    if (message.get('is_unread'))
+                    if (message.get('is_unread') || message.get('type') === 'system')
                         message.set('is_unread', false);
                     else
                         return;
@@ -2675,7 +2675,10 @@ define("xabber-chats", function () {
                 this.chat_item.updateLastMessage();
                 return;
             }
-            this.bottom.showChatNotification(name + ' ' + message);
+            if (message)
+                this.bottom.showChatNotification(name + ' ' + message);
+            else
+                this.bottom.showChatNotification();
             this.chat_item.$('.last-msg').text(message);
             this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime())
                 .attr('title', utils.pretty_datetime());
