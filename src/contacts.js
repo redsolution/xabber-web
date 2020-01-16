@@ -370,7 +370,7 @@ define("xabber-contacts", function () {
                     anonymous = $group_chat.find('privacy').text(),
                     searchable = $group_chat.find('index').text(),
                     description = $group_chat.find('description').text(),
-                    pinned_message = $group_chat.find('pinned-message').text(),
+                    pinned_message = Number($group_chat.find('pinned-message').text()),
                     private_chat = $group_chat.find('parent-chat').text() || false,
                     members_num = parseInt($group_chat.find('members').text()),
                     online_members_num = parseInt($group_chat.find('present').text()),
@@ -391,12 +391,12 @@ define("xabber-contacts", function () {
                 if (chat)
                     pinned_msg_elem = chat.item_view.content.$pinned_message;
                 if (pinned_msg_elem) {
-                    if (pinned_message && pinned_message != "") {
+                    if (pinned_message) {
                         this.getMessageByStanzaId(pinned_message, function ($message) {
                             this.parsePinnedMessage($message, pinned_msg_elem);
                         }.bind(this));
                     }
-                    if (pinned_message == "") {
+                    else {
                         this.set('pinned_message', undefined);
                         this.parsePinnedMessage(undefined, pinned_msg_elem);
                     }
@@ -3785,7 +3785,12 @@ define("xabber-contacts", function () {
                         // request_with_stamp && chat.trigger("get_retractions_list");
                     }
                     if (request_with_stamp) {
+                        let unread_messages = _.clone(chat.messages_unread.models);
                         chat.trigger('get_missed_history', request_with_stamp/1000);
+                        chat.set('unread', 0);
+                        _.each(unread_messages, function (unread_msg) {
+                            unread_msg.set('is_unread', false);
+                        }.bind(this));
                     }
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);

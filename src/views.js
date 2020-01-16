@@ -620,7 +620,7 @@ define("xabber-views", function () {
                   queryid = uuid(),
                   iq = $iq({from: account.get('jid'), type: 'set'})
                       .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                      .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                      .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                       .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                       .c('value').t(Strophe.NS.MAM).up().up()
                       .c('field', {'var': 'withtext'})
@@ -862,7 +862,7 @@ define("xabber-views", function () {
                     this.$('.toolbar-item.archive-chats').hasClass('active')))) {
                 return;
             }
-            this.$('.toolbar-item').removeClass('active unreaded');
+            this.$('.toolbar-item').removeClass('active unread');
             if (_.contains(['all-chats', 'contacts', 'mentions',
                             'settings', 'search', 'about'], name)) {
                 this.$('.toolbar-item.'+name).addClass('active');
@@ -870,37 +870,37 @@ define("xabber-views", function () {
         },
 
         showAllChats: function (ev) {
-            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
-            this.$('.toolbar-item').removeClass('active unreaded')
-                .filter('.all-chats').addClass('active').switchClass('unreaded', is_active);
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.all-chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
         },
 
         showChats: function (ev) {
-            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
-            this.$('.toolbar-item').removeClass('active unreaded')
-                .filter('.chats').addClass('active').switchClass('unreaded', is_active);
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_chats');
         },
 
         showGroupChats: function (ev) {
-            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unreaded');
-            this.$('.toolbar-item').removeClass('active unreaded')
-                .filter('.group-chats').addClass('active').switchClass('unreaded', is_active);
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.group-chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_group_chats');
         },
 
         showArchive: function () {
-            this.$('.toolbar-item').removeClass('active unreaded')
+            this.$('.toolbar-item').removeClass('active unread')
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_archive_chats');
         },
 
         showChatsByAccount: function (account) {
-            this.$('.toolbar-item').removeClass('active unreaded')
+            this.$('.toolbar-item').removeClass('active unread')
                 .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_account_chats', [account]);

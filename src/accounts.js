@@ -832,8 +832,8 @@ define("xabber-accounts", function () {
 
 
                 registerSyncedIQHandler: function () {
-                    this.connection.deleteHandler(this._stanza_handler);
-                    this._stanza_handler = this.connection.addHandler(
+                    this.connection.deleteHandler(this._synced_stanza_handler);
+                    this._synced_stanza_handler = this.connection.addHandler(
                         this.onSyncedIQ.bind(this),
                         Strophe.NS.SYNCHRONIZATION, 'iq', "set");
                 },
@@ -858,6 +858,7 @@ define("xabber-accounts", function () {
                         chat.set('opened', false);
                         xabber.chats_view.clearSearch();
                     }
+			return true;
             },
 
                 onGetIQ: function (iq) {

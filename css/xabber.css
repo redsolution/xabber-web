@@ -848,6 +848,12 @@ body {
     cursor: pointer;
 }
 
+.toolbar .toolbar-item.unread img,
+.toolbar .toolbar-item.unread svg,
+.toolbar .toolbar-item.unread i{
+    opacity: 0.5
+}
+
 .toolbar .toolbar-item .logo {
     position: absolute;
     width: 32px;
@@ -3696,7 +3702,15 @@ body {
     width: 100%;
     height: 100%;
     word-wrap: break-word;
+    /*padding-bottom: 24px;*/
+}
+
+.chat-content::after {
+    content: '';
+    display: block;
     padding-bottom: 24px;
+    width: 100%;
+    bottom: 0;
 }
 
 .chat-content .ps-scrollbar-y-rail {
@@ -7068,10 +7082,27 @@ input[type='range'].voice-message-volume:focus {
     max-width: 200px;
 }
 
+.recent-chats-panel .read-all-button {
+    position: absolute;
+    bottom: 16px;
+    background-color: #F44336;
+    color: #FFF;
+    padding: 4px 8px;
+    width: 140px;
+    text-align: center;
+    border-radius: 128px;
+    margin: 0 calc((100% - 140px) / 2);
+    cursor: pointer;
+}
+
 .chat-list-wrap .load-chats-feedback {
     height: 28px;
     line-height: 18px;
     padding: 4px 16px;
+}
+
+.chat-list-wrap .chat-list-wrap.with-padding {
+    padding-bottom: 56px;
 }
 
 .chatbox-placeholder,
