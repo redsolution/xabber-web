@@ -251,7 +251,7 @@ define("xabber-accounts", function () {
                     delete field_attrs.values;
                     delete field_attrs.options;
                     $stanza.c('field', field_attrs);
-                    field.values.forEach(function (value) {
+                    field.values && field.values.forEach(function (value) {
                         $stanza.c('value').t(value).up();
                     }.bind(this));
                     $stanza.up();
