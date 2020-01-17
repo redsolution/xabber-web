@@ -5306,7 +5306,7 @@ define("xabber-chats", function () {
         },
 
         onUpdatedScreen: function (name) {
-            this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.unread').length);
+            this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.active.unread').length);
         },
 
         defineMouseWheelEvent: function () {
@@ -5448,20 +5448,13 @@ define("xabber-chats", function () {
             view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
             options.clear_search && this.clearSearch();
-            if (view.contact.private_invitation) {
-                view.model.set('display', true);
-                view.model.set('active', true);
-                xabber.body.setScreen('all-chats', {right: 'private_invitation', contact: view.contact });
-            }
-            else
             if (!view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
                 view.model.set('display', true);
                 view.model.set('active', true);
                 xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
                 view.content.readMessages();
             }
-            else
-            {
+            else {
                 if (xabber.toolbar_view.$('.active').hasClass('contacts'))
                     this.updateScreenAllChats();
                 if (!view.model.get('history_loaded') && (view.model.messages.length < 20)) {
@@ -5504,6 +5497,7 @@ define("xabber-chats", function () {
             if (!group_chats.length) {
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+                this.onUpdatedScreen();
             } 
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5521,6 +5515,7 @@ define("xabber-chats", function () {
             if (!private_chats.length) {
                 private_chats = chats.filter(chat => !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+                this.onUpdatedScreen();
             }
             private_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
@@ -5559,6 +5554,7 @@ define("xabber-chats", function () {
             if (!all_chats.length) {
                 all_chats = chats.filter(chat => chat.get('timestamp') && !chat.contact.get('archived'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+                this.onUpdatedScreen();
             }
             all_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
