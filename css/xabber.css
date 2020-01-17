@@ -1161,7 +1161,7 @@ body {
     padding: 24px;
     margin: auto;
     border-radius: 2px;
-    background-color: #FFFFFF;
+    background-color: #FFF;
 }
 
 .login-panel-form .login-form-header {
@@ -3302,6 +3302,7 @@ body {
     top: 8px;
     width: 40px;
     height: 40px;
+    background-color: #E0E0E0 !important;
     background-image: url(../images/loading.png);
     background-size: 50%;
 }
