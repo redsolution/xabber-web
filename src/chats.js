@@ -1277,6 +1277,9 @@ define("xabber-chats", function () {
                         return;
                 }
             }
+            else if (this.messages_unread.find(msg_item => msg_item.get('archive_id') == stanza_id)) {
+                msg.set('is_unread', false);
+            }
         },
 
         receiveDeliveryReceipt: function ($message) {
@@ -2716,7 +2719,7 @@ define("xabber-chats", function () {
             }
 
             if (!(message.get('synced_from_server') || message.get('is_archived'))) {
-                if (message.get('type') === 'system' && this.model.get('display') && (xabber.get('focused') || !this.model.messages_unread.models.length))
+                if (!message.get('auth_request') && (message.get('type') === 'system' && this.model.get('display') && (xabber.get('focused') || !this.model.messages_unread.models.length)))
                     this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
@@ -5452,7 +5455,6 @@ define("xabber-chats", function () {
                 view.model.set('display', true);
                 view.model.set('active', true);
                 xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
-                view.content.readMessages();
             }
             else {
                 if (xabber.toolbar_view.$('.active').hasClass('contacts'))
