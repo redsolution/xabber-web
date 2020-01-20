@@ -2082,7 +2082,7 @@ define("xabber-contacts", function () {
                         var name = $(restriction).attr('name'),
                             pretty_name = $(restriction).attr('translation'),
                             restriction_item = $(templates.group_chats.restriction_item({name: name, pretty_name: pretty_name})),
-                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
+                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: name, expire_options: []}));
                         restriction_item.append(restriction_expire);
                         this.$('.restrictions-wrap').append(restriction_item);
                         this.$('.right-item #' + name).prop('checked', false);
@@ -2091,7 +2091,7 @@ define("xabber-contacts", function () {
                         var name = $(permission).attr('name'),
                             pretty_name = $(permission).attr('translation'),
                             permission_item = $(templates.group_chats.permission_item({name: name, pretty_name: pretty_name})),
-                            permission_expire = $(templates.group_chats.right_expire_variants({right_name: name}));
+                            permission_expire = $(templates.group_chats.right_expire_variants({right_name: name, expire_options: []}));
                         permission_item.append(permission_expire);
                         this.$('.permissions-wrap').append(permission_item);
                         this.$('.right-item #' + name).prop('checked', false);
@@ -2422,6 +2422,7 @@ define("xabber-contacts", function () {
             },
 
             open: function () {
+                this.$('.preloader-wrapper').addClass('active');
                 this.$el.openModal({
                     ready: function () {
                         this.update();
@@ -2544,7 +2545,7 @@ define("xabber-contacts", function () {
                             }
                         }
                     }.bind(this));
-                    this.$el.removeClass('request-waiting');
+                    this.$('.preloader-wrapper').removeClass('active');
                     this.$('.select-timer .dropdown-button').dropdown({
                         inDuration: 100,
                         outDuration: 100,
@@ -2552,6 +2553,9 @@ define("xabber-contacts", function () {
                         hover: false,
                         alignment: 'left'
                     });
+                }.bind(this), function () {
+                    this.$('.default-restrictions-list-wrap').text('You have no permission to change default restrictions');
+                    this.$('.preloader-wrapper').removeClass('active');
                 }.bind(this));
             },
 

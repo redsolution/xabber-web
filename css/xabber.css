@@ -7474,6 +7474,14 @@ ul.restrictions-list-content>li {
     margin: 9px 0;
 }
 
+.edit-default-restrictions .preloader-wrapper {
+    margin: 0 auto;
+}
+
+.edit-default-restrictions .preloader-wrapper:not(.active) {
+    display: none !important;
+}
+
 .edit-default-restrictions .right-name,
 .edit-rights .right-name {
     font-size: 14px;

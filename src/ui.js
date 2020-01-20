@@ -2,10 +2,7 @@ define("xabber-ui", function () {
   return function (xabber) {
     var env = xabber.env,
         constants = env.constants,
-        templates = env.templates,
-        utils = env.utils,
-        $ = env.$,
-        _ = env._;
+        $ = env.$;
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
