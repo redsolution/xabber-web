@@ -3527,7 +3527,7 @@ body {
 
 .chat-tools-wrap {
     position: absolute;
-    top: 18px;
+    top: 16px;
     right: 14px;
 }
 
@@ -3542,7 +3542,7 @@ body {
 }
 
 .chat-tools-wrap .chat-tool .muted {
-    margin: 2px;
+    margin: 4px 0;
 }
 
 .chat-tools-wrap .chat-tool .muted polygon {
@@ -3554,6 +3554,10 @@ body {
 }
 
 .chat-tools-wrap .chat-tool:hover .muted polygon {
+    fill: #616161;
+}
+
+.chat-tools-wrap .btn-set-status.chat-tool:hover path {
     fill: #616161;
 }
 
