@@ -2679,7 +2679,7 @@ define("xabber-chats", function () {
                 return;
             }
             if (message)
-                this.bottom.showChatNotification(name + ' ' + message);
+                this.bottom.showChatNotification(name + ' is ' + message);
             else
                 this.bottom.showChatNotification();
             this.chat_item.$('.last-msg').text(message);
