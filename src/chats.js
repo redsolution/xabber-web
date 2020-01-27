@@ -2928,9 +2928,9 @@ define("xabber-chats", function () {
 
         removeMessageFromDOM: function ($message) {
             if (($message.hasClass('with-author')) && (!$message.next().hasClass('with-author'))) {
-                var avatar = $message.find('.circle-avatar').html();
+                var avatar = $message.find('.circle-avatar')[0];
                 $message.next().addClass('with-author');
-                $message.next().find('.circle-avatar').html(avatar);
+                $message.next().find('.circle-avatar').replaceWith(avatar);
             }
             $message.prev('.chat-day-indicator').remove();
             $message.remove();
