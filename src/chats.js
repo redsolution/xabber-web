@@ -911,6 +911,7 @@ define("xabber-chats", function () {
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
             this.contact.on("destroy", this.destroy, this);
+            this.on("get_retractions_list", this.getAllMessageRetractions, this);
         },
 
         recountUnread: function () {
@@ -978,6 +979,12 @@ define("xabber-chats", function () {
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
             xabber.current_voip_call.modal_view.show({status: 'in'});
             xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
+        },
+
+        getAllMessageRetractions: function () {
+            var retractions_query = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version});
+            this.account.sendIQ(retractions_query);
         },
 
         receiveMessage: function ($message, options) {
