@@ -982,7 +982,7 @@ define("xabber-chats", function () {
         },
 
         getAllMessageRetractions: function () {
-            var retractions_query = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            var retractions_query = $iq({from: this.account.connection.jid, type: 'set', to: this.contact.get('jid')})
                 .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version});
             this.account.sendIQ(retractions_query);
         },
