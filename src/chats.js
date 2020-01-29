@@ -5342,7 +5342,7 @@ define("xabber-chats", function () {
         },
 
         onScroll: function () {
-            if (this.isScrolledToBottom() && !this._load_chats_timeout) {
+            if (this.getScrollBottom() < 12 && !this._load_chats_timeout) {
                 this._load_chats_timeout = setTimeout(function () {
                     this.hideChatsFeedback();
                 }.bind(this), 5000);

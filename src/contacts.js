@@ -3750,7 +3750,8 @@ define("xabber-contacts", function () {
             onSyncIQ: function (iq, request_with_stamp) {
                 this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
                 let last_chat_msg_id = $(iq).find('set last');
-                last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
+                if (!request_with_stamp)
+                    last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
                     xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                     return;
