@@ -591,7 +591,11 @@ define("xabber-views", function () {
                   account.searched_msgs_loaded = false;
                   options.account = account;
                   this.MAMRequest(query, options, function (messages) {
+                      if (!this.query_text)
+                          return;
                       _.each(messages, function (message) {
+                          if (!this.query_text)
+                              return;
                           let message_from_stanza = account.chats.receiveChatMessage(message,
                               _.extend({is_searched: true}, options)
                               ),
