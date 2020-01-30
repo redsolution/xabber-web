@@ -274,7 +274,6 @@ var constants = {
         ]
     },
 
-    PARTICIPANT_ROLES: ['Member', 'Admin', 'Owner'],
     PERSONAL_AREA_URL: {},
 
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',

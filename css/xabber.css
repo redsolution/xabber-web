@@ -2710,6 +2710,7 @@ body {
 
 .edit-rights .participant-details-item .participant-info {
     position: relative;
+    width: 100%;
 }
 
 .edit-rights .participant-details-item .jid.one-line,

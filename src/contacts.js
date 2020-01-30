@@ -147,8 +147,15 @@ define("xabber-contacts", function () {
                 let participant_id = options.id,
                     version = options.version || 0;
                 var iq = $iq({from: this.account.get('jid'), to: this.get('jid'), type: 'get'});
-                if (participant_id != undefined)
-                    iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                if (participant_id != undefined) {
+                    if (!participant_id)
+                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                    else
+                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {
+                            xmlns: Strophe.NS.GROUP_CHAT,
+                            id: participant_id
+                        });
+                }
                 else
                     iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
                 this.account.sendIQ(iq, function (response) {
@@ -158,7 +165,7 @@ define("xabber-contacts", function () {
 
             getMyInfo: function (callback) {
                 this.membersRequest({id: ''}, function (response) {
-                    let $item = $($(response).find('query item')),
+                    let $item = $($(response).find('query user')),
                         cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
                     $item.length && this.participants && this.participants.createFromStanza($item);
                     cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
@@ -1684,7 +1691,7 @@ define("xabber-contacts", function () {
                 this.model.membersRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
-                    $response.find('query item').each(function (idx, item) {
+                    $response.find('query user').each(function (idx, item) {
                         let $item = $(item),
                             subscription = $item.find('subscription').text(),
                             id = $item.find('id').text();
@@ -1748,17 +1755,13 @@ define("xabber-contacts", function () {
             },
 
             showParticipantProperties: function (ev) {
-                    var participant_item = $(ev.target).closest('.group-chat-participant'),
-                        participant_id = participant_item.attr('data-id'),
-                        participant = this.model.participants.get(participant_id);
-                    if (participant)
-                        this.participant_properties_panel.open(participant);
-                    else
-                        this.membersRequest({id: participant_id}, function (response) {
-                            let $item = $($(response).find('query item'));
-                            $item.length && this.model.participants && (participant = this.model.participants.createFromStanza($item));
-                            this.participant_properties_panel.open(participant);
-                        }.bind(this));
+                var participant_item = $(ev.target).closest('.group-chat-participant'),
+                    participant_id = participant_item.attr('data-id'),
+                    participant = this.model.participants.get(participant_id);
+                this.model.membersRequest({id: participant_id}, function (response) {
+                    let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                    this.participant_properties_panel.open(participant);
+                }.bind(this));
             },
 
             showJid: function (ev) {
@@ -1891,10 +1894,8 @@ define("xabber-contacts", function () {
                 this.updateMemberAvatar(this.participant);
                 this.participant_messages = [];
                 this.actual_rights = [];
-                if (!this.contact.get('private_chat')) {
-                    this.renderAllRights();
+                if (!this.contact.get('private_chat'))
                     this.setActualRights();
-                }
                 else {
                     this.$('.modal-content').addClass('hidden');
                     this.$('.modal-footer').switchClass('hidden', this.participant.get('jid') !== this.account.get('jid'));
@@ -2688,15 +2689,6 @@ define("xabber-contacts", function () {
                 });
             },
 
-            getRole: function (permissions) {
-                let role = 1;
-                if (!permissions.length)
-                    role = 0;
-                else
-                    permissions.find(permission => permission.name === 'owner') && (role = 2);
-                return constants.PARTICIPANT_ROLES[role];
-            },
-
             getRights: function (rights) {
                 let pretty_rights = [];
                 $(rights).each(function(idx, permission) {
@@ -2717,13 +2709,13 @@ define("xabber-contacts", function () {
             createFromStanza: function ($item) {
                 let jid = $item.find('jid').text(),
                     nickname = $item.find('nickname').text(),
-                    id = $item.find('id').text(),
+                    id = $item.attr('id'),
                     badge = $item.find('badge').text(),
                     present = $item.find('present').text(),
                     photo = $item.find('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').find('info').attr('id'),
                     permissions = this.getRights($item.find('permission')),
                     restrictions = this.getRights($item.find('restriction')),
-                    role = this.getRole(permissions);
+                    role = $item.find('role').text();
                 !nickname.trim().length && (nickname = jid || id);
 
                 let attrs = {
