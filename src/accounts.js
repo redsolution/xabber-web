@@ -997,7 +997,7 @@ define("xabber-accounts", function () {
 
             onQuit: function () {
                 xabber.api_account.revoke_token();
-                (!this.models.length) && xabber.body.setScreen('login');
+                !this.models.length && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     account.deleteAccount();
                 });
