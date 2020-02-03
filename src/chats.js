@@ -2733,21 +2733,20 @@ define("xabber-chats", function () {
                     if (!message.get('is_unread'))
                         this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
                     if (!xabber.get('focused')) {
-                        if (this.contact.get('muted')) {
+                        if (this.contact.get('muted'))
                             message.set('muted', true);
-                            if (this.contact.get('archived'))
-                                message.set('archived', true);
-                        }
-                        else {
-                            if (this.contact.get('archived')) {
-                                this.head.archiveChat();
-                                this.contact.set('archived', false);
-                            }
+                        else
                             this.notifyMessage(message);
-                        }
                     }
                     this.model.setMessagesDisplayed(message.get('timestamp'));
                 }
+                if (this.contact.get('archived'))
+                    if (this.contact.get('muted'))
+                        message.set('archived', true);
+                    else {
+                        this.head.archiveChat();
+                        this.contact.set('archived', false);
+                    }
             }
             if (message.isSenderMe()) {
                 if (!message.get('is_archived') || message.get('missed_msg'))
