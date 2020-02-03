@@ -2033,6 +2033,7 @@ define("xabber-accounts", function () {
                 this.$('input[name=jid]').val(this.model.get('jid'));
                 this.$password_input = this.$('input[name=password]');
                 this.data.on("change:authentication", this.updateButtons, this);
+                xabber.on("quit", this.onQuit, this);
                 return this;
             },
 
@@ -2051,6 +2052,8 @@ define("xabber-accounts", function () {
             },
 
             onRender: function () {
+                if (xabber.body.screen.get('name') === 'login')
+                    this.closeModal();
                 Materialize.updateTextFields();
                 this.authFeedback({});
                 this.$password_input.val('').focus();
@@ -2124,6 +2127,10 @@ define("xabber-accounts", function () {
 
             onHide: function () {
                 this.$el.detach();
+            },
+
+            onQuit: function () {
+                this.closeModal();
             },
 
             close: function () {
