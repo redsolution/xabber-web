@@ -1760,7 +1760,7 @@ define("xabber-contacts", function () {
                     participant = this.model.participants.get(participant_id);
                 this.model.membersRequest({id: participant_id}, function (response) {
                     let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                    this.participant_properties_panel.open(participant);
+                    this.participant_properties_panel.open(participant, data_form);
                 }.bind(this));
             },
 
@@ -1837,8 +1837,9 @@ define("xabber-contacts", function () {
                 this.contact = this.model.model;
             },
 
-            open: function (participant) {
+            open: function (participant, data_form) {
                 this.participant = participant;
+                this.data_form = data_form;
                 this.render();
                 this.$el.openModal({
                     ready: function () {
@@ -2102,6 +2103,33 @@ define("xabber-contacts", function () {
 
             setActualRights: function () {
                 var permissions = this.participant.get('permissions'), restrictions = this.participant.get('restrictions');
+
+                this.data_form.fields.forEach(function (field) {
+                    if (field.type  === 'fixed') {
+
+                    }
+                    if (field.type  === 'list-single') {
+                        let attrs = {
+                                pretty_name: field.label,
+                                name: field.var,
+                                expires: field.values ? field.values[0] : undefined
+                            },
+                            restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
+                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
+                        restriction_item.append(restriction_expire);
+                        this.$('.restrictions-wrap').append(restriction_item);
+                        if (attrs.expires) {
+                            this.actual_rights.push({name: attrs.name, expires: attrs.expires});
+                            this.$('.right-item #default-' + attrs.name).prop('checked', true).addClass(attrs.expires);
+                            if (attrs.expires != 0) {
+                                let $current_restriction = this.$('.right-item.restriction-default-' + attrs.name);
+                                $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
+                                    .removeClass('default-value')
+                                    .text(attrs.expires);
+                            }
+                        }
+                    }
+                }.bind(this));
                 permissions.forEach(
                     function(permission) {
                     let permission_name = permission.name,
