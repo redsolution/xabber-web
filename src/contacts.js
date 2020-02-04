@@ -2076,38 +2076,11 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            renderAllRights: function () {
-                if (this.contact.all_rights) {
-                    this.$('.restrictions-wrap').html("");
-                    this.$('.permissions-wrap').html("");
-                    this.contact.all_rights.restrictions.each(function (idx, restriction) {
-                        var name = $(restriction).attr('name'),
-                            pretty_name = $(restriction).attr('translation'),
-                            restriction_item = $(templates.group_chats.restriction_item({name: name, pretty_name: pretty_name})),
-                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: name, expire_options: []}));
-                        restriction_item.append(restriction_expire);
-                        this.$('.restrictions-wrap').append(restriction_item);
-                        this.$('.right-item #' + name).prop('checked', false);
-                    }.bind(this));
-                    this.contact.all_rights.permissions.each(function (idx, permission) {
-                        var name = $(permission).attr('name'),
-                            pretty_name = $(permission).attr('translation'),
-                            permission_item = $(templates.group_chats.permission_item({name: name, pretty_name: pretty_name})),
-                            permission_expire = $(templates.group_chats.right_expire_variants({right_name: name, expire_options: []}));
-                        permission_item.append(permission_expire);
-                        this.$('.permissions-wrap').append(permission_item);
-                        this.$('.right-item #' + name).prop('checked', false);
-                    }.bind(this));
-                }
-            },
-
             setActualRights: function () {
-                var permissions = this.participant.get('permissions'), restrictions = this.participant.get('restrictions');
-
+                this.$('.rights-wrap').html("");
                 this.data_form.fields.forEach(function (field) {
-                    if (field.type  === 'fixed') {
-
-                    }
+                    if (field.type  === 'fixed')
+                        this.$('.rights-wrap').append($('<div class="rights-header"/>').text(field.values[0]));
                     if (field.type  === 'list-single') {
                         let attrs = {
                                 pretty_name: field.label,
@@ -2117,7 +2090,7 @@ define("xabber-contacts", function () {
                             restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
                             restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
                         restriction_item.append(restriction_expire);
-                        this.$('.restrictions-wrap').append(restriction_item);
+                        this.$('.rights-wrap').append(restriction_item);
                         if (attrs.expires) {
                             this.actual_rights.push({name: attrs.name, expires: attrs.expires});
                             this.$('.right-item #default-' + attrs.name).prop('checked', true).addClass(attrs.expires);
@@ -2129,37 +2102,6 @@ define("xabber-contacts", function () {
                             }
                         }
                     }
-                }.bind(this));
-                permissions.forEach(
-                    function(permission) {
-                    let permission_name = permission.name,
-                        $current_permission = this.$('.right-item.permission-' + permission_name);
-                    this.actual_rights.push(permission_name);
-                    $current_permission.find('#' + permission_name).prop('checked', true);
-                    $current_permission.attr('data-switch', true);
-                    let expires_year = parseInt(moment(permission.expires_time).format('YYYY')),
-                        issued_at_year = parseInt(moment(permission.issued_time).format('YYYY'));
-                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
-                        if (expires_year - issued_at_year > 1)
-                            return;
-                    $current_permission.find('.select-timer .property-value').attr('data-value', permission.expires_time)
-                        .removeClass('default-value')
-                        .text(moment(permission.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
-                }.bind(this));
-                restrictions.forEach(function(restriction) {
-                    let restriction_name = restriction.name,
-                        $current_restriction = this.$('.right-item.restriction-' + restriction_name);
-                    this.actual_rights.push(restriction_name);
-                    $current_restriction.find('#' + restriction_name).prop('checked', true);
-                    $current_restriction.attr('data-switch', true);
-                    let expires_year = parseInt(moment(restriction.expires_time).format('YYYY')),
-                        issued_at_year = parseInt(moment(restriction.issued_time).format('YYYY'));
-                    if (!isNaN(expires_year) && !isNaN(issued_at_year))
-                        if (expires_year - issued_at_year > 1)
-                            return;
-                    $current_restriction.find('.select-timer .property-value').attr('data-value', restriction.expires_time)
-                        .removeClass('default-value')
-                        .text(moment(restriction.expires_time, 'YYYY-MM-DD hh:mm:ss').fromNow());
                 }.bind(this));
             },
 

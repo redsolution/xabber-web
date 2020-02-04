@@ -7563,16 +7563,11 @@ ul.restrictions-list-content>li {
     color: #9E9E9E !important;
 }
 
-.edit-rights .restrictions-header,
-.edit-rights .permissions-header {
+.edit-rights .rights-header {
     font-weight: 400;
     font-size: 18px;
     line-height: 21px;
     margin: 8px 0;
-}
-
-.edit-rights .dialog-permissions-edit {
-    margin-top: 8px;
 }
 
 /* ----------------- SYNC SETTTINGS MODAL ---------------- */
