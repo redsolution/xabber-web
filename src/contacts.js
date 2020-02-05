@@ -1758,6 +1758,7 @@ define("xabber-contacts", function () {
                 var participant_item = $(ev.target).closest('.group-chat-participant'),
                     participant_id = participant_item.attr('data-id'),
                     participant = this.model.participants.get(participant_id);
+                (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
                 this.model.membersRequest({id: participant_id}, function (response) {
                     let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                     this.participant_properties_panel.open(participant, data_form);
