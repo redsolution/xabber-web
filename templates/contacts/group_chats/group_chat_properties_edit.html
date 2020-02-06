@@ -3,51 +3,33 @@
     <div class="property-wrap jid-info-wrap">
         <div class="property-header">XMPP ID</div>
         <div class="jabber-id">
-            <div class="value one-line"></div>
+            <div class="value one-line">{{jid}}</div>
         </div>
         <p id="anonymous-public" class="property-description hidden">Public group chat. Participants can see real XMPP IDs of other participants</p>
         <p id="anonymous-incognito" class="property-description hidden">Incognito group chat. Participants can not see real XMPP IDs of other participants</p>
     </div>
-    <div class="property-wrap name-field">
-        <div class="property-header">Chat Name</div>
+    {[fields.forEach(function (field) { if (field.type === 'hidden' || field.type === 'jid-multi') return;]}
+    <div class="property-wrap {{field.var}}-field">
+        <div class="property-header">{{field.label}}</div>
+        {[if (field.type === 'text-single') {]}
         <div class="input-field input-group-chat-name">
-            <input id="new_name_value" type="text" name="chat_name" placeholder="Input Chat Name" class="text-field">
+            <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder="Input Chat Name" class="text-field">
         </div>
-    </div>
-    <div class="property-wrap description-field">
-        <div class="property-header">Description</div>
-        <textarea placeholder="Input description" id="" cols="30" rows="10" class="text-field materialize-textarea"></textarea>
-    </div>
-    <div class="property-wrap global-field">
-        <div class="property-header">Indexation</div>
+        {[} else if (field.type === 'text-multi') {]}
+        <textarea placeholder="Input {{field.var}}" id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea"/>
+        {[} else if (field.type === 'list-single') { field.options.forEach(function (option) {]}
         <div class="property-radio">
-            <input id="indexation-none" name="groupchatIndexation" type="radio" class="with-gap" required="">
-            <label class="property-radio-label" for="indexation-none">Not indexed</label>
+            <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{option.value}}" type="radio" class="with-gap" required="">
+            <label class="{{option.value}}-label" for="{{option.value}}">{{option.label}}</label>
         </div>
-        <div class="property-radio">
-            <input id="indexation-local" name="groupchatIndexation" type="radio" class="with-gap" required="">
-            <label class="property-radio-label" for="indexation-local">Local index</label>
-        </div>
-        <div class="property-radio">
-            <input id="indexation-global" name="groupchatIndexation" type="radio" class="with-gap" required="">
-            <label class="property-radio-label" for="indexation-global">Global index</label>
-        </div>
+        {[});}]}
+        {[if (field.var === 'index'){]}
         <p class="property-description">Locally indexed chats can be discovered by searching host server. Globally indexed chats can be discovered by searching global index</p>
+        {[} else if (field.var === 'membership') {]}
+        <p class="property-description">Locally indexed chats can be discovered by searching host server. Globally indexed chats can be discovered by searching global index</p>
+        {[}]}
     </div>
-    <div class="property-wrap membership-field">
-        <div class="property-header">Membership</div>
-        <div id="membership-header" class="membership-field">
-            <div class="property-radio">
-                <input id="membership-open" name="groupchatMembership" type="radio" class="with-gap" required="">
-                <label class="property-radio-label" for="membership-open">Open</label>
-            </div>
-            <div class="property-radio">
-                <input id="membership-member-only" name="groupchatMembership" type="radio" class="with-gap" required="">
-                <label class="property-radio-label" for="membership-member-only">Member only</label>
-            </div>
-        </div>
-        <p class="property-description">Member only chats can be joined by invitation</p>
-    </div>
+    {[})]}
 </div>
 <div class="modal-footer">
     <div class="buttons-wrap">

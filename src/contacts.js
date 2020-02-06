@@ -144,12 +144,17 @@ define("xabber-contacts", function () {
             },
 
             membersRequest: function (options, callback) {
+                options = options || {};
                 let participant_id = options.id,
                     version = options.version || 0;
                 var iq = $iq({from: this.account.get('jid'), to: this.get('jid'), type: 'get'});
                 if (participant_id != undefined) {
-                    if (!participant_id)
-                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                    if (!participant_id) {
+                        if (options.properties)
+                            iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                        else
+                            iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
+                    }
                     else
                         iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {
                             xmlns: Strophe.NS.GROUP_CHAT,
@@ -164,13 +169,17 @@ define("xabber-contacts", function () {
             },
 
             getMyInfo: function (callback) {
-                this.membersRequest({id: ''}, function (response) {
+                this.membersRequest({id: '', properties: true}, function (response) {
                     let $item = $($(response).find('query user')),
                         cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
                     $item.length && this.participants && this.participants.createFromStanza($item);
                     cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
                     this.trigger('update_my_info');
-                    callback && callback();
+                    this.membersRequest({id: ''}, function (response) {
+                        let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                        this.my_rights = data_form;
+                        callback && callback();
+                    }.bind(this));
                 }.bind(this));
             },
 
@@ -1127,7 +1136,6 @@ define("xabber-contacts", function () {
                 this.group_chat_properties = this.addChild('properties_view', xabber.GroupChatPropertiesView, {model:this.model, el: this.$('.group-chat-properties-wrap')[0]});
                 this.group_chat_properties_edit = new xabber.GroupChatPropertiesEditView({model: this.model});
                 this.default_restrictions_edit = new xabber.DefaultRestrictionsView({model: this.model});
-                this.model.my_rights = this.model.my_rights || {permissions: [], restrictions: []};
                 this.updateName();
                 this.updateStatus();
                 this.updateAvatar();
@@ -1168,7 +1176,7 @@ define("xabber-contacts", function () {
             },
 
             updateButtons: function () {
-                let has_permission = this.model.my_info && this.model.my_info.get('permissions').find(permission => (permission.name == 'owner' || permission.name == 'administrator')),
+                let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator')),
                     is_blocked = this.model.get('blocked');
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
@@ -1190,8 +1198,14 @@ define("xabber-contacts", function () {
             },
 
             editProperties: function (ev) {
-                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
-                    this.group_chat_properties_edit.open();
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
+                        let iq_get_properties = $iq({to: this.model.get('jid'), type: 'get'})
+                            .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
+                        this.account.sendIQ(iq_get_properties, function (properties) {
+                            let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                            this.group_chat_properties_edit.open(data_form);
+                        }.bind(this));
+                }
             },
 
             editDefaultRestrictions: function (ev) {
@@ -1404,7 +1418,6 @@ define("xabber-contacts", function () {
 
         xabber.GroupChatPropertiesEditView = xabber.BasicView.extend({
             className: 'modal dialog-modal group-chat-properties-edit',
-            template: templates.group_chats.group_chat_properties_edit,
 
             events: {
                 "click .btn-save": "saveChanges",
@@ -1416,12 +1429,12 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model;
-                this.$el.html(this.template());
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:group_info", this.update, this);
             },
 
-            open: function () {
+            open: function (data_form) {
+                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
                         this.update();
@@ -1451,14 +1464,14 @@ define("xabber-contacts", function () {
             },
 
             update: function () {
-                this.$('button').blur();
+                /*this.$('button').blur();
                 let info = this.model.get('group_info') || {};
                 this.$('.jid-info-wrap .jabber-id').find('.value').text(info.jid);
                 this.$('p[id="anonymous-' + info.anonymous + '"]').removeClass('hidden');
                 this.$('.name-field #new_name_value').val(info.name);
                 this.$('.description-field textarea').val(info.description);
                 this.$('.global-field input[id="indexation-' + info.searchable +'"]').prop('checked', true);
-                this.$('.membership-field input[id="membership-' + info.model +'"]').prop('checked', true);
+                this.$('.membership-field input[id="membership-' + info.model +'"]').prop('checked', true);*/
             },
 
             saveChanges: function() {
@@ -1501,7 +1514,7 @@ define("xabber-contacts", function () {
             },
 
             updateSaveButton: function () {
-                let new_name = this.$('input[name=chat_name]').val(),
+                /*let new_name = this.$('input[name=chat_name]').val(),
                     new_searchable = this.$('.global-field input:checked').attr('id').substr(11),
                     new_description = this.$('.description-field textarea').val(),
                     new_model = this.$('.membership-field input:checked').attr('id').substr(11),
@@ -1510,7 +1523,7 @@ define("xabber-contacts", function () {
                 (info.description != new_description) && (has_changes = true);
                 (info.searchable != new_searchable) && (has_changes = true);
                 (info.model != new_model) && (has_changes = true);
-                this.$('.btn-save').switchClass('non-active', !has_changes);
+                this.$('.btn-save').switchClass('non-active', !has_changes);*/
             }
 
         });
@@ -2080,26 +2093,34 @@ define("xabber-contacts", function () {
             setActualRights: function () {
                 this.$('.rights-wrap').html("");
                 this.data_form.fields.forEach(function (field) {
-                    if (field.type  === 'fixed')
-                        this.$('.rights-wrap').append($('<div class="rights-header"/>').text(field.values[0]));
-                    if (field.type  === 'list-single') {
+                    if (field.type  === 'fixed') {
+                        field.values && this.$('.rights-wrap').append($('<div class="rights-header"/>').text(field.values[0]));
+                    }
+                    if (field.type  === 'list-single' || field.type  === 'fixed' && !field.values) {
+                        !field.values && (field.values = []);
                         let attrs = {
                                 pretty_name: field.label,
                                 name: field.var,
                                 expires: field.values ? field.values[0] : undefined
                             },
-                            restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
-                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
-                        restriction_item.append(restriction_expire);
+                            restriction_item = $(templates.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name})),
+                            restriction_expire;
+                        if (field.options) {
+                            restriction_expire = $(templates.group_chats.right_expire_variants({
+                                right_name: ('default-' + attrs.name),
+                                expire_options: field.options
+                            }));
+                            restriction_item.append(restriction_expire);
+                        }
                         this.$('.rights-wrap').append(restriction_item);
                         if (attrs.expires) {
                             this.actual_rights.push({name: attrs.name, expires: attrs.expires});
-                            this.$('.right-item #default-' + attrs.name).prop('checked', true).addClass(attrs.expires);
+                            this.$('.right-item #' + attrs.name).prop('checked', true).addClass(attrs.expires);
                             if (attrs.expires != 0) {
-                                let $current_restriction = this.$('.right-item.restriction-default-' + attrs.name);
+                                let $current_restriction = this.$('.right-item.restriction-' + attrs.name);
                                 $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
                                     .removeClass('default-value')
-                                    .text(attrs.expires);
+                                    .text(moment(Number(attrs.expires)*1000).fromNow());
                             }
                         }
                     }
@@ -2196,10 +2217,11 @@ define("xabber-contacts", function () {
                     $participant_avatar = this.$('.participant-details-item .circle-avatar'),
                     nickname_value = this.$('.participant-info .nickname').text(),
                     changed_avatar = this.new_avatar,
+                    rights_changed = false,
                     has_changes = false,
                     iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
-                        .c('item', {id: member_id});
+                        .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
                 this.$('.buttons-wrap button').addClass('non-active');
                 changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 if (nickname_value != this.participant.get('nickname')) {
@@ -2209,17 +2231,22 @@ define("xabber-contacts", function () {
                 this.$('.right-item').each(function(idx, right_item) {
                     if ($(right_item).hasClass('changed')) {
                         var $right_item = $(right_item),
-                            right_type = $right_item.hasClass('restriction') ? 'restriction' : 'permission',
                             right_name = $right_item.find('.field input')[0].id;
                         if ($right_item.find('.field input:checked').val()) {
-                            let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value');
-                            iq_changes.c(right_type, {name: right_name, expires: right_expire}).up();
-                            has_changes = true;
+                            let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value'),
+                                field = this.data_form.fields.find(f => f.var === right_name),
+                                field_idx = this.data_form.fields.indexOf(field);
+                            field.values = [right_expire];
+                            this.data_form.fields[field_idx] = field;
+                            rights_changed = true;
                         }
                         else
                             if ($right_item.attr('data-switch')) {
-                                iq_changes.c(right_type, {name: right_name, expires: 'now'}).up();
-                                has_changes = true;
+                                let field = this.data_form.fields.find(f => f.var === right_name),
+                                    field_idx = this.data_form.fields.indexOf(field);
+                                field.values = [];
+                                this.data_form.fields[field_idx] = field;
+                                rights_changed = true;
                             }
                     }
                 }.bind(this));
@@ -2250,6 +2277,12 @@ define("xabber-contacts", function () {
                                 utils.dialogs.error("You have no permission to change participant's info");
                             }
                         }.bind(this));
+                if (rights_changed) {
+                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
+                    iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
+                    this.account.sendIQ(iq_rights_changes);
+                }
                 $btn.blur();
             }
         });
@@ -2555,7 +2588,7 @@ define("xabber-contacts", function () {
                         else if (this.actual_default_restrictions.find(restriction => restriction.name == restriction_name)) {
                             let field = data_form.fields.find(f => f.var === restriction_name),
                                 field_idx = data_form.fields.indexOf(field);
-                            field.values = [];
+                            field.values = [""];
                             data_form.fields[field_idx] = field;
                             has_new_default_restrictions = true;
                         }
@@ -2684,8 +2717,6 @@ define("xabber-contacts", function () {
                     badge = $item.find('badge').text(),
                     present = $item.find('present').text(),
                     photo = $item.find('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').find('info').attr('id'),
-                    permissions = this.getRights($item.find('permission')),
-                    restrictions = this.getRights($item.find('restriction')),
                     role = $item.find('role').text();
                 !nickname.trim().length && (nickname = jid || id);
 
@@ -2696,9 +2727,7 @@ define("xabber-contacts", function () {
                     nickname: nickname,
                     badge: badge,
                     present: present,
-                    role: role,
-                    permissions: permissions,
-                    restrictions: restrictions
+                    role: role
                 };
 
                 let participant = this.mergeParticipant(attrs);
