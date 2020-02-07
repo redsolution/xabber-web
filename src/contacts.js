@@ -1995,7 +1995,7 @@ define("xabber-contacts", function () {
                 }
                 $property_value.text($property_item.text());
                 $property_value.attr('data-value', $property_item.attr('data-value'));
-                if ($property_item.attr('data-value') === 'never') {
+                if ($property_item.attr('data-value') === '0') {
                     $property_value.addClass('default-value').text('set timer');
                 } else if ($property_value.hasClass('default-value'))
                     $property_value.removeClass('default-value');
@@ -2202,7 +2202,7 @@ define("xabber-contacts", function () {
                     else {
                         $right_item.removeClass('changed');
                         if ($right_item.hasClass('changed-timer'))
-                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', 'never');
+                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', "");
                     }
                 }
                 this.updateSaveButton();
@@ -2484,7 +2484,7 @@ define("xabber-contacts", function () {
             changeRestriction: function (ev) {
                 let $target = $(ev.target);
                 if (!$target.prop('checked')) {
-                    $target.closest('.right-item').find('.select-timer .property-value').attr('data-value', 'never').addClass('default-value')
+                    $target.closest('.right-item').find('.select-timer .property-value').attr('data-value', "").addClass('default-value')
                         .text('set timer');
                 }
             },
@@ -2599,7 +2599,7 @@ define("xabber-contacts", function () {
                     this.account.addDataFormToStanza(iq_change_default_rights, data_form);
                     this.account.sendIQ(iq_change_default_rights, function () {
                         this.close();
-                    }.bind(this), function () {
+                    }.bind(this), function (error) {
                         let err_text = $(error).find('error text').text() || 'You have no permission to change default restrictions';
                         utils.dialogs.error(err_text);
                         this.close();
@@ -2611,7 +2611,7 @@ define("xabber-contacts", function () {
                 var expire_time_item = $(ev.target),
                     new_expire_time = expire_time_item.val(),
                     $restriction_item = expire_time_item.prev();
-                if (expire_time_item.val() == 'never')
+                if (expire_time_item.val() == '0')
                     $restriction_item .find('.restriction-description').text('Indefinitely');
                 else
                     $restriction_item .find('.restriction-description').text('For ' + new_expire_time);
