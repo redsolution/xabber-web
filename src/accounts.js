@@ -735,7 +735,6 @@ define("xabber-accounts", function () {
                         if (type !== 'online') {
                             stanza.c('show').t(type).up();
                         }
-                        // stanza.c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash()).up().up();
                         stanza.c('status').t(status_message).up();
                         stanza.c('priority').t(this.get('priority')).up();
                     }
@@ -1151,7 +1150,9 @@ define("xabber-accounts", function () {
             },
 
             showSettings: function () {
+                let scroll_top = xabber.toolbar_view.getScrollTop();
                 this.model.showSettings();
+                xabber.toolbar_view.scrollTo(scroll_top);
             },
 
             filterChats: function (ev) {
