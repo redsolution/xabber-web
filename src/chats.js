@@ -1258,13 +1258,13 @@ define("xabber-chats", function () {
 
         setMessagesDelivered: function (timestamp) {
             !timestamp && (timestamp = moment.now());
-            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') != constants.MSG_ERROR) && (message.get('state') < constants.MSG_DELIVERED));
+            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED));
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DELIVERED));
         },
 
         setMessagesDisplayed: function (timestamp) {
             !timestamp && (timestamp = moment.now());
-            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') != constants.MSG_ERROR) && (message.get('state') < constants.MSG_DISPLAYED));
+            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED));
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DISPLAYED));
         },
 
