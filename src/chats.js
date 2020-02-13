@@ -5279,6 +5279,7 @@ define("xabber-chats", function () {
             this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
+            xabber.on("update_layout", this.onWindowResized, this);
         },
 
         render: function (options) {
@@ -5316,6 +5317,10 @@ define("xabber-chats", function () {
 
         onUpdatedScreen: function (name) {
             this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.active.unread').length);
+        },
+
+        onWindowResized: function (options) {
+            options.size_changed && this.onScroll();
         },
 
         defineMouseWheelEvent: function () {
