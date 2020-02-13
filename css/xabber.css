@@ -723,7 +723,8 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 50px;
+    /*width: 50px;*/
+    width: auto;
     height: 100%;
     background-color: transparent;
     z-index: 500;
@@ -845,7 +846,11 @@ body {
 .toolbar .toolbar-item,
 .toolbar .account-item {
     position: relative;
-    width: 100%;
+    /*width: 100%;*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
     height: 48px;
     cursor: pointer;
 }
@@ -892,6 +897,7 @@ body {
 .toolbar .border {
     position: absolute;
     width: 2px;
+    left: 0;
     height: 100%;
     display: none;
 }
@@ -1030,10 +1036,15 @@ body {
     height: 100%;
 }
 
+.toolbar .accounts .ps-scrollbar-y-rail {
+    left: 48px !important;
+}
+
 .account-item .circle-avatar {
-    position: absolute;
+    /*position: absolute;
     top: 7px;
-    left: 9px;
+    left: 9px;*/
+    margin: 7px 9px;
     width: 34px;
     height: 34px;
     border: 1px solid;
@@ -1072,15 +1083,16 @@ body {
 }
 
 .toolbar .account-item .account-actions-panel {
-    position: fixed;
+    position: relative;
+    /*position: fixed;*/
     font-size: 16px;
-    left: 45px;
-    padding: 0 5px;
+    /*left: 45px;
+    padding: 0 5px;*/
     height: 36px;
     opacity: 0;
     z-index: 1000;
     visibility: hidden;
-    margin: 6px 0;
+    /*margin: 6px 0;*/
     color: #C0C0C0;
     text-align: center;
     min-width: 134px;

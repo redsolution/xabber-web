@@ -1156,9 +1156,11 @@ define("xabber-accounts", function () {
             },
 
             filterChats: function (ev) {
+                let scroll_top = xabber.toolbar_view.getScrollTop();
                 ev.stopPropagation();
                 xabber.chats_view.showChatsByAccount(this.model);
                 this.model.trigger('filter_chats');
+                xabber.toolbar_view.scrollTo(scroll_top);
             },
 
             setActive: function () {
