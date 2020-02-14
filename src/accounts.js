@@ -1107,7 +1107,7 @@ define("xabber-accounts", function () {
 
             events: {
                 'click .filter-chats': 'filterChats',
-                'click': 'showSettings'
+                'click .circle-avatar': 'showSettings'
             },
 
             _initialize: function () {

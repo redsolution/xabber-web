@@ -846,13 +846,21 @@ body {
 .toolbar .toolbar-item,
 .toolbar .account-item {
     position: relative;
-    /*width: 100%;*/
     display: flex;
     align-items: center;
     justify-content: center;
     width: auto;
     height: 48px;
     cursor: pointer;
+}
+
+.toolbar .account-item:not(:hover) {
+    width: 50px;
+    display: block;
+}
+
+.toolbar .toolbar-item:not(.account-item) {
+    width: 50px;
 }
 
 .toolbar .toolbar-item.unread img,
@@ -1044,7 +1052,8 @@ body {
     /*position: absolute;
     top: 7px;
     left: 9px;*/
-    margin: 7px 9px;
+    display: inline-grid;
+    margin: 7px 0 7px 9px;
     width: 34px;
     height: 34px;
     border: 1px solid;
@@ -1084,15 +1093,12 @@ body {
 
 .toolbar .account-item .account-actions-panel {
     position: relative;
-    /*position: fixed;*/
     font-size: 16px;
-    /*left: 45px;
-    padding: 0 5px;*/
     height: 36px;
     opacity: 0;
     z-index: 1000;
     visibility: hidden;
-    /*margin: 6px 0;*/
+    padding-left: 10px;
     color: #C0C0C0;
     text-align: center;
     min-width: 134px;
@@ -1115,7 +1121,8 @@ body {
     line-height: 20px;
 }
 
-.toolbar .account-item:hover .account-actions-panel {
+.toolbar .account-item .account-actions-panel:hover,
+.toolbar .account-item .circle-avatar:hover ~ .account-actions-panel {
     opacity: 1;
     visibility: visible !important;
 }
