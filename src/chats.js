@@ -3645,6 +3645,7 @@ define("xabber-chats", function () {
         },
 
         addFileMessage: function (files) {
+            let new_files = [], file_counter = 0;
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
                     this.contact.messages_view.openChat();
@@ -3676,9 +3677,10 @@ define("xabber-chats", function () {
                         deferred.done(function (data) {
                             image.height = data.height;
                             image.width = data.width;
-                            files[idx] = image;
-                            if (idx === (files.length - 1))
-                                deferred_all.resolve(files);
+                            new_files.push(image);
+                            file_counter++;
+                            if (file_counter === files.length)
+                                deferred_all.resolve(new_files);
                         }.bind(this));
                     }.bind(this));
                     reader.onload = function (e) {
@@ -3692,8 +3694,10 @@ define("xabber-chats", function () {
                     };
                 }
                 else {
-                    if (idx === (files.length - 1))
-                        deferred_all.resolve(files);
+                    new_files.push(file);
+                    file_counter++;
+                    if (file_counter === files.length)
+                        deferred_all.resolve(new_files);
                 }
             }.bind(this));
         },
