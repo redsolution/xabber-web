@@ -13,6 +13,8 @@
         defaults: {
             version_number: env.version_number,
             actual_version_number: env.version_number,
+            audio: false,
+            video: false,
             client_id: uuid().substring(0, 8),
             client_name: 'Xabber for Web ' + env.version_number
         },
@@ -21,6 +23,8 @@
             this.env = env;
             this.fetchURLParams();
             this.cleanUpStorage();
+            this.detectMediaDevices();
+            window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this);
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.settings = this._settings.attributes;
@@ -85,6 +89,27 @@
                 if (key.startsWith(full_storage_name)) {
                     window.localStorage.removeItem(key);
                 }
+            }
+        },
+
+        detectMediaDevices: function () {
+            this.getMediaDevices(function (media_devices) {
+                this.set(media_devices);
+            }.bind(this));
+        },
+
+        getMediaDevices: function (callback, errback) {
+            if (window.navigator && window.navigator.mediaDevices) {
+                window.navigator.mediaDevices.enumerateDevices()
+                    .then(function (devices) {
+                        let media_devices = {audio: false, video: false};
+                        (devices.find(device => device.kind === 'audioinput')) && (media_devices.audio = true);
+                        (devices.find(device => device.kind === 'videoinput')) && (media_devices.video = true);
+                        callback && callback(media_devices);
+                    })
+                    .catch(function (err) {
+                        errback && errback(err);
+                    });
             }
         },
 

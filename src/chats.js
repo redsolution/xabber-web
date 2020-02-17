@@ -976,6 +976,13 @@ define("xabber-chats", function () {
         },
 
         initIncomingCall: function (full_jid, session_id) {
+            if (!xabber.get('audio')) {
+                this.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    message: 'You have no required devices to answer jingle message'
+                });
+                return;
+            }
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
             xabber.current_voip_call.modal_view.show({status: 'in'});
             xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
@@ -6090,6 +6097,7 @@ define("xabber-chats", function () {
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:private_chat", this.updatePrivateChat, this);
             this.contact.on("change:incognito_chat", this.updateIncognitoChat, this);
+            xabber.on('change:audio', this.updateGroupChatHead, this);
         },
 
         render: function (options) {
@@ -6248,7 +6256,7 @@ define("xabber-chats", function () {
         updateGroupChatHead: function () {
             var is_group_chat = this.contact.get('group_chat');
             (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
-            this.$('.btn-jingle-message').showIf(!is_group_chat);
+            this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio'));
             this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },

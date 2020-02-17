@@ -941,6 +941,8 @@ define("xabber-contacts", function () {
                 this.updateAvatar();
                 this.updateButtons();
                 this.model.on("change", this.update, this);
+                xabber.on("change:video", this.updateJingleButtons, this);
+                xabber.on("change:audio", this.updateJingleButtons, this);
             },
 
             render: function (options) {
@@ -955,12 +957,18 @@ define("xabber-contacts", function () {
                     alignment: 'right'
                 };
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+                this.updateJingleButtons();
                 this.updateName();
                 this.model.resources.models.forEach(function (resource) {this.model.resources.requestInfo(resource)}.bind(this));
             },
 
             onChangedVisibility: function () {
                 this.model.set('display', this.isVisible());
+            },
+
+            updateJingleButtons: function () {
+                this.$('.btn-voice-call').switchClass('non-active', !xabber.get('audio'));
+                this.$('.btn-video-call').switchClass('non-active', !xabber.get('video'));
             },
 
             update: function () {
@@ -1021,12 +1029,13 @@ define("xabber-contacts", function () {
             },
 
             voiceCall: function () {
-                this.initCall();
+                if (xabber.get('audio'))
+                    this.initCall();
             },
 
             videoCall: function () {
-                this.initCall({video: true});
-
+                if (xabber.get('video'))
+                    this.initCall({video: true});
             },
 
             initCall: function (type) {

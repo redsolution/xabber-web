@@ -325,14 +325,18 @@ input[type=checkbox].filled-in:checked + label:after {
     color: #9E9E9E !important;
 }
 
+i.non-active,
+i.non-active:hover,
+i.non-active:focus,
 .btn-main-filled.non-active:hover,
 .btn-main-filled.non-active:focus,
 .btn-main-filled.non-active {
     background-color: #BDBDBD !important;
 }
 
+i.non-active,
 button.non-active {
-    cursor: auto;
+    cursor: auto !important;
 }
 
 button.btn-float-left {
