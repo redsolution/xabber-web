@@ -511,6 +511,9 @@ define("xabber-chats", function () {
                   this.remote_stream = ev.streams[0];
                   this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
               }.bind(this);
+              this._waiting_timeout = setTimeout(function () {
+                  (!this.get('state') && this.get('status') === 'calling' && this.get('call_initiator') === this.account.get('jid')) && this.reject();
+              }.bind(this), constants.JINGLE_WAITING_TIME * 1000);
               this.conn.onicecandidate = this.onIceCandidate.bind(this);
               this.conn.oniceconnectionstatechange = this.onChangeIceConnectionState.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
@@ -634,6 +637,7 @@ define("xabber-chats", function () {
           },
 
           onDestroy: function () {
+              clearTimeout(this._waiting_timeout);
               clearInterval(this.call_timer);
               xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
@@ -979,7 +983,7 @@ define("xabber-chats", function () {
             if (!xabber.get('audio')) {
                 this.messages.createSystemMessage({
                     from_jid: this.account.get('jid'),
-                    message: 'You have no required devices to answer jingle message'
+                    message: 'Incoming call. You have no required devices to answer'
                 });
                 return;
             }
