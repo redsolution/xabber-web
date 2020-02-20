@@ -166,6 +166,7 @@
                 'XABBER_ACCOUNT_URL',
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
+                'CONTAINER',
                 'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',

@@ -31,8 +31,10 @@ define("xabber-views", function () {
             this.parent = options.parent;
             this.vname = options.vname;
             this.children = {};
+            this.is_el = true;
             this.$el.addClass(options.classlist);
             if (!options.el) {
+                this.is_el = false;
                 this.$el.html(this.template(_.extend({view: this}, constants)));
             }
             if (!_.isUndefined(this.ps_selector)) {
@@ -219,7 +221,9 @@ define("xabber-views", function () {
             tree = this.patchTree(tree, options) || tree;
             _.each(this.children, function (view, name) {
                 if (_.has(tree, name)) {
-                    this.$el.append(view.$el);
+                    if (name !== 'login' || name === 'login' && !view.is_el)
+                        this.$el.append(view.$el);
+                    this.$el.switchClass('hidden', name === 'login' && view.is_el);
                     view.show(options, tree[name]);
                 }
             }.bind(this));
@@ -764,6 +768,7 @@ define("xabber-views", function () {
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
             $('body').append(this.$el);
+            $('#modals').insertAfter(this.$el);
         },
 
         addScreen: function (name, attrs) {
@@ -1605,7 +1610,7 @@ define("xabber-views", function () {
         this.body = new this.Body({model: this});
 
         this.login_page = this.body.addChild('login', this.NodeView, {
-            classlist: 'login-page-wrap'});
+            classlist: 'login-page-wrap', el: constants.CONTAINER});
 
         this.toolbar_view = this.body.addChild('toolbar', this.ToolbarView);
 

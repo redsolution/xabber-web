@@ -700,7 +700,6 @@ html {
     min-height: 560px;
     min-width: 864px;
     background-color: #383940;
-    background-image: url(../images/background.png);
 }
 
 body {
@@ -718,9 +717,18 @@ body {
 }
 
 .client-body-wrap {
-    position: relative;
+    position: fixed;
+    background-image: url(../images/background.png);
+    z-index: 1000;
     width: 100%;
     height: 100%;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+}
+
+body .client-body-wrap.hidden + #modals {
+    z-index: -1;
 }
 
 .toolbar {
