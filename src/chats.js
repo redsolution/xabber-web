@@ -6755,11 +6755,11 @@ define("xabber-chats", function () {
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 // clear input
                 ev.preventDefault();
-                this.displayMicrophone();
+                /*this.displayMicrophone();
                 $rich_textarea.flushRichTextarea();
                 this.$('.mentions-list').hide();
                 this.unsetForwardedMessages();
-                this.view.sendChatState('active');
+                this.view.sendChatState('active');*/
             } else {
                 if (ev.keyCode === constants.KEY_ARROW_UP || ev.keyCode === constants.KEY_ARROW_DOWN) {
                     return;
