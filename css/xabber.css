@@ -1156,6 +1156,7 @@ body .client-body-wrap.hidden + #modals {
 .login-panel {
     position: relative;
     width: 560px;
+    margin: 0 auto;
 }
 
 .login-panel-head {
