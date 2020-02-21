@@ -710,10 +710,12 @@ body {
     overflow: hidden;
 }
 
-body.login > div.login-container,
-body.on-login > div#modals,
-body.on-login > div.client-body-wrap {
-    display: unset;
+body.on-login > div:not(.client-body-wrap):not(#modals) {
+    display: none;
+}
+
+body.login > div.login-container {
+    display: block;
 }
 
 #modals {
@@ -723,7 +725,7 @@ body.on-login > div.client-body-wrap {
 }
 
 .client-body-wrap {
-    position: fixed;
+    position: relative;
     background-image: url(../images/background.png);
     z-index: 1001;
     width: 100%;
