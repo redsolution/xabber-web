@@ -710,6 +710,12 @@ body {
     overflow: hidden;
 }
 
+body.login > div.login-container,
+body.on-login > div#modals,
+body.on-login > div.client-body-wrap {
+    display: unset;
+}
+
 #modals {
     position: absolute;
     width: 100%;
@@ -719,7 +725,7 @@ body {
 .client-body-wrap {
     position: fixed;
     background-image: url(../images/background.png);
-    z-index: 1000;
+    z-index: 1001;
     width: 100%;
     height: 100%;
     top: 0;
@@ -1145,15 +1151,9 @@ body .client-body-wrap.hidden + #modals {
 
 /* ------------- LOGIN PANEL ----------- */
 
-.login-page-wrap {
-    width: 100%;
-    height: 100%;
-}
-
 .login-panel {
     position: relative;
     width: 560px;
-    margin: 150px auto;
 }
 
 .login-panel-head {
