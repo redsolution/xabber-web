@@ -219,7 +219,9 @@ define("xabber-views", function () {
             tree = this.patchTree(tree, options) || tree;
             _.each(this.children, function (view, name) {
                 if (_.has(tree, name)) {
-                    this.$el.append(view.$el);
+                    if (name !== 'login')
+                        this.$el.append(view.$el);
+                    this.$el.switchClass('hidden', name === 'login');
                     view.show(options, tree[name]);
                 }
             }.bind(this));
@@ -764,6 +766,7 @@ define("xabber-views", function () {
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
             $('body').append(this.$el);
+            $('#modals').insertAfter(this.$el);
         },
 
         addScreen: function (name, attrs) {
@@ -771,6 +774,8 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
+            $('body').switchClass('login', name === 'login');
+            $('body').switchClass('on-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
@@ -1605,7 +1610,7 @@ define("xabber-views", function () {
         this.body = new this.Body({model: this});
 
         this.login_page = this.body.addChild('login', this.NodeView, {
-            classlist: 'login-page-wrap'});
+            classlist: 'login-page-wrap', el: $(document).find('.login-container')[0]});
 
         this.toolbar_view = this.body.addChild('toolbar', this.ToolbarView);
 

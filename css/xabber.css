@@ -700,7 +700,6 @@ html {
     min-height: 560px;
     min-width: 864px;
     background-color: #383940;
-    background-image: url(../images/background.png);
 }
 
 body {
@@ -711,6 +710,12 @@ body {
     overflow: hidden;
 }
 
+body.login > div.login-container,
+body.on-login > div#modals,
+body.on-login > div.client-body-wrap {
+    display: unset;
+}
+
 #modals {
     position: absolute;
     width: 100%;
@@ -718,9 +723,18 @@ body {
 }
 
 .client-body-wrap {
-    position: relative;
+    position: fixed;
+    background-image: url(../images/background.png);
+    z-index: 1001;
     width: 100%;
     height: 100%;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+}
+
+body .client-body-wrap.hidden + #modals {
+    z-index: -1;
 }
 
 .toolbar {
@@ -1137,15 +1151,9 @@ body {
 
 /* ------------- LOGIN PANEL ----------- */
 
-.login-page-wrap {
-    width: 100%;
-    height: 100%;
-}
-
 .login-panel {
     position: relative;
     width: 560px;
-    margin: 150px auto;
 }
 
 .login-panel-head {
