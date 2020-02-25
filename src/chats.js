@@ -5295,6 +5295,7 @@ define("xabber-chats", function () {
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
             xabber.on("update_layout", this.onWindowResized, this);
+            this.$('input').on('input', this.updateSearch.bind(this));
         },
 
         render: function (options) {

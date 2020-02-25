@@ -4116,6 +4116,7 @@ define("xabber-contacts", function () {
                 this.model.on("update_order", this.updateRosterViews, this);
                 this.model.on("deactivate destroy", this.removeRosterView, this);
                 this.on("before_hide", this.saveScrollBarOffset, this);
+                this.$('input').on('input', this.updateSearch.bind(this));
             },
 
             updateOneRosterView: function (account) {
