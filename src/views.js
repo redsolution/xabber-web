@@ -527,18 +527,26 @@ define("xabber-views", function () {
                   let jid = chat.get('jid').toLowerCase(),
                       name = chat.contact.get('roster_name') || chat.contact.get('name');
                   name && (name = name.toLowerCase());
-                  if ((name.indexOf(query) > -1 || jid.indexOf(query) > -1) && chat.get('timestamp')) {
-                      let chat_item = xabber.chats_view.child(chat.get('id'));
-                      chat_item && (chat_item = chat_item.$el.clone());
-                      if (chat_item) {
-                          this.$('.chats-list-wrap').removeClass('hidden');
-                          this.$('.chats-list').prepend(chat_item);
-                          this.updateChatItem(chat_item);
-                          chat_item.click(function () {
-                              this.$('.list-item.active').removeClass('active');
-                              xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
-                              chat_item.addClass('active');
-                          }.bind(this));
+                  if (chat.get('timestamp')) {
+                      if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
+                          let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
+                              chat_item = xabber.chats_view.child(chat.get('id'));
+                          chat_item && (chat_item = chat_item.$el.clone().addClass(searched_by));
+                          if (chat_item) {
+                              this.$('.chats-list-wrap').removeClass('hidden');
+                              if (searched_by === 'by-name')
+                                  this.$('.chats-list').prepend(chat_item);
+                              else if (this.$('.chats-list .by-jid').length)
+                                  chat_item.insertBefore(this.$('.chats-list .by-jid').first());
+                              else
+                                  this.$('.chats-list').append(chat_item);
+                              this.updateChatItem(chat_item);
+                              chat_item.click(function () {
+                                  this.$('.list-item.active').removeClass('active');
+                                  xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
+                                  chat_item.addClass('active');
+                              }.bind(this));
+                          }
                       }
                   }
               }.bind(this));
