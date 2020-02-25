@@ -710,7 +710,7 @@ body {
     overflow: hidden;
 }
 
-body.on-login > div:not(.client-body-wrap):not(#modals) {
+body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg) {
     display: none;
 }
 
