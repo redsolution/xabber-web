@@ -290,9 +290,6 @@ define("xabber-chats", function () {
                     carbon_copied: options.carbon_copied && !options.is_archived,
                     markable: markable,
                     msgid: msgid,
-                    stanza_id: options.stanza_id,
-                    origin_id: origin_id,
-                    archive_id: archive_id,
                     is_forwarded: options.is_forwarded,
                     forwarded_message: options.forwarded_message || null,
                     from_jid: from_jid,
@@ -307,6 +304,10 @@ define("xabber-chats", function () {
                 mentions = this.parseMentions($message),
                 markups = this.parseMarkup($message),
                 legacy_content = [];
+
+            options.stanza_id && (attrs.stanza_id = options.stanza_id);
+            origin_id && (attrs.origin_id = origin_id);
+            archive_id && (attrs.archive_id = archive_id);
 
             (options.replaced || mentions.length) && (attrs.mentions = mentions);
             (options.replaced || markups.length) && (attrs.markups = markups);
@@ -4766,10 +4767,10 @@ define("xabber-chats", function () {
                 if (!chat)
                     return;
                 let stanza_id = $message.find('replace').attr('id'),
-                    msg_item = chat.messages.find(msg => msg.get('archive_id') == stanza_id),
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id),
                     active_right_screen = xabber.body.screen.get('right'),
                     participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
-                    participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id);
+                    participant_msg_item = participant_messages.find(msg => msg.get('stanza_id') == stanza_id);
                 this.receiveChatMessage($message, {replaced: true});
                 if (participant_msg_item) {
                     participant_msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
