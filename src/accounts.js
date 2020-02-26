@@ -999,6 +999,8 @@ define("xabber-accounts", function () {
                 !this.models.length && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     account.deleteAccount();
+                    account.password_view.closeModal();
+                    utils.modals.clear_queue();
                 });
             },
 
@@ -2055,8 +2057,8 @@ define("xabber-accounts", function () {
             },
 
             onRender: function () {
-                if (xabber.body.screen.get('name') === 'login')
-                    this.closeModal();
+                /*if (xabber.body.screen.get('name') === 'login')
+                    this.closeModal();*/
                 Materialize.updateTextFields();
                 this.authFeedback({});
                 this.$password_input.val('').focus();
