@@ -82,6 +82,7 @@ define("xabber-mentions", function () {
                 this.model.on("destroy", this.onMentionRemoved, this);
                 xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
                 this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+                this.$('input').on('input', this.updateSearch.bind(this));
             },
 
             render: function (options) {

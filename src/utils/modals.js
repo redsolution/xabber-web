@@ -109,6 +109,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
     return {
         Modal: Modal,
 
+        clear_queue: function () {
+            modal_queue = [];
+        },
+
         dialogs: {
             common: function (header, text, buttons, dialog_options) {
                 var dialog = new Modal(function () {
