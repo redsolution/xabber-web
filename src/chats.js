@@ -28,6 +28,7 @@ define("xabber-chats", function () {
         initialize: function () {
             var time = this.get('time'), attrs = {};
             attrs.msgid = this.get('stanza_id');
+            attrs.origin_id = this.get('stanza_id');
             if (time) {
                 attrs.timestamp = Number(moment(time));
             } else {
@@ -980,6 +981,11 @@ define("xabber-chats", function () {
             }.bind(this));
         },
 
+        setStanzaId: function (msgid, stanza_id) {
+            this.messages.get(msgid).set({'stanza_id': stanza_id, 'msgid': stanza_id});
+            this.item_view.content.$('.chat-message[data-msgid="' + msgid + '"]').data('msgid', stanza_id)[0].setAttribute('data-msgid', stanza_id);
+        },
+
         getCallingAvailability: function (to, session_id, callback) {
             let iq = $iq({from: this.account.get('jid'), to: to, type: 'get'})
                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
@@ -1242,7 +1248,7 @@ define("xabber-chats", function () {
             if (error || !$displayed.length && !$received.length) {
                 return;
             }
-            var marked_msgid = $displayed.attr('id') || $received.attr('id'),
+            var marked_msgid = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 msg = this.account.messages.get(marked_msgid);
             if (!msg) {
                 return;
@@ -4583,7 +4589,7 @@ define("xabber-chats", function () {
             var origin_id = $message.children('origin-id').attr('id'),
                 pending_message = this.account._pending_messages.find(msg => msg.msg_id === origin_id);
             if (pending_message) {
-                this.account.chats.get(pending_message.chat_hash_id).messages.get(pending_message.msg_id).set('stanza_id', $message.children('stanza-id').attr('id'));
+                this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.msg_id, $message.children('stanza-id').attr('id'));
                 this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
             }
         },
