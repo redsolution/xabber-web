@@ -1261,7 +1261,7 @@ define("xabber-chats", function () {
                         let delivered_time = $received.children('time').attr('stamp');
                         if (delivered_time) {
                             msg.set('time', utils.pretty_datetime(delivered_time));
-                            msg.set('timestamp', Number(moment(delivered_time)));
+                            msg.set('timestamp', Number(delivered_time));
                         }
                     }
                     this.setMessagesDelivered(msg.get('timestamp'));
@@ -4701,12 +4701,11 @@ define("xabber-chats", function () {
                 $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]');
             if ($stanza_received.length) {
                 let $received_message = $stanza_received.children('forwarded').children('message'),
+                    stanza_id = $received_message.children('stanza-id').attr('id'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id') || $received_message.children('origin-id').first().attr('id');
-                if ($received_message.length)
-                    this.receiveChatMessage($received_message[0], {echo_msg: true});
                 if (origin_msg_id) {
-                    let msg = this.account.messages.get($received_message.children('stanza-id').attr('id') || origin_msg_id),
-                        delivered_time = $stanza_received.children('time').attr('stamp');
+                    let msg = this.account.messages.get(origin_msg_id || stanza_id),
+                        delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
                     msg && msg.set('state', constants.MSG_SENT);
                     if (msg && delivered_time) {
                         msg.set('time', delivered_time);
@@ -4718,7 +4717,7 @@ define("xabber-chats", function () {
                             if ($received_message.children('stanza-id').attr('by') == contact.get('jid')) {
                                 let from_id = $received_message.children('reference[type="groupchat"]').find('user').attr('id'); // TODO: add [xmlns="' + Strophe.NS.REFERENCE + '"]
                                 this.setStanzaId($received_message);
-                                this.account.messages.get($received_message.children('stanza-id').attr('id') || origin_msg_id).set({state: constants.MSG_DELIVERED, from_id: from_id});
+                                this.account.messages.get(stanza_id || origin_msg_id).set({state: constants.MSG_DELIVERED, from_id: from_id});
                                 let $groupchat = this.account.chats.getChat(contact);
                                 from_id && $groupchat.item_view.content.$el.find('.chat-message[data-msgid="' + origin_msg_id + '"]').attr('data-from-id', from_id);
                             }
@@ -4727,6 +4726,8 @@ define("xabber-chats", function () {
                             this.setStanzaId($stanza_received);
                     }
                 }
+                if ($received_message.length)
+                    this.receiveChatMessage($received_message[0], {echo_msg: true, stanza_id: $received_message.children('stanza-id').attr('id')});
                 return;
             }
 
