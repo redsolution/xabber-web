@@ -3803,6 +3803,7 @@ define("xabber-contacts", function () {
                         let unread_messages = _.clone(chat.messages_unread.models);
                         chat.trigger('get_missed_history', request_with_stamp/1000);
                         chat.set('unread', 0);
+                        chat.set('const_unread', 0);
                         _.each(unread_messages, function (unread_msg) {
                             unread_msg.set('is_unread', false);
                         }.bind(this));
