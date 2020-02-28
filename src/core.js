@@ -24,6 +24,7 @@
             this.fetchURLParams();
             this.cleanUpStorage();
             this.detectMediaDevices();
+            this.initFaviconsCache();
             window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this);
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
@@ -90,6 +91,13 @@
                     window.localStorage.removeItem(key);
                 }
             }
+        },
+
+        initFaviconsCache: function () {
+            window.caches.open('favicons').then(function(cache) {
+                this.favicons_cache = cache;
+                this.favicons_cache.addAll([constants.FAVICON_DEFAULT, constants.FAVICON_MESSAGE]);
+            }.bind(this));
         },
 
         detectMediaDevices: function () {
