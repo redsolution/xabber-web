@@ -710,7 +710,7 @@ body {
     overflow: hidden;
 }
 
-body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg) {
+body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
     display: none;
 }
 
@@ -4647,7 +4647,7 @@ img.fwd-img-preview {
     background-color: rgba(0, 0, 0, 0.7);
     border-radius: 15px;
     color: rgb(255, 255, 255);
-    z-index: 1000;
+    z-index: 1005;
 }
 
 .message-form .input-message {
