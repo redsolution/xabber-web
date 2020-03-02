@@ -1495,18 +1495,12 @@ define("xabber-views", function () {
             if (this._blink_interval)
                 return;
             this._blink_interval = setInterval(function () {
-                var $icon = $("link[rel='shortcut icon']");
-                if ($icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1) {
-                    this.favicons_cache.match(constants.FAVICON_MESSAGE).then((responses) => {
-                        let url = responses ? responses.url : constants.FAVICON_MESSAGE;
-                        $icon.attr('href', url);
-                    });
-                } else {
-                    this.favicons_cache.match(constants.FAVICON_DEFAULT).then((responses) => {
-                        let url = responses ? responses.url : constants.FAVICON_DEFAULT;
-                        $icon.attr('href', url);
-                    });
-                }
+                var $icon = $("link[rel='shortcut icon']"), url;
+                if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1)
+                    url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
+                else
+                    url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $icon.attr('href', url);
             }.bind(this), 1000);
         },
 
@@ -1514,10 +1508,8 @@ define("xabber-views", function () {
             if (this._blink_interval) {
                 clearInterval(this._blink_interval);
                 this._blink_interval = null;
-                this.favicons_cache.match(constants.FAVICON_DEFAULT).then((responses) => {
-                    let url = responses ? responses.url : constants.FAVICON_DEFAULT;
-                    $("link[rel='shortcut icon']").attr("href", url);
-                });
+                let url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $("link[rel='shortcut icon']").attr("href", url);
             }
         },
 

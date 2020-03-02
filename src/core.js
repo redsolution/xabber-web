@@ -24,7 +24,6 @@
             this.fetchURLParams();
             this.cleanUpStorage();
             this.detectMediaDevices();
-            this.initFaviconsCache();
             window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this);
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
@@ -32,6 +31,7 @@
             this._cache = new Backbone.ModelWithStorage({id: 'cache'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cacheFavicons();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -93,11 +93,9 @@
             }
         },
 
-        initFaviconsCache: function () {
-            window.caches.open('favicons').then(function(cache) {
-                this.favicons_cache = cache;
-                this.favicons_cache.addAll([constants.FAVICON_DEFAULT, constants.FAVICON_MESSAGE]);
-            }.bind(this));
+        cacheFavicons: async function () {
+            this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
+            this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
         },
 
         detectMediaDevices: function () {
