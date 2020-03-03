@@ -6526,42 +6526,39 @@ define("xabber-chats", function () {
                     emoji.emojify({tag_name: 'div', emoji_size: 25})
                 ).appendTo($emoji_panel);
             });
+            var window_onclick = function (ev) {
+                if ($(ev.target).closest('.emoji-panel').length || $(ev.target).closest('.insert-emoticon').length)
+                    return;
+                $emoji_panel_wrap.removeClass('opened');
+                window.removeEventListener( "click" , window_onclick);
+            };
             $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
-            $insert_emoticon.hover(function (ev) {
-                if (ev && ev.preventDefault) { ev.preventDefault(); }
-                $emoji_panel_wrap.addClass('opened');
-                if (_timeout) {
+            $insert_emoticon.click(function (ev) {
+                if (_timeout)
                     clearTimeout(_timeout);
+                if (ev && ev.preventDefault) { ev.preventDefault(); }
+                if ($emoji_panel_wrap.hasClass('opened')) {
+                    $emoji_panel_wrap.removeClass('opened');
+                    window.removeEventListener( "click" , window_onclick);
+                }
+                else {
+                    $emoji_panel_wrap.addClass('opened');
+                    window.addEventListener( "click" , window_onclick);
                 }
                 $emoji_panel.perfectScrollbar('update');
-            }.bind(this), function (ev) {
-                if (ev && ev.preventDefault) { ev.preventDefault(); }
-                if (_timeout) {
-                    clearTimeout(_timeout);
-                }
-                _timeout = setTimeout(function () {
-                    if (!$emoji_panel_wrap.is(':hover')) {
-                        $emoji_panel_wrap.removeClass('opened');
-                    }
-                }, 800);
-            }.bind(this));
-            $emoji_panel_wrap.hover(null, function (ev) {
-                if (ev && ev.preventDefault) { ev.preventDefault(); }
-                if (_timeout) {
-                    clearTimeout(_timeout);
-                }
-                _timeout = setTimeout(function () {
-                    $emoji_panel_wrap.removeClass('opened');
-                }, 200);
             }.bind(this));
             $emoji_panel_wrap.mousedown(function (ev) {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
-                if (ev.button) {
+                if (_timeout)
+                    clearTimeout(_timeout);
+                if (ev.button)
                     return;
-                }
                 var $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
                 $target.length && this.typeEmoticon($target.data('emoji'));
+                _timeout = setTimeout(function () {
+                    $emoji_panel_wrap.removeClass('opened');
+                }, 200);
             }.bind(this));
             this.renderLastEmoticons();
         },
