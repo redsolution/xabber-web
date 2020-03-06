@@ -39,11 +39,11 @@ define(["xabber-dependencies"], function (deps) {
 
     $.fn.getTextFromRichTextarea = function () {
         var $div = $('<div>').html(this.html());
+        $div.find('.emoji').each(function () {
+            $(this).replaceWith($(this).text());
+        });
         $div.find('p').each(function () {
             $(this).replaceWith($(this).html() + '\n');
-        });
-        $div.find('.emoji').each(function () {
-            $(this).replaceWith($(this).data('emoji'));
         });
         $div.find('span').each(function () {
             $(this).replaceWith($(this).html());
@@ -52,7 +52,10 @@ define(["xabber-dependencies"], function (deps) {
             var $this = $(this);
             $this.find('br').remove();
             var html = $this.html();
-            $this.replaceWith('\n'+html);
+            if ($this.hasClass('emoji'))
+                $this.replaceWith(html);
+            else
+                $this.replaceWith('\n'+html);
         });
         /*$div.find('br').each(function () {
             $(this).replaceWith('\n');

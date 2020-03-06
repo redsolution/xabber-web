@@ -1,3 +1,8 @@
+@font-face {
+    font-family: "Noto Color Emoji";
+    src: url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf"),
+    url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf");
+}
 /* -------------- COMMON CLASSES ---------------- */
 
 /* ---- Materialize CSS override ---- */
@@ -4682,7 +4687,6 @@ img.fwd-img-preview {
     right: -120px;
     width: 260px;
     height: 300px;
-    padding: 4px;
     background-color: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
     display: none;
@@ -4708,10 +4712,47 @@ img.fwd-img-preview {
     display: block;
 }
 
-.message-form .emoticons-panel, .edit-badge .emoticons-panel {
+.message-input-panel .emoticons-panel .emoji-list-header {
+    height: 24px;
+    line-height: 24px;
+    font-size: 16px;
+}
+
+.message-input-panel .emoji-menu {
+    position: relative;
+    padding: 2px 4px;
+    height: 32px;
+    width: 100%;
+    background-color: #EEE;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-input-panel .emoji-menu .emoji {
+    height: unset;
+    width: unset;
+}
+
+.message-input-panel .emoticons-panel .emoji-wrap {
+    display: inline-block;
+    padding: 1px;
+    cursor: pointer;
+    font-size: 20px;
+    font-family: "Noto Color Emoji";
+}
+
+.edit-badge .emoticons-panel {
     position: relative;
     width: 100%;
     height: 100%;
+}
+
+.message-form .emoticons-panel {
+    position: relative;
+    padding: 4px;
+    width: 100%;
+    height: calc(100% - 32px);
 }
 
 .message-form .emoticons-panel .emoji-wrap, .edit-badge .emoticons-panel .emoji-wrap {
@@ -7172,54 +7213,50 @@ input[type='range'].voice-message-volume:focus {
 
 .emoji {
     display: inline-block;
-    vertical-align: bottom;
-    background-repeat: no-repeat;
+    vertical-align: baseline;
+    text-align: center;
+    font-family: "Noto Color Emoji";
 }
 
 .emoji-w12 {
-    width: 12px;
-    height: 12px;
-    background-size: 324px 84px;
+    line-height: 12px;
+    font-size: 10px;
 }
 
 .emoji-w14 {
-    width: 14px;
-    height: 14px;
-    background-size: 378px 98px;
+    line-height: 14px;
+    font-size: 12px;
 }
 
 .emoji-w16 {
-    width: 16px;
-    height: 16px;
-    background-size: 432px 112px;
+    line-height: 16px;
+    font-size: 14px;
 }
 
 .emoji-w18 {
-    width: 18px;
-    height: 18px;
-    background-size: 486px 126px;
+    line-height: 18px;
+    font-size: 16px;
 }
 
 .emoji-w20 {
-    width: 20px;
-    height: 20px;
-    background-size: 540px 140px;
+    line-height: 20px;
+    font-size: 18px;
 }
 
 .emoji-w24 {
-    width: 24px;
-    height: 24px;
-    background-size: 648px 168px;
+    line-height: 24px;
+    font-size: 22px;
 }
 
 .emoji-w25 {
     width: 25px;
     height: 25px;
-    background-size: 675px 175px;
+    font-size: 20px;
 }
 
-.emoji-spritesheet-0 {
-    background-image: url(../images/emoji/emojisprite_0.png);
+.emoji-w22 {
+    line-height: 22px;
+    font-size: 20px;
 }
 
 /* ------------------ ROSTER SETTINGS -------------------- */

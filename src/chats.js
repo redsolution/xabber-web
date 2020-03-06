@@ -2880,7 +2880,7 @@ define("xabber-chats", function () {
             } else {
                 return;
             }
-            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'img', emoji_size: 18}));
+            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: 18}));
             if (images) {
                 if (images.length > 1) {
                     let template_for_images = this.createImageGrid(item.attributes);
@@ -3243,7 +3243,7 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'img'}).emojify('.chat-msg-author-badge', {emoji_size: 14});
+            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div'}).emojify('.chat-msg-author-badge', {emoji_size: 14});
         },
 
         getDateIndicator: function (date) {
@@ -4460,11 +4460,10 @@ define("xabber-chats", function () {
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
-            let Image = Quill.import('formats/image');
-            class ImageBlot extends Image {
+            class Emoji extends Embed {
                 static create(value) {
                     if (typeof value == 'string') {
-                        return $(value.emojify({tag_name: 'img'}))[0];
+                        return $(value.emojify({tag_name: 'div'}))[0];
                     } else {
                         return value;
                     }
@@ -4474,11 +4473,11 @@ define("xabber-chats", function () {
                     return domNode;
                 }
             }
-            ImageBlot.blotName = 'quill_emoji';
-            ImageBlot.className = 'emoji';
-            ImageBlot.tagName = 'img';
+            Emoji.blotName = 'quill_emoji';
+            Emoji.className = 'emoji';
+            Emoji.tagName = 'div';
 
-            Quill.register(ImageBlot);
+            Quill.register(Emoji);
             Quill.register(Mention);
         }
     });
@@ -6521,13 +6520,19 @@ define("xabber-chats", function () {
                 $emoji_panel = this.$('.emoticons-panel'),
                 _timeout;
 
-            _.each(Emoji.all, function (emoji) {
-                $('<div class="emoji-wrap"/>').html(
-                    emoji.emojify({tag_name: 'div', emoji_size: 25})
-                ).appendTo($emoji_panel);
-            });
+            for (var emoji_list in Emoji.all) {
+                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`);
+                $(`<div id=${emoji_list.replace(/ /g, '_')} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                _.each(Emoji.all[emoji_list], function (emoji) {
+                    $('<div class="emoji-wrap"/>').html(
+                        emoji.emojify({emoji_size: 25})
+                    ).appendTo($emoji_list_wrap);
+                });
+                $emoji_list_wrap.appendTo($emoji_panel);
+                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list.replace(/ /g, '_'), title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+            }
             var window_onclick = function (ev) {
-                if ($(ev.target).closest('.emoji-panel').length || $(ev.target).closest('.insert-emoticon').length)
+                if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)
                     return;
                 $emoji_panel_wrap.removeClass('opened');
                 window.removeEventListener( "click" , window_onclick);
@@ -6554,11 +6559,14 @@ define("xabber-chats", function () {
                     clearTimeout(_timeout);
                 if (ev.button)
                     return;
-                var $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
-                $target.length && this.typeEmoticon($target.data('emoji'));
+                var $target = $(ev.target),
+                    $target_emoji = $target.closest('.emoji-wrap').find('.emoji');
+                if ($target.closest('.emoji-menu').length)
+                    return;
+                $target_emoji.length && this.typeEmoticon($target_emoji.data('emoji'));
                 _timeout = setTimeout(function () {
                     $emoji_panel_wrap.removeClass('opened');
-                }, 200);
+                }, 100);
             }.bind(this));
             this.renderLastEmoticons();
         },
@@ -6871,7 +6879,7 @@ define("xabber-chats", function () {
                             if (item == '\n')
                                 arr_text.splice(idx, 1, '<br>');
                         }.bind(this));
-                        text = "<p>" + arr_text.join("").emojify({tag_name: 'img'}) + "</p>";
+                        text = "<p>" + arr_text.join("").emojify({tag_name: 'div'}) + "</p>";
                         window.document.execCommand('insertHTML', false, text);
                     }
                 }
@@ -6884,7 +6892,7 @@ define("xabber-chats", function () {
                         if (item == ' ')
                             arr_text.splice(idx, 1, '&nbsp');
                     }.bind(this));
-                    text = "<p>" + arr_text.join("").emojify({tag_name: 'img'}) + "</p>";
+                    text = "<p>" + arr_text.join("").emojify({tag_name: 'div'}) + "</p>";
                     window.document.execCommand('insertHTML', false, text);
                 }
             }
@@ -7071,7 +7079,7 @@ define("xabber-chats", function () {
                         start_idx = content_concat.length,
                         end_idx = start_idx + ((content.insert && content.insert.quill_emoji) ? 1 : (_.escape(content.insert).length - 1));
                     for (let attr in content.attributes)
-                        (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
+                        (attr !== 'quill_emoji' && attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
                     if (content_attrs.indexOf('mention') > -1) {
                         let mention_idx = content_attrs.indexOf('mention');
                         content_attrs.splice(mention_idx, mention_idx + 1);
@@ -7108,10 +7116,7 @@ define("xabber-chats", function () {
                     }
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markups: content_attrs});
                 }
-                if (content.insert && content.insert.quill_emoji)
-                    content_concat = content_concat.concat(Array.from($(content.insert.quill_emoji).data('emoji')));
-                else
-                    content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
+                content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));
             $rich_textarea.flushRichTextarea().focus();
             this.displayMicrophone();
@@ -7140,7 +7145,7 @@ define("xabber-chats", function () {
             this.displaySaveButton();
             xabber.chat_body.updateHeight();
             let markup_body = utils.markupBodyMessage(message),
-                emoji_node = markup_body.emojify({tag_name: 'img'}),
+                emoji_node = markup_body.emojify({tag_name: 'div'}),
                 arr_text = Array.from(emoji_node);
             arr_text.forEach(function (item, idx) {
                 if (item == '\n')
