@@ -4459,27 +4459,27 @@ define("xabber-chats", function () {
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
-            class Emoji extends Embed {
+            class QuillEmoji extends Embed {
                 static create(value) {
                     let node = super.create();
                     if (typeof value == 'string') {
                         node.innerHTML = $(value.emojify({tag_name: 'div'}))[0].innerHTML;
                         node.setAttribute('contenteditable', 'false');
+                        return node;
                     } else {
-                        node.innerHTML = value;
+                        return false;
                     }
-                    return node;
                 }
 
                 static value(node) {
                     return node.innerHTML;
                 }
             }
-            Emoji.blotName = 'quill_emoji';
-            Emoji.className = 'emoji';
-            Emoji.tagName = 'div';
+            QuillEmoji.blotName = 'quill_emoji';
+            QuillEmoji.className = 'emoji';
+            QuillEmoji.tagName = 'div';
 
-            Quill.register(Emoji);
+            Quill.register(QuillEmoji);
             Quill.register(Mention);
         }
     });
@@ -7039,7 +7039,7 @@ define("xabber-chats", function () {
             if (this.quill.getFormat(caret_idx, 1).mention) {
                 this.quill.formatText(caret_idx, 1, 'mention', false);
             }
-            this.quill.setSelection(caret_idx + 1, 0);
+            this.quill.setSelection(caret_idx + 2, 0);
             xabber.chat_body.updateHeight();
         },
 
