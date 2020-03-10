@@ -5064,16 +5064,17 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .input-toolbar .last-emoticons {
-    display: inline-block;
+    display: inline-flex;
     margin-left: 64px;
+    height: 100%;
+    align-items: center;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {
     display: inline-block;
     width: 26px;
-    height: 26px;
-    padding: 1px 3px;
-    margin: 2px;
+    padding: 0 3px;
+    margin: 0 2px;
     cursor: pointer;
 }
 

@@ -4446,7 +4446,6 @@ define("xabber-chats", function () {
                 static create(paramValue) {
                     let node = super.create();
                     node.innerHTML = paramValue.slice(paramValue.indexOf('&nickname=') + 10);
-                    // node.setAttribute('contenteditable', 'false');
                     node.setAttribute('data-id', paramValue.slice(0, paramValue.indexOf('&nickname=')));
                     return node;
                 }
@@ -4462,15 +4461,18 @@ define("xabber-chats", function () {
 
             class Emoji extends Embed {
                 static create(value) {
+                    let node = super.create();
                     if (typeof value == 'string') {
-                        return $(value.emojify({tag_name: 'div'}))[0];
+                        node.innerHTML = $(value.emojify({tag_name: 'div'}))[0].innerHTML;
+                        node.setAttribute('contenteditable', 'false');
                     } else {
-                        return value;
+                        node.innerHTML = value;
                     }
+                    return node;
                 }
 
-                static value(domNode) {
-                    return domNode;
+                static value(node) {
+                    return node.innerHTML;
                 }
             }
             Emoji.blotName = 'quill_emoji';
@@ -6460,6 +6462,7 @@ define("xabber-chats", function () {
                     },
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                        ['emoji'],
                         ['clean']
                     ]
                 },
@@ -6663,7 +6666,7 @@ define("xabber-chats", function () {
                     return;
                 }
             }
-            if (this.$('.input-message .rich-textarea').getTextFromRichTextarea().trim() && !this.view.chat_state && !this.view.edit_message)
+            if (this.quill.getText().trim() && !this.view.chat_state && !this.view.edit_message)
                 this.view.sendChatState('composing');
         },
 
@@ -6723,8 +6726,7 @@ define("xabber-chats", function () {
             let $participant_item = $(ev.target).closest('.mention-item'),
                 nickname = $participant_item.data('nickname'),
                 id = $participant_item.data('id') || "",
-                $rich_textarea = this.$('.rich-textarea'),
-                text = $rich_textarea.getTextFromRichTextarea(),
+                text = this.quill.getText(),
                 caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                 mention_at_regexp = /(^|\s)@(\w+)?/g,
                 mention_plus_regexp = /(^|\s)[+](\w+)?/g,
@@ -6753,7 +6755,7 @@ define("xabber-chats", function () {
 
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
-                text = $rich_textarea.getTextFromRichTextarea();
+                text = this.quill.getText();
             if ((!text || text == "\n") && !this.edit_message)
                 this.displayMicrophone();
             else
@@ -6896,7 +6898,7 @@ define("xabber-chats", function () {
                     window.document.execCommand('insertHTML', false, text);
                 }
             }
-            if ($rich_textarea.getTextFromRichTextarea().trim() && !this.view.chat_state && !this.view.edit_message)
+            if (this.quill.getText().trim() && !this.view.chat_state && !this.view.edit_message)
                 this.view.sendChatState('composing');
             this.focusOnInput();
             xabber.chat_body.updateHeight();
@@ -7025,15 +7027,19 @@ define("xabber-chats", function () {
         },
 
         typeEmoticon: function (emoji) {
+            let caret_idx = this.quill.selection.lastRange.index,
+                text_to_caret = Array.from(this.quill.getText()).slice(0,caret_idx).join("").trim();
+            if (text_to_caret.length != caret_idx)
+                caret_idx = text_to_caret.length;
             this.quill.focus();
             if (!this.edit_message)
                 this.displaySend();
             !this.view.chat_state && this.view.sendChatState('composing');
-            this.quill.insertEmbed(this.quill.selection.lastRange.index, 'quill_emoji', emoji);
-            if (this.quill.getFormat(this.quill.selection.lastRange.index, 1).mention) {
-                this.quill.formatText(this.quill.selection.lastRange.index, 1, 'mention', false);
+            this.quill.insertEmbed(caret_idx, 'quill_emoji', emoji);
+            if (this.quill.getFormat(caret_idx, 1).mention) {
+                this.quill.formatText(caret_idx, 1, 'mention', false);
             }
-            this.quill.setSelection(this.quill.selection.lastRange.index + 1, 0);
+            this.quill.setSelection(caret_idx + 1, 0);
             xabber.chat_body.updateHeight();
         },
 
@@ -7049,7 +7055,7 @@ define("xabber-chats", function () {
             cached_last_emoji = this.account.chat_settings.getLastEmoji();
             for (var idx = 0; idx < 7; idx++) {
                 $('<div class="emoji-wrap"/>').html(
-                    cached_last_emoji[idx].emojify({tag_name: 'div', emoji_size: 20})
+                    cached_last_emoji[idx] && cached_last_emoji[idx].emojify({tag_name: 'div', emoji_size: 20})
                 ).appendTo($last_emoticons);
             }
             $last_emoticons.find('.emoji-wrap').mousedown(function (ev) {
@@ -7067,7 +7073,7 @@ define("xabber-chats", function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                text = $rich_textarea.getTextFromRichTextarea().trim();
+                text = this.quill.getText().trim();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = $(emoji_item).data('emoji');
                 this.account.chat_settings.updateLastEmoji(emoji);
@@ -7239,7 +7245,7 @@ define("xabber-chats", function () {
             }
             this.edit_message = null
             this.$('.fwd-messages-preview').addClass('hidden');
-            let text = $rich_textarea.getTextFromRichTextarea();
+            let text = this.quill.getText();
             if (!text || text == "\n")
                 this.displayMicrophone();
             else
