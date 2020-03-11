@@ -7215,6 +7215,8 @@ input[type='range'].voice-message-volume:focus {
 .emoji {
     display: inline-block;
     vertical-align: baseline;
+    overflow: hidden;
+    position: relative;
     text-align: center;
     font-family: "Noto Color Emoji";
 }
@@ -7225,21 +7227,29 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .emoji-w14 {
+    width: 14px;
+    height: 14px;
     line-height: 14px;
     font-size: 12px;
 }
 
 .emoji-w16 {
+    width: 16px;
+    height: 16px;
     line-height: 16px;
     font-size: 14px;
 }
 
 .emoji-w18 {
+    width: 18px;
+    height: 18px;
     line-height: 18px;
     font-size: 16px;
 }
 
 .emoji-w20 {
+    width: 20px;
+    height: 20px;
     line-height: 20px;
     font-size: 18px;
 }
@@ -7256,10 +7266,23 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .emoji-w22 {
+    width: 22px;
+    height: 22px;
     line-height: 22px;
     font-size: 20px;
 }
 
+img.emoji[alt]:after {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    background-color: #fff;
+    font-weight: 300;
+    text-align: center;
+    content: attr(alt);
+}
 /* ------------------ ROSTER SETTINGS -------------------- */
 
 .account-roster-settings-panel .main-info .name {

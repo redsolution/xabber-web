@@ -4463,8 +4463,10 @@ define("xabber-chats", function () {
                 static create(value) {
                     let node = super.create();
                     if (typeof value == 'string') {
-                        node.innerHTML = $(value.emojify({tag_name: 'div'}))[0].innerHTML;
-                        node.setAttribute('contenteditable', 'false');
+                        node.src = "";
+                        node.alt = value;
+                        node.classList.add('emoji-w18');
+                        node.innerHTML = value;
                         return node;
                     } else {
                         return false;
@@ -4477,7 +4479,7 @@ define("xabber-chats", function () {
             }
             QuillEmoji.blotName = 'quill_emoji';
             QuillEmoji.className = 'emoji';
-            QuillEmoji.tagName = 'div';
+            QuillEmoji.tagName = 'img';
 
             Quill.register(QuillEmoji);
             Quill.register(Mention);
@@ -6462,7 +6464,6 @@ define("xabber-chats", function () {
                     },
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                        ['emoji'],
                         ['clean']
                     ]
                 },
