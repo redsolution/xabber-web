@@ -262,7 +262,7 @@ define("xabber-chats", function () {
                 message = msgid && this.get(msgid);
 
             if (options.replaced) {
-                $message = $message.find('replace message');
+                $message = $message.children('replace').children('message');
                 body = $message.children('body').text();
                 message = this.find(m => m.get('archive_id') === $message.children('stanza-id').attr('id'));
                 if (!message)
@@ -272,6 +272,7 @@ define("xabber-chats", function () {
                 let xml = message.get('xml');
                 xml.innerHTML = $message[0].innerHTML;
                 options.xml = xml;
+                options.forwarded_message = message.get('forwarded_message');
             }
 
             if (message && !options.replaced && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
@@ -326,7 +327,7 @@ define("xabber-chats", function () {
             if ($forward_references.length) {
                 $forward_references.each(function (idx, fwd_ref) {
                     let $fwd_ref = $(fwd_ref);
-                    legacy_content.push({start: parseInt($fwd_ref.attr('begin')), end: parseInt($fwd_ref.attr('end'))});
+                    legacy_content.push({start: parseInt($fwd_ref.attr('begin')), end: parseInt($fwd_ref.attr('end')), type: 'forward'});
                 }.bind(this));
             }
 
@@ -3455,6 +3456,11 @@ define("xabber-chats", function () {
                             stamp: fwd_msg.get('time')
                         }).up().cnode(fwd_msg.get('xml')).up().up().up();
                     legacy_body = legacy_body.concat(legacy_fwd_msg);
+                    legacy_content.push({
+                        start: idx_begin,
+                        end: idx_end,
+                        type: 'forward'
+                    });
                 }.bind(this));
                 body = _.unescape(legacy_body.join("")) + body;
             }
@@ -3532,8 +3538,10 @@ define("xabber-chats", function () {
                     body += legacy_body;
                     legacy_content.push({start: start_idx, end: end_idx});
                 }.bind(this));
-                message.set({type: 'main', legacy_content: legacy_content});
+                message.set({type: 'main'});
             }
+
+            legacy_content.length && message.set({legacy_content: legacy_content});
 
             this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, msg_id: msg_id});
 
@@ -7307,6 +7315,7 @@ define("xabber-chats", function () {
             let old_body = this.edit_message.get('message') || "",
                 legacy_body = Strophe.xmlescape(this.edit_message.get('original_message') || ""),
                 groupchat_legacy = this.edit_message.get('legacy_content') && this.edit_message.get('legacy_content').find(item => item.type === 'groupchat'),
+                forward_legacy = this.edit_message.get('legacy_content') && this.edit_message.get('legacy_content').filter(item => item.type === 'forward'),
                 stanza_id = this.edit_message.get('archive_id'),
                 markups = text_markups.markup_references || [],
                 mentions = text_markups.mentions || [];
@@ -7325,6 +7334,15 @@ define("xabber-chats", function () {
             }.bind(this));
             mentions.forEach(function (mention) {
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'mention'}).c('uri').t(mention.uri).up().up();
+            }.bind(this));
+            forward_legacy && forward_legacy.forEach(function (legacy, idx) {
+                let fwd_msg = this.edit_message.get('forwarded_message')[idx];
+                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_legacy ? (legacy.start - groupchat_legacy.start - groupchat_legacy.end - 1) : legacy.start), end: (groupchat_legacy ? (legacy.end - groupchat_legacy.start - groupchat_legacy.end - 1) : legacy.end), type: 'forward'})
+                    .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
+                    .c('delay', {
+                        xmlns: 'urn:xmpp:delay',
+                        stamp: fwd_msg.get('time')
+                    }).up().cnode(fwd_msg.get('xml')).up().up().up();
             }.bind(this));
             this.unsetForwardedMessages();
             this.account.sendIQ(iq, function () {}, function () {});
