@@ -453,9 +453,10 @@ input[type=text].simple-input-field:hover {
     width: 64px;
     height: 48px;
     top: 64px !important;
-    left: inherit;
+    left: unset;
+    margin: 0;
     transition: width .1s;
-    z-index: 500 !important;
+    z-index: 1001 !important;
     border-radius: 8px;
 }
 
