@@ -3936,7 +3936,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-message .chat-msg-content {
     width: 100%;
     font-size: 12px;
-    line-height: 16px;
+    line-height: 18px;
     color: #212121;
     white-space: pre-wrap;
 }
@@ -4792,7 +4792,7 @@ img.fwd-img-preview {
     font-size: 13px;
     overflow-y: auto;
     overflow-x: hidden;
-    line-height: 18px;
+    line-height: 20px;
     z-index: 1;
 }
 
@@ -7213,77 +7213,80 @@ input[type='range'].voice-message-volume:focus {
 
 /* ------------------- EMOJI SUPPORT ---------------------- */
 
-.emoji {
+.emoji:not(.ql-emoji) {
     display: inline-block;
-    vertical-align: baseline;
-    overflow: hidden;
+    vertical-align: middle;
     position: relative;
-    text-align: center;
+    margin: 0 !important;
+    border: none !important;
     font-family: "Noto Color Emoji";
 }
 
-.emoji-w12 {
+.ql-emoji>span {
+    font-family: "Noto Color Emoji";
+}
+
+.emoji-w12:not(.ql-emoji),
+.ql-emoji.emoji-w12>span {
+    height: 12px;
     line-height: 12px;
     font-size: 10px;
 }
 
-.emoji-w14 {
-    width: 14px;
+.emoji-w14:not(.ql-emoji),
+.ql-emoji.emoji-w14>span {
+    /*width: 14px;*/
     height: 14px;
     line-height: 14px;
     font-size: 12px;
 }
 
-.emoji-w16 {
-    width: 16px;
+.emoji-w16:not(.ql-emoji),
+.ql-emoji.emoji-w16>span {
+    /*width: 16px;*/
     height: 16px;
     line-height: 16px;
     font-size: 14px;
 }
 
-.emoji-w18 {
-    width: 18px;
+.emoji-w18:not(.ql-emoji),
+.ql-emoji.emoji-w18>span {
+    /*width: 18px*/
     height: 18px;
     line-height: 18px;
     font-size: 16px;
 }
 
-.emoji-w20 {
-    width: 20px;
+.emoji-w20:not(.ql-emoji),
+.ql-emoji.emoji-w20>span {
+    /*width: 20px;*/
     height: 20px;
     line-height: 20px;
     font-size: 18px;
 }
 
-.emoji-w24 {
+.emoji-w24:not(.ql-emoji),
+.ql-emoji.emoji-w24>span {
+    height: 24px;
     line-height: 24px;
     font-size: 22px;
 }
 
-.emoji-w25 {
-    width: 25px;
+.emoji-w25:not(.ql-emoji),
+.ql-emoji.emoji-w25>span {
+    /*width: 25px;*/
     height: 25px;
     font-size: 20px;
 }
 
-.emoji-w22 {
-    width: 22px;
+.emoji-w22:not(.ql-emoji),
+.ql-emoji.emoji-w22>span {
+    /*width: 22px;*/
     height: 22px;
     line-height: 22px;
     font-size: 20px;
 }
 
-img.emoji[alt]:after {
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-    background-color: #fff;
-    font-weight: 300;
-    text-align: center;
-    content: attr(alt);
-}
 /* ------------------ ROSTER SETTINGS -------------------- */
 
 .account-roster-settings-panel .main-info .name {
