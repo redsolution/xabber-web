@@ -7031,7 +7031,11 @@ define("xabber-chats", function () {
         },
 
         typeEmoticon: function (emoji) {
-            let caret_idx = this.quill.selection.lastRange.index;
+            let caret_idx = -1;
+            if (this.quill.selection.lastRange)
+                caret_idx = this.quill.selection.lastRange.index;
+            else if (this.quill.selection.savedRange)
+                caret_idx = this.quill.selection.savedRange.index;
             this.quill.focus();
             if (!this.edit_message)
                 this.displaySend();
@@ -7040,7 +7044,7 @@ define("xabber-chats", function () {
             if (this.quill.getFormat(caret_idx, 1).mention) {
                 this.quill.formatText(caret_idx, 1, 'mention', false);
             }
-            this.quill.setSelection(caret_idx + emoji.length);
+            this.quill.setSelection(caret_idx + 1);
             xabber.chat_body.updateHeight();
         },
 
@@ -7129,7 +7133,8 @@ define("xabber-chats", function () {
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));
-            $rich_textarea.flushRichTextarea().focus();
+            $rich_textarea.flushRichTextarea();
+            this.quill.focus();
             this.displayMicrophone();
             if (this.edit_message) {
                 this.editMessage(text, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes}, this.contact.get('group_chat'));
@@ -7248,7 +7253,7 @@ define("xabber-chats", function () {
             if (this.edit_message) {
                 $rich_textarea.flushRichTextarea();
             }
-            this.edit_message = null
+            this.edit_message = null;
             this.$('.fwd-messages-preview').addClass('hidden');
             let text = $rich_textarea.getTextFromRichTextarea();
             if (!text || text == "\n")

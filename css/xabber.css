@@ -1,7 +1,6 @@
 @font-face {
     font-family: "Noto Color Emoji";
-    src: url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf"),
-    url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf");
+    src: url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf");
 }
 /* -------------- COMMON CLASSES ---------------- */
 
