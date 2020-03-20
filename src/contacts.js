@@ -1680,6 +1680,8 @@ define("xabber-contacts", function () {
                             return;
                         }
                     }
+                    if (this.participants.version > version)
+                        return;
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
                     this.participants.each(function (participant) {
@@ -2322,11 +2324,17 @@ define("xabber-contacts", function () {
                     $emoji_panel = this.$('.emoticons-panel'),
                     _timeout;
 
-                _.each(Emoji.all, function (emoji) {
-                    $('<div class="emoji-wrap"/>').html(
-                        emoji.emojify({tag_name: 'div', emoji_size: 25})
-                    ).appendTo($emoji_panel);
-                });
+                for (var emoji_list in Emoji.all) {
+                    let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`);
+                    $(`<div id=${emoji_list.replace(/ /g, '_')} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                    _.each(Emoji.all[emoji_list], function (emoji) {
+                        $('<div class="emoji-wrap"/>').html(
+                            emoji.emojify({emoji_size: 25})
+                        ).appendTo($emoji_list_wrap);
+                    });
+                    $emoji_list_wrap.appendTo($emoji_panel);
+                    $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list.replace(/ /g, '_'), title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                }
                 $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
                 $insert_emoticon.hover(function (ev) {
@@ -2371,8 +2379,8 @@ define("xabber-contacts", function () {
             },
 
             saveNewBadge: function () {
-                let new_badge = this.$('.badge-text').getTextFromRichTextarea().trim();
-                if (new_badge.length > 32) {
+                let new_badge = this.$('.badge-text')[0].innerText;
+                if (Array.from(new_badge).length > 32) {
                     this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
                 }
                 else {
@@ -2393,10 +2401,9 @@ define("xabber-contacts", function () {
             },
 
             typeEmoticon: function (emoji) {
-                var emoji_node = emoji.emojify({tag_name: 'img'}),
+                var emoji_node = emoji.emojify({tag_name: 'span'}),
                     $textarea = this.$('.badge-text');
-                $textarea.focus();
-                window.document.execCommand('insertHTML', false, emoji_node);
+                $textarea.focus().pasteHtmlAtCaret(emoji_node);
             },
 
             checkKey: function (ev) {

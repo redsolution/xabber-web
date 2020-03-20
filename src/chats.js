@@ -310,8 +310,9 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-            if ($message.find('x').length && $message.find('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
+            if ($message.children('x').length && $message.children('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
                 attrs.type = 'system';
+                attrs.participants_version = $message.children('x').attr('version');
             }
 
             if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
