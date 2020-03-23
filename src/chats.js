@@ -6533,15 +6533,16 @@ define("xabber-chats", function () {
                 _timeout;
 
             for (var emoji_list in Emoji.all) {
-                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`);
-                $(`<div id=${emoji_list.replace(/ /g, '_')} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
+                    list_name = emoji_list.replace(/ /g, '_');
+                $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
                 _.each(Emoji.all[emoji_list], function (emoji) {
                     $('<div class="emoji-wrap"/>').html(
-                        emoji.emojify({emoji_size: 25})
+                        emoji.emojify({emoji_size: 32, sprite: list_name})
                     ).appendTo($emoji_list_wrap);
                 });
                 $emoji_list_wrap.appendTo($emoji_panel);
-                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list.replace(/ /g, '_'), title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
             }
             var window_onclick = function (ev) {
                 if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)

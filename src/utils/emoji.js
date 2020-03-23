@@ -137,11 +137,12 @@ define(["jquery", "underscore"], function ($, _) {
         options || (options = {});
         var tag_name = options.tag_name || 'span',
             emoji_size = options.emoji_size || 18,
+            sprite = options.sprite,
             href = options.href ? ` href="#${options.href}" ` :"",
             title = options.title ? ` title="${options.title}" ` :"";
         return this.replace(emoji_regexp, function (emoji) {
-            return '<' + tag_name + href + title + ' contenteditable="false" class="emoji emoji-w'+emoji_size+' emoji-spritesheet-0" '+ 'alt="' + emoji + '" ' +
-                'data-emoji="'+emoji+'">' + emoji + '</' + tag_name + '>';
+            return '<' + tag_name + href + title + ' contenteditable="false" class="emoji emoji-w'+emoji_size+ (sprite ? (' sprite-' + sprite) : "") + ' sprite-emoji_u' + Number(emoji_data[emoji]).toString(16) +' emoji-spritesheet-0" '+ 'alt="' + emoji + '" ' +
+                'data-emoji="'+emoji+'"/>';
         });
     };
 
