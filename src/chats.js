@@ -4450,7 +4450,7 @@ define("xabber-chats", function () {
 
         registerQuillEmbeddedsTags: function () {
             let Inline = Quill.import('blots/inline'),
-                Embed = Quill.import('blots/embed');
+                Image = Quill.import('formats/image');
 
             class Mention extends Inline {
                 static create(paramValue) {
@@ -4469,25 +4469,23 @@ define("xabber-chats", function () {
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
-            class QuillEmoji extends Embed {
+            class QuillEmoji extends Image {
                 static create(value) {
-                    let node = super.create();
                     if (typeof value == 'string') {
-                        node.classList.add('emoji-w18', 'ql-emoji');
-                        node.innerHTML = value;
-                        return node;
+                        return $(value.emojify({tag_name: 'img'}))[0];
                     } else {
-                        return false;
+                        return value;
                     }
                 }
 
-                static value(node) {
-                    return node.innerHTML;
+                static value(domNode) {
+                    return domNode;
                 }
             }
             QuillEmoji.blotName = 'emoji';
             QuillEmoji.className = 'emoji';
-            QuillEmoji.tagName = 'span';
+            QuillEmoji.tagName = 'img';
+            QuillEmoji.prototype.optimize = function () {};
 
             Quill.register(QuillEmoji);
             Quill.register(Mention);

@@ -76,7 +76,7 @@ define(["xabber-dependencies"], function (deps) {
     $.fn.getTextFromRichTextarea = function () {
         var $div = $('<div>').html(this.html());
         $div.find('.emoji').each(function () {
-            $(this).replaceWith($(this).find('span').text());
+            $(this).replaceWith($(this).data('emoji'));
         });
         $div.find('p').each(function () {
             $(this).replaceWith($(this).html() + '\n');
