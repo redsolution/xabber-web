@@ -6536,7 +6536,7 @@ define("xabber-chats", function () {
                 $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
                 _.each(Emoji.all[emoji_list], function (emoji) {
                     $('<div class="emoji-wrap"/>').html(
-                        emoji.emojify({emoji_size: 32, sprite: list_name})
+                        emoji.emojify({emoji_size: 24, sprite: list_name})
                     ).appendTo($emoji_list_wrap);
                 });
                 $emoji_list_wrap.appendTo($emoji_panel);
@@ -6550,6 +6550,9 @@ define("xabber-chats", function () {
             };
             $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
+            this.$('.emoji-menu .emoji').click(function (ev) {
+                $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            }.bind(this));
             $insert_emoticon.click(function (ev) {
                 if (_timeout)
                     clearTimeout(_timeout);
@@ -7031,6 +7034,8 @@ define("xabber-chats", function () {
         },
 
         typeEmoticon: function (emoji) {
+            if (typeof emoji == 'number')
+                emoji = Number(emoji).toString();
             let caret_idx = -1;
             if (this.quill.selection.lastRange)
                 caret_idx = this.quill.selection.lastRange.index;

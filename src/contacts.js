@@ -2325,18 +2325,22 @@ define("xabber-contacts", function () {
                     _timeout;
 
                 for (var emoji_list in Emoji.all) {
-                    let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`);
-                    $(`<div id=${emoji_list.replace(/ /g, '_')} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                    let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
+                        list_name = emoji_list.replace(/ /g, '_');
+                    $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
                     _.each(Emoji.all[emoji_list], function (emoji) {
                         $('<div class="emoji-wrap"/>').html(
-                            emoji.emojify({emoji_size: 25})
+                            emoji.emojify({emoji_size: 24, sprite: list_name})
                         ).appendTo($emoji_list_wrap);
                     });
                     $emoji_list_wrap.appendTo($emoji_panel);
-                    $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list.replace(/ /g, '_'), title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                    $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
                 }
                 $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
+                this.$('.emoji-menu .emoji').click(function (ev) {
+                    $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+                }.bind(this));
                 $insert_emoticon.hover(function (ev) {
                     if (ev && ev.preventDefault) { ev.preventDefault(); }
                     $emoji_panel_wrap.addClass('opened');
@@ -2379,7 +2383,7 @@ define("xabber-contacts", function () {
             },
 
             saveNewBadge: function () {
-                let new_badge = this.$('.badge-text')[0].innerText;
+                let new_badge = this.$('.badge-text').getTextFromRichTextarea();
                 if (Array.from(new_badge).length > 32) {
                     this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
                 }

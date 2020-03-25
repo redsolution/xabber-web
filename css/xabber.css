@@ -1,7 +1,3 @@
-@font-face {
-    font-family: "Noto Color Emoji";
-    src: url("https://raw.githubusercontent.com/googlei18n/noto-emoji/master/fonts/NotoColorEmoji.ttf") format("ttf");
-}
 /* -------------- COMMON CLASSES ---------------- */
 
 /* ---- Materialize CSS override ---- */
@@ -4681,11 +4677,10 @@ img.fwd-img-preview {
     z-index: 2;
 }
 
-.message-form .emoticons-panel-wrap {
+.message-form .emoticons-panel-wrap,
+.edit-badge .emoticons-panel-wrap {
     position: absolute;
-    top: -300px;
-    right: -120px;
-    width: 260px;
+    width: 248px;
     height: 300px;
     background-color: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
@@ -4694,17 +4689,14 @@ img.fwd-img-preview {
     z-index: 700;
 }
 
+.message-form .emoticons-panel-wrap {
+    top: -300px;
+    right: -120px;
+}
+
 .edit-badge .emoticons-panel-wrap {
-    position: absolute;
     top: 28px;
     right: 36px;
-    width: 260px;
-    height: 300px;
-    background-color: #FFFFFF;
-    box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    display: none;
-    border: 1px solid #DFDFDF;
-    z-index: 700;
 }
 
 .message-form .emoticons-panel-wrap.opened, .edit-badge .emoticons-panel-wrap.opened {
@@ -4732,10 +4724,8 @@ img.fwd-img-preview {
 
 .edit-badge .emoji-menu .emoji,
 .message-input-panel .emoji-menu .emoji {
-    height: unset;
-    width: unset;
+    cursor: pointer;
 }
-
 
 .edit-badge .emoticons-panel .emoji-wrap,
 .message-input-panel .emoticons-panel .emoji-wrap {
@@ -4743,7 +4733,6 @@ img.fwd-img-preview {
     padding: 1px;
     cursor: pointer;
     font-size: 20px;
-    font-family: "Noto Color Emoji";
 }
 
 .edit-badge .emoticons-panel,
@@ -7252,6 +7241,26 @@ input[type='range'].voice-message-volume:focus {
 .emoji-w24 {
     width: 24px;
     height: 24px;
+}
+
+.emoji-w24.sprite-smiles_and_people,
+.emoji-w24.sprite-objects {
+    background-size: auto calc(24/32 * 448px);
+}
+
+.emoji-w24.sprite-travel_and_places,
+.emoji-w24.sprite-signs {
+    background-size: auto calc(24/32 * 480px);
+}
+
+.emoji-w24.sprite-body_and_clothes,
+.emoji-w24.sprite-animals_and_nature,
+.emoji-w24.sprite-food_and_drinks {
+    background-size: auto calc(24/32 * 352px);
+}
+
+.emoji-w24.sprite-events {
+    background-size: auto calc(24/32 * 288px);
 }
 
 .emoji-w25 {
