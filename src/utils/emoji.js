@@ -26,9 +26,12 @@ define(["jquery", "underscore"], function ($, _) {
     var getEmojiByIndex = function (idx) {
         var emoji;
         for (var emoji_list in raw_data) {
-           raw_data[emoji_list][idx] && (emoji = raw_data[emoji_list][idx]);
+           if (raw_data[emoji_list][idx]) {
+               emoji = raw_data[emoji_list][idx];
+               break;
+           }
         }
-        return getEmoji(emoji);
+        return getEmoji(emoji.code);
     };
 
     for (var emoji_list in raw_data) {
@@ -46,18 +49,22 @@ define(["jquery", "underscore"], function ($, _) {
         options || (options = {});
         var sprite = options.sprite,
             tag_name = sprite ? (options.tag_name || 'span') : 'img',
-            emoji_size = options.emoji_size || 18,
+            emoji_size = options.emoji_size || 16,
             href = options.href ? ` href="#${options.href}" ` :"",
             title = options.title ? ` title="${options.title}" ` :"";
         return this.replace(emoji_regexp, function (emoji) {
             let data = emoji_data[emoji],
-                emoji_code = Number(data.code).toString(16);
-            (emoji_code.length < 4) && (emoji_code = "0".repeat(4 - emoji_code.length) + emoji_code);
-            let img_src = tag_name === 'img' ? (sprite ? ' src="images/emoji/blank.gif"' : '  src="images/emoji/32x32/emoji_u' + emoji_code +  '.png"') : '';
-            return '<' + tag_name + img_src + href + title + ' class="emoji emoji-w'+emoji_size+
-                (sprite ? (' sprite-' + sprite + '" style="background-position: '+'-'+(emoji_size*data.x)+'px '+'-'+(emoji_size*data.y)+'px;" ') : '" ') +
-                'alt="' + emoji + '" ' +
-                'data-emoji="'+emoji+'"/>';
+                emoji_code = data && Number(data.code).toString(16);
+            if (data) {
+                (emoji_code.length < 4) && (emoji_code = "0".repeat(4 - emoji_code.length) + emoji_code);
+                let img_src = tag_name === 'img' ? (sprite ? ' src="images/emoji/blank.gif"' : '  src="images/emoji/32x32/emoji_u' + emoji_code + '.png"') : '';
+                return '<' + tag_name + img_src + href + title + ' class="emoji emoji-w' + emoji_size +
+                    (sprite ? (' sprite-' + sprite + '" style="background-position: ' + '-' + (emoji_size * data.x) + 'px ' + '-' + (emoji_size * data.y) + 'px;" ') : '" ') +
+                    'alt="' + emoji + '" ' +
+                    'data-emoji="' + emoji + '"/>';
+            }
+            else
+                return emoji;
         });
     };
 
@@ -94,7 +101,6 @@ define(["jquery", "underscore"], function ($, _) {
     return {
         all: all,
         get: getEmoji,
-        getByIndex: getEmojiByIndex,
-        emoji_data: emoji_data
+        getByIndex: getEmojiByIndex
     };
 });
