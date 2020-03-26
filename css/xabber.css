@@ -4780,6 +4780,7 @@ img.fwd-img-preview {
     overflow-y: auto;
     overflow-x: hidden;
     line-height: 20px;
+    -moz-block-height: 20px;
     z-index: 1;
 }
 
@@ -7202,9 +7203,9 @@ input[type='range'].voice-message-volume:focus {
 
 .emoji {
     display: inline-block;
-    vertical-align: middle;
+    vertical-align: top;
     position: relative;
-    margin: 0 !important;
+    margin: 0 0.5px!important;
     border: none !important;
 }
 

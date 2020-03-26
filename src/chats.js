@@ -4472,7 +4472,12 @@ define("xabber-chats", function () {
             class QuillEmoji extends Image {
                 static create(value) {
                     if (typeof value == 'string') {
-                        return $(value.emojify({tag_name: 'img'}))[0];
+                        var emoji = $(value.emojify({tag_name: 'img'}))[0];
+                        emoji.style.display = 'none';
+                        emoji.onload = function () {
+                            this.style.display = 'unset';
+                        };
+                        return emoji;
                     } else {
                         return value;
                     }
@@ -6567,6 +6572,15 @@ define("xabber-chats", function () {
                 }
                 $emoji_panel.perfectScrollbar('update');
             }.bind(this));
+            $emoji_panel_wrap.hover(null, function (ev) {
+                if (ev && ev.preventDefault) { ev.preventDefault(); }
+                if (_timeout) {
+                    clearTimeout(_timeout);
+                }
+                _timeout = setTimeout(function () {
+                    $emoji_panel_wrap.removeClass('opened');
+                }, 200);
+            }.bind(this));
             $emoji_panel_wrap.mousedown(function (ev) {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
                 if (_timeout)
@@ -6578,9 +6592,6 @@ define("xabber-chats", function () {
                 if ($target.closest('.emoji-menu').length)
                     return;
                 $target_emoji.length && this.typeEmoticon($target_emoji.data('emoji'));
-                _timeout = setTimeout(function () {
-                    $emoji_panel_wrap.removeClass('opened');
-                }, 100);
             }.bind(this));
             this.renderLastEmoticons();
         },
