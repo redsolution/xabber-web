@@ -4680,7 +4680,7 @@ img.fwd-img-preview {
 .message-form .emoticons-panel-wrap,
 .edit-badge .emoticons-panel-wrap {
     position: absolute;
-    width: 248px;
+    width: 256px;
     height: 300px;
     background-color: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
@@ -5053,17 +5053,21 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .input-toolbar .last-emoticons {
-    display: inline-flex;
+    display: flex;
     margin-left: 64px;
+    width: 192px;
     height: 100%;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-around;
     align-items: center;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {
-    display: inline-block;
-    width: 26px;
-    padding: 0 3px;
-    margin: 0 2px;
+    display: inline-flex;
+    padding: 2px;
+    text-align: center;
+    align-items: center;
     cursor: pointer;
 }
 
