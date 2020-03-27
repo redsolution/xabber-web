@@ -3404,7 +3404,7 @@ body .client-body-wrap.hidden + #modals {
 .message-item .chat-title-wrap,
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
-    height: 19px;
+    height: 17px;
     padding-right: 40px;
     overflow: hidden;
 }
@@ -3414,7 +3414,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-item .chat-title {
     font-size: 16px;
     width: 100%;
-    line-height: 19px;
+    line-height: 17px;
     color: #212121;
     float: left;
 }
@@ -3424,12 +3424,12 @@ body .client-body-wrap.hidden + #modals {
 .mention-item .last-msg,
 .chat-item .last-msg {
     width: calc(100% - 20px);
-    height: 14px;
+    height: 16px;
     margin-top: 2px;
     font-size: 11px;
     font-weight: 300;
     color: #757575;
-    line-height: 13px;
+    line-height: 16px;
 }
 
 .message-item .last-msg-date,
@@ -3931,7 +3931,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-message .chat-msg-content {
     width: 100%;
     font-size: 12px;
-    line-height: 18px;
+    line-height: 20px;
     color: #212121;
     white-space: pre-wrap;
 }
@@ -7243,6 +7243,11 @@ input[type='range'].voice-message-volume:focus {
     height: 20px;
 }
 
+.emoji-w22 {
+    width: 22px;
+    height: 22px;
+}
+
 .emoji-w24 {
     width: 24px;
     height: 24px;
@@ -7278,14 +7283,14 @@ input[type='range'].voice-message-volume:focus {
     height: 32px;
 }
 
-.emoji-w48 {
-    width: 48px;
-    height: 48px;
+.emoji-w44 {
+    width: 44px;
+    height: 44px;
 }
 
-.emoji-w64 {
-    width: 64px;
-    height: 64px;
+.emoji-w56 {
+    width: 56px;
+    height: 56px;
 }
 
 .emoji-w22 {

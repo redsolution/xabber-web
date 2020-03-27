@@ -324,7 +324,7 @@ define("xabber-mentions", function () {
                 else {
                     this.$('.last-msg').text(msg_text);
                 }
-                this.$el.emojify('.last-msg', {emoji_size: 14});
+                this.$el.emojify('.last-msg', {emoji_size: 16});
                 this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
                     .attr('title', utils.pretty_datetime(msg_time));
             },

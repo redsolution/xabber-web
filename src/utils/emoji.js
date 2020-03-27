@@ -49,7 +49,7 @@ define(["jquery", "underscore"], function ($, _) {
         options || (options = {});
         var sprite = options.sprite,
             tag_name = sprite ? (options.tag_name || 'span') : 'img',
-            emoji_size = options.emoji_size || 18,
+            emoji_size = options.emoji_size || 20,
             href = options.href ? ` href="#${options.href}" ` :"",
             title = options.title ? ` title="${options.title}" ` :"";
         return this.replace(emoji_regexp, function (emoji) {

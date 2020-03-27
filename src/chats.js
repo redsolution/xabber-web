@@ -1684,7 +1684,7 @@ define("xabber-chats", function () {
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
-            this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
+            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
@@ -2873,7 +2873,7 @@ define("xabber-chats", function () {
             } else {
                 return;
             }
-            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: emoji ? utils.emoji_size(emoji) : 18}));
+            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: utils.emoji_size(emoji)}));
             if (images) {
                 if (images.length > 1) {
                     let template_for_images = this.createImageGrid(item.attributes);
@@ -3237,7 +3237,7 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: emoji ? utils.emoji_size(emoji) : 18}).emojify('.chat-msg-author-badge', {emoji_size: 14});
+            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 14});
         },
 
         getDateIndicator: function (date) {
@@ -5713,7 +5713,7 @@ define("xabber-chats", function () {
                   if (msg_from)
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
               }
-              this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
+              this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
               this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                   .attr('title', utils.pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
