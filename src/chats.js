@@ -414,6 +414,9 @@ define("xabber-chats", function () {
                 body = $message.children('comment').text() || body;
             /* ----------------------------------------------------- */
 
+            if (body.removeEmoji() === "")
+                attrs.only_emoji = Array.from(body).length;
+
             body && (attrs.message = body);
 
             options.echo_msg && ($delay = $message.children('time'));
@@ -3052,6 +3055,7 @@ define("xabber-chats", function () {
                 user_info = attrs.user_info || {},
                 username = Strophe.xmlescape(user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? this.contact.my_info.get('nickname') : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
                 images = attrs.images,
+                emoji = message.get('only_emoji'),
                 files =  attrs.files,
                 is_image = !_.isUndefined(images),
                 is_file = files ? true : false,
@@ -3233,7 +3237,7 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div'}).emojify('.chat-msg-author-badge', {emoji_size: 14});
+            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: emoji ? utils.emoji_size(emoji) : 18}).emojify('.chat-msg-author-badge', {emoji_size: 14});
         },
 
         getDateIndicator: function (date) {
@@ -3609,6 +3613,17 @@ define("xabber-chats", function () {
         onSubmit: function (text, fwd_messages, options) {
             // send forwarded messages before
             options = options || {};
+            let attrs = {
+                from_jid: this.account.get('jid'),
+                message: text,
+                mentions: options.mentions,
+                blockquotes: options.blockquotes,
+                markups: options.markup_references,
+                submitted_here: true,
+                forwarded_message: null
+            };
+            if (text.removeEmoji() === "")
+                attrs.only_emoji = Array.from(text).length;
             if (fwd_messages.length) {
                 var new_fwd_messages = [];
                 _.each(fwd_messages, function (msg) {
@@ -3617,26 +3632,11 @@ define("xabber-chats", function () {
                     }
                     new_fwd_messages.push(msg);
                 }.bind(this));
-                var message = this.model.messages.create({
-                    from_jid: this.account.get('jid'),
-                    message: text,
-                    mentions: options.mentions,
-                    blockquotes: options.blockquotes,
-                    markups: options.markup_references,
-                    submitted_here: true,
-                    forwarded_message: new_fwd_messages
-                });
+                attrs.forwarded_message = new_fwd_messages;
+                var message = this.model.messages.create(attrs);
                 this.sendMessage(message);
             } else if (text) {
-                var message = this.model.messages.create({
-                    from_jid: this.account.get('jid'),
-                    message: text,
-                    mentions: options.mentions,
-                    blockquotes: options.blockquotes,
-                    markups: options.markup_references,
-                    submitted_here: true,
-                    forwarded_message: null
-                });
+                var message = this.model.messages.create(attrs);
                 this.sendMessage(message);
             }
             if ((this.contact.get('archived'))&&(!this.contact.get('muted'))) {
