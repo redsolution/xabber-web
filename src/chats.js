@@ -1412,26 +1412,14 @@ define("xabber-chats", function () {
                 }.bind(this));
         },
 
-        showAcceptedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                message: 'Authorization accepted'
-            });
-        },
-
-        showDeclinedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                message: 'Authorization denied'
-            });
-        },
-
         showBlockedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                system_last_message: 'Authorization denied',
-                message: this.get('jid') + ' was blocked'
-            });
+            if (this.messages.length)
+                this.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    system_last_message: 'Authorization denied',
+                    message: this.get('jid') + ' was blocked',
+                    time: this.messages.last().get('time')
+                });
         },
 
         deleteChatFromSynchronization: function (callback, errback) {
@@ -2777,7 +2765,7 @@ define("xabber-chats", function () {
             }
 
             let last_message = this.model.last_message;
-            if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
+            if (!last_message || message.get('timestamp') >= last_message.get('timestamp')) {
                 this.model.last_message = message;
                 this.chat_item.updateLastMessage();
             }
