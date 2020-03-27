@@ -392,15 +392,20 @@ define([
             let size;
             switch (count) {
                 case 1:
-                    size = 32;
+                    size = 64;
                     break;
                 case 2:
-                    size = 25;
+                    size = 48;
                     break;
                 case 3:
-                    size = 22;
+                    size = 32;
                     break;
                 case 4:
+                    size = 25;
+                    break;
+                case 5:
+                    size = 22;
+                    break;
                 default:
                     size = 18;
                     break;

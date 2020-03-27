@@ -2866,14 +2866,14 @@ define("xabber-chats", function () {
         },
 
         updateMessage: function (item) {
-            let $message, images = item.get('images'),
+            let $message, images = item.get('images'), emoji = item.get('only_emoji'),
                 files =  item.get('files');
             if (item instanceof xabber.Message) {
                 $message = this.$('.chat-message[data-msgid="' + item.get('msgid') + '"]');
             } else {
                 return;
             }
-            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: 18}));
+            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: emoji ? utils.emoji_size(emoji) : 18}));
             if (images) {
                 if (images.length > 1) {
                     let template_for_images = this.createImageGrid(item.attributes);
@@ -7082,7 +7082,7 @@ define("xabber-chats", function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
+                text = $rich_textarea.getTextFromRichTextarea().trim();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
