@@ -3237,7 +3237,7 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 14});
+            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
 
         getDateIndicator: function (date) {
@@ -3711,7 +3711,7 @@ define("xabber-chats", function () {
         },
 
         startUploadFile: function (message, $message) {
-            $message.emojify('.chat-msg-author-badge', {emoji_size: 14});
+            $message.emojify('.chat-msg-author-badge', {emoji_size: 16});
             $message.find('.cancel-upload').show();
             $message.find('.repeat-upload').hide();
             $message.find('.status').hide();
@@ -6625,7 +6625,7 @@ define("xabber-chats", function () {
                     this.$('.account-role').show().text(role);
                 else
                     this.$('.account-role').hide();
-                this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 14});
+                this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 16});
                 !avatar && (avatar = Images.getDefaultAvatar(nickname));
                 this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size);
             }

@@ -2772,9 +2772,10 @@ body .client-body-wrap.hidden + #modals {
 }
 
 .edit-rights .participant-details-item .badge.one-line {
-    display: inline-block;
+    display: inline-flex;
     color: #424242;
-    line-height: 18px;
+    align-items: center;
+    line-height: 19px;
     height: 26px;
     font-size: 16px;
     padding: 4px 8px 4px 8px;
@@ -2793,11 +2794,6 @@ body .client-body-wrap.hidden + #modals {
 
 .edit-rights-private .participant-details-item .is-myself.nickname:hover {
     border-bottom: 1px dotted #9E9E9E;
-}
-
-.edit-rights .participant-details-item .badge.one-line,
-.edit-rights .participant-details-item .nickname.one-line {
-    vertical-align: middle;
 }
 
 .edit-rights .member-info-item .nickname {
@@ -3906,13 +3902,14 @@ body .client-body-wrap.hidden + #modals {
 
 .group-chat-participant .participant-info .badge,
 .chat-msg-author-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     color: #424242;
     line-height: 14px;
     height: 16px;
     margin: 0;
     font-size: 12px;
-    padding: 1px 4px;
+    padding: 0 4px;
     background-color: #D8D8D8;
     border-radius: 3px;
 }

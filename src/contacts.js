@@ -1716,7 +1716,7 @@ define("xabber-contacts", function () {
                 attrs.badge = _.escape(attrs.badge);
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
-                $item_view.emojify('.badge', {emoji_size: 14});
+                $item_view.emojify('.badge', {emoji_size: 16});
                 if (view.length) {
                     view.hasClass('active') && $item_view.addClass('active');
                     if (attrs.jid == this.account.get('jid'))
