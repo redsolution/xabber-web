@@ -3886,8 +3886,15 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-message .edited-info {
     display: inline-block;
-    font-size: 10px;
-    color: #616161;
+    font-size: 9px;
+    color: #BDBDBD;
+
+    position: absolute;
+    text-align: center;
+    top: 24px;
+    line-height: 9px;
+    width: 48px;
+    right: 32px;
 }
 
 .chat-msg-author-role {

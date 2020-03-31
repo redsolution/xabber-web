@@ -2914,8 +2914,10 @@ define("xabber-chats", function () {
                 $message.find('.chat-msg-content').append(data_form);
             }
             let short_datetime = utils.pretty_short_datetime(item.get('last_replace_time')),
-                datetime = utils.pretty_datetime(item.get('last_replace_time'));
-            $message.find('.edited-info').removeClass('hidden').text('Edited at ' + short_datetime).prop('title', datetime);
+                datetime = moment(item.get('last_replace_time')).format('D MMMM, YYYY HH:mm:ss'),
+                new_title = utils.pretty_datetime(item.get('time')) + ', edited ' + (moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime);
+            $message.find('.msg-time').prop('title', new_title);
+            $message.find('.edited-info').removeClass('hidden').text('edited').prop('title', new_title);
             $message.hyperlinkify({selector: '.chat-text-content'});
         },
 
