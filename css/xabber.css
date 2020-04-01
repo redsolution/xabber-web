@@ -3872,7 +3872,7 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-message.with-author .chat-msg-author-wrap,
 .fwd-message.with-author .fwd-msg-author-wrap {
-    display: inline-flex;
+    display: flex;
     margin-bottom: 2px;
 }
 
@@ -4545,6 +4545,7 @@ img.fwd-img-preview {
     max-width: 120px;
     font-size: 12px;
     line-height: 16px;
+    margin-left: 4px;
     color: #BDBDBD;
     display: inline-block;
 }
