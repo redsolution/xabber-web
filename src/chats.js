@@ -6752,7 +6752,7 @@ define("xabber-chats", function () {
                 mention_position = Math.max(at_position, plus_position),
                 mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("");
             (mention_text.length && mention_text[0].match(/\s/)) && mention_position++;
-            mention_text.replace(/\s?(@|[+])/, "");
+            mention_text = mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
             this.quill.deleteText(mention_position, ++mention_text.length);
             if (!nickname.length) {
