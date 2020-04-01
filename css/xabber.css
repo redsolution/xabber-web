@@ -5057,7 +5057,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .input-toolbar .last-emoticons {
-    display: flex;
+    display: inline-flex;
     margin-left: 64px;
     width: 192px;
     height: 100%;
