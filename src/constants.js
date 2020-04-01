@@ -199,6 +199,31 @@ var constants = {
         }
     },
 
+    EMOJI_LIST_NAME: function (emoji_list) {
+        return {
+            "ru": {
+                "smiles and people": 'Смайлики и люди',
+                "body and clothes": 'Тело и одежда',
+                "animals and nature": 'Животные и природа',
+                "food and drinks": 'Еда и напитки',
+                "travel and places": 'Путешествия и места',
+                "events": 'События',
+                "objects": 'Объекты',
+                "signs": 'Знаки'
+            },
+            "en": {
+                "smiles and people": 'Smiles and people',
+                "body and clothes": 'Body and clothes',
+                "animals and nature": 'Animals and nature',
+                "food and drinks": 'Food and drinks',
+                "travel and places": 'Travel and places',
+                "events": 'Events',
+                "objects": 'Objects',
+                "signs": 'Signs'
+            }
+        }["en"][emoji_list]
+    },
+
     QUOTE_MARKER: '&gt;',
 
     MIME_TYPES: {

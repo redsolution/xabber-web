@@ -453,9 +453,10 @@ input[type=text].simple-input-field:hover {
     width: 64px;
     height: 48px;
     top: 64px !important;
-    left: inherit;
+    left: unset;
+    margin: 0;
     transition: width .1s;
-    z-index: 500 !important;
+    z-index: 1001 !important;
     border-radius: 8px;
 }
 
@@ -710,7 +711,7 @@ body {
     overflow: hidden;
 }
 
-body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg) {
+body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
     display: none;
 }
 
@@ -720,6 +721,8 @@ body.login > div.login-container {
 
 #modals {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
 }
@@ -2769,9 +2772,10 @@ body .client-body-wrap.hidden + #modals {
 }
 
 .edit-rights .participant-details-item .badge.one-line {
-    display: inline-block;
+    display: inline-flex;
     color: #424242;
-    line-height: 18px;
+    align-items: center;
+    line-height: 19px;
     height: 26px;
     font-size: 16px;
     padding: 4px 8px 4px 8px;
@@ -2790,11 +2794,6 @@ body .client-body-wrap.hidden + #modals {
 
 .edit-rights-private .participant-details-item .is-myself.nickname:hover {
     border-bottom: 1px dotted #9E9E9E;
-}
-
-.edit-rights .participant-details-item .badge.one-line,
-.edit-rights .participant-details-item .nickname.one-line {
-    vertical-align: middle;
 }
 
 .edit-rights .member-info-item .nickname {
@@ -3401,7 +3400,7 @@ body .client-body-wrap.hidden + #modals {
 .message-item .chat-title-wrap,
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
-    height: 19px;
+    height: 17px;
     padding-right: 40px;
     overflow: hidden;
 }
@@ -3411,7 +3410,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-item .chat-title {
     font-size: 16px;
     width: 100%;
-    line-height: 19px;
+    line-height: 17px;
     color: #212121;
     float: left;
 }
@@ -3421,12 +3420,12 @@ body .client-body-wrap.hidden + #modals {
 .mention-item .last-msg,
 .chat-item .last-msg {
     width: calc(100% - 20px);
-    height: 14px;
+    height: 16px;
     margin-top: 2px;
     font-size: 11px;
     font-weight: 300;
     color: #757575;
-    line-height: 13px;
+    line-height: 16px;
 }
 
 .message-item .last-msg-date,
@@ -3887,8 +3886,15 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-message .edited-info {
     display: inline-block;
-    font-size: 10px;
-    color: #616161;
+    font-size: 9px;
+    color: #BDBDBD;
+
+    position: absolute;
+    text-align: center;
+    top: 24px;
+    line-height: 9px;
+    width: 48px;
+    right: 32px;
 }
 
 .chat-msg-author-role {
@@ -3903,13 +3909,14 @@ body .client-body-wrap.hidden + #modals {
 
 .group-chat-participant .participant-info .badge,
 .chat-msg-author-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
     color: #424242;
     line-height: 14px;
     height: 16px;
     margin: 0;
     font-size: 12px;
-    padding: 1px 4px;
+    padding: 0 4px;
     background-color: #D8D8D8;
     border-radius: 3px;
 }
@@ -3928,7 +3935,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-message .chat-msg-content {
     width: 100%;
     font-size: 12px;
-    line-height: 16px;
+    line-height: 20px;
     color: #212121;
     white-space: pre-wrap;
 }
@@ -4645,7 +4652,7 @@ img.fwd-img-preview {
     background-color: rgba(0, 0, 0, 0.7);
     border-radius: 15px;
     color: rgb(255, 255, 255);
-    z-index: 1000;
+    z-index: 1005;
 }
 
 .message-form .input-message {
@@ -4674,13 +4681,11 @@ img.fwd-img-preview {
     z-index: 2;
 }
 
-.message-form .emoticons-panel-wrap {
+.message-form .emoticons-panel-wrap,
+.edit-badge .emoticons-panel-wrap {
     position: absolute;
-    top: -300px;
-    right: -120px;
-    width: 260px;
+    width: 256px;
     height: 300px;
-    padding: 4px;
     background-color: #FFFFFF;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
     display: none;
@@ -4688,28 +4693,58 @@ img.fwd-img-preview {
     z-index: 700;
 }
 
+.message-form .emoticons-panel-wrap {
+    top: -300px;
+    right: -120px;
+}
+
 .edit-badge .emoticons-panel-wrap {
-    position: absolute;
     top: 28px;
     right: 36px;
-    width: 260px;
-    height: 300px;
-    padding: 4px;
-    background-color: #FFFFFF;
-    box-shadow: 0 1px 1px rgba(0,0,0,.1);
-    display: none;
-    border: 1px solid #DFDFDF;
-    z-index: 700;
 }
 
 .message-form .emoticons-panel-wrap.opened, .edit-badge .emoticons-panel-wrap.opened {
     display: block;
 }
 
-.message-form .emoticons-panel, .edit-badge .emoticons-panel {
+.edit-badge .emoticons-panel .emoji-list-header,
+.message-input-panel .emoticons-panel .emoji-list-header {
+    height: 24px;
+    line-height: 24px;
+    font-size: 16px;
+}
+
+.edit-badge .emoji-menu,
+.message-input-panel .emoji-menu {
     position: relative;
+    padding: 2px 4px;
+    height: 32px;
     width: 100%;
-    height: 100%;
+    background-color: #EEE;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edit-badge .emoji-menu .emoji,
+.message-input-panel .emoji-menu .emoji {
+    cursor: pointer;
+}
+
+.edit-badge .emoticons-panel .emoji-wrap,
+.message-input-panel .emoticons-panel .emoji-wrap {
+    display: inline-block;
+    padding: 1px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.edit-badge .emoticons-panel,
+.message-form .emoticons-panel {
+    position: relative;
+    padding: 4px;
+    width: 100%;
+    height: calc(100% - 32px);
 }
 
 .message-form .emoticons-panel .emoji-wrap, .edit-badge .emoticons-panel .emoji-wrap {
@@ -4748,7 +4783,8 @@ img.fwd-img-preview {
     font-size: 13px;
     overflow-y: auto;
     overflow-x: hidden;
-    line-height: 18px;
+    line-height: 20px;
+    -moz-block-height: 20px;
     z-index: 1;
 }
 
@@ -5021,16 +5057,21 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .input-toolbar .last-emoticons {
-    display: inline-block;
+    display: flex;
     margin-left: 64px;
+    width: 192px;
+    height: 100%;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {
-    display: inline-block;
-    width: 26px;
-    height: 26px;
-    padding: 1px 3px;
-    margin: 2px;
+    display: inline-flex;
+    padding: 2px;
+    text-align: center;
+    align-items: center;
     cursor: pointer;
 }
 
@@ -7170,54 +7211,95 @@ input[type='range'].voice-message-volume:focus {
 
 .emoji {
     display: inline-block;
-    vertical-align: bottom;
-    background-repeat: no-repeat;
+    vertical-align: top;
+    position: relative;
+    margin: 0 0.5px!important;
+    border: none !important;
+}
+
+.account-badge .emoji,
+.badge .emoji {
+    vertical-align: unset;
 }
 
 .emoji-w12 {
     width: 12px;
     height: 12px;
-    background-size: 324px 84px;
 }
 
 .emoji-w14 {
     width: 14px;
     height: 14px;
-    background-size: 378px 98px;
 }
 
 .emoji-w16 {
     width: 16px;
     height: 16px;
-    background-size: 432px 112px;
 }
 
 .emoji-w18 {
     width: 18px;
     height: 18px;
-    background-size: 486px 126px;
 }
 
 .emoji-w20 {
     width: 20px;
     height: 20px;
-    background-size: 540px 140px;
+}
+
+.emoji-w22 {
+    width: 22px;
+    height: 22px;
 }
 
 .emoji-w24 {
     width: 24px;
     height: 24px;
-    background-size: 648px 168px;
+}
+
+.emoji-w24.sprite-smiles_and_people,
+.emoji-w24.sprite-objects {
+    background-size: auto calc(24/32 * 448px);
+}
+
+.emoji-w24.sprite-travel_and_places,
+.emoji-w24.sprite-signs {
+    background-size: auto calc(24/32 * 480px);
+}
+
+.emoji-w24.sprite-body_and_clothes,
+.emoji-w24.sprite-animals_and_nature,
+.emoji-w24.sprite-food_and_drinks {
+    background-size: auto calc(24/32 * 352px);
+}
+
+.emoji-w24.sprite-events {
+    background-size: auto calc(24/32 * 288px);
 }
 
 .emoji-w25 {
     width: 25px;
     height: 25px;
-    background-size: 675px 175px;
 }
 
-.emoji-spritesheet-0 {
-    background-image: url(../images/emoji/emojisprite_0.png);
+.emoji-w32 {
+    width: 32px;
+    height: 32px;
+}
+
+.emoji-w44 {
+    width: 44px;
+    height: 44px;
+}
+
+.emoji-w56 {
+    width: 56px;
+    height: 56px;
+}
+
+.emoji-w22 {
+    width: 22px;
+    height: 22px;
 }
 
 /* ------------------ ROSTER SETTINGS -------------------- */
@@ -7658,4 +7740,55 @@ ul.restrictions-list-content>li {
 
 .about-panel .block-content {
     padding: 6px 48px;
+}
+
+
+/* -------------- EMOJI ------------- */
+
+.sprite-smiles_and_people {
+    background-image: url(../images/emoji/spritesheet0.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-body_and_clothes {
+    background-image: url(../images/emoji/spritesheet1.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-animals_and_nature {
+    background-image: url(../images/emoji/spritesheet2.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-food_and_drinks {
+    background-image: url(../images/emoji/spritesheet3.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-travel_and_places {
+    background-image: url(../images/emoji/spritesheet4.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-events {
+    background-image: url(../images/emoji/spritesheet5.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-objects {
+    background-image: url(../images/emoji/spritesheet6.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.sprite-signs {
+    background-image: url(../images/emoji/spritesheet7.png);
+    background-repeat: no-repeat;
+    display: block;
 }

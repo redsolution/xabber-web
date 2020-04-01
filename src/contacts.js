@@ -1680,6 +1680,8 @@ define("xabber-contacts", function () {
                             return;
                         }
                     }
+                    if (this.participants.version > version)
+                        return;
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
                     this.participants.each(function (participant) {
@@ -1714,7 +1716,7 @@ define("xabber-contacts", function () {
                 attrs.badge = _.escape(attrs.badge);
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
-                $item_view.emojify('.badge', {emoji_size: 14});
+                $item_view.emojify('.badge', {emoji_size: 16});
                 if (view.length) {
                     view.hasClass('active') && $item_view.addClass('active');
                     if (attrs.jid == this.account.get('jid'))
@@ -2322,13 +2324,23 @@ define("xabber-contacts", function () {
                     $emoji_panel = this.$('.emoticons-panel'),
                     _timeout;
 
-                _.each(Emoji.all, function (emoji) {
-                    $('<div class="emoji-wrap"/>').html(
-                        emoji.emojify({tag_name: 'div', emoji_size: 25})
-                    ).appendTo($emoji_panel);
-                });
+                for (var emoji_list in Emoji.all) {
+                    let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
+                        list_name = emoji_list.replace(/ /g, '_');
+                    $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                    _.each(Emoji.all[emoji_list], function (emoji) {
+                        $('<div class="emoji-wrap"/>').html(
+                            emoji.emojify({emoji_size: 24, sprite: list_name})
+                        ).appendTo($emoji_list_wrap);
+                    });
+                    $emoji_list_wrap.appendTo($emoji_panel);
+                    $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                }
                 $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
+                this.$('.emoji-menu .emoji').click(function (ev) {
+                    $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+                }.bind(this));
                 $insert_emoticon.hover(function (ev) {
                     if (ev && ev.preventDefault) { ev.preventDefault(); }
                     $emoji_panel_wrap.addClass('opened');
@@ -2371,8 +2383,8 @@ define("xabber-contacts", function () {
             },
 
             saveNewBadge: function () {
-                let new_badge = this.$('.badge-text').getTextFromRichTextarea().trim();
-                if (new_badge.length > 32) {
+                let new_badge = this.$('.badge-text').getTextFromRichTextarea();
+                if (Array.from(new_badge).length > 32) {
                     this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
                 }
                 else {
@@ -2393,10 +2405,9 @@ define("xabber-contacts", function () {
             },
 
             typeEmoticon: function (emoji) {
-                var emoji_node = emoji.emojify({tag_name: 'img'}),
+                var emoji_node = emoji.emojify({tag_name: 'span'}),
                     $textarea = this.$('.badge-text');
-                $textarea.focus();
-                window.document.execCommand('insertHTML', false, emoji_node);
+                $textarea.focus().pasteHtmlAtCaret(emoji_node);
             },
 
             checkKey: function (ev) {
@@ -3803,6 +3814,7 @@ define("xabber-contacts", function () {
                         let unread_messages = _.clone(chat.messages_unread.models);
                         chat.trigger('get_missed_history', request_with_stamp/1000);
                         chat.set('unread', 0);
+                        chat.set('const_unread', 0);
                         _.each(unread_messages, function (unread_msg) {
                             unread_msg.set('is_unread', false);
                         }.bind(this));

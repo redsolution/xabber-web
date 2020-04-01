@@ -31,6 +31,7 @@
             this._cache = new Backbone.ModelWithStorage({id: 'cache'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cacheFavicons();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -90,6 +91,11 @@
                     window.localStorage.removeItem(key);
                 }
             }
+        },
+
+        cacheFavicons: async function () {
+            this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
+            this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
         },
 
         detectMediaDevices: function () {

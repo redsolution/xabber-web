@@ -17,7 +17,7 @@ define([
     "sha1_hasher",
     "materialize",
     "perfectScrollbarJQuery"
-], function(Backbone, _, $, moment, WaveSurfer, slug, /*quill,*/ magnificPopup, Strophe) {
+], function(Backbone, _, $, moment, WaveSurfer, slug, magnificPopup, Strophe) {
     return _.extend({
         $: $,
         _: _,

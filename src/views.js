@@ -1492,24 +1492,24 @@ define("xabber-views", function () {
         },
 
         startBlinkingFavicon: function () {
-            if (this._blink_interval) {
+            if (this._blink_interval)
                 return;
-            }
             this._blink_interval = setInterval(function () {
-                var $icon = $("link[rel='shortcut icon']");
-                if ($icon.attr('href') === constants.FAVICON_DEFAULT) {
-                    $icon.attr('href', constants.FAVICON_MESSAGE);
-                } else {
-                    $icon.attr('href', constants.FAVICON_DEFAULT);
-                }
-            }, 500);
+                var $icon = $("link[rel='shortcut icon']"), url;
+                if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1)
+                    url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
+                else
+                    url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $icon.attr('href', url);
+            }.bind(this), 1000);
         },
 
         stopBlinkingFavicon: function () {
             if (this._blink_interval) {
                 clearInterval(this._blink_interval);
                 this._blink_interval = null;
-                $("link[rel='shortcut icon']").attr("href", constants.FAVICON_DEFAULT);
+                let url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $("link[rel='shortcut icon']").attr("href", url);
             }
         },
 
