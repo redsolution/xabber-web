@@ -3792,7 +3792,7 @@ define("xabber-contacts", function () {
                         last_displayed_msg = $item.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
                         msg_retraction_version = $item.children('retract').attr('version'),
-                        msg, options = {synced_msg: true};
+                        msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     contact.set('group_chat', is_group_chat);
                     if ($item.children('deleted').length) {
                         chat.set('opened', false);
@@ -3831,7 +3831,7 @@ define("xabber-contacts", function () {
                     message.length && (msg = this.account.chats.receiveChatMessage(message, options));
                     chat.set('const_unread', unread_msgs_count);
                     if (msg) {
-                        if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('archive_id') || $unread_messages.attr('after') < msg.get('contact_archive_id')))
+                        if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
                         chat.set('first_archive_id', msg.get('archive_id'));
                     }

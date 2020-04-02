@@ -18,8 +18,10 @@ define("xabber-chats", function () {
         idAttribute: 'stanza_id',
 
         defaults: function () {
+            let msgid = uuid();
             return {
-                stanza_id: uuid(),
+                msgid: msgid,
+                stanza_id: msgid,
                 type: 'main',
                 state: constants.MSG_PENDING
             };
@@ -27,8 +29,6 @@ define("xabber-chats", function () {
 
         initialize: function () {
             var time = this.get('time'), attrs = {};
-            attrs.msgid = this.get('stanza_id');
-            attrs.origin_id = this.get('stanza_id');
             if (time) {
                 attrs.timestamp = Number(moment(time));
             } else {
