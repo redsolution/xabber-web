@@ -367,14 +367,12 @@ define("xabber-mentions", function () {
             },
 
             openByClick: function () {
-                let msgid = this.model.message.get('msgid'),
-                    archive_id = this.model.message.get('archive_id'),
-                    contact_archive_id = this.model.message.get('contact_archive_id'),
+                let message = this.model.message,
                     chat = this.account.chats.getChat(this.contact);
                 this.model.message.set('is_unread', false);
-                chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
+                chat.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                 this.model.set('active', true);
-                this.contact.trigger("open_mention", this.contact, msgid);
+                this.contact.trigger("open_mention", this.contact, message.get('unique_id'));
             },
 
             updateColorScheme: function () {
