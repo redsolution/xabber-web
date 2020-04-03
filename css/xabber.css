@@ -2764,7 +2764,7 @@ body .client-body-wrap.hidden + #modals {
 
 .edit-rights .participant-details-item .nickname.one-line {
     height: 26px;
-    margin-bottom: 2px;
+    margin: 0 8px 2px 8px;
     color: #212121;
     font-size: 18px;
     font-weight: 500;

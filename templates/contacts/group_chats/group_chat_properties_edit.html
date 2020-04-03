@@ -16,10 +16,10 @@
             <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder="Input Chat Name" class="text-field">
         </div>
         {[} else if (field.type === 'text-multi') {]}
-        <textarea placeholder="Input {{field.var}}" id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea"/>
+        <textarea placeholder="Input {{field.var}}" id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea">{{field.values[0]}}</textarea>
         {[} else if (field.type === 'list-single') { field.options.forEach(function (option) {]}
         <div class="property-radio">
-            <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{option.value}}" type="radio" class="with-gap" required="">
+            <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{field.var}}" type="radio" class="with-gap" required="">
             <label class="{{option.value}}-label" for="{{option.value}}">{{option.label}}</label>
         </div>
         {[});}]}

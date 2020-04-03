@@ -178,6 +178,7 @@ define("xabber-contacts", function () {
                     this.membersRequest({id: ''}, function (response) {
                         let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                         this.my_rights = data_form;
+                        this.trigger('permissions_changed');
                         callback && callback();
                     }.bind(this));
                 }.bind(this));
@@ -1185,7 +1186,7 @@ define("xabber-contacts", function () {
             },
 
             updateButtons: function () {
-                let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator')),
+                let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator') && permission.values),
                     is_blocked = this.model.get('blocked');
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
@@ -1443,10 +1444,10 @@ define("xabber-contacts", function () {
             },
 
             open: function (data_form) {
+                this.data_form = data_form;
                 this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
-                        this.update();
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
                         this.updateScrollBar();
                     }.bind(this),
@@ -1462,7 +1463,6 @@ define("xabber-contacts", function () {
             close: function () {
                 this.$el.closeModal({
                     complete: function () {
-                        this.update();
                         this.hide.bind(this);
                     }.bind(this)
                 });
@@ -1472,44 +1472,34 @@ define("xabber-contacts", function () {
                 this.$('.name-info-wrap').find('.name').find('.value').text(this.model.get('name'));
             },
 
-            update: function () {
-                /*this.$('button').blur();
-                let info = this.model.get('group_info') || {};
-                this.$('.jid-info-wrap .jabber-id').find('.value').text(info.jid);
-                this.$('p[id="anonymous-' + info.anonymous + '"]').removeClass('hidden');
-                this.$('.name-field #new_name_value').val(info.name);
-                this.$('.description-field textarea').val(info.description);
-                this.$('.global-field input[id="indexation-' + info.searchable +'"]').prop('checked', true);
-                this.$('.membership-field input[id="membership-' + info.model +'"]').prop('checked', true);*/
-            },
-
             saveChanges: function() {
                 if (this.$('.btn-save').hasClass('non-active'))
                     return;
-                let new_name = this.$('input[name=chat_name]').val(),
-                    new_searchable = this.$('.global-field input:checked').attr('id').substr(11),
-                    new_description = this.$('.description-field textarea').val(),
-                    new_model = this.$('.membership-field input:checked').attr('id').substr(11),
-                    info = this.contact.get('group_info') || {}, has_changes = false,
-                    iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
-                        .c('update', {xmlns: Strophe.NS.GROUP_CHAT});
-                if (info.name != new_name) {
-                    has_changes = true;
-                    iq.c('name').t(new_name).up();
-                }
-                if (info.description != new_description) {
-                    has_changes = true;
-                    iq.c('description').t(new_description).up();
-                }
-                if (info.searchable != new_searchable) {
-                    has_changes = true;
-                    iq.c('index').t(new_searchable).up();
-                }
-                if (info.model != new_model) {
-                    has_changes = true;
-                    iq.c('membership').t(new_model).up();
-                }
-                if (has_changes)
+
+                let has_changes = false,
+                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
+                this.data_form.fields.forEach(function (field) {
+                    if (field.type === 'hidden' || field.type === 'fixed')
+                        return;
+                    var value = field.values ? field.values[0] : null,
+                        checked_inp = this.$('.' + field.var + '-field input:checked'),
+                        text_inp = this.$('.' + field.var + '-field input[type="text"]'),
+                        textarea = this.$('.' + field.var + '-field textarea'),
+                        new_value = "";
+                    checked_inp.length && (new_value = checked_inp[0].id);
+                    text_inp.length && (new_value = text_inp.val());
+                    textarea.length && (new_value = textarea.val());
+                    if (value !== new_value) {
+                        let field_idx = this.data_form.fields.indexOf(field);
+                        field.values = [new_value];
+                        this.data_form.fields[field_idx] = field;
+                        has_changes = true;
+                    }
+                }.bind(this));
+
+                if (has_changes) {
+                    iq = this.account.addDataFormToStanza(iq, this.data_form);
                     this.account.sendIQ(iq, function () {
                         this.$('button').addClass('non-active');
                     }.bind(this), function (error) {
@@ -1518,21 +1508,26 @@ define("xabber-contacts", function () {
                         this.close();
                         utils.dialogs.error(err_text);
                     }.bind(this));
-                else
+                } else
                     this.$('button').removeClass('non-active');
             },
 
             updateSaveButton: function () {
-                /*let new_name = this.$('input[name=chat_name]').val(),
-                    new_searchable = this.$('.global-field input:checked').attr('id').substr(11),
-                    new_description = this.$('.description-field textarea').val(),
-                    new_model = this.$('.membership-field input:checked').attr('id').substr(11),
-                    info = this.contact.get('group_info') || {}, has_changes = false;
-                (info.name != new_name) && (has_changes = true);
-                (info.description != new_description) && (has_changes = true);
-                (info.searchable != new_searchable) && (has_changes = true);
-                (info.model != new_model) && (has_changes = true);
-                this.$('.btn-save').switchClass('non-active', !has_changes);*/
+                let has_changes = false;
+                this.data_form.fields.forEach(function (field) {
+                    if (field.type === 'hidden' || field.type === 'fixed')
+                        return;
+                    var value = field.values ? field.values[0] : null,
+                        checked_inp = this.$('.' + field.var + '-field input:checked'),
+                        text_inp = this.$('.' + field.var + '-field input[type="text"]'),
+                        textarea = this.$('.' + field.var + '-field textarea'),
+                        new_value = "";
+                    checked_inp.length && (new_value = checked_inp[0].id);
+                    text_inp.length && (new_value = text_inp.val());
+                    textarea.length && (new_value = textarea.val());
+                    (value !== new_value) && (has_changes = true);
+                }.bind(this));
+                this.$('.btn-save').switchClass('non-active', !has_changes);
             }
 
         });
@@ -2006,7 +2001,7 @@ define("xabber-contacts", function () {
                 }
                 $property_value.text($property_item.text());
                 $property_value.attr('data-value', $property_item.attr('data-value'));
-                if ($property_item.attr('data-value') === 'never') {
+                if ($property_item.attr('data-value') === '0') {
                     $property_value.addClass('default-value').text('set timer');
                 } else if ($property_value.hasClass('default-value'))
                     $property_value.removeClass('default-value');
@@ -2213,7 +2208,7 @@ define("xabber-contacts", function () {
                     else {
                         $right_item.removeClass('changed');
                         if ($right_item.hasClass('changed-timer'))
-                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', 'never');
+                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', "");
                     }
                 }
                 this.updateSaveButton();
@@ -2424,7 +2419,6 @@ define("xabber-contacts", function () {
 
         });
 
-
         xabber.DefaultRestrictionsView = xabber.BasicView.extend({
             className: 'modal dialog-modal edit-default-restrictions',
             template: templates.group_chats.default_restrictions,
@@ -2447,14 +2441,12 @@ define("xabber-contacts", function () {
             },
 
             open: function () {
-                this.$('.preloader-wrapper').addClass('active');
+                this.update();
                 this.$el.openModal({
                     ready: function () {
-                        this.update();
                         this.updateScrollBar();
                     }.bind(this),
                     complete: function () {
-                        this.showDefaultRestrictions();
                         this.$el.detach();
                         this.data.set('visible', false);
                     }.bind(this)
@@ -2473,15 +2465,23 @@ define("xabber-contacts", function () {
                 this.$('.btn-default-restrictions-save').addClass('non-active');
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
-                this.showDefaultRestrictions();
-                let dropdown_settings = {
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    alignment: 'left'
-                };
-                this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
+                this.$('button').blur();
+                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
+                this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
+                    this.showDefaultRestrictions(iq_all_rights);
+                    let dropdown_settings = {
+                        inDuration: 100,
+                        outDuration: 100,
+                        constrainWidth: false,
+                        hover: false,
+                        alignment: 'left'
+                    };
+                    this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
+                }.bind(this),
+                    function () {
+                        utils.callback_popup_message("You have no permission to change default restrictions", 3000);
+                    }.bind(this));
             },
 
             updateSaveButton: function () {
@@ -2504,7 +2504,7 @@ define("xabber-contacts", function () {
             changeRestriction: function (ev) {
                 let $target = $(ev.target);
                 if (!$target.prop('checked')) {
-                    $target.closest('.right-item').find('.select-timer .property-value').attr('data-value', 'never').addClass('default-value')
+                    $target.closest('.right-item').find('.select-timer .property-value').attr('data-value', "").addClass('default-value')
                         .text('set timer');
                 }
             },
@@ -2537,51 +2537,42 @@ define("xabber-contacts", function () {
                 this.updateSaveButton();
             },
 
-            showDefaultRestrictions: function () {
-                this.$('button').blur();
-                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
-                this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
-                    let data_form = this.account.parseDataForm($(iq_all_rights).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                    data_form && (this.default_restrictions = _.clone(data_form));
-                    data_form.fields.forEach(function (field) {
-                        if (field.type === 'fixed' || field.type === 'hidden')
-                            return;
-                        let attrs = {
-                                pretty_name: field.label,
-                                name: field.var,
-                                expires: field.values ? field.values[0] : undefined
-                            },
-                            view = this.$('.default-restrictions-list-wrap .right-item.restriction-default-' + attrs.name),
-                            restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
-                            restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
-                        if (view.length)
-                            view.detach();
-                        restriction_item.append(restriction_expire);
-                        this.$('.default-restrictions-list-wrap').append(restriction_item);
-                        if (attrs.expires) {
-                            this.actual_default_restrictions.push({name: attrs.name, expires: attrs.expires});
-                            this.$('.right-item #default-' + attrs.name).prop('checked', true).addClass(attrs.expires);
-                            if (attrs.expires != 0) {
-                                let $current_restriction = this.$('.right-item.restriction-default-' + attrs.name);
-                                $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
-                                    .removeClass('default-value')
-                                    .text(attrs.expires);
-                            }
+            showDefaultRestrictions: function (iq_all_rights) {
+                let data_form = this.account.parseDataForm($(iq_all_rights).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                data_form && (this.default_restrictions = _.clone(data_form));
+                data_form.fields.forEach(function (field) {
+                    if (field.type === 'fixed' || field.type === 'hidden')
+                        return;
+                    let attrs = {
+                            pretty_name: field.label,
+                            name: field.var,
+                            expires: field.values ? field.values[0] : undefined
+                        },
+                        view = this.$('.default-restrictions-list-wrap .right-item.restriction-default-' + attrs.name),
+                        restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
+                        restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
+                    if (view.length)
+                        view.detach();
+                    restriction_item.append(restriction_expire);
+                    this.$('.default-restrictions-list-wrap').append(restriction_item);
+                    if (attrs.expires) {
+                        this.actual_default_restrictions.push({name: attrs.name, expires: attrs.expires});
+                        this.$('.right-item #default-' + attrs.name).prop('checked', true).addClass(attrs.expires);
+                        if (attrs.expires != 0) {
+                            let $current_restriction = this.$('.right-item.restriction-default-' + attrs.name);
+                            $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
+                                .removeClass('default-value')
+                                .text(attrs.expires);
                         }
-                    }.bind(this));
-                    this.$('.preloader-wrapper').removeClass('active');
-                    this.$('.select-timer .dropdown-button').dropdown({
-                        inDuration: 100,
-                        outDuration: 100,
-                        constrainWidth: false,
-                        hover: false,
-                        alignment: 'left'
-                    });
-                }.bind(this), function () {
-                    this.$('.default-restrictions-list-wrap').text('You have no permission to change default restrictions');
-                    this.$('.preloader-wrapper').removeClass('active');
+                    }
                 }.bind(this));
+                this.$('.select-timer .dropdown-button').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                });
             },
 
             saveChanges: function () {
@@ -2619,7 +2610,7 @@ define("xabber-contacts", function () {
                     this.account.addDataFormToStanza(iq_change_default_rights, data_form);
                     this.account.sendIQ(iq_change_default_rights, function () {
                         this.close();
-                    }.bind(this), function () {
+                    }.bind(this), function (error) {
                         let err_text = $(error).find('error text').text() || 'You have no permission to change default restrictions';
                         utils.dialogs.error(err_text);
                         this.close();
@@ -2631,7 +2622,7 @@ define("xabber-contacts", function () {
                 var expire_time_item = $(ev.target),
                     new_expire_time = expire_time_item.val(),
                     $restriction_item = expire_time_item.prev();
-                if (expire_time_item.val() == 'never')
+                if (expire_time_item.val() == '0')
                     $restriction_item .find('.restriction-description').text('Indefinitely');
                 else
                     $restriction_item .find('.restriction-description').text('For ' + new_expire_time);
@@ -2751,7 +2742,7 @@ define("xabber-contacts", function () {
                 };
 
                 let participant = this.mergeParticipant(attrs);
-                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('permissions_changed') && this.contact.trigger('update_my_info');
+                (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('update_my_info');
                 this.account.groupchat_settings.updateParticipant(this.contact.get('jid'), attrs);
                 return participant;
             }
