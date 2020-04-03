@@ -419,7 +419,7 @@ define("xabber-chats", function () {
                 let blockquotes = [];
                 $quote_references.each(function (idx, quote) {
                     let $quote = $(quote),
-                        marker = $quote.children('marker').text();
+                        .c('marker').t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
                     marker && (marker = Strophe.xmlescape(marker));
                     blockquotes.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), marker: marker});
                 }.bind(this));
