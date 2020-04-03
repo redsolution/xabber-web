@@ -397,7 +397,7 @@ define("xabber-chats", function () {
                 let blockquotes = [];
                 $quote_references.each(function (idx, quote) {
                     let $quote = $(quote),
-                        .c('marker').t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
+                        marker = $quote.children('marker').text();
                     marker && (marker = Strophe.xmlescape(marker));
                     blockquotes.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), marker: marker});
                 }.bind(this));
@@ -3495,7 +3495,7 @@ define("xabber-chats", function () {
                         end: blockquote.end + legacy_body.length,
                         type: 'quote'
                     })
-                        .c('marker').t(constants.QUOTE_MARKER).up().up();
+                        .c('marker').t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
                     legacy_content.push({
                         start: blockquote.start + legacy_body.length,
                         end: blockquote.end + legacy_body.length,
