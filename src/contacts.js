@@ -466,7 +466,7 @@ define("xabber-contacts", function () {
                         files = message.get('files'),
                         fwd_message = message.get('forwarded_message'),
                         fwd_msg_author = null,
-                        msg_text = message.get('message');
+                        msg_text = _.escape(message.get('message'));
                     if (fwd_message) {
                         let user_info = fwd_message[0].get('user_info') || {};
                         if (msg_text) {
@@ -508,7 +508,7 @@ define("xabber-contacts", function () {
                     });
                     if (is_scrolled)
                         chat_content.scrollToBottom();
-                    pinned_msg_elem.attr('data-msgid', message.msgid);
+                    pinned_msg_elem.attr('data-uniqueid', message.get('unique_id'));
                 }
             },
 
@@ -2998,7 +2998,7 @@ define("xabber-contacts", function () {
                 var invites = chat.item_view.content.$('.auth-request');
                 if (invites.length > 0) {
                     invites.each(function (idx, item) {
-                        var msg = chat.messages.get(item.dataset.msgid);
+                        var msg = chat.messages.get(item.dataset.uniqueid);
                         msg.set('is_accepted', true);
                     }.bind(this));
                 }

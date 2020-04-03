@@ -5,13 +5,8 @@ define("xabber-mentions", function () {
             templates = env.templates.mentions,
             utils = env.utils,
             $ = env.$,
-            $iq = env.$iq,
-            $msg = env.$msg,
-            $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
-            moment = env.moment,
-            uuid = env.uuid,
             Images = utils.images;
 
 
@@ -25,7 +20,7 @@ define("xabber-mentions", function () {
             initialize: function (attrs, options) {
                 this.contact = options.contact;
                 this.message = options.message;
-                this.id = this.message.get('msgid');
+                this.id = this.message.get('unique_id');
                 this.set('timestamp', this.message.get('timestamp'));
                 this.account = this.contact.account;
                 this.item_view = new xabber.MentionItemView({model: this});
@@ -50,7 +45,7 @@ define("xabber-mentions", function () {
 
         xabber.Mentions = xabber.MentionsBase.extend({
             comparator: 'timestamp',
-            initialize: function (models, options) {
+            initialize: function () {
                 this.collections = [];
                 this.on("add", _.bind(this.updateInCollections, this, 'add'));
                 this.on("change", _.bind(this.updateInCollections, this, 'change'));

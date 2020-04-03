@@ -6,12 +6,8 @@ define("xabber-searching", function () {
             utils = env.utils,
             $ = env.$,
             $iq = env.$iq,
-            $msg = env.$msg,
-            $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
-            moment = env.moment,
-            uuid = env.uuid,
             Images = utils.images;
 
         xabber.DiscoveringView = xabber.BasicView.extend({
