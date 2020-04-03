@@ -7,7 +7,6 @@ define("xabber-chats", function () {
         $ = env.$,
         $iq = env.$iq,
         $msg = env.$msg,
-        $pres = env.$pres,
         Strophe = env.Strophe,
         _ = env._,
         moment = env.moment,
@@ -16,11 +15,13 @@ define("xabber-chats", function () {
         Emoji = utils.emoji;
 
     xabber.Message = Backbone.Model.extend({
-        idAttribute: 'msgid',
+        idAttribute: 'unique_id',
 
         defaults: function () {
+            let msgid = uuid();
             return {
-                msgid: uuid(),
+                msgid: msgid,
+                unique_id: msgid,
                 type: 'main',
                 state: constants.MSG_PENDING
             };
@@ -34,7 +35,15 @@ define("xabber-chats", function () {
                 attrs.timestamp = moment.now();
                 attrs.time = moment(attrs.timestamp).format();
             }
+            if (!this.get('origin_id'))
+                (this.isSenderMe() && !this.get('synced_from_server') && !this.get('carbon_copied') && !this.get('is_archived')) && this.set('origin_id', this.get('msgid'));
+            this.updateUniqueId();
             this.set(attrs);
+            this.on("change:origin_id stanza_id archived_id", this.updateUniqueId, this);
+        },
+
+        updateUniqueId: function () {
+            this.set('unique_id', this.get('origin_id') || this.get('stanza_id') || this.get('archived_id') || this.get('msgid'));
         },
 
         getText: function () {
@@ -66,8 +75,10 @@ define("xabber-chats", function () {
         isSenderMe: function () {
             if (this.account)
                 return this.account.get('jid') === this.get('from_jid');
-            else
+            else if (this.collection.account)
                 return this.collection.account.get('jid') === this.get('from_jid');
+            else
+                false;
         }
     });
 
@@ -112,7 +123,10 @@ define("xabber-chats", function () {
                 body = $message.children('body').text(),
                 markable = $message.find('markable').length > 0,
                 msgid = $message.attr('id'),
-                message = msgid && this.get(msgid),
+                archive_id = $message.children('archived').attr('id'),
+                origin_id = $message.children('origin-id').attr('id'),
+                unique_id = origin_id || options.stanza_id || archive_id || msgid,
+                message = unique_id && this.get(unique_id),
                 $group_info = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]'),
                 is_private_invitation,
                 group_info_attributes = {};
@@ -131,8 +145,10 @@ define("xabber-chats", function () {
                 is_forwarded: options.is_forwarded,
                 forwarded_message: options.forwarded_message || null,
                 from_jid: from_jid,
-                archive_id: options.archive_id,
-                contact_archive_id: options.contact_archive_id,
+                origin_id: origin_id,
+                stanza_id: options.stanza_id,
+                archive_id: archive_id,
+                contact_stanza_id: options.contact_stanza_id,
                 is_archived: options.is_archived
             };
 
@@ -258,13 +274,16 @@ define("xabber-chats", function () {
                 from_jid = Strophe.getBareJidFromJid(full_jid),
                 body = $message.children('body').text(),
                 markable = $message.find('markable').length > 0,
+                archive_id = $message.children('archived').attr('id'),
+                origin_id = $message.children('origin-id').attr('id'),
                 msgid = $message.attr('id'),
-                message = msgid && this.get(msgid);
+                unique_id = origin_id || options.stanza_id || archive_id || msgid,
+                message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
-                $message = $message.find('replace message');
+                $message = $message.children('replace').children('message');
                 body = $message.children('body').text();
-                message = this.find(m => m.get('archive_id') === $message.children('stanza-id').attr('id'));
+                message = this.find(m => m.get('stanza_id') === $message.children('stanza-id').attr('id'));
                 if (!message)
                     return;
                 from_jid = message.get('from_jid');
@@ -272,6 +291,7 @@ define("xabber-chats", function () {
                 let xml = message.get('xml');
                 xml.innerHTML = $message[0].innerHTML;
                 options.xml = xml;
+                options.forwarded_message = message.get('forwarded_message');
             }
 
             if (message && !options.replaced && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
@@ -286,8 +306,7 @@ define("xabber-chats", function () {
                     is_forwarded: options.is_forwarded,
                     forwarded_message: options.forwarded_message || null,
                     from_jid: from_jid,
-                    archive_id: options.archive_id,
-                    contact_archive_id: options.contact_archive_id,
+                    contact_stanza_id: options.contact_stanza_id,
                     is_archived: options.is_archived
                 },
                 $media_references = $message.children('reference[type="media"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
@@ -299,6 +318,10 @@ define("xabber-chats", function () {
                 markups = this.parseMarkup($message),
                 legacy_content = [];
 
+            options.stanza_id && (attrs.stanza_id = options.stanza_id);
+            origin_id && (attrs.origin_id = origin_id);
+            archive_id && (attrs.archive_id = archive_id);
+
             (options.replaced || mentions.length) && (attrs.mentions = mentions);
             (options.replaced || markups.length) && (attrs.markups = markups);
 
@@ -309,8 +332,9 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-            if ($message.find('x').length && $message.find('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
+            if ($message.children('x').length && $message.children('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
                 attrs.type = 'system';
+                attrs.participants_version = $message.children('x').attr('version');
             }
 
             if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
@@ -326,7 +350,7 @@ define("xabber-chats", function () {
             if ($forward_references.length) {
                 $forward_references.each(function (idx, fwd_ref) {
                     let $fwd_ref = $(fwd_ref);
-                    legacy_content.push({start: parseInt($fwd_ref.attr('begin')), end: parseInt($fwd_ref.attr('end'))});
+                    legacy_content.push({start: parseInt($fwd_ref.attr('begin')), end: parseInt($fwd_ref.attr('end')), type: 'forward'});
                 }.bind(this));
             }
 
@@ -411,6 +435,9 @@ define("xabber-chats", function () {
             if (attrs.forwarded_message)
                 body = $message.children('comment').text() || body;
             /* ----------------------------------------------------- */
+
+            if (body.removeEmoji() === "")
+                attrs.only_emoji = Array.from(body).length;
 
             body && (attrs.message = body);
 
@@ -511,6 +538,9 @@ define("xabber-chats", function () {
                   this.remote_stream = ev.streams[0];
                   this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
               }.bind(this);
+              this._waiting_timeout = setTimeout(function () {
+                  (!this.get('state') && this.get('status') === 'calling' && this.get('call_initiator') === this.account.get('jid')) && this.reject();
+              }.bind(this), constants.JINGLE_WAITING_TIME * 1000);
               this.conn.onicecandidate = this.onIceCandidate.bind(this);
               this.conn.oniceconnectionstatechange = this.onChangeIceConnectionState.bind(this);
               this.on('change:audio', this.setEnabledAudioTrack, this);
@@ -634,6 +664,7 @@ define("xabber-chats", function () {
           },
 
           onDestroy: function () {
+              clearTimeout(this._waiting_timeout);
               clearInterval(this.call_timer);
               xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
@@ -968,6 +999,13 @@ define("xabber-chats", function () {
             }.bind(this));
         },
 
+        setStanzaId: function (unique_id, stanza_id) {
+            let message = this.messages.get(unique_id);
+            message.set('stanza_id', stanza_id);
+            if (!message.get('origin_id'))
+                this.item_view.content.$('.chat-message[data-uniqueid="' + stanza_id + '"]').data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id); // ?????!!!!!!!!!!!!!!!!!!!!!!!!!!
+        },
+
         getCallingAvailability: function (to, session_id, callback) {
             let iq = $iq({from: this.account.get('jid'), to: to, type: 'get'})
                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
@@ -976,6 +1014,13 @@ define("xabber-chats", function () {
         },
 
         initIncomingCall: function (full_jid, session_id) {
+            if (!xabber.get('audio')) {
+                this.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    message: 'Incoming call. You have no required devices to answer'
+                });
+                return;
+            }
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
             xabber.current_voip_call.modal_view.show({status: 'in'});
             xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
@@ -1070,8 +1115,7 @@ define("xabber-chats", function () {
                 return;
             }
             if (!options.is_archived) {
-                var $stanza_id, $contact_stanza_id,
-                    $archived = $message.find('archived');
+                var $stanza_id, $contact_stanza_id;
                 $message.children('stanza-id').each(function (idx, stanza_id) {
                     stanza_id = $(stanza_id);
                     if ($message.children('reference[type="groupchat"]').length) {
@@ -1087,19 +1131,13 @@ define("xabber-chats", function () {
                             $stanza_id = stanza_id;
                     }
                 }.bind(this));
-                if ($contact_stanza_id) {
-                    options.contact_archive_id = $contact_stanza_id.attr('id');
-                }
-                if ($stanza_id) {
-                    options.archive_id = $stanza_id.attr('id');
-                } else if ($archived.length) {
-                    options.archive_id = $archived.attr('id');
-                }
+                $stanza_id && (options.stanza_id = $stanza_id.attr('id'));
+                $contact_stanza_id && (options.contact_stanza_id = $contact_stanza_id.attr('id'));
             }
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
                 if ((marker_tag === 'markable') && !options.is_mam && !options.is_archived && !carbon_copied && (!options.synced_msg || options.synced_msg && options.is_unread))
-                    this.sendMarker($message.attr('id'), 'received', options.archive_id, options.contact_archive_id);
+                    this.sendMarker($message.attr('id'), 'received', options.stanza_id, options.contact_stanza_id);
                 if ((marker_tag !== 'markable') && !carbon_copied) {
                     this.receiveMarker($message, marker_tag, carbon_copied);
                     return;
@@ -1165,12 +1203,12 @@ define("xabber-chats", function () {
                 return this.messages.createFromStanza($message, options);
         },
 
-        getMessageContext: function (msgid, options) {
+        getMessageContext: function (unique_id, options) {
             options = options || {};
             let messages = options.mention && this.account.messages || options.seached_messages && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
-                message = messages.get(msgid);
+                message = messages.get(unique_id);
             if (message) {
-                let stanza_id = message.get('archive_id');
+                let stanza_id = message.get('stanza_id');
                 this.contact.messages_view = new xabber.MessageContextView({
                     contact: this.contact,
                     mention_context: options.mention,
@@ -1207,18 +1245,16 @@ define("xabber-chats", function () {
             this.account.sendMsg($delivery_msg);
         },
 
-        sendMarker: function (msgid, status, stanza_id, contact_stanza_id) {
+        sendMarker: function (origin_id, status, stanza_id, contact_stanza_id) {
             status || (status = 'displayed');
-            /*if ((status === 'displayed') && !this.contact.resources.chat_markers_support)
-                return;*/
-            var stanza = $msg({
+            let stanza = $msg({
                 from: this.account.jid,
                 to: this.get('jid'),
                 type: 'chat',
                 id: uuid()
             }).c(status).attrs({
                 xmlns: Strophe.NS.CHAT_MARKERS,
-                id: msgid
+                id: origin_id
             });
             stanza_id && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: stanza_id, by: this.account.get('jid')}).up();
             contact_stanza_id && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: contact_stanza_id, by: this.contact.get('jid')}).up();
@@ -1232,8 +1268,9 @@ define("xabber-chats", function () {
             if (error || !$displayed.length && !$received.length) {
                 return;
             }
-            var marked_msgid = $displayed.attr('id') || $received.attr('id'),
-                msg = this.account.messages.get(marked_msgid);
+            var marked_origin_id = $displayed.attr('id') || $received.attr('id'),
+                marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
+                msg = this.account.messages.get(marked_origin_id || marked_stanza_id); // !!!!!!!!!!!!!!!!!!!!!
             if (!msg) {
                 return;
             }
@@ -1244,7 +1281,7 @@ define("xabber-chats", function () {
                         let delivered_time = $received.children('time').attr('stamp');
                         if (delivered_time) {
                             msg.set('time', utils.pretty_datetime(delivered_time));
-                            msg.set('timestamp', Number(moment(delivered_time)));
+                            msg.set('timestamp', Number(delivered_time));
                         }
                     }
                     this.setMessagesDelivered(msg.get('timestamp'));
@@ -1258,21 +1295,19 @@ define("xabber-chats", function () {
 
         setMessagesDelivered: function (timestamp) {
             !timestamp && (timestamp = moment.now());
-            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') != constants.MSG_ERROR) && (message.get('state') < constants.MSG_DELIVERED));
+            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED));
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DELIVERED));
         },
 
         setMessagesDisplayed: function (timestamp) {
             !timestamp && (timestamp = moment.now());
-            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') != constants.MSG_ERROR) && (message.get('state') < constants.MSG_DISPLAYED));
+            let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED));
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DISPLAYED));
         },
 
         receiveCarbonsMarker: function ($marker) {
-            let msg_id = $marker.attr('id'),
-                stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                msg = this.messages.get(msg_id), msg_idx;
-            !msg && (msg = this.messages.find(msg_item => msg_item.get('archive_id') == stanza_id));
+            let stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
+                msg = this.messages.get(stanza_id), msg_idx;
             msg && (msg_idx = this.messages.indexOf(msg));
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
@@ -1284,15 +1319,15 @@ define("xabber-chats", function () {
                         return;
                 }
             }
-            else if (this.messages_unread.find(msg_item => msg_item.get('archive_id') == stanza_id)) {
+            else if (this.messages_unread.get(stanza_id))
                 msg.set('is_unread', false);
-            }
         },
 
         receiveDeliveryReceipt: function ($message) {
             var $received = $message.find('received'),
-                delivered_msgid = $received.attr('id'),
-                msg = this.account.messages.get(delivered_msgid);
+                delivered_origin_id = $received.attr('id'),
+                delivered_stanza_id = $received.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
+                msg = this.account.messages.get(delivered_origin_id || delivered_stanza_id);
             if (!msg) {
                 return;
             }
@@ -1345,7 +1380,7 @@ define("xabber-chats", function () {
                 }
             }.bind(this));
             $(msgs).each(function (idx, item) {
-                let stanza_id = item.get('archive_id');
+                let stanza_id = item.get('stanza_id');
                 if (stanza_id) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
                         .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
@@ -1399,26 +1434,14 @@ define("xabber-chats", function () {
                 }.bind(this));
         },
 
-        showAcceptedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                message: 'Authorization accepted'
-            });
-        },
-
-        showDeclinedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                message: 'Authorization denied'
-            });
-        },
-
         showBlockedRequestMessage: function () {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                system_last_message: 'Authorization denied',
-                message: this.get('jid') + ' was blocked'
-            });
+            if (this.messages.length)
+                this.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    system_last_message: 'Authorization denied',
+                    message: this.get('jid') + ' was blocked',
+                    time: this.messages.last().get('time')
+                });
         },
 
         deleteChatFromSynchronization: function (callback, errback) {
@@ -1680,7 +1703,7 @@ define("xabber-chats", function () {
                 if (msg_from)
                     this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
             }
-            this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
+            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
@@ -2329,7 +2352,7 @@ define("xabber-chats", function () {
             var unread_messages = _.clone(this.model.messages_unread.models);
             if (unread_messages.length) {
                 let msg = unread_messages[unread_messages.length - 1];
-                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('archive_id'), msg.get('contact_archive_id'));
+                this.model.sendMarker(msg.get('origin_id'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             }
             this.model.set('const_unread', 0);
             _.each(unread_messages, function (msg) {
@@ -2702,9 +2725,8 @@ define("xabber-chats", function () {
                 this.model.set('is_accepted', false);
             }
             this.model.set('opened', true);
-            if (!message.get('is_archived') && message.get('archive_id')) {
+            if (!message.get('is_archived') && message.get('archive_id'))
                 this.model.set('last_archive_id', message.get('archive_id'));
-            }
 
             if (message.get('participants_version')) {
                 if (this.contact.participants && this.contact.participants.version < message.get('participants_version'))
@@ -2727,11 +2749,11 @@ define("xabber-chats", function () {
 
             if (!(message.get('synced_from_server') || message.get('is_archived'))) {
                 if (!message.get('auth_request') && (message.get('type') === 'system' && this.model.get('display') && (xabber.get('focused') || !this.model.messages_unread.models.length)))
-                    this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
+                    this.model.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
                     if (!message.get('is_unread'))
-                        this.model.sendMarker(message.get('msgid'), 'displayed', message.get('archive_id'), message.get('contact_archive_id'));
+                        this.model.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                     if (!xabber.get('focused')) {
                         if (this.contact.get('muted'))
                             message.set('muted', true);
@@ -2751,9 +2773,9 @@ define("xabber-chats", function () {
             if (message.isSenderMe()) {
                 if (!message.get('is_archived') || message.get('missed_msg'))
                     this.readMessages(message.get('timestamp'));
-                if (this.model.get('last_displayed_id') >= message.get('archive_id'))
+                if (this.model.get('last_displayed_id') >= message.get('stanza_id') && message.get('stanza_id') !== message.get('origin_id'))
                     message.set('state', constants.MSG_DISPLAYED);
-                else if (this.model.get('last_delivered_id') >= message.get('archive_id') || message.get('is_archived'))
+                else if (message.get('stanza_id') !== message.get('origin_id') && (this.model.get('last_delivered_id') >= message.get('stanza_id') || message.get('is_archived')))
                     message.set('state', constants.MSG_DELIVERED);
             }
 
@@ -2764,7 +2786,7 @@ define("xabber-chats", function () {
             }
 
             let last_message = this.model.last_message;
-            if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
+            if (!last_message || message.get('timestamp') >= last_message.get('timestamp')) {
                 this.model.last_message = message;
                 this.chat_item.updateLastMessage();
             }
@@ -2862,14 +2884,14 @@ define("xabber-chats", function () {
         },
 
         updateMessage: function (item) {
-            let $message, images = item.get('images'),
+            let $message, images = item.get('images'), emoji = item.get('only_emoji'),
                 files =  item.get('files');
             if (item instanceof xabber.Message) {
-                $message = this.$('.chat-message[data-msgid="' + item.get('msgid') + '"]');
+                $message = this.$('.chat-message[data-uniqueid="' + item.get('unique_id') + '"]'); // ???????????????????????
             } else {
                 return;
             }
-            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'img', emoji_size: 18}));
+            $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: utils.emoji_size(emoji)}));
             if (images) {
                 if (images.length > 1) {
                     let template_for_images = this.createImageGrid(item.attributes);
@@ -2910,8 +2932,10 @@ define("xabber-chats", function () {
                 $message.find('.chat-msg-content').append(data_form);
             }
             let short_datetime = utils.pretty_short_datetime(item.get('last_replace_time')),
-                datetime = utils.pretty_datetime(item.get('last_replace_time'));
-            $message.find('.edited-info').removeClass('hidden').text('Edited at ' + short_datetime).prop('title', datetime);
+                datetime = moment(item.get('last_replace_time')).format('D MMMM, YYYY HH:mm:ss'),
+                new_title = utils.pretty_datetime(item.get('time')) + ', edited ' + (moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime);
+            $message.find('.msg-time').prop('title', new_title);
+            $message.find('.edited-info').removeClass('hidden').text('edited').prop('title', new_title);
             $message.hyperlinkify({selector: '.chat-text-content'});
         },
 
@@ -2919,12 +2943,12 @@ define("xabber-chats", function () {
             var message, $message, $message_in_chat;
             if (item instanceof xabber.Message) {
                 message = item;
-                $message_in_chat = this.$('.chat-message[data-msgid="'+item.get('msgid')+'"]');
-                (this.bottom.content_view) && ($message = this.bottom.content_view.$('.chat-message[data-msgid="'+item.get('msgid')+'"]'));
+                $message_in_chat = this.$('.chat-message[data-uniqueid="'+item.get('unique_id')+'"]'); // ???????????????????????
+                (this.bottom.content_view) && ($message = this.bottom.content_view.$('.chat-message[data-uniqueid="'+item.get('unique_id')+'"]')); // ???????????????????????
             } else {
                 $message = item;
                 if (!$message.length) return;
-                message = this.model.messages.get($message.data('msgid'));
+                message = this.model.messages.get($message.data('uniqueid')); // ???????????????????????
             }
             message && message.destroy();
             this.removeMessageFromDOM($message_in_chat);
@@ -3051,6 +3075,7 @@ define("xabber-chats", function () {
                 user_info = attrs.user_info || {},
                 username = Strophe.xmlescape(user_info.nickname || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? this.contact.my_info.get('nickname') : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
                 images = attrs.images,
+                emoji = message.get('only_emoji'),
                 files =  attrs.files,
                 is_image = !_.isUndefined(images),
                 is_file = files ? true : false,
@@ -3187,7 +3212,7 @@ define("xabber-chats", function () {
                     if (fwd_msg.get('forwarded_message')) {
                         var fwd_messages_count = fwd_msg.get('forwarded_message').length,
                             fwd_messages_link = fwd_messages_count + ' forwarded message' + ((fwd_messages_count > 1) ? 's' : "");
-                        $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message', 'data-msgid': attrs.msgid}).text(fwd_messages_link));
+                        $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message', 'data-uniqueid': attrs.unique_id}).text(fwd_messages_link)); // ???????????????????????
                     }
 
                     if (is_image_forward) {
@@ -3232,7 +3257,7 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'img'}).emojify('.chat-msg-author-badge', {emoji_size: 14});
+            return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
 
         getDateIndicator: function (date) {
@@ -3418,6 +3443,7 @@ define("xabber-chats", function () {
                 legacy_body = '',
                 legacy_content = [],
                 forwarded_message = message.get('forwarded_message'),
+                unique_id = message.get('unique_id'),
                 msg_id = message.get('msgid'),
                 stanza = $msg({
                     from: this.account.jid,
@@ -3444,6 +3470,11 @@ define("xabber-chats", function () {
                             stamp: fwd_msg.get('time')
                         }).up().cnode(fwd_msg.get('xml')).up().up().up();
                     legacy_body = legacy_body.concat(legacy_fwd_msg);
+                    legacy_content.push({
+                        start: idx_begin,
+                        end: idx_end,
+                        type: 'forward'
+                    });
                 }.bind(this));
                 body = _.unescape(legacy_body.join("")) + body;
             }
@@ -3483,7 +3514,7 @@ define("xabber-chats", function () {
                         end: blockquote.end + legacy_body.length,
                         type: 'quote'
                     })
-                        .c('marker').t(constants.QUOTE_MARKER).up().up();
+                        .c('marker').t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
                     legacy_content.push({
                         start: blockquote.start + legacy_body.length,
                         end: blockquote.end + legacy_body.length,
@@ -3521,10 +3552,12 @@ define("xabber-chats", function () {
                     body += legacy_body;
                     legacy_content.push({start: start_idx, end: end_idx});
                 }.bind(this));
-                message.set({type: 'main', legacy_content: legacy_content});
+                message.set({type: 'main'});
             }
 
-            this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, msg_id: msg_id});
+            legacy_content.length && message.set({legacy_content: legacy_content});
+
+            this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, unique_id: unique_id});
 
             message.set('original_message', body);
             body && stanza.c('body').t(body).up();
@@ -3601,6 +3634,17 @@ define("xabber-chats", function () {
         onSubmit: function (text, fwd_messages, options) {
             // send forwarded messages before
             options = options || {};
+            let attrs = {
+                from_jid: this.account.get('jid'),
+                message: text,
+                mentions: options.mentions,
+                blockquotes: options.blockquotes,
+                markups: options.markup_references,
+                submitted_here: true,
+                forwarded_message: null
+            };
+            if (text.removeEmoji() === "")
+                attrs.only_emoji = Array.from(text).length;
             if (fwd_messages.length) {
                 var new_fwd_messages = [];
                 _.each(fwd_messages, function (msg) {
@@ -3609,26 +3653,11 @@ define("xabber-chats", function () {
                     }
                     new_fwd_messages.push(msg);
                 }.bind(this));
-                var message = this.model.messages.create({
-                    from_jid: this.account.get('jid'),
-                    message: text,
-                    mentions: options.mentions,
-                    blockquotes: options.blockquotes,
-                    markups: options.markup_references,
-                    submitted_here: true,
-                    forwarded_message: new_fwd_messages
-                });
+                attrs.forwarded_message = new_fwd_messages;
+                var message = this.model.messages.create(attrs);
                 this.sendMessage(message);
             } else if (text) {
-                var message = this.model.messages.create({
-                    from_jid: this.account.get('jid'),
-                    message: text,
-                    mentions: options.mentions,
-                    blockquotes: options.blockquotes,
-                    markups: options.markup_references,
-                    submitted_here: true,
-                    forwarded_message: null
-                });
+                var message = this.model.messages.create(attrs);
                 this.sendMessage(message);
             }
             if ((this.contact.get('archived'))&&(!this.contact.get('muted'))) {
@@ -3645,6 +3674,7 @@ define("xabber-chats", function () {
         },
 
         addFileMessage: function (files) {
+            let new_files = [], file_counter = 0;
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
                     this.contact.messages_view.openChat();
@@ -3676,9 +3706,10 @@ define("xabber-chats", function () {
                         deferred.done(function (data) {
                             image.height = data.height;
                             image.width = data.width;
-                            files[idx] = image;
-                            if (idx === (files.length - 1))
-                                deferred_all.resolve(files);
+                            new_files.push(image);
+                            file_counter++;
+                            if (file_counter === files.length)
+                                deferred_all.resolve(new_files);
                         }.bind(this));
                     }.bind(this));
                     reader.onload = function (e) {
@@ -3692,14 +3723,16 @@ define("xabber-chats", function () {
                     };
                 }
                 else {
-                    if (idx === (files.length - 1))
-                        deferred_all.resolve(files);
+                    new_files.push(file);
+                    file_counter++;
+                    if (file_counter === files.length)
+                        deferred_all.resolve(new_files);
                 }
             }.bind(this));
         },
 
         startUploadFile: function (message, $message) {
-            $message.emojify('.chat-msg-author-badge', {emoji_size: 14});
+            $message.emojify('.chat-msg-author-badge', {emoji_size: 16});
             $message.find('.cancel-upload').show();
             $message.find('.repeat-upload').hide();
             $message.find('.status').hide();
@@ -3932,13 +3965,13 @@ define("xabber-chats", function () {
         },
 
         onChangedMessageState: function (message) {
-            if (message.get('state') === constants.MSG_DISPLAYED && this.model.get('last_displayed_id') < message.get('archive_id')) {
-                this.model.set('last_displayed_id', message.get('archive_id'));
-                this.model.set('last_delivered_id', message.get('archive_id'));
-            } else if (message.get('state') === constants.MSG_DELIVERED && this.model.get('last_delivered_id') < message.get('archive_id')) {
-                this.model.set('last_delivered_id', message.get('archive_id'));
+            if (message.get('state') === constants.MSG_DISPLAYED && this.model.get('last_displayed_id') < message.get('stanza_id')) {
+                this.model.set('last_displayed_id', message.get('stanza_id'));
+                this.model.set('last_delivered_id', message.get('stanza_id'));
+            } else if (message.get('state') === constants.MSG_DELIVERED && this.model.get('last_delivered_id') < message.get('stanza_id')) {
+                this.model.set('last_delivered_id', message.get('stanza_id'));
             }
-            var $message = this.$('.chat-message[data-msgid="' + message.get('msgid') + '"]'),
+            var $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]'), // ???????????????????????
                 $elem = $message.find('.msg-delivering-state');
             $elem.attr({
                 'data-state': message.getState(),
@@ -3957,7 +3990,7 @@ define("xabber-chats", function () {
         },
 
         onChangedMessageTimestamp: function (message) {
-            var $message = this.$('.chat-message[data-msgid="' + message.get('msgid') + '"]'),
+            var $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]'), // ???????????????????????
                 $next_msg = $message.next(),
                 $old_prev_msg = $message.prev();
             $message.attr({
@@ -4033,9 +4066,9 @@ define("xabber-chats", function () {
         onClickLink: function (ev) {
             let $elem = $(ev.target),
                 $message = $elem.closest('.chat-message'),
-                msg = this.model.messages.get($message.data('msgid'));
+                msg = this.model.messages.get($message.data('uniqueid')); // ???????????????????????
             if (!msg) {
-                msg = this.account.participant_messages.get($message.data('msgid'));
+                msg = this.account.participant_messages.get($message.data('uniqueid')); // ???????????????????????
             }
             let files = msg.get('files'),
                 images = msg.get('images'),
@@ -4099,7 +4132,7 @@ define("xabber-chats", function () {
                 $msg.attr('data-no-select-on-mouseup', '');
 
                 if ($elem.hasClass('data-form-field')) {
-                    msg = this.model.messages.get($msg.data('msgid'));
+                    msg = this.model.messages.get($msg.data('uniqueid')); // ???????????????????????
                     if (msg)
                         this.model.sendDataForm(msg, $elem.attr('id'));
                     return;
@@ -4110,7 +4143,7 @@ define("xabber-chats", function () {
                 }
 
                 if ($elem.hasClass('collapsed-forwarded-message')) {
-                    let msg = this.buildMessageHtml(this.account.forwarded_messages.get($elem.data('msgid'))),
+                    let msg = this.buildMessageHtml(this.account.forwarded_messages.get($elem.data('uniqueid'))), // ???????????????????????
                         expanded_fwd_message = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this});
                     expanded_fwd_message.$el.attr('data-color', this.account.settings.get('color'));
                     this.updateMessageInChat(msg);
@@ -4247,7 +4280,7 @@ define("xabber-chats", function () {
                 }
 
                 if ($msg.hasClass('searched-message')) {
-                    this.model.getMessageContext($msg.data('msgid'), {seached_messages: true});
+                    this.model.getMessageContext($msg.data('uniqueid'), {seached_messages: true}); // ???????????????????????
                     return;
                 }
 
@@ -4265,7 +4298,7 @@ define("xabber-chats", function () {
                     return;
                 }
 
-                msg = this.model.messages.get($msg.data('msgid'));
+                msg = this.model.messages.get($msg.data('uniqueid')); // ???????????????????????
                 if (!msg) {
                     return;
                 }
@@ -4316,7 +4349,7 @@ define("xabber-chats", function () {
                         }.bind(this));
                     }
                 } else if (is_forwarded) {
-                    var fwd_message = this.account.forwarded_messages.get($fwd_message.data('msgid'));
+                    var fwd_message = this.account.forwarded_messages.get($fwd_message.data('uniqueid')); // ???????????????????????
                     if (!fwd_message) {
                         return;
                     }
@@ -4329,7 +4362,7 @@ define("xabber-chats", function () {
 
         retrySendMessage: function (ev) {
             let $msg = $(ev.target).closest('.chat-message'),
-                msg = this.model.messages.get($msg.data('msgid'));
+                msg = this.model.messages.get($msg.data('uniqueid')); // ???????????????????????
             if (msg.get('type') === 'file_upload') {
                 msg.set('state', constants.MSG_PENDING);
                 this.startUploadFile(msg, $msg);
@@ -4393,8 +4426,8 @@ define("xabber-chats", function () {
 
         expandFwdMessage: function (ev) {
             var $target = $(ev.target),
-                msgid = $target.data('msgid'),
-                msg = this.chat_content.buildMessageHtml(this.account.forwarded_messages.get(msgid)),
+                unique_id = $target.data('uniqueid'),
+                msg = this.chat_content.buildMessageHtml(this.account.forwarded_messages.get(unique_id)),
                 expanded_fwd_message = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this.chat_content});
             expanded_fwd_message.$el.attr('data-color', this.account.settings.get('color'));
             this.chat_content.updateMessageInChat(msg);
@@ -4425,13 +4458,13 @@ define("xabber-chats", function () {
         },
 
         registerQuillEmbeddedsTags: function () {
-            let Embed = Quill.import('blots/inline');
+            let Inline = Quill.import('blots/inline'),
+                Image = Quill.import('formats/image');
 
-            class Mention extends Embed {
+            class Mention extends Inline {
                 static create(paramValue) {
                     let node = super.create();
                     node.innerHTML = paramValue.slice(paramValue.indexOf('&nickname=') + 10);
-                    // node.setAttribute('contenteditable', 'false');
                     node.setAttribute('data-id', paramValue.slice(0, paramValue.indexOf('&nickname=')));
                     return node;
                 }
@@ -4445,11 +4478,15 @@ define("xabber-chats", function () {
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
-            let Image = Quill.import('formats/image');
-            class ImageBlot extends Image {
+            class QuillEmoji extends Image {
                 static create(value) {
                     if (typeof value == 'string') {
-                        return $(value.emojify({tag_name: 'img'}))[0];
+                        var emoji = $(value.emojify({tag_name: 'img'}))[0];
+                        emoji.style.display = 'none';
+                        emoji.onload = function () {
+                            this.style.display = 'unset';
+                        };
+                        return emoji;
                     } else {
                         return value;
                     }
@@ -4459,11 +4496,12 @@ define("xabber-chats", function () {
                     return domNode;
                 }
             }
-            ImageBlot.blotName = 'quill_emoji';
-            ImageBlot.className = 'emoji';
-            ImageBlot.tagName = 'img';
+            QuillEmoji.blotName = 'emoji';
+            QuillEmoji.className = 'emoji';
+            QuillEmoji.tagName = 'img';
+            QuillEmoji.prototype.optimize = function () {};
 
-            Quill.register(ImageBlot);
+            Quill.register(QuillEmoji);
             Quill.register(Mention);
         }
     });
@@ -4536,10 +4574,10 @@ define("xabber-chats", function () {
             chat.trigger('open', {clear_search: options.clear_search});
         },
 
-        openMention: function (contact, msgid) {
+        openMention: function (contact, unique_id) {
             var chat = this.getChat(contact);
             xabber.body.setScreen('mentions', {right: 'mentions', chat_item: chat.item_view});
-            msgid && chat.getMessageContext(msgid, {mention: true});
+            unique_id && chat.getMessageContext(unique_id, {mention: true});
         },
 
         registerMessageHandler: function () {
@@ -4569,11 +4607,12 @@ define("xabber-chats", function () {
             }
         },
 
-        setArchiveId: function ($message) {
+        setStanzaId: function ($message) {
             var origin_id = $message.children('origin-id').attr('id'),
-                pending_message = this.account._pending_messages.find(msg => msg.msg_id === origin_id);
+                stanza_id = $message.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
+                pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_id || stanza_id));
             if (pending_message) {
-                this.account.chats.get(pending_message.chat_hash_id).messages.get(pending_message.msg_id).set('archive_id', $message.children('stanza-id').attr('id'));
+                this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, $message.children('stanza-id').attr('id'));
                 this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
             }
         },
@@ -4684,12 +4723,11 @@ define("xabber-chats", function () {
                 $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]');
             if ($stanza_received.length) {
                 let $received_message = $stanza_received.children('forwarded').children('message'),
+                    stanza_id = $received_message.children('stanza-id').attr('id'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id') || $received_message.children('origin-id').first().attr('id');
-                if ($received_message.length)
-                    this.receiveChatMessage($received_message[0], {echo_msg: true});
                 if (origin_msg_id) {
-                    let msg = this.account.messages.get(origin_msg_id),
-                        delivered_time = $stanza_received.children('time').attr('stamp');
+                    let msg = this.account.messages.get(origin_msg_id || stanza_id),
+                        delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
                     msg && msg.set('state', constants.MSG_SENT);
                     if (msg && delivered_time) {
                         msg.set('time', delivered_time);
@@ -4700,16 +4738,18 @@ define("xabber-chats", function () {
                         if (contact.get('group_chat')) {
                             if ($received_message.children('stanza-id').attr('by') == contact.get('jid')) {
                                 let from_id = $received_message.children('reference[type="groupchat"]').find('user').attr('id'); // TODO: add [xmlns="' + Strophe.NS.REFERENCE + '"]
-                                this.setArchiveId($received_message);
-                                this.account.messages.get(origin_msg_id).set({state: constants.MSG_DELIVERED, from_id: from_id});
+                                this.setStanzaId($received_message);
+                                this.account.messages.get(origin_msg_id || stanza_id).set({state: constants.MSG_DELIVERED, from_id: from_id});
                                 let $groupchat = this.account.chats.getChat(contact);
-                                from_id && $groupchat.item_view.content.$el.find('.chat-message[data-msgid="' + origin_msg_id + '"]').attr('data-from-id', from_id);
+                                from_id && $groupchat.item_view.content.$el.find('.chat-message[data-uniqueid="' + origin_msg_id + '"]').attr('data-from-id', from_id); // ???????????????????????
                             }
                         }
                         else
-                            this.setArchiveId($stanza_received);
+                            this.setStanzaId($stanza_received);
                     }
                 }
+                if ($received_message.length)
+                    this.receiveChatMessage($received_message[0], {echo_msg: true, stanza_id: $received_message.children('stanza-id').attr('id')});
                 return;
             }
 
@@ -4750,10 +4790,10 @@ define("xabber-chats", function () {
                 if (!chat)
                     return;
                 let stanza_id = $message.find('replace').attr('id'),
-                    msg_item = chat.messages.find(msg => msg.get('archive_id') == stanza_id),
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id),
                     active_right_screen = xabber.body.screen.get('right'),
                     participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
-                    participant_msg_item = participant_messages.find(msg => msg.get('archive_id') == stanza_id);
+                    participant_msg_item = participant_messages.find(msg => msg.get('stanza_id') == stanza_id);
                 this.receiveChatMessage($message, {replaced: true});
                 if (participant_msg_item) {
                     participant_msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
@@ -4761,7 +4801,7 @@ define("xabber-chats", function () {
                 if (msg_item) {
                     msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
                     if (contact.get('pinned_message'))
-                        if (contact.get('pinned_message').get('msgid') === msg_item.get('msgid')) {
+                        if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) { // ???????????????????????
                             contact.get('pinned_message').set('message', new_text);
                             chat.item_view.content.updatePinnedMessage();
                         }
@@ -4860,8 +4900,7 @@ define("xabber-chats", function () {
                 if ($mam.length) {
                     $forwarded = $mam.children('forwarded');
                     var $stanza_id, $contact_stanza_id,
-                        $archived = $message.find('archived'),
-                        archive_id, contact_archive_id;
+                        stanza_id, contact_stanza_id;
                     if ($forwarded.length) {
                         $message = $forwarded.children('message');
                         $delay = $forwarded.children('delay');
@@ -4881,20 +4920,14 @@ define("xabber-chats", function () {
                                 $stanza_id = stanza_id;
                         }
                     }.bind(this));
-                    if ($contact_stanza_id) {
-                        contact_archive_id = $contact_stanza_id.attr('id');
-                    }
-                    if ($stanza_id) {
-                        archive_id = $stanza_id.attr('id');
-                    } else if ($archived.length) {
-                        archive_id = $archived.attr('id');
-                    }
-                    archive_id = archive_id || $mam.attr('id');
+                    $contact_stanza_id && (contact_stanza_id = $contact_stanza_id.attr('id'));
+                    $stanza_id && (stanza_id = $stanza_id.attr('id'));
+                    stanza_id = stanza_id || $mam.attr('id');
                     return this.receiveChatMessage($message[0], _.extend(options, {
                         is_mam: true,
                         delay: $delay,
-                        archive_id: archive_id,
-                        contact_archive_id: contact_archive_id
+                        stanza_id: stanza_id,
+                        contact_stanza_id: contact_stanza_id
                     }));
                 }
                 let $carbons = $message.find('[xmlns="'+Strophe.NS.CARBONS+'"]');
@@ -5018,10 +5051,11 @@ define("xabber-chats", function () {
         },
 
         receiveErrorMessage: function (message) {
-            var msgid = message.getAttribute('id');
+            var msgid = message.getAttribute('id'),
+                origin_id = $(message).children('origin-id').attr('id');
             if (msgid) {
                 var code = $(message).find('error').attr('code');
-                var msg = this.account.messages.get(msgid);
+                var msg = this.account.messages.get(origin_id || msgid);
                 if (msg && code === '406') {
                     msg.set('state', constants.MSG_ERROR);
                 }
@@ -5279,6 +5313,8 @@ define("xabber-chats", function () {
             this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
+            xabber.on("update_layout", this.onWindowResized, this);
+            this.$('input').on('input', this.updateSearch.bind(this));
         },
 
         render: function (options) {
@@ -5316,6 +5352,10 @@ define("xabber-chats", function () {
 
         onUpdatedScreen: function (name) {
             this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.active.unread').length);
+        },
+
+        onWindowResized: function (options) {
+            options.size_changed && this.onScroll();
         },
 
         defineMouseWheelEvent: function () {
@@ -5472,7 +5512,7 @@ define("xabber-chats", function () {
                     let last_msg = view.model.messages.models[view.model.messages.length - 1];
                     if (last_msg)
                         if (!last_msg.isSenderMe() && !last_msg.get('is_unread')) {
-                            view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('archive_id'), last_msg.get('contact_archive_id'));
+                            view.model.sendMarker(last_msg.get('origin_id'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                             view.model.set('displayed_sent', true);
                         }
                 }
@@ -5488,7 +5528,7 @@ define("xabber-chats", function () {
             let invitations = view.content.$('.auth-request');
             if (invitations.length > 0) {
                 invitations.each(function (idx, item) {
-                    view.model.messages.get($(item).attr('msgid')).destroy();
+                    view.model.messages.get($(item).attr('unique_id')).destroy(); // ???????????????????????
                     view.content.removeMessage($(item));
                 }.bind(this));
             }
@@ -5690,7 +5730,7 @@ define("xabber-chats", function () {
                   if (msg_from)
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
               }
-              this.$el.emojify('.last-msg', {emoji_size: 14}).hyperlinkify({decode_uri: true});
+              this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
               this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                   .attr('title', utils.pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
@@ -5702,7 +5742,7 @@ define("xabber-chats", function () {
               this.$el.closest('.left-panel-list-wrap').find('.list-item').removeClass('active');
               this.$el.addClass('active');
               xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', chat_item: chat.item_view });
-              this.model.get('msgid') && chat.getMessageContext(this.model.get('msgid'), {message: true});
+              this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true});
           }
       });
 
@@ -6081,6 +6121,7 @@ define("xabber-chats", function () {
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:private_chat", this.updatePrivateChat, this);
             this.contact.on("change:incognito_chat", this.updateIncognitoChat, this);
+            xabber.on('change:audio', this.updateGroupChatHead, this);
         },
 
         render: function (options) {
@@ -6239,7 +6280,7 @@ define("xabber-chats", function () {
         updateGroupChatHead: function () {
             var is_group_chat = this.contact.get('group_chat');
             (is_group_chat && !this.contact.get('private_chat') && !this.contact.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-chat"]());
-            this.$('.btn-jingle-message').showIf(!is_group_chat);
+            this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio'));
             this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
         },
@@ -6442,7 +6483,7 @@ define("xabber-chats", function () {
                         ['clean']
                     ]
                 },
-                formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'quill_emoji', 'mention'],
+                formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
                 placeholder: 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
@@ -6499,30 +6540,42 @@ define("xabber-chats", function () {
                 $emoji_panel = this.$('.emoticons-panel'),
                 _timeout;
 
-            _.each(Emoji.all, function (emoji) {
-                $('<div class="emoji-wrap"/>').html(
-                    emoji.emojify({tag_name: 'div', emoji_size: 25})
-                ).appendTo($emoji_panel);
-            });
+            for (var emoji_list in Emoji.all) {
+                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
+                    list_name = emoji_list.replace(/ /g, '_');
+                $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                _.each(Emoji.all[emoji_list], function (emoji) {
+                    $('<div class="emoji-wrap"/>').html(
+                        emoji.emojify({emoji_size: 24, sprite: list_name})
+                    ).appendTo($emoji_list_wrap);
+                });
+                $emoji_list_wrap.appendTo($emoji_panel);
+                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+            }
+            var window_onclick = function (ev) {
+                if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)
+                    return;
+                $emoji_panel_wrap.removeClass('opened');
+                window.removeEventListener( "click" , window_onclick);
+            };
             $emoji_panel.perfectScrollbar(
                     _.extend({theme: 'item-list'}, xabber.ps_settings));
-            $insert_emoticon.hover(function (ev) {
-                if (ev && ev.preventDefault) { ev.preventDefault(); }
-                $emoji_panel_wrap.addClass('opened');
-                if (_timeout) {
+            this.$('.emoji-menu .emoji').click(function (ev) {
+                $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            }.bind(this));
+            $insert_emoticon.click(function (ev) {
+                if (_timeout)
                     clearTimeout(_timeout);
+                if (ev && ev.preventDefault) { ev.preventDefault(); }
+                if ($emoji_panel_wrap.hasClass('opened')) {
+                    $emoji_panel_wrap.removeClass('opened');
+                    window.removeEventListener( "click" , window_onclick);
+                }
+                else {
+                    $emoji_panel_wrap.addClass('opened');
+                    window.addEventListener( "click" , window_onclick);
                 }
                 $emoji_panel.perfectScrollbar('update');
-            }.bind(this), function (ev) {
-                if (ev && ev.preventDefault) { ev.preventDefault(); }
-                if (_timeout) {
-                    clearTimeout(_timeout);
-                }
-                _timeout = setTimeout(function () {
-                    if (!$emoji_panel_wrap.is(':hover')) {
-                        $emoji_panel_wrap.removeClass('opened');
-                    }
-                }, 800);
             }.bind(this));
             $emoji_panel_wrap.hover(null, function (ev) {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
@@ -6535,11 +6588,15 @@ define("xabber-chats", function () {
             }.bind(this));
             $emoji_panel_wrap.mousedown(function (ev) {
                 if (ev && ev.preventDefault) { ev.preventDefault(); }
-                if (ev.button) {
+                if (_timeout)
+                    clearTimeout(_timeout);
+                if (ev.button)
                     return;
-                }
-                var $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
-                $target.length && this.typeEmoticon($target.data('emoji'));
+                var $target = $(ev.target),
+                    $target_emoji = $target.closest('.emoji-wrap').find('.emoji');
+                if ($target.closest('.emoji-menu').length)
+                    return;
+                $target_emoji.length && this.typeEmoticon($target_emoji.data('emoji'));
             }.bind(this));
             this.renderLastEmoticons();
         },
@@ -6585,7 +6642,7 @@ define("xabber-chats", function () {
                     this.$('.account-role').show().text(role);
                 else
                     this.$('.account-role').hide();
-                this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 14});
+                this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 16});
                 !avatar && (avatar = Images.getDefaultAvatar(nickname));
                 this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size);
             }
@@ -6616,6 +6673,7 @@ define("xabber-chats", function () {
         },
 
         keyDown: function (ev) {
+            $rich_textarea = this.$('.input-message .rich-textarea');
             if (ev.keyCode === constants.KEY_ESCAPE ||
                     ev.keyCode === constants.KEY_BACKSPACE ||
                     ev.keyCode === constants.KEY_DELETE) {
@@ -6636,7 +6694,7 @@ define("xabber-chats", function () {
                     return;
                 }
             }
-            if (this.$('.input-message .rich-textarea').getTextFromRichTextarea().trim() && !this.view.chat_state && !this.view.edit_message)
+            if ($rich_textarea.getTextFromRichTextarea().trim() && !this.view.chat_state && !this.view.edit_message)
                 this.view.sendChatState('composing');
         },
 
@@ -6693,11 +6751,11 @@ define("xabber-chats", function () {
 
         inputMention: function (ev) {
             ev.preventDefault();
-            let $participant_item = $(ev.target).closest('.mention-item'),
+            let $rich_textarea = this.$('.rich-textarea'),
+                $participant_item = $(ev.target).closest('.mention-item'),
                 nickname = $participant_item.data('nickname'),
                 id = $participant_item.data('id') || "",
-                $rich_textarea = this.$('.rich-textarea'),
-                text = $rich_textarea.getTextFromRichTextarea(),
+                text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, ""),
                 caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                 mention_at_regexp = /(^|\s)@(\w+)?/g,
                 mention_plus_regexp = /(^|\s)[+](\w+)?/g,
@@ -6709,7 +6767,7 @@ define("xabber-chats", function () {
                 mention_position = Math.max(at_position, plus_position),
                 mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("");
             (mention_text.length && mention_text[0].match(/\s/)) && mention_position++;
-            mention_text.replace(/\s?(@|[+])/, "");
+            mention_text = mention_text.replace(/\s?(@|[+])/, "");
             this.$('.mentions-list').hide();
             this.quill.deleteText(mention_position, ++mention_text.length);
             if (!nickname.length) {
@@ -6726,19 +6784,13 @@ define("xabber-chats", function () {
 
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
-                text = $rich_textarea.getTextFromRichTextarea();
+                text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
             if ((!text || text == "\n") && !this.edit_message)
                 this.displayMicrophone();
             else
                 this.displaySend();
             if (ev.keyCode === constants.KEY_ESCAPE) {
-                // clear input
                 ev.preventDefault();
-                this.displayMicrophone();
-                $rich_textarea.flushRichTextarea();
-                this.$('.mentions-list').hide();
-                this.unsetForwardedMessages();
-                this.view.sendChatState('active');
             } else {
                 if (ev.keyCode === constants.KEY_ARROW_UP || ev.keyCode === constants.KEY_ARROW_DOWN) {
                     return;
@@ -6760,7 +6812,7 @@ define("xabber-chats", function () {
                 if (ev.keyCode === constants.KEY_SPACE) {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         to_caret_text = Array.from(text).slice(0, caret_position).join("").replaceEmoji();
-                    if (to_caret_text[caret_position - 2].match(/@|[+]/)) {
+                    if (to_caret_text[caret_position - 2] && to_caret_text[caret_position - 2].match(/@|[+]/)) {
                         this.$('.mentions-list').hide();
                         return;
                     }
@@ -6769,7 +6821,7 @@ define("xabber-chats", function () {
                     let caret_position = this.quill.selection.lastRange && this.quill.selection.lastRange.index,
                         mention_at_regexp = /(^|\s)@(\w+)?/g,
                         mention_plus_regexp = /(^|\s)[+](\w+)?/g,
-                        to_caret_text = Array.from(text).slice(0, caret_position).join("").replaceEmoji(),
+                        to_caret_text = Array.from(text).slice(0, caret_position).join("").replace(/\n$/, "").replaceEmoji(),
                         mentions_at = Array.from(to_caret_text.matchAll(mention_at_regexp)),
                         mentions_plus = Array.from(to_caret_text.matchAll(mention_plus_regexp)),
                         at_position = mentions_at.length ? mentions_at.slice(-1)[0].index : -1,
@@ -6797,8 +6849,8 @@ define("xabber-chats", function () {
                         this.$('.mentions-list').hide();
                 }
             }
-            $rich_textarea.updateRichTextarea().focus();
-            $rich_textarea.updateRichTextarea().focus();
+            $rich_textarea.updateRichTextarea();
+            this.focusOnInput();
             xabber.chat_body.updateHeight();
         },
 
@@ -6852,7 +6904,7 @@ define("xabber-chats", function () {
                             if (item == '\n')
                                 arr_text.splice(idx, 1, '<br>');
                         }.bind(this));
-                        text = "<p>" + arr_text.join("").emojify({tag_name: 'img'}) + "</p>";
+                        text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
                         window.document.execCommand('insertHTML', false, text);
                     }
                 }
@@ -6865,11 +6917,11 @@ define("xabber-chats", function () {
                         if (item == ' ')
                             arr_text.splice(idx, 1, '&nbsp');
                     }.bind(this));
-                    text = "<p>" + arr_text.join("").emojify({tag_name: 'img'}) + "</p>";
+                    text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
                     window.document.execCommand('insertHTML', false, text);
                 }
             }
-            if ($rich_textarea.getTextFromRichTextarea().trim() && !this.view.chat_state && !this.view.edit_message)
+            if ($rich_textarea.getTextFromRichTextarea().replace(/\n$/, "") && !this.view.chat_state && !this.view.edit_message)
                 this.view.sendChatState('composing');
             this.focusOnInput();
             xabber.chat_body.updateHeight();
@@ -6998,15 +7050,22 @@ define("xabber-chats", function () {
         },
 
         typeEmoticon: function (emoji) {
+            if (typeof emoji == 'number')
+                emoji = Number(emoji).toString();
+            let caret_idx = -1;
+            if (this.quill.selection.lastRange)
+                caret_idx = this.quill.selection.lastRange.index;
+            else if (this.quill.selection.savedRange)
+                caret_idx = this.quill.selection.savedRange.index;
             this.quill.focus();
             if (!this.edit_message)
                 this.displaySend();
             !this.view.chat_state && this.view.sendChatState('composing');
-            this.quill.insertEmbed(this.quill.selection.lastRange.index, 'quill_emoji', emoji);
-            if (this.quill.getFormat(this.quill.selection.lastRange.index, 1).mention) {
-                this.quill.formatText(this.quill.selection.lastRange.index, 1, 'mention', false);
+            this.quill.insertEmbed(caret_idx, 'emoji', emoji);
+            if (this.quill.getFormat(caret_idx, 1).mention) {
+                this.quill.formatText(caret_idx, 1, 'mention', false);
             }
-            this.quill.setSelection(this.quill.selection.lastRange.index + 1, 0);
+            this.quill.setSelection(caret_idx + 1);
             xabber.chat_body.updateHeight();
         },
 
@@ -7022,7 +7081,7 @@ define("xabber-chats", function () {
             cached_last_emoji = this.account.chat_settings.getLastEmoji();
             for (var idx = 0; idx < 7; idx++) {
                 $('<div class="emoji-wrap"/>').html(
-                    cached_last_emoji[idx].emojify({tag_name: 'div', emoji_size: 20})
+                    cached_last_emoji[idx] && cached_last_emoji[idx].emojify({tag_name: 'div', emoji_size: 20})
                 ).appendTo($last_emoticons);
             }
             $last_emoticons.find('.emoji-wrap').mousedown(function (ev) {
@@ -7042,7 +7101,7 @@ define("xabber-chats", function () {
                 blockquotes = [],
                 text = $rich_textarea.getTextFromRichTextarea().trim();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
-                var emoji = $(emoji_item).data('emoji');
+                var emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
@@ -7050,7 +7109,7 @@ define("xabber-chats", function () {
                 if (content.attributes) {
                     let content_attrs = [],
                         start_idx = content_concat.length,
-                        end_idx = start_idx + ((content.insert && content.insert.quill_emoji) ? 1 : (_.escape(content.insert).length - 1));
+                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : (_.escape(content.insert).length - 1));
                     for (let attr in content.attributes)
                         (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
                     if (content_attrs.indexOf('mention') > -1) {
@@ -7089,12 +7148,14 @@ define("xabber-chats", function () {
                     }
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markups: content_attrs});
                 }
-                if (content.insert && content.insert.quill_emoji)
-                    content_concat = content_concat.concat(Array.from($(content.insert.quill_emoji).data('emoji')));
+                if (content.insert && content.insert.emoji) {
+                    content_concat = content_concat.concat(Array.from(_.escape($(content.insert.emoji).text())));
+                }
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));
-            $rich_textarea.flushRichTextarea().focus();
+            $rich_textarea.flushRichTextarea();
+            this.quill.focus();
             this.displayMicrophone();
             if (this.edit_message) {
                 this.editMessage(text, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes}, this.contact.get('group_chat'));
@@ -7121,7 +7182,7 @@ define("xabber-chats", function () {
             this.displaySaveButton();
             xabber.chat_body.updateHeight();
             let markup_body = utils.markupBodyMessage(message),
-                emoji_node = markup_body.emojify({tag_name: 'img'}),
+                emoji_node = markup_body.emojify({tag_name: 'div'}),
                 arr_text = Array.from(emoji_node);
             arr_text.forEach(function (item, idx) {
                 if (item == '\n')
@@ -7213,7 +7274,7 @@ define("xabber-chats", function () {
             if (this.edit_message) {
                 $rich_textarea.flushRichTextarea();
             }
-            this.edit_message = null
+            this.edit_message = null;
             this.$('.fwd-messages-preview').addClass('hidden');
             let text = $rich_textarea.getTextFromRichTextarea();
             if (!text || text == "\n")
@@ -7259,8 +7320,8 @@ define("xabber-chats", function () {
             if (this.$('.pin-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
-                pinned_msg = this.messages_arr.get($msg.data('msgid')),
-                msg_text = pinned_msg.get('archive_id');
+                pinned_msg = this.messages_arr.get($msg.data('uniqueid')), // ???????????????????????
+                msg_text = pinned_msg.get('stanza_id');
             this.resetSelectedMessages();
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
@@ -7276,7 +7337,7 @@ define("xabber-chats", function () {
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
-                var msg = this.messages_arr.get(item.dataset.msgid);
+                var msg = this.messages_arr.get(item.dataset.uniqueid); // ???????????????????????
                 msg && msgs.push(msg);
             }.bind(this));
             this.resetSelectedMessages();
@@ -7288,7 +7349,8 @@ define("xabber-chats", function () {
             let old_body = this.edit_message.get('message') || "",
                 legacy_body = Strophe.xmlescape(this.edit_message.get('original_message') || ""),
                 groupchat_legacy = this.edit_message.get('legacy_content') && this.edit_message.get('legacy_content').find(item => item.type === 'groupchat'),
-                stanza_id = this.edit_message.get('archive_id'),
+                stanza_id = this.edit_message.get('stanza_id'),
+                forward_legacy = this.edit_message.get('legacy_content') && this.edit_message.get('legacy_content').filter(item => item.type === 'forward'),
                 markups = text_markups.markup_references || [],
                 mentions = text_markups.mentions || [];
             legacy_body.length && (legacy_body = legacy_body.slice(0, legacy_body.length - Strophe.xmlescape(old_body).length));
@@ -7307,6 +7369,15 @@ define("xabber-chats", function () {
             mentions.forEach(function (mention) {
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'mention'}).c('uri').t(mention.uri).up().up();
             }.bind(this));
+            forward_legacy && forward_legacy.forEach(function (legacy, idx) {
+                let fwd_msg = this.edit_message.get('forwarded_message')[idx];
+                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_legacy ? (legacy.start - groupchat_legacy.start - groupchat_legacy.end - 1) : legacy.start), end: (groupchat_legacy ? (legacy.end - groupchat_legacy.start - groupchat_legacy.end - 1) : legacy.end), type: 'forward'})
+                    .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
+                    .c('delay', {
+                        xmlns: 'urn:xmpp:delay',
+                        stamp: fwd_msg.get('time')
+                    }).up().cnode(fwd_msg.get('xml')).up().up().up();
+            }.bind(this));
             this.unsetForwardedMessages();
             this.account.sendIQ(iq, function () {}, function () {});
         },
@@ -7315,7 +7386,7 @@ define("xabber-chats", function () {
             if (this.$('.edit-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
-                edit_msg = this.messages_arr.get($msg.data('msgid'));
+                edit_msg = this.messages_arr.get($msg.data('uniqueid')); // ???????????????????????
             this.edit_message = edit_msg;
             this.resetSelectedMessages();
             this.setEditedMessage(edit_msg);
@@ -7327,7 +7398,7 @@ define("xabber-chats", function () {
                 my_msgs = 0,
                 dialog_options = [];
             $msgs.each(function (idx, item) {
-                let msg = this.messages_arr.get(item.dataset.msgid);
+                let msg = this.messages_arr.get(item.dataset.uniqueid); // ???????????????????????
                 msg && msgs.push(msg);
                 msg.isSenderMe() && my_msgs++;
             }.bind(this));
@@ -7393,7 +7464,7 @@ define("xabber-chats", function () {
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
-                let msg = this.messages_arr.get(item.dataset.msgid);
+                let msg = this.messages_arr.get(item.dataset.uniqueid); // ???????????????????????
                 msg && msgs.push(msg);
             }.bind(this));
             this.resetSelectedMessages();
@@ -7404,7 +7475,7 @@ define("xabber-chats", function () {
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
-                let msg = this.messages_arr.get(item.dataset.msgid);
+                let msg = this.messages_arr.get(item.dataset.uniqueid); // ???????????????????????
                 msg && msgs.push(msg);
             }.bind(this));
             this.resetSelectedMessages();
@@ -7604,7 +7675,7 @@ define("xabber-chats", function () {
                         view.content.bottom.focusOnInput();
                     let last_msg = view.model.messages.last();
                     if (last_msg && last_msg.get('type') === 'system')
-                        view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('archive_id'), last_msg.get('contact_archive_id'));
+                        view.model.sendMarker(last_msg.get('origin_id'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                 }
             }
         }, this);

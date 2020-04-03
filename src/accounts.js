@@ -735,7 +735,6 @@ define("xabber-accounts", function () {
                         if (type !== 'online') {
                             stanza.c('show').t(type).up();
                         }
-                        // stanza.c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash()).up().up();
                         stanza.c('status').t(status_message).up();
                         stanza.c('priority').t(this.get('priority')).up();
                     }
@@ -997,9 +996,11 @@ define("xabber-accounts", function () {
 
             onQuit: function () {
                 xabber.api_account.revoke_token();
-                (!this.models.length) && xabber.body.setScreen('login');
+                !this.models.length && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     account.deleteAccount();
+                    account.password_view.closeModal();
+                    utils.modals.clear_queue();
                 });
             },
 
@@ -1108,7 +1109,7 @@ define("xabber-accounts", function () {
 
             events: {
                 'click .filter-chats': 'filterChats',
-                'click': 'showSettings'
+                'click .circle-avatar': 'showSettings'
             },
 
             _initialize: function () {
@@ -1151,13 +1152,17 @@ define("xabber-accounts", function () {
             },
 
             showSettings: function () {
+                let scroll_top = xabber.toolbar_view.getScrollTop();
                 this.model.showSettings();
+                xabber.toolbar_view.scrollTo(scroll_top);
             },
 
             filterChats: function (ev) {
+                let scroll_top = xabber.toolbar_view.getScrollTop();
                 ev.stopPropagation();
                 xabber.chats_view.showChatsByAccount(this.model);
                 this.model.trigger('filter_chats');
+                xabber.toolbar_view.scrollTo(scroll_top);
             },
 
             setActive: function () {
@@ -2052,8 +2057,8 @@ define("xabber-accounts", function () {
             },
 
             onRender: function () {
-                if (xabber.body.screen.get('name') === 'login')
-                    this.closeModal();
+                /*if (xabber.body.screen.get('name') === 'login')
+                    this.closeModal();*/
                 Materialize.updateTextFields();
                 this.authFeedback({});
                 this.$password_input.val('').focus();

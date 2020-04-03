@@ -388,6 +388,31 @@ define([
             }, time);
         },
 
+        emoji_size: function (count) {
+            let size;
+            switch (count) {
+                case 1:
+                    size = 56;
+                    break;
+                case 2:
+                    size = 44;
+                    break;
+                case 3:
+                    size = 32;
+                    break;
+                case 4:
+                    size = 24;
+                    break;
+                case 5:
+                    size = 22;
+                    break;
+                default:
+                    size = 20;
+                    break;
+            }
+            return size;
+        },
+
         openWindow: function (url, errback) {
             let win = window.open(url, '_blank');
             if (win) {

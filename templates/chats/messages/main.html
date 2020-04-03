@@ -1,4 +1,4 @@
-<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-msgid="{{msgid}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">
+<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">
     <div class="left-side noselect">
         <div class="circle-avatar"></div>
     </div>
@@ -8,7 +8,6 @@
             <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
             {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
             {[ } if (role && (role != 'Member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
-            <div class="edited-info one-line hidden"></div>
         </div>
         <div class="fwd-msgs-block"></div>
         <div class="chat-msg-content chat-text-content">{{message}}</div>
@@ -17,6 +16,7 @@
 
     <div class="right-side noselect">
         <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
+        <div class="edited-info one-line hidden"></div>
         {[ if (is_sender) { ]}
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
             <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>
