@@ -3444,7 +3444,7 @@ body .client-body-wrap.hidden + #modals {
 .chat-item .msg-delivering-state {
     position: absolute;
     right: 10px;
-    bottom: 10px;
+    bottom: 12px;
     color: #388E3C;
 }
 
