@@ -1440,7 +1440,6 @@ define("xabber-contacts", function () {
                 this.account = this.model.account;
                 this.contact = this.model;
                 this.model.on("change:name", this.updateName, this);
-                this.model.on("change:group_info", this.update, this);
             },
 
             open: function (data_form) {
@@ -1452,7 +1451,6 @@ define("xabber-contacts", function () {
                         this.updateScrollBar();
                     }.bind(this),
                     complete: function () {
-                        // this.model.update();
                         this.$el.detach();
                         this.$('.modal-content').css('height', '100%');
                         this.data.set('visible', false);
@@ -1500,8 +1498,19 @@ define("xabber-contacts", function () {
 
                 if (has_changes) {
                     iq = this.account.addDataFormToStanza(iq, this.data_form);
-                    this.account.sendIQ(iq, function () {
+                    this.account.sendIQ(iq, function (result) {
+                        let $result  = $(result),
+                            group_info = _.clone(this.contact.get('group_info')),
+                            attrs = {
+                                name: $result.find('field[var="name"] value').text(),
+                                searchable: $result.find('field[var="index"]').children('value').text(),
+                                model: $result.find('field[var="membership"]').children('value').text(),
+                                description: $result.find('field[var="description"] value').text(),
+                                status: $result.find('field[var="status"]').children('value').text()
+                        };
                         this.$('button').addClass('non-active');
+                        _.extend(group_info, attrs);
+                        this.model.set('group_info', group_info);
                     }.bind(this), function (error) {
                         this.$('button').addClass('non-active');
                         let err_text = $(error).find('error text').text() || 'You have no permission to change chat properties';
