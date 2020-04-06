@@ -1452,7 +1452,7 @@ define("xabber-contacts", function () {
                         this.updateScrollBar();
                     }.bind(this),
                     complete: function () {
-                        this.update();
+                        // this.model.update();
                         this.$el.detach();
                         this.$('.modal-content').css('height', '100%');
                         this.data.set('visible', false);
@@ -1478,7 +1478,7 @@ define("xabber-contacts", function () {
 
                 let has_changes = false,
                     iq = $iq({type: 'set', to: this.contact.get('jid')})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 this.data_form.fields.forEach(function (field) {
                     if (field.type === 'hidden' || field.type === 'fixed')
                         return;
@@ -3587,6 +3587,17 @@ define("xabber-contacts", function () {
             handlePresence: function (presence, jid) {
                 var contact = this.mergeContact(jid);
                 contact.handlePresence(presence);
+            },
+
+            deleteGroupChat: function (jid) {
+                if (!jid)
+                    return;
+                let domain = Strophe.getDomainFromJid(jid),
+                    localpart = Strophe.getNodeFromJid(jid),
+                    iq = $iq({to: domain, type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'})
+                        .c('localpart').t(localpart);
+                this.account.sendIQ(iq);
             }
         });
 

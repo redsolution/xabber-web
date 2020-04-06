@@ -332,9 +332,9 @@ define("xabber-chats", function () {
                 body = "";
             }
 
-            if ($message.children('x').length && $message.children('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) {
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) { // if ($message.children('x').length && $message.children('x').attr('xmlns').indexOf(Strophe.NS.GROUP_CHAT) > -1) - universal
                 attrs.type = 'system';
-                attrs.participants_version = $message.children('x').attr('version');
+                attrs.participants_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
             }
 
             if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
@@ -5224,7 +5224,7 @@ define("xabber-chats", function () {
                 searchable = this.$('.global-field .property-value').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
                 model = this.$('.membership-field .property-value').attr('data-value'),
-                iq = $iq({from: my_jid, type: 'set', to: domain}).c('create', {xmlns: Strophe.NS.GROUP_CHAT})
+                iq = $iq({from: my_jid, type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                     .c('name').t(name).up()
                     .c('privacy').t(anonymous).up()
                     .c('index').t(searchable).up()
@@ -5234,23 +5234,21 @@ define("xabber-chats", function () {
                     iq.c('localpart').t(chat_jid);
             this.account.sendIQ(iq,
                 function (iq) {
-                    if ($(iq).attr('type') === 'result') {
-                        let group_jid = $(iq).find('created jid').text().trim(),
-                            contact = this.account.contacts.mergeContact(group_jid);
-                        contact.set('group_chat', true);
-                        contact.pres('subscribed');
-                        contact.pushInRoster(null, function () {
-                            contact.pres('subscribe');
-                            contact.getMyInfo();
-                            this.close();
-                            xabber.chats_view.updateScreenAllChats();
-                            contact.subGroupPres();
-                            contact.trigger("open_chat", contact);
-                            let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
-                                .c('item', {jid: group_jid + '/' + moment.now()});
-                            this.account.sendIQ(iq_set_blocking);
-                        }.bind(this));
-                    }
+                    let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
+                        contact = this.account.contacts.mergeContact(group_jid);
+                    contact.set('group_chat', true);
+                    contact.pres('subscribed');
+                    contact.pushInRoster(null, function () {
+                        contact.pres('subscribe');
+                        contact.getMyInfo();
+                        this.close();
+                        xabber.chats_view.updateScreenAllChats();
+                        contact.subGroupPres();
+                        contact.trigger("open_chat", contact);
+                        let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                            .c('item', {jid: group_jid + '/' + moment.now()});
+                        this.account.sendIQ(iq_set_blocking);
+                    }.bind(this));
                 }.bind(this),
                 function () {
                     this.$('.modal-footer .errors').removeClass('hidden').text('Jid is already in use');
