@@ -2450,16 +2450,17 @@ define("xabber-contacts", function () {
             },
 
             open: function () {
-                this.update();
-                this.$el.openModal({
-                    ready: function () {
-                        this.updateScrollBar();
-                    }.bind(this),
-                    complete: function () {
-                        this.$el.detach();
-                        this.data.set('visible', false);
-                    }.bind(this)
-                });
+                this.update(function () {
+                    this.$el.openModal({
+                        ready: function () {
+                            this.updateScrollBar();
+                        }.bind(this),
+                        complete: function () {
+                            this.$el.detach();
+                            this.data.set('visible', false);
+                        }.bind(this)
+                    });
+                }.bind(this));
             },
 
             close: function () {
@@ -2470,7 +2471,7 @@ define("xabber-contacts", function () {
                 });
             },
 
-            update: function () {
+            update: function (callback) {
                 this.$('.btn-default-restrictions-save').addClass('non-active');
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
@@ -2487,6 +2488,7 @@ define("xabber-contacts", function () {
                         alignment: 'left'
                     };
                     this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
+                    callback && callback();
                 }.bind(this),
                     function () {
                         utils.callback_popup_message("You have no permission to change default restrictions", 3000);
