@@ -230,14 +230,14 @@ define("xabber-chats", function () {
             return attrs;
         },
 
-        parseMentions: function ($message) {
+        parseMentions: function ($mentions) {
             let mentions = [];
-                $message.children('reference[type="mention"][xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, mention) {
+            $mentions.each(function (idx, mention) {
                 let $mention = $(mention),
                     start = parseInt($mention.attr('begin')),
                     end = parseInt($mention.attr('end')),
-                    mention_uri = ($mention.children('uri').text() || "").replace(/^(xmpp:)/,"");
-                mentions.push({start: start, end: end, uri: mention_uri});
+                    target = $mention.attr('target');
+                mentions.push({start: start, end: end, target: target});
             }.bind(this));
             return mentions;
         },
@@ -309,14 +309,35 @@ define("xabber-chats", function () {
                     contact_stanza_id: options.contact_stanza_id,
                     is_archived: options.is_archived
                 },
-                $media_references = $message.children('reference[type="media"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
+                $mutable_references = $message.children('reference[type="mutable"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
+                $decoration_references = $message.children('reference[type="decoration"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
+                $data_references = $message.children('reference[type="data"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
+                /*$media_references = $message.children('reference[type="media"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                 $voice_references = $message.children('reference[type="voice"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                 $quote_references = $message.children('reference[type="quote"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                 $forward_references = $message.children('reference[type="forward"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                $groupchat_reference = $message.children('reference[type="groupchat"]'),
-                mentions = this.parseMentions($message),
+                $groupchat_reference = $message.children('reference[type="groupchat"]'),*/
+                mentions = [],
                 markups = this.parseMarkup($message),
                 legacy_content = [];
+
+            if ($decoration_references.length) {
+                let $mentions = $decoration_references.children('mention[xmlns="' + Strophe.NS.REFERENCE + '-mention"]'),
+                    $quote = $decoration_references.children('marker');
+                if ($mentions.length)
+                    mentions = this.parseMentions($mentions);
+            }
+
+            if ($mutable_references.length) {
+                let $user = $mutable_references.children('user[xmlns="' + Strophe.NS.GROUP_CHAT + '"]');
+                if ($user.length) {
+
+                }
+            }
+
+            if ($data_references.length) {
+
+            }
 
             options.stanza_id && (attrs.stanza_id = options.stanza_id);
             origin_id && (attrs.origin_id = origin_id);
@@ -2792,15 +2813,15 @@ define("xabber-chats", function () {
             }
             if (message.get('mentions')) {
                 message.get('mentions').forEach(function (mention) {
-                    let mention_uri = mention.uri && (mention.uri.lastIndexOf('?id=') > -1 ? mention.uri.slice(mention.uri.lastIndexOf('?id=') + 4) : mention.uri) || "";
+                    let mention_target = mention.target || "";
                     if (this.contact.my_info)
-                        (mention_uri === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                        (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                     else if (this.contact.get('group_chat')) {
                         this.contact.getMyInfo(function () {
-                            (mention_uri === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                            (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                         }.bind(this));
                     }
-                    (mention_uri === this.account.get('jid')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                    (mention_target === this.account.get('jid')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                 }.bind(this));
             }
         },
@@ -3485,9 +3506,12 @@ define("xabber-chats", function () {
                         xmlns: Strophe.NS.REFERENCE,
                         begin: mention.start + legacy_body.length,
                         end: mention.end + legacy_body.length,
-                        type: 'mention'
+                        type: 'decoration',
                     })
-                        .c('uri').t(mention.uri).up().up();
+                        .c('mention', {
+                            xmlns: (Strophe.NS.REFERENCE + '-mention'),
+                            target: mention.target
+                        }).up().up();
                 }.bind(this));
             }
 
@@ -3512,7 +3536,7 @@ define("xabber-chats", function () {
                         xmlns: Strophe.NS.REFERENCE,
                         begin: blockquote.start + legacy_body.length,
                         end: blockquote.end + legacy_body.length,
-                        type: 'quote'
+                        type: 'decoration'
                     })
                         .c('marker').t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
                     legacy_content.push({
@@ -4465,7 +4489,7 @@ define("xabber-chats", function () {
                 static create(paramValue) {
                     let node = super.create();
                     node.innerHTML = paramValue.slice(paramValue.indexOf('&nickname=') + 10);
-                    node.setAttribute('data-id', paramValue.slice(0, paramValue.indexOf('&nickname=')));
+                    node.setAttribute('data-id', paramValue.slice(paramValue.indexOf('?id=') + 4, paramValue.indexOf('&nickname=')));
                     return node;
                 }
 
@@ -7116,7 +7140,7 @@ define("xabber-chats", function () {
                         mentions.push({
                             start: start_idx,
                             end: end_idx,
-                            uri: $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
+                            target: $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
                         });
                     }
                     if (content.attributes.blockquote) {
@@ -7365,7 +7389,7 @@ define("xabber-chats", function () {
                 iq.up();
             }.bind(this));
             mentions.forEach(function (mention) {
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'mention'}).c('uri').t(mention.uri).up().up();
+                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + legacy_body.length, end: mention.end + legacy_body.length, type: 'decoration'}).c('mention', {xmlns: Strophe.NS.REFERENCE, target: mention.target}).up().up();
             }.bind(this));
             forward_legacy && forward_legacy.forEach(function (legacy, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx];

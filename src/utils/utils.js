@@ -292,7 +292,7 @@ define([
                 let start_idx = markup.start,
                     end_idx = markup.end > (markup_body.length - 1) ? (markup_body.length - 1) : markup.end,
                     mark_up = markup.markups || [],
-                    mention = (markup.type !== 'uri') && markup.uri || "";
+                    mention = markup.target || "";
                 if (start_idx > markup_body.length - 1)
                     return;
                 if (mark_up.length) {

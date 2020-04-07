@@ -234,7 +234,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('REWRITE', 'http://xabber.com/protocol/rewrite');
-        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0'); // https://xabber.com/protocol/reference
+        Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/reference');
 
         return xabber;
     };
