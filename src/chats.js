@@ -7112,6 +7112,7 @@ define("xabber-chats", function () {
                         blockquotes.push({marker: constants.QUOTE_MARKER, start: quote_start_idx, end: quote_end_idx + constants.QUOTE_MARKER.length});
                         text = Array.from(_.escape(text));
                         text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                        (quote_end_idx > text.length - 1) && (quote_end_idx = text.length - 1);
                         text[quote_end_idx] += '\n';
                         text = _.unescape(text.join(""));
 
