@@ -230,43 +230,6 @@ define("xabber-chats", function () {
             return attrs;
         },
 
-        parseMentions: function ($mentions) {
-            let mentions = [];
-            $mentions.each(function (idx, mention) {
-                let $mention = $(mention),
-                    start = parseInt($mention.attr('begin')),
-                    end = parseInt($mention.attr('end')),
-                    target = $mention.attr('target');
-                mentions.push({start: start, end: end, target: target});
-            }.bind(this));
-            return mentions;
-        },
-
-        parseMarkup: function ($message) {
-            let markups = [];
-            $message.children('reference[type="markup"][xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, markup) {
-                let $markup = $(markup),
-                    start = parseInt($markup.attr('begin')),
-                    end = parseInt($markup.attr('end')),
-                    markup_styles = [], uri, markup_item;
-                $markup.children().each(function (idx, child) {
-                    if (child.tagName === 'uri')
-                        uri = $(child).text();
-                    else {
-                        markup_styles.push(child.tagName);
-                        uri = "";
-                    }
-                }.bind(this));
-                markup_item = {start: start, end: end, markups: markup_styles};
-                if (uri) {
-                    markup_item.uri = uri;
-                    markup_item.type = 'uri';
-                }
-                markups.push(markup_item);
-            }.bind(this));
-            return markups;
-        },
-
         createFromStanza: function ($message, options) {
             options || (options = {});
             let $delay = options.delay || $message.children('delay'),
@@ -312,32 +275,59 @@ define("xabber-chats", function () {
                 $mutable_references = $message.children('reference[type="mutable"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                 $decoration_references = $message.children('reference[type="decoration"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
                 $data_references = $message.children('reference[type="data"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                /*$media_references = $message.children('reference[type="media"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                $voice_references = $message.children('reference[type="voice"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                $quote_references = $message.children('reference[type="quote"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                $forward_references = $message.children('reference[type="forward"][xmlns="' + Strophe.NS.REFERENCE + '"]'),
-                $groupchat_reference = $message.children('reference[type="groupchat"]'),*/
-                mentions = [],
-                markups = this.parseMarkup($message),
-                legacy_content = [];
+                mentions = [], blockquotes = [], markups = [],
+                legacy_content = [], mutable_content = [];
 
-            if ($decoration_references.length) {
-                let $mentions = $decoration_references.children('mention[xmlns="' + Strophe.NS.REFERENCE + '-mention"]'),
-                    $quote = $decoration_references.children('marker');
-                if ($mentions.length)
-                    mentions = this.parseMentions($mentions);
-            }
 
-            if ($mutable_references.length) {
-                let $user = $mutable_references.children('user[xmlns="' + Strophe.NS.GROUP_CHAT + '"]');
-                if ($user.length) {
+            $message.children('reference').forEach(function () {
+                let $reference = $(reference);
+                if ($reference.attr('xmlns') === Strophe.NS.REFERENCE) {
+                    let type = $reference.attr('type'),
+                        begin = parseInt($reference.attr('begin')),
+                        end = parseInt($reference.attr('end'));
+                    if (type === 'decoration') {
+                        if ($reference.children('marker').length) {
+                            let marker = $reference.children('marker').text();
+                            marker && (marker = Strophe.xmlescape(marker));
+                            blockquotes.push({start: begin, end: end, marker: marker});
+                        } else if ($reference.children('mention[xmlns="'  + Strophe.NS.REFERENCE + '-mention"]').length) {
+                            let $mention = $reference.children('mention[xmlns="'  + Strophe.NS.REFERENCE + '-mention"]'),
+                                target = $mention.attr('target');
+                            mentions.push({start: begin, end: end, target: target});
+                        } else {
+                            let markup = [];
+                            $reference.children().each(function (idx, child_ref) {
+                                if (constants.MARKUP_TAGS.indexOf(child_ref.tagName) > -1) {
+                                    if (child_ref.tagName === 'uri')
+                                        markup.push({type: child_ref.tagName, uri: child_ref.text()});
+                                    else
+                                        markup.push(child_ref.tagName);
+                                }
+                            }.bind(this));
+                            markup.length && markup.push({start: begin, end: end, markup: markup});
+                        }
+                    } else if (type === 'mutable') {
+                        let $user = $mutable_references.children('user[xmlns="' + Strophe.NS.GROUP_CHAT + '"]');
+                        if ($user.length) {
 
+                        }
+                        if ($reference.children('forward').length)
+                            mutable_content.push({ start: begin, end: end, type: 'forward'});
+                    } else if (type === 'data') {
+
+                    }
                 }
-            }
+            }.bind(this));
 
-            if ($data_references.length) {
+            blockquotes.length && (attrs.blockquotes = blockquotes);
+            mentions.length && (attrs.mentions = mentions);
+            markups.length && (attrs.markups = markups);
 
-            }
+            $data_references.forEach(function (reference) {
+                let $reference = $(reference),
+                    begin = parseInt($reference.attr('begin')),
+                    end = parseInt($reference.attr('end'));
+            }.bind(this));
 
             options.stanza_id && (attrs.stanza_id = options.stanza_id);
             origin_id && (attrs.origin_id = origin_id);
@@ -366,13 +356,6 @@ define("xabber-chats", function () {
                     addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
                 }.bind(this));
                 attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
-            }
-
-            if ($forward_references.length) {
-                $forward_references.each(function (idx, fwd_ref) {
-                    let $fwd_ref = $(fwd_ref);
-                    legacy_content.push({start: parseInt($fwd_ref.attr('begin')), end: parseInt($fwd_ref.attr('end')), type: 'forward'});
-                }.bind(this));
             }
 
             if ($media_references.length || $voice_references.length) {
@@ -436,26 +419,10 @@ define("xabber-chats", function () {
                 files.length && (attrs.files = files);
             }
 
-            if ($quote_references.length) {
-                let blockquotes = [];
-                $quote_references.each(function (idx, quote) {
-                    let $quote = $(quote),
-                        marker = $quote.children('marker').text();
-                    marker && (marker = Strophe.xmlescape(marker));
-                    blockquotes.push({start: parseInt($quote.attr('begin')), end: parseInt($quote.attr('end')), marker: marker});
-                }.bind(this));
-                blockquotes.length && (attrs.blockquotes = blockquotes);
-            }
-
             legacy_content.length && (attrs.legacy_content = legacy_content);
 
             if (legacy_content.length)
                 body = utils.slice_pretty_body(attrs.original_message, legacy_content);
-
-            /* ---------- OLD FORMAT OF FORWARDED MESSAGES --------- */
-            if (attrs.forwarded_message)
-                body = $message.children('comment').text() || body;
-            /* ----------------------------------------------------- */
 
             if (body.removeEmoji() === "")
                 attrs.only_emoji = Array.from(body).length;
@@ -3521,10 +3488,10 @@ define("xabber-chats", function () {
                         xmlns: Strophe.NS.REFERENCE,
                         begin: markup.start + legacy_body.length,
                         end: markup.end + legacy_body.length,
-                        type: 'markup'
+                        type: 'decoration'
                     });
-                    for (let idx in markup.markups) {
-                        stanza.c(markup.markups[idx]).up();
+                    for (let idx in markup.markup) {
+                        stanza.c(markup.markup[idx]).up();
                     }
                     stanza.up();
                 }.bind(this));
@@ -4487,9 +4454,10 @@ define("xabber-chats", function () {
 
             class Mention extends Inline {
                 static create(paramValue) {
-                    let node = super.create();
-                    node.innerHTML = paramValue.slice(paramValue.indexOf('&nickname=') + 10);
-                    node.setAttribute('data-id', paramValue.slice(paramValue.indexOf('?id=') + 4, paramValue.indexOf('&nickname=')));
+                    let node = super.create(),
+                        data = JSON.parse(paramValue);
+                    node.innerHTML = data.nickname;
+                    node.setAttribute('data-target', data.id);
                     return node;
                 }
 
@@ -6798,7 +6766,7 @@ define("xabber-chats", function () {
                 else
                     return;
             }
-            this.quill.insertEmbed(mention_position, 'mention', 'xmpp:' + this.contact.get('jid') + '?id=' + id + '&nickname=' + Strophe.xmlescape(nickname));
+            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({id: id, nickname: Strophe.xmlescape(nickname)});
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();
@@ -7140,7 +7108,7 @@ define("xabber-chats", function () {
                         mentions.push({
                             start: start_idx,
                             end: end_idx,
-                            target: $($rich_textarea.find('mention')[mentions.length]).attr('data-id')
+                            target: $($rich_textarea.find('mention')[mentions.length]).attr('data-target')
                         });
                     }
                     if (content.attributes.blockquote) {
@@ -7168,7 +7136,7 @@ define("xabber-chats", function () {
                             }
                         });
                     }
-                    content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markups: content_attrs});
+                    content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markup: content_attrs});
                 }
                 if (content.insert && content.insert.emoji) {
                     content_concat = content_concat.concat(Array.from(_.escape($(content.insert.emoji).text())));
@@ -7383,8 +7351,8 @@ define("xabber-chats", function () {
                 .c('body').t(Strophe.xmlunescape(legacy_body) + text).up();
             markups.forEach(function (markup) {
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + legacy_body.length, end: markup.end + legacy_body.length, type: 'markup'});
-                for (let idx in markup.markups) {
-                    iq.c(markup.markups[idx]).up();
+                for (let idx in markup.markup) {
+                    iq.c(markup.markup[idx]).up();
                 }
                 iq.up();
             }.bind(this));
