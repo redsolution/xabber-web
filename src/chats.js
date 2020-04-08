@@ -4862,6 +4862,29 @@ define("xabber-chats", function () {
             return;
         },
 
+        receiveStanzaId: function ($message, options) {
+            let $stanza_id, $contact_stanza_id, attrs = {},
+                from_bare_jid = options.from_bare_jid;
+                $message.children('stanza-id').each(function (idx, stanza_id) {
+                stanza_id = $(stanza_id);
+                if ($message.children('reference[type="groupchat"]').length) {
+                    if (stanza_id.attr('by') === from_bare_jid) {
+                        $stanza_id = stanza_id;
+                        $contact_stanza_id = stanza_id;
+                    }
+                }
+                else {
+                    if (stanza_id.attr('by') === from_bare_jid && !options.carbon_copied)
+                        $contact_stanza_id = stanza_id;
+                    else
+                        $stanza_id = stanza_id;
+                }
+            }.bind(this));
+            $stanza_id && (attrs.stanza_id = $stanza_id.attr('id'));
+            $contact_stanza_id && (attrs.contact_stanza_id = $contact_stanza_id.attr('id'));
+            return attrs;
+        },
+
         receiveChatMessage: function (message, options) {
             options = options || {};
             var $message = $(message),
@@ -4900,35 +4923,16 @@ define("xabber-chats", function () {
                 var $mam = $message.find('result[xmlns="'+Strophe.NS.MAM+'"]');
                 if ($mam.length) {
                     $forwarded = $mam.children('forwarded');
-                    var $stanza_id, $contact_stanza_id,
-                        stanza_id, contact_stanza_id;
                     if ($forwarded.length) {
                         $message = $forwarded.children('message');
                         $delay = $forwarded.children('delay');
                     }
-                    $message.children('stanza-id').each(function (idx, stanza_id) {
-                        stanza_id = $(stanza_id);
-                        if ($message.children('reference[type="groupchat"]').length) {
-                            if (stanza_id.attr('by') === from_bare_jid) {
-                                $stanza_id = stanza_id;
-                                $contact_stanza_id = stanza_id;
-                            }
-                        }
-                        else {
-                            if (stanza_id.attr('by') === from_bare_jid)
-                                $contact_stanza_id = stanza_id;
-                            else
-                                $stanza_id = stanza_id;
-                        }
-                    }.bind(this));
-                    $contact_stanza_id && (contact_stanza_id = $contact_stanza_id.attr('id'));
-                    $stanza_id && (stanza_id = $stanza_id.attr('id'));
-                    stanza_id = stanza_id || $mam.attr('id');
+                    let stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid});
                     return this.receiveChatMessage($message[0], _.extend(options, {
                         is_mam: true,
                         delay: $delay,
-                        stanza_id: stanza_id,
-                        contact_stanza_id: contact_stanza_id
+                        stanza_id: stanza_ids.stanza_id || $mam.attr('id'),
+                        contact_stanza_id: stanza_ids.contact_stanza_id
                     }));
                 }
                 let $carbons = $message.find('[xmlns="'+Strophe.NS.CARBONS+'"]');
@@ -4986,13 +4990,15 @@ define("xabber-chats", function () {
                         }
                     }
                     $forwarded = $carbons.children('forwarded');
-                    if ($forwarded.length) {
+                    if ($forwarded.length)
                         $message = $forwarded.children('message');
-                    }
                     if ($carbons.find('request[xmlns="' + Strophe.NS.DELIVERY + '"][to="' + to_bare_jid + '"]').length)
                         return;
+                    let stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: true});
                     return this.receiveChatMessage($message[0], _.extend(options, {
-                        carbon_copied: true
+                        carbon_copied: true,
+                        stanza_id: stanza_ids.stanza_id,
+                        contact_stanza_id: stanza_ids.contact_stanza_id
                     }));
                 }
                 let $forwarded_msgs = [];
