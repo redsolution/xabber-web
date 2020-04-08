@@ -323,6 +323,7 @@ define([
             }.bind(this));
 
             blockquotes.forEach(function (quote) {
+                let end_idx = quote.end > (markup_body.length - 1) ? (markup_body.length - 1) : quote.end;
                 for (let idx = quote.start; idx < (quote.start + quote.marker.length); idx++)
                     markup_body[idx] = "";
                 for (let idx = quote.start; idx < quote.end; idx++) {
@@ -333,7 +334,7 @@ define([
                     }
                 }
                 markup_body[quote.start] = '<div class="quote">';
-                markup_body[quote.end] += '</div>';
+                markup_body[end_idx] += '</div>';
             }.bind(this));
 
             return markup_body.join("").trim();
