@@ -225,7 +225,7 @@ var constants = {
     },
 
     QUOTE_MARKER: '&gt;',
-    MARKUP_TAGS: ['bold', 'underline', 'italic', 'strike', 'uri'],
+    MARKUP_TAGS: ['bold', 'underline', 'italic', 'strike', 'link', 'quote'],
 
     MIME_TYPES: {
         image: [
