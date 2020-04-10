@@ -2108,10 +2108,7 @@ define("xabber-contacts", function () {
             setActualRights: function () {
                 this.$('.rights-wrap').html("");
                 this.data_form.fields.forEach(function (field) {
-                    if (field.type  === 'fixed') {
-                        field.values && this.$('.rights-wrap').append($('<div class="rights-header"/>').text(field.values[0]));
-                    }
-                    if (field.type  === 'list-single' || field.type  === 'fixed' && !field.values) {
+                    if (field.type  === 'list-single' || field.type  === 'fixed' && (!field.values || field.values[0] == 0)) {
                         !field.values && (field.values = []);
                         let attrs = {
                                 pretty_name: field.label,
@@ -2138,7 +2135,8 @@ define("xabber-contacts", function () {
                                     .text(moment(Number(attrs.expires)*1000).fromNow());
                             }
                         }
-                    }
+                    } else if (field.type  === 'fixed')
+                        field.values && this.$('.rights-wrap').append($('<div class="rights-header"/>').text(field.values[0]));
                 }.bind(this));
             },
 
@@ -2203,7 +2201,7 @@ define("xabber-contacts", function () {
                     $right_item = $target.closest('.right-item'),
                     right_name = $target.prop('id');
                 if ($target.prop('checked')) {
-                    if (!this.actual_rights.find(right => right === right_name))
+                    if (!this.actual_rights.find(right => right.name === right_name))
                         $right_item.addClass('changed');
                     else
                         if ($right_item.hasClass('changed-timer'))
@@ -2212,7 +2210,7 @@ define("xabber-contacts", function () {
                             $right_item.removeClass('changed');
                 }
                 else {
-                    if (this.actual_rights.find(right => right === right_name))
+                    if (this.actual_rights.find(right => right.name === right_name))
                         $right_item.addClass('changed');
                     else {
                         $right_item.removeClass('changed');
