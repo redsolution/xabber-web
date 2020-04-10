@@ -290,7 +290,7 @@ define("xabber-chats", function () {
                             from_jid: user_jid || user_id,
                             groupchat_jid: Strophe.getBareJidFromJid(options.is_sender ? $message.attr('to') : $message.attr('from'))
                         });
-                    } else if ($reference.children('forward').length)
+                    } else if ($reference.children('forwarded').length)
                         mutable_content.push({ start: begin, end: end, type: 'forward'});
                     else if ($file_sharing.length) {
                         let type = $file_sharing.parent('voice-message[xmlns="' + Strophe.NS.VOICE_MESSAGE + '"]').length ? 'voice' : 'file',
@@ -3449,7 +3449,7 @@ define("xabber-chats", function () {
                     images = message.get('images') || [],
                     all_files = files.concat(images);
                 all_files.forEach(function (file, idx) {
-                    legacy_body = file.url + ((idx != all_files.length - 1) ? '\n' : "");
+                    legacy_body = file.url[0] + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
                         end_idx = (body + legacy_body).length - 1;
                     stanza.c('reference', {
@@ -3467,7 +3467,7 @@ define("xabber-chats", function () {
                     file.width && stanza.c('width').t(file.width).up();
                     file.duration && stanza.c('duration').t(file.duration).up();
                     file.description && stanza.c('desc').t(file.description).up();
-                    stanza.c('sources')
+                    stanza.c('sources');
                     file.url.forEach(function (u) {
                         stanza.c('uri').t(u).up()
                     }.bind(this));
@@ -3738,10 +3738,10 @@ define("xabber-chats", function () {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
-                    url: file_.url
+                    url: [file_.url]
                 };
                 file_.voice && (file_new_format.voice = true);
-                body_message += file_new_format.url + "\n";
+                body_message += file_new_format.url[0] + "\n";
                 if (this.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
@@ -3795,7 +3795,7 @@ define("xabber-chats", function () {
                     let file_attrs = {
                             name: item.name,
                             type: item.type,
-                            url: item.url
+                            url: [item.url]
                         },
                         template_for_file_content,
                         mdi_icon_class = utils.file_type_icon(item.type);
@@ -4006,18 +4006,18 @@ define("xabber-chats", function () {
             $(files).each(function(idx, file) {
                 if (idx > 0)
                     files_links += '\n';
-                files_links += file.url;
+                files_links += file.url[0];
             });
             $(images).each(function(idx, image) {
                 if (idx > 0)
                     files_links += '\n';
-                files_links += image.url;
+                files_links += image.url[0];
             });
             $(fwd_messages).each(function (idx, message) {
                 $(message).each(function (i, file) {
                     if (files_links != "")
                         files_links += '\n';
-                    files_links += file.url;
+                    files_links += file.url[0];
                 });
             });
             utils.copyTextToClipboard(files_links, 'Link copied to clipboard', 'ERROR: Link not copied to clipboard');
@@ -4919,13 +4919,8 @@ define("xabber-chats", function () {
                         carbon_copied: true
                     }));
                 }
-                let $forwarded_msgs = [];
-                $forwarded = $message.children('reference[type="forward"][xmlns="' + Strophe.NS.REFERENCE + '"]').children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
-
-                /* --- OLD FORMAT OF FORWARDED MESSAGES --- */
-                if (!$forwarded.length)
-                    $forwarded = $message.children('forwarded');
-                /* ---------------------------------------- */
+                let forwarded_msgs = [];
+                $forwarded = $message.children('reference[type="mutable"][xmlns="' + Strophe.NS.REFERENCE + '"]').children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
 
                 $forwarded.each(function (idx, forwarded_msg) {
                     var $forwarded_msg = $(forwarded_msg),
@@ -4941,10 +4936,10 @@ define("xabber-chats", function () {
                         from_jid: from_jid,
                         delay: $forwarded_delay
                     });
-                    $forwarded_msgs.push(forwarded_message);
+                    forwarded_msgs.push(forwarded_message);
                 }.bind(this));
                 return this.receiveChatMessage($message[0], _.extend({
-                    forwarded_message: $forwarded_msgs,
+                    forwarded_message: forwarded_msgs.length ? forwarded_msgs : null,
                     xml: $message[0]
                 }, options));
             }
@@ -7185,7 +7180,7 @@ define("xabber-chats", function () {
 
         createPreviewImage: function(image) {
             var imgContent = new Image();
-                imgContent.src = image.url;
+                imgContent.src = image.url[0];
             $(imgContent).addClass('fwd-img-preview');
             return imgContent;
         },
