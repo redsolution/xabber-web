@@ -246,8 +246,8 @@ define([
         pretty_duration: function (duration) {
             if (_.isNaN(Number(duration)))
                 return duration;
-            if (_.isUndefined(duration))
-                return undefined;
+            if (_.isUndefined(duration) || duration === "")
+                return "";
             if (duration < 10)
                 return ("0:0" + duration);
             if (duration < 60)
@@ -268,11 +268,14 @@ define([
                 return Array.from(str).slice(from, to).join("");
         },
 
-        slice_pretty_body: function (body, legacy_refs) {
+        slice_pretty_body: function (body, mutable_refs) {
+            if (!mutable_refs || !mutable_refs.length)
+                return body;
             body = body || "";
+            mutable_refs = mutable_refs.filter(m => m.type === 'groupchat' || m.type === 'forward');
             let pretty_body = Array.from(deps.Strophe.xmlescape(body));
-            legacy_refs && legacy_refs.forEach(function (legacy_ref) {
-                for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
+            mutable_refs && mutable_refs.forEach(function (ref) {
+                for (let idx = ref.start; idx <= ref.end; idx++)
                     pretty_body[idx] = "";
             }.bind(this));
             return deps.Strophe.xmlunescape(pretty_body.join("").trim());
