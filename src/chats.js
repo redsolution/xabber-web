@@ -436,7 +436,7 @@ define("xabber-chats", function () {
                 body = $message.children('comment').text() || body;
             /* ----------------------------------------------------- */
 
-            if (body.removeEmoji() === "")
+            if (!attrs.forwarded_message && body.removeEmoji() === "")
                 attrs.only_emoji = Array.from(body).length;
 
             body && (attrs.message = body);
@@ -3644,7 +3644,7 @@ define("xabber-chats", function () {
                 submitted_here: true,
                 forwarded_message: null
             };
-            if (text.removeEmoji() === "")
+            if (!fwd_messages.length && text.removeEmoji() === "")
                 attrs.only_emoji = Array.from(text).length;
             if (fwd_messages.length) {
                 var new_fwd_messages = [];
