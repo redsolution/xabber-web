@@ -7286,7 +7286,7 @@ define("xabber-chats", function () {
                 .c('message');
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
-                    gc_length = groupchat_ref && (groupchat_ref.start - groupchat_ref.end - 1);
+                    gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end + 1);
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
                     .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
                     .c('delay', {
