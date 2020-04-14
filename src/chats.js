@@ -3435,13 +3435,7 @@ define("xabber-chats", function () {
                         end: blockquote.end + legacy_body.length,
                         type: 'decoration'
                     })
-                        .c('marker', {xmlns: Strophe.NS.QUOTE}).t(Strophe.xmlunescape(constants.QUOTE_MARKER)).up().up();
-                    mutable_content.push({
-                        start: blockquote.start + legacy_body.length,
-                        end: blockquote.end + legacy_body.length,
-                        type: 'quote',
-                        marker: constants.QUOTE_MARKER
-                    });
+                        .c('quote', {xmlns: Strophe.NS.MARKUP}).up().up();
                 }.bind(this));
             }
 

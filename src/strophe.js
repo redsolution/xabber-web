@@ -235,7 +235,6 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('REWRITE', 'http://xabber.com/protocol/rewrite');
         Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/reference');
-        Strophe.addNamespace('QUOTE', 'https://xabber.com/protocol/quote');
         Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
         Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-message');
         Strophe.addNamespace('OTB', 'https://xabber.com/protocol/otb');
