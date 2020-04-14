@@ -3483,10 +3483,11 @@ define("xabber-chats", function () {
             body && stanza.c('body').t(body).up();
             stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
-            let delivery_attrs = {xmlns: Strophe.NS.DELIVERY};
             this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
-            (message.get('state') === constants.MSG_ERROR) && (delivery_attrs.retry = true) && message.set('state', constants.MSG_PENDING);
-            stanza.c('request', delivery_attrs).up();
+            if (message.get('state') === constants.MSG_ERROR) {
+                stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
+                message.set('state', constants.MSG_PENDING);
+            }
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
             this.account.sendMsg(stanza, function () {
@@ -4641,37 +4642,25 @@ define("xabber-chats", function () {
         receiveHeadlineMessage: function (message) {
             var $message = $(message),
                 msg_from = Strophe.getBareJidFromJid($message.attr('from')),
-                $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]');
+                $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]'),
+                $echo_msg = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"][type="echo"]').children('message');
             if ($stanza_received.length) {
-                let $received_message = $stanza_received.children('forwarded').children('message'),
-                    stanza_id = $received_message.children('stanza-id').attr('id'),
-                    origin_msg_id = $stanza_received.children('origin-id').first().attr('id') || $received_message.children('origin-id').first().attr('id');
+                let stanza_id = $received_message.children('stanza-id').attr('id'),
+                    origin_msg_id = $stanza_received.children('origin-id').first().attr('id');
                 if (origin_msg_id) {
                     let msg = this.account.messages.get(origin_msg_id || stanza_id),
                         delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
-                    msg && msg.set('state', constants.MSG_SENT);
+                    msg && msg.set('state', constants.MSG_SENT); // delivery receipt
                     if (msg && delivered_time) {
-                        msg.set('time', delivered_time);
+                        msg.set('time', delivered_time); // changing on server time
                         msg.set('timestamp', Number(moment(delivered_time)));
                     }
-                    let contact = this.account.contacts.get(msg_from);
-                    if (contact) {
-                        if (contact.get('group_chat')) {
-                            if ($received_message.children('stanza-id').attr('by') == contact.get('jid')) {
-                                let from_id = $received_message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('reference[type="mutable"][xmlns="' + Strophe.NS.REFERENCE + '"]').children('user').attr('id');
-                                this.setStanzaId($received_message);
-                                this.account.messages.get(origin_msg_id || stanza_id).set({state: constants.MSG_DELIVERED, from_id: from_id});
-                                let $groupchat = this.account.chats.getChat(contact);
-                                from_id && $groupchat.item_view.content.$el.find('.chat-message[data-uniqueid="' + origin_msg_id + '"]').attr('data-from-id', from_id);
-                            }
-                        }
-                        else
-                            this.setStanzaId($stanza_received);
-                    }
+                    this.account.contacts.get(msg_from) && this.setStanzaId($stanza_received);
                 }
-                if ($received_message.length)
-                    this.receiveChatMessage($received_message[0], {echo_msg: true, stanza_id: $received_message.children('stanza-id').attr('id')});
-                return;
+            }
+
+            if ($echo_msg.length) { // TODO parsing of new echo message such as previous condition
+                this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
             }
 
             let $token_revoke = $message.children('revoke[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]');
