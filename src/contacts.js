@@ -993,12 +993,12 @@ define("xabber-contacts", function () {
             },
 
             updateStatus: function () {
-                this.$('.status').attr('data-status', this.model.get('status'));
-                this.$('.status-message').text(this.model.getStatusMessage());
+                this.$('.main-info .status').attr('data-status', this.model.get('status'));
+                this.$('.main-info .status-message').text(this.model.getStatusMessage());
             },
 
             updateStatusMsg: function () {
-                this.$('.status-message').text(this.model.getStatusMessage());
+                this.$('.main-info .status-message').text(this.model.getStatusMessage());
             },
 
             updateAvatar: function () {
