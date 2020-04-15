@@ -2398,7 +2398,7 @@ define("xabber-contacts", function () {
                     if (new_badge != this.participant.get('badge')) {
                         let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
-                            .c('item', {id: this.participant.get('id')})
+                            .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
                         this.account.sendIQ(iq_changes, function () {
                                 this.model.updateBadge(new_badge);
