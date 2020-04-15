@@ -2308,6 +2308,8 @@ define("xabber-chats", function () {
         },
 
         onScroll: function () {
+            if (!this.isVisible())
+                return;
             this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
             let $chatday_indicator = this.$('.chat-day-indicator'),
                 $messages = this.$('.chat-message'),
@@ -2804,11 +2806,10 @@ define("xabber-chats", function () {
         updateMessage: function (item) {
             let $message, images = item.get('images'), emoji = item.get('only_emoji'),
                 files =  item.get('files');
-            if (item instanceof xabber.Message) {
+            if (item instanceof xabber.Message)
                 $message = this.$('.chat-message[data-uniqueid="' + item.get('unique_id') + '"]');
-            } else {
+            else
                 return;
-            }
             $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: utils.emoji_size(emoji)}));
             if (images) {
                 if (images.length > 1) {
@@ -3483,7 +3484,6 @@ define("xabber-chats", function () {
             body && stanza.c('body').t(body).up();
             stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
-            this.contact.get('group_chat') && (delivery_attrs.to = this.model.get('jid'));
             if (message.get('state') === constants.MSG_ERROR) {
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
                 message.set('state', constants.MSG_PENDING);
@@ -3919,6 +3919,7 @@ define("xabber-chats", function () {
             });
             $message.detach();
             $message.children('.right-side').find('.msg-time').attr({title: utils.pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
+            message.get('user_info') && $message.attr('data-from-id', message.get('user_info').id);
             this.model.messages.sort();
             var index = this.model.messages.indexOf(message);
             if (index === 0) {
@@ -4529,16 +4530,6 @@ define("xabber-chats", function () {
             }
         },
 
-        setStanzaId: function ($message) {
-            var origin_id = $message.children('origin-id').attr('id'),
-                stanza_id = $message.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_id || stanza_id));
-            if (pending_message) {
-                this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, $message.children('stanza-id').attr('id'));
-                this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
-            }
-        },
-
         parsePubSubNode: function (node) {
             if (!node)
                 return null;
@@ -4645,22 +4636,25 @@ define("xabber-chats", function () {
                 $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]'),
                 $echo_msg = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"][type="echo"]').children('message');
             if ($stanza_received.length) {
-                let stanza_id = $received_message.children('stanza-id').attr('id'),
+                let stanza_id = $stanza_received.children('stanza-id').attr('id'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id');
                 if (origin_msg_id) {
                     let msg = this.account.messages.get(origin_msg_id || stanza_id),
                         delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
-                    msg && msg.set('state', constants.MSG_SENT); // delivery receipt
-                    if (msg && delivered_time) {
-                        msg.set('time', delivered_time); // changing on server time
-                        msg.set('timestamp', Number(moment(delivered_time)));
+                    if (!msg)
+                        return;
+                    msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
+                    let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
+                    if (pending_message) {
+                        this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, stanza_id);
+                        this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
                     }
-                    this.account.contacts.get(msg_from) && this.setStanzaId($stanza_received);
                 }
+                return;
             }
 
-            if ($echo_msg.length) { // TODO parsing of new echo message such as previous condition
-                this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
+            if ($echo_msg.length) {
+                return this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
             }
 
             let $token_revoke = $message.children('revoke[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]');
