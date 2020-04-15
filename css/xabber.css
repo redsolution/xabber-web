@@ -2804,7 +2804,7 @@ body .client-body-wrap.hidden + #modals {
 .edit-rights .participant-details-item #edit-nickname {
     display: none;
     height: 26px;
-    margin: 0px;
+    margin: 0px auto;
     line-height: 26px;
     margin-bottom: 2px;
     border-bottom: 1px dotted #F44336;
