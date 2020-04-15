@@ -3782,22 +3782,22 @@ define("xabber-contacts", function () {
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
                         jid = $item.attr('jid');
-                    if (jid === this.account.get('jid')) {
+                    if (jid === this.account.get('jid'))
                         return;
-                    }
-                    let contact = this.contacts.mergeContact(jid),
+                    let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
+                        contact = this.contacts.mergeContact(jid),
                         is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
                         chat = this.account.chats.getChat(contact),
-                        message = $item.children('last-message').children('message'),
-                        current_call = $item.children('call'),
-                        $unread_messages = $item.children('unread'),
-                        last_delivered_msg = $item.children('delivered').attr('id'),
-                        last_displayed_msg = $item.children('displayed').attr('id'),
+                        message = $sync_metadata.children('last-message').children('message'),
+                        current_call = $sync_metadata.children('call'),
+                        $unread_messages = $sync_metadata.children('unread'),
+                        last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
+                        last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
-                        msg_retraction_version = $item.children('retract').attr('version'),
+                        msg_retraction_version = $sync_metadata.children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     contact.set('group_chat', is_group_chat);
-                    if ($item.children('deleted').length) {
+                    if ($sync_metadata.children('deleted').length) {
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
