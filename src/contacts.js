@@ -3794,7 +3794,7 @@ define("xabber-contacts", function () {
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
-                        msg_retraction_version = $sync_metadata.children('retract').attr('version'),
+                        msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     contact.set('group_chat', is_group_chat);
                     if ($sync_metadata.children('deleted').length) {
