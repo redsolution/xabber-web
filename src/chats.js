@@ -2668,8 +2668,6 @@ define("xabber-chats", function () {
             }
 
             if (!(message.get('synced_from_server') || message.get('is_archived'))) {
-                if (!message.get('auth_request') && (message.get('type') === 'system' && this.model.get('display') && (xabber.get('focused') || !this.model.messages_unread.models.length)))
-                    this.model.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
                     if (!message.get('is_unread'))
@@ -5414,7 +5412,7 @@ define("xabber-chats", function () {
                 if (!view.model.get('displayed_sent') && view.model.messages.length) {
                     let last_msg = view.model.messages.models[view.model.messages.length - 1];
                     if (last_msg)
-                        if (!last_msg.isSenderMe() && !last_msg.get('is_unread')) {
+                        if (!last_msg.isSenderMe() && (view.model.get('unread') || view.model.get('const_unread'))) {
                             view.model.sendMarker(last_msg.get('origin_id'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                             view.model.set('displayed_sent', true);
                         }
@@ -7581,9 +7579,6 @@ define("xabber-chats", function () {
                     view.content.readMessages();
                     if (view.model.get('is_accepted') != false)
                         view.content.bottom.focusOnInput();
-                    let last_msg = view.model.messages.last();
-                    if (last_msg && last_msg.get('type') === 'system')
-                        view.model.sendMarker(last_msg.get('origin_id'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                 }
             }
         }, this);
