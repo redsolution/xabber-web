@@ -608,13 +608,15 @@ define("xabber-chats", function () {
           },
 
           onChangeIceConnectionState: function (ev) {
-              let conn_state = ev.target.iceConnectionState;
+              let peer_conn = ev.target,
+                  conn_state = peer_conn.iceConnectionState;
               if (conn_state === "failed" || conn_state === "disconnected") {
-                  this.set('status', conn_state);
+                  /*this.set('status', conn_state);
                   this.reject();
                   this.destroy();
                   this.updateStatus('Network error...');
-                  xabber.current_voip_call = null;
+                  xabber.current_voip_call = null;*/
+                  peer_conn.restartIce();
               }
               if (conn_state === "connected") {
                   !this.conn.connectionState && this.onConnected();
