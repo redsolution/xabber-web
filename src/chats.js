@@ -3019,7 +3019,7 @@ define("xabber-chats", function () {
                 is_image: is_image,
                 is_file: is_file,
                 files: files,
-                role: role,
+                role: utils.pretty_name(role),
                 badge: badge,
                 from_id: from_id
             });
@@ -3101,7 +3101,7 @@ define("xabber-chats", function () {
                         is_fwd_voice_message,
                         user_info = attrs.user_info || {},
                         avatar_id = user_info.avatar,
-                        role = user_info.role,
+                        role = utils.pretty_name(user_info.role),
                         badge = user_info.badge,
                         from_id = user_info.id,
                         from_jid = attrs.from_jid;
@@ -6539,8 +6539,8 @@ define("xabber-chats", function () {
                     this.$('.account-badge').show().text(badge);
                 else
                     this.$('.account-badge').hide();
-                if (role && role != 'Member')
-                    this.$('.account-role').show().text(role);
+                if (role && role != 'member')
+                    this.$('.account-role').show().text(utils.pretty_name(role));
                 else
                     this.$('.account-role').hide();
                 this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 16});
