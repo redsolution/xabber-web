@@ -3789,7 +3789,7 @@ define("xabber-contacts", function () {
                         is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
                         chat = this.account.chats.getChat(contact),
                         message = $sync_metadata.children('last-message').children('message'),
-                        current_call = $sync_metadata.children('call'),
+                        current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
                         $unread_messages = $sync_metadata.children('unread'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
