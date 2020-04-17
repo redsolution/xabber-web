@@ -3444,7 +3444,7 @@ define("xabber-chats", function () {
                     images = message.get('images') || [],
                     all_files = files.concat(images);
                 all_files.forEach(function (file, idx) {
-                    legacy_body = file.url[0] + ((idx != all_files.length - 1) ? '\n' : "");
+                    legacy_body = file.sources[0] + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
                         end_idx = (body + legacy_body).length - 1;
                     stanza.c('reference', {
@@ -3462,8 +3462,8 @@ define("xabber-chats", function () {
                     file.width && stanza.c('width').t(file.width).up();
                     file.duration && stanza.c('duration').t(file.duration).up();
                     file.description && stanza.c('desc').t(file.description).up();
-                    stanza.c('sources');
-                    file.url.forEach(function (u) {
+                    stanza.up().c('sources');
+                    file.sources.forEach(function (u) {
                         stanza.c('uri').t(u).up()
                     }.bind(this));
                     stanza.up().up().up();
@@ -3733,10 +3733,10 @@ define("xabber-chats", function () {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
-                    url: [file_.url]
+                    sources: [file_.url]
                 };
                 file_.voice && (file_new_format.voice = true);
-                body_message += file_new_format.url[0] + "\n";
+                body_message += file_new_format.sources[0] + "\n";
                 if (this.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
@@ -3790,7 +3790,7 @@ define("xabber-chats", function () {
                     let file_attrs = {
                             name: item.name,
                             type: item.type,
-                            url: [item.url]
+                            sources: [item.url]
                         },
                         template_for_file_content,
                         mdi_icon_class = utils.file_type_icon(item.type);
@@ -4002,37 +4002,31 @@ define("xabber-chats", function () {
             $(files).each(function(idx, file) {
                 if (idx > 0)
                     files_links += '\n';
-                files_links += file.url[0];
+                files_links += file.sources[0];
             });
             $(images).each(function(idx, image) {
                 if (idx > 0)
                     files_links += '\n';
-                files_links += image.url[0];
+                files_links += image.sources[0];
             });
             $(fwd_messages).each(function (idx, message) {
                 $(message).each(function (i, file) {
                     if (files_links != "")
                         files_links += '\n';
-                    files_links += file.url[0];
+                    files_links += file.sources[0];
                 });
             });
             utils.copyTextToClipboard(files_links, 'Link copied to clipboard', 'ERROR: Link not copied to clipboard');
         },
 
-        showParticipantProperties: function (member_id) {
-            let this_member = this.contact.participants.get(member_id);
+        showParticipantProperties: function (participant_id) {
+            let participant = this.contact.participants.get(participant_id);
+            (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
             this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
-            if (this_member) {
-                this.contact.participants.participant_properties_panel.open(this_member);
-            }
-            else {
-                let iq_member_info = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: member_id});
-                this.account.sendIQ(iq_member_info, function (iq) {
-                    let this_member = this.contact.participants.createFromStanza($(iq).find('item'));
-                    this.contact.participants.participant_properties_panel.open(this_member);
-                }.bind(this));
-            }
+            this.contact.membersRequest({id: participant_id}, function (response) {
+                let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                this.contact.participants.participant_properties_panel.open(participant, data_form);
+            }.bind(this));
         },
 
         onClickMessage: function (ev) {
@@ -4106,14 +4100,7 @@ define("xabber-chats", function () {
                     let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
                     if (this.contact.get('group_chat')) {
                         let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id');
-                        if (member_id) {
-                            if (!this.contact.all_rights)
-                                this.contact.getAllRights(function () {
-                                    this.showParticipantProperties(member_id)
-                                }.bind(this));
-                            else
-                                this.showParticipantProperties(member_id);
-                        }
+                        member_id && this.showParticipantProperties(member_id);
                         return;
                     }
                     else if (from_jid === this.account.get('jid')) {
@@ -4130,12 +4117,7 @@ define("xabber-chats", function () {
                 if ($elem.hasClass('mention')) {
                     let member_id = $elem.data('target');
                     if (this.contact.get('group_chat')) {
-                        if (!this.contact.all_rights)
-                            this.contact.getAllRights(function () {
-                                this.showParticipantProperties(member_id)
-                            }.bind(this));
-                        else
-                            this.showParticipantProperties(member_id);
+                        member_id && this.showParticipantProperties(member_id);
                     }
                     else {
                         if (member_id === this.account.get('jid'))
@@ -7164,7 +7146,7 @@ define("xabber-chats", function () {
 
         createPreviewImage: function(image) {
             var imgContent = new Image();
-                imgContent.src = image.url[0];
+                imgContent.src = image.sources[0];
             $(imgContent).addClass('fwd-img-preview');
             return imgContent;
         },
