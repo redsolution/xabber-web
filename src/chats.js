@@ -353,7 +353,7 @@ define("xabber-chats", function () {
                 attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
             }
 
-            if (body.removeEmoji() === "")
+            if (!attrs.forwarded_message && body.removeEmoji() === "")
                 attrs.only_emoji = Array.from(body).length;
 
             body && (attrs.message = utils.slice_pretty_body(body, mutable_content));
@@ -3562,7 +3562,7 @@ define("xabber-chats", function () {
                 submitted_here: true,
                 forwarded_message: null
             };
-            if (text.removeEmoji() === "")
+            if (!fwd_messages.length && text.removeEmoji() === "")
                 attrs.only_emoji = Array.from(text).length;
             if (fwd_messages.length) {
                 var new_fwd_messages = [];
