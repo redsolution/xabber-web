@@ -353,10 +353,12 @@ define("xabber-chats", function () {
                 attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
             }
 
+            body && (body = utils.slice_pretty_body(body, mutable_content));
+
             if (!attrs.forwarded_message && body.removeEmoji() === "")
                 attrs.only_emoji = Array.from(body).length;
 
-            body && (attrs.message = utils.slice_pretty_body(body, mutable_content));
+            attrs.message = body;
 
             options.echo_msg && ($delay = $message.children('time'));
             $delay.length && (attrs.time = $delay.attr('stamp'));
