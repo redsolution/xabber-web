@@ -1158,6 +1158,10 @@ define("xabber-contacts", function () {
             render: function (options) {
                 this.updateName();
                 this.updateButtons();
+                if (!this.model.my_rights)
+                    this.model.getMyInfo(function () {
+                        this.updateButtons();
+                    }.bind(this));
                 this.$('.btn-delete').showIf(this.model.get('subscription') === "both");
                 this.$('.btn-join').showIf(this.model.get('subscription') !== "both");
                 let dropdown_settings = {
@@ -1848,7 +1852,7 @@ define("xabber-contacts", function () {
 
             events: {
                 "click .btn-cancel-changes": "close",
-                "click .clickable-field input": "changeRights",
+                "change .clickable-field input": "changeRights",
                 "click .btn-save-user-rights": "saveRights",
                 "click .nickname": "editNickname",
                 "change .circle-avatar input": "changeAvatar",
@@ -2115,7 +2119,7 @@ define("xabber-contacts", function () {
                                 name: field.var,
                                 expires: field.values ? field.values[0] : undefined
                             },
-                            restriction_item = $(templates.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name})),
+                            restriction_item = $(templates.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: field.type})),
                             restriction_expire;
                         if (field.options) {
                             restriction_expire = $(templates.group_chats.right_expire_variants({
@@ -2235,7 +2239,7 @@ define("xabber-contacts", function () {
                     iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                         .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
-                this.$('.buttons-wrap button').addClass('non-active');
+                this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
                 changed_avatar && $participant_avatar.find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 if (nickname_value != this.participant.get('nickname')) {
                     has_changes = true;
@@ -2294,7 +2298,14 @@ define("xabber-contacts", function () {
                     let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
-                    this.account.sendIQ(iq_rights_changes);
+                    this.account.sendIQ(iq_rights_changes, function () {
+                            this.close();
+                        }.bind(this),
+                        function (error) {
+                            this.close();
+                            if ($(error).find('not-allowed').length)
+                                utils.dialogs.error("You have no permission to change participant's info");
+                        }.bind(this));
                 }
                 $btn.blur();
             }
@@ -2558,7 +2569,7 @@ define("xabber-contacts", function () {
                             expires: field.values ? field.values[0] : undefined
                         },
                         view = this.$('.default-restrictions-list-wrap .right-item.restriction-default-' + attrs.name),
-                        restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name})),
+                        restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name, type: field.type})),
                         restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
                     if (view.length)
                         view.detach();
