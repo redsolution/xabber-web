@@ -3455,7 +3455,7 @@ define("xabber-chats", function () {
                         begin: start_idx,
                         end: end_idx
                     });
-                    file.voice && stanza.c('voice-message', {xmlns: Strohpe.NS.VOICE_MESSAGE});
+                    file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                     stanza.c('file-sharing', {xmlns: Strophe.NS.OTB}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
                     file.name && stanza.c('name').t(file.name).up();
@@ -4752,7 +4752,7 @@ define("xabber-chats", function () {
                 from_bare_jid = options.from_bare_jid;
                 $message.children('stanza-id').each(function (idx, stanza_id) {
                 stanza_id = $(stanza_id);
-                if ($message.children('reference[type="groupchat"]').length) {
+                if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').length) {
                     if (stanza_id.attr('by') === from_bare_jid) {
                         $stanza_id = stanza_id;
                         $contact_stanza_id = stanza_id;
