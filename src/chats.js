@@ -3792,7 +3792,7 @@ define("xabber-chats", function () {
                     let file_attrs = {
                             name: item.name,
                             type: item.type,
-                            sources: [item.url]
+                            sources: item.sources
                         },
                         template_for_file_content,
                         mdi_icon_class = utils.file_type_icon(item.type);
