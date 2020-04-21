@@ -1890,10 +1890,10 @@ define("xabber-chats", function () {
           addMessage: function (message) {
               if (message.get('auth_request'))
                   return;
-              if (this.mention_context && (message.get('archive_id') === this.stanza_id)) {} else message.set('is_archived', true);
+              if (this.mention_context && (message.get('stanza_id') === this.stanza_id)) {} else message.set('is_archived', true);
               let $message = this.chat_content.buildMessageHtml(message).addClass('context-message'),
                   index = this.account.context_messages.indexOf(message);
-              if (message.get('archive_id') === this.stanza_id) {
+              if (message.get('stanza_id') === this.stanza_id) {
                   $message.addClass('message-from-context');
                   setTimeout(function () {
                       $message.removeClass('message-from-context')
@@ -2647,8 +2647,8 @@ define("xabber-chats", function () {
                 this.model.set('is_accepted', false);
             }
             this.model.set('opened', true);
-            if (!message.get('is_archived') && message.get('archive_id'))
-                this.model.set('last_archive_id', message.get('archive_id'));
+            if (!message.get('is_archived') && message.get('stanza_id'))
+                this.model.set('last_archive_id', message.get('stanza_id'));
 
             if (message.get('participants_version')) {
                 if (this.contact.participants && this.contact.participants.version < message.get('participants_version'))
@@ -4700,7 +4700,7 @@ define("xabber-chats", function () {
                     return;
                 let $retracted_msg = $message.find('retract-message'),
                     retracted_msg_id = $retracted_msg.attr('id'),
-                    msg_item = chat.messages.find(msg => msg.get('archive_id') == retracted_msg_id);
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id);
                 if (msg_item) {
                     msg_item.set('is_unread', false);
                     chat.item_view.content.removeMessage(msg_item);

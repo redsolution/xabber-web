@@ -465,7 +465,7 @@ define("xabber-contacts", function () {
                 else {
                     var $msg = $message.find('result message').first();
                     if (this.get('pinned_message'))
-                        if (this.get('pinned_message').archive_id === $msg.find('stanza-id').attr('id'))
+                        if (this.get('pinned_message').stanza_id === $msg.find('stanza-id').attr('id'))
                             return;
                     var message = this.account.chats.receiveChatMessage($message, {pinned_message: true});
                     this.set('pinned_message', message);
@@ -2996,7 +2996,7 @@ define("xabber-contacts", function () {
                 let contact = this.model,
                     chat = this.account.chats.getChat(contact);
                 chat.set('is_accepted', true);
-                this.message && chat.sendMarker(this.message.get('msgid'), 'displayed', this.message.get('archive_id'), this.message.get('contact_archive_id'));
+                this.message && chat.sendMarker(this.message.get('msgid'), 'displayed', this.message.get('stanza_id'), this.message.get('contact_stanza_id'));
                 chat.item_view.content.readMessages();
                 var invites = chat.item_view.content.$('.auth-request');
                 if (invites.length > 0) {
@@ -3847,7 +3847,7 @@ define("xabber-contacts", function () {
                     if (msg) {
                         if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
-                        chat.set('first_archive_id', msg.get('archive_id'));
+                        chat.set('first_archive_id', msg.get('stanza_id'));
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
                 }.bind(this));
