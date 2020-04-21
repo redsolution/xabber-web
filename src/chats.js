@@ -7035,7 +7035,7 @@ define("xabber-chats", function () {
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markup: content_attrs});
                 }
                 if (content.insert && content.insert.emoji) {
-                    content_concat = content_concat.concat(Array.from(_.escape($(content.insert.emoji).text())));
+                    content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
                 }
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
