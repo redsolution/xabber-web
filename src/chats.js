@@ -3491,7 +3491,7 @@ define("xabber-chats", function () {
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
             this.account.sendMsg(stanza, function () {
-                if (!this.contact.get('group_chat') && !this.account.server_features.find(feature => feature.get('var') === Strophe.NS.DELIVERY)) {
+                if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                     setTimeout(function () {
                         if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
                             message.set('state', constants.MSG_SENT);
