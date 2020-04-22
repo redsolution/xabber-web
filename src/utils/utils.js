@@ -275,7 +275,7 @@ define([
             mutable_refs = mutable_refs.filter(m => m.type === 'groupchat' || m.type === 'forward');
             let pretty_body = Array.from(deps.Strophe.xmlescape(body));
             mutable_refs && mutable_refs.forEach(function (ref) {
-                for (let idx = ref.start; idx <= ref.end; idx++)
+                for (let idx = ref.start; idx < ref.end; idx++)
                     pretty_body[idx] = "";
             }.bind(this));
             return deps.Strophe.xmlunescape(pretty_body.join("").trim());
@@ -291,13 +291,13 @@ define([
             !mention_tag && (mention_tag = 'span');
 
             mutable_refs.forEach(function (muted) {
-                for (let idx = muted.start; idx <= muted.end; idx++)
+                for (let idx = muted.start; idx < muted.end; idx++)
                     markup_body[idx] = "";
             }.bind(this));
 
             mentions.forEach(function (mention) {
                 let start_idx = mention.start,
-                    end_idx = mention.end > (markup_body.length - 1) ? (markup_body.length - 1) : mention.end;
+                    end_idx = mention.end > (markup_body.length - 1) ? (markup_body.length - 1) : (mention.end - 1);
                 if (start_idx > markup_body.length - 1)
                     return;
                 markup_body[start_idx] = '<' + mention_tag + ' data-target="' + mention.target + '" class="mention ground-color-100">' + markup_body[start_idx];
@@ -306,7 +306,7 @@ define([
 
             markups.forEach(function (markup) {
                 let start_idx = markup.start,
-                    end_idx = markup.end > (markup_body.length - 1) ? (markup_body.length - 1) : markup.end;
+                    end_idx = markup.end > (markup_body.length - 1) ? (markup_body.length - 1) : (markup.end - 1);
                 if (start_idx > markup_body.length - 1)
                     return;
                 if (markup.markup.length) {
@@ -327,10 +327,10 @@ define([
             }.bind(this));
 
             blockquotes.forEach(function (quote) {
-                let end_idx = quote.end > (markup_body.length - 1) ? (markup_body.length - 1) : quote.end;
+                let end_idx = quote.end > (markup_body.length - 1) ? (markup_body.length - 1) : (quote.end - 1);
                 for (let idx = quote.start; idx < (quote.start + constants.QUOTE_MARKER.length); idx++)
                     markup_body[idx] = "";
-                for (let idx = quote.start; idx < quote.end; idx++) {
+                for (let idx = quote.start; idx < end_idx; idx++) {
                     if (markup_body[idx] === '\n') {
                         for (let child_idx = idx + 1; child_idx <= (idx + constants.QUOTE_MARKER.length); child_idx++)
                             markup_body[child_idx] = "";

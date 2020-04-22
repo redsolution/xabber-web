@@ -3376,7 +3376,7 @@ define("xabber-chats", function () {
                 $(forwarded_message).each(function (idx, fwd_msg) {
                     let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
                         idx_begin = legacy_body.length,
-                        idx_end = legacy_body.concat(legacy_fwd_msg).length - 1;
+                        idx_end = legacy_body.concat(legacy_fwd_msg).length;
                     stanza.c('reference', {
                         xmlns: Strophe.NS.REFERENCE,
                         type: 'mutable',
@@ -3448,7 +3448,7 @@ define("xabber-chats", function () {
                 all_files.forEach(function (file, idx) {
                     legacy_body = file.sources[0] + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
-                        end_idx = (body + legacy_body).length - 1;
+                        end_idx = (body + legacy_body).length;
                     stanza.c('reference', {
                         xmlns: Strophe.NS.REFERENCE,
                         type: 'mutable',
@@ -6994,7 +6994,7 @@ define("xabber-chats", function () {
                 if (content.attributes) {
                     let content_attrs = [],
                         start_idx = content_concat.length,
-                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : (_.escape(content.insert).length - 1));
+                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
                     for (let attr in content.attributes)
                         (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
                     if (content_attrs.indexOf('mention') > -1) {
@@ -7008,12 +7008,12 @@ define("xabber-chats", function () {
                     }
                     if (content.attributes.blockquote) {
                         let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
-                            quote_end_idx = content_concat.length - 1;
+                            quote_end_idx = content_concat.length;
                         blockquotes.push({marker: constants.QUOTE_MARKER, start: quote_start_idx, end: quote_end_idx + constants.QUOTE_MARKER.length});
                         text = Array.from(_.escape(text));
                         text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
-                        (quote_end_idx > text.length - 1) && (quote_end_idx = text.length - 1);
-                        text[quote_end_idx] += '\n';
+                        (quote_end_idx > text.length) && (quote_end_idx = text.length);
+                        text[quote_end_idx - 1] += '\n';
                         text = _.unescape(text.join(""));
 
                         content_concat[quote_start_idx] += constants.QUOTE_MARKER;
@@ -7245,14 +7245,14 @@ define("xabber-chats", function () {
                 .c('message');
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
-                    gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end + 1);
+                    gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end);
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
                     .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
                     .c('delay', {
                         xmlns: 'urn:xmpp:delay',
                         stamp: fwd_msg.get('time')
                     }).up().cnode(fwd_msg.get('xml')).up().up().up();
-                forwarded_body += original_body.slice(fwd.start, fwd.end + 1);
+                forwarded_body += original_body.slice(fwd.start, fwd.end);
             }.bind(this));
             markups.forEach(function (markup) {
                 iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + forwarded_body.length, end: markup.end + forwarded_body.length, type: 'decoration'});
