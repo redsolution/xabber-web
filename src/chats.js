@@ -1042,6 +1042,8 @@ define("xabber-chats", function () {
                             $stanza_id = stanza_id;
                             $contact_stanza_id = stanza_id;
                         }
+                        else
+                            $stanza_id = stanza_id;
                     }
                     else {
                         if (stanza_id.attr('by') === from_bare_jid)
@@ -4757,6 +4759,8 @@ define("xabber-chats", function () {
                         $stanza_id = stanza_id;
                         $contact_stanza_id = stanza_id;
                     }
+                    else
+                        $stanza_id = stanza_id;
                 }
                 else {
                     if (stanza_id.attr('by') === from_bare_jid && !options.carbon_copied)
