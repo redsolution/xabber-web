@@ -297,10 +297,24 @@ define([
 
             mentions.forEach(function (mention) {
                 let start_idx = mention.start,
-                    end_idx = mention.end > (markup_body.length - 1) ? (markup_body.length - 1) : (mention.end - 1);
+                    end_idx = mention.end > (markup_body.length - 1) ? (markup_body.length - 1) : (mention.end - 1), target = mention.target;
                 if (start_idx > markup_body.length - 1)
                     return;
-                markup_body[start_idx] = '<' + mention_tag + ' data-target="' + mention.target + '" class="mention ground-color-100">' + markup_body[start_idx];
+                if (mention.is_gc) {
+                    let id = target.match(/\?id=\w*/),
+                        jid = target.match(/\?jid=.*/);
+                    if (id)
+                        target = id[0].slice(4);
+                    else if (jid)
+                        target = jid[0].slice(5);
+                    else {
+                        target = "";
+                        mention.me = true;
+                    }
+                }
+                else
+                    target = target.slice(5);
+                markup_body[start_idx] = '<' + mention_tag + ' data-target="' + target + '" class="mention' + (mention.me ? ' ground-color-100' : '') + '">' + markup_body[start_idx];
                 markup_body[end_idx] += '</' + mention_tag + '>';
             }.bind(this));
 

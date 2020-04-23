@@ -3949,6 +3949,10 @@ body .client-body-wrap.hidden + #modals {
     width: 100%;
 }
 
+.chat-message .chat-msg-content .mention {
+    background-color: #EEE;
+}
+
 .chat-message .chat-msg-content .mention:hover {
     text-decoration: underline;
 }
