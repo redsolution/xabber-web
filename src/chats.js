@@ -1236,10 +1236,7 @@ define("xabber-chats", function () {
                 this.set('const_unread', 0);
                 for (var i = msg_idx; i >= 0; i--) {
                     let message = this.messages.models[i];
-                    if (message.get('is_unread') || message.get('type') === 'system')
-                        message.set('is_unread', false);
-                    else
-                        return;
+                    message.set('is_unread', false);
                 }
             }
             else if (this.messages_unread.get(origin_id || stanza_id))
@@ -1405,6 +1402,7 @@ define("xabber-chats", function () {
             this.updateBot();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
+            this.model.on("change:const_unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
             this.model.messages.on("destroy", this.onMessageRemoved, this);
@@ -2719,8 +2717,9 @@ define("xabber-chats", function () {
                         this.contact.set('archived', false);
                     }
             }
+
             if (message.isSenderMe()) {
-                if (!message.get('is_archived') || message.get('missed_msg'))
+                if (!message.get('is_archived') && !message.get('missed_msg'))
                     this.readMessages(message.get('timestamp'));
                 if (this.model.get('last_displayed_id') >= message.get('stanza_id') && message.get('stanza_id') !== message.get('origin_id'))
                     message.set('state', constants.MSG_DISPLAYED);
