@@ -6668,10 +6668,7 @@ define("xabber-chats", function () {
         updateMentionsList: function (mention_text) {
             this.contact.searchByParticipants(mention_text, function (participants) {
                 if (participants.length) {
-                    let mention_all = $(templates.group_chats.mention_item({jid: "", nickname: "All", id: ""}));
-                    mention_all.find('.circle-avatar').setAvatar(this.contact.cached_image, this.mention_avatar_size);
-                    mention_all.find('.one-line.jid').text(this.getParticipantsList());
-                    this.$('.mentions-list').html(mention_all).show().perfectScrollbar({theme: 'item-list'});
+                    this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
@@ -6681,6 +6678,10 @@ define("xabber-chats", function () {
                         mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
                         this.$('.mentions-list').append(mention_item);
                     }.bind(this));
+                    let mention_all = $(templates.group_chats.mention_item({jid: "", nickname: "Everyone", id: ""}));
+                    mention_all.find('.circle-avatar').setAvatar(this.contact.cached_image, this.mention_avatar_size);
+                    mention_all.find('.one-line.jid').text(this.getParticipantsList());
+                    this.$('.mentions-list').append(mention_all);
                     this.$('.mentions-list').children('.mention-item').first().addClass('active');
                 }
                 else
