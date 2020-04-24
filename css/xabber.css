@@ -4737,6 +4737,19 @@ img.fwd-img-preview {
     cursor: pointer;
 }
 
+.message-input-panel .uploading-emoticons {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #FFF;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .edit-badge .emoticons-panel .emoji-wrap,
 .message-input-panel .emoticons-panel .emoji-wrap {
     display: inline-block;

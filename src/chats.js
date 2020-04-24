@@ -6460,6 +6460,9 @@ define("xabber-chats", function () {
                 $emoji_panel = this.$('.emoticons-panel'),
                 _timeout;
 
+            let onloaded_sprites = 0,
+                i = 0,
+                all_sprites = Object.keys(Emoji.all).length;
             for (var emoji_list in Emoji.all) {
                 let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
                     list_name = emoji_list.replace(/ /g, '_');
@@ -6471,6 +6474,12 @@ define("xabber-chats", function () {
                 });
                 $emoji_list_wrap.appendTo($emoji_panel);
                 $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                let img = new Image();
+                img.onload = function () {
+                    onloaded_sprites++;
+                    (onloaded_sprites === all_sprites) && $emoji_panel_wrap.find('.uploading-emoticons').detach();
+                }.bind(this);
+                img.src = './images/emoji/spritesheet' + i++ + '.png';
             }
             var window_onclick = function (ev) {
                 if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)
