@@ -3951,6 +3951,8 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-message .chat-msg-content .mention {
     background-color: #EEE;
+    padding: 1px 4px;
+    border-radius: 3px;
 }
 
 .chat-message .chat-msg-content .mention:hover {
@@ -4598,6 +4600,11 @@ img.fwd-img-preview {
 .message-input-panel .message-form {
     position: relative;
     padding: 8px 88px 0 64px;
+}
+
+.message-input-panel .rich-textarea mention {
+    padding: 1px 4px;
+    border-radius: 3px;
 }
 
 .fwd-messages-preview {
