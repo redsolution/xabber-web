@@ -2257,14 +2257,15 @@ define("xabber-contacts", function () {
                             this.data_form.fields[field_idx] = field;
                             rights_changed = true;
                         }
-                        else
-                            if ($right_item.attr('data-switch')) {
-                                let field = this.data_form.fields.find(f => f.var === right_name),
-                                    field_idx = this.data_form.fields.indexOf(field);
+                        else {
+                            let field = this.data_form.fields.find(f => f.var === right_name);
+                            if (field.values.length) {
+                                let field_idx = this.data_form.fields.indexOf(field);
                                 field.values = [];
                                 this.data_form.fields[field_idx] = field;
                                 rights_changed = true;
                             }
+                        }
                     }
                 }.bind(this));
                 if (changed_avatar)
