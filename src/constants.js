@@ -87,6 +87,7 @@ var constants = {
     JINGLE_MSG_REJECT: 1,
     JINGLE_MSG_ACCEPT: 2,
 
+    MSG_BLOCKED: -2,
     MSG_ERROR: -1,
     MSG_PENDING: 0,
     MSG_SENT: 1,
@@ -332,6 +333,7 @@ constants.MSG_STATE[constants.MSG_SENT] = 'sent';
 constants.MSG_STATE[constants.MSG_DELIVERED] = 'delivered';
 constants.MSG_STATE[constants.MSG_DISPLAYED] = 'displayed';
 constants.MSG_STATE[constants.MSG_ARCHIVED] = 'archived';
+constants.MSG_STATE[constants.MSG_BLOCKED] = 'not-allowed';
 
 constants.MSG_VERBOSE_STATE = {};
 constants.MSG_VERBOSE_STATE[constants.MSG_ERROR] = 'Message error';
@@ -340,6 +342,7 @@ constants.MSG_VERBOSE_STATE[constants.MSG_SENT] = 'Message sent';
 constants.MSG_VERBOSE_STATE[constants.MSG_DELIVERED] = 'Message delivered to user';
 constants.MSG_VERBOSE_STATE[constants.MSG_DISPLAYED] = 'Message read';
 constants.MSG_VERBOSE_STATE[constants.MSG_ARCHIVED] = 'Message from archive';
+constants.MSG_VERBOSE_STATE[constants.MSG_BLOCKED] = 'Message error';
 
 
 if (typeof define === "function") {
