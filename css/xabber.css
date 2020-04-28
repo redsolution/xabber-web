@@ -4412,6 +4412,7 @@ img.fwd-img-preview {
     color: #388E3C;
 }
 
+.msg-delivering-state[data-state=not-allowed],
 .msg-delivering-state[data-state=error] {
     color: #D32F2F;
 }
@@ -4436,6 +4437,7 @@ img.fwd-img-preview {
     content: "\F12D";
 }
 
+.msg-delivering-state[data-state=not-allowed]:before,
 .msg-delivering-state[data-state=error]:before {
     content: "\F156";
 }

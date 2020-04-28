@@ -4977,8 +4977,13 @@ define("xabber-chats", function () {
             if (msgid) {
                 var code = $(message).find('error').attr('code');
                 var msg = this.account.messages.get(origin_id || msgid);
-                if (msg && code === '406') {
-                    msg.set('state', constants.MSG_ERROR);
+                if (msg) {
+                    if (code === '405') {
+                        msg.set('state', constants.MSG_BLOCKED);
+                    }
+                    if (code === '406') {
+                        msg.set('state', constants.MSG_ERROR);
+                    }
                 }
             }
         },
