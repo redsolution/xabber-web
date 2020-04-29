@@ -2749,6 +2749,7 @@ body .client-body-wrap.hidden + #modals {
 
 .edit-rights .participant-details-item .participant-info {
     position: relative;
+    width: 100%;
 }
 
 .edit-rights .participant-details-item .jid.one-line,
@@ -2763,7 +2764,7 @@ body .client-body-wrap.hidden + #modals {
 
 .edit-rights .participant-details-item .nickname.one-line {
     height: 26px;
-    margin-bottom: 2px;
+    margin: 0 8px 2px 8px;
     color: #212121;
     font-size: 18px;
     font-weight: 500;
@@ -2803,7 +2804,7 @@ body .client-body-wrap.hidden + #modals {
 .edit-rights .participant-details-item #edit-nickname {
     display: none;
     height: 26px;
-    margin: 0px;
+    margin: 0px auto;
     line-height: 26px;
     margin-bottom: 2px;
     border-bottom: 1px dotted #F44336;
@@ -3948,6 +3949,12 @@ body .client-body-wrap.hidden + #modals {
     width: 100%;
 }
 
+.chat-message .chat-msg-content .mention {
+    background-color: #EEE;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
 .chat-message .chat-msg-content .mention:hover {
     text-decoration: underline;
 }
@@ -4405,6 +4412,7 @@ img.fwd-img-preview {
     color: #388E3C;
 }
 
+.msg-delivering-state[data-state=not-allowed],
 .msg-delivering-state[data-state=error] {
     color: #D32F2F;
 }
@@ -4429,6 +4437,7 @@ img.fwd-img-preview {
     content: "\F12D";
 }
 
+.msg-delivering-state[data-state=not-allowed]:before,
 .msg-delivering-state[data-state=error]:before {
     content: "\F156";
 }
@@ -4595,6 +4604,11 @@ img.fwd-img-preview {
     padding: 8px 88px 0 64px;
 }
 
+.message-input-panel .rich-textarea mention {
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
 .fwd-messages-preview {
     position: relative;
     min-height: 40px;
@@ -4730,6 +4744,19 @@ img.fwd-img-preview {
 .edit-badge .emoji-menu .emoji,
 .message-input-panel .emoji-menu .emoji {
     cursor: pointer;
+}
+
+.message-input-panel .uploading-emoticons {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #FFF;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .edit-badge .emoticons-panel .emoji-wrap,
@@ -5992,8 +6019,41 @@ input[type='range'].voice-message-volume:focus {
 }
 
 
-.blocked-contacts .placeholder {
+.blocked-items .placeholder {
     color: #616161;
+}
+
+.blocked-items .blocked-item {
+    height: 48px;
+    position: relative;
+    cursor: pointer;
+}
+
+.blocked-items .toggle-items {
+    position: absolute;
+    color: #757575;
+    top: 2px;
+}
+
+.blocked-items .blocked-item .blocked-item-header {
+    height: 24px;
+    line-height: 24px;
+    font-size: 16px;
+    color: #212121;
+    padding-left: 24px;
+}
+
+.blocked-items .blocked-item .blocked-item-description {
+    height: 24px;
+    line-height: 12px;
+    font-weight: 300;
+    font-size: 10px;
+    color: #9E9E9E;
+    padding-left: 24px;
+}
+
+.blocked-items .invitations-item .blocked-item-description {
+    overflow: hidden;
 }
 
 .blocked-contact {
@@ -7672,16 +7732,11 @@ ul.restrictions-list-content>li {
     color: #9E9E9E !important;
 }
 
-.edit-rights .restrictions-header,
-.edit-rights .permissions-header {
+.edit-rights .rights-header {
     font-weight: 400;
     font-size: 18px;
     line-height: 21px;
     margin: 8px 0;
-}
-
-.edit-rights .dialog-permissions-edit {
-    margin-top: 8px;
 }
 
 /* ----------------- SYNC SETTTINGS MODAL ---------------- */

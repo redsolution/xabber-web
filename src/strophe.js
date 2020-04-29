@@ -200,6 +200,7 @@ define("xabber-strophe", function () {
         };
 
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
+        Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
@@ -224,7 +225,6 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('BLOCKING', 'urn:xmpp:blocking');
         Strophe.addNamespace('SEARCH', 'jabber:iq:search');
         Strophe.addNamespace('PRIVATE_STORAGE', 'jabber:iq:private');
-        Strophe.addNamespace('OOB', 'jabber:x:oob');
         Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
         Strophe.addNamespace('LAST', 'jabber:iq:last');
         Strophe.addNamespace('GROUP_CHAT', 'http://xabber.com/protocol/groupchat');
@@ -234,8 +234,10 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('REWRITE', 'http://xabber.com/protocol/rewrite');
-        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0'); // https://xabber.com/protocol/reference
-
+        Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/reference');
+        Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
+        Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-message');
+        Strophe.addNamespace('OTB', 'https://xabber.com/protocol/otb');
         return xabber;
     };
 });

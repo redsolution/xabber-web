@@ -66,7 +66,6 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/invited_member_item.html",
     "text!templates/contacts/group_chats/participant_rights.html",
     "text!templates/contacts/group_chats/restriction_item.html",
-    "text!templates/contacts/group_chats/permission_item.html",
     "text!templates/contacts/group_chats/right_expire_variants.html",
     "text!templates/contacts/group_chats/pinned_message.html",
     "text!templates/contacts/group_chats/participant_details_item.html",
@@ -239,7 +238,6 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.invited_member_item');
     addTemplate('contacts.group_chats.participant_rights');
     addTemplate('contacts.group_chats.restriction_item');
-    addTemplate('contacts.group_chats.permission_item');
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
     addTemplate('contacts.group_chats.participant_details_item');
