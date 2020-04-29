@@ -445,7 +445,19 @@ define("xabber-chats", function () {
               this.registerIqHandler();
               this.audio_notifiation = xabber.playAudio('call', true);
               this.modal_view = new xabber.JingleMessageView({model: this});
-              this.conn = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}], sdpSemantics: 'unified-plan'});
+              this.conn = new RTCPeerConnection({
+                  iceServers: [
+                      {
+                          urls: "stun:stun.l.google.com:19302"
+                      },
+                      {
+                          urls: 'turn:192.158.29.39:3478?transport=udp',
+                          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                          username: '28224511:1379330808'
+                      }
+                  ],
+                  sdpSemantics: 'unified-plan'
+              });
               this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
               this.$remote_audio_el = $('<audio autoplay class="webrtc-remote-audio hidden"/>');
               this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
@@ -508,11 +520,25 @@ define("xabber-chats", function () {
           },
 
           onChangeConnectionState: function (ev) {
-              let conn_state = ev.target.connectionState;
+              let peer_conn = ev.target,
+                  conn_state = peer_conn.connectionState;
               if (conn_state === 'connected') {
                   this.onConnected();
               } else {
                   this.updateStatus(utils.pretty_name(conn_state) + '...');
+                  if (conn_state === "failed") {
+                      clearTimeout(this._timeout_failed);
+                      this._timeout_failed = setTimeout(function (){
+                          if (peer_conn.connectionState === 'failed' || peer_conn.connectionState === 'disconnected') {
+                              this.set('status', conn_state);
+                              this.reject();
+                              this.destroy();
+                              this.updateStatus('Network error...');
+                              xabber.current_voip_call = null;
+                          }
+                      }.bind(this), 40000);
+                      peer_conn.restartIce();
+                  }
                   if (conn_state === 'disconnected') {
                       this.set('status', conn_state);
                       this.destroy();
@@ -530,12 +556,17 @@ define("xabber-chats", function () {
           onChangeIceConnectionState: function (ev) {
               let peer_conn = ev.target,
                   conn_state = peer_conn.iceConnectionState;
-              if (conn_state === "failed" || conn_state === "disconnected") {
-                  /*this.set('status', conn_state);
-                  this.reject();
-                  this.destroy();
-                  this.updateStatus('Network error...');
-                  xabber.current_voip_call = null;*/
+              if (conn_state === "failed") {
+                  clearTimeout(this._timeout_failed);
+                  this._timeout_failed = setTimeout(function (){
+                      if (peer_conn.iceConnectionState === 'failed' || peer_conn.connectionState === 'disconnected') {
+                          this.set('status', conn_state);
+                          this.reject();
+                          this.destroy();
+                          this.updateStatus('Network error...');
+                          xabber.current_voip_call = null;
+                      }
+                  }.bind(this), 40000);
                   peer_conn.restartIce();
               }
               if (conn_state === "connected") {
@@ -588,6 +619,7 @@ define("xabber-chats", function () {
           onDestroy: function () {
               clearTimeout(this._waiting_timeout);
               clearInterval(this.call_timer);
+              clearTimeout(this._timeout_failed);
               xabber.stopAudio(this.audio_notifiation);
               this.account.connection.deleteHandler(this.iq_handler);
               this.stopTracks();
@@ -714,6 +746,7 @@ define("xabber-chats", function () {
                   .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                  .c('body').t('You have received a voice call. If your are seing this, your client probably does not support this functionality. For more information, see https://xabber.com/voice/').up()
                   .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
               this.account.sendMsg($propose_msg);
           },
@@ -1078,7 +1111,7 @@ define("xabber-chats", function () {
                 this.receiveDeliveryReceipt($message);
             }
 
-            if (!$message.find('body').length) {
+            if (!$message.find('body').length || $jingle_msg_propose.length || $jingle_msg_accept.length || $jingle_msg_reject.length) {
                 var view = xabber.chats_view.child(this.contact.hash_id);
                 if (view && view.content) {
                     view.content.receiveNoTextMessage($message, carbon_copied);
