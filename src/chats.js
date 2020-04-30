@@ -504,6 +504,7 @@ define("xabber-chats", function () {
 
           startTimer: function () {
               this.updateTimer();
+              clearInterval(this.call_timer);
               this.call_timer = setInterval(function () {
                   this.updateTimer();
               }.bind(this), 1000);

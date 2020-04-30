@@ -2855,6 +2855,11 @@ body .client-body-wrap.hidden + #modals {
     background-color: rgba(255, 255, 255, .8);
 }
 
+.jingle-message-view:not([data-state]) .contact-info,
+.jingle-message-view[data-state=calling] .contact-info {
+    display: none !important;
+}
+
 .jingle-message-view[data-state=search],
 .jingle-message-view[data-state=calling] {
     background-color: rgba(2, 119, 189, .6);
@@ -2874,9 +2879,24 @@ body .client-body-wrap.hidden + #modals {
 
 .jingle-message-view .call-header {
     text-align: center;
+    display: none;
     margin: 16px;
     font-weight: 500;
     font-size: 16px;
+}
+
+.jingle-message-view.collapsed .video-wrap,
+.jingle-message-view.collapsed .contact-info,
+.jingle-message-view.collapsed .buttons-panel,
+.jingle-message-view.collapsed .call-header {
+    display: none !important;
+}
+
+.jingle-message-view:not([data-state]) .default-screen .name,
+.jingle-message-view[data-state=calling] .default-screen .name,
+.jingle-message-view:not([data-state]) .call-header,
+.jingle-message-view[data-state=calling] .call-header {
+    display: block;
 }
 
 .jingle-message-view .calling-status {
@@ -2918,6 +2938,10 @@ body .client-body-wrap.hidden + #modals {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+.jingle-message-view .default-screen .name {
+    display: none;
 }
 
 .jingle-message-view .buttons-wrap .btn-accept,

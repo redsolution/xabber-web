@@ -1139,9 +1139,6 @@ define("xabber-views", function () {
 
         updateCallingStatus: function (status) {
             this.$('.buttons-wrap').switchClass('incoming', (status === 'in'));
-            this.$('.contact-info').switchClass('hidden', (status === 'in' || status === constants.JINGLE_MSG_PROPOSE));
-            this.$('.default-screen .name').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
-            this.$('.call-header').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
         },
 
         updateStatusText: function (status) {
@@ -1192,7 +1189,6 @@ define("xabber-views", function () {
             }
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
-            this.$el.children().toggle();
             this.$el.toggleClass('collapsed');
             if (this.$el.hasClass('collapsed'))
                 (this.model.get('video') || this.model.get('video_in')) && this.$el.addClass('collapsed-video');
