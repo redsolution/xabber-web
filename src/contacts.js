@@ -3780,7 +3780,13 @@ define("xabber-contacts", function () {
             syncFromServer: function (options) {
                 options = options || {};
                 let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
-                (!options.after && this.account.last_msg_timestamp) && (request_attrs.stamp = this.account.last_msg_timestamp * 1000);
+                if (!options.after) {
+                    if (options.stamp)
+                        request_attrs.stamp = options.stamp;
+                    else if (this.account.last_msg_timestamp)
+                        request_attrs.stamp = this.account.last_msg_timestamp * 1000;
+                }
+                delete(options.stamp);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
                 this.account.sendIQ(iq, function (response) {
                     this.onSyncIQ(response, request_attrs.stamp);
