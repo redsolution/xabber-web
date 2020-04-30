@@ -7630,6 +7630,16 @@ define("xabber-chats", function () {
             }
         }.bind(this));
         this.trigger('ready_to_get_roster');
+
+        this.connection.deleteTimedHandler(this._get_msg_handler);
+        this._get_msg_handler = this.connection.addTimedHandler(60000, function () {
+            if (this.connection && !this.connection.handlers.find(h => !h.ns && h.name === 'message')) {
+                let last_msg_timestamp = this.last_msg_timestamp;
+                this.chats.registerMessageHandler();
+                this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000});
+            }
+            return true;
+        }.bind(this));
     }, true, true);
 
     xabber.once("start", function () {
