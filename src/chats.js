@@ -1094,7 +1094,7 @@ define("xabber-chats", function () {
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
                 if ((marker_tag === 'markable') && !options.is_mam && !options.is_archived && !carbon_copied && (!options.synced_msg || options.synced_msg && options.is_unread))
-                    this.sendMarker($message.attr('id'), 'received', options.stanza_id, options.contact_stanza_id);
+                    this.sendMarker($message.children('origin-id').attr('id') || $message.attr('id'), 'received', options.stanza_id, options.contact_stanza_id);
                 if ((marker_tag !== 'markable') && !carbon_copied) {
                     this.receiveMarker($message, marker_tag, carbon_copied);
                     return;
@@ -1228,9 +1228,9 @@ define("xabber-chats", function () {
             var marked_origin_id = $displayed.attr('id') || $received.attr('id'),
                 marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 msg = this.account.messages.get(marked_origin_id || marked_stanza_id);
-            if (!msg) {
+            !msg && (msg = this.account.messages.find(m => m.get('msgid') === marked_origin_id));
+            if (!msg)
                 return;
-            }
             if (msg.isSenderMe()) {
                 if ($received.length) {
                     let msg_state = msg.get('state');
@@ -1266,6 +1266,7 @@ define("xabber-chats", function () {
             let stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 origin_id = $marker.attr('id'),
                 msg = this.messages.get(origin_id || stanza_id), msg_idx;
+            !msg && (msg = this.messages.find(m => m.get('msgid') === origin_id));
             msg && (msg_idx = this.messages.indexOf(msg));
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
@@ -2308,7 +2309,7 @@ define("xabber-chats", function () {
             var unread_messages = _.clone(this.model.messages_unread.models);
             if (unread_messages.length) {
                 let msg = unread_messages[unread_messages.length - 1];
-                this.model.sendMarker(msg.get('origin_id'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+                this.model.sendMarker(msg.get('origin_id') || msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             }
             this.model.set('const_unread', 0);
             _.each(unread_messages, function (msg) {
@@ -2735,7 +2736,7 @@ define("xabber-chats", function () {
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
                     if (!message.get('is_unread'))
-                        this.model.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
+                        this.model.sendMarker(message.get('origin_id') || message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                     if (!xabber.get('focused')) {
                         if (this.contact.get('muted'))
                             message.set('muted', true);
@@ -5471,7 +5472,7 @@ define("xabber-chats", function () {
                     let last_msg = view.model.messages.models[view.model.messages.length - 1];
                     if (last_msg)
                         if (!last_msg.isSenderMe() && (view.model.get('unread') || view.model.get('const_unread'))) {
-                            view.model.sendMarker(last_msg.get('origin_id'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                            view.model.sendMarker(last_msg.get('origin_id') || last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                             view.model.set('displayed_sent', true);
                         }
                 }

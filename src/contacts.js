@@ -2997,7 +2997,7 @@ define("xabber-contacts", function () {
                 let contact = this.model,
                     chat = this.account.chats.getChat(contact);
                 chat.set('is_accepted', true);
-                this.message && chat.sendMarker(this.message.get('msgid'), 'displayed', this.message.get('stanza_id'), this.message.get('contact_stanza_id'));
+                this.message && chat.sendMarker(this.message.get('origin_id') || this.message.get('msgid'), 'displayed', this.message.get('stanza_id'), this.message.get('contact_stanza_id'));
                 chat.item_view.content.readMessages();
                 var invites = chat.item_view.content.$('.auth-request');
                 if (invites.length > 0) {
