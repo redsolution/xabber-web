@@ -9,6 +9,11 @@
     <div class="calling-status"/>
 </div>
 <div class="video-wrap">
+    <video autoplay loop class="blank-video hidden">
+        <source src="{{constants.BLANK_VIDEO.MP4}}">
+        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">
+        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">
+    </video>
     <audio autoplay class="webrtc-remote-audio hidden"/>
     <video autoplay muted class="webrtc-local-video collapsed hidden"/>
     <div class="default-screen">
