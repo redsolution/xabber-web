@@ -1094,7 +1094,7 @@ define("xabber-chats", function () {
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
                 if ((marker_tag === 'markable') && !options.is_mam && !options.is_archived && !carbon_copied && (!options.synced_msg || options.synced_msg && options.is_unread))
-                    this.sendMarker($message.children('origin-id').attr('id') || $message.attr('id'), 'received', options.stanza_id, options.contact_stanza_id);
+                    this.sendMarker($message.attr('id'), 'received', options.stanza_id, options.contact_stanza_id);
                 if ((marker_tag !== 'markable') && !carbon_copied) {
                     this.receiveMarker($message, marker_tag, carbon_copied);
                     return;
@@ -1202,7 +1202,7 @@ define("xabber-chats", function () {
             this.account.sendMsg($delivery_msg);
         },
 
-        sendMarker: function (origin_id, status, stanza_id, contact_stanza_id) {
+        sendMarker: function (msg_id, status, stanza_id, contact_stanza_id) {
             status || (status = 'displayed');
             let stanza = $msg({
                 from: this.account.jid,
@@ -1211,7 +1211,7 @@ define("xabber-chats", function () {
                 id: uuid()
             }).c(status).attrs({
                 xmlns: Strophe.NS.CHAT_MARKERS,
-                id: origin_id
+                id: msg_id || stanza_id || contact_stanza_id || ""
             });
             stanza_id && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: stanza_id, by: this.account.get('jid')}).up();
             contact_stanza_id && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: contact_stanza_id, by: this.contact.get('jid')}).up();
@@ -1222,13 +1222,11 @@ define("xabber-chats", function () {
             var $displayed = $message.find('displayed'),
                 $received = $message.find('received'),
                 error = $message.attr('type') === 'error';
-            if (error || !$displayed.length && !$received.length) {
+            if (error || !$displayed.length && !$received.length)
                 return;
-            }
-            var marked_origin_id = $displayed.attr('id') || $received.attr('id'),
+            var marked_msg_id = $displayed.attr('id') || $received.attr('id'),
                 marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                msg = this.account.messages.get(marked_origin_id || marked_stanza_id);
-            !msg && (msg = this.account.messages.find(m => m.get('msgid') === marked_origin_id));
+                msg = this.account.messages.find(m => m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id || m.get('msgid') === marked_msg_id);
             if (!msg)
                 return;
             if (msg.isSenderMe()) {
@@ -1264,9 +1262,8 @@ define("xabber-chats", function () {
 
         receiveCarbonsMarker: function ($marker) {
             let stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                origin_id = $marker.attr('id'),
-                msg = this.messages.get(origin_id || stanza_id), msg_idx;
-            !msg && (msg = this.messages.find(m => m.get('msgid') === origin_id));
+                msg_id = $marker.attr('id'),
+                msg = this.messages.find(m => m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id || m.get('msgid') === msg_id), msg_idx;
             msg && (msg_idx = this.messages.indexOf(msg));
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
@@ -1275,8 +1272,10 @@ define("xabber-chats", function () {
                     message.set('is_unread', false);
                 }
             }
-            else if (this.messages_unread.get(origin_id || stanza_id))
-                msg.set('is_unread', false);
+            else {
+                let unread_msg = this.messages_unread.find(m => m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id || m.get('msgid') === msg_id);
+                unread_msg && unread_msg.set('is_unread', false);
+            }
         },
 
         receiveDeliveryReceipt: function ($message) {
@@ -2309,7 +2308,7 @@ define("xabber-chats", function () {
             var unread_messages = _.clone(this.model.messages_unread.models);
             if (unread_messages.length) {
                 let msg = unread_messages[unread_messages.length - 1];
-                this.model.sendMarker(msg.get('origin_id') || msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             }
             this.model.set('const_unread', 0);
             _.each(unread_messages, function (msg) {
@@ -2736,7 +2735,7 @@ define("xabber-chats", function () {
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', !(this.model.get('display') && xabber.get('focused')));
                     if (!message.get('is_unread'))
-                        this.model.sendMarker(message.get('origin_id') || message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
+                        this.model.sendMarker(message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                     if (!xabber.get('focused')) {
                         if (this.contact.get('muted'))
                             message.set('muted', true);
@@ -5472,7 +5471,7 @@ define("xabber-chats", function () {
                     let last_msg = view.model.messages.models[view.model.messages.length - 1];
                     if (last_msg)
                         if (!last_msg.isSenderMe() && (view.model.get('unread') || view.model.get('const_unread'))) {
-                            view.model.sendMarker(last_msg.get('origin_id') || last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                            view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
                             view.model.set('displayed_sent', true);
                         }
                 }
