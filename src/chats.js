@@ -6771,12 +6771,21 @@ define("xabber-chats", function () {
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
+            if (ev.keyCode === constants.KEY_ARROW_UP) {
+                let $msg = this.view.$('.chat-message').last(),
+                    edit_msg = this.messages_arr.get($msg.data('uniqueid'));
+                if (!text && edit_msg.isSenderMe()) {
+                    this.edit_message = edit_msg;
+                    this.setEditedMessage(edit_msg);
+                }
+            }
             if ((!text || text == "\n") && !this.edit_message)
                 this.displayMicrophone();
             else
                 this.displaySend();
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 ev.preventDefault();
+                this.unsetForwardedMessages();
             } else {
                 if (ev.keyCode === constants.KEY_ARROW_UP || ev.keyCode === constants.KEY_ARROW_DOWN) {
                     return;
