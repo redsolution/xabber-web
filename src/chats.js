@@ -2643,6 +2643,9 @@ define("xabber-chats", function () {
                         let file_type = mime_type ? utils.pretty_file_type_with_article(mime_type) : 'file';
                         mime_type && (this._current_composing_msg.mime_type = mime_type);
                         message = 'sending ' + file_type;
+                        this._chatstate_show_timeout = setTimeout(function () {
+                            this.showChatState();
+                        }.bind(this), constants.CHATSTATE_TIMEOUT_PAUSED_AUDIO);
                     } else {
                         if (type === 'voice')
                             message = 'recording a voice message...';
@@ -2808,6 +2811,7 @@ define("xabber-chats", function () {
                 this.updateMessageInChat($next_message[0]);
             }
             this.initPopup($message);
+            this.bottom.showChatNotification();
             return $message;
         },
 
