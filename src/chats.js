@@ -6772,9 +6772,10 @@ define("xabber-chats", function () {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
             if (ev.keyCode === constants.KEY_ARROW_UP) {
-                let $msg = this.view.$('.chat-message').last(),
-                    edit_msg = this.messages_arr.get($msg.data('uniqueid'));
-                if (!text && edit_msg.isSenderMe()) {
+                if (!text) {
+                    let $msg = this.view.$('.chat-message[data-from="' + this.account.get('jid') + '"]').last();
+                    (!$msg.length && this.contact.participants) && ($msg = this.view.$('.chat-message[data-from="' + this.contact.participants.find(m => m.get('jid') === this.account.get('jid')).get('id') + '"]').last());
+                    let edit_msg = this.messages_arr.get($msg.data('uniqueid'));
                     this.edit_message = edit_msg;
                     this.setEditedMessage(edit_msg);
                 }
