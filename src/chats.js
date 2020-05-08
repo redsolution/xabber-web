@@ -1688,6 +1688,11 @@ define("xabber-chats", function () {
         removeInvite: function (options) {
             options || (options = {});
             xabber.chats_view.removeInvite(this, options);
+            let msgs = _.clone(this.model.messages.models);
+            this.model.set({'last_archive_id': undefined, 'first_archive_id': undefined});
+            msgs.forEach(function (item) {
+                item && this.content.removeMessage(item);
+            }.bind(this));
             delete this.contact.attributes.invitation;
             this.updateGroupChats();
             this.updateIncognitoChat();
@@ -4736,7 +4741,7 @@ define("xabber-chats", function () {
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
 
-            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#user-updated"]').length) {
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
                 if (!contact)
                     return;
                 let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#user-updated"]').attr('version');

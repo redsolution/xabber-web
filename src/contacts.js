@@ -1723,6 +1723,7 @@ define("xabber-contacts", function () {
                 this.model.membersRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
+                    (this.participants.version === 0) && this.participants.resetParticipants();
                     $response.find('query user').each(function (idx, item) {
                         let $item = $(item),
                             subscription = $item.find('subscription').text(),
@@ -3037,7 +3038,7 @@ define("xabber-contacts", function () {
                 contact.declineRequest();
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
-                var declined_chat =  xabber.chats_view.active_chat;
+                var declined_chat = xabber.chats_view.active_chat;
                 declined_chat.model.set('active', false);
                 declined_chat.content.head.closeChat();
                 xabber.body.setScreen('all-chats', {right: null});
