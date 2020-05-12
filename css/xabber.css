@@ -429,6 +429,10 @@ input[type=text].simple-input-field:hover {
     overflow-y: visible;
 }
 
+.modal .modal-footer.extended .btn-cancel {
+    float: left !important;
+}
+
 .modal .modal-footer {
     background-color: #FFFFFF;
     padding: 4px 24px;
@@ -5211,8 +5215,16 @@ input[type='range'].voice-message-volume:focus {
 .details-panel .button-wrap.non-active i,
 .message-actions-panel .button-wrap.non-active .action-button,
 .edit-rights .button-wrap.non-active i {
-    background-color: #BDBDBD !important;
+    background-color: #9E9E9E !important;
     cursor: auto !important;
+}
+
+.details-panel .btn-block-wrap i.btn-block {
+    background-color: #9E9E9E !important;
+}
+
+.details-panel .btn-block-wrap i.btn-unblock ~ .btn-name {
+    color: #F44336 !important;
 }
 
 .message-actions-panel .button-wrap .close-message-panel {
@@ -5233,6 +5245,11 @@ input[type='range'].voice-message-volume:focus {
 
 .optional-button {
     float: left !important;
+}
+
+.modal .modal-footer.extended .optional-button {
+    float: right !important;
+    color: #F44336 !important;
 }
 
 .btn-group-info-edit, .btn-group-info-save {
@@ -6136,6 +6153,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .connection-wrap,
+.details-panel .subscription-info-wrap,
 .details-panel .synchronization-wrap,
 .details-panel .color-scheme-wrap,
 .details-panel .resources-wrap,

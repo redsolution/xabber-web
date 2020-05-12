@@ -43,7 +43,6 @@ define("xabber-contacts", function () {
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
                 this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
-                this.invitation = new xabber.ContactInvitationView({model: this});
                 this.on("change:photo_hash", this.getContactInfo, this);
                 this.on("change:roster_name", this.updateName, this);
                 !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
@@ -275,7 +274,7 @@ define("xabber-contacts", function () {
 
             blockRequest: function (callback) {
                 this.pres('unsubscribed');
-                this.removeFromRoster().block(callback);
+                this.block(callback);
             },
 
             declineRequest: function (callback) {
@@ -285,6 +284,10 @@ define("xabber-contacts", function () {
 
             declineSubscription: function () {
                 this.pres('unsubscribe');
+            },
+
+            declineSubscribe: function () {
+                this.pres('unsubscribed');
             },
 
             block: function (callback, errback) {
@@ -931,13 +934,13 @@ define("xabber-contacts", function () {
                 "click .btn-escape": "openChat",
                 "click .btn-chat": "openChat",
                 "click .btn-voice-call": "voiceCall",
-                "click .btn-video-call": "videoCall",
                 "click .btn-add": "addContact",
                 "click .btn-delete": "deleteContact",
                 "click .btn-block": "blockContact",
                 "click .btn-unblock": "unblockContact",
                 "click .btn-mute": "changeNotifications",
-                "click .btn-auth-request": "requestAuthorization"
+                "click .btn-auth-request": "requestAuthorization",
+                "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
             _initialize: function () {
@@ -974,6 +977,7 @@ define("xabber-contacts", function () {
                     alignment: 'right'
                 };
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+                this.updateSubscriptions();
                 this.updateJingleButtons();
                 this.updateName();
                 this.model.resources.models.forEach(function (resource) {this.model.resources.requestInfo(resource)}.bind(this));
@@ -985,7 +989,6 @@ define("xabber-contacts", function () {
 
             updateJingleButtons: function () {
                 this.$('.btn-voice-call').switchClass('non-active', !xabber.get('audio'));
-                this.$('.btn-video-call').switchClass('non-active', !xabber.get('video'));
             },
 
             update: function () {
@@ -994,6 +997,7 @@ define("xabber-contacts", function () {
                 if (_.has(changed, 'image')) this.updateAvatar();
                 if (_.has(changed, 'status_updated')) this.updateStatus();
                 if (_.has(changed, 'muted')) this.updateNotifications();
+                if (_.has(changed, 'subscription')) this.updateSubscriptions();
                 if (_.has(changed, 'status_message')) this.updateStatusMsg();
                 if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
                     _.has(changed, 'subscription')) {
@@ -1030,8 +1034,9 @@ define("xabber-contacts", function () {
                     subscription = this.model.get('subscription');
                 this.$('.btn-add').hideIf(in_roster);
                 this.$('.btn-delete').showIf(in_roster);
-                this.$('.btn-block').hideIf(is_blocked);
-                this.$('.btn-unblock').showIf(is_blocked);
+                this.$('.btn-block-wrap i').switchClass('btn-block', !is_blocked).switchClass('btn-unblock', is_blocked);
+                this.$('.btn-block-wrap .btn-name').text(is_blocked ? 'Unblock' : 'Block');
+                this.$('.buttons-wrap .button-wrap:not(.btn-block-wrap)').switchClass('non-active', is_blocked);
                 this.$('.btn-auth-request').showIf(!is_server && in_roster && !is_blocked &&
                     subscription !== 'both' && subscription !== 'to');
             },
@@ -1041,18 +1046,63 @@ define("xabber-contacts", function () {
                 this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
-            openChat: function () {
+            updateSubscriptions: function () {
+                let subscription = this.model.get('subscription'),
+                    $label_outcoming = this.$('label[for="outcoming-subscription"]'),
+                    $label_incoming = this.$('label[for="incoming-subscription"]');
+                if (subscription === 'both') {
+                    $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
+                    $label_outcoming.text('Receive presence updates').prev('input').prop('checked', true);
+                }
+                if (subscription === 'from') {
+                    $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
+                    $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
+                }
+                if (subscription === 'to') {
+                    $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
+                    $label_outcoming.text('Receive presence updates').prev('input').prop('checked', true);
+                }
+                if (subscription === 'ask_subscribe') {
+                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
+                    $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', true);
+                }
+                if (!subscription) {
+                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
+                    $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
+                }
+                if (this.model.get('invitation'))
+                    $label_incoming.text('Send presence updates').prev('input').prop('checked', false);
+            },
+
+            onChangedSubscription: function (ev) {
+                let contact = this.model,
+                    $target = $(ev.target),
+                    is_checked = $target.prop('checked');
+                if (is_checked) {
+                    if ($target.attr('id') === "outcoming-subscription")
+                        contact.askRequest();
+                    else
+                        contact.acceptRequest();
+                }
+                else {
+                    if ($target.attr('id') === "outcoming-subscription")
+                        contact.declineSubscribe();
+                    else
+                        contact.declineSubscription();
+                }
+            },
+
+            openChat: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active') || $(ev.target).closest('.button-wrap').length && this.model.get('blocked'))
+                    return;
                 this.model.trigger("open_chat", this.model);
             },
 
-            voiceCall: function () {
+            voiceCall: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
+                    return;
                 if (xabber.get('audio'))
                     this.initCall();
-            },
-
-            videoCall: function () {
-                if (xabber.get('video'))
-                    this.initCall({video: true});
             },
 
             initCall: function (type) {
@@ -1061,7 +1111,9 @@ define("xabber-contacts", function () {
                 chat.item_view.content.initJingleMessage(type);
             },
 
-            changeNotifications: function () {
+            changeNotifications: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
+                    return;
                 var muted = !this.model.get('muted');
                 this.model.set('muted', muted);
                 this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
@@ -1073,21 +1125,30 @@ define("xabber-contacts", function () {
 
             deleteContact: function (ev) {
                 var contact = this.model;
-                utils.dialogs.ask("Delete contact", "Do you want to delete "+
-                    contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        contact.removeFromRoster();
-                        contact.trigger('archive_chat');
-                        xabber.trigger("clear_search");
-                    }
-                });
+                utils.dialogs.ask("Delete contact", "Do you really want to delete contact "+ contact.get('name').bold() +
+                    " from account " + this.account.get('jid').bold() + "?", null, { ok_button_text: 'delete'}).done(
+                    function (result) {
+                        if (result) {
+                            contact.removeFromRoster();
+                            contact.trigger('archive_chat');
+                            xabber.trigger("clear_search");
+                        }
+                    });
             },
 
             blockContact: function () {
                 var contact = this.model;
-                utils.dialogs.ask("Block contact", "Do you want to block "+
-                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
+                utils.dialogs.ask_extended("Block contact", "Do you really want to block " + contact.get('name').bold() +
+                    " from account " + this.account.get('jid').bold() +
+                    "?\nYou will be unable to exchange messages and presence updates with " + contact.get('jid').bold(), null,
+                    { ok_button_text: 'block', optional_button: 'block & delete'}).done(function (result) {
                     if (result) {
+                        if (result === 'block & delete') {
+                            contact.removeFromRoster();
+                            let chat = this.account.chats.getChat(contact);
+                            chat.retractAllMessages(false);
+                            chat.deleteChatFromSynchronization();
+                        }
                         contact.blockRequest();
                         xabber.trigger("clear_search");
                     }
@@ -1096,8 +1157,9 @@ define("xabber-contacts", function () {
 
             unblockContact: function () {
                 var contact = this.model;
-                utils.dialogs.ask("Unblock contact", "Do you want to unblock "+
-                    contact.get('name')+"?", null, { ok_button_text: 'unblock'}).done(function (result) {
+                utils.dialogs.ask("Unblock contact", "Do you really want to unblock "+
+                    " from account " + this.account.get('jid').bold() + "?", null,
+                    { ok_button_text: 'unblock'}).done(function (result) {
                     if (result) {
                         contact.unblock();
                         xabber.trigger("clear_search");
@@ -3913,7 +3975,8 @@ define("xabber-contacts", function () {
                     return;
                 }
                 var contact = this.contacts.mergeContact(jid);
-                var subscription = item.getAttribute("subscription");
+                var subscription = item.getAttribute("subscription"),
+                    ask = item.getAttribute("ask");
                 if (contact.get('invitation') && (subscription === 'both' || subscription === 'to')) {
                     contact.set('invitation', false);
                     contact.trigger('remove_invite');
@@ -3933,7 +3996,7 @@ define("xabber-contacts", function () {
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
                 var attrs = {
-                    subscription: subscription,
+                    subscription: ask ? ("ask_" + ask) :  subscription,
                     in_roster: true,
                     roster_name: item.getAttribute("name"),
                     groups: groups

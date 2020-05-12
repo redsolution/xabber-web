@@ -2319,8 +2319,7 @@ define("xabber-chats", function () {
             this.model.set('const_unread', 0);
             _.each(unread_messages, function (msg) {
                 if (!timestamp || msg.get('timestamp') <= timestamp) {
-                    if (this.model.get('is_accepted') != false)
-                        msg.set('is_unread', false);
+                    msg.set('is_unread', false);
                 }
             }.bind(this));
         },
@@ -5466,29 +5465,22 @@ define("xabber-chats", function () {
             view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
             options.clear_search && this.clearSearch();
-            if (!view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
-                view.model.set('display', true);
-                view.model.set('active', true);
-                xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
+            if (xabber.toolbar_view.$('.active').hasClass('contacts'))
+                this.updateScreenAllChats();
+            if (!view.model.get('history_loaded') && (view.model.messages.length < 20)) {
+                view.content.loadPreviousHistory();
             }
-            else {
-                if (xabber.toolbar_view.$('.active').hasClass('contacts'))
-                    this.updateScreenAllChats();
-                if (!view.model.get('history_loaded') && (view.model.messages.length < 20)) {
-                    view.content.loadPreviousHistory();
-                }
-                if (!view.model.get('displayed_sent') && view.model.messages.length) {
-                    let last_msg = view.model.messages.models[view.model.messages.length - 1];
-                    if (last_msg)
-                        if (!last_msg.isSenderMe() && (view.model.get('unread') || view.model.get('const_unread'))) {
-                            view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
-                            view.model.set('displayed_sent', true);
-                        }
-                }
-                xabber.body.setScreen((options.screen || 'all-chats'), {right: 'chat', clear_search: options.clear_search, chat_item: view});
-                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
-                    view.contact.getVCard();
-                }
+            if (!view.model.get('displayed_sent') && view.model.messages.length) {
+                let last_msg = view.model.messages.models[view.model.messages.length - 1];
+                if (last_msg)
+                    if (!last_msg.isSenderMe() && (view.model.get('unread') || view.model.get('const_unread'))) {
+                        view.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                        view.model.set('displayed_sent', true);
+                    }
+            }
+            xabber.body.setScreen((options.screen || 'all-chats'), {right: 'chat', clear_search: options.clear_search, chat_item: view});
+            if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                view.contact.getVCard();
             }
             xabber.chats_view.scrollTo(scrolled_top);
         },
@@ -5497,8 +5489,12 @@ define("xabber-chats", function () {
             let invitations = view.content.$('.auth-request');
             if (invitations.length > 0) {
                 invitations.each(function (idx, item) {
-                    view.model.messages.get($(item).attr('unique_id')).destroy();
-                    view.content.removeMessage($(item));
+                    let message = view.model.messages.get($(item).attr('unique_id')),
+                        iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: this.account.get('jid')})
+                        .c('retract-message', {id: message.get('stanza_id'), xmlns: Strophe.NS.REWRITE, symmetric: false, by: view.contact.account.get('jid')});
+                    view.contact.account.sendIQ(iq_retraction, function () {
+                        view.content.removeMessage(message);
+                    }.bind(this));
                 }.bind(this));
             }
             view.contact.invitation.retractInvitation();
@@ -7693,8 +7689,7 @@ define("xabber-chats", function () {
                 var view = this.chats_view.active_chat;
                 if (view && view.model.get('display')) {
                     view.content.readMessages();
-                    if (view.model.get('is_accepted') != false)
-                        view.content.bottom.focusOnInput();
+                    view.content.bottom.focusOnInput();
                 }
             }
         }, this);

@@ -19,8 +19,6 @@
             <li class="btn-auth-request"><span class="one-line">Request authorization</span></li>
             <li class="btn-add"><span class="one-line">Add contact</span></li>
             <li class="btn-delete"><span class="one-line">Delete contact</span></li>
-            <li class="btn-block"><span class="one-line">Block contact</span></li>
-            <li class="btn-unblock"><span class="one-line">Unblock contact</span></li>
         </ul>
         <div class="buttons-wrap">
             <div class="button-wrap btn-chat-wrap">
@@ -31,18 +29,37 @@
                 <i class="mdi mdi-24px mdi-phone btn-voice-call"></i>
                 <div class="btn-name">Voice Call</div>
             </div>
-            <div class="button-wrap btn-video-call-wrap">
-                <i class="mdi mdi-24px mdi-video btn-video-call"></i>
-                <div class="btn-name">Video Call</div>
-            </div>
             <div class="button-wrap btn-mute-wrap">
                 <i class="mdi mdi-24px mdi-bell btn-mute"></i>
-                <div class="btn-name">Mute</div>
+                <div class="btn-name">Notifications</div>
+            </div>
+            <div class="button-wrap btn-block-wrap">
+                <i class="mdi mdi-24px mdi-block-helper btn-block"></i>
+                <div class="btn-name">Block</div>
             </div>
         </div>
     </div>
     <div class="panel-content private-chat">
         <div class="left-column">
+            <div class="block-wrap subscription-block-wrap">
+                <div class="block-header">
+                    <span class="block-name">Subscription information</span>
+                </div>
+                <div class="subscription-info-wrap">
+                    <div class="incoming-subscription-wrap">
+                        <div class="input-field checkbox-field incoming-subscription-wrap">
+                            <input type="checkbox" class="filled-in" id="incoming-subscription"/>
+                            <label for="incoming-subscription"></label>
+                        </div>
+                    </div>
+                    <div class="outcoming-subscription-wrap">
+                        <div class="input-field checkbox-field incoming-subscription-wrap">
+                            <input type="checkbox" class="filled-in" id="outcoming-subscription"/>
+                            <label for="outcoming-subscription"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="block-wrap vcard">
             </div>
         </div>
