@@ -1625,7 +1625,7 @@ define("xabber-chats", function () {
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
                     else
-                        msg_text = $('<span class=text-color-700/>').text(msg_text);
+                        msg_text = $('<span class=text-color-500/>').text(msg_text);
                     this.$('.last-msg').html(msg_text);
                 }
                 else {
@@ -7463,7 +7463,7 @@ define("xabber-chats", function () {
                     msg_sender = $msg.isSenderMe() ? this.account.get('name') : ($msg.get('user_info') && $msg.get('user_info').nickname || (this.account.contacts.get($msg.get('from_jid')) ? this.account.contacts.get($msg.get('from_jid')).get('name') : $msg.get('from_jid')));
                     text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";
                     fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
-                    let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end + 1) : $msg.get('original_message'));
+                    let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
                     fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
                     (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
                     (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
