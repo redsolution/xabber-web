@@ -833,6 +833,18 @@ body .client-body-wrap.hidden + #modals {
     background-color: #FFFFFF;
 }
 
+.chat-bottom-blocked-wrap {
+    height: 64px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    text-transform: uppercase;
+    box-shadow: 1px 0px 1px 0 rgba(0,0,0,.25);
+    cursor: pointer;
+}
+
 .panel-head {
     position: absolute;
     width: 100%;
@@ -3772,6 +3784,30 @@ body .client-body-wrap.hidden + #modals {
     height: 100%;
     word-wrap: break-word;
     /*padding-bottom: 24px;*/
+}
+
+.chat-content .subscription-message-wrap {
+    position: absolute;
+    width: 100%;
+    top: 8px;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chat-content .subscription-message {
+    display: inline-flex;
+    height: 32px;
+    padding: 0 24px;
+    border-radius: 100px;
+    align-items: center;
+    text-transform: uppercase;
+    background-color: rgba(224, 224, 224, .25);
+}
+
+.chat-content .subscription-message-wrap .button {
+    margin-right: 8px;
 }
 
 .chat-content::after {

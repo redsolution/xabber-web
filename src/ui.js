@@ -170,6 +170,7 @@ define("xabber-ui", function () {
         var path_chat_head = new this.ViewPath('chat_item.content.head'),
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
+            path_chat_bottom_blocked = new this.ViewPath('chat_item.content.bottom_blocked'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
             path_private_invitation = new this.ViewPath('contact.private_invitation'),
@@ -235,7 +236,7 @@ define("xabber-ui", function () {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,
-                    chat_bottom: path_chat_bottom
+                    chat_bottom: options.blocked ? path_chat_bottom_blocked : path_chat_bottom
                 };
             }
         };

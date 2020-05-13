@@ -322,11 +322,11 @@ define("xabber-contacts", function () {
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
                 if (type === 'subscribe') {
-                    if (this.get('in_roster')) {
+                    /*if (this.get('in_roster')) {
                         this.pres('subscribed');
                     } else {
                         this.trigger('presence', this, 'subscribe');
-                    }
+                    }*/
                 } else if (type === 'subscribed') {
                     if (this.get('subscription') === 'to') {
                         this.pres('subscribed');
@@ -336,7 +336,7 @@ define("xabber-contacts", function () {
                     if (this.get('group_chat'))
                         this.removeFromRoster();
                 } else if (type === 'unsubscribed') {
-                    this.trigger('presence', this, 'unsubscribed');
+                    // this.trigger('presence', this, 'unsubscribed');
                 } else {
                     var jid = presence.getAttribute('from'),
                         resource = Strophe.getResourceFromJid(jid),
