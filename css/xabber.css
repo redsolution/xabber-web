@@ -3786,28 +3786,52 @@ body .client-body-wrap.hidden + #modals {
     /*padding-bottom: 24px;*/
 }
 
-.chat-content .subscription-message-wrap {
+.elements-in-top {
     position: absolute;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-content-wrap .subscription-message-wrap {
+    /*position: absolute;*/
+    width: 100%;
     top: 8px;
+    z-index: 3;
+    margin-top: 8px;
     background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.chat-content .subscription-message {
+.chat-content-wrap .subscription-message {
     display: inline-flex;
     height: 32px;
     padding: 0 24px;
     border-radius: 100px;
     align-items: center;
-    text-transform: uppercase;
-    background-color: rgba(224, 224, 224, .25);
+    background-color: rgba(245, 245, 245, .8);
 }
 
-.chat-content .subscription-message-wrap .button {
-    margin-right: 8px;
+.chat-content-wrap .subscription-message-wrap .subscription-info {
+    color: #424242;
+    margin-right: 24px;
+}
+
+.chat-content-wrap .subscription-message-wrap .button {
+    margin-right: 24px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.chat-content-wrap .subscription-message-wrap .btn-block {
+    color: #d32f2f;
+}
+
+.chat-content-wrap .subscription-message-wrap .btn-decline {
+    color: #9E9E9E;
+    cursor: pointer;
 }
 
 .chat-content::after {
@@ -3885,7 +3909,7 @@ body .client-body-wrap.hidden + #modals {
     -ms-transition: opacity .2s;
     -o-transition: opacity .2s;
     transition: opacity .2s;
-    position: absolute;
+    /*position: absolute;*/
     padding: 4px 96px 4px 64px !important;
     z-index: 3;
 }
@@ -6198,6 +6222,10 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
     width: 100%;
     padding: 0 0 6px 36px;
+}
+
+.details-panel .subscription-info-wrap #incoming-subscription-wrap {
+    margin: 0 !important;
 }
 
 .details-panel .token-wrap {

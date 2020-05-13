@@ -322,11 +322,11 @@ define("xabber-contacts", function () {
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
                 if (type === 'subscribe') {
-                    /*if (this.get('in_roster')) {
+                    if (this.get('in_roster')) {
                         this.pres('subscribed');
                     } else {
                         this.trigger('presence', this, 'subscribe');
-                    }*/
+                    }
                 } else if (type === 'subscribed') {
                     if (this.get('subscription') === 'to') {
                         this.pres('subscribed');
@@ -1048,30 +1048,30 @@ define("xabber-contacts", function () {
 
             updateSubscriptions: function () {
                 let subscription = this.model.get('subscription'),
+                    in_request = this.model.get('subscription_request_in'),
+                    out_request = this.model.get('subscription_request_out');
                     $label_outcoming = this.$('label[for="outcoming-subscription"]'),
                     $label_incoming = this.$('label[for="incoming-subscription"]');
                 if (subscription === 'both') {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
                     $label_outcoming.text('Receive presence updates').prev('input').prop('checked', true);
-                }
-                if (subscription === 'from') {
+                } else if (subscription === 'from') {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
-                }
-                if (subscription === 'to') {
-                    $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
+                } else if (subscription === 'to') {
+                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
                     $label_outcoming.text('Receive presence updates').prev('input').prop('checked', true);
                 }
-                if (subscription === 'ask_subscribe') {
-                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
-                    $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', true);
-                }
-                if (!subscription) {
+                else if (!subscription) {
                     $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
                 }
-                if (this.model.get('invitation'))
+                if (in_request) {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', false);
+                }
+                if (out_request) {
+                    $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', true);
+                }
             },
 
             onChangedSubscription: function (ev) {
@@ -1126,14 +1126,19 @@ define("xabber-contacts", function () {
             deleteContact: function (ev) {
                 var contact = this.model;
                 utils.dialogs.ask("Delete contact", "Do you really want to delete contact "+ contact.get('name').bold() +
-                    " from account " + this.account.get('jid').bold() + "?", null, { ok_button_text: 'delete'}).done(
-                    function (result) {
+                    " from account " + this.account.get('jid').bold() + "?",
+                    [{ name: 'delete_history', checked: false, text: 'Delete chat history'}],
+                    { ok_button_text: 'delete'}).done(function (result) {
+                        if (result.delete_history) {
+                            let chat = this.account.chats.getChat(contact);
+                            chat.retractAllMessages(false);
+                            chat.deleteChatFromSynchronization();
+                        }
                         if (result) {
                             contact.removeFromRoster();
-                            contact.trigger('archive_chat');
                             xabber.trigger("clear_search");
                         }
-                    });
+                    }.bind(this));
             },
 
             blockContact: function () {
@@ -1270,7 +1275,7 @@ define("xabber-contacts", function () {
             },
 
             joinChat: function () {
-                this.model.invitation.joinGroupChat();
+
             },
 
             editProperties: function (ev) {
@@ -2927,89 +2932,6 @@ define("xabber-contacts", function () {
         });
 
         xabber.ContactInvitationView = xabber.BasicView.extend({
-            className: 'details-panel invitation-view',
-            template: templates.group_chats.invitation,
-            ps_selector: '.panel-content',
-            avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
-
-            events: {
-                "click .btn-chat": "openChat",
-                "click .btn-accept": "addContact",
-                "click .btn-join": "joinGroupChat",
-                "click .btn-decline": "declineContact",
-                "click .btn-decline-all": "declineAll",
-                "click .btn-block": "blockContact",
-                "click .btn-escape": "closeInvitationView"
-            },
-
-            _initialize: function () {
-                this.account = this.model.account;
-                this.name_field = this.model.get('name');
-                this.invite_msgs = [];
-                this.updateName();
-                this.updateStatus();
-                this.updateAvatar();
-                this.$('.invite-msg .invite-msg-text')
-                    .text('User requests permission to add you to his contact list. If you accept, '+ this.model.get('jid') + ' will also be added to ' +  this.account.get('jid') + ' contacts');
-                this.model.on("change", this.update, this);
-            },
-
-            render: function (options) {
-                this.$('.btn-escape').showIf(!this.model.get('group_chat'));
-                this.renderButtons();
-            },
-
-            onChangedVisibility: function () {
-                if (this.isVisible()) {
-                    this.model.set({display: true, active: true});
-                } else {
-                    this.model.set({display: false});
-                }
-            },
-
-            update: function () {
-                var changed = this.model.changed;
-                if (_.has(changed, 'name')) this.updateName();
-                if (_.has(changed, 'image')) this.updateAvatar();
-                if (_.has(changed, 'status_updated')) this.updateStatus();
-                if (_.has(changed, 'group_chat')) this.updateGroupChat();
-            },
-
-            updateName: function () {
-                this.$('.main-info  .name-wrap').text(this.model.get('name'));
-                if (this.model.get('name-wrap') == this.model.get('jid')) {
-                    this.$('.main-info .name-wrap').addClass('name-is-jid');
-                    this.$('.main-info  .jid').text('');
-                }
-                else {
-                    this.$('.main-info .name-wrap').removeClass('name-is-jid');
-                    this.$('.main-info  .jid').text(this.model.get('jid'));
-                }
-            },
-
-            updateStatus: function () {
-                this.$('.status').attr('data-status', this.model.get('status'));
-                this.$('.status-message').text(this.model.getStatusMessage());
-            },
-
-            updateAvatar: function () {
-                var image = this.model.cached_image;
-                this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-            },
-
-            renderButtons: function () {
-                this.$('.buttons-wrap .btn-accept').hideIf(this.model.get('group_chat') && !this.private_invite);
-                this.$('.buttons-wrap .btn-block').hideIf(this.model.get('group_chat') && this.private_invite);
-                this.$('.buttons-wrap .btn-join').showIf(this.model.get('group_chat') && !this.private_invite);
-                this.$('.buttons-wrap .btn-decline-all').showIf(this.model.get('group_chat') && this.private_invite);
-            },
-
-            updateGroupChat: function () {
-                this.renderButtons();
-                if (this.model.get('group_chat') && !this.private_invite) {
-                    this.updateInviteMsg('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
-                }
-            },
 
             updateInviteMsg: function (msg) {
                 this.$('.invite-msg .invite-msg-text').text(msg);
@@ -3996,11 +3918,17 @@ define("xabber-contacts", function () {
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
                 var attrs = {
-                    subscription: ask ? ("ask_" + ask) :  subscription,
+                    subscription: subscription,
                     in_roster: true,
                     roster_name: item.getAttribute("name"),
                     groups: groups
                 };
+                if (subscription === 'both') {
+                    attrs.subscription_request_out = false;
+                    attrs.subscription_request_in = false;
+                }
+                else if (ask === 'subscribe')
+                    attrs.subscription_request_out = true;
                 this.account.cached_roster.putInroster(_.extend(_.clone(attrs), {jid: jid}));
                 attrs.roster_name && (attrs.name = attrs.roster_name);
                 contact.set(attrs);

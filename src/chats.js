@@ -173,15 +173,13 @@ define("xabber-chats", function () {
                 searchable && (group_info_attributes.searchable = searchable);
                 description && (group_info_attributes.description = description);
                 parent_chat.length && (is_private_invitation = true);
-                is_private_invitation && (contact.invitation.private_invite = true);
                 is_private_invitation && contact.set('private_chat', true);
                 anonymous === 'incognito' && contact.set('incognito_chat', true);
                 contact.set('group_info', group_info_attributes);
             }
 
-            let invite_msg_text = $message.find('reason').text();
-            contact.invitation.updateInviteMsg(invite_msg_text);
-            let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
+            let invite_msg_text = $message.find('reason').text(),
+                invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
                 from_jid: from_jid,
                 auth_request: true,
                 invite: true,
@@ -190,15 +188,6 @@ define("xabber-chats", function () {
                 silent: false,
                 message: invite_msg_text
             }));
-            if (contact.invitation.message) {
-                if (contact.invitation.message.get('timestamp') < invite_msg.get('timestamp'))
-                    contact.invitation.message = invite_msg;
-            }
-            else
-                contact.invitation.message = invite_msg;
-            contact.invitation.invite_msgs.push({
-                stanza_id: $message.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id')
-            });
             return;
         },
 
@@ -1299,27 +1288,21 @@ define("xabber-chats", function () {
                     this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         silent: false,
-                        message: 'Authorization request sent'
+                        message: 'Incoming subscription request'
                     });
                 } else if (type === 'subscribe') {
+                    this.contact.set('subscription_request_in', true);
                     this.messages.createSystemMessage({
                         from_jid: jid,
                         auth_request: true,
                         is_accepted: false,
                         silent: false,
-                        message: 'User ' + jid + ' wants to be in your contact list'
+                        message: 'Subscription request sent'
                     });
                 } else if (type === 'subscribed') {
                     this.messages.createSystemMessage({
                         from_jid: jid,
-                        system_last_message: 'Authorization granted',
-                        message: 'User ' + jid + ' was authorized for chat',
-                    });
-                } else if (type === 'unsubscribed') {
-                    this.messages.createSystemMessage({
-                        from_jid: jid,
-                        system_last_message: 'Authorization denied',
-                        message: 'User ' + jid + ' was not authorized for chat'
+                        message: this.contact.get('name') + ' added to your contacts',
                     });
                 }
             }
@@ -1616,11 +1599,7 @@ define("xabber-chats", function () {
                             if (msg.get('private_invite'))
                                 msg_text = 'Invitation to private chat';
                             else
-                                msg_text = 'Authorization request';
-                    }
-                    else {
-                        if (msg.get('system_last_message'))
-                            msg_text = msg.get('system_last_message');
+                                msg_text = 'Incoming subscription request';
                     }
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
@@ -2134,7 +2113,12 @@ define("xabber-chats", function () {
             "keyup .messages-search-form": "keyupSearch",
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
-            "click .btn-retry-send-message": "retrySendMessage"
+            "click .btn-retry-send-message": "retrySendMessage",
+
+            "click .btn-decline": "declineSubscription",
+            "click .btn-allow": "allowSubscription",
+            "click .btn-add": "addContact",
+            "click .btn-block": "blockContact"
         },
 
         _initialize: function (options) {
@@ -2235,6 +2219,26 @@ define("xabber-chats", function () {
             }
         },
 
+        declineSubscription: function () {
+            this.contact.declineSubscribe();
+            this.$('.subscription-message-wrap').addClass('hidden');
+        },
+
+        allowSubscription: function () {
+            this.contact.acceptRequest();
+            this.$('.subscription-message-wrap').addClass('hidden');
+        },
+
+        addContact: function () {
+            this.contact.askRequest();
+            this.$('.subscription-message-wrap').addClass('hidden');
+        },
+
+        blockContact: function () {
+            this.contact.blockRequest();
+            this.$('.subscription-message-wrap').addClass('hidden');
+        },
+
         onChangedActiveStatus: function () {
             this.sendChatState(this.model.get('active') ? 'active' : 'inactive');
             if (this.contact.get('group_chat')) {
@@ -2246,16 +2250,27 @@ define("xabber-chats", function () {
         },
 
         updateSubscription: function () {
-            let subscription = this.contact.get('subscription');
-            if (subscription === 'both')
+            let subscription = this.contact.get('subscription'),
+                in_request = this.contact.get('subscription_request_in'),
+                out_request = this.contact.get('subscription_request_out');
+            this.$('.subscription-message-wrap .button').removeClass('hidden');
+            this.$('.subscription-message-wrap .subscription-info').text("");
+            if (subscription === 'both') {
+                this.$('.subscription-message-wrap').addClass('hidden');
                 return;
-            else if (subscription === 'to') {
-
-            } else if (subscription === 'from') {
-
-            } else if (!subscription) {
-
             }
+            else if (subscription === 'to' && in_request || (!subscription || subscription === 'none') && in_request) {
+                this.$('.subscription-message-wrap .subscription-info').text("Contact asks permission to see your presence information");
+                this.$('.subscription-message-wrap .button:not(.btn-allow)').addClass('hidden');
+            } else if (subscription === 'from' && !out_request || subscription === 'none') {
+                this.$('.subscription-message-wrap .subscription-info').text("Subscribe to see contact status information");
+                this.$('.subscription-message-wrap .button:not(.btn-subscribe)').addClass('hidden');
+            } else if (!subscription && !out_request || (!subscription || subscription === 'none') && in_request) {
+                this.$('.subscription-message-wrap .button:not(.btn-add):not(.btn-block)').addClass('hidden');
+            } else {
+                return;
+            }
+            this.$('.subscription-message-wrap').removeClass('hidden');
         },
 
         updateName: function (contact) {
@@ -5513,7 +5528,6 @@ define("xabber-chats", function () {
                     }.bind(this));
                 }.bind(this));
             }
-            view.contact.invitation.retractInvitation();
         },
 
         showGroupChats: function () {
