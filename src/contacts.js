@@ -1086,9 +1086,9 @@ define("xabber-contacts", function () {
                 }
                 else {
                     if ($target.attr('id') === "outcoming-subscription")
-                        contact.declineSubscribe();
-                    else
                         contact.declineSubscription();
+                    else
+                        contact.declineSubscribe();
                 }
             },
 
