@@ -2118,6 +2118,7 @@ define("xabber-chats", function () {
             "click .btn-decline": "declineSubscription",
             "click .btn-allow": "allowSubscription",
             "click .btn-add": "addContact",
+            "click .btn-subscribe": "addContact",
             "click .btn-block": "blockContact"
         },
 
@@ -2255,8 +2256,8 @@ define("xabber-chats", function () {
                 out_request = this.contact.get('subscription_request_out');
             this.$('.subscription-message-wrap .button').removeClass('hidden');
             this.$('.subscription-message-wrap .subscription-info').text("");
+            this.$('.subscription-message-wrap').addClass('hidden');
             if (subscription === 'both') {
-                this.$('.subscription-message-wrap').addClass('hidden');
                 return;
             }
             else if (subscription === 'to' && in_request || (!subscription || subscription === 'none') && in_request) {
