@@ -4455,6 +4455,7 @@ define("xabber-chats", function () {
                         data = JSON.parse(paramValue),
                         target = data.jid ? ('?jid=' + data.jid) : (data.id ?  ('?id=' + data.id) : "");
                     node.innerHTML = data.nickname;
+                    data.is_me && node.classList.add('ground-color-100');
                     node.setAttribute('data-target', target);
                     return node;
                 }
@@ -4464,7 +4465,6 @@ define("xabber-chats", function () {
                 }
             }
             Mention.blotName = 'mention';
-            Mention.className = 'ground-color-100';
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
@@ -6775,7 +6775,8 @@ define("xabber-chats", function () {
                 else
                     return;
             }
-            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({jid: jid, id: id, nickname: Strophe.xmlescape(nickname)}));
+            let is_me = !id && !jid || this.account.get('jid') === jid || this.contact.my_info && this.contact.my_info.get('id') === id;
+            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({jid: jid, id: id, nickname: Strophe.xmlescape(nickname), is_me: is_me}));
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();
