@@ -834,7 +834,7 @@ body .client-body-wrap.hidden + #modals {
 }
 
 .chat-bottom-blocked-wrap {
-    height: 64px;
+    height: 104px;
     width: 100%;
     display: inline-flex;
     align-items: center;
@@ -3793,7 +3793,7 @@ body .client-body-wrap.hidden + #modals {
     flex-direction: column;
 }
 
-.chat-content-wrap .subscription-message-wrap {
+.chat-content-wrap .subscription-buttons-wrap {
     /*position: absolute;*/
     width: 100%;
     top: 8px;
@@ -3805,7 +3805,7 @@ body .client-body-wrap.hidden + #modals {
     align-items: center;
 }
 
-.chat-content-wrap .subscription-message {
+.chat-content-wrap .subscription-buttons {
     display: inline-flex;
     height: 32px;
     padding: 0 24px;
@@ -3814,22 +3814,22 @@ body .client-body-wrap.hidden + #modals {
     background-color: rgba(245, 245, 245, .8);
 }
 
-.chat-content-wrap .subscription-message-wrap .subscription-info {
+.chat-content-wrap .subscription-buttons-wrap .subscription-info {
     color: #424242;
     margin-right: 24px;
 }
 
-.chat-content-wrap .subscription-message-wrap .button {
+.chat-content-wrap .subscription-buttons-wrap .button {
     margin-right: 24px;
     cursor: pointer;
     text-transform: uppercase;
 }
 
-.chat-content-wrap .subscription-message-wrap .btn-block {
+.chat-content-wrap .subscription-buttons-wrap .btn-block {
     color: #d32f2f;
 }
 
-.chat-content-wrap .subscription-message-wrap .btn-decline {
+.chat-content-wrap .subscription-buttons-wrap .btn-decline {
     color: #9E9E9E;
     cursor: pointer;
 }
@@ -5235,9 +5235,11 @@ input[type='range'].voice-message-volume:focus {
 .non-authorized-panel {
     position: relative;
     height: 104px;
+    width: 100%;
     padding: 30px 10px;
     background-color: #FFFFFF;
     border-top: 1px solid #E0E0E0;
+    text-transform: none;
 }
 
 .message-actions-panel {

@@ -20,6 +20,8 @@ define("xabber-contacts", function () {
                 status: "offline",
                 status_message: "",
                 subscription: null,
+                subscription_request_in: false,
+                subscription_request_out: false,
                 groups: [],
                 group_chat: false
             },
@@ -53,7 +55,37 @@ define("xabber-contacts", function () {
             },
 
             getStatusMessage: function () {
-                return this.get('status_message') || constants.STATUSES[this.get('status')];
+                let subscription = this.get('subscription'),
+                    in_request = this.get('subscription_request_in'),
+                    out_request = this.get('subscription_request_out'),
+                    status_text = "";
+                if (this.get('blocked'))
+                    status_text = 'Contact blocked';
+                else if (subscription === 'from') {
+                    if (out_request)
+                        status_text = 'Subscription request pending';
+                    else
+                        status_text = 'Subscribed to your status';
+                } else if (!subscription || subscription == 'none') {
+                    if (out_request)
+                        status_text =  'Subscription request pending';
+                    else if (in_request)
+                        status_text = 'Incoming subscription request';
+                    else if (!subscription)
+                        status_text = 'Not in your contacts';
+                    else
+                        status_text = 'No subscriptions';
+                } else if (this.get('group_info')) {
+                    status_text = this.get('group_info').members_num;
+                    if (this.get('group_info').members_num > 1)
+                        status_text += ' participants';
+                    else
+                        status_text += ' participant';
+                    if (this.get('group_info').online_members_num > 0)
+                        status_text += ', ' + this.get('group_info').online_members_num + ' online';
+                } else
+                    status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                return status_text;
             },
 
             getContactInfo: function () {
@@ -87,7 +119,7 @@ define("xabber-contacts", function () {
                             vcard: vcard,
                             vcard_updated: moment.now(),
                             name: this.get('roster_name')
-                        }
+                        };
                         if (!attrs.name) {
                             if (this.get('group_chat'))
                                 attrs.name = vcard.nickname || this.get('name');
@@ -303,13 +335,13 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, callback, errback);
             },
 
-            subGroupPres: function () {
+            sendPresent: function () {
                 var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#present'});
                 this.account.sendPres(pres);
             },
 
-            unsubGroupPres: function () {
+            sendNotPresent: function () {
                 var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#not-present'});
                 this.account.sendPres(pres);
@@ -322,6 +354,7 @@ define("xabber-contacts", function () {
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
                 if (type === 'subscribe') {
+                    this.set('subscription_request_in', true);
                     if (this.get('in_roster')) {
                         this.pres('subscribed');
                     } else {
@@ -329,7 +362,7 @@ define("xabber-contacts", function () {
                     }
                 } else if (type === 'subscribed') {
                     if (this.get('subscription') === 'to') {
-                        this.pres('subscribed');
+                        // this.pres('subscribed');
                     }
                     this.trigger('presence', this, 'subscribed');
                 } else if (type === 'unsubscribe') {
@@ -979,6 +1012,7 @@ define("xabber-contacts", function () {
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
                 this.updateSubscriptions();
                 this.updateJingleButtons();
+                this.updateStatusMsg();
                 this.updateName();
                 this.model.resources.models.forEach(function (resource) {this.model.resources.requestInfo(resource)}.bind(this));
             },
@@ -998,6 +1032,8 @@ define("xabber-contacts", function () {
                 if (_.has(changed, 'status_updated')) this.updateStatus();
                 if (_.has(changed, 'muted')) this.updateNotifications();
                 if (_.has(changed, 'subscription')) this.updateSubscriptions();
+                if (_.has(changed, 'subscription_request_in')) this.updateSubscriptions();
+                if (_.has(changed, 'blocked')) this.updateStatusMsg();
                 if (_.has(changed, 'status_message')) this.updateStatusMsg();
                 if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
                     _.has(changed, 'subscription')) {
@@ -1049,7 +1085,7 @@ define("xabber-contacts", function () {
             updateSubscriptions: function () {
                 let subscription = this.model.get('subscription'),
                     in_request = this.model.get('subscription_request_in'),
-                    out_request = this.model.get('subscription_request_out');
+                    out_request = this.model.get('subscription_request_out'),
                     $label_outcoming = this.$('label[for="outcoming-subscription"]'),
                     $label_incoming = this.$('label[for="incoming-subscription"]');
                 if (subscription === 'both') {
@@ -1156,6 +1192,7 @@ define("xabber-contacts", function () {
                         }
                         contact.blockRequest();
                         xabber.trigger("clear_search");
+                        xabber.body.setScreen('all-chats', {right: null});
                     }
                 });
             },
@@ -1168,6 +1205,7 @@ define("xabber-contacts", function () {
                     if (result) {
                         contact.unblock();
                         xabber.trigger("clear_search");
+                        xabber.body.setScreen('all-chats', {right: null});
                     }
                 });
             },
@@ -2230,7 +2268,7 @@ define("xabber-contacts", function () {
                             contact.pres('subscribe');
                             contact.getMyInfo();
                             this.close();
-                            contact.subGroupPres();
+                            contact.sendPresent();
                             this.account.chats.openChat(contact);
                             let chat = this.account.chats.getChat(contact);
                             chat.messages.createSystemMessage({
@@ -3011,7 +3049,7 @@ define("xabber-contacts", function () {
                 contact.pushInRoster();
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
-                contact.subGroupPres();
+                contact.sendPresent();
                 contact.getMyInfo();
                 this.openChat();
             },
@@ -3927,7 +3965,11 @@ define("xabber-contacts", function () {
                     attrs.subscription_request_out = false;
                     attrs.subscription_request_in = false;
                 }
-                else if (ask === 'subscribe')
+                if (subscription === 'from')
+                    attrs.subscription_request_in = false;
+                if (subscription === 'to')
+                    attrs.subscription_request_out = false;
+                if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
                 this.account.cached_roster.putInroster(_.extend(_.clone(attrs), {jid: jid}));
                 attrs.roster_name && (attrs.name = attrs.roster_name);

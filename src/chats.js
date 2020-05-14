@@ -1291,7 +1291,6 @@ define("xabber-chats", function () {
                         message: 'Incoming subscription request'
                     });
                 } else if (type === 'subscribe') {
-                    this.contact.set('subscription_request_in', true);
                     this.messages.createSystemMessage({
                         from_jid: jid,
                         auth_request: true,
@@ -2096,7 +2095,71 @@ define("xabber-chats", function () {
           }
       });
 
-    xabber.ChatContentView = xabber.BasicView.extend({
+      xabber.SubscriptionButtonsView = xabber.BasicView.extend({
+          template: templates.subscription_buttons,
+
+          events: {
+              "click .btn-decline": "declineSubscription",
+              "click .btn-allow": "allowSubscription",
+              "click .btn-add": "addContact",
+              "click .btn-subscribe": "addContact",
+              "click .btn-block": "blockContact"
+          },
+
+          _initialize: function (options) {
+              this.$el.html(this.template());
+              this.contact = options.contact;
+              this.contact.on("change:subscription", this.render, this);
+              this.contact.on("change:blocked", this.render, this);
+              this.contact.on("change:subscription_request_in", this.render, this);
+          },
+
+          render: function () {
+              let subscription = this.contact.get('subscription'),
+                  in_request = this.contact.get('subscription_request_in'),
+                  out_request = this.contact.get('subscription_request_out');
+              this.$('.button').removeClass('hidden');
+              this.$('.subscription-info').text("");
+              this.$el.addClass('hidden');
+              if (subscription === 'both' || this.contact.get('blocked'))
+                  return;
+              else if (subscription === 'to' && in_request || (!subscription || subscription === 'none') && in_request) {
+                  this.$('.subscription-info').text("Contact asks permission to see your presence information");
+                  this.$('.button:not(.btn-allow)').addClass('hidden');
+              } else if (subscription === 'from' && !out_request || subscription === 'none') {
+                  this.$('.subscription-info').text("Subscribe to see contact status information");
+                  this.$('.button:not(.btn-subscribe)').addClass('hidden');
+              } else if (!subscription && !out_request || (!subscription || subscription === 'none') && in_request) {
+                  this.$('.button:not(.btn-add):not(.btn-block)').addClass('hidden');
+              } else {
+                  return;
+              }
+              this.$el.removeClass('hidden');
+          },
+
+          declineSubscription: function () {
+              this.contact.declineSubscribe();
+              this.$el.addClass('hidden');
+          },
+
+          allowSubscription: function () {
+              this.contact.acceptRequest();
+              this.$el.addClass('hidden');
+          },
+
+          addContact: function () {
+              this.contact.askRequest();
+              this.$el.addClass('hidden');
+          },
+
+          blockContact: function () {
+              this.contact.blockRequest();
+              this.$el.addClass('hidden');
+          }
+
+      });
+
+      xabber.ChatContentView = xabber.BasicView.extend({
         className: 'chat-content-wrap',
         template: templates.chat_content,
         ps_selector: '.chat-content',
@@ -2113,13 +2176,7 @@ define("xabber-chats", function () {
             "keyup .messages-search-form": "keyupSearch",
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
-            "click .btn-retry-send-message": "retrySendMessage",
-
-            "click .btn-decline": "declineSubscription",
-            "click .btn-allow": "allowSubscription",
-            "click .btn-add": "addContact",
-            "click .btn-subscribe": "addContact",
-            "click .btn-block": "blockContact"
+            "click .btn-retry-send-message": "retrySendMessage"
         },
 
         _initialize: function (options) {
@@ -2131,7 +2188,7 @@ define("xabber-chats", function () {
             this.contact = this.model.contact;
             this.head = new xabber.ChatHeadView({content: this});
             this.bottom = new xabber.ChatBottomView({content: this});
-            this.bottom_blocked = new xabber.ChatBottomBlockedView();
+            this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
             this.$history_feedback = this.$('.load-history-feedback');
             this.$pinned_message = this.$('.pinned-message');
             this.$search_form = this.$('.search-form-header');
@@ -2150,7 +2207,6 @@ define("xabber-chats", function () {
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
-            this.contact.on("change:subscription", this.updateSubscription, this);
             this.contact.on("change:group_chat", this.updateGroupChat, this);
             this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
             this.account.contacts.on("change:name", this.updateName, this);
@@ -2191,7 +2247,7 @@ define("xabber-chats", function () {
             this.onScroll();
             this.updateContactStatus();
             this.updatePinnedMessage();
-            this.updateSubscription();
+            this.subscription_buttons.render();
         },
 
         cancelSearch: function () {
@@ -2199,7 +2255,7 @@ define("xabber-chats", function () {
         },
 
         updateContactStatus: function () {
-            if ((this.head.$('.contact-status').attr('data-status') == 'offline')&&(this.contact.get('last_seen'))) {
+            if (this.head.$('.contact-status').attr('data-status') == 'offline' && this.contact.get('last_seen')) {
                 var seconds = (moment.now() - this.contact.get('last_seen'))/1000,
                     new_status = utils.pretty_last_seen(seconds);
                 this.contact.set({status_message: new_status });
@@ -2220,58 +2276,14 @@ define("xabber-chats", function () {
             }
         },
 
-        declineSubscription: function () {
-            this.contact.declineSubscribe();
-            this.$('.subscription-message-wrap').addClass('hidden');
-        },
-
-        allowSubscription: function () {
-            this.contact.acceptRequest();
-            this.$('.subscription-message-wrap').addClass('hidden');
-        },
-
-        addContact: function () {
-            this.contact.askRequest();
-            this.$('.subscription-message-wrap').addClass('hidden');
-        },
-
-        blockContact: function () {
-            this.contact.blockRequest();
-            this.$('.subscription-message-wrap').addClass('hidden');
-        },
-
         onChangedActiveStatus: function () {
             this.sendChatState(this.model.get('active') ? 'active' : 'inactive');
             if (this.contact.get('group_chat')) {
                 if (this.model.get('active'))
-                    this.contact.subGroupPres();
+                    this.contact.sendPresent();
                 else
-                    this.contact.unsubGroupPres();
+                    this.contact.sendNotPresent();
             }
-        },
-
-        updateSubscription: function () {
-            let subscription = this.contact.get('subscription'),
-                in_request = this.contact.get('subscription_request_in'),
-                out_request = this.contact.get('subscription_request_out');
-            this.$('.subscription-message-wrap .button').removeClass('hidden');
-            this.$('.subscription-message-wrap .subscription-info').text("");
-            this.$('.subscription-message-wrap').addClass('hidden');
-            if (subscription === 'both') {
-                return;
-            }
-            else if (subscription === 'to' && in_request || (!subscription || subscription === 'none') && in_request) {
-                this.$('.subscription-message-wrap .subscription-info').text("Contact asks permission to see your presence information");
-                this.$('.subscription-message-wrap .button:not(.btn-allow)').addClass('hidden');
-            } else if (subscription === 'from' && !out_request || subscription === 'none') {
-                this.$('.subscription-message-wrap .subscription-info').text("Subscribe to see contact status information");
-                this.$('.subscription-message-wrap .button:not(.btn-subscribe)').addClass('hidden');
-            } else if (!subscription && !out_request || (!subscription || subscription === 'none') && in_request) {
-                this.$('.subscription-message-wrap .button:not(.btn-add):not(.btn-block)').addClass('hidden');
-            } else {
-                return;
-            }
-            this.$('.subscription-message-wrap').removeClass('hidden');
         },
 
         updateName: function (contact) {
@@ -2339,6 +2351,10 @@ define("xabber-chats", function () {
         updateBlockedState: function () {
             if (this.contact.get('blocked')) {
                 this.model.showBlockedRequestMessage();
+            }
+            if (this.isVisible()) {
+                xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'chat', chat_item: this.chat_item, blocked: this.contact.get('blocked')});
+                this.updateScrollBar();
             }
         },
 
@@ -5245,7 +5261,7 @@ define("xabber-chats", function () {
                         contact.getMyInfo();
                         this.close();
                         xabber.chats_view.updateScreenAllChats();
-                        contact.subGroupPres();
+                        contact.sendPresent();
                         contact.trigger("open_chat", contact);
                         let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                             .c('item', {jid: group_jid + '/' + moment.now()});
@@ -6112,7 +6128,7 @@ define("xabber-chats", function () {
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
             this.contact.on("change:image", this.updateAvatar, this);
-            this.contact.on("change:blocked", this.updateMenu, this);
+            this.contact.on("change:blocked", this.onChangedBlocked, this);
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:private_chat", this.updatePrivateChat, this);
@@ -6130,6 +6146,7 @@ define("xabber-chats", function () {
             });
             this.$('.chat-head-menu').hide();
             this.updateMenu();
+            this.updateStatusMsg();
             this.updateGroupChatHead();
             return this;
         },
@@ -6147,27 +6164,17 @@ define("xabber-chats", function () {
         },
 
         updateStatusMsg: function () {
-            if (this.contact.get('blocked')) {
-                this.$('.contact-status-message').text('Contact blocked');
-                return;
-            }
-            var group_text = 'Group chat';
-            if (this.contact.get('group_info')) {
-                group_text = this.contact.get('group_info').members_num;
-                if (this.contact.get('group_info').members_num > 1)
-                    group_text += ' participants';
-                else
-                    group_text += ' participant';
-                if (this.contact.get('group_info').online_members_num > 0)
-                    group_text += ', ' + this.contact.get('group_info').online_members_num + ' online';
-            }
-            this.contact.get('group_chat') ? this.$('.contact-status-message').text(group_text) : this.$('.contact-status-message').text(this.contact.getStatusMessage());
             this.$('.contact-status-message').text(this.contact.getStatusMessage());
         },
 
         updateAvatar: function () {
             var image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        },
+
+        onChangedBlocked: function () {
+            this.updateMenu();
+            this.updateStatusMsg();
         },
 
         updateMenu: function () {
@@ -6363,20 +6370,6 @@ define("xabber-chats", function () {
         }
     });
 
-    xabber.ChatBottomBlockedView = xabber.BasicView.extend({
-        className: 'chat-bottom-blocked-wrap',
-
-        _initialize: function () {
-            this.$el.text('blocked');
-        },
-
-        render: function () {
-            xabber.chat_body.$el.css({bottom: this.$el.height()});
-            xabber.chat_body.view && xabber.chat_body.view.updateScrollBar();
-        }
-
-    });
-
     xabber.ChatBottomView = xabber.BasicView.extend({
         className: 'chat-bottom-wrap',
         template: templates.chat_bottom,
@@ -6384,6 +6377,7 @@ define("xabber-chats", function () {
         mention_avatar_size: constants.AVATAR_SIZES.MENTION_ITEM,
 
         events: {
+            "click": "onClickBottom",
             "click .my-avatar": "showAccountSettings",
             "keyup .input-message .rich-textarea": "keyUp",
             "keydown .input-message .rich-textarea": "keyDown",
@@ -6512,6 +6506,7 @@ define("xabber-chats", function () {
             this.$('.account-jid').text(this.account.get('jid'));
             this.updateAvatar();
             this.account.on("change:image", this.updateAvatar, this);
+            this.contact.on("change:blocked", this.onBlockedUpdate, this);
             this.contact.on("reply_selected_messages", this.replyMessages, this);
             this.contact.on("forward_selected_messages", this.forwardMessages, this);
             this.contact.on("copy_selected_messages", this.copyMessages, this);
@@ -6625,6 +6620,9 @@ define("xabber-chats", function () {
         },
 
         render: function (options) {
+            this.$('.message-input-panel').hideIf(options.blocked);
+            this.$('.blocked-msg').showIf(options.blocked);
+            this.$el.switchClass('chat-bottom-blocked-wrap', options.blocked);
             this.updateAvatar();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
             this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
@@ -6643,6 +6641,19 @@ define("xabber-chats", function () {
             xabber.chat_body.updateHeight();
             this.manageSelectedMessages();
             return this;
+        },
+
+        onBlockedUpdate: function () {
+            if (!this.isVisible())
+                return;
+            let is_blocked = this.contact.get('blocked');
+            this.$('.message-input-panel').hideIf(is_blocked);
+            this.$('.blocked-msg').showIf(is_blocked);
+            this.$el.switchClass('chat-bottom-blocked-wrap', is_blocked);
+        },
+
+        onClickBottom: function (ev) {
+            (this.$el.hasClass('chat-bottom-blocked-wrap') && !$(ev.target).closest('.message-actions-panel').length) && this.contact.showDetails(xabber.body.screen.get('name'));
         },
 
         updateInfoInBottom: function () {
@@ -7342,12 +7353,13 @@ define("xabber-chats", function () {
         },
 
         manageSelectedMessages: function () {
-            var $selected_msgs =  this.content_view ? this.content_view.$('.chat-message.selected') : this.view.$('.chat-message.selected'),
+            var $selected_msgs = this.content_view.$('.chat-message.selected'),
                 $input_panel = this.$('.message-input-panel'),
                 $message_actions = this.$('.message-actions-panel');
                 length = $selected_msgs.length;
-            $input_panel.hideIf(length);
+            $input_panel.hideIf(this.contact.get('blocked') || length);
             $message_actions.showIf(length);
+            this.contact.get('blocked') && this.$('.blocked-msg').hideIf(length);
             if (length) {
                 var my_msg = false;
                 if (length === 1) {
@@ -7358,8 +7370,9 @@ define("xabber-chats", function () {
                             my_msg = true;
                 }
                 $message_actions.find('.pin-message-wrap').showIf(this.contact.get('group_chat'));
+                $message_actions.find('.reply-message-wrap').switchClass('non-active', this.contact.get('blocked'));
                 $message_actions.find('.pin-message-wrap').switchClass('non-active', ((length !== 1) && this.contact.get('group_chat')));
-                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg));
+                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.contact.get('blocked'));
                 this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {
                 this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");

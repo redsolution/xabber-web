@@ -50,7 +50,7 @@ define(["xabber-dependencies"], function (deps) {
         return _image_cache[image] || new CachedImage(image);
     };
 
-    var getDefaultAvatar = function (name) {
+    var getDefaultAvatar = function (name, color) {
         // generate colored avatar with first letters of username
         var canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d'),
@@ -70,7 +70,7 @@ define(["xabber-dependencies"], function (deps) {
         canvas.width = 256;
         canvas.height = 256;
         ctx.rect(0, 0, 256, 256);
-        ctx.fillStyle = getAccountColor(name);//COLORS[color_index];
+        ctx.fillStyle = color || getAccountColor(name);//COLORS[color_index];
         ctx.fill();
         ctx.font = "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";

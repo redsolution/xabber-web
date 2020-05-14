@@ -228,7 +228,7 @@ define("xabber-ui", function () {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_chat_body,
-                    chat_bottom: options.blocked ? path_chat_bottom_blocked : path_chat_bottom
+                    chat_bottom: path_chat_bottom
                 };
             }
         };
