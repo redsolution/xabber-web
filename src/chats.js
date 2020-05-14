@@ -2784,7 +2784,15 @@ define("xabber-chats", function () {
             }
             if (message.get('mentions')) {
                 message.get('mentions').forEach(function (mention) {
-                    let mention_target = mention.target || "";
+                    let mention_target = mention.target || "",
+                        id = mention_target.match(/\?id=\w*/),
+                        jid = mention_target.match(/\?jid=.*/);
+                    if (id)
+                        mention_target = id[0].slice(4);
+                    else if (jid)
+                        mention_target = jid[0].slice(5);
+                    else
+                        mention_target = "";
                     if (this.contact.my_info)
                         (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                     else if (this.contact.get('group_chat')) {
@@ -2792,7 +2800,7 @@ define("xabber-chats", function () {
                             (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                         }.bind(this));
                     }
-                    (mention_target === this.account.get('jid')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                    (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
                 }.bind(this));
             }
         },
@@ -6716,8 +6724,9 @@ define("xabber-chats", function () {
         },
 
         updateMentionsList: function (mention_text) {
+            mention_text = (mention_text || "").toLowerCase();
             this.contact.searchByParticipants(mention_text, function (participants) {
-                if (participants.length) {
+                if (participants.length || 'everyone'.indexOf(mention_text) > -1 || mention_text === "*" || 'all'.indexOf(mention_text) > -1 || 'все'.indexOf(mention_text) > -1) {
                     this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
@@ -6733,8 +6742,7 @@ define("xabber-chats", function () {
                     mention_all.find('.one-line.jid').text(this.getParticipantsList());
                     this.$('.mentions-list').append(mention_all);
                     this.$('.mentions-list').children('.mention-item').first().addClass('active');
-                }
-                else
+                } else
                     this.$('.mentions-list').html("").hide();
             }.bind(this));
         },
