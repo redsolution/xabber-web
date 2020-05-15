@@ -120,6 +120,7 @@ define("xabber-templates", [
     "text!templates/svg/ic-bot-chat.html",
     "text!templates/svg/ic-private-chat.html",
     "text!templates/svg/ic-group-contact.html",
+    "text!templates/svg/ic-blocked.html",
     "text!templates/svg/ic-incognito-contact.html",
     "text!templates/svg/ic-bot-contact.html",
     "text!templates/svg/ic-private-contact.html",
@@ -293,6 +294,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.ic-bot-chat');
     addSvgTemplate('svg.ic-private-chat');
     addSvgTemplate('svg.ic-group-contact');
+    addSvgTemplate('svg.ic-blocked');
     addSvgTemplate('svg.ic-incognito-contact');
     addSvgTemplate('svg.ic-bot-contact');
     addSvgTemplate('svg.ic-private-contact');
