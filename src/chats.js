@@ -2831,7 +2831,6 @@ define("xabber-chats", function () {
                     this.contact.invitation = new xabber.GroupchatInvitationView({model: this.contact, message: message});
                 this.model.contact.set('invitation', true);
                 this.model.get('active') && this.model.contact.trigger('open_chat', this.model.contact);
-                // this.chat_item.updateInvitation();
             }
 
             let last_message = this.model.last_message;

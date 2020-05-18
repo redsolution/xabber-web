@@ -113,7 +113,7 @@ define("xabber-views", function () {
             var view = this.children[name];
             if (view) {
                 delete this.children[name];
-                options.soft ? view.detach() : view.remove();
+                options.soft ? view.detach() : (view.trigger("remove") && view.remove());
             }
         },
 

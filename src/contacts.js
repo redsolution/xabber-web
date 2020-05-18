@@ -4164,6 +4164,7 @@ define("xabber-contacts", function () {
                 this.$el.attr({'data-jid': this.model.get('jid')});
                 this.$('.jid').text(this.model.get('jid'));
                 this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
+                this.on("remove", this.onRemoved, this);
             },
 
             unblockContact: function (ev) {
@@ -4174,6 +4175,17 @@ define("xabber-contacts", function () {
             showDetails: function (ev) {
                 if (!$(ev.target).closest('.blocked-invitations-wrap').length)
                     this.model.showDetails();
+            },
+
+            onRemoved: function () {
+                let blocked_list = this.$el.closest('.blocked-list'),
+                    jid = this.model.get('jid'),
+                    reg = new RegExp(('\\,\\s' + jid + '|' + jid + '\\,\\s' + '|' + jid)),
+                    blocked_contacts_desc = this.$el.closest('.blocked-contacts-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description'),
+                    blocked_domains_desc = this.$el.closest('.blocked-domains-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description');
+                this.$el.closest('.blocked-invitations-wrap').showIf(blocked_list.children().length > 1);
+                blocked_contacts_desc.text(blocked_contacts_desc.text().replace(reg, ""));
+                blocked_domains_desc.text(blocked_domains_desc.text().replace(reg, ""));
             }
         });
 
