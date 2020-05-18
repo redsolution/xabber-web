@@ -710,16 +710,13 @@ define("xabber-contacts", function () {
                 this.updateAvatar();
                 this.selectView();
                 this.updateGroupChat();
-                this.updateBot();
-                this.updatePrivateChat();
-                this.updateIncognitoChat();
-                this.$('.bot-chat-icon').showIf(this.model.get('bot'));
+                this.updateIcon();
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
-                this.model.on("change:private_chat", this.updatePrivateChat, this);
-                this.model.on("change:incognito_chat", this.updateIncognitoChat, this);
-                this.model.on("change:bot", this.updateBot, this);
+                this.model.on("change:private_chat", this.updateIcon, this);
+                this.model.on("change:incognito_chat", this.updateIcon, this);
+                this.model.on("change:bot", this.updateIcon, this);
                 this.model.on("change:status_message", this.updateStatusMsg, this);
                 this.model.on("change:last_seen", this.lastSeenUpdated, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
@@ -791,20 +788,29 @@ define("xabber-contacts", function () {
             updateGroupChat: function () {
                 var is_group_chat = this.model.get('group_chat');
                 this.$('.status').hideIf(is_group_chat);
-                (is_group_chat && !this.model.get('private_chat') && !this.model.get('incognito_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-group-contact"]());
+                this.updateIcon();
                 this.updateCSS();
             },
 
-            updateBot: function () {
-                this.model.get('bot') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-bot-contact"]());
-            },
-
-            updatePrivateChat: function () {
-                this.model.get('private_chat') && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-private-contact"]());
-            },
-
-            updateIncognitoChat: function () {
-                (this.model.get('incognito_chat') && !this.model.get('private_chat')) && this.$('.chat-icon').showIf(true).children('svg').html(env.templates.svg["ic-incognito-contact"]());
+            updateIcon: function () {
+                let ic_name;
+                this.$('.chat-icon').addClass('hidden');
+                if (this.model.get('blocked')) {
+                    ic_name = 'ic-blocked';
+                } else {
+                    if (this.model.get('invitation')) {
+                        ic_name = 'ic-invitation-contact';
+                    } else if (this.model.get('group_chat')) {
+                        if (this.model.get('private_chat'))
+                            ic_name = 'ic-private-contact';
+                        else if (this.model.get('incognito_chat'))
+                            ic_name = 'ic-incognito-contact';
+                        else
+                            ic_name = 'ic-group-contact';
+                    } else if (this.model.get('bot'))
+                        ic_name = 'ic-bot-contact';
+                }
+                ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
             },
 
             updateStatusMsg: function() {
