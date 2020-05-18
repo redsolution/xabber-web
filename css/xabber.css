@@ -3456,6 +3456,12 @@ body .client-body-wrap.hidden + #modals {
     float: left;
 }
 
+.chat-item.blocked .last-msg,
+.chat-item.blocked .last-msg span,
+.chat-item.not-in-roster .chat-title,
+.chat-item.blocked .chat-title {
+    color: #757575 !important;
+}
 
 .message-item .last-msg,
 .mention-item .last-msg,

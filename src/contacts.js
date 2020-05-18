@@ -355,7 +355,7 @@ define("xabber-contacts", function () {
                     this.set('photo_hash', $vcard_update.find('photo').text());
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
-                    if (this.get('in_roster')) {
+                    if (this.get('in_roster') || this.get('subscription_preapproved')) {
                         this.pres('subscribed');
                     } else {
                         this.trigger('presence', this, 'subscribe');
@@ -1087,11 +1087,11 @@ define("xabber-contacts", function () {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', true);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
                 } else if (subscription === 'to') {
-                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
+                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text('Receive presence updates').prev('input').prop('checked', true);
                 }
                 else if (!subscription) {
-                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', false);
+                    $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
                 }
                 if (in_request) {
@@ -1109,8 +1109,10 @@ define("xabber-contacts", function () {
                 if (is_checked) {
                     if ($target.attr('id') === "outcoming-subscription")
                         contact.askRequest();
-                    else
+                    else {
                         contact.acceptRequest();
+                        contact.set('subscription_preapproved', true);
+                    }
                 }
                 else {
                     if ($target.attr('id') === "outcoming-subscription")
@@ -3921,9 +3923,8 @@ define("xabber-contacts", function () {
                         from: this.account.jid
                     }));
                 }
-                else {
+                else
                     new_roster_version && (this.roster_version != new_roster_version) && this.account.cached_roster.clearDataBase();
-                }
                 new_roster_version && (this.roster_version = new_roster_version);
                 this.account.save('roster_version', this.roster_version);
                 $(iq).children('query').find('item').each(function (idx, item) {
@@ -3934,9 +3935,8 @@ define("xabber-contacts", function () {
 
             onRosterItem: function (item) {
                 var jid = item.getAttribute('jid');
-                if (jid === this.account.get('jid')) {
+                if (jid === this.account.get('jid'))
                     return;
-                }
                 var contact = this.contacts.mergeContact(jid);
                 var subscription = item.getAttribute("subscription"),
                     ask = item.getAttribute("ask");
@@ -3948,6 +3948,7 @@ define("xabber-contacts", function () {
                     contact.set({
                         in_roster: false,
                         known: false,
+                        name: contact.get('jid'),
                         subscription: null
                     });
                     this.account.cached_roster.removeFromCachedRoster(jid);

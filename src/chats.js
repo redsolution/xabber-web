@@ -1375,8 +1375,7 @@ define("xabber-chats", function () {
             if (this.messages.length)
                 this.messages.createSystemMessage({
                     from_jid: this.account.get('jid'),
-                    system_last_message: 'Contact blocked',
-                    message: this.get('jid') + ' was blocked',
+                    message: 'Contact blocked',
                     time: this.messages.last().get('time')
                 });
         },
@@ -1426,13 +1425,14 @@ define("xabber-chats", function () {
             this.contact.on("change:private_chat", this.updateIcon, this);
             this.contact.on("change:incognito_chat", this.updateIcon, this);
             this.contact.on("change:image", this.updateAvatar, this);
-            this.contact.on("change:blocked", this.updateIcon, this);
+            this.contact.on("change:blocked", this.onBlocked, this);
             this.contact.on("change:muted", this.updateIcon, this);
             this.contact.on("change:archived", this.updateArchivedState, this);
             this.contact.on("change:group_chat", this.updateGroupChats, this);
             this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
             this.contact.on("remove_invite", this.removeInvite, this);
             this.account.settings.on("change:color", this.updateColorScheme, this);
+            // this.$el.switchClass('not-in-roster', !this.contact.get('in_roster'));
         },
 
         updateName: function () {
@@ -1450,9 +1450,15 @@ define("xabber-chats", function () {
         },
 
         updateAcceptedStatus: function () {
-            if (this.contact.get('in_roster')) {
+            let in_roster = this.contact.get('in_roster');
+            if (in_roster)
                 this.model.set('is_accepted', true);
-            }
+            // this.$el.switchClass('not-in-roster', !in_roster);
+        },
+
+        onBlocked: function () {
+            this.updateIcon();
+            this.$el.switchClass('blocked', this.contact.get('blocked'));
         },
 
         updateCounter: function () {
@@ -2357,9 +2363,8 @@ define("xabber-chats", function () {
         },
 
         updateBlockedState: function () {
-            if (this.contact.get('blocked')) {
+            if (this.contact.get('blocked'))
                 this.model.showBlockedRequestMessage();
-            }
             if (this.isVisible()) {
                 xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'chat', chat_item: this.chat_item, blocked: this.contact.get('blocked')});
                 this.updateScrollBar();
@@ -5831,7 +5836,6 @@ define("xabber-chats", function () {
                 if (!is_match) {
                     if (!this.$('.chat-list-wrap .chat-item[data-id="' + chat_id + '"]').length ) {
                         let contact_list_item = xabber.contacts_view.$('.account-roster-wrap[data-jid="'+this.account.get('jid')+'"] .roster-contact[data-jid="' + jid + '"]').first().clone();
-                        contact_list_item.find('.blocked-indicator').hide();
                         contact_list_item.find('.muted-icon').hide();
                         this.$('.chat-list-wrap').append(contact_list_item);
                     }
