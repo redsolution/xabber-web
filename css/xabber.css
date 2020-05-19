@@ -4701,6 +4701,7 @@ img.fwd-img-preview {
 .message-input-panel .rich-textarea mention {
     padding: 1px 4px;
     border-radius: 3px;
+    background-color: #EEE;
 }
 
 .fwd-messages-preview {

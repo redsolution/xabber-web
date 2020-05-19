@@ -1607,7 +1607,7 @@ define("xabber-chats", function () {
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
                     else
-                        msg_text = $('<span class=text-color-700/>').text(msg_text);
+                        msg_text = $('<span class=text-color-500/>').text(msg_text);
                     this.$('.last-msg').html(msg_text);
                 }
                 else {
@@ -2845,7 +2845,15 @@ define("xabber-chats", function () {
             }
             if (message.get('mentions')) {
                 message.get('mentions').forEach(function (mention) {
-                    let mention_target = mention.target || "";
+                    let mention_target = mention.target || "",
+                        id = mention_target.match(/\?id=\w*/),
+                        jid = mention_target.match(/\?jid=.*/);
+                    if (id)
+                        mention_target = id[0].slice(4);
+                    else if (jid)
+                        mention_target = jid[0].slice(5);
+                    else
+                        mention_target = "";
                     if (this.contact.my_info)
                         (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                     else if (this.contact.get('group_chat')) {
@@ -2853,7 +2861,7 @@ define("xabber-chats", function () {
                             (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                         }.bind(this));
                     }
-                    (mention_target === this.account.get('jid')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                    (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
                 }.bind(this));
             }
         },
@@ -4506,6 +4514,7 @@ define("xabber-chats", function () {
                         data = JSON.parse(paramValue),
                         target = data.jid ? ('?jid=' + data.jid) : (data.id ?  ('?id=' + data.id) : "");
                     node.innerHTML = data.nickname;
+                    data.is_me && node.classList.add('ground-color-100');
                     node.setAttribute('data-target', target);
                     return node;
                 }
@@ -4515,7 +4524,6 @@ define("xabber-chats", function () {
                 }
             }
             Mention.blotName = 'mention';
-            Mention.className = 'ground-color-100';
             Mention.tagName = 'mention';
             Mention.prototype.optimize = function () {};
 
@@ -6798,8 +6806,9 @@ define("xabber-chats", function () {
         },
 
         updateMentionsList: function (mention_text) {
+            mention_text = (mention_text || "").toLowerCase();
             this.contact.searchByParticipants(mention_text, function (participants) {
-                if (participants.length) {
+                if (participants.length || 'everyone'.indexOf(mention_text) > -1 || mention_text === "*" || 'all'.indexOf(mention_text) > -1 || 'все'.indexOf(mention_text) > -1) {
                     this.$('.mentions-list').html("").show().perfectScrollbar({theme: 'item-list'});
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
@@ -6815,8 +6824,7 @@ define("xabber-chats", function () {
                     mention_all.find('.one-line.jid').text(this.getParticipantsList());
                     this.$('.mentions-list').append(mention_all);
                     this.$('.mentions-list').children('.mention-item').first().addClass('active');
-                }
-                else
+                } else
                     this.$('.mentions-list').html("").hide();
             }.bind(this));
         },
@@ -6849,7 +6857,8 @@ define("xabber-chats", function () {
                 else
                     return;
             }
-            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({jid: jid, id: id, nickname: Strophe.xmlescape(nickname)}));
+            let is_me = !id && !jid || this.account.get('jid') === jid || this.contact.my_info && this.contact.my_info.get('id') === id;
+            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({jid: jid, id: id, nickname: Strophe.xmlescape(nickname), is_me: is_me}));
             this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
             this.quill.setSelection(mention_position + nickname.length + 1, 0);
             this.focusOnInput();
@@ -7547,7 +7556,7 @@ define("xabber-chats", function () {
                     msg_sender = $msg.isSenderMe() ? this.account.get('name') : ($msg.get('user_info') && $msg.get('user_info').nickname || (this.account.contacts.get($msg.get('from_jid')) ? this.account.contacts.get($msg.get('from_jid')).get('name') : $msg.get('from_jid')));
                     text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";
                     fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
-                    let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end + 1) : $msg.get('original_message'));
+                    let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
                     fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
                     (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
                     (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
