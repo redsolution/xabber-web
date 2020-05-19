@@ -30,13 +30,12 @@ define("xabber-contacts", function () {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
                 var attrs = _.clone(_attrs);
-                (this.account && this.account.connection.domain === attrs.jid) && (attrs.is_server = true);
+                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
                 attrs.name = attrs.roster_name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
                     attrs.image = Images.getDefaultAvatar(attrs.name);
                 }
-                (this.account.domain === attrs.jid) && (attrs.bot = true);
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
@@ -265,7 +264,6 @@ define("xabber-contacts", function () {
             pres: function (type) {
                 var pres = $pres({to: this.get('jid'), type: type});
                 this.account.sendPres(pres);
-                this.trigger('presence', this, type + '_from');
                 return this;
             },
 
@@ -1138,13 +1136,13 @@ define("xabber-contacts", function () {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
                 if (xabber.get('audio'))
-                    this.initCall();
+                    this.initCall(ev);
             },
 
-            initCall: function (type) {
-                this.openChat();
+            initCall: function (ev) {
+                this.openChat(ev);
                 let chat = this.account.chats.getChat(this.model);
-                chat.item_view.content.initJingleMessage(type);
+                chat.item_view.content.initJingleMessage();
             },
 
             changeNotifications: function (ev) {
@@ -1165,12 +1163,12 @@ define("xabber-contacts", function () {
                     " from account " + this.account.get('jid').bold() + "?",
                     [{ name: 'delete_history', checked: false, text: 'Delete chat history'}],
                     { ok_button_text: 'delete'}).done(function (result) {
-                        if (result.delete_history) {
-                            let chat = this.account.chats.getChat(contact);
-                            chat.retractAllMessages(false);
-                            chat.deleteChatFromSynchronization();
-                        }
                         if (result) {
+                            if (result.delete_history) {
+                                let chat = this.account.chats.getChat(contact);
+                                chat.retractAllMessages(false);
+                                chat.deleteChatFromSynchronization();
+                            }
                             contact.removeFromRoster();
                             xabber.trigger("clear_search");
                         }
@@ -1212,6 +1210,7 @@ define("xabber-contacts", function () {
 
             requestAuthorization: function () {
                 this.model.pres('subscribe');
+                this.model.trigger('presence', this.model, 'subscribe_from');
                 this.openChat();
             }
         });
@@ -3951,11 +3950,13 @@ define("xabber-contacts", function () {
                     contact.trigger('remove_invite');
                 }
                 if (subscription === 'remove') {
+                    contact.trigger('roster_push', contact, "remove");
                     contact.set({
                         in_roster: false,
                         known: false,
                         name: contact.get('jid'),
-                        subscription: null
+                        subscription: null,
+                        subscription_request_out: false
                     });
                     this.account.cached_roster.removeFromCachedRoster(jid);
                     return;

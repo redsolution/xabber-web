@@ -1286,16 +1286,15 @@ define("xabber-chats", function () {
                 if (type === 'subscribe_from') {
                     this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
-                        silent: false,
-                        message: 'Incoming subscription request'
+                        silent: true,
+                        message: 'Subscription request sent'
                     });
                 } else if (type === 'subscribe') {
                     this.messages.createSystemMessage({
                         from_jid: jid,
                         auth_request: true,
-                        is_accepted: false,
                         silent: false,
-                        message: 'Subscription request sent'
+                        message: 'Incoming subscription request'
                     });
                 } else if (type === 'subscribed') {
                     this.messages.createSystemMessage({
@@ -1304,6 +1303,17 @@ define("xabber-chats", function () {
                     });
                 }
             }
+        },
+
+        onRosterPush: function (type) {
+            let jid = this.get('jid');
+            if (type === 'remove')
+                this.messages.createSystemMessage({
+                    from_jid: jid,
+                    silent: false,
+                    message: 'Contact deleted'
+                });
+
         },
 
         retractMessages: function (msgs, group_chat, symmetric) {
@@ -1601,8 +1611,6 @@ define("xabber-chats", function () {
                         else
                             if (msg.get('private_invite'))
                                 msg_text = 'Invitation to private chat';
-                            else
-                                msg_text = 'Incoming subscription request';
                     }
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
@@ -2124,6 +2132,7 @@ define("xabber-chats", function () {
               this.contact.on("change:subscription", this.render, this);
               this.contact.on("change:blocked", this.render, this);
               this.contact.on("change:subscription_request_in", this.render, this);
+              this.contact.on("change:subscription_request_out", this.render, this);
           },
 
           render: function () {
@@ -2137,7 +2146,7 @@ define("xabber-chats", function () {
               this.$el.addClass('hidden');
               if (subscription === 'both' || this.contact.get('blocked'))
                   return;
-              else if (subscription === 'to' && in_request || (!subscription || subscription === 'none') && in_request) {
+              else if (subscription === 'to' && in_request || ((!subscription || subscription === 'none') && in_request && out_request)) {
                   this.$('.subscription-info').text("Contact asks permission to see your presence information");
                   this.$('.button:not(.btn-allow)').addClass('hidden');
               } else if (subscription === 'from' && !out_request || subscription === 'none') {
@@ -2162,6 +2171,7 @@ define("xabber-chats", function () {
           },
 
           addContact: function () {
+              this.contact.acceptRequest();
               this.contact.askRequest();
               this.$el.addClass('hidden');
           },
@@ -2831,7 +2841,7 @@ define("xabber-chats", function () {
                     message.set('state', constants.MSG_DELIVERED);
             }
 
-            if (message.get('private_invite') || message.get('invite') || message.get('auth_request')) {
+            if (message.get('private_invite') || message.get('invite')) {
                 if (!(this.contact.invitation && this.contact.invitation.message.get('timestamp') > message.get('timestamp')))
                     this.contact.invitation = new xabber.GroupchatInvitationView({model: this.contact, message: message});
                 this.model.contact.set('invitation', true);
@@ -2868,7 +2878,7 @@ define("xabber-chats", function () {
 
         addMessage: function (message) {
             if (message.get('auth_request')) {
-                return;
+                // return;
             }
             var $message = this.buildMessageHtml(message);
             var index = this.model.messages.indexOf(message);
@@ -3170,7 +3180,7 @@ define("xabber-chats", function () {
             }
 
             if (attrs.type === 'system') {
-                let tpl_name = attrs.auth_request ? ( attrs.invite ? 'group_request' : 'auth_request') : 'system';
+                let tpl_name = attrs.invite ? 'group_request' : 'system';
                 return $(templates.messages[tpl_name](attrs));
             }
 
@@ -4604,6 +4614,7 @@ define("xabber-chats", function () {
             this.account.contacts.on("open_chat", this.openChat, this);
             this.account.contacts.on("open_mention", this.openMention, this);
             this.account.contacts.on("presence", this.onPresence, this);
+            this.account.contacts.on("roster_push", this.onRosterPush, this);
         },
 
         getChat: function (contact) {
@@ -5103,6 +5114,11 @@ define("xabber-chats", function () {
         onPresence: function (contact, type) {
             var chat = this.getChat(contact);
             chat.onPresence(type);
+        },
+
+        onRosterPush: function (contact, type) {
+            var chat = this.getChat(contact);
+            chat.onRosterPush(type);
         }
     });
 
@@ -6149,6 +6165,9 @@ define("xabber-chats", function () {
             this.updateArchiveButton();
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
+            this.contact.on("change:subscription_request_in", this.updateStatusMsg, this);
+            this.contact.on("change:subscription_request_out", this.updateStatusMsg, this);
+            this.contact.on("change:subscription", this.updateStatusMsg, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:status_message", this.updateStatusMsg, this);
             this.contact.on("change:image", this.updateAvatar, this);

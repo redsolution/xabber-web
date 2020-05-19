@@ -2866,7 +2866,7 @@ body .client-body-wrap.hidden + #modals {
 .jingle-message-view {
     width: 80vh;
     height: 60vh;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(10px);
     background-color: rgba(255, 255, 255, .8);
 }
@@ -2876,6 +2876,7 @@ body .client-body-wrap.hidden + #modals {
     display: none !important;
 }
 
+.jingle-message-view:not([data-state]),
 .jingle-message-view[data-state=search],
 .jingle-message-view[data-state=calling] {
     background-color: rgba(2, 119, 189, .6);
@@ -6233,8 +6234,8 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 0 6px 36px;
 }
 
-.details-panel .subscription-info-wrap #incoming-subscription-wrap {
-    margin: 0 !important;
+.details-panel .subscription-info-wrap .input-field {
+    margin-top: 0 !important;
 }
 
 .details-panel .token-wrap {
