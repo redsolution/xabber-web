@@ -3630,6 +3630,10 @@ body .client-body-wrap.hidden + #modals {
     float: left;
 }
 
+.chat-tools-wrap .chat-tool.btn-notifications {
+    padding-top: 1px;
+}
+
 .chat-tools-wrap .chat-tool i {
     color: #9E9E9E;
 }
