@@ -611,6 +611,13 @@ input[type=file] {
     line-height: 24px;
 }
 
+.mdi.mdi-22px {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    line-height: 22px;
+}
+
 .mdi.mdi-20px {
     width: 20px;
     height: 20px;
@@ -2289,6 +2296,11 @@ body .client-body-wrap.hidden + #modals {
     width: 100%;
     height: 19px;
     overflow: hidden;
+    display: inline-flex;
+}
+
+.roster-contact .name-wrap .muted-icon {
+    margin: 2px 5px 0 !important;
 }
 
 .roster-left-container .roster-contact .name {
@@ -2296,8 +2308,8 @@ body .client-body-wrap.hidden + #modals {
 }
 
 .muted-icon {
-    margin: 4px 0 0 5px;
-    float: left;
+    margin: 1px 5px 0;
+    color: rgba(117, 117, 117, .9);
 }
 
 .muted-icon polygon {
@@ -3443,8 +3455,10 @@ body .client-body-wrap.hidden + #modals {
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
     height: 17px;
-    padding-right: 40px;
     overflow: hidden;
+    display: inline-flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .message-item .chat-title,
@@ -3454,7 +3468,6 @@ body .client-body-wrap.hidden + #modals {
     width: 100%;
     line-height: 17px;
     color: #212121;
-    float: left;
 }
 
 .chat-item.blocked .last-msg,
@@ -3469,7 +3482,6 @@ body .client-body-wrap.hidden + #modals {
 .chat-item .last-msg {
     width: calc(100% - 20px);
     height: 16px;
-    margin-top: 2px;
     font-size: 11px;
     font-weight: 300;
     color: #757575;
@@ -3479,13 +3491,11 @@ body .client-body-wrap.hidden + #modals {
 .message-item .last-msg-date,
 .mention-item .last-msg-date,
 .chat-item .last-msg-date {
-    position: absolute;
-    top: 16px;
-    right: 7px;
     max-width: 54px;
-    height: 10px;
+    margin: 0 0 0 2px;
+    height: 16px;
     font-size: 9px;
-    line-height: 10px;
+    line-height: 16px;
     color: #757575;
 }
 
@@ -3622,14 +3632,6 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-tools-wrap .chat-tool i {
     color: #9E9E9E;
-}
-
-.chat-tools-wrap .chat-tool .muted {
-    margin: 4px 0;
-}
-
-.chat-tools-wrap .chat-tool .muted polygon {
-    fill: #9E9E9E;
 }
 
 .chat-tools-wrap .chat-tool:hover i {

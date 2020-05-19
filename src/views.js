@@ -588,10 +588,10 @@ define("xabber-views", function () {
           },
 
           updateChatItem: function (chat_item) {
-              var date_width = chat_item.find('.last-msg-date').width();
+              /*var date_width = chat_item.find('.last-msg-date').width();
               chat_item.find('.chat-title-wrap').css('padding-right', date_width + 5);
               var title_width = chat_item.find('.chat-title-wrap').width();
-              chat_item.find('.chat-title').css('max-width', title_width);
+              chat_item.find('.chat-title').css('max-width', title_width);*/
           },
 
           searchMessages: function (query, options) {

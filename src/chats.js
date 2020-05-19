@@ -1434,7 +1434,7 @@ define("xabber-chats", function () {
             this.contact.on("change:incognito_chat", this.updateIcon, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onBlocked, this);
-            this.contact.on("change:muted", this.updateIcon, this);
+            this.contact.on("change:muted", this.updateMutedState, this);
             this.contact.on("change:archived", this.updateArchivedState, this);
             this.contact.on("change:group_chat", this.updateGroupChats, this);
             this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
@@ -1504,7 +1504,6 @@ define("xabber-chats", function () {
             let is_muted = this.contact.get('muted');
             this.$('.msg-counter').switchClass('muted-chat-counter', is_muted);
             this.$('.muted-icon').showIf(is_muted);
-            this.updateCSS();
         },
 
         updateArchivedState: function () {
@@ -1554,7 +1553,6 @@ define("xabber-chats", function () {
             this.$('.last-msg').html('No messages'.italics());
             this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
-            this.updateCSS();
         },
 
         updateLastMessage: function (msg) {
@@ -1653,15 +1651,6 @@ define("xabber-chats", function () {
                 .attr('title', utils.pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                 .attr('data-state', msg.getState());
-            this.updateCSS();
-        },
-
-        updateCSS: function () {
-            var date_width = this.$('.last-msg-date').width();
-            this.$('.chat-title-wrap').css('padding-right', date_width + 5);
-            var title_width = this.$('.chat-title-wrap').width();
-            this.contact.get('muted') && (title_width -= 24);
-            this.$('.chat-title').css('max-width', title_width);
         },
 
         openByClick: function () {
@@ -5593,7 +5582,6 @@ define("xabber-chats", function () {
             } 
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
-                chat.item_view.updateCSS();
             });
         },
 
@@ -5611,7 +5599,6 @@ define("xabber-chats", function () {
             }
             private_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
-                chat.item_view.updateCSS();
             });
         },
 
@@ -5622,7 +5609,6 @@ define("xabber-chats", function () {
                 account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && chat.get('timestamp') && !chat.contact.get('archived'));
             account_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
-                chat.item_view.updateCSS();
             });
         },
 
@@ -5632,7 +5618,6 @@ define("xabber-chats", function () {
                 archive_chats = chats.filter(chat => chat.contact.get('archived'));
             archive_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
-                chat.item_view.updateCSS();
             });
         },
 
@@ -5650,7 +5635,6 @@ define("xabber-chats", function () {
             }
             all_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
-                chat.item_view.updateCSS();
             });
         },
 
@@ -6242,8 +6226,7 @@ define("xabber-chats", function () {
 
         updateNotifications: function () {
             var muted = this.contact.get('muted');
-            this.$('.btn-notifications .muted').showIf(muted);
-            this.$('.btn-notifications .no-muted').hideIf(muted);
+            this.$('.btn-notifications .muted-icon').switchClass('mdi-bell', !muted).switchClass('mdi-bell-off', muted);
         },
 
         changeNotifications: function () {

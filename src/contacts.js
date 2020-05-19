@@ -775,20 +775,10 @@ define("xabber-contacts", function () {
                 }
             },
 
-            updateCSS: function () {
-                if (this.$el.is(':visible')) {
-                    var name_width = this.$('.name-wrap').width();
-                    this.model.get('muted') && (name_width -= 24);
-                    this.model.get('group_chat') && (name_width -= 20);
-                    this.$('.name').css('max-width', name_width);
-                }
-            },
-
             updateGroupChat: function () {
                 var is_group_chat = this.model.get('group_chat');
                 this.$('.status').hideIf(is_group_chat);
                 this.updateIcon();
-                this.updateCSS();
             },
 
             updateIcon: function () {
@@ -872,7 +862,6 @@ define("xabber-contacts", function () {
 
             updateMutedState: function () {
                 this.$('.muted-icon').showIf(this.model.get('muted'));
-                this.updateCSS();
             },
 
             clickOnItem: function () {
