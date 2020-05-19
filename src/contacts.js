@@ -314,6 +314,7 @@ define("xabber-contacts", function () {
 
             declineSubscription: function () {
                 this.pres('unsubscribe');
+                this.set('subscription_request_out', false);
             },
 
             declineSubscribe: function () {
@@ -1127,7 +1128,7 @@ define("xabber-contacts", function () {
             },
 
             openChat: function (ev) {
-                if ($(ev.target).closest('.button-wrap').hasClass('non-active') || $(ev.target).closest('.button-wrap').length && this.model.get('blocked'))
+                if (ev && ($(ev.target).closest('.button-wrap').hasClass('non-active') || $(ev.target).closest('.button-wrap').length && this.model.get('blocked')))
                     return;
                 this.model.trigger("open_chat", this.model);
             },
@@ -1140,7 +1141,7 @@ define("xabber-contacts", function () {
             },
 
             initCall: function (ev) {
-                this.openChat(ev);
+                this.openChat();
                 let chat = this.account.chats.getChat(this.model);
                 chat.item_view.content.initJingleMessage();
             },

@@ -1286,14 +1286,12 @@ define("xabber-chats", function () {
                 if (type === 'subscribe_from') {
                     this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
-                        silent: true,
                         message: 'Subscription request sent'
                     });
                 } else if (type === 'subscribe') {
                     this.messages.createSystemMessage({
                         from_jid: jid,
                         auth_request: true,
-                        silent: false,
                         message: 'Incoming subscription request'
                     });
                 } else if (type === 'subscribed') {
