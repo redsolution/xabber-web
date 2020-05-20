@@ -408,8 +408,6 @@ define("xabber-api-service", function () {
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
                 this.trigger('open_sync_window', data);
-            } else if (sync_request === 'silent') {
-                this.synchronize_main_settings();
             } else {
                 this.fetch_from_server(data);
             }

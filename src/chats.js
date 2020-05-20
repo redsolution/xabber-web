@@ -7784,9 +7784,10 @@ define("xabber-chats", function () {
         this.on("change:focused", function () {
             if (this.get('focused')) {
                 var view = this.chats_view.active_chat;
-                if (view && view.model.get('display') && !view.model.get('is_accepted')) {
+                if (view && view.model.get('display')) {
                     view.content.readMessages();
-                    view.content.bottom.focusOnInput();
+                    if (view.model.get('is_accepted') !== false)
+                        view.content.bottom.focusOnInput();
                 }
             }
         }, this);

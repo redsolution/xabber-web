@@ -4189,7 +4189,8 @@ define("xabber-contacts", function () {
 
         xabber.BlockListView = xabber.BasicView.extend({
             events: {
-                "click .blocked-item": "toggleItems"
+                "click .blocked-item": "toggleItems",
+                "click .btn-block": "openBlockWindow"
             },
 
             _initialize: function (options) {
@@ -4219,6 +4220,15 @@ define("xabber-contacts", function () {
                 this.removeChild(contact.get('jid'));
                 this.$('.placeholder').hideIf(this.account.blocklist.length);
                 this.parent.updateScrollBar();
+            },
+
+            openBlockWindow: function () {
+                utils.dialogs.ask_enter_value("Block", "Block a specific xmpp address", {input_placeholder_value: 'name@example.com'}, { ok_button_text: 'block'}).done(function (result) {
+                    if (result) {
+                        let contact = this.account.contacts.mergeContact(result);
+                        contact.block();
+                    }
+                }.bind(this));
             }
         });
 

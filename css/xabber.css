@@ -1511,7 +1511,7 @@ body .client-body-wrap.hidden + #modals {
     display: inline-block;
 }
 
-.login-panel.add-xabber-account-panel {
+:not(.modals) .login-panel.add-xabber-account-panel {
     top: 0 !important;
 }
 
@@ -5493,7 +5493,8 @@ input[type='range'].voice-message-volume:focus {
     padding: 16px 24px 11px;
 }
 
-.settings-panel .block-header .block-name {
+.settings-panel .block-header .block-name,
+.details-panel .block-header .block-name {
     max-width: 100%;
     height: 21px;
     font-size: 18px;
@@ -7041,14 +7042,6 @@ input[type='range'].voice-message-volume:focus {
     width: 100%;
     height: 40px;
     padding: 12px 24px 8px;
-}
-
-.details-panel .block-header .block-name {
-    max-width: 100%;
-    height: 21px;
-    font-size: 18px;
-    line-height: 21px;
-    color: #212121;
 }
 
 .groupchat-details-panel .errors {
