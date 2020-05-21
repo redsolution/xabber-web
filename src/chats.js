@@ -1030,16 +1030,18 @@ define("xabber-chats", function () {
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    this.messages.createSystemMessage({
+                    return this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
+                        stanza_id: options.stanza_id,
                         message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
                     });
                 }
                 else {
-                    this.messages.createSystemMessage({
+                    return this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
+                        stanza_id: options.stanza_id,
                         message: 'Cancelled call'
                     });
                 }
@@ -4903,10 +4905,10 @@ define("xabber-chats", function () {
                         $stanza_id = stanza_id;
                 }
                 else {
-                    if (stanza_id.attr('by') === from_bare_jid && !options.carbon_copied)
-                        $contact_stanza_id = stanza_id;
-                    else
+                    if (stanza_id.attr('by') === this.account.get('jid'))
                         $stanza_id = stanza_id;
+                    else
+                        $contact_stanza_id = stanza_id;
                 }
             }.bind(this));
             $stanza_id && (attrs.stanza_id = $stanza_id.attr('id'));
@@ -4972,7 +4974,8 @@ define("xabber-chats", function () {
                     }
                     let $jingle_msg_accept = $carbons.find('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                         $jingle_msg_propose = $carbons.find('propose[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
-                        $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
+                        $jingle_msg_reject = $carbons.find('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
+                        stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: true});
                     if ($jingle_msg_propose.length) {
                         if (xabber.current_voip_call) {
                             let msg_to = ($carbons[0].tagName === 'sent') ? Strophe.getBareJidFromJid($jingle_msg_propose.parent('message').attr('to')) : this.account.get('jid');
@@ -5008,12 +5011,16 @@ define("xabber-chats", function () {
                                 initiator = $message.find('call').attr('initiator');
                             return chat.messages.createSystemMessage({
                                 from_jid: this.account.get('jid'),
+                                stanza_id: stanza_ids.stanza_id,
+                                contact_stanza_id: stanza_ids.contact_stanza_id,
                                 message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
                             });
                         }
                         else {
                             return chat.messages.createSystemMessage({
                                 from_jid: this.account.get('jid'),
+                                stanza_id: stanza_ids.stanza_id,
+                                contact_stanza_id: stanza_ids.contact_stanza_id,
                                 message: 'Cancelled call'
                             });
                         }
@@ -5023,7 +5030,6 @@ define("xabber-chats", function () {
                         $message = $forwarded.children('message');
                     if ($carbons.find('request[xmlns="' + Strophe.NS.DELIVERY + '"][to="' + to_bare_jid + '"]').length)
                         return;
-                    let stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: true});
                     return this.receiveChatMessage($message[0], _.extend(options, {
                         carbon_copied: true,
                         stanza_id: stanza_ids.stanza_id,
@@ -5070,7 +5076,8 @@ define("xabber-chats", function () {
             }
 
             var contact = this.account.contacts.mergeContact(contact_jid),
-                chat = this.account.chats.getChat(contact);
+                chat = this.account.chats.getChat(contact),
+                stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid});
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();
@@ -5078,7 +5085,7 @@ define("xabber-chats", function () {
                     contact.pushInRoster();
             }
 
-            return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender}));
+            return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
         },
 
         receiveErrorMessage: function (message) {
