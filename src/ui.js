@@ -212,6 +212,8 @@ define("xabber-ui", function () {
 
 
         this.right_panel.patchTree = function (tree, options) {
+            if (!options.right)
+                return;
             if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
                 return {
                     chat_head: path_chat_head,

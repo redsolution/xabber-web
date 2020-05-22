@@ -1389,7 +1389,7 @@ define("xabber-chats", function () {
                 });
         },
 
-        deleteChatFromSynchronization: function (callback, errback) {
+        deleteFromSynchronization: function (callback, errback) {
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', {jid: this.get('jid')});
@@ -4160,6 +4160,8 @@ define("xabber-chats", function () {
 
         showParticipantProperties: function (participant_id) {
             let participant = this.contact.participants.get(participant_id);
+            if (!participant)
+                return;
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
             this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
             this.contact.membersRequest({id: participant_id}, function (response) {
@@ -6151,6 +6153,7 @@ define("xabber-chats", function () {
             this.updateMenu();
             this.updateNotifications();
             this.updateArchiveButton();
+            this.model.on("close_chat", this.closeChat, this);
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:subscription_request_in", this.updateStatusMsg, this);
@@ -6372,7 +6375,7 @@ define("xabber-chats", function () {
         },
 
         closeChat: function () {
-            this.model.set({'opened': false, 'display': false});
+            this.model.set({'opened': false, 'display': false, 'active': false});
             xabber.chats_view.clearSearch();
         },
 
@@ -6380,7 +6383,7 @@ define("xabber-chats", function () {
             if (this.contact.get('group_chat')) {
                 utils.dialogs.ask("Delete chat", "If you delete a group chat, you won't receive messages from it", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
-                        (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteChatFromSynchronization();
+                        (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteFromSynchronization();
                         this.leaveGroupChat();
                         this.closeChat();
                     }
@@ -6392,7 +6395,7 @@ define("xabber-chats", function () {
                 (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
                         if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteChatFromSynchronization();
+                            this.model.deleteFromSynchronization();
                         }
                         if (rewrite_support) {
                             this.model.retractAllMessages(false);

@@ -365,8 +365,15 @@ define("xabber-contacts", function () {
                     }
                     this.trigger('presence', this, 'subscribed');
                 } else if (type === 'unsubscribe') {
-                    if (this.get('group_chat'))
+                    if (this.get('group_chat')) {
                         this.removeFromRoster();
+                        let chat = this.account.chats.getChat(this);
+                        chat.deleteFromSynchronization(function () {
+                            chat.trigger("close_chat");
+                        }.bind(this), function () {
+                            chat.trigger("close_chat");
+                        }.bind(this));
+                    }
                 } else if (type === 'unsubscribed') {
                     // this.trigger('presence', this, 'unsubscribed');
                 } else {
@@ -788,7 +795,7 @@ define("xabber-contacts", function () {
                     ic_name = 'ic-blocked';
                 } else {
                     if (this.model.get('invitation')) {
-                        ic_name = 'ic-invitation-contact';
+                        return;
                     } else if (this.model.get('group_chat')) {
                         if (this.model.get('private_chat'))
                             ic_name = 'ic-private-contact';
@@ -1157,7 +1164,7 @@ define("xabber-contacts", function () {
                             if (result.delete_history) {
                                 let chat = this.account.chats.getChat(contact);
                                 chat.retractAllMessages(false);
-                                chat.deleteChatFromSynchronization();
+                                chat.deleteFromSynchronization();
                             }
                             contact.removeFromRoster();
                             xabber.trigger("clear_search");
@@ -1176,7 +1183,7 @@ define("xabber-contacts", function () {
                             contact.removeFromRoster();
                             let chat = this.account.chats.getChat(contact);
                             chat.retractAllMessages(false);
-                            chat.deleteChatFromSynchronization();
+                            chat.deleteFromSynchronization();
                         }
                         contact.blockRequest();
                         xabber.trigger("clear_search");
@@ -1328,9 +1335,12 @@ define("xabber-contacts", function () {
                     if (result) {
                         contact.declineSubscription();
                         contact.removeFromRoster();
-                        contact.set('in_roster', false);
-                        xabber.trigger("clear_search");
-                        this.openChat();
+                        let chat = this.account.chats.getChat(contact);
+                        chat.deleteFromSynchronization(function () {
+                            chat.trigger("close_chat");
+                        }.bind(this), function () {
+                            chat.trigger("close_chat");
+                        }.bind(this));
                     }
                 }.bind(this));
             },
@@ -3001,8 +3011,9 @@ define("xabber-contacts", function () {
             closeChat: function () {
                 let chat = this.account.chats.getChat(this.model);
                 chat.set({'opened': false, 'display': false, 'active': false});
-                chat.deleteChatFromSynchronization();
-                xabber.body.setScreen('all-chats', { right: null });
+                chat.deleteFromSynchronization(function () {
+                    xabber.body.setScreen('all-chats', { right: null });
+                }.bind(this));
             },
 
             updateAvatar: function () {
@@ -3072,7 +3083,6 @@ define("xabber-contacts", function () {
                 this.blockInvitation();
                 contact.trigger('remove_invite', contact);
                 this.closeChat();
-                xabber.body.setScreen('all-chats', {right: null});
             },
 
             declineAll: function () {
@@ -3083,7 +3093,6 @@ define("xabber-contacts", function () {
                 }
                 this.model.trigger('remove_invite', this.model);
                 this.closeChat();
-                xabber.body.setScreen('all-chats', {right: null});
             },
 
             blockContact: function (ev) {
@@ -3940,7 +3949,7 @@ define("xabber-contacts", function () {
                     contact.trigger('remove_invite');
                 }
                 if (subscription === 'remove') {
-                    contact.trigger('roster_push', contact, "remove");
+                    !contact.get('group_chat') && contact.trigger('roster_push', contact, "remove");
                     contact.set({
                         in_roster: false,
                         known: false,
