@@ -1026,11 +1026,11 @@ define("xabber-chats", function () {
                 }
             }
             if ($jingle_msg_reject.length) {
-                let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp');
+                let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp'), message;
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    return this.messages.createSystemMessage({
+                    message = this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
                         stanza_id: options.stanza_id,
@@ -1038,16 +1038,15 @@ define("xabber-chats", function () {
                     });
                 }
                 else {
-                    return this.messages.createSystemMessage({
+                    message = this.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         time: time,
                         stanza_id: options.stanza_id,
                         message: 'Cancelled call'
                     });
                 }
-                if (options.is_archived || options.synced_msg) {
-                    return;
-                }
+                if (options.is_archived || options.synced_msg)
+                    return message;
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
                     xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                     let busy_audio = xabber.playAudio('busy');
@@ -1058,7 +1057,7 @@ define("xabber-chats", function () {
                     xabber.current_voip_call.destroy();
                     xabber.current_voip_call = null;
                 }
-                return;
+                return message;
             }
             if (!options.is_archived) {
                 var $stanza_id, $contact_stanza_id;
@@ -5002,7 +5001,7 @@ define("xabber-chats", function () {
                         }
                     }
                     if ($jingle_msg_reject.length) {
-                        let msg_to = ($carbons[0].tagName === 'sent') ? this.account.get('jid') : $carbons.find('message').attr('from');
+                        let msg_to = ($carbons[0].tagName === 'sent') ? Strophe.getBareJidFromJid($jingle_msg_reject.parent('message').attr('to')) : this.account.get('jid');
                         let time = $message.find('call').attr('end'),
                             contact = this.account.contacts.mergeContact(msg_to),
                             chat = this.account.chats.getChat(contact);
