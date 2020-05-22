@@ -1338,8 +1338,10 @@ define("xabber-contacts", function () {
                         let chat = this.account.chats.getChat(contact);
                         chat.deleteFromSynchronization(function () {
                             chat.trigger("close_chat");
+                            xabber.body.setScreen('all-chats', {right: null});
                         }.bind(this), function () {
                             chat.trigger("close_chat");
+                            xabber.body.setScreen('all-chats', {right: null});
                         }.bind(this));
                     }
                 }.bind(this));
@@ -1929,7 +1931,6 @@ define("xabber-contacts", function () {
                     let $this = $(item),
                         participant_id = $this.data('id'),
                         participant = this.model.participants.find(participant => participant.get('id') === participant_id);
-                    if (!participant) return;
                     var jid = participant.get('jid').toLowerCase(),
                         name = participant.get('nickname').toLowerCase();
                     $this.hideIf(name.indexOf(query) < 0 && jid.indexOf(query) < 0);
@@ -1976,6 +1977,7 @@ define("xabber-contacts", function () {
             },
 
             open: function (participant, data_form) {
+                if (!participant) return;
                 this.participant = participant;
                 this.data_form = data_form;
                 this.render();
