@@ -559,7 +559,7 @@ define("xabber-views", function () {
                       if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
                           if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
                               let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
-                                  item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
+                                  item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').first().clone().data('account-jid', account.get('jid'));
                               item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).addClass(searched_by).prepend($('<div class="account-indicator ground-color-700"/>'));
                               if (searched_by === 'by-name')
                                   this.$('.contacts-list').prepend(item_list);

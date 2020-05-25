@@ -5848,7 +5848,7 @@ define("xabber-chats", function () {
                     name = contact.get('name').toLowerCase(),
                     is_match = (name.indexOf(query) < 0 && jid.indexOf(query) < 0) ? true : false;
                 if (!is_match) {
-                    if (!this.$('.chat-list-wrap .chat-item[data-id="' + chat_id + '"]').length ) {
+                    if (!this.$('.chat-list-wrap .chat-item[data-id="' + chat_id + '"]').length) {
                         let contact_list_item = xabber.contacts_view.$('.account-roster-wrap[data-jid="'+this.account.get('jid')+'"] .roster-contact[data-jid="' + jid + '"]').first().clone();
                         contact_list_item.find('.muted-icon').hide();
                         this.$('.chat-list-wrap').append(contact_list_item);
