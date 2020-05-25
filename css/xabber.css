@@ -6805,6 +6805,19 @@ input[type='range'].voice-message-volume:focus {
     text-align: center;
 }
 
+.edit-rights .participant-details-item .btn-block-participant-wrap {
+    position: absolute;
+    margin: 4px 0 !important;
+    height: 0px;
+    overflow: hidden;
+    transition: height .2s;
+}
+
+.edit-rights .btn-kick-participant-wrap:hover .btn-block-participant-wrap {
+    height: 70px;
+    z-index: 10;
+}
+
 .edit-rights .participant-details-item .buttons-wrap i,
 .edit-rights .participant-details-item .buttons-wrap svg,
 .details-panel .buttons-wrap .btn-leave,
@@ -6828,12 +6841,17 @@ input[type='range'].voice-message-volume:focus {
     height: 48px;
 }
 
+.edit-rights .participant-details-item .buttons-wrap .btn-kick-participant,
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
 .groupchat-details-panel .buttons-wrap .btn-leave {
     background-color: #e0e0e0;
     fill: #9e9e9e;
     color: #9e9e9e;
     padding: 0;
+}
+
+.edit-rights .participant-details-item .buttons-wrap .btn-kick-participant {
+    padding: 12px;
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-name,

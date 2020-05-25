@@ -1326,10 +1326,11 @@ define("xabber-chats", function () {
                 }
             }.bind(this));
             $(msgs).each(function (idx, item) {
-                let stanza_id = item.get('stanza_id');
-                if (stanza_id) {
+                let stanza_id = item.get('stanza_id'),
+                    contact_stanza_id = item.get('contact_stanza_id');
+                if (stanza_id || contact_stanza_id) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
-                        .c('retract-message', {id: stanza_id, xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
+                        .c('retract-message', {id: (this.contact.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
                             msgs_responses++;
@@ -1671,7 +1672,7 @@ define("xabber-chats", function () {
                 if (item.get('invite')) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: this.account.get('jid')})
                         .c('retract-message', {
-                            id: item.get('stanza_id'),
+                            id: this.contact.get('group_chat') && item.get('contact_stanza_id') || item.get('stanza_id'),
                             xmlns: Strophe.NS.REWRITE,
                             symmetric: false,
                             by: this.account.get('jid')
@@ -4211,20 +4212,12 @@ define("xabber-chats", function () {
                     let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from'),
                         from_id = is_forwarded ? $fwd_message.data('fromId') : $msg.data('fromId');
                     if (this.contact.get('group_chat')) {
-                        if (this.contact.get('group_info')) {
-                            let participant = this.contact.participants.get(from_id),
-                                participant_attrs = ((participant && participant.attributes) || {jid: from_jid, id: from_id, nickname: $elem.text()});
-                            this.contact.messages_view = new xabber.ParticipantMessagesView({
-                                contact: this.contact,
-                                model: participant_attrs
-                            });
-                            this.contact.messages_view.messagesRequest({}, function () {
-                                xabber.body.setScreen('all-chats', {
-                                    right: 'participant_messages',
-                                    contact: this.contact
-                                });
-                            }.bind(this));
-                        }
+                        this.bottom.quill.focus();
+                        let caret_position = this.bottom.quill.getSelection(),
+                            participant_attrs = {jid: from_jid, id: from_id, nickname: $elem.text()};
+                        caret_position && (caret_position = caret_position.index);
+                        participant_attrs.position = caret_position || 0;
+                        this.bottom.insertMention(participant_attrs);
                     }
                     else if (from_jid === this.account.get('jid')) {
                         this.account.showSettings();
@@ -4356,45 +4349,7 @@ define("xabber-chats", function () {
                 }
 
                 if (type === 'system') {
-                    if (!msg.get('auth_request')) {
-                        return;
-                    }
-                    if ($elem.hasClass('accept-request')) {
-                        this.contact.acceptRequest(function () {
-                            this.removeMessage($msg);
-                            this.contact.showDetails('all-chats');
-                        }.bind(this));
-                    } else if ($elem.hasClass('block-request')) {
-                        this.contact.blockRequest(function () {
-                            this.removeMessage($msg);
-                        }.bind(this));
-                    } else if ($elem.hasClass('decline-request')) {
-                        this.contact.declineRequest(function () {
-                            this.removeMessage($msg);
-                            this.model.set('active', false);
-                            this.head.closeChat();
-                            xabber.body.setScreen('all-chats', {right: null});
-                        }.bind(this));
-                    }
-
-                    if ($elem.hasClass('accept-request-group')) {
-                        this.contact.acceptGroupRequest(function () {
-                            this.removeMessage($msg);
-                            this.contact.set('in_roster', true);
-                            this.contact.trigger("open_chat", this.model);
-                        }.bind(this));
-                    } else if ($elem.hasClass('block-request-group')) {
-                        this.contact.blockRequest(function () {
-                            this.removeMessage($msg);
-                        }.bind(this));
-                    } else if ($elem.hasClass('decline-request-group')) {
-                        this.contact.declineRequest(function () {
-                            this.removeMessage($msg);
-                            this.model.set('active', false);
-                            this.head.closeChat();
-                            xabber.body.setScreen('all-chats', {right: null});
-                        }.bind(this));
-                    }
+                    return;
                 } else if (is_forwarded) {
                     var fwd_message = this.account.forwarded_messages.get($fwd_message.data('uniqueid'));
                     if (!fwd_message) {
@@ -4845,7 +4800,7 @@ define("xabber-chats", function () {
                     return;
                 let $retracted_msg = $message.find('retract-message'),
                     retracted_msg_id = $retracted_msg.attr('id'),
-                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id);
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
                 if (msg_item) {
                     msg_item.set('is_unread', false);
                     chat.item_view.content.removeMessage(msg_item);
@@ -6839,7 +6794,7 @@ define("xabber-chats", function () {
         },
 
         inputMention: function (ev) {
-            ev.preventDefault();
+            ev && ev.preventDefault();
             let $rich_textarea = this.$('.rich-textarea'),
                 $participant_item = $(ev.target).closest('.mention-item'),
                 nickname = $participant_item.data('nickname'),
@@ -6866,11 +6821,20 @@ define("xabber-chats", function () {
                 else
                     return;
             }
-            let is_me = !id && !jid || this.account.get('jid') === jid || this.contact.my_info && this.contact.my_info.get('id') === id;
-            this.quill.insertEmbed(mention_position, 'mention', JSON.stringify({jid: jid, id: id, nickname: Strophe.xmlescape(nickname), is_me: is_me}));
-            this.quill.pasteHTML(mention_position + nickname.length, '<text> </text>');
-            this.quill.setSelection(mention_position + nickname.length + 1, 0);
+            this.insertMention({jid: jid, id: id, nickname: nickname, position: mention_position});
             this.focusOnInput();
+        },
+
+        insertMention: function (options) {
+            if (!options)
+                return;
+            let id = options.id, jid = options.jid, nickname = options.nickname,
+                is_me = !id && !jid || this.account.get('jid') === jid || this.contact.my_info && this.contact.my_info.get('id') === id,
+                attrs = {jid: jid, id: id, nickname: Strophe.xmlescape(nickname), is_me: is_me},
+                position = options.position;
+            this.quill.insertEmbed(position, 'mention', JSON.stringify(attrs));
+            this.quill.pasteHTML(position + nickname.length, '<text> </text>');
+            this.quill.setSelection(position + nickname.length + 1, 0);
         },
 
         keyUp: function (ev) {

@@ -1187,7 +1187,7 @@ define("xabber-contacts", function () {
                         }
                         contact.blockRequest();
                         xabber.trigger("clear_search");
-                        xabber.body.setScreen('all-chats', {right: null});
+                        xabber.body.setScreen('all-chats', {right: undefined});
                     }
                 }.bind(this));
             },
@@ -1200,7 +1200,7 @@ define("xabber-contacts", function () {
                     if (result) {
                         contact.unblock();
                         xabber.trigger("clear_search");
-                        xabber.body.setScreen('all-chats', {right: null});
+                        xabber.body.setScreen('all-chats', {right: undefined});
                     }
                 });
             },
@@ -1338,10 +1338,10 @@ define("xabber-contacts", function () {
                         let chat = this.account.chats.getChat(contact);
                         chat.deleteFromSynchronization(function () {
                             chat.trigger("close_chat");
-                            xabber.body.setScreen('all-chats', {right: null});
+                            xabber.body.setScreen('all-chats', {right: undefined});
                         }.bind(this), function () {
                             chat.trigger("close_chat");
-                            xabber.body.setScreen('all-chats', {right: null});
+                            xabber.body.setScreen('all-chats', {right: undefined});
                         }.bind(this));
                     }
                 }.bind(this));
@@ -1962,9 +1962,10 @@ define("xabber-contacts", function () {
                 "click .btn-save-user-rights": "saveRights",
                 "click .nickname": "editNickname",
                 "change .circle-avatar input": "changeAvatar",
-                "click .btn-block-participant": "blockParticipant",
+                "click .btn-block-participant": "block",
+                "click .btn-kick-participant": "kick",
                 "click .btn-set-badge": "editBadge",
-                "click .btn-participant-messages": "getParticipantMessages",
+                "click .btn-participant-messages": "getMessages",
                 "click .btn-chat": "getPrivateChat",
                 "click .property-variant": "changeTimerValue",
                 "keydown .rich-textarea": "checkKeydown",
@@ -2080,7 +2081,7 @@ define("xabber-contacts", function () {
                 !$(ev.target).hasClass('non-active') && this.render(this.participant);
             },
 
-            getParticipantMessages: function (options, callback) {
+            getMessages: function (options, callback) {
                 this.contact.messages_view = new xabber.ParticipantMessagesView({contact: this.contact, model: this.participant.attributes });
                 this.contact.messages_view.messagesRequest(options, function () {
                     this.close();
@@ -2194,7 +2195,7 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            blockParticipant: function () {
+            block: function () {
                 utils.dialogs.ask("Block participant", "Do you want to block "+
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
@@ -2211,6 +2212,28 @@ define("xabber-contacts", function () {
                             function (error) {
                                 if ($(error).find('not-allowed').length)
                                     utils.dialogs.error("You have no permission to block participants");
+                            });
+                    }
+                }.bind(this));
+            },
+
+            kick: function () {
+                utils.dialogs.ask("Kick participant", "Do you want to kick "+
+                    this.participant.get('nickname') + "?", null, { ok_button_text: 'kick'}).done(function (result) {
+                    if (result) {
+                        let contact_id = this.participant.get('id'),
+                            jid = this.account.resources.connection.jid,
+                            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                                .c('block', {xmlns: Strophe.NS.GROUP_CHAT})
+                                .c('id').t(contact_id);
+                        this.account.sendIQ(iq, function () {
+                                this.close();
+                                this.model.$el.find('.members-list-wrap .group-chat-participant[data-id="' + contact_id + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                            }.bind(this),
+                            function (error) {
+                                if ($(error).find('not-allowed').length)
+                                    utils.dialogs.error("You have no permission to kick participants");
                             });
                     }
                 }.bind(this));
@@ -3014,7 +3037,7 @@ define("xabber-contacts", function () {
                 let chat = this.account.chats.getChat(this.model);
                 chat.set({'opened': false, 'display': false, 'active': false});
                 chat.deleteFromSynchronization(function () {
-                    xabber.body.setScreen('all-chats', { right: null });
+                    xabber.body.setScreen('all-chats', { right: undefined });
                 }.bind(this));
             },
 
