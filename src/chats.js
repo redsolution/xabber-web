@@ -6505,6 +6505,7 @@ define("xabber-chats", function () {
             this.edit_message = null;
             this.$('.account-jid').text(this.account.get('jid'));
             this.updateAvatar();
+            this.quill.on("text-change", this.onChangedText, this);
             this.account.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onBlockedUpdate, this);
             this.contact.on("reply_selected_messages", this.replyMessages, this);
@@ -6771,6 +6772,14 @@ define("xabber-chats", function () {
             return list.join(', ');
         },
 
+        onChangedText: function () {
+            let current_height = this.$el.height();
+            if (current_height !== this.bottom_height) {
+                this.bottom_height = current_height;
+                this.view.scrolled_to_bottom = this.view.isScrolledToBottom();
+            }
+        },
+
         updateMentionsList: function (mention_text) {
             mention_text = (mention_text || "").toLowerCase();
             this.contact.searchByParticipants(mention_text, function (participants) {
@@ -6900,7 +6909,6 @@ define("xabber-chats", function () {
                     }
                     if (!(caret_position > -1) || mention_position === -1) {
                         this.$('.mentions-list').hide();
-                        return;
                     }
                     if (mention_position > -1) {
                         let mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("").replace(/\s?(@|[+])/, "");
@@ -7582,7 +7590,10 @@ define("xabber-chats", function () {
             var bottom_height = xabber.chat_bottom.$el.height();
             if (bottom_height) {
                 this.$el.css({bottom: bottom_height});
-                this.view && this.view.updateScrollBar();
+                if (this.view) {
+                    this.view.updateScrollBar();
+                    this.view.scrolled_to_bottom && this.view.scrollToBottom();
+                }
             }
         }
     });
