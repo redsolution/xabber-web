@@ -1179,15 +1179,16 @@ define("xabber-contacts", function () {
                     "?\nYou will be unable to exchange messages and presence updates with " + contact.get('jid').bold(), null,
                     { ok_button_text: 'block', optional_button: 'block & delete'}).done(function (result) {
                     if (result) {
+                        let chat = this.account.chats.getChat(contact);
                         if (result === 'block & delete') {
                             contact.removeFromRoster();
-                            let chat = this.account.chats.getChat(contact);
                             chat.retractAllMessages(false);
                             chat.deleteFromSynchronization();
                         }
                         contact.blockRequest();
                         xabber.trigger("clear_search");
                         xabber.body.setScreen('all-chats', {right: undefined});
+                        chat.set('active', false);
                     }
                 }.bind(this));
             },
@@ -1200,7 +1201,6 @@ define("xabber-contacts", function () {
                     if (result) {
                         contact.unblock();
                         xabber.trigger("clear_search");
-                        xabber.body.setScreen('all-chats', {right: undefined});
                     }
                 });
             },

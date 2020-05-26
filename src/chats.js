@@ -5320,6 +5320,8 @@ define("xabber-chats", function () {
         },
 
         render: function (options) {
+            if (options.right === undefined)
+                this.active_chat = null;
             this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item.unread').length);
             if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
                 this.clearSearch();
