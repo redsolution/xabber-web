@@ -963,6 +963,7 @@ define("xabber-contacts", function () {
                 "click .btn-add": "addContact",
                 "click .btn-delete": "deleteContact",
                 "click .btn-block": "blockContact",
+                "click .btn-qr-code": "showQRCode",
                 "click .btn-unblock": "unblockContact",
                 "click .btn-mute": "changeNotifications",
                 "click .btn-auth-request": "requestAuthorization",
@@ -1073,6 +1074,18 @@ define("xabber-contacts", function () {
             updateNotifications: function () {
                 this.$('.btn-mute').switchClass('mdi-bell-off', this.model.get('muted'));
                 this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
+            },
+
+            showQRCode: function () {
+                let src = $('<img/>').ClassyQR({
+                    type: 'text',
+                    text: 'xmpp:' + this.model.get('jid')
+                })[0].src;
+                utils.dialogs.ask("QR-code", null, {blob_image_from_clipboard: src}, { ok_button_text: 'copy'}).done(function (result) {
+                    if (result) {
+
+                    }
+                }.bind(this));
             },
 
             updateSubscriptions: function () {
@@ -2200,8 +2213,7 @@ define("xabber-contacts", function () {
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
                         let contact_id = this.participant.get('id'),
-                            jid = this.account.resources.connection.jid,
-                            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                            iq = $iq({type: 'set', to: this.contact.get('jid')})
                                 .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
                                 .c('id').t(contact_id);
                         this.account.sendIQ(iq, function () {
@@ -2222,10 +2234,13 @@ define("xabber-contacts", function () {
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'kick'}).done(function (result) {
                     if (result) {
                         let contact_id = this.participant.get('id'),
-                            jid = this.account.resources.connection.jid,
-                            iq = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
-                                .c('block', {xmlns: Strophe.NS.GROUP_CHAT})
-                                .c('id').t(contact_id);
+                            jid = this.participant.get('jid'),
+                            iq = $iq({type: 'set', to: this.contact.get('jid')})
+                                .c('kick', {xmlns: Strophe.NS.GROUP_CHAT});
+                        if (jid)
+                            iq.c('jid').t(jid);
+                        else
+                            iq.c('id').t(contact_id);
                         this.account.sendIQ(iq, function () {
                                 this.close();
                                 this.model.$el.find('.members-list-wrap .group-chat-participant[data-id="' + contact_id + '"]').remove();

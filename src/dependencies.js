@@ -16,6 +16,7 @@ define([
     "backbone.localsync",
     "sha1_hasher",
     "materialize",
+    "qrcode",
     "perfectScrollbarJQuery"
 ], function(Backbone, _, $, moment, WaveSurfer, slug, magnificPopup, Strophe) {
     return _.extend({
