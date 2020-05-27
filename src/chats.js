@@ -2141,10 +2141,8 @@ define("xabber-chats", function () {
               } else if (!out_request && !in_request && (subscription === 'from' || _.isNull(subscription))) {
                   this.$('.subscription-info').text("Subscribe to see contact status information");
                   this.$('.button:not(.btn-subscribe)').addClass('hidden');
-              } else if (subscription === undefined) {
+              } else if (subscription === undefined || !subscription && in_request) {
                   this.$('.button:not(.btn-add):not(.btn-block)').addClass('hidden');
-              } else if (!subscription && in_request) {
-                  this.$('.button:not(.btn-allow):not(.btn-block)').addClass('hidden');
               } else {
                   return;
               }
@@ -2162,9 +2160,18 @@ define("xabber-chats", function () {
           },
 
           addContact: function () {
+              if (this.contact.get('subscription') === undefined)
+                  this.contact.pushInRoster(function () {
+                      this.sendAndAskSubscription();
+                  }.bind(this));
+              else
+                  this.sendAndAskSubscription();
+              this.$el.addClass('hidden');
+          },
+
+          sendAndAskSubscription: function () {
               this.contact.acceptRequest();
               this.contact.askRequest();
-              this.$el.addClass('hidden');
           },
 
           blockContact: function () {
