@@ -2135,14 +2135,16 @@ define("xabber-chats", function () {
               this.$el.addClass('hidden');
               if (subscription === 'both' || this.contact.get('blocked'))
                   return;
-              else if (subscription === 'to' && in_request || ((!subscription || subscription === 'none') && in_request && out_request)) {
+              else if (subscription === 'to' && in_request || (!subscription && in_request && out_request)) {
                   this.$('.subscription-info').text("Contact asks permission to see your presence information");
                   this.$('.button:not(.btn-allow)').addClass('hidden');
-              } else if (subscription === 'from' && !out_request || subscription === 'none') {
+              } else if (!out_request && !in_request && (subscription === 'from' || _.isNull(subscription))) {
                   this.$('.subscription-info').text("Subscribe to see contact status information");
                   this.$('.button:not(.btn-subscribe)').addClass('hidden');
-              } else if (!subscription && !out_request || (!subscription || subscription === 'none') && in_request) {
+              } else if (subscription === undefined) {
                   this.$('.button:not(.btn-add):not(.btn-block)').addClass('hidden');
+              } else if (!subscription && in_request) {
+                  this.$('.button:not(.btn-allow):not(.btn-block)').addClass('hidden');
               } else {
                   return;
               }

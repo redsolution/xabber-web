@@ -19,7 +19,7 @@ define("xabber-contacts", function () {
             defaults: {
                 status: "offline",
                 status_message: "",
-                subscription: null,
+                subscription: undefined,
                 subscription_request_in: false,
                 subscription_request_out: false,
                 groups: [],
@@ -65,15 +65,15 @@ define("xabber-contacts", function () {
                         status_text = 'Subscription request pending';
                     else
                         status_text = 'Subscribed to your status';
-                } else if (!subscription || subscription == 'none') {
+                } else if (!subscription) {
                     if (out_request)
                         status_text =  'Subscription request pending';
                     else if (in_request)
                         status_text = 'Incoming subscription request';
-                    else if (!subscription)
-                        status_text = 'Not in your contacts';
-                    else
+                    else if (_.isNull(subscription))
                         status_text = 'No subscriptions';
+                    else
+                        status_text = 'Not in your contacts';
                 } else if (this.get('group_info')) {
                     status_text = this.get('group_info').members_num;
                     if (this.get('group_info').members_num > 1)
@@ -3994,7 +3994,7 @@ define("xabber-contacts", function () {
                         in_roster: false,
                         known: false,
                         name: contact.get('jid'),
-                        subscription: null,
+                        subscription: undefined,
                         subscription_request_out: false
                     });
                     this.account.cached_roster.removeFromCachedRoster(jid);
@@ -4021,7 +4021,7 @@ define("xabber-contacts", function () {
                     attrs.subscription_request_out = false;
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
-                this.account.cached_roster.putInroster(_.extend(_.clone(attrs), {jid: jid}));
+                this.account.cached_roster.putInRoster(_.extend(_.clone(attrs), {jid: jid}));
                 attrs.roster_name && (attrs.name = attrs.roster_name);
                 contact.set(attrs);
             }
@@ -4789,7 +4789,7 @@ define("xabber-contacts", function () {
         });
 
         xabber.CachedRoster = Backbone.ModelWithDataBase.extend({
-            putInroster: function (value, callback) {
+            putInRoster: function (value, callback) {
                 this.database.put('roster_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
