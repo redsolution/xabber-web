@@ -1080,12 +1080,13 @@ define("xabber-contacts", function () {
                 let src = $('<img/>').ClassyQR({
                     type: 'text',
                     text: 'xmpp:' + this.model.get('jid')
-                })[0].src;
-                utils.dialogs.ask("QR-code", null, {blob_image_from_clipboard: src}, { ok_button_text: 'copy'}).done(function (result) {
-                    if (result) {
+                })[0].onload = function () {
+                    utils.dialogs.ask("QR-code", null, {blob_image_from_clipboard: this.src, qrcode: true}, { ok_button_text: 'copy'}).done(function (result) {
+                        if (result) {
 
-                    }
-                }.bind(this));
+                        }
+                    }.bind(this));
+                };
             },
 
             updateSubscriptions: function () {

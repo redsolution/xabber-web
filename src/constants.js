@@ -155,7 +155,8 @@ var constants = {
         beep_a:             'sounds/beep_a.ogg',
         call:               'sounds/marching-band-dave-girtsman.mp3',
         connecting:         'sounds/alien-bomb-timer.wav',
-        busy:               'sounds/phone_busy.wav'
+        busy:               'sounds/phone_busy.wav',
+        attention:          'sounds/attention.wav'
     },
 
     SYNC_WAY_DATA: {

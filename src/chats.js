@@ -2830,6 +2830,10 @@ define("xabber-chats", function () {
                     }
             }
 
+            if (message.get('attention') && xabber.settings.call_attention) {
+                this.attentionMessage(message);
+            }
+
             if (message.isSenderMe()) {
                 if (!message.get('is_archived') && !message.get('missed_msg'))
                     this.readMessages(message.get('timestamp'));
@@ -3504,6 +3508,22 @@ define("xabber-chats", function () {
             }
             xabber.recountAllMessageCounter();
         },
+
+          attentionMessage: function () {
+              if (xabber.settings.call_attention) {
+                  var notification = xabber.popupNotification({
+                      title: this.contact.get('name'),
+                      text: 'Attention',
+                      icon: this.contact.cached_image.url
+                  });
+                  notification.onclick = function () {
+                      window.focus();
+                      this.model.trigger('open');
+                  }.bind(this);
+                  let sound = xabber.settings.sound_on_attention;
+                  xabber.playAudio(sound);
+              }
+          },
 
         sendMessage: function (message) {
             let body = message.get('message'),
@@ -4772,6 +4792,13 @@ define("xabber-chats", function () {
 
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
+
+            if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]')) {
+                // return this.attention();
+                if (!chat)
+                    return;
+                return chat.messages.createSystemMessage({from_jid: msg_from, message: 'Attention was requested', attention: true});
+            }
 
             if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
                 if (!contact)
@@ -6103,6 +6130,7 @@ define("xabber-chats", function () {
             "click .btn-retract-own-messages": "retractOwnMessages",
             "click .btn-delete-chat": "deleteChat",
             "click .btn-archive-chat": "archiveChat",
+            "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
             "click .btn-jingle-message": "sendJingleMessage",
             "click .btn-set-status": "setStatus"
@@ -6181,6 +6209,7 @@ define("xabber-chats", function () {
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
+            this.$('.btn-call-attention').hideIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
         },
 
@@ -6208,6 +6237,13 @@ define("xabber-chats", function () {
             var muted = !this.contact.get('muted');
             this.contact.set('muted', muted);
             this.account.chat_settings.updateMutedList(this.contact.get('jid'), muted);
+        },
+
+        callAttention: function (ev) {
+            let msg = $msg({type: 'headline', to: this.contact.get('jid')})
+                .c('attention', {xmlns: Strophe.NS.ATTENTION});
+            this.account.sendMsg(msg);
+            this.model.messages.createSystemMessage({from_jid: this.account.get('jid'), message: "Call attention was sent"});
         },
 
         archiveChat: function (ev) {

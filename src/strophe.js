@@ -199,9 +199,10 @@ define("xabber-strophe", function () {
             return testRegexp.test(text) ? text.replace(replaceRegexp, escaper) : text;
         };
 
+        Strophe.addNamespace('ATTENTION', 'urn:xmpp:attention:0');
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
-        Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+        Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');

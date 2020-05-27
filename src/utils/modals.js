@@ -136,7 +136,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
 
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
-                    dialog.$modal.find('.img-from-clipboard').get(0).src = dialog_options.blob_image_from_clipboard;
+                    dialog.$modal.find('.img-from-clipboard').switchClass('qr-code', dialog_options.qrcode)[0].src = dialog_options.blob_image_from_clipboard;
                     dialog.$modal.find('.container-for-img').removeClass('hidden');
                 }
 

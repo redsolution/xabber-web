@@ -7258,6 +7258,11 @@ input[type='range'].voice-message-volume:focus {
     max-height: 380px;
 }
 
+.dialog-modal .img-from-clipboard.qr-code {
+    width: 230px;
+    height: 230px;
+}
+
 .dialog-modal .container-for-img {
     margin: 20px auto;
     width: max-content;

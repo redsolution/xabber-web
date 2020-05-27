@@ -1240,6 +1240,7 @@ define("xabber-views", function () {
             "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
             "mousedown .setting.notifications label": "setNotifications",
             "mousedown .setting.message-preview label": "setMessagePreview",
+            "mousedown .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
@@ -1256,6 +1257,8 @@ define("xabber-views", function () {
             });
             this.$('.message-preview input[type=checkbox]')
                 .prop({checked: settings.message_preview});
+            this.$('.call-attention input[type=checkbox]')
+                .prop({checked: settings.call_attention});
             var sound_value = settings.sound ? settings.sound_on_message : '';
             this.$('.sound input[type=radio][name=sound][value="'+sound_value+'"]')
                     .prop('checked', true);
@@ -1286,6 +1289,13 @@ define("xabber-views", function () {
         setMessagePreview: function (ev) {
             var value = !this.model.get('message_preview');
             this.model.save('message_preview', value);
+            ev.preventDefault();
+            $(ev.target).closest('input').prop('checked', value);
+        },
+
+        setCallAttention: function (ev) {
+            var value = !this.model.get('call_attention');
+            this.model.save('call_attention', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);
         },
