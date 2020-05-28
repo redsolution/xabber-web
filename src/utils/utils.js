@@ -400,6 +400,7 @@ define([
         callback_popup_message: function (info_msg, time) {
             let $body = $(document.body),
                 $popup_msg = $('<div class="callback-popup-message"/>').text(info_msg);
+            time = time || 3000;
             $body.find('.callback-popup-message').remove();
             $body.append($popup_msg);
             setTimeout( function() {

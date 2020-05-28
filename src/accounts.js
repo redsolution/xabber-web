@@ -1254,14 +1254,15 @@ define("xabber-accounts", function () {
                 return p1 > p2 ? -1 : (p1 < p2 ? 1 : 0);
             },
 
-            requestInfo: function (resource) {
+            requestInfo: function (resource, callback) {
                 var jid = this.jid + '/' + resource.get('resource');
                 this.connection.disco.info(jid, null, function (iq) {
                     var $identity = $(iq).find('identity[category=client]');
                     if ($identity.length) {
                         resource.set('client', $identity.attr('name'));
                     }
-                    this.isFeatureSupported(iq, Strophe.NS.CHAT_MARKERS) && (this.chat_markers_support = true);
+                    this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
+                    callback && callback();
                 }.bind(this));
             },
 

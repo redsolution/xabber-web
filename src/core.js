@@ -144,7 +144,7 @@
                 message_preview: false,
                 sound: true,
                 sound_on_message: 'beep_up',
-                call_attention: false,
+                call_attention: true,
                 sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',

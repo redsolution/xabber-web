@@ -4793,7 +4793,7 @@ define("xabber-chats", function () {
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
 
-            if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]')) {
+            if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length) {
                 // return this.attention();
                 if (!chat)
                     return;
@@ -5307,8 +5307,7 @@ define("xabber-chats", function () {
             else {
             if ((input_value == "")||((input_value.search(/[А-яЁё]/) == -1)&&(input_value.search(/\s/) == -1)&&(input_value != ""))) {
             this.$('.modal-footer .errors').text('').addClass('hidden');
-            var jid = this.account.resources.connection.jid,
-                iq = $iq({from: jid, type: 'get', to: xmpp_server}).c('query', {xmlns: Strophe.NS.DISCO_INFO}),
+            var iq = $iq({type: 'get', to: xmpp_server}).c('query', {xmlns: Strophe.NS.DISCO_INFO}),
                 group_chats_support;
             this.account.sendIQ(iq, function (iq) {
                 $(iq).children('query').children('feature').each(function(elem, item) {
@@ -5565,6 +5564,8 @@ define("xabber-chats", function () {
                 if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
+                if (_.isUndefined(view.contact.resources.attention_supported))
+                    view.contact.resources.models.forEach(function (resource) {view.contact.resources.requestInfo(resource)}.bind(this));
             }
             xabber.chats_view.scrollTo(scrolled_top);
         },
@@ -6240,10 +6241,18 @@ define("xabber-chats", function () {
         },
 
         callAttention: function (ev) {
-            let msg = $msg({type: 'headline', to: this.contact.get('jid')})
-                .c('attention', {xmlns: Strophe.NS.ATTENTION});
-            this.account.sendMsg(msg);
-            this.model.messages.createSystemMessage({from_jid: this.account.get('jid'), message: "Call attention was sent"});
+            if (this.contact.resources.attention_supported) {
+                let msg = $msg({type: 'headline', to: this.contact.get('jid')})
+                    .c('attention', {xmlns: Strophe.NS.ATTENTION});
+                this.account.sendMsg(msg);
+                this.model.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    message: "Call attention was sent"
+                });
+            }
+            else {
+                utils.callback_popup_message('Contact doesn\'t support or has disabled attention');
+            }
         },
 
         archiveChat: function (ev) {
