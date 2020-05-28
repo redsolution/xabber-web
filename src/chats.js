@@ -2830,7 +2830,7 @@ define("xabber-chats", function () {
                     }
             }
 
-            if (message.get('attention') && xabber.settings.call_attention) {
+            if (message.get('attention')) {
                 this.attentionMessage(message);
             }
 
@@ -3510,19 +3510,17 @@ define("xabber-chats", function () {
         },
 
           attentionMessage: function () {
-              if (xabber.settings.call_attention) {
-                  var notification = xabber.popupNotification({
-                      title: this.contact.get('name'),
-                      text: 'Attention',
-                      icon: this.contact.cached_image.url
-                  });
-                  notification.onclick = function () {
-                      window.focus();
-                      this.model.trigger('open');
-                  }.bind(this);
-                  let sound = xabber.settings.sound_on_attention;
-                  xabber.playAudio(sound);
-              }
+              var notification = xabber.popupNotification({
+                  title: this.contact.get('name'),
+                  text: 'Attention',
+                  icon: this.contact.cached_image.url
+              });
+              notification.onclick = function () {
+                  window.focus();
+                  this.model.trigger('open');
+              }.bind(this);
+              let sound = xabber.settings.sound_on_attention;
+              xabber.playAudio(sound);
           },
 
         sendMessage: function (message) {
@@ -4793,7 +4791,7 @@ define("xabber-chats", function () {
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
 
-            if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length) {
+            if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
                 // return this.attention();
                 if (!chat)
                     return;
@@ -5564,8 +5562,6 @@ define("xabber-chats", function () {
                 if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
-                if (_.isUndefined(view.contact.resources.attention_supported))
-                    view.contact.resources.models.forEach(function (resource) {view.contact.resources.requestInfo(resource)}.bind(this));
             }
             xabber.chats_view.scrollTo(scrolled_top);
         },
@@ -6130,6 +6126,10 @@ define("xabber-chats", function () {
             "click .btn-invite-users": "inviteUsers",
             "click .btn-retract-own-messages": "retractOwnMessages",
             "click .btn-delete-chat": "deleteChat",
+            "click .btn-delete-contact": "deleteContact",
+            "click .btn-block-contact": "blockContact",
+            "click .btn-unblock-contact": "unblockContact",
+            "click .btn-export-history": "exportHistory",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -6162,6 +6162,7 @@ define("xabber-chats", function () {
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:private_chat", this.updateIcon, this);
             this.contact.on("change:incognito_chat", this.updateIcon, this);
+            this.contact.on("change:in_roster", this.updateMenu, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
         },
 
@@ -6212,6 +6213,9 @@ define("xabber-chats", function () {
             this.$('.btn-invite-users').showIf(is_group_chat);
             this.$('.btn-call-attention').hideIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
+            this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
+            this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
+            this.$('.btn-delete-contact').showIf(this.contact.get('in_roster'));
         },
 
         renderSearchPanel: function () {
@@ -6241,18 +6245,13 @@ define("xabber-chats", function () {
         },
 
         callAttention: function (ev) {
-            if (this.contact.resources.attention_supported) {
-                let msg = $msg({type: 'headline', to: this.contact.get('jid')})
-                    .c('attention', {xmlns: Strophe.NS.ATTENTION});
-                this.account.sendMsg(msg);
-                this.model.messages.createSystemMessage({
-                    from_jid: this.account.get('jid'),
-                    message: "Call attention was sent"
-                });
-            }
-            else {
-                utils.callback_popup_message('Contact doesn\'t support or has disabled attention');
-            }
+            let msg = $msg({type: 'headline', to: this.contact.get('jid')})
+                .c('attention', {xmlns: Strophe.NS.ATTENTION});
+            this.account.sendMsg(msg);
+            this.model.messages.createSystemMessage({
+                from_jid: this.account.get('jid'),
+                message: "Call attention was sent"
+            });
         },
 
         archiveChat: function (ev) {
@@ -6421,6 +6420,22 @@ define("xabber-chats", function () {
                     }
                 }.bind(this));
             }
+        },
+
+        deleteContact: function () {
+            this.contact.details_view.deleteContact();
+        },
+
+        blockContact: function () {
+            this.contact.details_view.blockContact();
+        },
+
+        unblockContact: function () {
+            this.contact.details_view.unblockContact();
+        },
+
+        exportHistory: function () {
+            utils.callback_popup_message('History export is not implemented yet', 2000);
         }
     });
 

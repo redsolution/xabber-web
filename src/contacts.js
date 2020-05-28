@@ -1077,16 +1077,15 @@ define("xabber-contacts", function () {
             },
 
             showQRCode: function () {
-                let src = $('<img/>').ClassyQR({
-                    type: 'text',
-                    text: 'xmpp:' + this.model.get('jid')
-                })[0].onload = function () {
-                    utils.dialogs.ask("QR-code", null, {blob_image_from_clipboard: this.src, qrcode: true}, { ok_button_text: 'copy'}).done(function (result) {
-                        if (result) {
-
-                        }
-                    }.bind(this));
-                };
+                let qrcode = new VanillaQR({
+                    url: 'xmpp:' + this.model.get('jid'),
+                    noBorder: true
+                });
+                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement}, { ok_button_text: 'copy'}).done(function (result) {
+                    if (result) {
+                        qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+                    }
+                }.bind(this));
             },
 
             updateSubscriptions: function () {
@@ -1168,19 +1167,20 @@ define("xabber-contacts", function () {
                 xabber.add_contact_view.show({account: this.account, jid: this.model.get('jid')});
             },
 
-            deleteContact: function (ev) {
+            deleteContact: function () {
                 var contact = this.model;
                 utils.dialogs.ask("Delete contact", "Do you really want to delete contact "+ contact.get('name').bold() +
                     " from account " + this.account.get('jid').bold() + "?",
                     [{ name: 'delete_history', checked: false, text: 'Delete chat history'}],
                     { ok_button_text: 'delete'}).done(function (result) {
                         if (result) {
+                            contact.removeFromRoster();
                             if (result.delete_history) {
                                 let chat = this.account.chats.getChat(contact);
                                 chat.retractAllMessages(false);
                                 chat.deleteFromSynchronization();
+                                xabber.body.setScreen('all-chats', {right: undefined});
                             }
-                            contact.removeFromRoster();
                             xabber.trigger("clear_search");
                         }
                     }.bind(this));
@@ -1236,6 +1236,7 @@ define("xabber-contacts", function () {
             events: {
                 "click .btn-join": "joinChat",
                 "click .btn-delete": "deleteContact",
+                "click .btn-qr-code": "showQRCode",
                 "click .btn-block": "blockContact",
                 "click .btn-unblock": "unblockContact",
                 "click .btn-leave": "leaveGroupChat",
@@ -1323,7 +1324,25 @@ define("xabber-contacts", function () {
             },
 
             joinChat: function () {
+                var contact = this.model;
+                contact.acceptRequest();
+                contact.pushInRoster(null, function () {
+                    contact.askRequest();
+                    contact.getMyInfo();
+                    contact.sendPresent();
+                }.bind(this));
+            },
 
+            showQRCode: function () {
+                let qrcode = new VanillaQR({
+                    url: 'xmpp:' + this.model.get('jid'),
+                    noBorder: true
+                });
+                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement}, { ok_button_text: 'copy'}).done(function (result) {
+                    if (result) {
+                        qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+                    }
+                }.bind(this));
             },
 
             editProperties: function (ev) {

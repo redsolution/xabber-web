@@ -136,8 +136,13 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
 
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
-                    dialog.$modal.find('.img-from-clipboard').switchClass('qr-code', dialog_options.qrcode)[0].src = dialog_options.blob_image_from_clipboard;
+                    dialog.$modal.find('.img-from-clipboard')[0].src = dialog_options.blob_image_from_clipboard;
                     dialog.$modal.find('.container-for-img').removeClass('hidden');
+                }
+
+                if (dialog_options.canvas) {
+                    dialog.$modal.find('.dialog-options-wrap').html('');
+                    dialog.$modal.find('.container-for-img').html("").removeClass('hidden')[0].appendChild(dialog_options.canvas);
                 }
 
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {

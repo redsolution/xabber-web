@@ -2959,6 +2959,10 @@ body .client-body-wrap.hidden + #modals {
     border-radius: 8px;
 }
 
+.jingle-message-view.collapsed .webrtc-local-video {
+    box-shadow: 0 16px 28px 0 rgba(0, 0, 0, 0.22), 0 25px 55px 0 rgba(0, 0, 0, 0.21);
+}
+
 .jingle-message-view .default-screen {
     height: 100%;
     width: 100%;
@@ -3640,6 +3644,11 @@ body .client-body-wrap.hidden + #modals {
 
 .chat-tools-wrap .chat-tool:hover i {
     color: #616161;
+}
+
+.chat-tools-wrap .btn-unblock-contact span,
+.chat-tools-wrap .btn-block-contact span {
+    color: #f44336 !important;
 }
 
 .chat-tools-wrap .chat-tool:hover .muted polygon {
@@ -7258,14 +7267,13 @@ input[type='range'].voice-message-volume:focus {
     max-height: 380px;
 }
 
-.dialog-modal .img-from-clipboard.qr-code {
-    width: 230px;
-    height: 230px;
-}
-
 .dialog-modal .container-for-img {
     margin: 20px auto;
     width: max-content;
+}
+
+.dialog-modal .container-for-img canvas {
+    margin: 48px auto;
 }
 
 .dialog-modal .modal-content {
