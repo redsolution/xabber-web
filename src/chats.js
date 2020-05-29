@@ -755,6 +755,8 @@ define("xabber-chats", function () {
           },
 
           reject: function () {
+              if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
+                  return;
               let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
@@ -6288,6 +6290,10 @@ define("xabber-chats", function () {
         },
 
         sendJingleMessage: function () {
+            if (xabber.current_voip_call) {
+                utils.callback_popup_message('Voice call is already in progress', 1000);
+                return;
+            }
             this.content.initJingleMessage();
         },
 
