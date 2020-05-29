@@ -1150,6 +1150,10 @@ define("xabber-contacts", function () {
             },
 
             initCall: function (ev) {
+                if (xabber.current_voip_call) {
+                    utils.callback_popup_message('Voice call is already in progress', 1000);
+                    return;
+                }
                 this.openChat();
                 let chat = this.account.chats.getChat(this.model);
                 chat.item_view.content.initJingleMessage();
