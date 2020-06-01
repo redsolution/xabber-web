@@ -961,6 +961,20 @@ define("xabber-chats", function () {
             this.account.sendIQ(iq, callback);
         },
 
+        sendReject: function (options) {
+            !options && (options = {});
+            let msg_to = options.to || this.contact.get('jid'),
+                $reject_msg = $msg({
+                type: 'chat',
+                to: msg_to
+            })
+                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id}).up()
+                .c('store', {xmlns: Strophe.NS.HINTS}).up()
+                .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+                .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+            this.account.sendMsg($reject_msg);
+        },
+
         initIncomingCall: function (full_jid, session_id) {
             if (!xabber.get('audio')) {
                 this.messages.createSystemMessage({
@@ -972,6 +986,12 @@ define("xabber-chats", function () {
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
             xabber.current_voip_call.modal_view.show({status: 'in'});
             xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
+        },
+
+        endCall: function (status) {
+            status && xabber.current_voip_call.set('status', status);
+            xabber.current_voip_call.destroy();
+            xabber.current_voip_call = null;
         },
 
         getAllMessageRetractions: function () {
@@ -991,22 +1011,10 @@ define("xabber-chats", function () {
                 $jingle_msg_accept = $message.children('accept[xmlns="' + Strophe.NS.JINGLE_MSG + '"]'),
                 $jingle_msg_reject = $message.children('reject[xmlns="' + Strophe.NS.JINGLE_MSG + '"]');
             if ($jingle_msg_propose.length) {
-                if (carbon_copied) {
-                    if (from_bare_jid == this.account.get('jid')) {
-                        if (xabber.current_voip_call) {
-                            let session_id = $jingle_msg_propose.attr('id'),
-                                $reject_msg = $msg({
-                                    type: 'chat',
-                                    to: Strophe.getBareJidFromJid($message.attr('to'))
-                                })
-                                    .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
-                                    .c('store', {xmlns: Strophe.NS.HINTS}).up()
-                                    .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
-                                    .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
-                            this.account.sendMsg($reject_msg);
-                        }
-                        return;
-                    }
+                if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
+                    if (xabber.current_voip_call)
+                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id')});
+                    return;
                 }
                 if (options.is_archived || options.synced_msg)
                     return;
@@ -1015,12 +1023,7 @@ define("xabber-chats", function () {
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
                         if (xabber.current_voip_call) {
-                            let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
-                                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: session_id}).up()
-                                .c('store', {xmlns: Strophe.NS.HINTS}).up()
-                                .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
-                                .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
-                            this.account.sendMsg($reject_msg);
+                            this.sendReject({session_id: session_id});
                             this.messages.createSystemMessage({
                                 from_jid: this.account.get('jid'),
                                 message: 'Cancelled call'
@@ -1031,52 +1034,43 @@ define("xabber-chats", function () {
                     }.bind(this));
                 }
             }
-            if (carbon_copied && ($jingle_msg_accept.length || $jingle_msg_reject.length) && xabber.current_voip_call && xabber.current_voip_call.get('session_id')) {
-                if (xabber.current_voip_call.account.get('jid') === from_bare_jid) {
-                    $jingle_msg_reject.length && xabber.current_voip_call.set('status', 'disconnected');
-                    xabber.current_voip_call.destroy();
-                    xabber.current_voip_call = null;
-                }
-            }
             if ($jingle_msg_accept.length) {
                 if (options.is_archived || options.synced_msg)
                     return;
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_accept.attr('id')) {
-                    !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
-                    let jingle_start = $jingle_msg_accept.find('time').attr('stamp');
-                    jingle_start = jingle_start ? Number(moment(jingle_start)) : moment.now();
-                    xabber.current_voip_call.set('jingle_start', jingle_start);
-                    !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
-                    xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
-                    xabber.current_voip_call.set('status', 'connecting');
-                    xabber.current_voip_call.updateStatus('Connecting...');
-                    xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
+                    if (carbon_copied)
+                        this.endCall();
+                    else {
+                        !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
+                        let jingle_start = $jingle_msg_accept.find('time').attr('stamp');
+                        jingle_start = jingle_start ? Number(moment(jingle_start)) : moment.now();
+                        xabber.current_voip_call.set('jingle_start', jingle_start);
+                        !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
+                        xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
+                        xabber.current_voip_call.set('status', 'connecting');
+                        xabber.current_voip_call.updateStatus('Connecting...');
+                        xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
+                    }
                 }
             }
             if ($jingle_msg_reject.length) {
                 if (this.messages.filter(m => m.get('session_id') === $jingle_msg_reject.attr('id')).length)
                     return;
-                let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp'), message;
+                let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp'), message, msg_text = "";
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    message = this.messages.createSystemMessage({
-                        from_jid: this.account.get('jid'),
-                        time: time,
-                        session_id: $jingle_msg_reject.attr('id'),
-                        stanza_id: options.stanza_id,
-                        message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
-                    });
+                    msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
                 }
-                else {
-                    message = this.messages.createSystemMessage({
-                        from_jid: this.account.get('jid'),
-                        time: time,
-                        session_id: $jingle_msg_reject.attr('id'),
-                        stanza_id: options.stanza_id,
-                        message: 'Cancelled call'
-                    });
-                }
+                else
+                    msg_text = 'Cancelled call';
+                message = this.messages.createSystemMessage({
+                    from_jid: this.account.get('jid'),
+                    time: time,
+                    session_id: $jingle_msg_reject.attr('id'),
+                    stanza_id: options.stanza_id,
+                    message: msg_text
+                });
                 if (options.is_archived || options.synced_msg)
                     return message;
                 if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
@@ -1085,9 +1079,7 @@ define("xabber-chats", function () {
                     setTimeout(function () {
                         xabber.stopAudio(busy_audio);
                     }.bind(this), 1500);
-                    xabber.current_voip_call.set('status', 'disconnected');
-                    xabber.current_voip_call.destroy();
-                    xabber.current_voip_call = null;
+                    this.endCall('disconnected');
                 }
                 return message;
             }
