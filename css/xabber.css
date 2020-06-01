@@ -6807,24 +6807,19 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 auto;
 }
 
+.edit-rights .participant-details-item .btn-more {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    cursor: pointer;
+    color: #424242;
+}
+
 .edit-rights .participant-details-item .button-wrap,
 .details-panel .main-info .button-wrap {
     width: 64px;
     margin: 8px;
     text-align: center;
-}
-
-.edit-rights .participant-details-item .btn-block-participant-wrap {
-    position: absolute;
-    margin: 4px 0 !important;
-    height: 0px;
-    overflow: hidden;
-    transition: height .2s;
-}
-
-.edit-rights .btn-kick-participant-wrap:hover .btn-block-participant-wrap {
-    height: 70px;
-    z-index: 10;
 }
 
 .edit-rights .participant-details-item .buttons-wrap i,

@@ -2035,6 +2035,7 @@ define("xabber-contacts", function () {
                             alignment: 'left'
                         };
                         this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
+                        this.$('.participant-details-item .dropdown-button').dropdown(_.extend(dropdown_settings, {alignment: 'right'}));
                     }.bind(this),
                     complete: function () {
                         this.render();
