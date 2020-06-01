@@ -3822,8 +3822,10 @@ define("xabber-chats", function () {
                     Images.compressImage(file).done(function (image) {
                         reader.readAsDataURL(image);
                         deferred.done(function (data) {
-                            image.height = data.height;
-                            image.width = data.width;
+                            if (data) {
+                                image.height = data.height;
+                                image.width = data.width;
+                            }
                             new_files.push(image);
                             file_counter++;
                             if (file_counter === files.length)
@@ -3831,12 +3833,16 @@ define("xabber-chats", function () {
                         }.bind(this));
                     }.bind(this));
                     reader.onload = function (e) {
-                        var image_prev = new Image();
-                        image_prev.src = e.target.result;
-                        image_prev.onload = function () {
-                            var height = this.height,
-                                width = this.width;
-                            deferred.resolve({height: height, width: width});
+                        if (file.type === 'image/svg+xml') {
+                            deferred.resolve();
+                        } else {
+                            var image_prev = new Image();
+                            image_prev.onload = function () {
+                                var height = this.height,
+                                    width = this.width;
+                                deferred.resolve({height: height, width: width});
+                            };
+                            image_prev.src = e.target.result;
                         }
                     };
                 }

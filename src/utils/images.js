@@ -114,6 +114,11 @@ define(["xabber-dependencies"], function (deps) {
                 file_type = file.type,
                 file_name = file.name,
                 new_size = getImageSize({width: width, height: height}, MAX_IMG_SIZE);
+            if (file.type === 'image/svg+xml') {
+                file.width = width;
+                file.height = height;
+                deferred.resolve(file);
+            }
             canvas.width = new_size.width;
             canvas.height = new_size.height;
             ctx.drawImage(image_obj, 0, 0, new_size.width, new_size.height);
