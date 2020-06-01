@@ -334,7 +334,7 @@ define("xabber-mentions", function () {
                     image;
                 if (user_info) {
                     if (user_info.avatar) {
-                        image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.avatar);
+                        image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.id);
                         if (image) {
                             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                         }

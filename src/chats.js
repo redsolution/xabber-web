@@ -2229,6 +2229,7 @@ define("xabber-chats", function () {
             this.chat_item = options.chat_item;
             this.current_day_indicator = null;
             this.prev_audio_message;
+            this._pending_avatars = [];
             this.account = this.chat_item.account;
             this.model = this.chat_item.model;
             this.contact = this.model.contact;
@@ -2893,9 +2894,22 @@ define("xabber-chats", function () {
                     if (this.contact.my_info)
                         (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                     else if (this.contact.get('group_chat')) {
-                        this.contact.getMyInfo(function () {
-                            (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
-                        }.bind(this));
+                        if (this._pending_my_info) {
+                            this._pending_my_info.done(function () {
+                                (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                                this._pending_my_info = null;
+                            }.bind(this));
+                        }
+                        else {
+                            this._pending_my_info = new $.Deferred();
+                            this.contact.getMyInfo(function () {
+                                (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {
+                                    message: message,
+                                    contact: this.contact
+                                });
+                                this._pending_my_info.resolve();
+                            }.bind(this));
+                        }
                     }
                     (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
                 }.bind(this));
@@ -3401,11 +3415,23 @@ define("xabber-chats", function () {
                         $avatar.setAvatar(this.account.chat_settings.getB64Avatar($msg.data('from-id')), this.avatar_size);
                     }
                     else {
-                        var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $msg.data('from-id');
-                        this.contact.getAvatar($msg.data('avatar'), node, function (data_avatar) {
-                            $avatar.setAvatar(data_avatar, this.avatar_size);
-                            this.account.chat_settings.updateCachedAvatars($msg.data('from-id'), $msg.data('avatar'), data_avatar);
-                        }.bind(this));
+                        let pending_avatar = this._pending_avatars.find(a => a.hash == $msg.data('avatar'));
+                        if (pending_avatar) {
+                            pending_avatar.dfd.done(function (data_avatar) {
+                                $avatar.setAvatar(data_avatar, this.avatar_size);
+                                let idx = this._pending_avatars.indexOf(pending_avatar);
+                                if (idx > -1)
+                                    this._pending_avatars.splice(idx, 1);
+                            }.bind(this));
+                        } else {
+                            var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $msg.data('from-id'), dfd = new $.Deferred();
+                            this._pending_avatars.push({hash: $msg.data('avatar'), dfd: dfd});
+                            this.contact.getAvatar($msg.data('avatar'), node, function (data_avatar) {
+                                $avatar.setAvatar(data_avatar, this.avatar_size);
+                                this.account.chat_settings.updateCachedAvatars($msg.data('from-id'), $msg.data('avatar'), data_avatar);
+                                dfd.resolve(data_avatar);
+                            }.bind(this));
+                        }
                     }
                 }
             }
