@@ -1466,7 +1466,6 @@ define("xabber-chats", function () {
             this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
             this.contact.on("remove_invite", this.removeInvite, this);
             this.account.settings.on("change:color", this.updateColorScheme, this);
-            // this.$el.switchClass('not-in-roster', !this.contact.get('in_roster'));
         },
 
         updateName: function () {
@@ -1487,7 +1486,6 @@ define("xabber-chats", function () {
             let in_roster = this.contact.get('in_roster');
             if (in_roster)
                 this.model.set('is_accepted', true);
-            // this.$el.switchClass('not-in-roster', !in_roster);
         },
 
         onBlocked: function () {
@@ -1506,23 +1504,8 @@ define("xabber-chats", function () {
         },
 
         updateIcon: function () {
-            let ic_name;
             this.$('.chat-icon').addClass('hidden');
-            if (this.contact.get('blocked')) {
-                ic_name = 'ic-blocked';
-            } else {
-                if (this.contact.get('invitation')) {
-                    ic_name = 'ic-invitation-chat';
-                } else if (this.contact.get('group_chat')) {
-                    if (this.contact.get('private_chat'))
-                        ic_name = 'ic-private-chat';
-                    else if (this.contact.get('incognito_chat'))
-                        ic_name = 'ic-incognito-chat';
-                    else
-                        ic_name = 'ic-group-chat';
-                } else if (this.contact.get('bot'))
-                    ic_name = 'ic-bot-chat';
-            }
+            let ic_name = this.contact.getIcon();
             ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
         },
 
@@ -1588,45 +1571,34 @@ define("xabber-chats", function () {
                 return;
             }
             let msg_time = msg.get('time'),
-                timestamp = msg.get('timestamp'),
+                timestamp = msg.get('timestamp'), msg_from = "",
                 forwarded_message = msg.get('forwarded_message'),
-                msg_files = msg.get('files'),
-                msg_images = msg.get('images'),
+                msg_files = msg.get('files') || [], msg_images = msg.get('images')  || [],
                 msg_text = forwarded_message ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
-                msg_user_info = msg.get('user_info') || {};
+                msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes || {};
             this.model.set({timestamp: timestamp});
-            if (msg_files || msg_images) {
+            if (this.contact.get('group_chat'))
+                msg_from = msg_user_info.nickname || msg_user_info.jid || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid')) || "";
+            msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
+            if (msg_files.length || msg_images.length) {
                 let $colored_span = $('<span class="text-color-500"/>');
-                if (msg_files && msg_images) {
-                    msg_files = (msg_files.length > 0) ? msg_files : undefined;
-                    msg_images = (msg_images.length > 0) ? msg_images : undefined;
-                }
-                if (msg_files && msg_images)
+                if (msg_files.length && msg_images.length)
                     msg_text = $colored_span.text(msg_files.length + msg_images.length + ' files');
                 else {
-                    if (msg_files) {
-                        if (msg_files.length > 1)
-                            msg_text = $colored_span.text(msg_files.length + ' files');
-                        if (msg_files.length == 1)
-                            msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
-                    }
-                    if (msg_images) {
-                        if (msg_images.length > 1)
-                            msg_text = $colored_span.text(msg_images.length + ' images');
-                        if (msg_images.length == 1)
-                            msg_text = $colored_span.text(msg_images[0].name);
-                    }
+                    if (msg_files.length > 1)
+                        msg_text = $colored_span.text(msg_files.length + ' files');
+                    if (msg_files.length == 1)
+                        msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
+                    if (msg_images.length > 1)
+                        msg_text = $colored_span.text(msg_images.length + ' images');
+                    if (msg_images.length == 1)
+                        msg_text = $colored_span.text(msg_images[0].name);
                 }
-                if (this.contact.get('group_chat')) {
-                    let msg_from = msg_user_info.nickname || (msg.isSenderMe() ? (this.contact.get('my_info') && this.contact.get('my_info').nickname || this.account.get('name')) : msg.get('from_jid'));
-                    this.$('.last-msg').text("").append($('<span class=text-color-700/>').text(msg_from + ': ')).append(msg_text);
-                }
-                else
-                    this.$('.last-msg').html(msg_text);
+                this.$('.last-msg').html("").append(msg_from).append(msg_text);
             }
             else {
-                var msg_from = "";
                 if (msg.get('type') == 'system') {
+                    msg_from = "";
                     if (msg.get('auth_request')) {
                         if (msg.get('invite'))
                             msg_text = 'Invitation to group chat';
@@ -1641,8 +1613,6 @@ define("xabber-chats", function () {
                     this.$('.last-msg').html(msg_text);
                 }
                 else {
-                    if (this.contact.get('group_chat'))
-                        msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
                     if (forwarded_message) {
                         if (msg.get('message')) {
                             msg_text = msg.get('message');
@@ -1652,11 +1622,10 @@ define("xabber-chats", function () {
                             let first_forwarded_msg = forwarded_message[0];
                             if (first_forwarded_msg.get('message')) {
                                 let fist_msg_user_info = first_forwarded_msg.get('user_info') || {};
-                                msg_from = fist_msg_user_info.nickname
-                                    || (first_forwarded_msg.isSenderMe() ? this.account.get('name') : this.account.contacts.get(first_forwarded_msg.get('from_jid')) && this.account.contacts.get(first_forwarded_msg.get('from_jid')).get('name'))
-                                    || first_forwarded_msg.get('from_jid');
+                                msg_from = fist_msg_user_info.nickname || fist_msg_user_info.jid || "";
                                 msg_text = first_forwarded_msg.get('message');
                                 this.$('.last-msg').text(msg_text);
+                                msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
                             }
                             else {
                                 msg_text = $('<i/>').text((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message');
@@ -1669,8 +1638,7 @@ define("xabber-chats", function () {
                         this.$('.last-msg').text(msg_text);
                     }
                 }
-                if (msg_from)
-                    this.$('.last-msg').prepend($('<span class=text-color-700/>').text(msg_from + ': '));
+                this.$('.last-msg').prepend(msg_from);
             }
             this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
@@ -5689,23 +5657,8 @@ define("xabber-chats", function () {
           },
 
           updateIcon: function () {
-              let ic_name;
               this.$('.chat-icon').addClass('hidden');
-              if (this.contact.get('blocked')) {
-                  ic_name = 'ic-blocked';
-              } else {
-                  if (this.contact.get('invitation')) {
-                      ic_name = 'ic-invitation-chat';
-                  } else if (this.contact.get('group_chat')) {
-                      if (this.contact.get('private_chat'))
-                          ic_name = 'ic-private-chat';
-                      else if (this.contact.get('incognito_chat'))
-                          ic_name = 'ic-incognito-chat';
-                      else
-                          ic_name = 'ic-group-chat';
-                  } else if (this.contact.get('bot'))
-                      ic_name = 'ic-bot-chat';
-              }
+              let ic_name = this.contact.getIcon();
               ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
           },
 
@@ -6146,23 +6099,17 @@ define("xabber-chats", function () {
             this.updateName();
             this.updateStatus();
             this.updateAvatar();
-            this.updateMenu();
             this.updateNotifications();
             this.updateArchiveButton();
             this.model.on("close_chat", this.closeChat, this);
+            this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
-            this.contact.on("change:subscription_request_in", this.updateStatusMsg, this);
-            this.contact.on("change:subscription_request_out", this.updateStatusMsg, this);
-            this.contact.on("change:subscription", this.updateStatusMsg, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
-            this.contact.on("change:status_message", this.updateStatusMsg, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onChangedBlocked, this);
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
-            this.contact.on("change:private_chat", this.updateIcon, this);
-            this.contact.on("change:incognito_chat", this.updateIcon, this);
             this.contact.on("change:in_roster", this.updateMenu, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
         },
@@ -6201,6 +6148,14 @@ define("xabber-chats", function () {
         updateAvatar: function () {
             var image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        },
+
+        onContactChanged: function () {
+            let changed = this.contact.changed;
+            if (_.has(changed, 'subscription_request_in') || _.has(changed, 'subscription_request_out') || _.has(changed, 'subscription') || _.has(changed, 'status_message'))
+                this.updateStatusMsg();
+            if (_.has(changed, 'private_chat') || _.has(changed, 'incognito_chat'))
+                this.updateIcon();
         },
 
         onChangedBlocked: function () {
@@ -6342,23 +6297,8 @@ define("xabber-chats", function () {
         },
 
         updateIcon: function () {
-            let ic_name;
             this.$('.chat-icon').addClass('hidden');
-            if (this.contact.get('blocked')) {
-                ic_name = 'ic-blocked';
-            } else {
-                if (this.contact.get('invitation')) {
-                    ic_name = 'ic-invitation-chat';
-                } else if (this.contact.get('group_chat')) {
-                    if (this.contact.get('private_chat'))
-                        ic_name = 'ic-private-chat';
-                    else if (this.contact.get('incognito_chat'))
-                        ic_name = 'ic-incognito-chat';
-                    else
-                        ic_name = 'ic-group-chat';
-                } else if (this.contact.get('bot'))
-                    ic_name = 'ic-bot-chat';
-            }
+            let ic_name = this.contact.getIcon();
             ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
         },
 
@@ -7461,9 +7401,8 @@ define("xabber-chats", function () {
                         if ($selected_msgs.first().data('from') === this.contact.my_info.get('id'))
                             my_msg = true;
                 }
-                $message_actions.find('.pin-message-wrap').showIf(this.contact.get('group_chat'));
+                $message_actions.find('.pin-message-wrap').showIf(this.contact.get('group_chat')).switchClass('non-active', ((length !== 1) && this.contact.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.contact.get('blocked'));
-                $message_actions.find('.pin-message-wrap').switchClass('non-active', ((length !== 1) && this.contact.get('group_chat')));
                 $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.contact.get('blocked'));
                 this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {

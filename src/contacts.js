@@ -87,6 +87,23 @@ define("xabber-contacts", function () {
                 return status_text;
             },
 
+            getIcon: function () {
+                if (this.get('blocked'))
+                    return 'ic-blocked';
+                if (this.get('invitation'))
+                    return 'ic-invitation-chat';
+                if (this.get('group_chat')) {
+                    if (this.get('private_chat'))
+                        return 'ic-private-chat';
+                    if (this.get('incognito_chat'))
+                        return 'ic-incognito-chat';
+                    return 'ic-group-chat';
+                }
+                if (this.get('bot'))
+                    return 'ic-bot-chat';
+                return;
+            },
+
             getContactInfo: function () {
                 xabber.cached_contacts_info.getContactInfo(this.get('jid'), function (contact_info) {
                     if (!_.isNull(contact_info)) {
@@ -104,8 +121,6 @@ define("xabber-contacts", function () {
                             this.set('name', contact_info.name);
                         return;
                     }
-                    if (!this.get('group_chat'))
-                        this.getVCard();
                 }.bind(this));
             },
 
