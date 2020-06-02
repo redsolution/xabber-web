@@ -3646,6 +3646,10 @@ body .client-body-wrap.hidden + #modals {
     color: #616161;
 }
 
+.chat-tools-wrap .btn-delete-chat {
+    box-shadow: 0px -1px 1px 0 rgba(0,0,0,.1);
+}
+
 .chat-tools-wrap .btn-unblock-contact span,
 .chat-tools-wrap .btn-block-contact span {
     color: #f44336 !important;

@@ -121,6 +121,8 @@ define("xabber-contacts", function () {
                             this.set('name', contact_info.name);
                         return;
                     }
+                    if (!this.get('group_chat'))
+                        this.getVCard();
                 }.bind(this));
             },
 

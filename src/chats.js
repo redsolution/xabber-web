@@ -6862,6 +6862,20 @@ define("xabber-chats", function () {
             this.quill.setSelection(position + nickname.length + 1, 0);
         },
 
+        showAccountSettings: function () {
+            if (this.contact.get('group_chat')) {
+                this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
+                if (this.contact.my_info && this.contact.my_rights) {
+                    this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                } else
+                    this.contact.getMyInfo(function () {
+                        this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                    }.bind(this));
+            } else {
+                this.account.showSettings();
+            }
+        },
+
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
