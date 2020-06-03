@@ -6078,7 +6078,6 @@ define("xabber-chats", function () {
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
             "click .btn-invite-users": "inviteUsers",
-            "click .btn-retract-own-messages": "retractOwnMessages",
             "click .btn-delete-chat": "deleteChat",
             "click .btn-delete-contact": "deleteContact",
             "click .btn-block-contact": "blockContact",
@@ -6304,18 +6303,6 @@ define("xabber-chats", function () {
 
         inviteUsers: function () {
             xabber.invite_panel.open(this.account, this.contact);
-        },
-
-        retractOwnMessages: function () {
-            let my_id = this.contact.my_info && this.contact.my_info.get('id');
-            if (!my_id) {
-                this.contact.getMyInfo(function () {
-                    my_id = this.contact.my_info && this.contact.my_info.get('id');
-                    this.model.retractMessagesByUser(my_id);
-                });
-            }
-            else
-                this.model.retractMessagesByUser(my_id);
         },
 
         clearHistory: function () {

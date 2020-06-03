@@ -6366,34 +6366,22 @@ input[type='range'].voice-message-volume:focus {
 
 /* ---------------------  GROUPCHAT DETAILS PANEL --------------------------- */
 
-.groupchat-details-panel .select-users-list-wrap {
+.groupchat-details-panel .user-lists-navbar {
     cursor: pointer;
-    display: inline-block;
+    display: flex;
+    width: 100%;
+    font-size: 16px;
+    color: #212121;
+    justify-content: space-around;
+    padding: 4px 0;
 }
 
-.groupchat-details-panel .select-users-list-wrap .list-variant {
-    font-size: 18px;
-    line-height: 21px;
+.groupchat-details-panel .user-lists-navbar .list-variant {
+    padding: 0 8px;
 }
 
-.select-users-list-wrap .dropdown-content .list-variant {
-    padding: 12px 24px;
-}
-
-.groupchat-details-panel .select-users-list-wrap .dropdown-button {
-    font-size: 18px;
-    line-height: 21px;
-    padding: 12px 8px 8px 24px;
-    cursor: pointer;
-    display: inline-flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    height: 100%;
-    justify-content: flex-start;
-}
-
-.groupchat-details-panel .select-users-list-wrap .caret {
-    padding: 0 12px;
+.groupchat-details-panel .user-lists-navbar .active {
+    border-bottom: 2px solid #212121;
 }
 
 .groupchat-details-panel .left-column .groups-block-wrap {
@@ -6420,6 +6408,27 @@ input[type='range'].voice-message-volume:focus {
 
 .groupchat-details-panel .left-column .groups-block-wrap {
     padding: 12px;
+}
+
+.status-block-wrap .group-chat-status {
+    position: relative;
+}
+
+.status-block-wrap .status-message {
+    text-transform: capitalize;
+    padding: 0 24px;
+    line-height: 24px;
+    color: #616161;
+    cursor: pointer;
+}
+
+.status-block-wrap .status-bulb {
+    position: absolute;
+    top: 10px;
+    right: 30px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
 }
 
 /* ----------- GROUPCHAT DETAILS PANEL ------------ */
@@ -7049,6 +7058,16 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 10px;
 }
 
+.groupchat-details-panel .head-block,
+.groupchat-details-panel .bottom-block {
+    display: flex;
+}
+
+.groupchat-details-panel .bottom-block {
+    margin: 8px 0 0 0;
+    flex-direction: column;
+}
+
 .groupchat-details-panel .right-column,
 .groupchat-details-panel .left-column,
 .contact-details-panel .left-column,
@@ -7169,10 +7188,6 @@ input[type='range'].voice-message-volume:focus {
 
 .group-chat-participant .last-seen[data-present=true] {
     color: #388E3C;
-}
-
-.block-wrap.groups-block-wrap {
-    height: 100%;
 }
 
 .groupchat-details-panel .preloader-wrapper {
@@ -7852,7 +7867,6 @@ ul.restrictions-list-content>li {
     left: -48px !important;
 }
 
-.select-users-list-wrap .dropdown-content .list-variant:hover,
 .edit-default-restrictions .dropdown-content .property-variant:hover,
 .edit-rights .dropdown-content .property-variant:hover {
     background-color: #EEEEEE;

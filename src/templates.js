@@ -75,6 +75,7 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/private_participant_details.html",
     "text!templates/contacts/group_chats/set_status.html",
     "text!templates/contacts/group_chats/status_item.html",
+    "text!templates/contacts/group_chats/group_status.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
@@ -249,6 +250,7 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.private_participant_details');
     addTemplate('contacts.group_chats.set_status');
     addTemplate('contacts.group_chats.status_item');
+    addTemplate('contacts.group_chats.group_status');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');

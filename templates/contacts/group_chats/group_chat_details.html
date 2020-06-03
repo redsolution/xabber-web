@@ -32,27 +32,25 @@
         </div>
         <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">
             <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>
-            <li class="btn-join"><span class="one-line">Join group chat</span></li>
-            <li class="btn-delete"><span class="one-line">Delete group chat</span></li>
-            <li class="btn-block"><span class="one-line">Block group chat</span></li>
-            <li class="btn-unblock"><span class="one-line">Unlock group chat</span></li>
+            <li class="btn-default-restrictions"><span class="one-line">Default restrictions</span></li>
+            <li class="btn-delete-group"><span class="one-line">Delete group</span></li>
         </ul>
         <div class="btn-escape">
             <i class="mdi mdi-24px mdi-close"></i>
             <span class="btn-text">Esc</span>
         </div>
         <div class="buttons-wrap">
+            <div class="button-wrap btn-chat-wrap">
+                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
+                <div class="btn-name">Chat</div>
+            </div>
             <div class="button-wrap btn-invite-wrap">
                 <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>
                 <div class="btn-name">Invite</div>
             </div>
-            <div class="button-wrap btn-settings-wrap">
-                <i class="mdi mdi-24px mdi-settings btn-settings"></i>
-                <div class="btn-name">Settings</div>
-            </div>
-            <div class="button-wrap btn-default-restrictions-wrap">
-                <i class="mdi mdi-24px mdi-sign-caution btn-default-restrictions"></i>
-                <div class="btn-name">Default restrictions</div>
+            <div class="button-wrap btn-mute-wrap">
+                <i class="mdi mdi-24px mdi-bell btn-mute"></i>
+                <div class="btn-name">Notifications</div>
             </div>
             <div class="button-wrap btn-leave-wrap">
                 <div class="btn-leave"><svg viewBox="0 0 24 24">
@@ -64,26 +62,22 @@
         </div>
     </div>
     <div class="panel-content">
-        <div class="left-column">
-            <div class="select-users-list-wrap lists-dropdown-wrap">
-                <div class="dropdown-button" data-activates="select-users-list">
-                    <div class="list-item-wrap"><div data-value="participants" class="list-value">Participants</div></div>
-                    <div class="caret">
-                        <i class="mdi mdi-20px mdi-menu-down"></i>
-                    </div>
-                </div>
-                <div id="select-users-list" class="dropdown-content noselect">
-                    <div data-value="participants" class="list-variant">Participants</div>
-                    <div data-value="invitations" class="list-variant">Invitations</div>
-                    <div data-value="blocked" class="list-variant">Blocked</div>
-                </div>
+        <div class="head-block">
+            <div class="left-column">
+                <div class="block-wrap group-chat-properties-wrap"></div>
+            </div>
+            <div class="right-column">
+                <div class="block-wrap status-block-wrap"></div>
+                <div class="block-wrap groups-block-wrap"></div>
+            </div>
+        </div>
+        <div class="bottom-block">
+            <div class="user-lists-navbar">
+                <div data-value="participants" class="list-variant">Participants</div>
+                <div data-value="invitations" class="list-variant">Invitations</div>
+                <div data-value="blocked" class="list-variant">Blocked</div>
             </div>
             <div class="block-wrap participants-wrap"></div>
-            <div class="block-wrap participant-wrap"></div>
-        </div>
-        <div class="right-column">
-            <div class="block-wrap group-chat-properties-wrap"></div>
-            <div class="block-wrap groups-block-wrap"></div>
         </div>
     </div>
 </div>

@@ -756,15 +756,7 @@ define("xabber-contacts", function () {
             updateStatus: function () {
                 this.$('.status').attr('data-status', this.model.get('status'));
                 this.$('.chat-icon').attr('data-status', this.model.get('status'));
-                var group_text = 'Group chat';
-                if (this.model.get('group_info')) {
-                    group_text = this.model.get('group_info').members_num;
-                    if (this.model.get('group_info').members_num > 1)
-                        group_text += ' participants';
-                    else
-                        group_text += ' participant';
-                }
-                this.model.get('group_chat') ? this.$('.status-message').text(group_text) : this.$('.status-message').text(this.model.getStatusMessage());
+                this.$('.status-message').text(this.model.getStatusMessage());
                 if (this.model.get('status') == 'offline') {
                     if (!Strophe.getNodeFromJid(this.model.get('jid'))) {
                         this.model.set({status_message: 'Server'});
@@ -1255,11 +1247,9 @@ define("xabber-contacts", function () {
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             events: {
+                "click .btn-mute": "changeNotifications",
                 "click .btn-join": "joinChat",
-                "click .btn-delete": "deleteContact",
                 "click .btn-qr-code": "showQRCode",
-                "click .btn-block": "blockContact",
-                "click .btn-unblock": "unblockContact",
                 "click .btn-leave": "leaveGroupChat",
                 "click .btn-invite": "inviteUser",
                 "click .btn-settings": "editProperties",
@@ -1281,6 +1271,7 @@ define("xabber-contacts", function () {
                 this.edit_groups_view = this.addChild('groups',
                     xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
                 this.group_chat_properties = this.addChild('properties_view', xabber.GroupChatPropertiesView, {model:this.model, el: this.$('.group-chat-properties-wrap')[0]});
+                this.group_chat_status = this.addChild('status_view', xabber.GroupChatStatusView, {model:this.model, el: this.$('.status-block-wrap')[0]});
                 this.group_chat_properties_edit = new xabber.GroupChatPropertiesEditView({model: this.model});
                 this.default_restrictions_edit = new xabber.DefaultRestrictionsView({model: this.model});
                 this.updateName();
@@ -1318,8 +1309,8 @@ define("xabber-contacts", function () {
                 var changed = this.model.changed;
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
-                if (_.has(changed, 'status_updated')) this.updateStatus();
-                if (_.has(changed, 'status_message')) this.updateStatusMsg();
+                if (_.has(changed, 'muted')) this.updateNotifications();
+                if (_.has(changed, 'status_updated') || _.has(changed, 'status_message')) this.updateStatus();
             },
 
             updateColorScheme: function () {
@@ -1342,6 +1333,19 @@ define("xabber-contacts", function () {
                     this.$('.main-info .contact-name').addClass('name-is-custom');
                 else
                     this.$('.main-info .contact-name').removeClass('name-is-custom');
+            },
+
+            changeNotifications: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
+                    return;
+                var muted = !this.model.get('muted');
+                this.model.set('muted', muted);
+                this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
+            },
+
+            updateNotifications: function () {
+                this.$('.btn-mute').switchClass('mdi-bell-off', this.model.get('muted'));
+                this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
             joinChat: function () {
@@ -1470,20 +1474,7 @@ define("xabber-contacts", function () {
             },
 
             updateStatus: function () {
-                this.$('.status-message').text(this.model.getStatusMessage());
-            },
-
-            updateStatusMsg: function () {
-                var group_text = 'Group chat';
-                if (this.model.get('group_info')) {
-                    group_text = this.model.get('group_info').members_num;
-                    if (this.model.get('group_info').members_num > 1)
-                        group_text += ' participants';
-                    else
-                        group_text += ' participant';
-                    group_text += ', ' + (this.model.get('group_info').online_members_num) + ' online';
-                }
-                this.$('.status-message').text(group_text);
+                this.$('.main-info .status-message').text(this.model.getStatusMessage());
             },
 
             updateAvatar: function () {
@@ -1530,6 +1521,33 @@ define("xabber-contacts", function () {
                         group_chat.retractAllMessages(true);
                     }
                 }.bind(this));
+            }
+        });
+
+        xabber.GroupChatStatusView = xabber.BasicView.extend({
+            template: templates.group_chats.group_status,
+            events: {
+                "click .status-message": "setStatus"
+            },
+
+            _initialize: function () {
+                this.$el.html(this.template());
+                this.render();
+                this.model.on("change:group_info", this.render, this);
+            },
+
+            render: function () {
+                let status;
+                this.model.get('group_info') && (status = this.model.get('group_info').status);
+                if (!status)
+                    return;
+                this.$('.status').attr('data-status', status);
+                this.$('.status-message').text(status);
+            },
+
+            setStatus: function () {
+                let set_status_view = new xabber.SetGroupchatStatusView();
+                set_status_view.open(this.model);
             }
         });
 
@@ -2642,8 +2660,6 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.contact = this.model;
                 this.account = this.contact.account;
-                this.model.on("change: name", this.updateName, this);
-                this.model.on("change: group_info", this.update, this);
             },
 
             open: function () {
