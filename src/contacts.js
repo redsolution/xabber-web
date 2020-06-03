@@ -107,15 +107,11 @@ define("xabber-contacts", function () {
             getContactInfo: function () {
                 xabber.cached_contacts_info.getContactInfo(this.get('jid'), function (contact_info) {
                     if (!_.isNull(contact_info)) {
-                        if ((contact_info.hash === this.get('photo_hash')) || !this.get('photo_hash') && !_.isNull(this.get('photo_hash'))) {
+                        if ((contact_info.hash === this.get('photo_hash')) || contact_info.hash && !this.get('photo_hash') && !_.isNull(this.get('photo_hash'))) {
                             this.cached_image = Images.getCachedImage(contact_info.avatar);
                             contact_info.avatar_priority && this.set('avatar_priority', contact_info.avatar_priority);
                             this.set('photo_hash', contact_info.hash);
                             this.set('image', contact_info.avatar);
-                        }
-                        else {
-                            if (!this.get('group_chat'))
-                                this.getVCard();
                         }
                         if (!this.get('roster_name') && contact_info.name)
                             this.set('name', contact_info.name);
@@ -152,9 +148,13 @@ define("xabber-contacts", function () {
                             this.cached_image = Images.getCachedImage(attrs.image);
                         }
                         this.set(attrs);
-                        if (this.get('photo_hash') || vcard.photo.image) {
-                            xabber.cached_contacts_info.putContactInfo({jid: this.get('jid'), hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar_priority: this.get('avatar_priority'), avatar: this.get('image'), name: this.get('name')});
-                        }
+                        let cached_info = {
+                            jid: this.get('jid'),
+                            name: this.get('name')
+                        };
+                        if (this.get('photo_hash') || vcard.photo.image)
+                            _.extend(cached_info, {hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar_priority: this.get('avatar_priority'), avatar: this.get('image')});
+                        xabber.cached_contacts_info.putContactInfo(cached_info);
                         is_callback && callback(vcard);
                     }.bind(this),
                     function () {
