@@ -6387,12 +6387,16 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .participants-search-form {
     padding: 12px 0 !important;
     border: none !important;
+    position: relative;
 }
 
 .groupchat-details-panel .participants-search-form .search-input {
     padding: 0px 52px 0px 64px;
 }
 
+.groupchat-details-panel table td {
+    text-transform: capitalize;
+}
 
 .groupchat-details-panel .left-column .groups-block-wrap {
     padding: 12px;
@@ -7159,7 +7163,7 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .participants-wrap {
     position: relative;
     max-height: calc(100% - 108px);
-    padding-right: 16px;
+    padding: 0 36px;
 }
 
 .group-chat-participant .participant-info .top-line {
@@ -7167,8 +7171,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .group-chat-participant .participant-info .jid,
-.group-chat-participant .participant-info .id,
-.group-chat-participant .participant-info .last-seen {
+.group-chat-participant .participant-info .id {
     color: #757575;
     margin-top: 2px;
     font-size: 11px;

@@ -1865,9 +1865,7 @@ define("xabber-contacts", function () {
             events: {
                 "click .group-chat-participant": "showParticipantProperties",
                 "keyup .participants-search-form" : "keyUpSearch",
-                "click .close-search-icon": "clearSearch",
-                "mouseover .group-chat-participant": "showJid",
-                "mouseleave .group-chat-participant": "hideJid"
+                "click .close-search-icon": "clearSearch"
             },
 
             _initialize: function () {
@@ -1937,29 +1935,26 @@ define("xabber-contacts", function () {
                 attrs.nickname = _.escape(attrs.nickname);
                 attrs.badge = _.escape(attrs.badge);
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
-                    view = this.$('.members-list-wrap .list-item[data-id="' + attrs.id + '"]');
+                    view = this.$('tr[data-id="' + attrs.id + '"]');
                 $item_view.emojify('.badge', {emoji_size: 16});
                 if (view.length) {
                     view.hasClass('active') && $item_view.addClass('active');
-                    if (attrs.jid == this.account.get('jid'))
-                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-participant-item text-color-700">(this is you)</span>');
                     $item_view.insertBefore(view);
                     view.detach();
                 }
                 else {
                     if (attrs.jid == this.account.get('jid')) {
-                        $item_view.prependTo(this.$('.members-list-wrap .owners'));
-                        $item_view.find('.last-seen.one-line').html($item_view.find('.last-seen.one-line').text() + '<span class="myself-participant-item text-color-700">(this is you)</span>');
+                        $item_view.prependTo(this.$('.members-list-wrap tbody'));
                     }
                     else
-                        $item_view.appendTo(this.$('.members-list-wrap .'+ attrs.role.toLowerCase() + 's'));
+                        $item_view.appendTo(this.$('.members-list-wrap tbody'));
                 }
                 this.updateMemberAvatar(attrs);
             },
 
             updateMemberAvatar: function (member) {
                 let image = Images.getDefaultAvatar(member.nickname || member.jid || member.id);
-                var $avatar = (member.id) ? this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
+                var $avatar = (member.id) ? this.$('tr[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
                 $avatar.setAvatar(image, this.member_avatar_size);
                 if (member.avatar) {
                     let cached_avatar = this.account.chat_settings.getB64Avatar(member.id);
@@ -1989,20 +1984,6 @@ define("xabber-contacts", function () {
                     let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                     this.participant_properties_panel.open(participant, data_form);
                 }.bind(this));
-            },
-
-            showJid: function (ev) {
-                var $target_item = $(ev.target).closest('.group-chat-participant');
-                $target_item.find('.last-seen.one-line').addClass('hidden');
-                $target_item.find('.jid.one-line').removeClass('hidden');
-                $target_item.find('.id.one-line').removeClass('hidden');
-            },
-
-            hideJid: function (ev) {
-                var $target_item = $(ev.target).closest('.group-chat-participant');
-                $target_item.find('.jid.one-line').addClass('hidden');
-                $target_item.find('.id.one-line').addClass('hidden');
-                $target_item.find('.last-seen.one-line').removeClass('hidden');
             },
 
             keyUpSearch: function (ev) {
