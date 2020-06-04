@@ -6366,22 +6366,10 @@ input[type='range'].voice-message-volume:focus {
 
 /* ---------------------  GROUPCHAT DETAILS PANEL --------------------------- */
 
-.groupchat-details-panel .user-lists-navbar {
+.groupchat-details-panel .bottom-block .tabs {
+    margin: 0 36px;
+    width: unset !important;
     cursor: pointer;
-    display: flex;
-    width: 100%;
-    font-size: 16px;
-    color: #212121;
-    justify-content: space-around;
-    padding: 4px 0;
-}
-
-.groupchat-details-panel .user-lists-navbar .list-variant {
-    padding: 0 8px;
-}
-
-.groupchat-details-panel .user-lists-navbar .active {
-    border-bottom: 2px solid #212121;
 }
 
 .groupchat-details-panel .left-column .groups-block-wrap {
@@ -6433,8 +6421,13 @@ input[type='range'].voice-message-volume:focus {
 
 /* ----------- GROUPCHAT DETAILS PANEL ------------ */
 
+.groupchat-details-panel .group-chat-properties-wrap .buttons-wrap,
 .groupchat-details-panel .group-chat-properties {
     margin: 4px 6px 0 36px;
+}
+
+.groupchat-details-panel .group-chat-properties-wrap .buttons-wrap {
+    padding: 0 34px;
 }
 
 .group-chat-properties .description .value {

@@ -442,7 +442,8 @@ define("xabber-contacts", function () {
                 var $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
                     name = $group_chat.find('name').text(),
                     model = $group_chat.find('membership').text(),
-                    status = $group_chat.find('status').text(),
+                    status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'inactive' : 'active'),
+                    status_msg = $presence.children('status').text(),
                     anonymous = $group_chat.find('privacy').text(),
                     searchable = $group_chat.find('index').text(),
                     description = $group_chat.find('description').text(),
@@ -457,6 +458,7 @@ define("xabber-contacts", function () {
                         searchable: searchable,
                         model: model,
                         status: status,
+                        status_msg: status_msg,
                         description: description,
                         members_num: members_num,
                         online_members_num: online_members_num
@@ -1248,11 +1250,11 @@ define("xabber-contacts", function () {
 
             events: {
                 "click .btn-mute": "changeNotifications",
-                "click .btn-join": "joinChat",
                 "click .btn-qr-code": "showQRCode",
                 "click .btn-leave": "leaveGroupChat",
                 "click .btn-invite": "inviteUser",
-                "click .btn-settings": "editProperties",
+                "click .btn-delete-group": "deleteGroupChat",
+                "click .btn-edit-settings": "editProperties",
                 "click .btn-default-restrictions": "editDefaultRestrictions",
                 "click .btn-chat": "openChat",
                 "click .btn-escape": "openChat",
@@ -1267,6 +1269,7 @@ define("xabber-contacts", function () {
                     el: this.$('.name-wrap')[0],
                     model: this.model
                 });
+                this.$('.tabs').tabs();
                 this.participants = this.addChild('participants', xabber.ParticipantsView, {model: this.model, el: this.$('.participants-wrap')[0]});
                 this.edit_groups_view = this.addChild('groups',
                     xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
@@ -1348,13 +1351,24 @@ define("xabber-contacts", function () {
                 this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
-            joinChat: function () {
+            deleteGroupChat: function () {
                 var contact = this.model;
-                contact.acceptRequest();
-                contact.pushInRoster(null, function () {
-                    contact.askRequest();
-                    contact.getMyInfo();
-                    contact.sendPresent();
+                utils.dialogs.ask("Delete groupchat", "Do you want to delete groupchat "+
+                    contact.get('name')+"?", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        let jid = contact.get('jid'),
+                            domain = Strophe.getDomainFromJid(jid),
+                            localpart = Strophe.getNodeFromJid(jid),
+                            iq = $iq({to: domain, type: 'set'})
+                                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'}).t(localpart);
+                        this.account.sendIQ(iq, function () {
+                            contact.declineSubscription();
+                            contact.removeFromRoster();
+                            let chat = this.account.chats.getChat(contact);
+                            chat.trigger("close_chat");
+                            xabber.body.setScreen('all-chats', {right: undefined});
+                        }.bind(this));
+                    }
                 }.bind(this));
             },
 
@@ -1419,8 +1433,11 @@ define("xabber-contacts", function () {
             updateList: function (name) {
                 let view = this.child(name);
                 !view && (view = this.addList(name));
-                this.$('.panel-footer').showIf(name == 'settings');
-                view && this.$('.select-users-list-wrap .dropdown-button .list-value').data('value', name).text(utils.pretty_name(name)) && view._render();
+                if (view) {
+                    this.$('.user-lists-navbar .list-variant').removeClass('active');
+                    this.$('.user-lists-navbar .list-variant[data-value="' + name + '"]').addClass('active');
+                    view._render();
+                }
             },
 
             addList: function (name) {
@@ -1538,7 +1555,7 @@ define("xabber-contacts", function () {
 
             render: function () {
                 let status;
-                this.model.get('group_info') && (status = this.model.get('group_info').status);
+                this.model.get('group_info') && (status = this.model.get('group_info').status_msg);
                 if (!status)
                     return;
                 this.$('.status').attr('data-status', status);
@@ -1734,7 +1751,6 @@ define("xabber-contacts", function () {
                 this.contact = options.model;
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
-                this.$current_list = this.$el.prev().find('.dropdown-button .list-value');
             },
 
             _render: function () {
@@ -1750,7 +1766,7 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
 
                 this.account.sendIQ(iq, function (response) {
-                    if (this.$current_list.data('value') === this.status) {
+                    if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"]').hasClass('active')) {
                         this.$el.html("");
                         $(response).find('query').find('user').each(function (idx, item) {
                             let user = {jid: $(item).attr('jid'), status: this.status},
@@ -1764,7 +1780,7 @@ define("xabber-contacts", function () {
                     }
                     }.bind(this),
                     function(err) {
-                        if (this.$current_list.data('value') === this.status)
+                        if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"]').hasClass('active'))
                             this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see invitations list'));
                     }.bind(this));
             },
@@ -1793,7 +1809,6 @@ define("xabber-contacts", function () {
                 this.contact = options.model;
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
-                this.$current_list = this.$el.prev().find('.dropdown-button .list-value');
             },
 
             _render: function () {
@@ -1808,8 +1823,8 @@ define("xabber-contacts", function () {
                     to: this.contact.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
                 this.account.sendIQ(iq, function (response) {
-                   if (this.$current_list.data('value') === this.status) {
-                       this.$el.html("");
+                    if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"]').hasClass('active')) {
+                            this.$el.html("");
                        $(response).find('query').find('user').each(function (idx, item) {
                             let user = {jid: $(item).attr('jid'), status: this.status},
                                 $item_view = $(templates.group_chats.invited_member_item(user)),
@@ -1822,7 +1837,7 @@ define("xabber-contacts", function () {
                     }
                     }.bind(this),
                     function(err) {
-                        if (this.$current_list.data('value') === this.status)
+                        if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"]').hasClass('active'))
                             this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see blocked list'));
                     }.bind(this));
             },
@@ -3738,17 +3753,6 @@ define("xabber-contacts", function () {
             handlePresence: function (presence, jid) {
                 var contact = this.mergeContact(jid);
                 contact.handlePresence(presence);
-            },
-
-            deleteGroupChat: function (jid) {
-                if (!jid)
-                    return;
-                let domain = Strophe.getDomainFromJid(jid),
-                    localpart = Strophe.getNodeFromJid(jid),
-                    iq = $iq({to: domain, type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'})
-                        .c('localpart').t(localpart);
-                this.account.sendIQ(iq);
             }
         });
 
