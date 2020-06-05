@@ -1945,7 +1945,7 @@ define("xabber-contacts", function () {
                             .c('id').t($target.attr('data-id'));
                         this.account.sendIQ(iq, function () {
                                 $target.remove();
-                                this.parent.updateScrollBar();
+                                this.paren.updateScrollBar();
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
@@ -2022,7 +2022,7 @@ define("xabber-contacts", function () {
             },
 
             showParticipantProperties: function (ev) {
-                var participant_item = $(ev.target).closest('.group-chat-participant'),
+                var participant_item = $(ev.target).closest('.participant-wrap'),
                     participant_id = participant_item.attr('data-id'),
                     participant = this.model.participants.get(participant_id);
                 (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
