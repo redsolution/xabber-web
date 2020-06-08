@@ -6458,6 +6458,7 @@ input[type='range'].voice-message-volume:focus {
 .status-block-wrap .btn-edit-status {
     color: #9E9E9E;
     display: none;
+    font-size: 12px;
     cursor: pointer;
 }
 
