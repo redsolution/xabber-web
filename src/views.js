@@ -696,6 +696,7 @@ define("xabber-views", function () {
 
         events: {
             "click .field-text": "showInput",
+            "click .btn-rename": "showInput",
             "keydown .field-input": "keyDown",
             "keyup .field-input": "keyUp",
             "focusout .field-input": "changeValue"
@@ -708,6 +709,7 @@ define("xabber-views", function () {
                 placeholder: this.placeholder
             }));
             this.$value = this.$('.field-text');
+            this.$btn = this.$('.btn-rename');
             this.$input = this.$('.field-input');
             this.updateValue();
             this.data = new Backbone.Model({input_mode: false});
@@ -727,6 +729,7 @@ define("xabber-views", function () {
         onChangedInputMode: function () {
             var input_mode = this.data.get('input_mode');
             this.$value.hideIf(input_mode);
+            this.$btn.hideIf(input_mode);
             this.$input.showIf(input_mode).focus();
         },
 

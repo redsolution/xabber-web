@@ -2860,6 +2860,7 @@ body .client-body-wrap.hidden + #modals {
 
 .list-item.group-chat-participant .member-item {
     padding: 0px 7px 0px 64px;
+    position: relative;
     height: 44px;
     min-width: 212px;
     text-transform: none;
@@ -6401,6 +6402,15 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
+.groupchat-details-panel table th:first-child {
+    padding-left: 36px !important;
+}
+
+
+.groupchat-details-panel table th:last-child {
+    padding-right: 36px !important;
+}
+
 .groupchat-details-panel table td {
     font-size: 14px;
 }
@@ -6418,17 +6428,37 @@ input[type='range'].voice-message-volume:focus {
     visibility: visible;
 }
 
+.groupchat-details-panel .members-list-wrap tbody tr:hover {
+    background-color: #F8F8F8;
+}
+
 .groupchat-details-panel .left-column .groups-block-wrap {
     padding: 12px;
 }
 
+.status-block-wrap .status-wrap,
 .status-block-wrap .group-chat-status {
     position: relative;
     display: flex;
-    padding: 0 24px;
+    margin: 0 12px;
     flex-direction: row;
     justify-content: flex-start;
     align-items: baseline;
+}
+
+.status-block-wrap .group-chat-status:hover .btn-edit-status {
+    display: block !important;
+}
+
+.status-block-wrap .status-wrap {
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+
+.status-block-wrap .btn-edit-status {
+    color: #9E9E9E;
+    display: none;
+    cursor: pointer;
 }
 
 .status-block-wrap .status-message {
@@ -6436,11 +6466,9 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 12px;
     line-height: 24px;
     color: #616161;
-    border-radius: 4px;
-    border: 1px solid transparent;
 }
 
-.status-block-wrap .status-message:hover {
+.status-block-wrap .status-wrap:hover {
     border: 1px solid #E0E0E0;
     box-shadow: 0px 1px 1px 0px #EEEEEE;
 }
@@ -6459,6 +6487,8 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
     font-size: 12px;
     display: none;
+    vertical-align: text-bottom;
+    padding: 0 8px;
 }
 
 .groupchat-details-panel .group-chat-properties-wrap .block-header:hover .btn-edit-settings {
@@ -6960,7 +6990,33 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .main-info .contact-name-wrap {
-    height: 35px;
+    height: 36px;
+    width: 100%;
+    position: relative;
+}
+
+.details-panel .main-info .contact-name {
+    display: inline-flex;
+}
+
+.btn-rename {
+    display: none;
+}
+
+.details-panel .main-info .contact-name-wrap .btn-rename {
+    font-size: 14px;
+    color: #9e9e9e;
+    position: absolute;
+    line-height: 14px;
+    height: 38px;
+    bottom: 0;
+    cursor: pointer;
+    padding: 14px 16px 8px;
+}
+
+.details-panel .main-info .btn-rename:hover,
+.details-panel .main-info .contact-name:hover + .btn-rename {
+    display: inline-flex;
 }
 
 .details-panel .main-info .contact-name,
@@ -6969,14 +7025,23 @@ input[type='range'].voice-message-volume:focus {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    max-width: 100%;
-    height: 36px;
     margin: 0;
     font-size: 30px;
-    line-height: 35px;
+    line-height: 32px;
     color: #212121;
+    padding: 2px 16px;
     text-align: center;
     overflow: hidden;
+    border: 1px solid transparent;
+}
+
+.details-panel .main-info .name-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+.details-panel .main-info .contact-name-input {
+    height: unset;
 }
 
 .details-panel .main-info .contact-name-input {
@@ -6985,7 +7050,9 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .main-info .contact-name:hover {
-    border-bottom: 1px dotted #616161 !important;
+    border-radius: 4px;
+    border: 1px solid #E0E0E0 !important;
+    box-shadow: 0px 1px 1px 0px #EEEEEE;
 }
 
 .details-panel .main-info .status-message,
@@ -7203,7 +7270,6 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .participants-wrap {
     position: relative;
     max-height: calc(100% - 108px);
-    padding: 0 36px;
 }
 
 .groupchat-details-panel .participants-wrap .buttons-wrap {
@@ -7212,6 +7278,7 @@ input[type='range'].voice-message-volume:focus {
     height: 24px;
     flex-direction: row;
     color: #616161;
+    padding-right: 36px !important;
 }
 
 .groupchat-details-panel .participants-wrap .buttons-wrap>div {
@@ -7304,6 +7371,10 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
     padding: 11px 7px 11px 60px;
     cursor: pointer;
+}
+
+.groupchat-details-panel .participants-wrap .group-chat-participant {
+    padding-left: 36px !important;
 }
 
 .groupchat-details-panel .participants-wrap .permission-list-item,

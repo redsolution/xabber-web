@@ -1547,7 +1547,8 @@ define("xabber-contacts", function () {
         xabber.GroupChatStatusView = xabber.BasicView.extend({
             template: templates.group_chats.group_status,
             events: {
-                "click .status-message": "setStatus"
+                "click .status-wrap": "setStatus",
+                "click .btn-edit-status": "setStatus"
             },
 
             _initialize: function () {
