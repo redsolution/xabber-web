@@ -2347,6 +2347,7 @@ define("xabber-contacts", function () {
             setActualRights: function () {
                 this.$('.rights-wrap').html("");
                 this.data_form.fields.forEach(function (field) {
+                    field = _.clone(field);
                     if (field.type  === 'list-single' || field.type  === 'fixed' && (!field.values || field.values[0] == 0)) {
                         !field.values && (field.values = []);
                         let attrs = {

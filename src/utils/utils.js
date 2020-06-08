@@ -342,8 +342,13 @@ define([
 
             blockquotes.forEach(function (quote) {
                 let end_idx = quote.end > (markup_body.length - 1) ? (markup_body.length - 1) : (quote.end - 1);
-                for (let idx = quote.start; idx < (quote.start + constants.QUOTE_MARKER.length); idx++)
-                    markup_body[idx] = "";
+                for (let idx = quote.start; idx < (quote.start + constants.QUOTE_MARKER.length); idx++) {
+                    if (idx === end_idx)
+                        markup_body[idx] = '<br>';
+                    else
+                        markup_body[idx] = "";
+
+                }
                 for (let idx = quote.start; idx < end_idx; idx++) {
                     if (markup_body[idx] === '\n') {
                         for (let child_idx = idx + 1; child_idx <= (idx + constants.QUOTE_MARKER.length); child_idx++)

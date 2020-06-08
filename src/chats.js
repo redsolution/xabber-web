@@ -7216,36 +7216,48 @@ define("xabber-chats", function () {
                         });
                     }
                     if (content.attributes.blockquote) {
-                        let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
-                            quote_end_idx = content_concat.length;
-                        blockquotes.push({marker: constants.QUOTE_MARKER, start: quote_start_idx, end: quote_end_idx + constants.QUOTE_MARKER.length});
-                        text = Array.from(_.escape(text));
-                        text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
-                        (quote_end_idx > text.length) && (quote_end_idx = text.length);
-                        text[quote_end_idx - 1] += '\n';
-                        text = _.unescape(text.join(""));
+                        if (content_concat.length) {
+                            Array.from(content.insert).forEach(function (ins) {
+                                let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
+                                    quote_end_idx = content_concat.length;
+                                blockquotes.push({
+                                    marker: constants.QUOTE_MARKER,
+                                    start: quote_start_idx,
+                                    end: quote_end_idx + constants.QUOTE_MARKER.length
+                                });
+                                text = Array.from(_.escape(text));
 
-                        content_concat[quote_start_idx] += constants.QUOTE_MARKER;
-                        content_concat = Array.from(content_concat.join(""));
+                                if (quote_start_idx === quote_end_idx) {
+                                    text[quote_start_idx - 1] += constants.QUOTE_MARKER;
+                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER;
+                                }
+                                else {
+                                    text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
+                                }
+                                (quote_end_idx > text.length) && (quote_end_idx = text.length);
+                                text[quote_end_idx - 1] += '\n';
 
-                        markup_references.forEach(function (markup_ref) {
-                            if (markup_ref.start >= quote_start_idx) {
-                                markup_ref.start += constants.QUOTE_MARKER.length;
-                                markup_ref.end += constants.QUOTE_MARKER.length;
-                            }
-                        }.bind(this));
-                        mentions.forEach(function (mention) {
-                            if (mention.start >= quote_start_idx) {
-                                mention.start += constants.QUOTE_MARKER.length;
-                                mention.end += constants.QUOTE_MARKER.length;
-                            }
-                        });
+                                text = _.unescape(text.join(""));
+                                content_concat = Array.from(content_concat.join(""));
+
+                                markup_references.forEach(function (markup_ref) {
+                                    if (markup_ref.start >= quote_start_idx) {
+                                        markup_ref.start += constants.QUOTE_MARKER.length;
+                                        markup_ref.end += constants.QUOTE_MARKER.length;
+                                    }
+                                }.bind(this));
+
+                                content_concat = content_concat.concat(Array.from(_.escape(ins)));
+                            }.bind(this))
+                        }
                     }
                     content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markup: content_attrs});
                 }
                 if (content.insert && content.insert.emoji) {
                     content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
                 }
+                else if (content.attributes && content.attributes.blockquote) {}
                 else
                     content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
             }.bind(this));

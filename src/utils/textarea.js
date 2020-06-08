@@ -81,6 +81,9 @@ define(["xabber-dependencies"], function (deps) {
         $div.find('p').each(function () {
             $(this).replaceWith($(this).html() + '\n');
         });
+        /*$div.find('blockquote').each(function () {
+            $(this).replaceWith($(this).html() + '\n');
+        });*/
         $div.find('span').each(function () {
             $(this).replaceWith($(this).html());
         });
