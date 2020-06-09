@@ -4907,6 +4907,7 @@ define("xabber-chats", function () {
         },
 
         receiveStanzaId: function ($message, options) {
+            options.replaced && ($message = $message.children('replace').children('message'));
             let $stanza_id, $contact_stanza_id, attrs = {},
                 from_bare_jid = options.from_bare_jid;
                 $message.children('stanza-id').each(function (idx, stanza_id) {
@@ -5037,7 +5038,7 @@ define("xabber-chats", function () {
 
             var contact = this.account.contacts.mergeContact(contact_jid),
                 chat = this.account.chats.getChat(contact),
-                stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied});
+                stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();

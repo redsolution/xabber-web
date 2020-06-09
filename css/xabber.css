@@ -7250,31 +7250,6 @@ input[type='range'].voice-message-volume:focus {
     justify-content: center;
 }
 
-.groupchat-details-panel .group-chat-nav {
-    height: 53px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    font-size: 14px;
-    justify-content: flex-start;
-    padding: 0 24px;
-}
-
-.groupchat-details-panel .group-chat-nav .nav-item-wrap {
-    padding: 14px 14px 18px 14px;
-    cursor: pointer;
-    color: #757575;
-    text-transform: uppercase;
-    font-weight: 500;
-}
-
-.groupchat-details-panel .group-chat-nav .nav-item-wrap.active {
-    border-bottom: 2px solid #F44336;
-    padding: 14px 14px 16px 14px;
-    color: #F44336;
-}
-
 .groupchat-details-panel .participants-wrap {
     position: relative;
     max-height: calc(100% - 108px);
@@ -7355,10 +7330,6 @@ input[type='range'].voice-message-volume:focus {
     top: 6px;
 }
 
-.groupchat-details-panel .participants-wrap .member-item:hover {
-    background-color: transparent;
-}
-
 .groupchat-details-panel .member-item .revoke-invitation,
 .groupchat-details-panel .member-item .unblock-user {
     position: absolute;
@@ -7387,11 +7358,6 @@ input[type='range'].voice-message-volume:focus {
 
 .list-item.group-chat-participant {
     padding: 0 0 0 36px !important;
-}
-
-.groupchat-details-panel .participants-wrap .permission-list-item,
-.groupchat-details-panel .participants-wrap .restriction-list-item {
-    font-size: 12px;
 }
 
 /* ---------------- DIALOG MODALS --------------------- */
