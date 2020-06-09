@@ -1437,7 +1437,7 @@ define("xabber-contacts", function () {
                 let view = this.child(name);
                 !view && (view = this.addList(name));
                 if (view) {
-                    this.$('.user-lists-navbar .list-variant').removeClass('active');
+                    this.$('.tabs .list-variant').removeClass('active');
                     this.$('.user-lists-navbar .list-variant[data-value="' + name + '"]').addClass('active');
                     view._render();
                 }
@@ -1867,7 +1867,7 @@ define("xabber-contacts", function () {
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             events: {
-                "click .group-chat-participant": "showParticipantProperties",
+                "click .participant-wrap": "showParticipantProperties",
                 "keyup .participants-search-form" : "keyUpSearch",
                 "click .close-search-icon": "clearSearch",
                 "click .btn-block": "blockParticipant",
@@ -1980,6 +1980,7 @@ define("xabber-contacts", function () {
                 let attrs = _.clone(participant.attributes);
                 attrs.nickname = _.escape(attrs.nickname);
                 attrs.badge = _.escape(attrs.badge);
+                attrs.is_me = attrs.jid == this.account.get('jid');
                 attrs.pretty_present = attrs.present ? moment(attrs.present).fromNow() : "";
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('tr[data-id="' + attrs.id + '"]');
@@ -1990,7 +1991,7 @@ define("xabber-contacts", function () {
                     view.detach();
                 }
                 else {
-                    if (attrs.jid == this.account.get('jid')) {
+                    if (attrs.is_me) {
                         $item_view.prependTo(this.$('.members-list-wrap tbody'));
                     }
                     else
@@ -2023,7 +2024,10 @@ define("xabber-contacts", function () {
             },
 
             showParticipantProperties: function (ev) {
-                var participant_item = $(ev.target).closest('.participant-wrap'),
+                let $target = $(ev.target);
+                if ($target.closest('.buttons-wrap').length)
+                    return;
+                let participant_item = $target.closest('.participant-wrap'),
                     participant_id = participant_item.attr('data-id'),
                     participant = this.model.participants.get(participant_id);
                 (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');

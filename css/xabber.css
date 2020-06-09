@@ -6381,7 +6381,7 @@ input[type='range'].voice-message-volume:focus {
 
 .groupchat-details-panel .participants-search-form .search-icon {
     top: inherit;
-    left: 22px;
+    left: 28px;
     width: 20px;
     height: 20px;
     fill: #9E9E9E;
@@ -6393,8 +6393,12 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
 }
 
+.groupchat-details-panel .search-form .close-search-icon {
+    top: 0 !important;
+}
+
 .groupchat-details-panel .participants-search-form .search-input {
-    padding: 0px 52px 0px 60px;
+    padding: 0px 52px 0px 64px;
 }
 
 .groupchat-details-panel table th {
@@ -7289,7 +7293,6 @@ input[type='range'].voice-message-volume:focus {
 
 .group-chat-participant .participant-info .top-line {
     display: flex;
-    margin-top: 2px;
 }
 
 .group-chat-participant .participant-info .jid,
@@ -7338,7 +7341,7 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .blocked-user .circle-avatar {
     position: absolute;
     left: 20px;
-    top: 10px;
+    top: 6px;
     width: 32px;
     height: 32px;
 }
@@ -7346,7 +7349,7 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .list-item .participant-info {
     width: calc(100% - 96px);
     height: auto;
-    top: 8px;
+    top: 6px;
 }
 
 .groupchat-details-panel .participants-wrap .member-item:hover {
