@@ -206,7 +206,8 @@ define("xabber-chats", function () {
             if (options.replaced) {
                 $message = $message.children('replace').children('message');
                 body = $message.children('body').text();
-                message = this.find(m => m.get('stanza_id') === $message.children('stanza-id').attr('id'));
+                let sid = $message.children('stanza-id').first().attr('id');
+                message = this.find(m => m.get('stanza_id') === sid || m.get('contact_stanza_id') === sid);
                 if (!message)
                     return;
                 from_jid = message.get('from_jid');
@@ -4834,7 +4835,7 @@ define("xabber-chats", function () {
                 if (!chat)
                     return;
                 let stanza_id = $message.find('replace').attr('id'),
-                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id),
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id),
                     active_right_screen = xabber.body.screen.get('right'),
                     participant_messages = active_right_screen === 'participant_messages' && this.account.participant_messages || active_right_screen === 'message_context' && this.account.context_messages || active_right_screen === 'searched_messages' && this.account.searched_messages || [],
                     participant_msg_item = participant_messages.find(msg => msg.get('stanza_id') == stanza_id);
