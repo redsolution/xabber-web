@@ -2851,13 +2851,6 @@ body .client-body-wrap.hidden + #modals {
     top: 5px;
 }
 
-.list-item.group-chat-participant,
-.list-item.invitations-user,
-.list-item.blocked-user {
-    position: relative;
-    padding: 0 !important;
-}
-
 .list-item.group-chat-participant .member-item {
     padding: 0px 7px 0px 64px;
     position: relative;
@@ -2868,7 +2861,13 @@ body .client-body-wrap.hidden + #modals {
 
 .list-item.invitations-user .member-item,
 .list-item.blocked-user .member-item {
-    padding: 14px 7px 14px 62px !important;
+    padding: 14px 7px 14px 64px !important;
+    position: relative;
+}
+
+.list-item.blocked-user:hover .unblock-user,
+.list-item.invitations-user:hover .revoke-invitation {
+    visibility: visible;
 }
 
 .invitations-user .member-item p.one-line,
@@ -6373,6 +6372,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 36px;
     width: unset !important;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .groupchat-details-panel .left-column .groups-block-wrap {
@@ -6410,7 +6410,6 @@ input[type='range'].voice-message-volume:focus {
     padding-left: 36px !important;
 }
 
-
 .groupchat-details-panel table th:last-child {
     padding-right: 36px !important;
 }
@@ -6426,6 +6425,10 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .members-list-wrap tr {
     border-bottom: 1px solid #F5F5F5;
     color: #616161;
+}
+
+.groupchat-details-panel .members-list-wrap .participant-wrap {
+    cursor: pointer;
 }
 
 .groupchat-details-panel .members-list-wrap tr:hover .buttons-wrap {
@@ -7282,7 +7285,7 @@ input[type='range'].voice-message-volume:focus {
     visibility: hidden;
     height: 24px;
     flex-direction: row;
-    color: #616161;
+    color: #9e9e9e;
     padding-right: 36px !important;
 }
 
@@ -7359,10 +7362,12 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .member-item .revoke-invitation,
 .groupchat-details-panel .member-item .unblock-user {
     position: absolute;
-    right: 8px;
+    right: 24px;
     line-height: 20px;
     top: 12px;
-    color: #424242;
+    visibility: hidden;
+    color: #9e9e9e;
+    cursor: pointer;
 }
 
 .list-item.invitations-user,
@@ -7370,15 +7375,18 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .participants-wrap .group-chat-participant {
     font-size: 14px;
     line-height: 16px;
-    height: 48px;
     color: #000;
     position: relative;
-    padding: 11px 7px 11px 60px;
-    cursor: pointer;
 }
 
-.groupchat-details-panel .participants-wrap .group-chat-participant {
-    padding-left: 36px !important;
+
+.list-item.invitations-user,
+.list-item.blocked-user {
+    padding: 0 36px !important;
+}
+
+.list-item.group-chat-participant {
+    padding: 0 0 0 36px !important;
 }
 
 .groupchat-details-panel .participants-wrap .permission-list-item,

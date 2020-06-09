@@ -1286,10 +1286,6 @@ define("xabber-contacts", function () {
             },
 
             render: function (options) {
-                if (!this.$('.indicator').length) {
-                    this.$('.tabs').tabs();
-                    this.$('.indicator').addClass('ground-color-500');
-                }
                 this.updateName();
                 this.updateButtons();
                 if (!this.model.my_rights)
@@ -1308,6 +1304,9 @@ define("xabber-contacts", function () {
                 this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
                 this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
                 this.updateList('participants');
+                this.$('.tabs .indicator').remove();
+                this.$('.tabs').tabs();
+                this.$('.indicator').addClass('ground-color-500');
                 return this;
             },
 
@@ -1437,8 +1436,8 @@ define("xabber-contacts", function () {
                 let view = this.child(name);
                 !view && (view = this.addList(name));
                 if (view) {
-                    this.$('.tabs .list-variant').removeClass('active');
-                    this.$('.user-lists-navbar .list-variant[data-value="' + name + '"]').addClass('active');
+                    this.$('.tabs .list-variant a').removeClass('active');
+                    this.$('.tabs .list-variant[data-value="' + name + '"] a').addClass('active');
                     view._render();
                 }
             },
