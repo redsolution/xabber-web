@@ -890,7 +890,7 @@ define("xabber-chats", function () {
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
-            this.contact.on("destroy", this.destroy, this);
+            this.contact.on("destroy", this.onContactDestroyed, this);
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
         },
 
@@ -901,6 +901,11 @@ define("xabber-chats", function () {
             else {
                 xabber.toolbar_view.recountAllMessageCounter();
             }
+        },
+
+        onContactDestroyed: function () {
+            this.resetUnread();
+            this.destroy();
         },
 
         resetUnread: function () {
@@ -3079,8 +3084,8 @@ define("xabber-chats", function () {
                         this._clearing_history = false;
                         return;
                     }
-                    let msgs = this.model.messages;
-                    msgs.forEach(function (item) { this.removeMessage(item); }.bind(this))
+                    let msgs = _.clone(this.model.messages.models);
+                    msgs.forEach(function (item) { this.removeMessage(item); }.bind(this));
                 }.bind(this));
             }
         },

@@ -4060,9 +4060,16 @@ body .client-body-wrap.hidden + #modals {
 .chat-message .chat-msg-content .quote {
     border-left: 2px solid #E0E0E0;
     padding: 0 0 0 8px;
-    margin: 4px 0;
     display: inline-block;
     width: 100%;
+}
+
+.chat-message .chat-msg-content .quote:first-child {
+    margin: 4px 0 0 0;
+}
+
+.chat-message .chat-msg-content .quote:last-child {
+    margin: 0 0 4px 0;
 }
 
 .chat-message .chat-msg-content .mention {
@@ -4921,7 +4928,7 @@ img.fwd-img-preview {
 .add-group-chat-modal .description-field .rich-textarea-wrap .rich-textarea {
     position: relative;
     width: 100%;
-    min-height: 56px;
+    min-height: 64px;
     max-height: 120px;
     margin: 0;
     padding-right: 40px;

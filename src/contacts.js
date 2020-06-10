@@ -387,8 +387,10 @@ define("xabber-contacts", function () {
                         let chat = this.account.chats.getChat(this);
                         chat.deleteFromSynchronization(function () {
                             chat.trigger("close_chat");
+                            this.destroy();
                         }.bind(this), function () {
                             chat.trigger("close_chat");
+                            this.destroy();
                         }.bind(this));
                     }
                 } else if (type === 'unsubscribed') {
