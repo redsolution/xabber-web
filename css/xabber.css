@@ -417,12 +417,6 @@ input[type=text].simple-input-field:hover {
     z-index: 1;
 }
 
-.circle-avatar img {
-    position: absolute;
-    overflow: hidden;
-    background-color: #FFFFFF;
-}
-
 .modal {
     max-height: initial;
     background-color: #FFFFFF;
@@ -3937,7 +3931,6 @@ body .client-body-wrap.hidden + #modals {
     -ms-transition: opacity .2s;
     -o-transition: opacity .2s;
     transition: opacity .2s;
-    /*position: absolute;*/
     padding: 4px 96px 4px 64px !important;
     z-index: 3;
 }
@@ -3970,7 +3963,6 @@ body .client-body-wrap.hidden + #modals {
 .chat-message.with-author .left-side .circle-avatar {
     display: block;
 }
-
 
 .chat-message .msg-wrap {
     width: 100%;
