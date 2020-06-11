@@ -1605,13 +1605,8 @@ define("xabber-chats", function () {
             else {
                 if (msg.get('type') == 'system') {
                     msg_from = "";
-                    if (msg.get('auth_request')) {
-                        if (msg.get('invite'))
-                            msg_text = 'Invitation to group chat';
-                        else
-                            if (msg.get('private_invite'))
-                                msg_text = 'Invitation to private chat';
-                    }
+                    msg.get('invite') && (msg_text = 'Invitation to group chat');
+                    msg.get('private_invite') && (msg_text = 'Invitation to private chat');
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
                     else
@@ -5681,45 +5676,30 @@ define("xabber-chats", function () {
               let msg_time = msg.get('time'),
                   timestamp = msg.get('timestamp'),
                   forwarded_message = msg.get('forwarded_message'),
-                  msg_files = msg.get('files'),
-                  msg_images = msg.get('images'),
+                  msg_files = msg.get('files') || [],
+                  msg_images = msg.get('images') || [],
                   msg_text = (forwarded_message) ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
-                  msg_user_info = msg.get('user_info') || {};
+                  msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes || {}, msg_from = "";
               this.model.set({timestamp: timestamp});
-              if (msg_files || msg_images) {
+              if (this.contact.get('group_chat'))
+                  msg_from = msg_user_info.nickname || msg_user_info.jid || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid')) || "";
+              if (msg_files.length || msg_images.length) {
                   let $colored_span = $('<span class="text-color-500"/>');
-                  if (msg_files && msg_images) {
-                      msg_files = (msg_files.length > 0) ? msg_files : undefined;
-                      msg_images = (msg_images.length > 0) ? msg_images : undefined;
-                  }
-                  if (msg_files && msg_images)
+                  if (msg_files.length && msg_images.length)
                       msg_text = $colored_span.text(msg_files.length + msg_images.length + ' files');
                   else {
-                      if (msg_files) {
-                          if (msg_files.length > 1)
-                              msg_text = $colored_span.text(msg_files.length + ' files');
-                          if (msg_files.length == 1)
-                              msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
-                      }
-                      if (msg_images) {
-                          if (msg_images.length > 1)
-                              msg_text = $colored_span.text(msg_images.length + ' images');
-                          if (msg_images.length == 1)
-                              msg_text = $colored_span.text(msg_images[0].name);
-                      }
+                      if (msg_files.length > 1)
+                          msg_text = $colored_span.text(msg_files.length + ' files');
+                      if (msg_files.length == 1)
+                          msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : msg_files[0].name));
+                      if (msg_images.length > 1)
+                          msg_text = $colored_span.text(msg_images.length + ' images');
+                      if (msg_images.length == 1)
+                          msg_text = $colored_span.text(msg_images[0].name);
                   }
-                  if (this.contact.get('group_chat')) {
-                      let msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
-                      this.$('.last-msg').text("").append($('<span class=text-color-700>' + msg_from + ': ' + '</span>')).append(msg_text);
-                  }
-                  else
-                      this.$('.last-msg').text("").append(msg_text);
+                  this.$('.last-msg').html("").append(msg_from).append(msg_text);
               }
               else {
-                  let msg_from = "";
-                  if (this.contact.get('group_chat')) {
-                      msg_from = msg_user_info.nickname || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid'));
-                  }
                   this.$('.last-msg').text("").append(msg_text);
                   if (msg_from)
                       this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));

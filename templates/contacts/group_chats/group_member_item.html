@@ -8,7 +8,7 @@
             </div>
         </div>
     </td>
-    <td>{[if (!present) {]}<span class="text-color-green-700">Online</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}</td>
+    <td class="last-seen">{[if (!present) {]}<span class="online-status text-color-green-700">Online</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}</td>
     <td class="role">{[if (role !== 'member') {]}{{role}}{[}]}</td>
     <td>
         {[if (is_me) {]}

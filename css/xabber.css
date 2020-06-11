@@ -3465,9 +3465,9 @@ body .client-body-wrap.hidden + #modals {
 .mention-item .chat-title,
 .chat-item .chat-title {
     font-size: 16px;
-    width: 100%;
     line-height: 17px;
     color: #212121;
+    margin: 0 auto 0 0;
 }
 
 .chat-item.blocked .last-msg,
@@ -3491,12 +3491,12 @@ body .client-body-wrap.hidden + #modals {
 .message-item .last-msg-date,
 .mention-item .last-msg-date,
 .chat-item .last-msg-date {
-    max-width: 54px;
     margin: 0 0 0 2px;
     height: 16px;
     font-size: 9px;
     line-height: 16px;
     color: #757575;
+    white-space: nowrap;
 }
 
 .chat-item .msg-delivering-state {
@@ -6422,6 +6422,16 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .groupchat-details-panel table td.role {
+    font-size: 14px;
+}
+
+.groupchat-details-panel table td.last-seen :not(.online-status) {
+    font-size: 12px;
+    font-weight: 300;
+    color: #9E9E9E;
+}
+
+.groupchat-details-panel table td.role {
     text-transform: capitalize;
 }
 
@@ -6453,7 +6463,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 12px;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: baseline;
+    align-items: center;
 }
 
 .status-block-wrap .group-chat-status:hover .btn-edit-status {
@@ -6469,7 +6479,7 @@ input[type='range'].voice-message-volume:focus {
     color: #9E9E9E;
     display: none;
     font-size: 12px;
-    padding: 0 2px;
+    line-height: 14px;
     cursor: pointer;
 }
 
@@ -6505,8 +6515,7 @@ input[type='range'].voice-message-volume:focus {
     display: none;
     vertical-align: text-top;
     line-height: 16px;
-    margin: 0px 8px;
-    padding: 0px 2px;
+    margin: 0px 10px;
 }
 
 .groupchat-details-panel .group-chat-properties-wrap .btn-edit-settings:hover {
@@ -7033,11 +7042,7 @@ input[type='range'].voice-message-volume:focus {
     height: 38px;
     bottom: 0;
     cursor: pointer;
-    padding: 14px 12px 8px;
-}
-
-.details-panel .main-info .contact-name-wrap .btn-rename span {
-    padding: 0 4px;
+    padding: 14px 16px 8px;
 }
 
 .details-panel .main-info .contact-name-wrap .btn-rename:hover span {
