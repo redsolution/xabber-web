@@ -5516,6 +5516,10 @@ input[type='range'].voice-message-volume:focus {
     color: #212121;
 }
 
+.details-panel .group-chat-properties-wrap .block-header .block-name {
+    text-transform: capitalize;
+}
+
 .settings-panel .sub-block-header {
     width: 100%;
     height: 32px;
@@ -6465,7 +6469,12 @@ input[type='range'].voice-message-volume:focus {
     color: #9E9E9E;
     display: none;
     font-size: 12px;
+    padding: 0 2px;
     cursor: pointer;
+}
+
+.status-block-wrap .btn-edit-status:hover {
+    border-bottom: 1px solid #BDBDBD;
 }
 
 .status-block-wrap .status-message {
@@ -6494,8 +6503,14 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
     font-size: 12px;
     display: none;
-    vertical-align: text-bottom;
-    padding: 0 8px;
+    vertical-align: text-top;
+    line-height: 16px;
+    margin: 0px 8px;
+    padding: 0px 2px;
+}
+
+.groupchat-details-panel .group-chat-properties-wrap .btn-edit-settings:hover {
+    border-bottom: 1px solid #BDBDBD;
 }
 
 .groupchat-details-panel .group-chat-properties-wrap .block-header:hover .btn-edit-settings {
@@ -7018,7 +7033,15 @@ input[type='range'].voice-message-volume:focus {
     height: 38px;
     bottom: 0;
     cursor: pointer;
-    padding: 14px 16px 8px;
+    padding: 14px 12px 8px;
+}
+
+.details-panel .main-info .contact-name-wrap .btn-rename span {
+    padding: 0 4px;
+}
+
+.details-panel .main-info .contact-name-wrap .btn-rename:hover span {
+    border-bottom: 1px solid #BDBDBD;
 }
 
 .details-panel .main-info .btn-rename:hover,

@@ -571,10 +571,9 @@ define("xabber-accounts", function () {
                     this.enableCarbons();
                     this.getVCard();
                     this.sendPendingStanzas();
-                    // this.activateXabberRewrite();
                     /*setTimeout(function () {
                         this.sendPendingMessages();
-                    }.bind(this), 15000);*/
+                    }.bind(this), 5000);*/
                 },
 
                 activateXabberRewrite: function () {

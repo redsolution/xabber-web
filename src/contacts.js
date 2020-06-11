@@ -1594,18 +1594,17 @@ define("xabber-contacts", function () {
 
             update: function () {
                 let info = this.model.get('group_info') || {};
+                this.$('.block-name').text(this.contact.get('group_info').anonymous + " group");
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
                 this.$('.model .value').text(utils.pretty_name(info.model));
                 this.$('.status .value').text(utils.pretty_name(info.status));
-                this.$('.anonymous .value').text((info.anonymous === 'incognito') ? 'Yes' : 'No');
                 this.$('.searchable .value').text((info.searchable === 'none') ? 'No' : utils.pretty_name(info.searchable));
                 this.$('.name-info-wrap').switchClass('hidden', !info.name);
                 this.$('.description-info-wrap').switchClass('hidden', !info.description);
                 this.$('.model-info-wrap').switchClass('hidden', !info.model);
                 this.$('.status-info-wrap').switchClass('hidden', !info.status);
-                this.$('.anonymous-info-wrap').switchClass('hidden', !info.anonymous);
                 this.$('.searchable-info-wrap').switchClass('hidden', !info.searchable);
             },
 
@@ -1615,7 +1614,7 @@ define("xabber-contacts", function () {
                 $target_value.each(function (idx, item) {
                     let $item = $(item),
                         value_text = $item.text();
-                    if ($target_info.hasClass('anonymous-info-wrap') || $target_info.hasClass('searchable-info-wrap')) {
+                    if ($target_info.hasClass('searchable-info-wrap')) {
                         let label_name = $target_info.find('.label').first().text();
                         if (value_text === 'No')
                             value_text += ' ' + label_name.toLowerCase();
@@ -1648,7 +1647,7 @@ define("xabber-contacts", function () {
 
             open: function (data_form) {
                 this.data_form = data_form;
-                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, jid: this.model.get('jid')}));
+                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').anonymous), jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
@@ -1713,6 +1712,7 @@ define("xabber-contacts", function () {
                                 status: $result.find('field[var="status"]').children('value').text()
                         };
                         this.$('button').addClass('non-active');
+                        this.close();
                         _.extend(group_info, attrs);
                         this.model.set('group_info', group_info);
                     }.bind(this), function (error) {
@@ -2107,7 +2107,7 @@ define("xabber-contacts", function () {
                         this.$el.css('height', "");
                         if (($(window).height() * 0.1 + this.$el.height()) > $(window).height())
                             this.$el.css('height', $(window).height() * 0.9);
-                        this.$('.modal-content').css('max-height', 'calc(100% - ' + (56 + this.$('.header').height()) + 'px)');
+                        this.$('.modal-content').css('max-height', 'calc(100% - ' + (64 + this.$('.header').height()) + 'px)');
                         this.scrollToTop();
                         this.updateSaveButton();
                         let dropdown_settings = {
