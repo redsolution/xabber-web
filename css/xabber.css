@@ -7413,7 +7413,23 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .dialog-modal .container-for-img canvas {
-    margin: 48px auto;
+    margin: 48px auto 16px;
+}
+
+.dialog-modal .container-for-img .dialog-bottom-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: #616161;
+    margin-bottom: 32px;
+}
+
+.dialog-modal .container-for-img .dialog-bottom-text .name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #212121;
 }
 
 .dialog-modal .modal-content {

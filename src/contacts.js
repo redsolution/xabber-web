@@ -1094,7 +1094,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement}, { ok_button_text: 'copy'}).done(function (result) {
+                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { ok_button_text: 'copy'}).done(function (result) {
                     if (result) {
                         qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
                     }
@@ -1381,7 +1381,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement}, { ok_button_text: 'copy'}).done(function (result) {
+                utils.dialogs.ask("QR-code", null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { ok_button_text: 'copy'}).done(function (result) {
                     if (result) {
                         qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
                     }

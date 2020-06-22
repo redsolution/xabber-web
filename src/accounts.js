@@ -2382,6 +2382,11 @@ define("xabber-accounts", function () {
                 this.add_account_view.show();
             }, this);
 
+            $(window).bind('beforeunload',function(){
+                xabber.current_voip_call && xabber.current_voip_call.reject();
+                return;
+            });
+
             window.onbeforeunload = function () {
                 _.each(this.accounts.connected, function (account) {
                     account.sendPresence('offline');

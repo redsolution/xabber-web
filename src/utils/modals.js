@@ -143,6 +143,8 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 if (dialog_options.canvas) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
                     dialog.$modal.find('.container-for-img').html("").removeClass('hidden')[0].appendChild(dialog_options.canvas);
+                    if (dialog_options.bottom_text)
+                        $('<div class="dialog-bottom-text"/>').html(dialog_options.bottom_text).appendTo(dialog.$modal.find('.container-for-img'));
                 }
 
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {
