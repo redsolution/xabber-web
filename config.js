@@ -19,6 +19,7 @@ require.config({
         "text":                     "node_modules/requirejs-text/text",
         "wavesurfer":               "node_modules/wavesurfer/dist/wavesurfer",
         "slug":                     "node_modules/slug/slug",
+        "sha256":                   "node_modules/js-sha256/src/sha256",
         "magnific-popup":           "node_modules/magnific-popup/dist/jquery.magnific-popup",
 
         // modified libs and plugins
@@ -28,6 +29,7 @@ require.config({
         "strophe.caps":             "src/lib/strophe.caps",
         "strophe.pubsub":           "src/lib/strophe.pubsub",
         "sha1_hasher":              "src/lib/sha1.min",
+        "omemo":                    "src/lib/omemo",
         "qrcode":                   "src/lib/VanillaQR.min",
 
         // Xabber sources
