@@ -92,13 +92,16 @@ define("xabber-discovery", function () {
         onItems: function (stanza) {
             let groupchat_servers_list = [];
             $(stanza).find('query item').each(function (idx, item) {
-                if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
-                    let server_name = $(item).attr('jid');
-                    groupchat_servers_list.push(server_name);
+                let jid = $(item).attr('jid'),
+                    name = $(item).attr('name'),
+                    node = $(item).attr('node');
+                if (node === Strophe.NS.GROUP_CHAT) {
+                    groupchat_servers_list.push(jid);
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
+                this.connection.disco.addItem(jid, name, node, () => {});
                 this.connection.disco.info(
-                    $(item).attr('jid'),
+                    jid,
                     null,
                     this.onInfo.bind(this));
             }.bind(this));

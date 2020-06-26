@@ -1,5 +1,5 @@
 (function (root, factory) {
-    define(["strophe","strophe.disco"], function (Strophe) {
+    define(["strophe","strophe.disco", "strophe.pubsub"], function (Strophe) {
         factory(Strophe.Strophe, Strophe.$build, Strophe.$iq);
     });
 }(this, function (Strophe, $build, $iq) {
@@ -11,42 +11,63 @@
         init = function(c) {
             conn = c;
             Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
-            if (typeof(sha256) === "undefined") {
-                throw new Error("SHA-256 library required!");
-            }
             conn.disco.addFeature(Strophe.NS.OMEMO);
             conn.disco.addFeature(Strophe.NS.OMEMO + '+notify');
-            this.device_id = generateDeviceId();
+            conn.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
         };
 
-        var generateDeviceId = function () {
-            let min = 1,
-                max = Math.pow(2, 31) - 1,
-                rand = min + Math.random() * (max + 1 - min);
-            return Math.floor(rand);
-        };
-
-        var getUserDevices = function ($message) {
-            let id = $message.find('items item').attr('id'),
-                devices = [];
-            $message.find(`devices[xmlns="${Strophe.NS.OMEMO}"] device`).each(function(device) {
+        var getUserDevices = function ($stanza) {
+            let devices = [];
+            $stanza.find(`devices[xmlns="${Strophe.NS.OMEMO}"] device`).each(function(idx, device) {
                 let $device = $(device),
                     id = $device.attr('id'),
                     label = $device.attr(('label'));
-                devices.push({id: id, label: label});
+                id && devices.push({id, label});
             }.bind(this));
             return devices;
         };
 
-        var publishDevice = function () {
+        var getDevicesNode = function (callback) {
+            if (!conn)
+                return;
+            if (this.devices) {
+                callback && callback();
+                return;
+            }
+            let iq = $iq({type: 'get', to: `pubsub.${conn.domain}`})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: Strophe.NS.OMEMO + ":devices"});
+            conn.sendIQ(iq, callback, function (err) {
+                ($(err).find('error').attr('code') == 404) && createNode(callback);
+            }.bind(this));
+        };
+
+        var addDevice = function (device_id) {
+            getDevicesNode(function (cb) {
+                if (!cb)
+                    return;
+                let $cb = $(cb);
+                this.devices = getUserDevices($cb);
+                if (!this.devices.find(d => d.id == device_id))
+                    publishDevice(device_id);
+            }.bind(this));
+        };
+
+        var createNode = function (callback) {
+            conn.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
+        };
+
+        var publishDevice = function (id) {
             !this.devices && (this.devices = []);
-            this.devices.push({id: this.device_id});
+            this.devices.push({id});
             let stanza = $iq({type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: Strophe.NS.OMEMO + ':devices'})
-                .c('item', {id: this.node_id})
+                .c('item', {id: 'current'})
                 .c('devices', {xmlns: Strophe.NS.OMEMO});
             this.devices.forEach(function (device) {
+                if (!device.id)
+                    return;
                 let attrs = {id: device.id};
                 device.label && (attrs.label = device.label);
                 stanza.c('device', attrs).up();
@@ -61,8 +82,36 @@
             conn.sendIQ(stanza);
         };
 
+        var publishBundle = function (attrs, callback) {
+            let preKeys = attrs.preKeys,
+                spk = attrs.spk,
+                iq = $iq({type: 'set'})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
+                .c('item')
+                .c('bundle', {xmlns: Strophe.NS.OMEMO})
+                .c('spk', {id: spk.id}).t(spk.key).up()
+                .c('spks').t().up()
+                .c('ik').t().up()
+                .c('prekeys');
+            for (var preKey in preKeys) {
+                iq.c('pk', {id: preKey.id}).t(preKey.key).up()
+            }
+            iq.up().up().up().up().up()
+                .c('publish-options')
+                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                .c('field', {type: 'FORM_TYPE', type: 'hidden'})
+                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
+                .c('field', {var: 'pubsub#max_items'})
+                .c('value').t('max');
+            conn.sendIQ(iq, callback);
+        };
+
         return {
-            init: init
+            init: init,
+            getUserDevices: getUserDevices,
+            publishDevice: publishDevice,
+            addDevice: addDevice
         };
     })());
 }));

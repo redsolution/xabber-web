@@ -56,6 +56,7 @@ require.config({
         "xabber-searching":         "src/searching",
         "xabber-mentions":          "src/mentions",
         "xabber-ui":                "src/ui",
+        "xabber-omemo":             "src/omemo",
 
         // main file
         "xabber":                   "src/xabber"

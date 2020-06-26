@@ -4681,7 +4681,14 @@ define("xabber-chats", function () {
             if (node.indexOf(Strophe.NS.OMEMO) > -1) {
                 let devices = this.account.connection.omemo.getUserDevices($message),
                     contact = this.account.contacts.get(from_jid);
-                contact.set('omemo_devices', devices);
+                if (from_jid === this.account.get('jid')) {
+                    this.account.connection.omemo.devices = devices;
+                    let device_id = this.account.omemo.get('device_id');
+                    if (!this.account.connection.omemo.devices.find(d => d.id == device_id))
+                        this.account.connection.omemo.publishDevice(device_id);
+                }
+                else
+                    contact.set('omemo_devices', devices);
                 return;
             }
             if (node.indexOf(Strophe.NS.PUBSUB_AVATAR_METADATA) > -1) {
