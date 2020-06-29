@@ -4678,14 +4678,14 @@ define("xabber-chats", function () {
             var photo_id =  $message.find('info').attr('id'),
                 from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                 node = $message.find('items').attr('node');
-            if (node.indexOf(Strophe.NS.OMEMO) > -1) {
+            if (node.indexOf(Strophe.NS.OMEMO + ':devices') > -1) {
                 let devices = this.account.connection.omemo.getUserDevices($message),
                     contact = this.account.contacts.get(from_jid);
                 if (from_jid === this.account.get('jid')) {
                     this.account.connection.omemo.devices = devices;
                     let device_id = this.account.omemo.get('device_id');
                     if (!this.account.connection.omemo.devices.find(d => d.id == device_id))
-                        this.account.connection.omemo.publishDevice(device_id);
+                        this.account.connection.omemo.publishDevice(device_id, () => {this.account.trigger('device_published')});
                 }
                 else
                     contact.set('omemo_devices', devices);

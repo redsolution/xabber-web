@@ -16,9 +16,11 @@ define("xabber-omemo", function () {
             FingerprintGenerator = libsignal.FingerprintGenerator;
 
         xabber.Bundle = Backbone.Model.extend({
-            initialize: function (attrs, options) {
+            initialize: async function (attrs, options) {
+                this.preKeys = [];
                 this.store = options.store;
-                this.generateIdentity();
+                await this.generateIdentity();
+                this.generatePreKeys().then((prekeys) => {this.preKeys = prekeys;});
             },
 
             generateIdentity: function () {
@@ -31,52 +33,64 @@ define("xabber-omemo", function () {
                 });
             },
 
-            generatePreKeyBundle: function (preKeyId, signedPreKeyId) {
-                return Promise.all([
-                    this.store.getIdentityKeyPair(),
-                    this.store.getLocalRegistrationId()
-                ]).then(function(result) {
-                    let identity = result[0],
-                        registrationId = result[1];
+            generatePreKeys: async function () {
+                let preKeysPromises = [];
+                for (let i = 0; i < constants.PREKEYS_COUNT; i++) {
+                    preKeysPromises.push(this.generatePreKey(i));
+                }
 
-                    return Promise.all([
-                        KeyHelper.generatePreKey(preKeyId),
-                        KeyHelper.generateSignedPreKey(identity, signedPreKeyId),
-                    ]).then(function(keys) {
-                        let preKey = keys[0],
-                            signedPreKey = keys[1];
+                preKeysPromises.push(this.generateSignedPreKey(1));
 
-                        this.store.storePreKey(preKeyId, preKey.keyPair);
-                        this.store.storeSignedPreKey(signedPreKeyId, signedPreKey.keyPair);
-
-                        return {
-                            identityKey: identity.pubKey,
-                            registrationId : registrationId,
-                            preKey:  {
-                                keyId     : preKeyId,
-                                publicKey : preKey.keyPair.pubKey
-                            },
-                            signedPreKey: {
-                                keyId     : signedPreKeyId,
-                                publicKey : signedPreKey.keyPair.pubKey,
-                                signature : signedPreKey.signature
-                            }
-                        };
-                    });
-                });
+                return await Promise.all(preKeysPromises);
             },
 
-            generateSignedPreKeys: function () {
+            generatePreKey: async function (id) {
+                let preKey = await KeyHelper.generatePreKey(id);
+                this.store.storePreKey(id, preKey.keyPair);
 
+                return preKey;
+
+            },
+
+            generateSignedPreKey: async function (id) {
+                let identity = await this.store.getIdentityKeyPair();
+                let signedPreKey = await KeyHelper.generateSignedPreKey(identity, id);
+
+                this.store.storeSignedPreKey(id, signedPreKey.keyPair);
+
+                return signedPreKey;
             }
 
         });
 
         xabber.Device = Backbone.Model.extend({
             initialize: function (attrs, options) {
+                this.account = options.account;
+                this.id = attrs.id;
+                this.item_id = attrs.item_id;
+                this.contact = this.account.contacts.get(attrs.jid);
                 this.store = options.store;
+                this.preKeys = [];
                 this.address = new SignalProtocolAddress(attrs.jid, attrs.id);
                 this.session = new SessionBuilder(this.store, this.address);
+            },
+
+            getBundle: function (callback) {
+                this.account.connection.omemo.getBundleInfo({jid: this.contact.get('jid'), id: this.id}, function (iq) {
+                    let $iq = $(iq);
+                    $iq.find('item prekeys pk').each((pk) => {
+                        let $pk = $(pk);
+                        this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                    });
+                    callback && callback(this.getRandomPreKey());
+                }.bind(this));
+            },
+
+            getRandomPreKey: function () {
+                let min = 0,
+                    max = this.preKeys.length - 1,
+                    i = Math.floor(min + Math.random() * (max + 1 - min));
+                return this.preKeys[i];
             },
 
             decrypt: async function (cipherText, preKey) {
@@ -139,6 +153,7 @@ define("xabber-omemo", function () {
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
                 this.bundle = new xabber.Bundle(null, {store: this.store});
+                this.account.on('device_published', this.publishBundle, this);
             },
 
             onDeviceIdUpdated: function () {
@@ -175,6 +190,10 @@ define("xabber-omemo", function () {
 
             },
 
+            toBase64: function (arrayBuffer) {
+                return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            },
+
             createEncryptedStanza: function (msg) {
                 let $message = $msg({type: 'chat', to: msg.get('to')})
                     .c('encrypted', {xmlns: Strophe.NS.OMEMO})
@@ -192,6 +211,30 @@ define("xabber-omemo", function () {
                     $message.c('key', attrs).t(btoa(key.ciphertext.body)).up();
                 }
                 $message.up().up().c('payload').t(btoa(msg.get('payload')));
+            },
+
+            publish: function (spk, ik, pks) {
+                if (!this.account.connection)
+                    return;
+                let conn_omemo = this.account.connection.omemo,
+                    prekeys = [];
+                pks.forEach(function (pk) {
+                    if (!pk.signature)
+                        prekeys.push({id: pk.keyId, key: this.toBase64(pk.keyPair.pubKey)});
+                }.bind(this));
+                conn_omemo.publishBundle({
+                    spk: {id: spk.keyId, key: this.toBase64(spk.keyPair.pubKey)},
+                    spks: this.toBase64(spk.signature),
+                    ik:  this.toBase64(ik),
+                    pks: prekeys
+                });
+            },
+
+            publishBundle: async function () {
+               let spk = this.bundle.preKeys.find(pk => pk.signature),
+                   ik = await this.store.getIdentityKeyPair(),
+                   pks = this.bundle.preKeys;
+               this.publish(spk, ik.pubKey, pks);
             }
         });
 
@@ -335,7 +378,7 @@ define("xabber-omemo", function () {
                 fetch: 'before'
             });
             let connection = this.connection;
-            connection.omemo.addDevice(this.omemo.get('device_id'));
+            connection.omemo.addDevice(this.omemo.get('device_id'), () => this.trigger('device_published'));
         }, true, true);
 
         return xabber;

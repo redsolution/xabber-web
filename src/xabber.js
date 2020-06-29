@@ -10,9 +10,10 @@ define("xabber", [
     "xabber-chats",
     "xabber-searching",
     "xabber-mentions",
-    "xabber-ui"
+    "xabber-ui",
+    "xabber-omemo"
 ], function (xabber, views, api_service, strophe, vcard,
-             accounts, discovery, contacts, chats, searching, mentions, ui) {
+             accounts, discovery, contacts, chats, searching, mentions, ui, omemo) {
     return xabber.extendWith(views, api_service, strophe, vcard,
-                             accounts, discovery, contacts, chats, searching, mentions, ui);
+                             accounts, discovery, contacts, chats, searching, mentions, ui, omemo);
 });

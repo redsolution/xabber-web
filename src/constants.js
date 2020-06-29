@@ -52,6 +52,8 @@ var constants = {
         10:'CONNTIMEOUT'
     },
 
+    PREKEYS_COUNT: 100,
+
     BAD_CONN_STATUSES: [0, 2, 4, 6, 10],
 
     RECONNECTION_TIMEOUTS: [5000, 10000, 15000],

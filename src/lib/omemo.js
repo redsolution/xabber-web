@@ -14,6 +14,7 @@
             conn.disco.addFeature(Strophe.NS.OMEMO);
             conn.disco.addFeature(Strophe.NS.OMEMO + '+notify');
             conn.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
+            conn.disco.addFeature(Strophe.NS.OMEMO + ':bundles+notify');
         };
 
         var getUserDevices = function ($stanza) {
@@ -34,7 +35,7 @@
                 callback && callback();
                 return;
             }
-            let iq = $iq({type: 'get', to: `pubsub.${conn.domain}`})
+            let iq = $iq({type: 'get'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
             conn.sendIQ(iq, callback, function (err) {
@@ -42,14 +43,16 @@
             }.bind(this));
         };
 
-        var addDevice = function (device_id) {
+        var addDevice = function (device_id, callback) {
             getDevicesNode(function (cb) {
                 if (!cb)
                     return;
                 let $cb = $(cb);
                 this.devices = getUserDevices($cb);
                 if (!this.devices.find(d => d.id == device_id))
-                    publishDevice(device_id);
+                    publishDevice(device_id, callback);
+                else
+                    callback && callback();
             }.bind(this));
         };
 
@@ -57,7 +60,7 @@
             conn.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
         };
 
-        var publishDevice = function (id) {
+        var publishDevice = function (id, callback) {
             !this.devices && (this.devices = []);
             this.devices.push({id});
             let stanza = $iq({type: 'set'})
@@ -74,16 +77,16 @@
             }.bind(this));
             stanza.up().up().up()
                 .c('publish-options')
-                .c('x', {xmlns: Strophe.NS.DATA_FORM, type: 'submit'})
+                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                 .c('field', {var: 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open');
-            conn.sendIQ(stanza);
+            conn.sendIQ(stanza, callback);
         };
 
         var publishBundle = function (attrs, callback) {
-            let preKeys = attrs.preKeys,
+            let preKeys = attrs.pks,
                 spk = attrs.spk,
                 iq = $iq({type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
@@ -91,19 +94,28 @@
                 .c('item')
                 .c('bundle', {xmlns: Strophe.NS.OMEMO})
                 .c('spk', {id: spk.id}).t(spk.key).up()
-                .c('spks').t().up()
-                .c('ik').t().up()
+                .c('spks').t(attrs.spks).up()
+                .c('ik').t(attrs.ik).up()
                 .c('prekeys');
-            for (var preKey in preKeys) {
+            for (var i in preKeys) {
+                let preKey = preKeys[i];
                 iq.c('pk', {id: preKey.id}).t(preKey.key).up()
             }
-            iq.up().up().up().up().up()
+            iq.up().up().up().up()
                 .c('publish-options')
                 .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {type: 'FORM_TYPE', type: 'hidden'})
+                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
-                .c('field', {var: 'pubsub#max_items'})
-                .c('value').t('max');
+                .c('field', {var: 'pubsub#access_model'})
+                .c('value').t('open');
+            conn.sendIQ(iq, callback);
+        };
+
+        var getBundleInfo = function (attrs, callback) {
+            let iq = $iq({type: 'get', to: attrs.jid})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`})
+                .c('item', {id: attrs.id});
             conn.sendIQ(iq, callback);
         };
 
@@ -111,6 +123,8 @@
             init: init,
             getUserDevices: getUserDevices,
             publishDevice: publishDevice,
+            publishBundle: publishBundle,
+            getBundleInfo: getBundleInfo,
             addDevice: addDevice
         };
     })());
