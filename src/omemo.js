@@ -4,16 +4,70 @@ define("xabber-omemo", function () {
             constants = env.constants,
             utils = env.utils,
             $ = env.$,
-            $iq = env.$iq,
-            $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
-            moment = env.moment,
             KeyHelper = libsignal.KeyHelper,
             SignalProtocolAddress = libsignal.SignalProtocolAddress,
             SessionBuilder = libsignal.SessionBuilder,
             SessionCipher = libsignal.SessionCipher,
             FingerprintGenerator = libsignal.FingerprintGenerator;
+
+        xabber.Peer = Backbone.Model.extend({
+            initialize: function (attrs, options) {
+                this.contact = options.contact;
+                this.account = this.contact.account;
+                this.devices = [];
+                var jid = this.contact.get('jid');
+                this.set({
+                    id: this.contact.hash_id,
+                    jid: jid
+                });
+            },
+
+            encrypt: function (message) {
+                let enc_promises = [];
+
+                this.devices.forEach(function (device) {
+                    enc_promises.push(device.encrypt(message));
+                }.bind(this));
+
+                return {
+
+                };
+            },
+
+            decrypt: function () {
+
+            },
+
+            getDevice: function (id) {
+                if (!this.devices[id]) {
+                    this.devices[id] = new xabber.Device({jid: this.contact.get('jid'), id: id }, { account: this.account, store: this.store});
+                }
+
+                return this.devices[i];
+            }
+        });
+
+        xabber.Peers = Backbone.Collection.extend({
+            model: xabber.Peer,
+
+            initialize: function (models, options) {
+                this.collections = [];
+                this.on("add", _.bind(this.updateInCollections, this, 'add'));
+                this.on("change", _.bind(this.updateInCollections, this, 'change'));
+            },
+
+            addCollection: function (collection) {
+                this.collections.push(collection);
+            },
+
+            updateInCollections: function (event, contact) {
+                _.each(this.collections, function (collection) {
+                    collection.update(contact, event);
+                });
+            }
+        });
 
         xabber.Bundle = Backbone.Model.extend({
             initialize: async function (attrs, options) {
@@ -67,7 +121,6 @@ define("xabber-omemo", function () {
             initialize: function (attrs, options) {
                 this.account = options.account;
                 this.id = attrs.id;
-                this.item_id = attrs.item_id;
                 this.contact = this.account.contacts.get(attrs.jid);
                 this.store = options.store;
                 this.preKeys = [];
@@ -77,12 +130,17 @@ define("xabber-omemo", function () {
 
             getBundle: function (callback) {
                 this.account.connection.omemo.getBundleInfo({jid: this.contact.get('jid'), id: this.id}, function (iq) {
-                    let $iq = $(iq);
-                    $iq.find('item prekeys pk').each((pk) => {
+                    let $iq = $(iq),
+                        $bundle = $iq.find(`item bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                        $spk = $bundle.find('spk'),
+                        spk = {id: $spk.attr('id'), key: $spk.text(), signature: $bundle.find('spks').text()},
+                        ik =  $bundle.find(`ik`).text();
+                    $bundle.find('prekeys pk').each((pk) => {
                         let $pk = $(pk);
                         this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
                     });
-                    callback && callback(this.getRandomPreKey());
+                    let pk = this.getRandomPreKey();
+                    callback && callback({pk, spk, ik});
                 }.bind(this));
             },
 
@@ -105,7 +163,22 @@ define("xabber-omemo", function () {
             },
 
             encrypt: async function (plainText) {
-                try {
+                this.getBundle(function ({pk, spk, ik}) {
+                    this.session.processPreKey({
+                        registrationId: this.id,
+                        identityKey: utils.fromBase64toArrayBuffer(ik),
+                        signedPreKey: {
+                            keyId: spk.id,
+                            publicKey: utils.fromBase64toArrayBuffer(spk.key),
+                            signature: utils.fromBase64toArrayBuffer(spk.signature)
+                        },
+                        preKey: pk
+                }).then(() => {
+                    this.session.encrypt(plainText);
+                    });
+                }.bind(this));
+
+                /*try {
                     if (!this.store.hasSession(this.address.toString())) {
                         await this.initSession();
                     }
@@ -123,7 +196,7 @@ define("xabber-omemo", function () {
                     console.warn('Could not encrypt data for device with id ' + this.address.getDeviceId());
 
                     return null;
-                }
+                }*/
             },
 
             initSession: function (preKeyBundle) {
@@ -149,6 +222,7 @@ define("xabber-omemo", function () {
             _initialize: function (attrs, options) {
                 this.on("change:device_id", this.onDeviceIdUpdated, this);
                 this.account = options.account;
+                this.peers = new xabber.Peers();
                 if (!this.get('device_id'))
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
@@ -239,12 +313,11 @@ define("xabber-omemo", function () {
         });
 
         xabber.SignalProtocolStore = Backbone.Model.extend({
-            direction: {
-                SENDING: 1,
-                RECEIVING: 2
-            },
-
             initialize: function () {
+                this.Direction = {
+                    SENDING: 1,
+                    RECEIVING: 2
+                };
                 this.store = {};
             },
 

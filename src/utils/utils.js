@@ -477,6 +477,95 @@ define([
             }
         },
 
+        fromBase64toArrayBuffer: function (b64_string) {
+            return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0));
+        },
+
+        AES: {
+            ALGO_NAME: 'AES-GCM',
+
+            decoder: new window.TextDecoder('utf-8'),
+            encoder: new window.TextEncoder('utf-8'),
+
+            decrypt: async function (exportedAESKey, iv, data) {
+                let key = await window.crypto.subtle.importKey('raw', exportedAESKey, utils.AES.ALGO_NAME, false, ['decrypt']);
+
+                let decryptedBuffer = await window.crypto.subtle.decrypt({
+                    name: utils.AES.ALGO_NAME,
+                    iv,
+                    tagLength: constants.AES_TAG_LENGTH
+                }, key, data);
+
+                return utils.encoder.decode(decryptedBuffer);
+            },
+
+            encrypt: async function (plaintext) {
+                let iv = window.crypto.getRandomValues(new Uint8Array(12)),
+                    key = await utils.generateAESKey(),
+                    encrypted = await utils.generateAESencryptedMessage(iv, key, plaintext);
+
+                let ciphertext = encrypted.ciphertext,
+                    authenticationTag = encrypted.authenticationTag,
+                    keydata = await window.crypto.subtle.exportKey('raw', key);
+
+                return {
+                    keydata: utils.AES.arrayBufferConcat(keydata, authenticationTag),
+                    iv,
+                    payload: ciphertext
+                }
+            },
+
+            generateAESencryptedMessage: async function (iv, key, plaintext) {
+                let encryptOptions = {
+                    name: utils.AES.ALGO_NAME,
+                    iv,
+                    tagLength: constants.AES_TAG_LENGTH
+                };
+                let encodedPlaintext = utils.encoder.encode(plaintext),
+                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext),
+                    ciphertextLength = encrypted.byteLength - ((128 + 7) >> 3),
+                    ciphertext = encrypted.slice(0, ciphertextLength),
+                    authenticationTag = encrypted.slice(ciphertextLength);
+
+                return {
+                    ciphertext,
+                    authenticationTag
+                };
+            },
+
+            arrayBufferConcat: function () {
+                let length = 0,
+                    buffer = null;
+
+                for (var i in arguments) {
+                    buffer = arguments[i];
+                    length += buffer.byteLength;
+                }
+
+                let joined = new Uint8Array(length),
+                    offset = 0;
+
+                for (var i in arguments) {
+                    buffer = arguments[i];
+                    joined.set(new Uint8Array(buffer), offset);
+                    offset += buffer.byteLength;
+                }
+
+                return joined.buffer
+            },
+
+            generateAESKey: async function () {
+                let algo = {
+                    name: utils.AES.ALGO_NAME,
+                    length: constants.AES_KEY_LENGTH,
+                };
+                let keyUsage = ['encrypt', 'decrypt'],
+                    key = await window.crypto.subtle.generateKey(algo, constants.AES_EXTRACTABLE, keyUsage);
+
+                return key;
+            }
+        },
+
         emoji: emoji,
         images: images,
         modals: modals,

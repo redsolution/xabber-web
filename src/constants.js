@@ -54,6 +54,10 @@ var constants = {
 
     PREKEYS_COUNT: 100,
 
+    AES_KEY_LENGTH: 128,
+    AES_TAG_LENGTH: 128,
+    AES_EXTRACTABLE: true,
+
     BAD_CONN_STATUSES: [0, 2, 4, 6, 10],
 
     RECONNECTION_TIMEOUTS: [5000, 10000, 15000],
