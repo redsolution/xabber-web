@@ -43,6 +43,15 @@
             }.bind(this));
         };
 
+        var requestUserDevices = function (jid, callback, errback) {
+            if (!conn)
+                return;
+            let iq = $iq({type: 'get', to: jid})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: Strophe.NS.OMEMO + ":devices"});
+            conn.sendIQ(iq, callback, errback);
+        };
+
         var addDevice = function (device_id, callback) {
             getDevicesNode(function (cb) {
                 if (!cb)
@@ -114,14 +123,15 @@
         var getBundleInfo = function (attrs, callback) {
             let iq = $iq({type: 'get', to: attrs.jid})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`})
-                .c('item', {id: attrs.id});
+                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`, max_items: 1});
+            attrs.id && iq.c('item', {id: attrs.id});
             conn.sendIQ(iq, callback);
         };
 
         return {
             init: init,
             getUserDevices: getUserDevices,
+            requestUserDevices: requestUserDevices,
             publishDevice: publishDevice,
             publishBundle: publishBundle,
             getBundleInfo: getBundleInfo,

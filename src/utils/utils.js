@@ -478,7 +478,7 @@ define([
         },
 
         fromBase64toArrayBuffer: function (b64_string) {
-            return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0));
+            return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0)).buffer;
         },
 
         AES: {
@@ -496,13 +496,13 @@ define([
                     tagLength: constants.AES_TAG_LENGTH
                 }, key, data);
 
-                return utils.encoder.decode(decryptedBuffer);
+                return utils.AES.decoder.decode(decryptedBuffer);
             },
 
             encrypt: async function (plaintext) {
                 let iv = window.crypto.getRandomValues(new Uint8Array(12)),
-                    key = await utils.generateAESKey(),
-                    encrypted = await utils.generateAESencryptedMessage(iv, key, plaintext);
+                    key = await utils.AES.generateAESKey(),
+                    encrypted = await utils.AES.generateAESencryptedMessage(iv, key, plaintext);
 
                 let ciphertext = encrypted.ciphertext,
                     authenticationTag = encrypted.authenticationTag,
@@ -521,7 +521,7 @@ define([
                     iv,
                     tagLength: constants.AES_TAG_LENGTH
                 };
-                let encodedPlaintext = utils.encoder.encode(plaintext),
+                let encodedPlaintext = utils.AES.encoder.encode(plaintext),
                     encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext),
                     ciphertextLength = encrypted.byteLength - ((128 + 7) >> 3),
                     ciphertext = encrypted.slice(0, ciphertextLength),
