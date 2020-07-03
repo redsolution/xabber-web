@@ -7,14 +7,15 @@
         if (typeof(libsignal) === "undefined")
             throw new Error("Signal library required!");
         let conn, init;
-        conn = null;
+        this._connection = null;
         init = function(c) {
-            conn = c;
+            this._connection = c;
+            this.devices = [];
             Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
-            conn.disco.addFeature(Strophe.NS.OMEMO);
-            conn.disco.addFeature(Strophe.NS.OMEMO + '+notify');
-            conn.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
-            conn.disco.addFeature(Strophe.NS.OMEMO + ':bundles+notify');
+            this._connection.disco.addFeature(Strophe.NS.OMEMO);
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + ':bundles+notify');
         };
 
         var getUserDevices = function ($stanza) {
@@ -28,51 +29,25 @@
             return devices;
         };
 
-        var getDevicesNode = function (callback) {
-            if (!conn)
-                return;
-            if (this.devices) {
-                callback && callback();
-                return;
-            }
-            let iq = $iq({type: 'get'})
+        var getDevicesNode = function (jid, callback) {
+            let attrs = {from: this._connection.jid, type: 'get'};
+            jid && (attrs.to = jid);
+            let iq = $iq(attrs)
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
-            conn.sendIQ(iq, callback, function (err) {
-                ($(err).find('error').attr('code') == 404) && createNode(callback);
-            }.bind(this));
-        };
-
-        var requestUserDevices = function (jid, callback, errback) {
-            if (!conn)
-                return;
-            let iq = $iq({type: 'get', to: jid})
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('items', {node: Strophe.NS.OMEMO + ":devices"});
-            conn.sendIQ(iq, callback, errback);
-        };
-
-        var addDevice = function (device_id, callback) {
-            getDevicesNode(function (cb) {
-                if (!cb)
-                    return;
-                let $cb = $(cb);
-                this.devices = getUserDevices($cb);
-                if (!this.devices.find(d => d.id == device_id))
-                    publishDevice(device_id, callback);
-                else
-                    callback && callback();
+            this._connection.sendIQ(iq, callback, function (err) {
+                ($(err).find('error').attr('code') == 404 && !jid) && createNode(callback);
             }.bind(this));
         };
 
         var createNode = function (callback) {
-            conn.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
+            this._connection.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
         };
 
         var publishDevice = function (id, callback) {
             !this.devices && (this.devices = []);
             this.devices.push({id});
-            let stanza = $iq({type: 'set'})
+            let stanza = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: Strophe.NS.OMEMO + ':devices'})
                 .c('item', {id: 'current'})
@@ -91,13 +66,13 @@
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open');
-            conn.sendIQ(stanza, callback);
+            this._connection.sendIQ(stanza, callback);
         };
 
         var publishBundle = function (attrs, callback) {
             let preKeys = attrs.pks,
                 spk = attrs.spk,
-                iq = $iq({type: 'set'})
+                iq = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
                 .c('item')
@@ -117,25 +92,24 @@
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open');
-            conn.sendIQ(iq, callback);
+            this._connection.sendIQ(iq, callback);
         };
 
         var getBundleInfo = function (attrs, callback) {
-            let iq = $iq({type: 'get', to: attrs.jid})
+            let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: `${Strophe.NS.OMEMO}:bundles`, max_items: 1});
             attrs.id && iq.c('item', {id: attrs.id});
-            conn.sendIQ(iq, callback);
+            this._connection.sendIQ(iq, callback);
         };
 
         return {
             init: init,
             getUserDevices: getUserDevices,
-            requestUserDevices: requestUserDevices,
+            getDevicesNode: getDevicesNode,
             publishDevice: publishDevice,
             publishBundle: publishBundle,
-            getBundleInfo: getBundleInfo,
-            addDevice: addDevice
+            getBundleInfo: getBundleInfo
         };
     })());
 }));

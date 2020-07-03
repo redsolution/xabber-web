@@ -17,15 +17,13 @@ define("xabber-omemo", function () {
 
             initialize: function (attrs, options) {
                 attrs = attrs || {};
-                this.contact = options.contact;
-                this.account = this.contact.account;
+                this.account = options.account;
                 this.devices = [];
                 this.updateDevices(attrs.devices);
                 this.own_devices = [];
                 this.updateOwnDevices(this.account.connection.omemo.devices);
-                let jid = this.contact.get('jid');
                 this.set({
-                    jid: jid
+                    jid: attrs.jid
                 });
             },
 
@@ -50,7 +48,7 @@ define("xabber-omemo", function () {
                     aes = await utils.AES.encrypt(message);
 
                 if (!this.devices.length)
-                    this.account.connection.omemo.requestUserDevices(this.get('jid'), function (cb) {
+                    this.account.connection.omemo.getDevicesNode(this.get('jid'), function (cb) {
                         this.updateDevices(this.account.connection.omemo.getUserDevices($(cb)));
                         for (let device in this.devices) {
                             enc_promises.push(this.devices[device].encrypt(aes.keydata));
@@ -63,7 +61,7 @@ define("xabber-omemo", function () {
                 }
 
                 for (let device in this.own_devices) {
-                    enc_promises.push(this.devices[device].encrypt(aes.keydata));
+                    enc_promises.push(this.own_devices[device].encrypt(aes.keydata));
                 }
 
                 let keys = await Promise.all(enc_promises);
@@ -93,7 +91,7 @@ define("xabber-omemo", function () {
 
             getDevice: function (id) {
                 if (!this.devices[id]) {
-                    this.devices[id] = new xabber.Device({jid: this.contact.get('jid'), id: id }, { account: this.account, store: this.account.omemo.store});
+                    this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.account.omemo.store});
                 }
 
                 return this.devices[id];
@@ -172,7 +170,7 @@ define("xabber-omemo", function () {
             initialize: function (attrs, options) {
                 this.account = options.account;
                 this.id = attrs.id;
-                this.contact = this.account.contacts.get(attrs.jid);
+                this.jid = attrs.jid;
                 this.store = options.store;
                 this.preKeys = [];
                 this.address = new SignalProtocolAddress(attrs.jid, attrs.id);
@@ -181,7 +179,7 @@ define("xabber-omemo", function () {
 
             getBundle: async function () {
                 return new Promise((resolve, reject) => {
-                    this.account.connection.omemo.getBundleInfo({jid: this.contact.get('jid')}, function (iq) {
+                    this.account.connection.omemo.getBundleInfo({jid: this.jid}, function (iq) {
                         let $iq = $(iq),
                             $bundle = $iq.find(`item bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                             $spk = $bundle.find('spk'),
@@ -216,18 +214,25 @@ define("xabber-omemo", function () {
             },
 
             encrypt: async function (plainText) {
-                if (!this.store.hasSession(this.address.toString())) {
-                    await this.initSession();
+                try {
+                    if (!this.store.hasSession(this.address.toString())) {
+                        await this.initSession();
+                    }
+
+                    let session = this.getSession(),
+                        ciphertext = await session.encrypt(plainText);
+
+                    return {
+                        preKey: ciphertext.type === 3,
+                        ciphertext: ciphertext,
+                        deviceId: this.address.getDeviceId()
+                    };
+                } catch (e) {
+                    console.log('Error:', e);
+                    console.warn('Could not encrypt data for device with id ' + this.address.getDeviceId());
+
+                    return null;
                 }
-
-                let session = this.getSession(),
-                    ciphertext = await session.encrypt(plainText);
-
-                return {
-                    preKey: ciphertext.type === 3,
-                    ciphertext: ciphertext,
-                    deviceId: this.address.getDeviceId()
-                };
             },
 
             initSession: async function () {
@@ -276,9 +281,33 @@ define("xabber-omemo", function () {
                 this.store = new xabber.SignalProtocolStore();
                 this.bundle = new xabber.Bundle(null, {store: this.store});
                 this.account.on('device_published', this.publishBundle, this);
-                let connection = this.account.connection;
-                connection && connection.omemo.addDevice(this.get('device_id'), () => this.trigger('device_published'));
                 this.registerMessageHandler();
+                this.connection = this.account.connection;
+                this.addDevice();
+            },
+
+            addDevice: function () {
+                let device_id = this.get('device_id');
+                if (this.connection) {
+                    let omemo = this.connection.omemo;
+                    if (omemo.devices.length) {
+                        if (!omemo.devices.find(d => d.id == device_id)) {
+                            omemo.publishDevice(device_id, function () {
+                                this.account.trigger('device_published');
+                            }.bind(this));
+                        }
+                    }
+                    else
+                        omemo.getDevicesNode(null, function (cb) {
+                            omemo.devices = omemo.getUserDevices($(cb));
+                            if (!omemo.devices.find(d => d.id == device_id)) {
+                                omemo.publishDevice(device_id, function () {
+                                    this.account.trigger('device_published');
+
+                                }.bind(this));
+                            }
+                        }.bind(this));
+                }
             },
 
             onDeviceIdUpdated: function () {
@@ -301,10 +330,46 @@ define("xabber-omemo", function () {
             },
 
             encrypt: function (contact, message) {
-                let peer = this.getPeer(contact.get('jid'));
+                let peer = this.getPeer(contact.get('jid')),
+                    plaintext = $(message.tree()).children('body').parent().html() + $(message.tree()).children('reference').parent().html();
 
-                return peer.encrypt(message).then((encryptedMessages) => {
-                     console.log(encryptedMessages);
+                return peer.encrypt(plaintext).then((encryptedMessage) => {
+
+                    let encryptedElement = $build('encrypted', {xmlns: Strophe.NS.OMEMO})
+                        .c('header', {
+                            sid: this.get('device_id')
+                        }),
+                        myKeys = $build('keys', {jid: this.account.get('jid')});
+
+                    encryptedElement.c('keys', { jid: contact.get('jid')});
+
+                    for (let key of encryptedMessage.keys) {
+                        let attrs = {
+                            rid: key.deviceId,
+                            kex: undefined
+                        };
+                        if (key.preKey) {
+                            attrs.kex = true;
+                        }
+
+                        if (peer.devices[key.deviceId])
+                            encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                        else
+                            myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                    }
+                    encryptedElement.up().cnode(myKeys.tree());
+
+                    encryptedElement.up().c('iv', this.toBase64(encryptedMessage.iv)).up().up()
+                        .c('payload').t(this.toBase64(encryptedMessage.payload));
+
+                    $(message.tree()).find('body').remove();
+
+                    message.cnode(encryptedElement.tree());
+                    message.up().c('store', {
+                        xmlns: 'urn:xmpp:hints'
+                    }).up();
+
+                    return message;
                 }).catch((msg) => {
 
                 });
@@ -324,7 +389,7 @@ define("xabber-omemo", function () {
                             let device_id = this.account.omemo.get('device_id');
                             if (!this.account.connection.omemo.devices.find(d => d.id == device_id))
                                 this.account.connection.omemo.publishDevice(device_id, () => {
-                                    this.account.trigger('device_published')
+                                    this.account.trigger('device_published');
                                 });
                         }
                         else {
@@ -338,83 +403,56 @@ define("xabber-omemo", function () {
                 }
 
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
-
+                    this.decrypt(message).then((dec) => {console.log(dec)});
                 }
+
+            },
+
+            parseEncrypted: function ($encrypted) {
+                let $payload = $encrypted.children(`payload`),
+                    $header = $encrypted.children('header'),
+                    iv = utils.fromBase64toArrayBuffer($header.find('iv').text()),
+                    payload = utils.fromBase64toArrayBuffer($payload.text()),
+                    sid = Number($header.attr('sid'));
+
+                let keys = $header.find(`key`).get().map(function(keyElement) {
+                    return {
+                        preKey: $(keyElement).attr('kex') === 'true',
+                        ciphertext: utils.fromBase64toArrayBuffer($(keyElement).text()),
+                        deviceId: parseInt($(keyElement).attr('rid'))
+                    };
+                });
+
+                return {sid, keys, iv, payload};
             },
 
             getPeer: function (jid) {
-                let contact = this.account.contacts.get(jid);
                 if (!this.peers.get(jid))
-                    this.peers.create(null, {contact});
+                    this.peers.create({jid}, {account:this.account});
                 return this.peers.get(jid);
             },
 
-            decrypt: function (stanza) {
-                /*let messageElement = $(stanza),
-                    encryptedElement = $(stanza).find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+            decrypt: async function (message) {
+                let $message = $(message),
+                    from_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                    $encrypted = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
 
-                let from = new JID(messageElement.attr('from'));
-                let encryptedData = Stanza.parseEncryptedStanza(encryptedElement);
+                let encryptedData = this.parseEncrypted($encrypted),
+                    deviceId = this.get('device_id'),
+                    ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
+                    ownPreKey = ownPreKeysArr[0],
+                    peer = this.getPeer(from_jid),
+                    exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey),
+                    exportedAESKey = exportedKey.slice(0, 16),
+                    authenticationTag = exportedKey.slice(16),
+                    iv = encryptedData.iv,
+                    ciphertextAndAuthenticationTag = utils.AES.arrayBufferConcat(encryptedData.payload, authenticationTag);
 
-                if (!encryptedData) {
-                    throw 'Could not parse encrypted stanza';
-                }
-
-                let ownDeviceId = this.store.getDeviceId();
-                let ownPreKeyFiltered = encryptedData.keys.filter(function(preKey) {
-                    return ownDeviceId === preKey.deviceId;
-                });
-
-                if (ownPreKeyFiltered.length !== 1) {
-                    return Promise.reject(`Found ${ownPreKeyFiltered.length} PreKeys which match my device id (${ownDeviceId}).`);
-                }
-
-                //@TODO remove own prekey id from bundle???
-
-                let ownPreKey = ownPreKeyFiltered[0];
-                let peer = this.getPeer(from);
-                let exportedKey;
-
-                try {
-                    exportedKey = await peer.decrypt(encryptedData.sourceDeviceId, ownPreKey.ciphertext, ownPreKey.preKey);
-                } catch (err) {
-                    throw 'Error during decryption: ' + err;
-                }
-
-                let exportedAESKey = exportedKey.slice(0, 16);
-                let authenticationTag = exportedKey.slice(16);
-
-                if (authenticationTag.byteLength < 16) {
-                    throw "Authentication tag too short";
-                }
-
-                let iv = (<any>encryptedData).iv;
-                let ciphertextAndAuthenticationTag = ArrayBufferUtils.concat((<any>encryptedData).payload, authenticationTag);
-
-                return utils.AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);*/
+                return utils.AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);
             },
 
             toBase64: function (arrayBuffer) {
                 return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-            },
-
-            createEncryptedStanza: function (msg) {
-                let $message = $msg({type: 'chat', to: msg.get('to')})
-                    .c('encrypted', {xmlns: Strophe.NS.OMEMO})
-                    .c('header', {sid: this.device_id});
-                for (let key of msg.get('keys')) {
-                    let attrs = {
-                        rid: key.deviceId,
-                        prekey: undefined
-                    };
-
-                    if (key.preKey) {
-                        attrs.prekey = true;
-                    }
-
-                    $message.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-                }
-                $message.up().up().c('payload').t(btoa(msg.get('payload')));
             },
 
             publish: function (spk, ik, pks) {

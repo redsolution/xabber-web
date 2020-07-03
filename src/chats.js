@@ -873,7 +873,8 @@ define("xabber-chats", function () {
             last_delivered_id: 0,
             unread: 0,
             timestamp: 0,
-            const_unread: 0
+            const_unread: 0,
+            encrypted: false
         },
 
         initialize: function (attrs, options) {
@@ -3672,36 +3673,72 @@ define("xabber-chats", function () {
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
                 message.set('state', constants.MSG_PENDING);
             }
-            message.set({xml: stanza.tree()});
-            let msg_sending_timestamp = moment.now();
-            this.account.sendMsg(stanza, function () {
-                if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
-                    setTimeout(function () {
-                        if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
-                            message.set('state', constants.MSG_SENT);
-                        } else {
-                            this.account.connection.ping.ping(this.account.get('jid'), function () {
-                                (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
-                            }.bind(this));
+
+            if (this.model.get('encrypted')) {
+                this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
+                    let msg_sending_timestamp = moment.now();
+                    this.account.sendMsg(stanza, function () {
+                        if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                             setTimeout(function () {
-                                if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                                if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                                    message.set('state', constants.MSG_SENT);
+                                } else {
+                                    this.account.connection.ping.ping(this.account.get('jid'), function () {
+                                        (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
+                                    }.bind(this));
+                                    setTimeout(function () {
+                                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                                            message.set('state', constants.MSG_ERROR);
+                                    }.bind(this), 5000);
+                                }
+                            }.bind(this), 1000);
+                        }
+                        else {
+                            let _pending_time = 5, _interval = setInterval(function () {
+                                if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
                                     message.set('state', constants.MSG_ERROR);
-                            }.bind(this), 5000);
+                                    clearInterval(_interval);
+                                }
+                                else if (message.get('state') !== constants.MSG_PENDING)
+                                    clearInterval(_interval);
+                                _pending_time += 10;
+                            }.bind(this), 10000);
                         }
-                    }.bind(this), 1000);
-                }
-                else {
-                    let _pending_time = 5, _interval = setInterval(function () {
-                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
-                            message.set('state', constants.MSG_ERROR);
-                            clearInterval(_interval);
-                        }
-                        else if (message.get('state') !== constants.MSG_PENDING)
-                            clearInterval(_interval);
-                        _pending_time += 10;
-                    }.bind(this), 10000);
-                }
-            }.bind(this));
+                    }.bind(this));
+                });
+                return;
+            } else {
+
+                let msg_sending_timestamp = moment.now();
+                this.account.sendMsg(stanza, function () {
+                    if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
+                        setTimeout(function () {
+                            if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                                message.set('state', constants.MSG_SENT);
+                            } else {
+                                this.account.connection.ping.ping(this.account.get('jid'), function () {
+                                    (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
+                                }.bind(this));
+                                setTimeout(function () {
+                                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                                        message.set('state', constants.MSG_ERROR);
+                                }.bind(this), 5000);
+                            }
+                        }.bind(this), 1000);
+                    }
+                    else {
+                        let _pending_time = 5, _interval = setInterval(function () {
+                            if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                                message.set('state', constants.MSG_ERROR);
+                                clearInterval(_interval);
+                            }
+                            else if (message.get('state') !== constants.MSG_PENDING)
+                                clearInterval(_interval);
+                            _pending_time += 10;
+                        }.bind(this), 10000);
+                    }
+                }.bind(this));
+            }
         },
 
         isImageType: function(type) {
@@ -6395,6 +6432,7 @@ define("xabber-chats", function () {
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
             "click .markup-text": "onShowMarkupPanel",
+            "click .set-encryption": "changeEncryption",
             "click .reply-message": "replyMessages",
             "click .forward-message": "forwardMessages",
             "click .pin-message": "pinMessage",
@@ -6523,6 +6561,7 @@ define("xabber-chats", function () {
             this.contact.on("pin_selected_message", this.pinMessage, this);
             this.contact.on('update_my_info', this.updateInfoInBottom, this);
             this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
+            this.model.on("change:encrypted", this.onChangeEncrypted, this);
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
@@ -6769,6 +6808,15 @@ define("xabber-chats", function () {
                 this.$('.ql-toolbar.ql-snow').hide();
                 this.$('.last-emoticons').show();
             }
+        },
+
+        changeEncryption: function () {
+            this.model.set('encrypted', !this.model.get('encrypted'));
+        },
+
+        onChangeEncrypted: function () {
+            let enc = this.model.get('encrypted');
+            this.$('.set-encryption i').switchClass('mdi-lock', enc).switchClass('mdi-lock-open', !enc);
         },
         
         getParticipantsList: function () {

@@ -561,14 +561,13 @@ input.xabber-input:focus {
 }
 
 input[type=file] {
-    bottom: 15px;
     font-size: 1px;
     cursor: pointer;
     opacity: 0;
-    position: relative;
+    position: absolute;
     z-index: 100;
     width: 100%;
-    height: 110%;
+    height: 100%;
 }
 
 .account-indicator {
@@ -4967,6 +4966,8 @@ img.fwd-img-preview {
     height: 40px;
     padding: 5px 5px 5px 0px;
     overflow: hidden;
+    display: flex;
+    flex-direction: row;
 }
 
 .message-input-panel .mentions-list {
@@ -5028,18 +5029,14 @@ img.fwd-img-preview {
     margin-right: 8px;
 }
 
+.input-toolbar .set-encryption,
 .input-toolbar .format-text,
 .input-toolbar .attach-file {
-    position: absolute;
-    top: 8px;
-    left: 8px;
+    position: relative;
+    cursor: pointer;
     width: 24px;
     height: 24px;
-}
-
-.input-toolbar .format-text {
-    left: 36px;
-    cursor: pointer;
+    margin: 0 4px;
 }
 
 .send-area .attach-voice-message {
@@ -5058,12 +5055,9 @@ img.fwd-img-preview {
 }
 
 
+.input-toolbar .set-encryption i,
 .input-toolbar .attach i,
 .input-toolbar .format-text i {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    display: inline-block;
     color: #757575;
 }
 
