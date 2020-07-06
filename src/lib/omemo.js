@@ -44,7 +44,7 @@
             this._connection.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
         };
 
-        var publishDevice = function (id, callback) {
+        var publishDevice = function (id, callback, errback) {
             !this.devices && (this.devices = []);
             this.devices.push({id});
             let stanza = $iq({from: this._connection.jid, type: 'set'})
@@ -66,13 +66,18 @@
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open');
-            this._connection.sendIQ(stanza, callback);
+            this._connection.sendIQ(stanza, callback, function (err) {
+                if ($(err).find('error').attr('code') == 409) {
+                    $(stanza.tree()).find('publish-options').remove();
+                    this._connection.sendIQ(stanza, callback, errback);
+                }
+            }.bind(this));
         };
 
-        var publishBundle = function (attrs, callback) {
+        var publishBundle = function (attrs, callback, errback) {
             let preKeys = attrs.pks,
                 spk = attrs.spk,
-                iq = $iq({from: this._connection.jid, type: 'set'})
+                stanza = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
                 .c('item')
@@ -83,16 +88,21 @@
                 .c('prekeys');
             for (var i in preKeys) {
                 let preKey = preKeys[i];
-                iq.c('pk', {id: preKey.id}).t(preKey.key).up()
+                stanza.c('pk', {id: preKey.id}).t(preKey.key).up()
             }
-            iq.up().up().up().up()
+            stanza.up().up().up().up()
                 .c('publish-options')
                 .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                 .c('field', {var: 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open');
-            this._connection.sendIQ(iq, callback);
+            this._connection.sendIQ(stanza, callback, function (err) {
+                if ($(err).find('error').attr('code') == 409) {
+                    $(stanza.tree()).find('publish-options').remove();
+                    this._connection.sendIQ(stanza, callback, errback);
+                }
+            }.bind(this));
         };
 
         var getBundleInfo = function (attrs, callback) {

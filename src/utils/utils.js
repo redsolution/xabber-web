@@ -481,6 +481,10 @@ define([
             return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0)).buffer;
         },
 
+        ArrayBuffertoBase64: function (arrayBuffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        },
+
         AES: {
             ALGO_NAME: 'AES-GCM',
 

@@ -21,7 +21,8 @@ define("xabber-omemo", function () {
                 this.devices = [];
                 this.updateDevices(attrs.devices);
                 this.own_devices = [];
-                this.updateOwnDevices(this.account.connection.omemo.devices);
+                this.onOwnDevicesUpdated();
+                this.account.on("devices_updated", this.onOwnDevicesUpdated, this);
                 this.set({
                     jid: attrs.jid
                 });
@@ -33,6 +34,10 @@ define("xabber-omemo", function () {
                 devices.forEach(function (device) {
                     this.getDevice(device.id);
                 }.bind(this));
+            },
+
+            onOwnDevicesUpdated: function () {
+                this.updateOwnDevices(this.account.connection.omemo.devices);
             },
 
             updateOwnDevices: function (devices) {
@@ -121,8 +126,12 @@ define("xabber-omemo", function () {
         xabber.Bundle = Backbone.Model.extend({
             initialize: async function (attrs, options) {
                 this.preKeys = [];
+                this.model = options.model;
                 this.store = options.store;
-                await this.generateIdentity();
+                if (this.model.get('identityKey'))
+                    this.getIdentity();
+                else
+                    await this.generateIdentity();
                 this.generatePreKeys().then((prekeys) => {this.preKeys = prekeys;});
             },
 
@@ -131,14 +140,33 @@ define("xabber-omemo", function () {
                     KeyHelper.generateIdentityKeyPair(),
                     KeyHelper.generateRegistrationId(),
                 ]).then((result) => {
-                    this.store.put('identityKey', result[0]);
-                    this.store.put('registrationId', result[1]);
+                    let identityKey = result[0],
+                        registrationId = result[1];
+                    this.store.put('identityKey', identityKey);
+                    this.store.put('registrationId', registrationId);
+                    this.cacheIdentity(identityKey, registrationId);
                 });
+            },
+
+            getIdentity: function () {
+                let identityKey = JSON.parse(this.model.get('identityKey')),
+                    registrationId = this.model.get('registrationId'),
+                    pubKey = utils.fromBase64toArrayBuffer(identityKey.pubKey),
+                    privKey = utils.fromBase64toArrayBuffer(identityKey.privKey);
+                this.store.put('identityKey', {pubKey: pubKey, privKey: privKey});
+                this.store.put('registrationId', registrationId);
+            },
+
+            cacheIdentity: function (identityKey, registrationId) {
+                let pubKey = utils.ArrayBuffertoBase64(identityKey.pubKey),
+                    privKey = utils.ArrayBuffertoBase64(identityKey.privKey);
+                this.model.save('identityKey', JSON.stringify({pubKey: pubKey, privKey: privKey}));
+                this.model.save('registrationId', registrationId);
             },
 
             generatePreKeys: async function () {
                 let preKeysPromises = [];
-                for (let i = 0; i < constants.PREKEYS_COUNT; i++) {
+                for (let i = 1; i <= constants.PREKEYS_COUNT; i++) {
                     preKeysPromises.push(this.generatePreKey(i));
                 }
 
@@ -279,7 +307,7 @@ define("xabber-omemo", function () {
                 if (!this.get('device_id'))
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
-                this.bundle = new xabber.Bundle(null, {store: this.store});
+                this.bundle = new xabber.Bundle(null, {store: this.store, model: this});
                 this.account.on('device_published', this.publishBundle, this);
                 this.registerMessageHandler();
                 this.connection = this.account.connection;
@@ -296,6 +324,8 @@ define("xabber-omemo", function () {
                                 this.account.trigger('device_published');
                             }.bind(this));
                         }
+                        else
+                            this.account.trigger('device_published');
                     }
                     else
                         omemo.getDevicesNode(null, function (cb) {
@@ -303,9 +333,10 @@ define("xabber-omemo", function () {
                             if (!omemo.devices.find(d => d.id == device_id)) {
                                 omemo.publishDevice(device_id, function () {
                                     this.account.trigger('device_published');
-
                                 }.bind(this));
                             }
+                            else
+                                this.account.trigger('device_published');
                         }.bind(this));
                 }
             },
@@ -331,7 +362,12 @@ define("xabber-omemo", function () {
 
             encrypt: function (contact, message) {
                 let peer = this.getPeer(contact.get('jid')),
-                    plaintext = $(message.tree()).children('body').parent().html() + $(message.tree()).children('reference').parent().html();
+                    $msg = $(message.tree()),
+                    plaintext = $msg.children('body')[0].outerHTML;
+
+                $msg.children('reference').each(function (i, ref) {
+                    plaintext += ref.outerHTML;
+                }.bind(this));
 
                 return peer.encrypt(plaintext).then((encryptedMessage) => {
 
@@ -359,8 +395,8 @@ define("xabber-omemo", function () {
                     }
                     encryptedElement.up().cnode(myKeys.tree());
 
-                    encryptedElement.up().c('iv', this.toBase64(encryptedMessage.iv)).up().up()
-                        .c('payload').t(this.toBase64(encryptedMessage.payload));
+                    encryptedElement.up().c('iv', utils.ArrayBuffertoBase64(encryptedMessage.iv)).up().up()
+                        .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
 
                     $(message.tree()).find('body').remove();
 
@@ -391,6 +427,7 @@ define("xabber-omemo", function () {
                                 this.account.connection.omemo.publishDevice(device_id, () => {
                                     this.account.trigger('device_published');
                                 });
+                            this.account.trigger("devices_updated");
                         }
                         else {
                             this.getPeer(from_jid).updateDevices(devices);
@@ -403,7 +440,10 @@ define("xabber-omemo", function () {
                 }
 
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
-                    this.decrypt(message).then((dec) => {console.log(dec)});
+                    this.decrypt(message).then((decrypted_msg) => {
+                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                        this.account.chats.receiveChatMessage($message[0]);
+                    });
                 }
 
             },
@@ -437,11 +477,21 @@ define("xabber-omemo", function () {
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                     $encrypted = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
 
+                if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length || $message.find('result[xmlns="'+Strophe.NS.MAM+'"]').length) {
+                    let $m = $message.find('message').first();
+                    from_jid = Strophe.getBareJidFromJid($m.attr('from'));
+                    if (this.account.get('jid') == from_jid)
+                        from_jid = Strophe.getBareJidFromJid($m.attr('to'));
+
+                }
+
                 let encryptedData = this.parseEncrypted($encrypted),
                     deviceId = this.get('device_id'),
                     ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
-                    ownPreKey = ownPreKeysArr[0],
-                    peer = this.getPeer(from_jid),
+                    ownPreKey = ownPreKeysArr[0];
+                if (!ownPreKey)
+                    return;
+                let peer = this.getPeer(from_jid),
                     exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey),
                     exportedAESKey = exportedKey.slice(0, 16),
                     authenticationTag = exportedKey.slice(16),
@@ -462,12 +512,12 @@ define("xabber-omemo", function () {
                     prekeys = [];
                 pks.forEach(function (pk) {
                     if (!pk.signature)
-                        prekeys.push({id: pk.keyId, key: this.toBase64(pk.keyPair.pubKey)});
+                        prekeys.push({id: pk.keyId, key: utils.ArrayBuffertoBase64(pk.keyPair.pubKey)});
                 }.bind(this));
                 conn_omemo.publishBundle({
-                    spk: {id: spk.keyId, key: this.toBase64(spk.keyPair.pubKey)},
-                    spks: this.toBase64(spk.signature),
-                    ik:  this.toBase64(ik),
+                    spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},
+                    spks: utils.ArrayBuffertoBase64(spk.signature),
+                    ik:  utils.ArrayBuffertoBase64(ik),
                     pks: prekeys
                 });
             },
