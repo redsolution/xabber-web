@@ -109,8 +109,12 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
     return {
         Modal: Modal,
 
+        clear_queue: function () {
+            modal_queue = [];
+        },
+
         dialogs: {
-            common: function (header, text, buttons, dialog_options) {
+            common: function (header, text, buttons, dialog_options, flag) {
                 var dialog = new Modal(function () {
                     buttons || (buttons = {});
                     dialog_options || (dialog_options = []);
@@ -125,14 +129,22 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         ok_button: ok_button,
                         cancel_button: cancel_button,
                         optional_buttons: optional_buttons,
-                        dialog_options: dialog_options
+                        dialog_options: dialog_options,
+                        flag: flag || ""
                     });
                 }, {use_queue: true});
 
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
-                    dialog.$modal.find('.img-from-clipboard').get(0).src = dialog_options.blob_image_from_clipboard;
+                    dialog.$modal.find('.img-from-clipboard')[0].src = dialog_options.blob_image_from_clipboard;
                     dialog.$modal.find('.container-for-img').removeClass('hidden');
+                }
+
+                if (dialog_options.canvas) {
+                    dialog.$modal.find('.dialog-options-wrap').html('');
+                    dialog.$modal.find('.container-for-img').html("").removeClass('hidden')[0].appendChild(dialog_options.canvas);
+                    if (dialog_options.bottom_text)
+                        $('<div class="dialog-bottom-text"/>').html(dialog_options.bottom_text).appendTo(dialog.$modal.find('.container-for-img'));
                 }
 
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {
@@ -184,6 +196,15 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                     ok_text = buttons.ok_button_text;
                 }
                 return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true}, dialog_options);
+            },
+
+            ask_extended: function (header, text, dialog_options, buttons) {
+                var ok_text, optional_button;
+                if (buttons) {
+                    ok_text = buttons.ok_button_text;
+                    optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button}] : false;
+                }
+                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true, optional_buttons: optional_button}, dialog_options, 'extended');
             },
 
             ask_enter_value: function (header, text, dialog_options, buttons) {

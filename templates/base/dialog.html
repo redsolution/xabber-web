@@ -14,15 +14,15 @@
         </div>
         <div class="container-for-img hidden"><img class="img-from-clipboard"></div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer {{flag}}">
+        {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}
+        <button class="optional-button btn-flat btn-main btn-dark" data-option="{{button.value}}">{{button.name}}</button>
+        {[ } ]}
         {[ if (ok_button) { ]}
         <button class="ok-button btn-flat btn-main" data-option=true>{{ok_button.text}}</button>
         {[ } ]}
         {[ if (cancel_button) { ]}
         <button class="cancel-button btn-flat btn-main btn-dark btn-cancel" data-option=false>{{cancel_button.text}}</button>
-        {[ } ]}
-        {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}
-        <button class="optional-button btn-flat btn-main btn-dark" data-option="{{button.value}}">{{button.name}}</button>
         {[ } ]}
     </div>
 </div>

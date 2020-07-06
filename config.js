@@ -28,6 +28,7 @@ require.config({
         "strophe.caps":             "src/lib/strophe.caps",
         "strophe.pubsub":           "src/lib/strophe.pubsub",
         "sha1_hasher":              "src/lib/sha1.min",
+        "qrcode":                   "src/lib/VanillaQR.min",
 
         // Xabber sources
         "xabber-version":           "version",

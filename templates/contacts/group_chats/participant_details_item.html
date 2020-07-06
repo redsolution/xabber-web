@@ -1,4 +1,10 @@
 <div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
+    <div class="btn-more dropdown-button" data-activates="{{id}}-buttons-wrap">
+        <i class="mdi mdi-24px mdi-dots-vertical"></i>
+    </div>
+    <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">
+        <li class="btn-block-participant"><span class="one-line">Block</span></li>
+    </ul>
         <div class="circle-avatar">
             <input title="Change avatar" type="file">
             <img>
@@ -48,9 +54,9 @@
             </svg>
             <div class="btn-name">Set badge</div>
         </div>
-        <div class="button-wrap btn-block-participant-wrap">
-            <i class="mdi mdi-24px mdi-account-off btn-block-participant"></i>
-            <div class="btn-name">Block</div>
+        <div class="button-wrap btn-kick-participant-wrap">
+            <i class="mdi mdi-24px mdi-account-remove btn-kick-participant"></i>
+            <div class="btn-name">Kick</div>
         </div>
     </div>
 </div>

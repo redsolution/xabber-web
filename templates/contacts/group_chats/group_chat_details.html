@@ -3,7 +3,6 @@
         <div class="avatar-wrap">
             <div class="circle-avatar">
                 <input title="Change avatar" type="file"/>
-                <img>
                 <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
                     <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
                 </svg>
@@ -27,31 +26,31 @@
             <div class="name-wrap"></div>
             <div class="status-message one-line"></div>
         </div>
-        <div class="btn-more  dropdown-button" data-activates="{{view.cid}}-buttons-wrap">
+        <div class="btn-more dropdown-button" data-activates="{{view.cid}}-buttons-wrap">
             <i class="mdi mdi-24px mdi-dots-vertical"></i>
         </div>
         <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">
-            <li class="btn-join"><span class="one-line">Join group chat</span></li>
-            <li class="btn-delete"><span class="one-line">Delete group chat</span></li>
-            <li class="btn-block"><span class="one-line">Block group chat</span></li>
-            <li class="btn-unblock"><span class="one-line">Unlock group chat</span></li>
+            <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>
+            <li class="btn-edit-settings"><span class="one-line">Settings</span></li>
+            <li class="btn-default-restrictions"><span class="one-line">Default restrictions</span></li>
+            <li class="btn-delete-group"><span class="one-line">Delete group</span></li>
         </ul>
         <div class="btn-escape">
             <i class="mdi mdi-24px mdi-close"></i>
             <span class="btn-text">Esc</span>
         </div>
         <div class="buttons-wrap">
+            <div class="button-wrap btn-chat-wrap">
+                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
+                <div class="btn-name">Chat</div>
+            </div>
             <div class="button-wrap btn-invite-wrap">
                 <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>
                 <div class="btn-name">Invite</div>
             </div>
-            <div class="button-wrap btn-settings-wrap">
-                <i class="mdi mdi-24px mdi-settings btn-settings"></i>
-                <div class="btn-name">Settings</div>
-            </div>
-            <div class="button-wrap btn-default-restrictions-wrap">
-                <i class="mdi mdi-24px mdi-sign-caution btn-default-restrictions"></i>
-                <div class="btn-name">Default restrictions</div>
+            <div class="button-wrap btn-mute-wrap">
+                <i class="mdi mdi-24px mdi-bell btn-mute"></i>
+                <div class="btn-name">Notifications</div>
             </div>
             <div class="button-wrap btn-leave-wrap">
                 <div class="btn-leave"><svg viewBox="0 0 24 24">
@@ -63,26 +62,22 @@
         </div>
     </div>
     <div class="panel-content">
-        <div class="left-column">
-            <div class="select-users-list-wrap lists-dropdown-wrap">
-                <div class="dropdown-button" data-activates="select-users-list">
-                    <div class="list-item-wrap"><div data-value="participants" class="list-value">Participants</div></div>
-                    <div class="caret">
-                        <i class="mdi mdi-20px mdi-menu-down"></i>
-                    </div>
-                </div>
-                <div id="select-users-list" class="dropdown-content noselect">
-                    <div data-value="participants" class="list-variant">Participants</div>
-                    <div data-value="invitations" class="list-variant">Invitations</div>
-                    <div data-value="blocked" class="list-variant">Blocked</div>
-                </div>
+        <div class="head-block">
+            <div class="left-column">
+                <div class="block-wrap group-chat-properties-wrap"></div>
             </div>
-            <div class="block-wrap participants-wrap"></div>
-            <div class="block-wrap participant-wrap"></div>
+            <div class="right-column">
+                <div class="block-wrap status-block-wrap"></div>
+                <div class="block-wrap groups-block-wrap"></div>
+            </div>
         </div>
-        <div class="right-column">
-            <div class="block-wrap group-chat-properties-wrap"></div>
-            <div class="block-wrap groups-block-wrap"></div>
+        <div class="bottom-block">
+            <ul class="tabs">
+                <li data-value="participants" class="list-variant tab"><a class="text-color-700">Participants</a></li>
+                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">Invitations</a></li>
+                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">Blocked</a></li>
+            </ul>
+            <div class="block-wrap participants-wrap"></div>
         </div>
     </div>
 </div>

@@ -1,28 +1,39 @@
-<i class="mdi mdi-24px mdi-phone btn-collapse"></i>
-<div class="modal-header">
-    <div class="panel-header">xabber voice call</div>
-    <div class="calling-status"></div>
-    <svg class="btn-collapse" viewBox="0 0 24 24">
-        <path fill="#616161" d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z" />
-    </svg>
+<i class="mdi mdi-phone btn-collapse"></i>
+<div class="call-header">
+    Xabber voice call
+    <div class="calling-status"/>
 </div>
-<div class="modal-content">
-    <div class="contact-info">
+<div class="blur-background"></div>
+<div class="contact-info">
+    <div class="name one-line"/>
+    <div class="calling-status"/>
+</div>
+<div class="video-wrap">
+    <video autoplay loop class="blank-video hidden">
+        <source src="{{constants.BLANK_VIDEO.MP4}}">
+        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">
+        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">
+    </video>
+    <audio autoplay class="webrtc-remote-audio hidden"/>
+    <video autoplay muted class="webrtc-local-video collapsed hidden"/>
+    <div class="default-screen">
         <div class="circle-avatar"/>
         <div class="name one-line"/>
     </div>
-    <div class="video-wrap">
-        <audio autoplay class="webrtc-remote-audio hidden"></audio>
-        <video autoplay muted class="webrtc-local-video collapsed hidden"></video>
-    </div>
-    <div class="buttons-wrap">
-        <i class="btn-video mdi mdi-24px mdi-video"></i>
-        <i class="btn-volume mdi mdi-24px mdi-volume-high"></i>
-        <i class="btn-microphone mdi mdi-24px mdi-microphone"></i>
-    </div>
 </div>
-<div class="modal-footer">
-    <i class="btn-accept hidden ground-color-green-700 mdi mdi-24px mdi-phone"></i>
-    <i class="btn-cancel ground-color-red-700 mdi mdi-24px mdi-phone-hangup"></i>
-    <div class="contact-info"><div class="jid one-line"></div></div>
+<div class="buttons-panel">
+    <div class="buttons-wrap">
+        <div class="btn-wrap" title="Collapse window"><svg class="btn-collapse mdi-24px" viewBox="0 0 24 24">
+            <path d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>
+        </svg></div>
+        <div class="btn-wrap" title="Fullscreen mode"><svg class="btn-full-screen mdi-24px" viewBox="0 0 24 24">
+            <path d="M11,21H3V13H5V17.59L17.59,5H13V3H21V11H19V6.41L6.41,19H11V21Z" />
+        </svg></div>
+        <i title="Mute" class="btn-volume mdi mdi-24px mdi-volume-high"/>
+        <i title="Mute microphone" class="btn-microphone mdi mdi-24px mdi-microphone"/>
+        <i title="Switch on/off video" class="btn-video mdi mdi-24px mdi-video"/>
+        <i title="Share screen" class="btn-share-screen mdi mdi-24px mdi-monitor"/>
+        <i title="Accept call" class="btn-accept mdi mdi-24px mdi-phone"/>
+        <i title="Decline call" class="btn-cancel mdi mdi-24px mdi-phone-hangup"/>
+    </div>
 </div>

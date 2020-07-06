@@ -32,10 +32,10 @@
                 <i class="mdi mdi-24px mdi-volume-high"></i>
                 <div class="settings-block-name one-line">Sounds</div>
             </div>
-            {[if (xabber.env.constants.PERSONAL_AREA_URL) {]}
-            <a href="{{xabber.env.constants.PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{xabber.env.constants.PERSONAL_AREA_URL.label}}">
-                <i class="mdi mdi-24px mdi-{{xabber.env.constants.PERSONAL_AREA_URL.icon_name}}"></i>
-                <div class="settings-block-name one-line">{{xabber.env.constants.PERSONAL_AREA_URL.label}}</div>
+            {[if (PERSONAL_AREA_URL) {]}
+            <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">
+                <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>
+                <div class="settings-block-name one-line">{{PERSONAL_AREA_URL.label}}</div>
             </div>
             </a>
             {[}]}
@@ -122,6 +122,15 @@
                             <span class="field-name">Message preview</span>
                             <label class="field-value">
                                 <input type="checkbox" name="message-preview">
+                                <span class="lever"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="setting call-attention field-wrap">
+                        <div class="field clickable-field switch small">
+                            <span class="field-name">Call attention</span>
+                            <label class="field-value">
+                                <input type="checkbox" name="call-attention">
                                 <span class="lever"></span>
                             </label>
                         </div>

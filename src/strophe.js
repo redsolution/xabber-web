@@ -1,6 +1,7 @@
 define("xabber-strophe", function () {
     return function (xabber) {
         var env = xabber.env,
+            uuid = env.uuid,
             $iq = env.$iq,
             Strophe = env.Strophe,
             constants = env.constants;
@@ -179,8 +180,29 @@ define("xabber-strophe", function () {
             }
         });
 
+        Strophe.xmlunescape = function (text) {
+            let reg_exp = {
+                '&amp;': '&',
+                '&lt;': '<',
+                '&gt;': '>',
+                '&quot;': '"',
+                '&apos;': "'"
+            };
+            var escaper = function(match) {
+                return reg_exp[match];
+            };
+            // Regexes for identifying a key that needs to be escaped
+            let source = '(?:' + _.keys(reg_exp).join('|') + ')',
+                testRegexp = RegExp(source),
+                replaceRegexp = RegExp(source, 'g');
+            text = text == null ? '' : '' + text;
+            return testRegexp.test(text) ? text.replace(replaceRegexp, escaper) : text;
+        };
+
+        Strophe.addNamespace('ATTENTION', 'urn:xmpp:attention:0');
         Strophe.addNamespace('CARBONS', 'urn:xmpp:carbons:2');
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
+        Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');
@@ -188,6 +210,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('JINGLE_MSG', 'urn:xmpp:jingle-message:0');
         Strophe.addNamespace('JINGLE_RTP', 'urn:xmpp:jingle:apps:rtp:1');
         Strophe.addNamespace('JINGLE_TRANSPORTS_ICE', 'urn:xmpp:jingle:transports:ice-udp:1');
+        Strophe.addNamespace('ADDRESS', 'http://jabber.org/protocol/address');
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
         Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extended-chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
@@ -196,24 +219,26 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('DELIVERY', 'http://xabber.com/protocol/delivery');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
-        Strophe.addNamespace('XDATA', 'jabber:x:data');
+        Strophe.addNamespace('DATAFORM', 'jabber:x:data');
         Strophe.addNamespace('CHAT_MARKERS', 'urn:xmpp:chat-markers:0');
         Strophe.addNamespace('VCARD_UPDATE', 'vcard-temp:x:update');
         Strophe.addNamespace('HTTP_UPLOAD', 'urn:xmpp:http:upload');
         Strophe.addNamespace('BLOCKING', 'urn:xmpp:blocking');
         Strophe.addNamespace('SEARCH', 'jabber:iq:search');
         Strophe.addNamespace('PRIVATE_STORAGE', 'jabber:iq:private');
-        Strophe.addNamespace('OOB', 'jabber:x:oob');
         Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
         Strophe.addNamespace('LAST', 'jabber:iq:last');
         Strophe.addNamespace('GROUP_CHAT', 'http://xabber.com/protocol/groupchat');
+        Strophe.addNamespace('WEBCHAT', 'http://xabber.com/protocol/webchat');
         Strophe.addNamespace('INDEX', 'http://xabber.com/protocol/index');
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('REWRITE', 'http://xabber.com/protocol/rewrite');
-        Strophe.addNamespace('REFERENCE', 'urn:xmpp:reference:0'); // https://xabber.com/protocol/reference
-
+        Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/reference');
+        Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
+        Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-message');
+        Strophe.addNamespace('OTB', 'https://xabber.com/protocol/otb');
         return xabber;
     };
 });

@@ -15,7 +15,7 @@ define(["xabber-dependencies"], function (deps) {
         "#a94136"
     ];
 
-    var MAX_SIZE = 256;
+    var MAX_SIZE = 200;
     var MAX_IMG_SIZE = 1280;
 
     var b64toBlob = function (b64Data, contentType, sliceSize) {
@@ -50,7 +50,7 @@ define(["xabber-dependencies"], function (deps) {
         return _image_cache[image] || new CachedImage(image);
     };
 
-    var getDefaultAvatar = function (name) {
+    var getDefaultAvatar = function (name, color) {
         // generate colored avatar with first letters of username
         var canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d'),
@@ -70,13 +70,13 @@ define(["xabber-dependencies"], function (deps) {
         canvas.width = 256;
         canvas.height = 256;
         ctx.rect(0, 0, 256, 256);
-        ctx.fillStyle = getAccountColor(name);//COLORS[color_index];
+        ctx.fillStyle = color || getAccountColor(name);//COLORS[color_index];
         ctx.fill();
         ctx.font = "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
         ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
-        var image = canvas.toDataURL().replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+        var image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
         return image;
     };
 
@@ -114,6 +114,11 @@ define(["xabber-dependencies"], function (deps) {
                 file_type = file.type,
                 file_name = file.name,
                 new_size = getImageSize({width: width, height: height}, MAX_IMG_SIZE);
+            if (file.type === 'image/svg+xml') {
+                file.width = width;
+                file.height = height;
+                deferred.resolve(file);
+            }
             canvas.width = new_size.width;
             canvas.height = new_size.height;
             ctx.drawImage(image_obj, 0, 0, new_size.width, new_size.height);
@@ -160,12 +165,12 @@ define(["xabber-dependencies"], function (deps) {
              canvas.width = new_size.width;
              canvas.height = new_size.height;
              ctx.drawImage(image_obj, 0, 0, canvas.width, canvas.height);
-             b64_image = canvas.toDataURL('image/jpeg').replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+             b64_image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
              window.URL.revokeObjectURL(src);
              canvas.toBlob((blob) => {
                  var reader = new FileReader();
                  reader.onload = function () {
-                     b64_image = reader.result.replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+                     b64_image = reader.result.replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
                      let binary_file = atob(b64_image),
                         bytes = new Uint8Array(binary_file.length);
 
@@ -176,7 +181,7 @@ define(["xabber-dependencies"], function (deps) {
                      deferred.resolve(b64_image, hash, binary_file.length);
                  }.bind(this);
                  reader.readAsDataURL(blob);
-             }, 'image/jpeg', 0.8);
+             }, file.type, 0.8);
          };
          image_obj.onerror = function() {
              image_obj.onerror = null;

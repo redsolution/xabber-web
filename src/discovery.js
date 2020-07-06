@@ -52,6 +52,7 @@ define("xabber-discovery", function () {
             this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
+            this.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
@@ -149,6 +150,51 @@ define("xabber-discovery", function () {
             }
         }
     });
+
+    xabber.ServerInfo = Backbone.Collection.extend({
+        model: xabber.ServerFeature,
+
+        initialize: function (options) {
+            this.domain = options.domain;
+            this.account = options.account;
+            this.connection = this.account.connection;
+        },
+
+        request: function () {
+            this.connection.disco.info(this.domain, null, this.onInfo.bind(this));
+        },
+
+        onInfo: function (stanza) {
+            var $stanza = $(stanza),
+                from = $stanza.attr('from'),
+                self = this;
+            $stanza.find('feature').each(function () {
+                var namespace = $(this).attr('var');
+                self.create({
+                    'var': namespace,
+                    from: from
+                });
+            });
+        }
+    });
+
+      xabber.Server = Backbone.Model.extend({
+          idAttribute: 'domain',
+          initialize: function (models) {
+              this.account = models.account;
+              this.set('domain', models.domain || this.account.domain);
+              this.server_features = new xabber.ServerInfo({account: this.account, domain: this.get('domain')});
+              this.getServerInfo();
+          },
+
+          getServerInfo: function () {
+              this.server_features.request();
+          }
+      });
+
+      xabber.Servers = Backbone.Collection.extend({
+          model: xabber.Server
+      });
 
     xabber.Account.addInitPlugin(function () {
         this.client_features = new xabber.ClientFeatures(null, {account: this});

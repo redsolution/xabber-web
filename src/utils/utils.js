@@ -33,8 +33,8 @@ define([
 
     var getHyperLink = function (url) {
         var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
-            escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
-        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
+                escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+decodeURI(url)+"</a>";
     };
 
     $.fn.hyperlinkify = function (options) {
@@ -60,10 +60,10 @@ define([
                         return;
                     }
                     if (list.length === 1 && list[0] === x) {
-                        html_concat += getHyperLink(x);
+                        html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                     } else {
                         for (i = 0; i < list.length; i++) {
-                            x = x.replace(list[i], getHyperLink(list[i]));
+                            x = x.replace(list[i], options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
                         }
                         html_concat += x;
                     }
@@ -108,6 +108,22 @@ define([
         pretty_datetime: function (timestamp) {
             var datetime = timestamp ? moment(timestamp) : moment();
             return datetime.format('MMMM D, YYYY HH:mm:ss');
+        },
+
+        pretty_short_datetime_recent_chat: function (timestamp) {
+            timestamp = Number(timestamp ? moment(timestamp) : moment());
+            if (moment(timestamp).startOf('day').isSame(moment().startOf('day')) || Number(moment().subtract(12, 'hours') < timestamp)) {
+                return moment(timestamp).format("HH:mm:ss");
+            }
+            if (Number(moment().subtract(12, 'hours')) > timestamp && Number(moment().subtract(7, 'days')) <= timestamp) {
+                return moment(timestamp).format("ddd");
+            }
+            if (Number(moment().subtract(7, 'days')) > timestamp && Number(moment().subtract(1, 'year')) <= timestamp) {
+                return moment(timestamp).format("MMM D");
+            }
+            if (timestamp && Number(moment().subtract(1, 'year')) > timestamp) {
+                return moment(timestamp).format("D MMM YYYY");
+            }
         },
 
         pretty_short_datetime: function (timestamp) {
@@ -228,8 +244,10 @@ define([
         },
 
         pretty_duration: function (duration) {
-            if (_.isUndefined(duration))
-                return undefined;
+            if (_.isNaN(Number(duration)))
+                return duration;
+            if (_.isUndefined(duration) || duration === "")
+                return "";
             if (duration < 10)
                 return ("0:0" + duration);
             if (duration < 60)
@@ -239,7 +257,7 @@ define([
         },
 
         pretty_name: function (name) {
-            return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1)) : "";
+            return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
         },
 
         slice_string: function (str, from, to) {
@@ -250,73 +268,121 @@ define([
                 return Array.from(str).slice(from, to).join("");
         },
 
-        slice_pretty_body: function (body, legacy_refs) {
+        slice_pretty_body: function (body, mutable_refs) {
+            if (!mutable_refs || !mutable_refs.length)
+                return body;
             body = body || "";
+            mutable_refs = mutable_refs.filter(m => m.type === 'groupchat' || m.type === 'forward');
             let pretty_body = Array.from(deps.Strophe.xmlescape(body));
-            legacy_refs && legacy_refs.forEach(function (legacy_ref) {
-                for (let idx = legacy_ref.start; idx <= legacy_ref.end; idx++)
+            mutable_refs && mutable_refs.forEach(function (ref) {
+                for (let idx = ref.start; idx < ref.end; idx++)
                     pretty_body[idx] = "";
             }.bind(this));
-            return deps.Strophe.xmlunescape(pretty_body.join(""));
+            return deps.Strophe.xmlunescape(pretty_body.join("").trim());
         },
 
-        markupBodyMessage: function (message, mention_elem) {
+        markupBodyMessage: function (message, mention_tag) {
             let attrs = _.clone(message.attributes),
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
-                legacy_refs = attrs.legacy_content || [],
+                mutable_refs = attrs.mutable_content || [],
                 blockquotes = attrs.blockquotes || [],
-                body = legacy_refs.length ? attrs.original_message : attrs.message,
-                markup_body = Array.from(deps.Strophe.xmlescape(body));
-            !mention_elem && (mention_elem = 'span');
+                markup_body = Array.from(deps.Strophe.xmlescape(attrs.original_message || attrs.message || ""));
+            !mention_tag && (mention_tag = 'span');
 
-            mentions.concat(markups).forEach(function (markup) {
+            mutable_refs.forEach(function (muted) {
+                for (let idx = muted.start; idx < muted.end; idx++)
+                    markup_body[idx] = "";
+            }.bind(this));
+
+            mentions.forEach(function (mention) {
+                let start_idx = mention.start,
+                    end_idx = mention.end > (markup_body.length - 1) ? (markup_body.length - 1) : (mention.end - 1), target = mention.target;
+                if (start_idx > markup_body.length - 1)
+                    return;
+                if (mention.is_gc) {
+                    let id = target.match(/\?id=\w*/),
+                        jid = target.match(/\?jid=.*/);
+                    if (id)
+                        target = id[0].slice(4);
+                    else if (jid)
+                        target = jid[0].slice(5);
+                    else {
+                        target = "";
+                        mention.me = true;
+                    }
+                }
+                else
+                    target = target.slice(5);
+                markup_body[start_idx] = '<' + mention_tag + ' data-target="' + target + '" class="mention' + (mention.me ? ' ground-color-100' : '') + '">' + markup_body[start_idx];
+                markup_body[end_idx] += '</' + mention_tag + '>';
+            }.bind(this));
+
+            markups.forEach(function (markup) {
                 let start_idx = markup.start,
-                    end_idx = markup.end,
-                    mark_up = markup.markups || [],
-                    mention = (markup.type !== 'uri') && markup.uri || "";
-                if (mark_up.length) {
+                    end_idx = markup.end > (markup_body.length - 1) ? (markup_body.length - 1) : (markup.end - 1);
+                if (start_idx > markup_body.length - 1)
+                    return;
+                if (markup.markup.length) {
                     let start_tags = "",
                         end_tags = "";
-                    mark_up.forEach(function (mark_up_style) {
-                        start_tags = '<' + mark_up_style[0].toLowerCase() + '>' + start_tags;
-                        end_tags += '</' + mark_up_style[0].toLowerCase() + '>';
+                    markup.markup.forEach(function (mark_up_style) {
+                        if (typeof(mark_up_style) === 'object') {
+                            start_tags = '<a target="_blank" class="msg-hyperlink" href="' + mark_up_style.uri + '">' + start_tags;
+                            end_tags += '</a>';
+                        } else {
+                            start_tags = '<' + mark_up_style[0].toLowerCase() + '>' + start_tags;
+                            end_tags += '</' + mark_up_style[0].toLowerCase() + '>';
+                        }
                     }.bind(this));
                     markup_body[start_idx] = start_tags + markup_body[start_idx];
                     markup_body[end_idx] += end_tags;
                 }
-                else {
-                    if (mention) {
-                        markup_body[start_idx] = '<' + mention_elem + ' data-id="' + (mention.lastIndexOf('?id=') > -1 ? mention.slice(mention.lastIndexOf('?id=') + 4) : mention) + '" class="mention ground-color-100">' + markup_body[start_idx];
-                        markup_body[end_idx] += '</' + mention_elem + '>';
-                    }
-                    else if (markup.type === 'uri') {
-                        markup_body[start_idx] = '<a target="_blank" class="msg-hyperlink" href="' + markup.uri + '">' + markup_body[start_idx];
-                        markup_body[end_idx] += '</a>';
-                    }
-                }
-            }.bind(this));
-
-            legacy_refs.forEach(function (legacy) {
-                for (let idx = legacy.start; idx <= legacy.end; idx++)
-                    markup_body[idx] = "";
             }.bind(this));
 
             blockquotes.forEach(function (quote) {
-                for (let idx = quote.start; idx < (quote.start + quote.marker.length); idx++)
-                    markup_body[idx] = "";
-                for (let idx = quote.start; idx < quote.end; idx++) {
+                let end_idx = quote.end > (markup_body.length - 1) ? (markup_body.length - 1) : (quote.end - 1);
+                for (let idx = quote.start; idx < (quote.start + constants.QUOTE_MARKER.length); idx++) {
+                    if (idx === end_idx)
+                        markup_body[idx] = '<br>';
+                    else
+                        markup_body[idx] = "";
+
+                }
+                for (let idx = quote.start; idx < end_idx; idx++) {
                     if (markup_body[idx] === '\n') {
-                        for (let child_idx = idx + 1; child_idx <= (idx + quote.marker.length); child_idx++)
+                        for (let child_idx = idx + 1; child_idx <= (idx + constants.QUOTE_MARKER.length); child_idx++)
                             markup_body[child_idx] = "";
-                        idx+= quote.marker.length - 1;
+                        idx+= constants.QUOTE_MARKER.length - 1;
                     }
                 }
                 markup_body[quote.start] = '<div class="quote">';
-                markup_body[quote.end] += '</div>';
+                markup_body[end_idx] += '</div>';
             }.bind(this));
 
-            return markup_body.join("");
+            return markup_body.join("").trim();
+        },
+
+        render_data_form: function (data_form) {
+            let $data_form = $('<div class="data-form"/>');
+            data_form.fields.forEach(function (field) {
+                if (field.type === 'hidden')
+                    return;
+                if (field.type === 'fixed') {
+                    let $fixed_field = $('<div class="data-form-field fixed-field"/>');
+                    field.label && $fixed_field.append($('<div class="label"/>').text(field.label));
+                    field.values.forEach(function (value) {
+                        let $input = $('<div class="value"/>').text(value);
+                        $fixed_field.append($input);
+                    }.bind(this));
+                    $data_form.append($fixed_field);
+                }
+                if (field.type === 'boolean') {
+                    let $input = $(`<button id=${field.var} class="data-form-field ground-color-100 btn-dark btn-flat btn-main boolean-field"/>`).text(field.label);
+                    $data_form.append($input);
+                }
+            }.bind(this));
+            return $data_form;
         },
 
         copyTextToClipboard: function(text, callback_msg, errback_msg) {
@@ -339,11 +405,37 @@ define([
         callback_popup_message: function (info_msg, time) {
             let $body = $(document.body),
                 $popup_msg = $('<div class="callback-popup-message"/>').text(info_msg);
+            time = time || 3000;
             $body.find('.callback-popup-message').remove();
             $body.append($popup_msg);
             setTimeout( function() {
                 $popup_msg.remove();
             }, time);
+        },
+
+        emoji_size: function (count) {
+            let size;
+            switch (count) {
+                case 1:
+                    size = 56;
+                    break;
+                case 2:
+                    size = 44;
+                    break;
+                case 3:
+                    size = 32;
+                    break;
+                case 4:
+                    size = 24;
+                    break;
+                case 5:
+                    size = 22;
+                    break;
+                default:
+                    size = 20;
+                    break;
+            }
+            return size;
         },
 
         openWindow: function (url, errback) {
