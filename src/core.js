@@ -24,7 +24,7 @@
             this.fetchURLParams();
             this.cleanUpStorage();
             this.detectMediaDevices();
-            window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this);
+            window.navigator.mediaDevices && (window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this));
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.settings = this._settings.attributes;
@@ -172,6 +172,7 @@
                 'LOG_LEVEL',
                 'DEBUG',
                 'XABBER_ACCOUNT_URL',
+                'REGISTER_XMPP_ACCOUNT',
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
                 'CONTAINER',

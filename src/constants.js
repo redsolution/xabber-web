@@ -315,6 +315,7 @@ var constants = {
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
     API_SERVICE_URL: 'https://api.xabber.com/api/v2',
     USE_SOCIAL_AUTH: true,
+    REGISTER_XMPP_ACCOUNT: 'https://www.xabber.com/account/auth/signup/',
     CHECK_VERSION: true,
     DEFAULT_LOGIN_SCREEN: 'xmpp',
 

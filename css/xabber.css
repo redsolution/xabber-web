@@ -1251,10 +1251,17 @@ body .client-body-wrap.hidden + #modals {
     margin: 0;
 }
 
+.login-panel-form .buttons-wrap {
+    display: flex;
+    justify-content: space-between;
+}
+
 .login-panel-form .buttons-wrap button {
-    float: right;
     min-width: 120px;
-    margin-left: 15px;
+}
+
+.login-panel-form .buttons-wrap .btn-log-in:first-child {
+    margin: 0 auto;
 }
 
 .login-panel-form .btn-forgot-password {
