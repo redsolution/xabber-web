@@ -80,7 +80,7 @@
                 stanza = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
-                .c('item')
+                .c('item', {id: attrs.device_id})
                 .c('bundle', {xmlns: Strophe.NS.OMEMO})
                 .c('spk', {id: spk.id}).t(spk.key).up()
                 .c('spks').t(attrs.spks).up()

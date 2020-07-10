@@ -53,6 +53,7 @@ var constants = {
     },
 
     PREKEYS_COUNT: 100,
+    MIN_PREKEYS_COUNT: 80,
 
     AES_KEY_LENGTH: 128,
     AES_TAG_LENGTH: 128,
