@@ -838,7 +838,8 @@ define("xabber-views", function () {
             "click .settings":              "showSettings",
             "click .add-variant.contact":   "showAddContactView",
             "click .add-variant.account":   "showAddAccountView",
-            "click .add-variant.groupchat": "showAddGroupChatView",
+            "click .add-variant.public-groupchat": "showAddPublicGroupChatView",
+            "click .add-variant.incognito-groupchat": "showAddIncognitoGroupChatView",
             "click .about":                 "showAbout"
         },
 
@@ -955,8 +956,12 @@ define("xabber-views", function () {
             xabber.trigger('add_account', {right: null});
         },
 
-        showAddGroupChatView: function () {
-            xabber.trigger('add_group_chat', {right: null});
+        showAddIncognitoGroupChatView: function () {
+            xabber.trigger('add_group_chat', {incognito: true, right: null});
+        },
+
+        showAddPublicGroupChatView: function () {
+            xabber.trigger('add_group_chat', {public: true, right: null});
         },
 
         showAbout: function () {
