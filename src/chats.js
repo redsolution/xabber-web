@@ -1108,8 +1108,8 @@ define("xabber-chats", function () {
                             $stanza_id = stanza_id;
                     }
                 }.bind(this));
-                $stanza_id && (options.stanza_id = $stanza_id.attr('id'));
-                $contact_stanza_id && (options.contact_stanza_id = $contact_stanza_id.attr('id'));
+                (!options.stanza_id && $stanza_id) && (options.stanza_id = $stanza_id.attr('id'));
+                (!options.contact_stanza_id && $contact_stanza_id) && (options.contact_stanza_id = $contact_stanza_id.attr('id'));
             }
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
@@ -2154,7 +2154,7 @@ define("xabber-chats", function () {
 
           addContact: function () {
               if (this.contact.get('subscription') === undefined)
-                  this.contact.pushInRoster(function () {
+                  this.contact.pushInRoster(null, function () {
                       this.sendAndAskSubscription();
                   }.bind(this));
               else
@@ -4847,7 +4847,7 @@ define("xabber-chats", function () {
                     msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
                     if (contact.get('pinned_message'))
                         if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) {
-                            contact.get('pinned_message').set('message', new_text);
+                            contact.get('pinned_message').set('message', msg_item.get('message'));
                             chat.item_view.content.updatePinnedMessage();
                         }
                     chat && chat.item_view.updateLastMessage(chat.last_message);
