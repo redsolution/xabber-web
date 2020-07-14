@@ -108,7 +108,7 @@
         var getBundleInfo = function (attrs, callback) {
             let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`, max_items: 1});
+                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
             attrs.id && iq.c('item', {id: attrs.id});
             this._connection.sendIQ(iq, callback);
         };

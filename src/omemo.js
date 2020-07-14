@@ -316,7 +316,7 @@ define("xabber-omemo", function () {
             },
 
             decrypt: async function (cipherText, preKey) {
-                let sessionCipher = this.getSession(), plainText;
+                let sessionCipher = new SessionCipher(this.store, this.address), plainText;
 
                 if (preKey)
                     plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
@@ -370,6 +370,11 @@ define("xabber-omemo", function () {
                 this.session = new SessionBuilder(this.store, this.address);
                 // this.store.storeSession(this.address.toString(), builder);
                 return this.session.processPreKey(preKeyBundle);
+            },
+
+            removeSession: function () {
+                this.store.removeSession(this.address);
+                this.sessionCipher = null;
             },
 
             getSession: function () {
@@ -525,7 +530,8 @@ define("xabber-omemo", function () {
                         return;
                     }
                     if (node == `${Strophe.NS.OMEMO}:bundles`) {
-
+                        let id = $message.find('item').attr('id');
+                        this.getPeer(from_jid).getDevice(id).removeSession();
                     }
                 }
 
