@@ -4058,6 +4058,8 @@ define("xabber-chats", function () {
         },
 
         sendChatState: function (state, type) {
+            if (this.contact.get('status') === 'offline')
+                return;
             clearTimeout(this._chatstate_timeout);
             clearTimeout(this._chatstate_send_timeout);
             this.chat_state = false;
