@@ -3887,6 +3887,12 @@ body .client-body-wrap.hidden + #modals {
     transition: background-color .3s;
 }
 
+.chat-message.encrypted {
+    background-size: 10px 10px;
+    background-position: center;
+    background-image: linear-gradient(to right, rgba(207,216,220,.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(207,216,220,.3) 1px, transparent 1px);
+}
+
 .chat-message.selected {
     background-color: #FFEBEE;
     -webkit-transition: background-color 0s;

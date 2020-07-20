@@ -235,6 +235,7 @@ define("xabber-chats", function () {
                 },
                 mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [];
 
+            options.encrypted && (attrs.encrypted = true);
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -3201,7 +3202,8 @@ define("xabber-chats", function () {
             }
 
             var classes = [
-                attrs.forwarded_message && 'forwarding'
+                attrs.forwarded_message && 'forwarding',
+                attrs.encrypted && 'encrypted'
             ];
 
             let markup_body = utils.markupBodyMessage(message);
@@ -3674,7 +3676,7 @@ define("xabber-chats", function () {
                 message.set('state', constants.MSG_PENDING);
             }
 
-            if (this.model.get('encrypted')) {
+            if (message.get('encrypted')) {
                 this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
                     let msg_sending_timestamp = moment.now();
                     this.account.sendMsg(stanza, function () {
@@ -3782,6 +3784,7 @@ define("xabber-chats", function () {
                 mentions: options.mentions,
                 blockquotes: options.blockquotes,
                 markups: options.markup_references,
+                encrypted: this.model.get('encrypted'),
                 submitted_here: true,
                 forwarded_message: null
             };

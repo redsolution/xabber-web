@@ -237,10 +237,15 @@
         initialize: function (attrs, options) {
             this.database = new IndexedDB(options);
             this._initialize && this._initialize(attrs, options);
+            this.on("quit", this.onQuit, this);
         },
 
         clearDataBase: function () {
             this.database.clear();
+        },
+
+        onQuit: function () {
+            this.clearDataBase();
         }
     });
 

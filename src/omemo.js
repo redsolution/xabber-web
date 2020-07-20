@@ -4,6 +4,7 @@ define("xabber-omemo", function () {
             constants = env.constants,
             utils = env.utils,
             $ = env.$,
+            templates = env.templates.base,
             Strophe = env.Strophe,
             _ = env._,
             KeyHelper = libsignal.KeyHelper,
@@ -48,21 +49,23 @@ define("xabber-omemo", function () {
                 }.bind(this));
             },
 
+            getDevicesNode: async function () {
+                return new Promise((resolve, reject) => {
+                    this.account.connection.omemo.getDevicesNode(this.get('jid'), function (cb) {
+                        this.updateDevices(this.account.connection.omemo.getUserDevices($(cb)));
+                        resolve();
+                    }.bind(this));
+                });
+            },
+
             encrypt: async function (message) {
                 let enc_promises = [],
                     aes = await utils.AES.encrypt(message);
 
                 if (!this.devices.length)
-                    this.account.connection.omemo.getDevicesNode(this.get('jid'), function (cb) {
-                        this.updateDevices(this.account.connection.omemo.getUserDevices($(cb)));
-                        for (let device in this.devices) {
-                            enc_promises.push(this.devices[device].encrypt(aes.keydata));
-                        }
-                    }.bind(this));
-                else {
-                    for (let device in this.devices) {
-                        enc_promises.push(this.devices[device].encrypt(aes.keydata));
-                    }
+                    await this.getDevicesNode();
+                for (let device in this.devices) {
+                    enc_promises.push(this.devices[device].encrypt(aes.keydata));
                 }
 
                 for (let device in this.own_devices) {
@@ -120,6 +123,30 @@ define("xabber-omemo", function () {
                 _.each(this.collections, function (collection) {
                     collection.update(contact, event);
                 });
+            }
+        });
+
+        xabber.Fingerprints = xabber.BasicView.extend({
+            className: 'fingerprints-wrap',
+            template: templates.fingerprints,
+
+            events: {
+                'click .btn-trust': "trustDevice",
+                'click tbody .tr': "selectItem"
+            },
+
+            _initialize: function () {
+
+            },
+
+            selectItem: function (ev) {
+                $(ev.target).closest('tr').toggleClass('selected');
+            },
+
+            trustDevice: function () {
+                this.$('tr.selected').forEach(function () {
+
+                }.bind(this));
             }
         });
 
@@ -206,10 +233,10 @@ define("xabber-omemo", function () {
                             this.preKeys.push({keyId: id, keyPair: key_pair});
                             this.store.storePreKey(id, key_pair);
                         }.bind(this));
+                        this.getUsedPreKeys();
                         let spk = await this.getSignedPreKey();
                         this.preKeys.push(spk);
                         this.store.storeSignedPreKey(spk.keyId, spk.keyPair);
-                        this.getUsedPreKeys();
                     }
                     else {
                         this.generatePreKeys().then((prekeys) => {
@@ -226,10 +253,9 @@ define("xabber-omemo", function () {
                         cb.forEach(async function (pk) {
                             let id = pk.id,
                                 prekey = JSON.parse(pk.key),
-                                priv_pk = utils.fromBase64toArrayBuffer(prekey.privKey),
-                                pub_pk = utils.fromBase64toArrayBuffer(prekey.pubKey),
-                                key_pair = {pubKey: pub_pk, privKey: priv_pk};
-                            this.store.storePreKey(id, key_pair);
+                                privKey = utils.fromBase64toArrayBuffer(prekey.privKey),
+                                pubKey = utils.fromBase64toArrayBuffer(prekey.pubKey);
+                            this.store.storePreKey(id, {pubKey, privKey});
                         }.bind(this));
                     }
                 }.bind(this));
@@ -240,7 +266,6 @@ define("xabber-omemo", function () {
                 this.store.storePreKey(id, preKey.keyPair);
 
                 return preKey;
-
             },
 
             generateSignedPreKey: async function (id) {
@@ -399,6 +424,12 @@ define("xabber-omemo", function () {
                 this.address = new SignalProtocolAddress(attrs.jid, attrs.id);
             },
 
+            generateFingerprint: async function () {
+                /*let generator = new FingerprintGenerator(1024),
+                    localPub = (await this.store.getIdentityKeyPair()).pubKey;
+                generator.createFor(this.account.omemo.get('device_id'), localPub, this.id, this.get('pk'));*/
+            },
+
             getBundle: async function () {
                 return new Promise((resolve, reject) => {
                     this.account.connection.omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
@@ -517,6 +548,8 @@ define("xabber-omemo", function () {
                 }
                 else
                     this.account.used_prekeys.putPreKey({id, pk, spk, ik});
+                this.set('pk', utils.fromBase64toArrayBuffer(pk.key));
+                this.generateFingerprint();
                 this.processPreKey({
                     registrationId: Number(id),
                     identityKey: utils.fromBase64toArrayBuffer(ik),
@@ -697,15 +730,23 @@ define("xabber-omemo", function () {
                         return;
                     }
                     if (node == `${Strophe.NS.OMEMO}:bundles`) {
-                        /*let id = $message.find('item').attr('id');
-                        this.getPeer(from_jid).getDevice(id).removeSession();*/
+                        let id = $message.find('item').attr('id');
+                        this.getPeer(from_jid).getDevice(id);
                     }
                 }
 
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
+                    let options = {encrypted: true};
+                    if ($message.find('result[xmlns="'+Strophe.NS.MAM+'"]').length)
+                        _.extend(options, {
+                            is_mam: true,
+                            is_archived: true
+                        });
+                    if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length)
+                        options.carbon_copied = true;
                     this.decrypt(message).then((decrypted_msg) => {
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
-                        this.account.chats.receiveChatMessage($message[0]);
+                        this.account.chats.receiveChatMessage($message[0], options);
                     });
                 }
 
@@ -922,7 +963,7 @@ define("xabber-omemo", function () {
 
             removePreKey: function (keyId) {
                 this.trigger('prekey_removed', keyId);
-                return Promise.resolve(this.remove('25519KeypreKey' + keyId));
+                // return Promise.resolve(this.remove('25519KeypreKey' + keyId));
             },
 
             /* Returns a signed keypair object or undefined */
