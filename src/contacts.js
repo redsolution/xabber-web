@@ -1786,7 +1786,7 @@ define("xabber-contacts", function () {
                     }.bind(this),
                     function(err) {
                         if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active'))
-                            this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see invitations list'));
+                            this.$el.html(this.$error.text($(err).find('text').text() || 'You do not have permission to see the list of invitations.'));
                     }.bind(this));
             },
 
@@ -1843,7 +1843,7 @@ define("xabber-contacts", function () {
                     }.bind(this),
                     function(err) {
                         if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active'))
-                            this.$el.html(this.$error.text($(err).find('text').text() || 'You nave no permission to see blocked list'));
+                            this.$el.html(this.$error.text($(err).find('text').text() || 'You do not have permission to see the list of blocked users.'));
                     }.bind(this));
             },
 
@@ -1947,7 +1947,7 @@ define("xabber-contacts", function () {
                             .c('id').t($target.attr('data-id'));
                         this.account.sendIQ(iq, function () {
                                 $target.remove();
-                                this.paren.updateScrollBar();
+                                this.parent.updateScrollBar();
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
@@ -1982,7 +1982,7 @@ define("xabber-contacts", function () {
                 attrs.nickname = _.escape(attrs.nickname);
                 attrs.badge = _.escape(attrs.badge);
                 attrs.is_me = attrs.jid == this.account.get('jid');
-                attrs.pretty_present = attrs.present ? moment(attrs.present).fromNow() : "";
+                attrs.pretty_present = attrs.present ? (moment(attrs.present).isValid() ? moment(attrs.present).fromNow() : moment(attrs.present.substr(0, attrs.present.length - 1)).fromNow()) : "";
                 let $item_view = $(templates.group_chats.group_member_item(attrs)),
                     view = this.$('tr[data-id="' + attrs.id + '"]');
                 $item_view.emojify('.badge', {emoji_size: 16});

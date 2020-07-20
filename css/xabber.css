@@ -1034,7 +1034,7 @@ body .client-body-wrap.hidden + #modals {
 .toolbar .add-variants {
     top: -21px !important;
     left: 50px !important;
-    min-width: 185px !important;
+    min-width: 220px !important;
     background-color: transparent;
     box-shadow: none;
     z-index: 1100;
@@ -1044,8 +1044,9 @@ body .client-body-wrap.hidden + #modals {
     position: relative;
     height: 36px;
     max-width: 100%;
-    margin: 6px 0;
-    padding: 8px 12px 8px 42px;
+    margin: 3px 0;
+    display: inline-flex;
+    padding: 8px 16px 8px 42px;
     background-color: #000000;
     border-radius: 18px;
     overflow: hidden;
@@ -1250,10 +1251,17 @@ body .client-body-wrap.hidden + #modals {
     margin: 0;
 }
 
+.login-panel-form .buttons-wrap {
+    display: flex;
+    justify-content: space-between;
+}
+
 .login-panel-form .buttons-wrap button {
-    float: right;
     min-width: 120px;
-    margin-left: 15px;
+}
+
+.login-panel-form .buttons-wrap .btn-log-in:first-child {
+    margin: 0 auto;
 }
 
 .login-panel-form .btn-forgot-password {
@@ -6157,6 +6165,10 @@ input[type='range'].voice-message-volume:focus {
 
 .blocked-items .placeholder {
     color: #616161;
+}
+
+.blocked-items .blocked-list {
+    padding: 0 12px 12px;
 }
 
 .blocked-items .blocked-item {

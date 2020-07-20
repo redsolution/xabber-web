@@ -1110,8 +1110,8 @@ define("xabber-chats", function () {
                             $stanza_id = stanza_id;
                     }
                 }.bind(this));
-                $stanza_id && (options.stanza_id = $stanza_id.attr('id'));
-                $contact_stanza_id && (options.contact_stanza_id = $contact_stanza_id.attr('id'));
+                (!options.stanza_id && $stanza_id) && (options.stanza_id = $stanza_id.attr('id'));
+                (!options.contact_stanza_id && $contact_stanza_id) && (options.contact_stanza_id = $contact_stanza_id.attr('id'));
             }
             if ($marker.length) {
                 var marker_tag = $marker[0].tagName.toLowerCase();
@@ -2156,7 +2156,7 @@ define("xabber-chats", function () {
 
           addContact: function () {
               if (this.contact.get('subscription') === undefined)
-                  this.contact.pushInRoster(function () {
+                  this.contact.pushInRoster(null, function () {
                       this.sendAndAskSubscription();
                   }.bind(this));
               else
@@ -4098,6 +4098,8 @@ define("xabber-chats", function () {
         },
 
         sendChatState: function (state, type) {
+            if (this.contact.get('status') === 'offline')
+                return;
             clearTimeout(this._chatstate_timeout);
             clearTimeout(this._chatstate_send_timeout);
             this.chat_state = false;
@@ -4906,7 +4908,7 @@ define("xabber-chats", function () {
                     msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
                     if (contact.get('pinned_message'))
                         if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) {
-                            contact.get('pinned_message').set('message', new_text);
+                            contact.get('pinned_message').set('message', msg_item.get('message'));
                             chat.item_view.content.updatePinnedMessage();
                         }
                     chat && chat.item_view.updateLastMessage(chat.last_message);
@@ -5159,7 +5161,7 @@ define("xabber-chats", function () {
                 return;
             }
             options || (options = {});
-            this.setDefaultSettings();
+            this.setDefaultSettings(options);
             var accounts = options.account ? [options.account] : xabber.accounts.connected;
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
@@ -5190,7 +5192,13 @@ define("xabber-chats", function () {
 
         },
 
-        setDefaultSettings: function () {
+        setDefaultSettings: function (options) {
+            this.$('.incognito-field .public-item-wrap').showIf(options.public);
+            this.$('.incognito-field .incognito-item-wrap').showIf(options.incognito);
+            if (options.public)
+                this.$('.panel-header').text('Create public group');
+            if (options.incognito)
+                this.$('.panel-header').text('Create incognito group');
             this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
             this.$('#new_chat_domain').val("");
             this.$('input[name=chat_name]').val("");
@@ -5198,9 +5206,6 @@ define("xabber-chats", function () {
             this.$('.btn-add').addClass('non-active');
             this.showPlaceholder();
             this.$('span.errors').text('').addClass('hidden');
-            let $incognito_wrap = this.$('.incognito-dropdown-wrap'),
-                default_incognito_value = $incognito_wrap.find('.dropdown-content .default-value');
-            $incognito_wrap.find('.incognito-item-wrap .property-value').attr('data-value', default_incognito_value.attr('data-value')).text(default_incognito_value.text());
             let $global_wrap = this.$('.global-dropdown-wrap'),
                 default_global_value = $global_wrap.find('.dropdown-content .default-value');
             $global_wrap.find('.global-item-wrap .property-value').attr('data-value', default_global_value.attr('data-value')).text(default_global_value.text());
@@ -5287,7 +5292,7 @@ define("xabber-chats", function () {
             var my_jid = this.account.resources.connection.jid,
                 name = this.$('input[name=chat_name]').val(),
                 chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
-                anonymous = this.$('.incognito-field .property-value').attr('data-value'),
+                anonymous = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 searchable = this.$('.global-field .property-value').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
@@ -7846,8 +7851,8 @@ define("xabber-chats", function () {
 
         this.add_group_chat_view = new this.AddGroupChatView();
 
-        this.on("add_group_chat", function () {
-            this.add_group_chat_view.show();
+        this.on("add_group_chat", function (attrs) {
+            this.add_group_chat_view.show(attrs);
         }, this);
 
         this.on("change:focused", function () {
