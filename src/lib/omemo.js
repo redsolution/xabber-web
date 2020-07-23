@@ -29,19 +29,33 @@
             return devices;
         };
 
-        var getDevicesNode = function (jid, callback) {
+        var getDevicesNode = function (jid, callback, errback) {
             let attrs = {from: this._connection.jid, type: 'get'};
             jid && (attrs.to = jid);
             let iq = $iq(attrs)
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
             this._connection.sendIQ(iq, callback, function (err) {
-                ($(err).find('error').attr('code') == 404 && !jid) && createNode(callback);
+                ($(err).find('error').attr('code') == 404 && !jid) && createDeviceNode.call(this, callback);
             }.bind(this));
         };
 
-        var createNode = function (callback) {
-            this._connection.pubsub.createNode(Strophe.NS.OMEMO + ':devices', callback);
+        var createDeviceNode = function (callback) {
+            createNode.call(this, Strophe.NS.OMEMO + ':devices', null, callback);
+        };
+
+        var createBundleNode = function (id, callback) {
+            createNode.call(this, `${Strophe.NS.OMEMO}:bundles:${id}`, null, callback);
+        };
+
+        var createNode = function(node, options, callback) {
+            let iq = $iq({from:this._connection.jid, type:'set'})
+                .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
+                .c('create',{node:node});
+            if(options) {
+                iq.up().c('configure').form(Strophe.NS.PUBSUB_NODE_CONFIG, options);
+            }
+            this._connection.sendIQ(iq, callback);
         };
 
         var publishDevice = function (id, callback, errback) {
@@ -59,58 +73,36 @@
                 device.label && (attrs.label = device.label);
                 stanza.c('device', attrs).up();
             }.bind(this));
-            stanza.up().up().up()
-                .c('publish-options')
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
-                .c('field', {var: 'pubsub#access_model'})
-                .c('value').t('open');
-            this._connection.sendIQ(stanza, callback, function (err) {
-                if ($(err).find('error').attr('code') == 409) {
-                    $(stanza.tree()).find('publish-options').remove();
-                    this._connection.sendIQ(stanza, callback, errback);
-                }
-            }.bind(this));
+            this._connection.sendIQ(stanza, callback, errback);
         };
 
         var publishBundle = function (attrs, callback, errback) {
             let preKeys = attrs.pks,
                 spk = attrs.spk,
                 stanza = $iq({from: this._connection.jid, type: 'set'})
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
-                .c('item', {id: attrs.device_id})
-                .c('bundle', {xmlns: Strophe.NS.OMEMO})
-                .c('spk', {id: spk.id}).t(spk.key).up()
-                .c('spks').t(attrs.spks).up()
-                .c('ik').t(attrs.ik).up()
-                .c('prekeys');
+                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                    .c('publish', {node: `${Strophe.NS.OMEMO}:bundles:${attrs.device_id}`})
+                    .c('item')
+                    .c('bundle', {xmlns: Strophe.NS.OMEMO})
+                    .c('spk', {id: spk.id}).t(spk.key).up()
+                    .c('spks').t(attrs.spks).up()
+                    .c('ik').t(attrs.ik).up()
+                    .c('prekeys');
             for (var i in preKeys) {
                 let preKey = preKeys[i];
                 stanza.c('pk', {id: preKey.id}).t(preKey.key).up()
             }
-            stanza.up().up().up().up()
-                .c('publish-options')
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
-                .c('field', {var: 'pubsub#access_model'})
-                .c('value').t('open');
-            this._connection.sendIQ(stanza, callback, function (err) {
-                if ($(err).find('error').attr('code') == 409) {
-                    $(stanza.tree()).find('publish-options').remove();
-                    this._connection.sendIQ(stanza, callback, errback);
-                }
-            }.bind(this));
+            this._connection.sendIQ(stanza, callback, errback);
         };
 
-        var getBundleInfo = function (attrs, callback) {
+        var getBundleInfo = function (attrs, callback, errback) {
             let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
-            attrs.id && iq.c('item', {id: attrs.id});
-            this._connection.sendIQ(iq, callback);
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB});
+            if (attrs.id)
+                iq.c('items', {node: `${Strophe.NS.OMEMO}:bundles:${attrs.id}`});
+            else
+                iq.c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
+            this._connection.sendIQ(iq, callback, errback);
         };
 
         return {
@@ -118,6 +110,8 @@
             getUserDevices: getUserDevices,
             getDevicesNode: getDevicesNode,
             publishDevice: publishDevice,
+            createBundleNode: createBundleNode,
+            createDeviceNode: createDeviceNode,
             publishBundle: publishBundle,
             getBundleInfo: getBundleInfo
         };

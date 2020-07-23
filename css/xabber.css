@@ -205,7 +205,7 @@ input[type=checkbox].filled-in:checked + label:after {
     display: none;
     position: absolute;
     bottom: -40px;
-    left: 64px;
+    left: 90px;
     border: none !important;
     z-index: 100;
 }
@@ -4982,6 +4982,7 @@ img.fwd-img-preview {
     overflow: hidden;
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .message-input-panel .mentions-list {
@@ -5210,13 +5211,17 @@ input[type='range'].voice-message-volume:focus {
 
 .input-toolbar .last-emoticons {
     display: inline-flex;
-    margin-left: 64px;
     width: 192px;
     height: 100%;
     flex-wrap: nowrap;
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
+}
+
+.input-toolbar .account-info-wrap {
+    margin: 0 0 0 auto;
+    height: 100%;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {
@@ -5234,7 +5239,6 @@ input[type='range'].voice-message-volume:focus {
 .input-toolbar .account-jid, .input-toolbar .account-nickname, .input-toolbar .account-badge, .input-toolbar .account-role {
     margin-left: 4px;
     font-size: 12px;
-    float: right;
 }
 
 .input-toolbar .account-nickname, .input-toolbar .account-badge, .input-toolbar .account-role {

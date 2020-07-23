@@ -3679,6 +3679,7 @@ define("xabber-chats", function () {
             if (message.get('encrypted')) {
                 this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
                     let msg_sending_timestamp = moment.now();
+                    message.set({xml: stanza.tree()});
                     this.account.sendMsg(stanza, function () {
                         if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                             setTimeout(function () {
@@ -3710,8 +3711,8 @@ define("xabber-chats", function () {
                 });
                 return;
             } else {
-
                 let msg_sending_timestamp = moment.now();
+                message.set({xml: stanza.tree()});
                 this.account.sendMsg(stanza, function () {
                     if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                         setTimeout(function () {
@@ -5003,6 +5004,12 @@ define("xabber-chats", function () {
                 to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
                 from_jid = $message.attr('from') || options.from_jid;
 
+            if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
+                if (options.synced_msg)
+                    this.account.omemo.receiveMessage(message, options);
+                return;
+            }
+
             if ($message.find('invite').length) {
                 if (options.forwarded)
                     return;
@@ -6134,6 +6141,7 @@ define("xabber-chats", function () {
             "click .btn-block-contact": "blockContact",
             "click .btn-unblock-contact": "unblockContact",
             "click .btn-export-history": "exportHistory",
+            "click .btn-show-fingerprints": "showFingerprints",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -6419,6 +6427,11 @@ define("xabber-chats", function () {
 
         exportHistory: function () {
             utils.callback_popup_message('History export is not implemented yet', 2000);
+        },
+
+        showFingerprints: function () {
+            let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+            peer.fingerprints.open();
         }
     });
 
