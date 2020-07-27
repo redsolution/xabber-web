@@ -3671,6 +3671,7 @@ define("xabber-chats", function () {
             body && stanza.c('body').t(body).up();
             stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
+            message.set({xml: $(stanza.tree()).clone()[0]});
             if (message.get('state') === constants.MSG_ERROR) {
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
                 message.set('state', constants.MSG_PENDING);
@@ -3679,7 +3680,6 @@ define("xabber-chats", function () {
             if (message.get('encrypted')) {
                 this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
                     let msg_sending_timestamp = moment.now();
-                    message.set({xml: stanza.tree()});
                     this.account.sendMsg(stanza, function () {
                         if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                             setTimeout(function () {
@@ -3712,7 +3712,6 @@ define("xabber-chats", function () {
                 return;
             } else {
                 let msg_sending_timestamp = moment.now();
-                message.set({xml: stanza.tree()});
                 this.account.sendMsg(stanza, function () {
                     if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                         setTimeout(function () {
@@ -3839,6 +3838,7 @@ define("xabber-chats", function () {
                     from_jid: this.account.get('jid'),
                     type: 'file_upload',
                     files: data,
+                    encrypted: this.model.get('encrypted'),
                     upload_service: http_upload_service.get('from'),
                     message: 'Uploading file',
                     submitted_here: true

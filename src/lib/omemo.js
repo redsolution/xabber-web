@@ -40,6 +40,15 @@
             }.bind(this));
         };
 
+        var sendOptOut = function (attrs, callback) {
+            let msg = $msg({type: 'chat', to: attrs.to})
+                .c('content', {xmlns: Strophe.NS.SCE})
+                .c('payload')
+                .c('opt-out', {xmlns: Strophe.NS.OMEMO})
+                .c('reason').t(attrs.reason || 'Bad MAC');
+            this._connection.sendMsg(msg, callback);
+        };
+
         var createDeviceNode = function (callback) {
             createNode.call(this, Strophe.NS.OMEMO + ':devices', null, callback);
         };
