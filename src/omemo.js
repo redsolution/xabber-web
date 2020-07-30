@@ -619,22 +619,8 @@ define("xabber-omemo", function () {
                         plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
                     else {
                         if (!this.store.hasSession(this.address.toString())) {
-                            let cached_pk = await this.getPreKey();
-                            if (cached_pk) {
-                                this.processPreKey({
-                                    registrationId: Number(cached_pk.id),
-                                    identityKey: utils.fromBase64toArrayBuffer(cached_pk.ik),
-                                    signedPreKey: {
-                                        keyId: Number(cached_pk.spk.id),
-                                        publicKey: utils.fromBase64toArrayBuffer(cached_pk.spk.key),
-                                        signature: utils.fromBase64toArrayBuffer(cached_pk.spk.signature)
-                                    },
-                                    preKey: {
-                                        keyId: Number(cached_pk.pk.id),
-                                        publicKey: utils.fromBase64toArrayBuffer(cached_pk.pk.key)
-                                    }
-                                });
-                            }
+                             let session = await this.getCachedSession();
+                            (session && session.session) && await this.store.storeSession(this.address.toString(), session.session);
                         }
                         plainText = await sessionCipher.decryptWhisperMessage(cipherText, 'binary');
                     }
@@ -766,7 +752,7 @@ define("xabber-omemo", function () {
                 this.account.on('device_published', this.publishBundle, this);
                 this.store.on('prekey_removed', this.removePreKey, this);
                 this.on("quit", this.onQuit, this);
-                // this.store.on('session_stored', this.cacheSession, this);
+                this.store.on('session_stored', this.cacheSession, this);
             },
 
             onConnected: function () {
@@ -1241,18 +1227,13 @@ define("xabber-omemo", function () {
         });
 
         xabber.Account.addInitPlugin(function () {
-            this.ownprekeys = new xabber.OwnPreKeys(null, {
-            name: `cached-prekeys-list-${this.get('jid')}`,
-            objStoreName: 'prekeys',
-            primKey: 'id'
-        });
-            this.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
-                name: `cached-used-own-prekeys-list-${this.get('jid')}`,
-                objStoreName: 'prekeys',
+            this.omemo_sessions = new xabber.OmemoSessionsList(null, {
+                name: `cached-omemo-sessions-list-${this.get('jid')}`,
+                objStoreName: 'sessions',
                 primKey: 'id'
             });
-            this.used_prekeys = new xabber.OwnUsedPreKeys(null, {
-                name: `cached-used-prekeys-list-${this.get('jid')}`,
+            this.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                name: `cached-used-own-prekeys-list-${this.get('jid')}`,
                 objStoreName: 'prekeys',
                 primKey: 'id'
             });
@@ -1264,6 +1245,16 @@ define("xabber-omemo", function () {
         });
 
         xabber.Account.addConnPlugin(function () {
+            this.ownprekeys = new xabber.OwnPreKeys(null, {
+                name: `cached-prekeys-list-${this.get('jid')}`,
+                objStoreName: 'prekeys',
+                primKey: 'id'
+            });
+            this.used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                name: `cached-used-prekeys-list-${this.get('jid')}`,
+                objStoreName: 'prekeys',
+                primKey: 'id'
+            });
             this.omemo.onConnected();
         }, true, true);
 
