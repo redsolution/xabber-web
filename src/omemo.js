@@ -948,6 +948,8 @@ define("xabber-omemo", function () {
                             options.encrypted = true;
                             $message.find('body').remove();
                         }
+                        else
+                            options.not_encrypted = true;
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                         this.account.chats.receiveChatMessage($message[0], options);
                     });

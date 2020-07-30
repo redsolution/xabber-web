@@ -883,9 +883,10 @@ define("xabber-chats", function () {
             this.account = this.contact.account;
             var jid = this.contact.get('jid');
             this.set({
-                id: this.contact.hash_id,
+                id: attrs && attrs.id || this.contact.hash_id,
                 jid: jid
             });
+            (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
             this.message_retraction_version = 0;
             this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
             this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
@@ -1273,12 +1274,20 @@ define("xabber-chats", function () {
         setMessagesDelivered: function (timestamp) {
             !timestamp && (timestamp = moment.now());
             let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED));
+            if (!undelivered_messages.length) {
+                let chat =  this.account.chats.get(this.id + ':encrypted');
+                chat && (undelivered_messages = chat.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED)));
+            }
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DELIVERED));
         },
 
         setMessagesDisplayed: function (timestamp) {
             !timestamp && (timestamp = moment.now());
             let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED));
+            if (!undelivered_messages.length) {
+                let chat =  this.account.chats.get(this.id + ':encrypted');
+                chat && (undelivered_messages = chat.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED)));
+            }
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DISPLAYED));
         },
 
@@ -2494,6 +2503,10 @@ define("xabber-chats", function () {
                     .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                     .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                     .c('value').t(Strophe.NS.MAM).up().up();
+            if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
+                    .c('value').t(this.model.get('encrypted')).up().up();
+            }
             if (!is_groupchat)
                 iq.c('field', {'var': 'with'})
                     .c('value').t(this.model.get('jid')).up().up();
@@ -3665,7 +3678,7 @@ define("xabber-chats", function () {
 
             mutable_content.length && message.set({mutable_content: mutable_content});
 
-            this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, unique_id: unique_id});
+            this.account._pending_messages.push({chat_hash_id: this.model.id, unique_id: unique_id});
 
             message.set('original_message', body);
             body && stanza.c('body').t(body).up();
@@ -4657,10 +4670,16 @@ define("xabber-chats", function () {
             this.account.contacts.on("roster_push", this.onRosterPush, this);
         },
 
-        getChat: function (contact) {
-            var chat = this.get(contact.hash_id);
+        getChat: function (contact, identifier) {
+            var attrs = null,
+                id = identifier && `${contact.hash_id}:${identifier}`,
+                chat = id ? this.get(id) : this.get(contact.hash_id);
+            if (id)
+                attrs = {id};
+            if (identifier === 'encrypted')
+                attrs.type = identifier;
             if (!chat) {
-                chat = xabber.chats.create(null, {contact: contact});
+                chat = xabber.chats.create(attrs, {contact: contact});
                 this.add(chat);
                 contact.set('known', true);
             }
@@ -4670,7 +4689,7 @@ define("xabber-chats", function () {
         openChat: function (contact, options) {
             options = options || {};
             _.isUndefined(options.clear_search) && (options.clear_search = true);
-            var chat = this.getChat(contact);
+            var chat = this.getChat(contact, options.encrypted && 'encrypted');
             chat.trigger('open', {clear_search: options.clear_search});
         },
 
@@ -4922,6 +4941,10 @@ define("xabber-chats", function () {
                 let $retracted_msg = $message.find('retract-message'),
                     retracted_msg_id = $retracted_msg.attr('id'),
                     msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
+                if (!msg_item) {
+                    chat = this.account.chats.getChat(contact, 'encrypted');
+                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
+                }
                 if (msg_item) {
                     msg_item.set('is_unread', false);
                     chat.item_view.content.removeMessage(msg_item);
@@ -4942,14 +4965,16 @@ define("xabber-chats", function () {
                 chat.item_view.updateLastMessage(chat.last_message);
             }
             if ($message.find('retract-all').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact));
                 if (!chat)
                     return;
-                var all_messages = chat.messages.models;
+                let enc_chat = this.get(contact, 'encrypted'), enc_messages = enc_chat.messages.length;
+                var all_messages = chat.messages.models.concat(enc_chat.messages.models);
                 $(all_messages).each(function (idx, item) {
                     chat.item_view.content.removeMessage(item);
                 }.bind(this));
                 chat.item_view.updateLastMessage();
+                enc_messages && enc_chat.item_view.updateLastMessage();
             }
             if ($message.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH + '"]').length) {
                 let code =  $message.find('confirm').attr('id');
@@ -5105,7 +5130,7 @@ define("xabber-chats", function () {
             }
 
             var contact = this.account.contacts.mergeContact(contact_jid),
-                chat = this.account.chats.getChat(contact),
+                chat = this.account.chats.getChat(contact, (options.encrypted || options.not_encrypted) && 'encrypted'),
                 stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
@@ -6142,6 +6167,7 @@ define("xabber-chats", function () {
             "click .btn-unblock-contact": "unblockContact",
             "click .btn-export-history": "exportHistory",
             "click .btn-show-fingerprints": "showFingerprints",
+            "click .btn-start-encryption": "openEncryptedChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -6226,6 +6252,8 @@ define("xabber-chats", function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
             this.$('.btn-call-attention').hideIf(is_group_chat);
+            this.$('.btn-start-encryption').showIf(!is_group_chat && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
@@ -6432,6 +6460,13 @@ define("xabber-chats", function () {
         showFingerprints: function () {
             let peer = this.account.omemo.getPeer(this.contact.get('jid'));
             peer.fingerprints.open();
+        },
+
+        openEncryptedChat: function () {
+            this.account.chats.openChat(this.contact, {encrypted: true});
+            let chat = this.account.chats.get(this.contact.hash_id + ':encrypted');
+            chat.set('timestamp', moment.now());
+            chat.item_view.updateLastMessage();
         }
     });
 
@@ -6453,7 +6488,6 @@ define("xabber-chats", function () {
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
             "click .markup-text": "onShowMarkupPanel",
-            "click .set-encryption": "changeEncryption",
             "click .reply-message": "replyMessages",
             "click .forward-message": "forwardMessages",
             "click .pin-message": "pinMessage",
@@ -6833,11 +6867,6 @@ define("xabber-chats", function () {
 
         changeEncryption: function () {
             this.model.set('encrypted', !this.model.get('encrypted'));
-        },
-
-        onChangeEncrypted: function () {
-            let enc = this.model.get('encrypted');
-            this.$('.set-encryption i').switchClass('mdi-lock', enc).switchClass('mdi-lock-open', !enc);
         },
         
         getParticipantsList: function () {

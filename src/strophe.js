@@ -218,6 +218,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
         Strophe.addNamespace('SYNCHRONIZATION', 'http://xabber.com/protocol/synchronization');
         Strophe.addNamespace('DELIVERY', 'http://xabber.com/protocol/delivery');
+        Strophe.addNamespace('ARCHIVE', 'http://xabber.com/protocol/archive');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
         Strophe.addNamespace('DATAFORM', 'jabber:x:data');

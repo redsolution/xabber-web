@@ -3993,8 +3993,10 @@ define("xabber-contacts", function () {
                         return;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         contact = this.contacts.mergeContact(jid),
-                        is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
-                        chat = this.account.chats.getChat(contact),
+                        type = $item.attr('type'),
+                        is_group_chat =  type === 'groupchat',
+                        encrypted = type === 'encrypted',
+                        chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
                         $unread_messages = $sync_metadata.children('unread'),
