@@ -3554,6 +3554,7 @@ body .client-body-wrap.hidden + #modals {
     height: 17px;
     overflow: hidden;
     display: inline-flex;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
 }
@@ -3565,6 +3566,26 @@ body .client-body-wrap.hidden + #modals {
     line-height: 17px;
     color: #212121;
     margin: 0 auto 0 0;
+}
+
+.message-item.encrypted .chat-title,
+.mention-item.encrypted .chat-title,
+.chat-item.encrypted .chat-title {
+    color: #388E3C !important;
+}
+
+.message-item .chat-title-wrap .encrypted-icon,
+.mention-item .chat-title-wrap .encrypted-icon,
+.chat-item .chat-title-wrap .encrypted-icon {
+    color: #388E3C !important;
+    display: none;
+    margin-right: 4px;
+}
+
+.message-item.encrypted .chat-title-wrap .encrypted-icon,
+.mention-item.encrypted .chat-title-wrap .encrypted-icon,
+.chat-item.encrypted .chat-title-wrap .encrypted-icon {
+    display: block;
 }
 
 .chat-item.blocked .last-msg,

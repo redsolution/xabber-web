@@ -3995,7 +3995,7 @@ define("xabber-contacts", function () {
                         contact = this.contacts.mergeContact(jid),
                         type = $item.attr('type'),
                         is_group_chat =  type === 'groupchat',
-                        encrypted = type === 'encrypted',
+                        encrypted = type === 'encrypted-chat',
                         chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),

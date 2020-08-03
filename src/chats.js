@@ -957,10 +957,13 @@ define("xabber-chats", function () {
         },
 
         setStanzaId: function (unique_id, stanza_id) {
-            let message = this.messages.get(unique_id);
+            let message = this.messages.get(unique_id),
+                origin_id = message.get('origin_id');
             message.set('stanza_id', stanza_id);
             if (!message.get('origin_id'))
                 this.item_view.content.$('.chat-message[data-uniqueid="' + stanza_id + '"]').data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id);
+            if (this.get('encrypted'))
+                this.account.omemo.updateMessage({stanza_id, origin_id}, this.contact);
         },
 
         getCallingAvailability: function (to, session_id, callback) {
@@ -1465,8 +1468,10 @@ define("xabber-chats", function () {
             this.updateArchivedState();
             this.updateColorScheme();
             this.updateIcon();
+            this.updateEncrypted();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
+            this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("change:const_unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
@@ -1518,6 +1523,10 @@ define("xabber-chats", function () {
         updateAvatar: function () {
             var image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        },
+
+        updateEncrypted: function () {
+            this.$el.switchClass('encrypted', this.model.get('encrypted'));
         },
 
         updateIcon: function () {

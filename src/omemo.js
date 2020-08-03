@@ -523,37 +523,6 @@ define("xabber-omemo", function () {
             }
         });
 
-        xabber.OmemoSessionsList = Backbone.ModelWithDataBase.extend({
-            defaults: {
-                sessions: []
-            },
-
-            putSession: function (value, callback) {
-                this.database.put('sessions', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            },
-
-            getSession: function (value, callback) {
-                this.database.get('sessions', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            },
-
-            getAll: function (value, callback) {
-                !value && (value = null);
-                this.database.get_all('sessions', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            },
-
-            removeSession: function (value, callback) {
-                this.database.remove('sessions', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            }
-        });
-
         xabber.Device = Backbone.Model.extend({
             initialize: function (attrs, options) {
                 this.account = options.account;
@@ -619,8 +588,8 @@ define("xabber-omemo", function () {
                         plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
                     else {
                         if (!this.store.hasSession(this.address.toString())) {
-                             let session = await this.getCachedSession();
-                            (session && session.session) && await this.store.storeSession(this.address.toString(), session.session);
+                             let session = this.getCachedSession();
+                            session && await this.store.storeSession(this.address.toString(), session);
                         }
                         plainText = await sessionCipher.decryptWhisperMessage(cipherText, 'binary');
                     }
@@ -640,13 +609,8 @@ define("xabber-omemo", function () {
                 });
             },
 
-
             getCachedSession: function () {
-                return new Promise((resolve, reject) => {
-                    this.account.omemo_sessions.getSession('session' + this.address.toString(), function (session) {
-                        resolve(session);
-                    }.bind(this));
-                });
+                return this.account.omemo.getSession('session' + this.address.toString());
             },
 
             encrypt: async function (plainText) {
@@ -718,7 +682,6 @@ define("xabber-omemo", function () {
 
             processPreKey: function (preKeyBundle) {
                 this.session = new SessionBuilder(this.store, this.address);
-                // this.store.storeSession(this.address.toString(), builder);
                 return this.session.processPreKey(preKeyBundle);
             },
 
@@ -737,7 +700,7 @@ define("xabber-omemo", function () {
 
         xabber.Omemo = Backbone.ModelWithStorage.extend({
             defaults: {
-                sessions: [],
+                sessions: {},
                 fingerprints: {},
                 device_id: ""
             },
@@ -756,6 +719,11 @@ define("xabber-omemo", function () {
             },
 
             onConnected: function () {
+                this.cached_messages = new xabber.DecryptedMessages({id: 'decrypted-messages'}, {
+                    account: this.account,
+                    storage_name: xabber.getStorageName() + '-decrypted-messages-' + this.account.get('jid'),
+                    fetch: 'before'
+                });
                 this.bundle = new xabber.Bundle(null, {store: this.store, model: this});
                 this.connection = this.account.connection;
                 this.registerMessageHandler();
@@ -830,6 +798,12 @@ define("xabber-omemo", function () {
                 return Math.floor(rand);
             },
 
+            updateMessage: function (attrs, contact) {
+                if (!this.cached_messages)
+                    return;
+                this.cached_messages.updateMessage(attrs, contact);
+            },
+
             registerMessageHandler: function () {
                 this.account.connection.deleteHandler(this._msg_handler);
                 this._msg_handler = this.account.connection.addHandler(function (message) {
@@ -841,11 +815,14 @@ define("xabber-omemo", function () {
             encrypt: function (contact, message) {
                 let peer = this.getPeer(contact.get('jid')),
                     $msg = $(message.tree()),
+                    origin_id = $msg.children('origin-id').attr('id'),
                     plaintext = $msg.children('body')[0].outerHTML;
 
                 $msg.children('reference').each(function (i, ref) {
                     plaintext += ref.outerHTML;
                 }.bind(this));
+
+                this.cached_messages.putMessage(contact, origin_id, plaintext);
 
                 return peer.encrypt(plaintext).then((encryptedMessage) => {
 
@@ -929,9 +906,25 @@ define("xabber-omemo", function () {
                         });
                     if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length)
                         options.carbon_copied = true;
+
+                    let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
+                        jid = Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from')),
+                        contact = this.account.contacts.get(jid),
+                        stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
+                        cached_msg = this.cached_messages.getMessage(contact, stanza_id);
+
+                    if (cached_msg) {
+                        options.encrypted = true;
+                        $message.find('body').remove();
+                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                        this.account.chats.receiveChatMessage($message[0], options);
+                        return;
+                    }
+
                     this.decrypt(message).then((decrypted_msg) => {
                         if (decrypted_msg) {
                             options.encrypted = true;
+                            this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
                             $message.find('body').remove();
                         }
                         else
@@ -1054,8 +1047,16 @@ define("xabber-omemo", function () {
 
             cacheSession: function (attrs) {
                 let id = attrs.id,
-                    session = attrs.rec;
-                this.account.omemo_sessions.putSession({id, session});
+                    session = attrs.rec,
+                    sessions = _.clone(this.get('sessions'));
+                _.isArray(sessions) && (sessions = {});
+                sessions[id] = session;
+                this.save('sessions', sessions);
+            },
+
+            getSession: function (id) {
+                let sessions = _.clone(this.get('sessions'));
+                return sessions[id];
             },
 
             publishBundle: async function () {
@@ -1075,6 +1076,47 @@ define("xabber-omemo", function () {
                                 this.publish(spk, ik.pubKey, pks);
                             }.bind(this));
                     }.bind(this));
+            }
+        });
+
+        xabber.DecryptedMessages = Backbone.ModelWithStorage.extend({
+            defaults: {
+                messages: {}
+            },
+
+            getMessage: function (contact, stanza_id) {
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                return contact_messages[stanza_id];
+            },
+
+            putMessage: function (contact, stanza_id, message) {
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                contact_messages[stanza_id] = message;
+                messages[contact.get('jid')] = contact_messages;
+                this.save('messages', messages);
+            },
+
+            removeMessage: function (attrs, contact) {
+                let origin_id = attrs.origin_id;
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                delete contact_messages[origin_id];
+                messages[contact.get('jid')] = contact_messages;
+                this.save('messages', messages);
+            },
+
+            updateMessage: function (attrs, contact) {
+                let stanza_id = attrs.stanza_id,
+                    origin_id = attrs.origin_id,
+                    messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {},
+                    message = contact_messages[origin_id];
+                if (origin_id)
+                    this.removeMessage({origin_id}, contact);
+                if (stanza_id)
+                    this.putMessage(contact, stanza_id, message);
             }
         });
 
@@ -1227,11 +1269,6 @@ define("xabber-omemo", function () {
         });
 
         xabber.Account.addInitPlugin(function () {
-            this.omemo_sessions = new xabber.OmemoSessionsList(null, {
-                name: `cached-omemo-sessions-list-${this.get('jid')}`,
-                objStoreName: 'sessions',
-                primKey: 'id'
-            });
             this.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
                 name: `cached-used-own-prekeys-list-${this.get('jid')}`,
                 objStoreName: 'prekeys',
