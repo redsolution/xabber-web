@@ -1479,6 +1479,7 @@ define("xabber-chats", function () {
             this.contact.on("change:name", this.updateName, this);
             this.contact.on("change:status", this.updateStatus, this);
             this.contact.on("change:private_chat", this.updateIcon, this);
+            this.contact.on("change:invitation", this.updateIcon, this);
             this.contact.on("change:incognito_chat", this.updateIcon, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onBlocked, this);
@@ -4412,6 +4413,7 @@ define("xabber-chats", function () {
 
                 if ($elem.hasClass('msg-hyperlink')) {
                     ev && ev.preventDefault();
+                    $elem.blur();
                     let link = $elem.attr('href');
                     utils.dialogs.ask("", ("Open this link?\n\n<b class='link'>" + decodeURI(link) + "</b>"), null, {ok_button_text: "open"}).done(function (result) {
                         if (result) {
