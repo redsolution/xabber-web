@@ -94,13 +94,13 @@ define("xabber-contacts", function () {
                     return 'ic-invitation-chat';
                 if (this.get('group_chat')) {
                     if (this.get('private_chat'))
-                        return 'ic-private-chat';
+                        return 'ic-private-contact';
                     if (this.get('incognito_chat'))
-                        return 'ic-incognito-chat';
-                    return 'ic-group-chat';
+                        return 'ic-incognito-contact';
+                    return 'ic-group-contact';
                 }
                 if (this.get('bot'))
-                    return 'ic-bot-chat';
+                    return 'ic-bot-contact';
                 return;
             },
 
