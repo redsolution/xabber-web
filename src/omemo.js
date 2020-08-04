@@ -868,16 +868,13 @@ define("xabber-omemo", function () {
                 });
             },
 
-            receiveMessage: function (message, options) {
-                options = options || {};
-                let $message = $(message),
-                    node = $message.find('items').attr('node'),
-                    from_jid = Strophe.getBareJidFromJid($message.attr('from'));
-
+            receiveHeadlineMessage: function (message) {
+                var $message = $(message),
+                    from_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                    node = $message.find('items').attr('node');
                 if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
                     if (node == `${Strophe.NS.OMEMO}:devices`) {
-                        let devices = this.account.connection.omemo.getUserDevices($message),
-                            contact = this.account.contacts.get(from_jid);
+                        let devices = this.account.connection.omemo.getUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.account.omemo.get('device_id');
@@ -897,14 +894,18 @@ define("xabber-omemo", function () {
                         this.getPeer(from_jid).getDevice(id);
                     }
                 }
+            },
 
+            receiveChatMessage: function (message, options) {
+                options = options || {};
+                let $message = $(message);
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
-                    if ($message.find('result[xmlns="'+Strophe.NS.MAM+'"]').length)
+                    if ($message.find('result[xmlns="' + Strophe.NS.MAM + '"]').length)
                         _.extend(options, {
                             is_mam: true,
                             is_archived: true
                         });
-                    if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length)
+                    if ($message.find('[xmlns="' + Strophe.NS.CARBONS + '"]').length)
                         options.carbon_copied = true;
 
                     let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
@@ -933,7 +934,14 @@ define("xabber-omemo", function () {
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
                 }
+            },
 
+            receiveMessage: function (message) {
+                let $message = $(message),
+                    type = $message.attr('type');
+                if (type === 'headline') {
+                    return this.receiveHeadlineMessage(message);
+                }
             },
 
             parseEncrypted: function ($encrypted) {

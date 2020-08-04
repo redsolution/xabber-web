@@ -4977,10 +4977,13 @@ define("xabber-chats", function () {
                 !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact));
                 if (!chat)
                     return;
-                let enc_chat = this.get(contact, 'encrypted'), enc_messages = enc_chat.messages.length;
-                var all_messages = chat.messages.models.concat(enc_chat.messages.models);
+                let enc_chat = this.getChat(contact, 'encrypted'), enc_messages = enc_chat.messages.models;
+                var all_messages = chat.messages.models;
                 $(all_messages).each(function (idx, item) {
                     chat.item_view.content.removeMessage(item);
+                }.bind(this));
+                $(enc_messages).each(function (idx, item) {
+                    enc_chat.item_view.content.removeMessage(item);
                 }.bind(this));
                 chat.item_view.updateLastMessage();
                 enc_messages && enc_chat.item_view.updateLastMessage();
@@ -5039,8 +5042,7 @@ define("xabber-chats", function () {
                 from_jid = $message.attr('from') || options.from_jid;
 
             if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
-                if (options.synced_msg)
-                    this.account.omemo.receiveMessage(message, options);
+                this.account.omemo.receiveChatMessage(message, options);
                 return;
             }
 
