@@ -5043,7 +5043,7 @@ define("xabber-chats", function () {
                 to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
                 from_jid = $message.attr('from') || options.from_jid;
 
-            if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo) {
+            if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
                 this.account.omemo.receiveChatMessage(message, options);
                 return;
             }
