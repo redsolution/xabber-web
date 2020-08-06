@@ -117,10 +117,14 @@ define("xabber-templates", [
     "text!templates/svg/ic-searching.html",
     "text!templates/svg/ic-invitation-chat.html",
     "text!templates/svg/ic-group-contact.html",
+    "text!templates/svg/ic-group-chat.html",
     "text!templates/svg/ic-blocked.html",
     "text!templates/svg/ic-incognito-contact.html",
+    "text!templates/svg/ic-incognito-chat.html",
     "text!templates/svg/ic-bot-contact.html",
+    "text!templates/svg/ic-bot-chat.html",
     "text!templates/svg/ic-private-contact.html",
+    "text!templates/svg/ic-private-chat.html",
     "text!templates/svg/volume-off-variant.html",
     "text!templates/svg/message-group.html",
     "text!templates/svg/xabber-offline.html",
@@ -288,10 +292,14 @@ define("xabber-templates", [
     addSvgTemplate('svg.ic-searching');
     addSvgTemplate('svg.ic-invitation-chat');
     addSvgTemplate('svg.ic-group-contact');
+    addSvgTemplate('svg.ic-group-chat');
     addSvgTemplate('svg.ic-blocked');
     addSvgTemplate('svg.ic-incognito-contact');
+    addSvgTemplate('svg.ic-incognito-chat');
     addSvgTemplate('svg.ic-bot-contact');
+    addSvgTemplate('svg.ic-bot-chat');
     addSvgTemplate('svg.ic-private-contact');
+    addSvgTemplate('svg.ic-private-chat');
     addSvgTemplate('svg.volume-off-variant');
     addSvgTemplate('svg.message-group');
     addSvgTemplate('svg.xabber-offline');

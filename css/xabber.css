@@ -3449,9 +3449,17 @@ body .client-body-wrap.hidden + #modals {
     margin: 0;
     box-sizing: content-box;
     left: 35px;
-    width: 18px !important;
-    height: 18px !important;
+    width: 16px !important;
+    height: 16px !important;
     background-color: white;
+}
+
+.message-item .chat-icon svg,
+.chat-item .chat-icon svg,
+.chat-head-wrap .chat-icon svg {
+    position: absolute;
+    top: -1px;
+    left: -1px;
 }
 
 .mention-item .mention-info,
