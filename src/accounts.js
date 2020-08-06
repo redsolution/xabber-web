@@ -43,6 +43,7 @@ define("xabber-accounts", function () {
                             to_sync: xabber.api_account.get('sync_all')
                         });
                     }
+                    _.isUndefined(this.settings.get('omemo')) && this.settings.save('omemo', true);
                     var settings = _.clone(this.settings.attributes);
                     settings.color || (settings.color = this.collection.getDefaultColor());
                     settings.order || (settings.order = this.collection.getLastOrder() + 1);
