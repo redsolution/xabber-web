@@ -1507,13 +1507,16 @@ define("xabber-accounts", function () {
 
             events: {
                 "change .enabled-state input": "setEnabled",
+                "change .setting-use-omemo input": "setEnabledOmemo",
+                "change .setting-send-device-description input": "setSendingDescription",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "change .sync-account": "changeSyncSetting",
                 "click .btn-delete-settings": "deleteSettings",
                 "click .color-values .color-value": "changeColor",
                 "click .token-wrap .btn-revoke-token": "revokeXToken",
-                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens"
+                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
+                "click .omemo-info .btn-remove-device": "removeDevice"
             },
 
             _initialize: function () {
@@ -1534,14 +1537,19 @@ define("xabber-accounts", function () {
                 this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
                 xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
                 this.model.on("change:enabled", this.updateEnabled, this);
+                this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
+                this.model.settings.on("change:device_label_sending", this.updateSendingDescription, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
             },
 
             render: function (options) {
+                this.updateSendingDescription();
+                this.updateEnabledOmemo();
                 this.updateEnabled();
                 this.updateXTokens();
+                this.updateDevices();
                 this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
@@ -1675,8 +1683,29 @@ define("xabber-accounts", function () {
             },
 
             updateEnabled: function () {
-                var enabled = this.model.get('enabled');
+                let enabled = this.model.get('enabled');
                 this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
+            },
+
+            updateEnabledOmemo: function () {
+                let enabled = this.model.settings.get('omemo');
+                this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
+                this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+                this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);
+            },
+
+            removeDevice: function (ev) {
+                let $target = $(ev.target).closest('.device-wrap'),
+                    data_id = $target.data('device-id'),
+                    omemo =  this.model.connection.omemo,
+                    devices = omemo.devices,
+                    device = devices.find(d => d.id == data_id),
+                    idx = devices.indexOf(device);
+                devices.splice(idx, 1);
+                omemo.publishDevice(null, null, function () {
+                    $target.detach();
+                }.bind(this));
+
             },
 
             updateReconnectButton: function () {
@@ -1684,9 +1713,72 @@ define("xabber-accounts", function () {
             },
 
             setEnabled: function (ev) {
-                var enabled = this.$('.enabled-state input').prop('checked');
+                let enabled = this.$('.enabled-state input').prop('checked');
                 this.model.save('enabled', enabled);
                 enabled ? this.model.activate() : this.model.deactivate();
+            },
+
+            setEnabledOmemo: function () {
+                let enabled = this.$('.setting-use-omemo input').prop('checked');
+                this.model.settings.save('omemo', enabled);
+                this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+                this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);
+                if (enabled)
+                    this.initOmemo();
+                else
+                    this.destroyOmemo();
+            },
+
+            updateSendingDescription: function () {
+                let enabled = this.model.settings.get('device_label_sending');
+                this.$('.setting-send-device-description input[type=checkbox]').prop('checked', enabled);
+            },
+
+            setSendingDescription: function () {
+                let enabled = this.$('.setting-send-device-description input').prop('checked');
+                this.model.settings.save('device_label_sending', enabled);
+            },
+
+            initOmemo: function () {
+                this.model.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                    name: `cached-used-own-prekeys-list-${this.model.get('jid')}`,
+                    objStoreName: 'prekeys',
+                    primKey: 'id'
+                });
+                this.model.omemo = new xabber.Omemo({id: 'omemo'}, {
+                    account: this.model,
+                    storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                    fetch: 'before'
+                });
+                setTimeout(function () {
+                    this.model.ownprekeys = new xabber.OwnPreKeys(null, {
+                        name: `cached-prekeys-list-${this.model.get('jid')}`,
+                        objStoreName: 'prekeys',
+                        primKey: 'id'
+                    });
+                    this.model.used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                        name: `cached-used-prekeys-list-${this.model.get('jid')}`,
+                        objStoreName: 'prekeys',
+                        primKey: 'id'
+                    });
+                    this.model.omemo.onConnected();
+                }.bind(this), 2000);
+            },
+
+            destroyOmemo: function () {
+                this.model.omemo = undefined;
+            },
+
+            updateDevices: function () {
+                this.$('.omemo-settings-wrap .own-devices').html("");
+                let conn = this.model.connection;
+                if (conn && conn.omemo)
+                    conn.omemo.devices.forEach(function (device) {
+                        let attrs = _.clone(device);
+                        attrs.this_device = this.model.omemo.get('device_id') == device.id;
+                        let tmpl = templates.device_item(attrs);
+                        this.$('.omemo-settings-wrap .own-devices').append(tmpl);
+                    }.bind(this));
             },
 
             showConnectionStatus: function () {
@@ -1777,6 +1869,7 @@ define("xabber-accounts", function () {
                 this.updateSyncState();
                 this.showConnectionStatus();
                 this.model.on("change:enabled", this.updateEnabled, this);
+                this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.settings.on("change:color", this.updateColorScheme, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);

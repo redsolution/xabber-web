@@ -67,9 +67,10 @@
             this._connection.sendIQ(iq, callback);
         };
 
-        var publishDevice = function (id, callback, errback) {
+        var publishDevice = function (id, label, callback, errback) {
             !this.devices && (this.devices = []);
-            this.devices.push({id});
+            if (id)
+                this.devices.push({id, label});
             let stanza = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: Strophe.NS.OMEMO + ':devices'})

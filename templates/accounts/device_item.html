@@ -1,0 +1,16 @@
+<div class="device-wrap" data-device-id="{{id}}">
+    <div class="device-wrap">
+        <div class="label">Device id: </div>
+        <div class="device one-line">{{id}}</div>
+        {[if (this_device) {]}
+        <div class="flag">(this)</div>
+        {[}]}
+    </div>
+    {[if (label) {]}
+    <div class="label-wrap">
+        <div class="label">Label: </div>
+        <div class="description one-line">{{label}}</div>
+    </div>
+    {[}]}
+    <i class="btn-remove-device mdi mdi-24px mdi-close"></i>
+</div>

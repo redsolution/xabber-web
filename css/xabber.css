@@ -3506,7 +3506,7 @@ body .client-body-wrap.hidden + #modals {
     left: 38px;
     width: 12px;
     height: 12px;
-    border: 2px solid #FFF;
+    border: 1px solid #FFF;
     border-radius: 50%;
 }
 
@@ -6397,11 +6397,50 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .capabilities-wrap,
 .details-panel .blocklist-wrap,
+.details-panel .omemo-settings-wrap,
 .details-panel .groups-wrap {
     position: relative;
     width: 50%;
     padding: 0 0 6px 38px;
     min-height: 56px;
+}
+
+.details-panel .omemo-settings-wrap .device-wrap,
+.details-panel .omemo-settings-wrap .setting-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 36px;
+}
+
+.details-panel .omemo-settings-wrap .own-devices-wrap {
+    padding: 8px 0;
+}
+
+.details-panel .omemo-settings-wrap .flag {
+    margin-left: 4px;
+    color: #0f9d58;
+    font-size: 12px;
+}
+
+.details-panel .omemo-settings-wrap .label {
+    font-weight: 300;
+    color: #9E9E9E;
+    margin-right: 8px;
+}
+
+.details-panel .omemo-settings-wrap .device,
+.details-panel .omemo-settings-wrap .description {
+    font-weight: 300;
+}
+
+.details-panel .own-devices-wrap .block-name {
+    font-size: 16px;
+}
+
+.details-panel .own-devices-wrap .btn-remove-device {
+    cursor: pointer;
+    color: #757575;
 }
 
 .details-panel .groups-wrap {
@@ -7144,7 +7183,7 @@ input[type='range'].voice-message-volume:focus {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 4px solid #FFFFFF;
+    border: 2px solid #FFFFFF;
 }
 
 .details-panel .main-info .contact-name-wrap {

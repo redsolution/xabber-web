@@ -963,7 +963,7 @@ define("xabber-chats", function () {
             if (!message.get('origin_id'))
                 this.item_view.content.$('.chat-message[data-uniqueid="' + stanza_id + '"]').data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id);
             if (this.get('encrypted'))
-                this.account.omemo.updateMessage({stanza_id, origin_id}, this.contact);
+                this.account.omemo && this.account.omemo.updateMessage({stanza_id, origin_id}, this.contact);
         },
 
         getCallingAvailability: function (to, session_id, callback) {
@@ -3700,7 +3700,7 @@ define("xabber-chats", function () {
                 message.set('state', constants.MSG_PENDING);
             }
 
-            if (message.get('encrypted')) {
+            if (message.get('encrypted') && this.account.omemo) {
                 this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
                     let msg_sending_timestamp = moment.now();
                     this.account.sendMsg(stanza, function () {
@@ -5043,7 +5043,7 @@ define("xabber-chats", function () {
                 to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
                 from_jid = $message.attr('from') || options.from_jid;
 
-            if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
+            if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo) {
                 this.account.omemo.receiveChatMessage(message, options);
                 return;
             }
@@ -6265,8 +6265,8 @@ define("xabber-chats", function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
             this.$('.btn-call-attention').hideIf(is_group_chat);
-            this.$('.btn-start-encryption').showIf(!is_group_chat && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
-            this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.model.get('encrypted'));
+            this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
@@ -6471,6 +6471,8 @@ define("xabber-chats", function () {
         },
 
         showFingerprints: function () {
+            if (!this.account.omemo)
+                return;
             let peer = this.account.omemo.getPeer(this.contact.get('jid'));
             peer.fingerprints.open();
         },

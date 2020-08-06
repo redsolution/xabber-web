@@ -154,7 +154,7 @@ define("xabber-strophe", function () {
                     id: uniq_id
                 }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('device').t('PC, ' + navigator.platform);
+                    .c('device').t('PC, ' + window.navigator.platform);
 
                 handler = function (stanza) {
                     var iqtype = stanza.getAttribute('type');

@@ -33,6 +33,10 @@ define("xabber-omemo", function () {
             updateDevices: function (devices) {
                 if (!devices)
                     return;
+                for (let d in this.devices) {
+                    if (!devices.indexOf(d))
+                        delete this.devices[d];
+                }
                 devices.forEach(function (device) {
                     this.getDevice(device.id);
                 }.bind(this));
@@ -765,8 +769,10 @@ define("xabber-omemo", function () {
                 if (this.connection) {
                     let omemo = this.connection.omemo;
                     if (omemo.devices.length) {
-                        if (!omemo.devices.find(d => d.id == device_id)) {
-                            omemo.publishDevice(device_id, function () {
+                        let device = omemo.devices.find(d => d.id == device_id);
+                        if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
+                            let label = this.account.settings.get('omemo_description') ? ('PC, ' + window.navigator.platform) : null;
+                            omemo.publishDevice(device_id, label, function () {
                                 this.account.trigger('device_published');
                             }.bind(this));
                         }
@@ -776,8 +782,10 @@ define("xabber-omemo", function () {
                     else
                         omemo.getDevicesNode(null, function (cb) {
                             omemo.devices = omemo.getUserDevices($(cb));
-                            if (!omemo.devices.find(d => d.id == device_id)) {
-                                omemo.publishDevice(device_id, function () {
+                            let device = omemo.devices.find(d => d.id == device_id);
+                            if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
+                                let label = this.account.settings.get('omemo_description') ? ('PC, ' + window.navigator.platform) : null;
+                                omemo.publishDevice(device_id, label, function () {
                                     this.account.trigger('device_published');
                                 }.bind(this));
                             }
@@ -877,11 +885,14 @@ define("xabber-omemo", function () {
                         let devices = this.account.connection.omemo.getUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
                             this.account.connection.omemo.devices = devices;
-                            let device_id = this.account.omemo.get('device_id');
-                            if (!this.account.connection.omemo.devices.find(d => d.id == device_id))
-                                this.account.connection.omemo.publishDevice(device_id, () => {
+                            let device_id = this.account.omemo.get('device_id'),
+                                device = this.account.connection.omemo.devices.find(d => d.id == device_id);
+                            if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
+                                let label = this.account.settings.get('omemo_description') ? ('PC, ' + window.navigator.platform) : null;
+                                this.account.connection.omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
                                 });
+                            }
                             this.account.trigger("devices_updated");
                         }
                         else {
@@ -1277,6 +1288,8 @@ define("xabber-omemo", function () {
         });
 
         xabber.Account.addInitPlugin(function () {
+            if (!this.settings.get('omemo'))
+                return;
             this.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
                 name: `cached-used-own-prekeys-list-${this.get('jid')}`,
                 objStoreName: 'prekeys',
@@ -1290,6 +1303,8 @@ define("xabber-omemo", function () {
         });
 
         xabber.Account.addConnPlugin(function () {
+            if (!this.settings.get('omemo'))
+                return;
             this.ownprekeys = new xabber.OwnPreKeys(null, {
                 name: `cached-prekeys-list-${this.get('jid')}`,
                 objStoreName: 'prekeys',
