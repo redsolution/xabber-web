@@ -1059,6 +1059,7 @@ body .client-body-wrap.hidden + #modals {
     top: 8px;
     left: 8px;
     color: #C0C0C0;
+    fill: #C0C0C0;
 }
 
 .toolbar .add-variant .text {
@@ -1071,6 +1072,7 @@ body .client-body-wrap.hidden + #modals {
 .toolbar .add-variant:hover .mdi,
 .toolbar .add-variant:hover .text {
     color: #FFFFFF;
+    fill: #FFFFFF;
 }
 
 .toolbar .accounts-wrap {
