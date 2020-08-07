@@ -10,7 +10,7 @@
         this._connection = null;
         init = function(c) {
             this._connection = c;
-            this.devices = [];
+            this.devices = {};
             Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
             this._connection.disco.addFeature(Strophe.NS.OMEMO);
             this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');
@@ -19,12 +19,12 @@
         };
 
         var getUserDevices = function ($stanza) {
-            let devices = [];
+            let devices = {};
             $stanza.find(`devices[xmlns="${Strophe.NS.OMEMO}"] device`).each(function(idx, device) {
                 let $device = $(device),
                     id = $device.attr('id'),
                     label = $device.attr(('label'));
-                id && devices.push({id, label});
+                id && (devices[id] = {id, label});
             }.bind(this));
             return devices;
         };
@@ -61,28 +61,29 @@
             let iq = $iq({from:this._connection.jid, type:'set'})
                 .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
                 .c('create',{node:node});
-            if(options) {
+            if (options) {
                 iq.up().c('configure').form(Strophe.NS.PUBSUB_NODE_CONFIG, options);
             }
             this._connection.sendIQ(iq, callback);
         };
 
         var publishDevice = function (id, label, callback, errback) {
-            !this.devices && (this.devices = []);
+            !this.devices && (this.devices = {});
             if (id)
-                this.devices.push({id, label});
+                this.devices[id] = {id, label};
             let stanza = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: Strophe.NS.OMEMO + ':devices'})
                 .c('item', {id: 'current'})
                 .c('devices', {xmlns: Strophe.NS.OMEMO});
-            this.devices.forEach(function (device) {
+            for (var i in this.devices) {
+                let device = this.devices[i];
                 if (!device.id)
                     return;
                 let attrs = {id: device.id};
                 device.label && (attrs.label = device.label);
                 stanza.c('device', attrs).up();
-            }.bind(this));
+            }
             this._connection.sendIQ(stanza, callback, errback);
         };
 

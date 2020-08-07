@@ -1510,6 +1510,7 @@ define("xabber-accounts", function () {
                 "change .enabled-state input": "setEnabled",
                 "change .setting-use-omemo input": "setEnabledOmemo",
                 "change .setting-send-device-description input": "setSendingDescription",
+                "click .btn-edit-description-text": "editDescriptionText",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "change .sync-account": "changeSyncSetting",
@@ -1737,11 +1738,24 @@ define("xabber-accounts", function () {
             updateSendingDescription: function () {
                 let enabled = this.model.settings.get('device_label_sending');
                 this.$('.setting-send-device-description input[type=checkbox]').prop('checked', enabled);
+                this.$('.setting-device-description-text').switchClass('hidden', !enabled);
             },
 
             setSendingDescription: function () {
                 let enabled = this.$('.setting-send-device-description input').prop('checked');
                 this.model.settings.save('device_label_sending', enabled);
+                enabled && this.editDescriptionText();
+            },
+
+            editDescriptionText: function () {
+                let default_desc = 'PC, ' + window.navigator.platform,
+                    current_description = this.model.settings.get('device_label_text') || default_desc;
+                utils.dialogs.ask_enter_value('Description text', null, {input_value: current_description}, { ok_button_text: 'save'}).done(function (result) {
+                    if (result) {
+                        this.model.settings.save('device_label_text', result);
+                    } else if (result == "")
+                        this.model.settings.save('device_label_text', default_desc);
+                }.bind(this));
             },
 
             initOmemo: function () {
@@ -1778,12 +1792,13 @@ define("xabber-accounts", function () {
                 this.$('.omemo-settings-wrap .own-devices').html("");
                 let conn = this.model.connection;
                 if (conn && conn.omemo)
-                    conn.omemo.devices.forEach(function (device) {
-                        let attrs = _.clone(device);
+                    for (let i in conn.omemo.devices) {
+                        let device = conn.omemo.devices[i],
+                            attrs = _.clone(device);
                         attrs.this_device = this.model.omemo.get('device_id') == device.id;
                         let tmpl = templates.device_item(attrs);
                         this.$('.omemo-settings-wrap .own-devices').append(tmpl);
-                    }.bind(this));
+                    }
             },
 
             showConnectionStatus: function () {
