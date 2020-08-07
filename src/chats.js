@@ -4827,13 +4827,6 @@ define("xabber-chats", function () {
                 return chat.messages.createSystemMessage({from_jid: msg_from, message: 'Attention was requested', attention: true});
             }
 
-            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
-                if (!contact)
-                    return;
-                let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#user-updated"]').attr('version');
-                if (participant_version && contact.participants && contact.participants.version < participant_version)
-                    contact.trigger('update_participants');
-            }
             if ($message.find('replace[xmlns="'+ Strophe.NS.REWRITE +'#notify"]').length) {
                 !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
                 if (!chat)
@@ -5043,6 +5036,14 @@ define("xabber-chats", function () {
             var contact = this.account.contacts.mergeContact(contact_jid),
                 chat = this.account.chats.getChat(contact),
                 stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
+
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
+                if (!contact)
+                    return;
+                let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
+                if (participant_version && contact.participants && contact.participants.version < participant_version)
+                    contact.trigger('update_participants');
+            }
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();
