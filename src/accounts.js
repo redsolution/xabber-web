@@ -1750,7 +1750,7 @@ define("xabber-accounts", function () {
             editDescriptionText: function () {
                 let default_desc = 'PC, ' + window.navigator.platform,
                     current_description = this.model.settings.get('device_label_text') || default_desc;
-                utils.dialogs.ask_enter_value('Description text', null, {input_value: current_description}, { ok_button_text: 'save'}).done(function (result) {
+                utils.dialogs.ask_enter_value('Description text', null, {input_value: current_description, input_placeholder_value: current_description}, { ok_button_text: 'save'}).done(function (result) {
                     if (result) {
                         this.model.settings.save('device_label_text', result);
                     } else if (result == "")
