@@ -2391,7 +2391,7 @@ define("xabber-contacts", function () {
                     return;
                 let participant_jid = this.participant.get('jid'),
                     participant_in_roster = this.account.contacts.get(participant_jid);
-                if (!participant_jid) {
+                if (!participant_jid || this.contact.get('incognito_chat')) {
                     let iq = $iq({from: this.account.get('jid'), to: this.account.domain/*Strophe.getDomainFromJid(this.contact.get('jid'))*/, type: 'set'})
                         .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
