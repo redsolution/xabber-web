@@ -1,16 +1,19 @@
 <div class="device-wrap" data-device-id="{{id}}">
     <div class="device-info-wrap">
         <div class="device-id-wrap">
-            <div class="label">Device id: </div>
+            <div class="label">DeviceID: </div>
             <div class="device one-line">{{id}}</div>
             {[if (this_device) {]}
-            <div class="flag">(this)</div>
+            <div class="flag">this device</div>
             {[}]}
         </div>
-        {[if (label) {]}
+        {[if (label || this_device) {]}
         <div class="label-wrap">
-            <div class="label">Label: </div>
+            {[if (this_device) {]}
+            <input class="description one-line" value="{{label}}">
+            {[} else {]}
             <div class="description one-line">{{label}}</div>
+            {[}]}
         </div>
         {[}]}
     </div>

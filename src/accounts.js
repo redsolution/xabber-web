@@ -1509,8 +1509,6 @@ define("xabber-accounts", function () {
             events: {
                 "change .enabled-state input": "setEnabled",
                 "change .setting-use-omemo input": "setEnabledOmemo",
-                "change .setting-send-device-description input": "setSendingDescription",
-                "click .btn-edit-description-text": "editDescriptionText",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "change .sync-account": "changeSyncSetting",
@@ -1540,14 +1538,12 @@ define("xabber-accounts", function () {
                 xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
                 this.model.on("change:enabled", this.updateEnabled, this);
                 this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
-                this.model.settings.on("change:device_label_sending", this.updateSendingDescription, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
             },
 
             render: function (options) {
-                this.updateSendingDescription();
                 this.updateEnabledOmemo();
                 this.updateEnabled();
                 this.updateXTokens();
@@ -1735,29 +1731,6 @@ define("xabber-accounts", function () {
                     this.destroyOmemo();
             },
 
-            updateSendingDescription: function () {
-                let enabled = this.model.settings.get('device_label_sending');
-                this.$('.setting-send-device-description input[type=checkbox]').prop('checked', enabled);
-                this.$('.setting-device-description-text').switchClass('hidden', !enabled);
-            },
-
-            setSendingDescription: function () {
-                let enabled = this.$('.setting-send-device-description input').prop('checked');
-                this.model.settings.save('device_label_sending', enabled);
-                enabled && this.editDescriptionText();
-            },
-
-            editDescriptionText: function () {
-                let default_desc = 'PC, ' + window.navigator.platform,
-                    current_description = this.model.settings.get('device_label_text') || default_desc;
-                utils.dialogs.ask_enter_value('Description text', null, {input_value: current_description, input_placeholder_value: current_description}, { ok_button_text: 'save'}).done(function (result) {
-                    if (result) {
-                        this.model.settings.save('device_label_text', result);
-                    } else if (result == "")
-                        this.model.settings.save('device_label_text', default_desc);
-                }.bind(this));
-            },
-
             initOmemo: function () {
                 this.model.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
                     name: `cached-used-own-prekeys-list-${this.model.get('jid')}`,
@@ -1798,6 +1771,11 @@ define("xabber-accounts", function () {
                         attrs.this_device = this.model.omemo.get('device_id') == device.id;
                         let tmpl = templates.device_item(attrs);
                         this.$('.omemo-settings-wrap .own-devices').append(tmpl);
+                        this.$('.omemo-settings-wrap .own-devices input.description')[0].onblur = function (ev) {
+                            let label = ev.target.value;
+                            this.model.settings.save('device_label_text', label);
+                            this.model.connection.omemo.publishDevice($(ev.target).closest('.device-wrap').data('device-id'), label);
+                        }.bind(this);
                     }
             },
 

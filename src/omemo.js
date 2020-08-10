@@ -276,7 +276,7 @@ define("xabber-omemo", function () {
                                 is_trusted = $(tr).children('th[data-trust]').data('trust'),
                                 device_id = Number($(tr).children('th:not(.fingerprint):not([data-trust])').text());
                             $(tr).children('th[data-trust]').attr('data-trust', trust).text(trust);
-                            this.omemo.updateFingerprints(this.jid, fingerprint, trust);
+                            this.omemo.updateFingerprints((this.$('.contact-devices.active').length ? this.jid : this.account.get('jid')), fingerprint, trust);
                             let device = this.model.getDevice(device_id);
                             if (is_trusted != trust) {
                                 device.set('trusted', trust);
@@ -592,13 +592,14 @@ define("xabber-omemo", function () {
                 try {
                     let sessionCipher = new SessionCipher(this.store, this.address), plainText;
 
+                    if (!this.store.hasSession(this.address.toString())) {
+                        let session = this.getCachedSession();
+                        session && await this.store.storeSession(this.address.toString(), session);
+                    }
+
                     if (preKey)
                         plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
                     else {
-                        if (!this.store.hasSession(this.address.toString())) {
-                             let session = this.getCachedSession();
-                            session && await this.store.storeSession(this.address.toString(), session);
-                        }
                         plainText = await sessionCipher.decryptWhisperMessage(cipherText, 'binary');
                     }
 
@@ -774,8 +775,8 @@ define("xabber-omemo", function () {
                     let omemo = this.connection.omemo;
                     if (omemo.devices.length) {
                         let device = omemo.devices[device_id];
-                        if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
-                            let label = this.account.settings.get('device_label_text') ? ('PC, ' + window.navigator.platform) : null;
+                        if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                            let label = this.account.settings.get('device_label_text');
                             omemo.publishDevice(device_id, label, function () {
                                 this.account.trigger('device_published');
                             }.bind(this));
@@ -787,8 +788,8 @@ define("xabber-omemo", function () {
                         omemo.getDevicesNode(null, function (cb) {
                             omemo.devices = omemo.getUserDevices($(cb));
                             let device = omemo.devices[device_id];
-                            if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
-                                let label = this.account.settings.get('device_label_text') ? ('PC, ' + window.navigator.platform) : null;
+                            if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                                let label = this.account.settings.get('device_label_text');
                                 omemo.publishDevice(device_id, label, function () {
                                     this.account.trigger('device_published');
                                 }.bind(this));
@@ -891,8 +892,8 @@ define("xabber-omemo", function () {
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.account.omemo.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
-                            if (!device || (device && (!device.label && this.account.settings.get('device_label_sending') || device.label && !this.account.settings.get('device_label_sending')))) {
-                                let label = this.account.settings.get('device_label_text') ? ('PC, ' + window.navigator.platform) : null;
+                            if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                                let label = this.account.settings.get('device_label_text');
                                 this.account.connection.omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
                                 });

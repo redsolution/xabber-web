@@ -6181,7 +6181,8 @@ define("xabber-chats", function () {
             "click .btn-unblock-contact": "unblockContact",
             "click .btn-export-history": "exportHistory",
             "click .btn-show-fingerprints": "showFingerprints",
-            "click .btn-start-encryption": "openEncryptedChat",
+            "click .btn-start-encryption": "startEncryptedChat",
+            "click .btn-open-encryption": "openEncryptedChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -6267,6 +6268,7 @@ define("xabber-chats", function () {
             this.$('.btn-invite-users').showIf(is_group_chat);
             this.$('.btn-call-attention').hideIf(is_group_chat);
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-open-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
@@ -6478,11 +6480,16 @@ define("xabber-chats", function () {
             peer.fingerprints.open();
         },
 
-        openEncryptedChat: function () {
+        startEncryptedChat: function () {
             this.account.chats.openChat(this.contact, {encrypted: true});
             let chat = this.account.chats.get(this.contact.hash_id + ':encrypted');
             chat.set('timestamp', moment.now());
             chat.item_view.updateLastMessage();
+        },
+
+        openEncryptedChat: function () {
+            this.model.set('opened', true);
+            this.account.chats.openChat(this.contact, {encrypted: true});
         }
     });
 

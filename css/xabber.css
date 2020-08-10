@@ -6407,7 +6407,6 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .capabilities-wrap,
 .details-panel .blocklist-wrap,
-.details-panel .omemo-settings-wrap,
 .details-panel .groups-wrap {
     position: relative;
     width: 50%;
@@ -6415,12 +6414,27 @@ input[type='range'].voice-message-volume:focus {
     min-height: 56px;
 }
 
+.details-panel .omemo-settings-wrap {
+    position: relative;
+    width: 75%;
+    padding: 0 38px 6px 38px;
+}
+
 .details-panel .omemo-settings-wrap .device-wrap,
 .details-panel .omemo-settings-wrap .device-id-wrap,
 .details-panel .omemo-settings-wrap .label-wrap,
 .details-panel .omemo-settings-wrap .setting-wrap {
     display: flex;
+    position: relative;
     align-items: center;
+}
+
+.details-panel .omemo-settings-wrap .device-info-wrap {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: calc(100% - 36px);
 }
 
 .details-panel .omemo-settings-wrap .setting-wrap,
@@ -6435,9 +6449,14 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .omemo-settings-wrap .flag {
-    margin-left: 8px;
+    /*margin-left: 8px;
     color: #0f9d58;
-    font-size: 12px;
+    font-size: 12px;*/
+    position: absolute;
+    right: 0;
+    font-size: 10px;
+    bottom: -10px;
+    color: #9E9E9E;
 }
 
 .details-panel .omemo-settings-wrap .label {
@@ -6452,9 +6471,16 @@ input[type='range'].voice-message-volume:focus {
     font-weight: 300;
 }
 
-
 .details-panel .omemo-settings-wrap .description {
     color: #424242;
+    padding: 0 0 0 16px;
+}
+
+.details-panel .omemo-settings-wrap input.description {
+    padding: 0 4px;
+    margin: 0 0 0 12px;
+    height: 24px;
+    text-align: right;
 }
 
 .details-panel .own-devices-wrap .block-name {
@@ -6464,18 +6490,6 @@ input[type='range'].voice-message-volume:focus {
 .details-panel .own-devices-wrap .btn-remove-device {
     cursor: pointer;
     color: #757575;
-}
-
-.details-panel .omemo-settings-wrap .setting-device-description-text {
-    font-size: 12px;
-    cursor: pointer;
-    color: #757575;
-    font-weight: 300;
-    line-height: 24px;
-}
-
-.details-panel .omemo-settings-wrap .btn-edit-description-text:hover {
-    color: #424242;
 }
 
 .details-panel .groups-wrap {
