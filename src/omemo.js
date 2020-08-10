@@ -213,7 +213,7 @@ define("xabber-omemo", function () {
                     let device = devices[device_id];
                     if (device.get('ik')) {
                         let f = await device.generateFingerprint(),
-                            is_trusted = (this.omemo.get('fingerprints')[this.jid] || []).indexOf(f) < 0 ? false : true;
+                            is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
                         $container.append(this.addRow(device.id, is_trusted, f));
                         counter++;
                         if (devices_count == counter)
@@ -227,7 +227,7 @@ define("xabber-omemo", function () {
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = await device.generateFingerprint(),
-                                    is_trusted = (this.omemo.get('fingerprints')[this.jid] || []).indexOf(f) < 0 ? false : true;
+                                    is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
                                 $container.append(this.addRow(device.id, is_trusted, f));
                             }
                             counter++;
