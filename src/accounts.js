@@ -1771,11 +1771,13 @@ define("xabber-accounts", function () {
                         attrs.this_device = this.model.omemo.get('device_id') == device.id;
                         let tmpl = templates.device_item(attrs);
                         this.$('.omemo-settings-wrap .own-devices').append(tmpl);
-                        this.$('.omemo-settings-wrap .own-devices input.description')[0].onblur = function (ev) {
-                            let label = ev.target.value;
-                            this.model.settings.save('device_label_text', label);
-                            this.model.connection.omemo.publishDevice($(ev.target).closest('.device-wrap').data('device-id'), label);
-                        }.bind(this);
+                        if (attrs.this_device) {
+                            this.$('.omemo-settings-wrap .own-devices input.description')[0].onblur = function (ev) {
+                                let label = ev.target.value;
+                                this.model.settings.save('device_label_text', label);
+                                this.model.connection.omemo.publishDevice($(ev.target).closest('.device-wrap').data('device-id'), label);
+                            }.bind(this);
+                        }
                     }
             },
 
