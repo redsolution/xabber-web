@@ -1544,6 +1544,10 @@ body .client-body-wrap.hidden + #modals {
     width: 600px !important;
 }
 
+.fingerprints-wrap table {
+    table-layout: fixed;
+}
+
 .fingerprints-wrap .fingerprints-header {
     display: flex;
     flex-direction: row;
@@ -1582,6 +1586,9 @@ body .client-body-wrap.hidden + #modals {
     font-weight: 300;
     font-size: 14px;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .fingerprints-wrap tr.selected {
     background-color: #F5F5F5;
@@ -1605,10 +1612,16 @@ body .client-body-wrap.hidden + #modals {
 
 .fingerprints-wrap tr>th:first-child {
     padding-left: 24px;
+    width: 20%;
+}
+
+.fingerprints-wrap tr>th:nth-child(3) {
+    width: 10%;
 }
 
 .fingerprints-wrap tr>th:last-child {
     padding-right: 24px;
+    width: 50%;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap >div {

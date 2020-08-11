@@ -38,7 +38,9 @@ define("xabber-omemo", function () {
                         delete this.devices[d];
                 }
                 for (let d in devices) {
-                    this.getDevice(d);
+                    let device = this.getDevice(d),
+                        label = devices[d].label;
+                    label && device.set('label', label);
                 }
             },
 
@@ -54,7 +56,9 @@ define("xabber-omemo", function () {
                         delete this.own_devices[d];
                 }
                 for (let d in devices) {
-                    this.getOwnDevice(d);
+                    let device = this.getOwnDevice(d),
+                        label = devices[d].label;
+                    label && device.set('label', label);
                 }
             },
 
@@ -174,15 +178,6 @@ define("xabber-omemo", function () {
                 this.renderDevices();
             },
 
-            renderOwnFingerprint: async function () {
-               /* let pubKey = utils.fromBase64toArrayBuffer(JSON.parse(this.omemo.get('identityKey')).pubKey),
-                    device_id = this.omemo.get('device_id'),
-                    device = this.model.getDevice(device_id);
-                if (!device.get('ik'))
-                    device.set('ik', pubKey);
-                this.$('.own-fingerprint-wrap .fingerprint').text(await device.generateFingerprint());*/
-            },
-
             renderDevices: function () {
                 if (_.keys(this.model.devices).length)
                     this.updateContactFingerprints();
@@ -191,7 +186,6 @@ define("xabber-omemo", function () {
                         this.updateContactFingerprints();
                     });
                 this.updateOwnFingerprints();
-                this.renderOwnFingerprint();
             },
 
             render: function () {
@@ -214,7 +208,7 @@ define("xabber-omemo", function () {
                     if (device.get('ik')) {
                         let f = await device.generateFingerprint(),
                             is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
-                        $container.append(this.addRow(device.id, is_trusted, f));
+                        $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
                         if (devices_count == counter)
                             dfd.resolve($container.find('tr').length);
@@ -228,7 +222,7 @@ define("xabber-omemo", function () {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = await device.generateFingerprint(),
                                     is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
-                                $container.append(this.addRow(device.id, is_trusted, f));
+                                $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
                             counter++;
                             if (devices_count == counter)
@@ -289,11 +283,12 @@ define("xabber-omemo", function () {
                 }.bind(this));
             },
 
-            addRow: function (id, trust, fingerprint) {
+            addRow: function (id, label, trust, fingerprint) {
                 let $row = $('<tr/>');
                 $row.append($('<th/>').text(id));
+                $row.append($('<th/>').text(label || ""));
                 $row.append($(`<th data-trust="${trust}"/>`).text(trust));
-                $row.append($('<th class="fingerprint"/>').text(fingerprint));
+                $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint));
                 return $row;
             }
         });
