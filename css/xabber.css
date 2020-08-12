@@ -6493,7 +6493,6 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 4px;
     margin: 0 0 0 12px;
     height: 24px;
-    text-align: right;
 }
 
 .details-panel .own-devices-wrap .block-name {

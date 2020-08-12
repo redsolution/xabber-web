@@ -287,6 +287,11 @@ define("xabber-chats", function () {
                             images.push(file_attrs);
                         else
                             files.push(file_attrs);
+                        if (options.encrypted) {
+                            files.each(function (i, file) {
+                                this.decryptFile(file.first());
+                            });
+                        }
                     }
                 } else if (type === 'data') {}
             }.bind(this));
@@ -393,6 +398,25 @@ define("xabber-chats", function () {
             message = this.create(attrs);
             return message;
         },
+
+          decryptFile: async function (file) {
+              var uri = file.replace(/^aesgcm/, 'https'),
+                  iv_and_key = uri.slice(uri.length - 89),
+                  iv = iv_and_key.slice(0, 25),
+                  key = iv_and_key.slice(24);
+              uri = uri.slice(0, uri.length - 89);
+              let arrayBuffer;
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", uri, true);
+              xhr.responseType = "arraybuffer";
+
+              xhr.onload = async function () {
+                  arrayBuffer = xhr.response; // Note: not oReq.responseText
+
+                  let enc_file = await utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16)));
+                  console.log(enc_file);
+              }.bind(this);
+          },
 
         getFilename: function (url_media) {
             let idx = url_media.lastIndexOf("/");
@@ -3656,7 +3680,7 @@ define("xabber-chats", function () {
                     images = message.get('images') || [],
                     all_files = files.concat(images);
                 all_files.forEach(function (file, idx) {
-                    legacy_body = file.sources[0] + ((idx != all_files.length - 1) ? '\n' : "");
+                    legacy_body = (this.model.get('encrypted') ? (file.sources[0].replace(/^(https|http)/, 'aesgcm') + '#' + file.iv + file.key) : file.sources[0]) + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
                         end_idx = (body + legacy_body).length;
                     stanza.c('reference', {
@@ -3676,6 +3700,7 @@ define("xabber-chats", function () {
                     file.description && stanza.c('desc').t(file.description).up();
                     stanza.up().c('sources');
                     file.sources.forEach(function (u) {
+                        this.model.get('encrypted') && (u = u.replace(/^(https|http)/, 'aesgcm') + '#' + file.iv + file.key);
                         stanza.c('uri').t(u).up()
                     }.bind(this));
                     stanza.up().up().up();
@@ -3684,7 +3709,9 @@ define("xabber-chats", function () {
                     mutable_content.push({start: start_idx, end: end_idx});
                 }.bind(this));
                 message.set({type: 'main'});
+                return;
             }
+
 
             mutable_content.length && message.set({mutable_content: mutable_content});
 
@@ -3877,31 +3904,79 @@ define("xabber-chats", function () {
                                 image.height = data.height;
                                 image.width = data.width;
                             }
-                            new_files.push(image);
+                            if (data.encrypted_file)
+                                new_files.push(data.encrypted_file);
+                            else
+                                new_files.push(image);
                             file_counter++;
                             if (file_counter === files.length)
                                 deferred_all.resolve(new_files);
                         }.bind(this));
                     }.bind(this));
                     reader.onload = function (e) {
-                        if (file.type === 'image/svg+xml') {
-                            deferred.resolve();
+                        if (this.model.get('encrypted')) {
+                            this.encryptFile(e.target.result).then(function (encrypted) {
+                                let iv = utils.ArrayBuffertoBase64(encrypted.iv),
+                                    key = utils.ArrayBuffertoBase64(encrypted.keydata),
+                                    new_file = new File([encrypted.payload], file.name, {type: file.type, iv: iv, key: key});
+                                var a = document.createElement("a");
+                                let ffffile = new Blob([encrypted.payload], {type: file.type});
+                                a.href = URL.createObjectURL(ffffile);
+                                a.download = ffffile.name;
+                                a.click();
+                                if (new_file.type === 'image/svg+xml') {
+                                    deferred.resolve({encrypted_file: new_file});
+                                } else {
+                                    var image_prev = new Image();
+                                    image_prev.onload = function () {
+                                        var height = this.height,
+                                            width = this.width;
+                                        deferred.resolve({height: height, width: width, encrypted_file: new_file});
+                                    };
+                                    image_prev.src = e.target.result;
+                                }
+                            }.bind(this));
                         } else {
-                            var image_prev = new Image();
-                            image_prev.onload = function () {
-                                var height = this.height,
-                                    width = this.width;
-                                deferred.resolve({height: height, width: width});
-                            };
-                            image_prev.src = e.target.result;
+                            if (file.type === 'image/svg+xml') {
+                                deferred.resolve();
+                            } else {
+                                var image_prev = new Image();
+                                image_prev.onload = function () {
+                                    var height = this.height,
+                                        width = this.width;
+                                    deferred.resolve({height: height, width: width});
+                                };
+                                image_prev.src = e.target.result;
+                            }
                         }
-                    };
+                    }.bind(this);
                 }
                 else {
-                    new_files.push(file);
-                    file_counter++;
-                    if (file_counter === files.length)
-                        deferred_all.resolve(new_files);
+                    if (this.model.get('encrypted')) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            this.encryptFile(e.target.result).then(function (encrypted) {
+                                let iv = utils.ArrayBuffertoBase64(encrypted.iv),
+                                    key = utils.ArrayBuffertoBase64(encrypted.keydata),
+                                    new_file = new File([encrypted.payload], file.name, {type: file.type, iv: iv, key: key});
+                                var a = document.createElement("a");
+                                let ffffile = new Blob([encrypted.payload], {type: file.type});
+                                a.href = URL.createObjectURL(ffffile);
+                                a.download = ffffile.name;
+                                a.click();
+                                new_files.push(new_file);
+                                file_counter++;
+                                if (file_counter === files.length)
+                                    deferred_all.resolve(new_files);
+                            }.bind(this));
+                        }.bind(this);
+                        reader.readAsDataURL(file);
+                    } else {
+                        new_files.push(file);
+                        file_counter++;
+                        if (file_counter === files.length)
+                            deferred_all.resolve(new_files);
+                    }
                 }
             }.bind(this));
         },
@@ -3974,11 +4049,18 @@ define("xabber-chats", function () {
                         xhr.abort();
                     } else {
                         xhr.open("PUT", data.put_url, true);
-                        xhr.send(file);
+                        let enc_file = _.clone(file);
+                        delete enc_file.iv;
+                        delete enc_file.key;
+                        xhr.send(enc_file);
                     }
                 }.bind(this));
             }.bind(this));
         },
+
+          encryptFile: async function (file) {
+            return await utils.AES.encrypt(file);
+          },
 
         onFileUploaded: function (message, $message) {
             var files = message.get('files'),

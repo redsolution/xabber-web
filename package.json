@@ -20,7 +20,7 @@
     "http-server": "^0.9.0",
     "jquery": "~3.0.0",
     "moment": ">2.19.3",
-    "npm": "^4.5.0",
+    "npm": "^6.14.0",
     "perfect-scrollbar": "~0.6.16",
     "requirejs": "~2.3.3",
     "requirejs-text": "~2.0.15",

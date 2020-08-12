@@ -1700,10 +1700,8 @@ define("xabber-accounts", function () {
                 let $target = $(ev.target).closest('.device-wrap'),
                     data_id = $target.data('device-id'),
                     omemo =  this.model.connection.omemo,
-                    devices = omemo.devices,
-                    device = devices.find(d => d.id == data_id),
-                    idx = devices.indexOf(device);
-                devices.splice(idx, 1);
+                    devices = omemo.devices;
+                delete devices[data_id];
                 omemo.publishDevice(null, null, function () {
                     $target.detach();
                 }.bind(this));
