@@ -207,7 +207,7 @@ define("xabber-omemo", function () {
                     let device = devices[device_id];
                     if (device.get('ik')) {
                         let f = await device.generateFingerprint(),
-                            is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
+                            is_trusted = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
                         $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
                         if (devices_count == counter)
@@ -221,7 +221,7 @@ define("xabber-omemo", function () {
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = await device.generateFingerprint(),
-                                    is_trusted = (this.omemo.get('fingerprints')[(this.$('.contact-devices.active').length ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
+                                    is_trusted = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
                                 $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
                             counter++;
@@ -268,9 +268,9 @@ define("xabber-omemo", function () {
                         this.$('tr.selected').each(function (i, tr) {
                             let fingerprint = $(tr).children('.fingerprint').text(),
                                 is_trusted = $(tr).children('th[data-trust]').data('trust'),
-                                device_id = Number($(tr).children('th:not(.fingerprint):not([data-trust])').text());
+                                device_id = Number($(tr).children('th.device-id').text());
                             $(tr).children('th[data-trust]').attr('data-trust', trust).text(trust);
-                            this.omemo.updateFingerprints((this.$('.contact-devices.active').length ? this.jid : this.account.get('jid')), fingerprint, trust);
+                            this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, trust);
                             let device = this.model.getDevice(device_id);
                             if (is_trusted != trust) {
                                 device.set('trusted', trust);
@@ -285,7 +285,7 @@ define("xabber-omemo", function () {
 
             addRow: function (id, label, trust, fingerprint) {
                 let $row = $('<tr/>');
-                $row.append($('<th/>').text(id));
+                $row.append($('<th class="device-id"/>').text(id));
                 $row.append($('<th/>').text(label || ""));
                 $row.append($(`<th data-trust="${trust}"/>`).text(trust));
                 $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint));

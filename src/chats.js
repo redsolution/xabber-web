@@ -288,9 +288,11 @@ define("xabber-chats", function () {
                         else
                             files.push(file_attrs);
                         if (options.encrypted) {
-                            files.each(function (i, file) {
-                                this.decryptFile(file.first());
-                            });
+                            files.forEach(function (file) {
+                                this.decryptFile(file.sources[0]).then(function (fff) {
+                                    console.log(fff);
+                                });
+                            }.bind(this));
                         }
                     }
                 } else if (type === 'data') {}
@@ -400,22 +402,28 @@ define("xabber-chats", function () {
         },
 
           decryptFile: async function (file) {
-              var uri = file.replace(/^aesgcm/, 'https'),
-                  iv_and_key = uri.slice(uri.length - 89),
-                  iv = iv_and_key.slice(0, 25),
-                  key = iv_and_key.slice(24);
-              uri = uri.slice(0, uri.length - 89);
-              let arrayBuffer;
-              var xhr = new XMLHttpRequest();
-              xhr.open("GET", uri, true);
-              xhr.responseType = "arraybuffer";
+              return new Promise((resolve, reject) => {
+                  let uri = file.replace(/^aesgcm/, 'https'),
+                      iv_and_key = uri.slice(uri.length - 44 - 16),
+                      iv = iv_and_key.slice(0, 17),
+                      key = iv_and_key.slice(16);
+                  uri = uri.slice(0, uri.length - 44 - 16 - 1);
 
-              xhr.onload = async function () {
-                  arrayBuffer = xhr.response; // Note: not oReq.responseText
+                  fetch(uri).then((r) => {
+                      r.blob().then((blob) => {
+                          let filereader = new FileReader();
+                          filereader.onloadend = function () {
+                              let arrayBuffer = filereader.result;
+                              utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
+                                  let new_file = new File([enc_file]);
+                                  resolve(new_file);
+                              });
+                          }.bind(this);
+                          filereader.readAsArrayBuffer(blob);
+                      });
+                  });
 
-                  let enc_file = await utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16)));
-                  console.log(enc_file);
-              }.bind(this);
+              });
           },
 
         getFilename: function (url_media) {
@@ -3709,7 +3717,6 @@ define("xabber-chats", function () {
                     mutable_content.push({start: start_idx, end: end_idx});
                 }.bind(this));
                 message.set({type: 'main'});
-                return;
             }
 
 
@@ -3918,20 +3925,17 @@ define("xabber-chats", function () {
                             this.encryptFile(e.target.result).then(function (encrypted) {
                                 let iv = utils.ArrayBuffertoBase64(encrypted.iv),
                                     key = utils.ArrayBuffertoBase64(encrypted.keydata),
-                                    new_file = new File([encrypted.payload], file.name, {type: file.type, iv: iv, key: key});
-                                var a = document.createElement("a");
-                                let ffffile = new Blob([encrypted.payload], {type: file.type});
-                                a.href = URL.createObjectURL(ffffile);
-                                a.download = ffffile.name;
-                                a.click();
+                                    new_file = new File([encrypted.payload], file.name, {type: file.type});
+                                new_file.iv = iv;
+                                new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
-                                    deferred.resolve({encrypted_file: new_file});
+                                    deferred.resolve({encrypted_file: new_file, iv: iv, key: key});
                                 } else {
                                     var image_prev = new Image();
                                     image_prev.onload = function () {
                                         var height = this.height,
                                             width = this.width;
-                                        deferred.resolve({height: height, width: width, encrypted_file: new_file});
+                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, iv: iv, key: key});
                                     };
                                     image_prev.src = e.target.result;
                                 }
@@ -3958,13 +3962,10 @@ define("xabber-chats", function () {
                             this.encryptFile(e.target.result).then(function (encrypted) {
                                 let iv = utils.ArrayBuffertoBase64(encrypted.iv),
                                     key = utils.ArrayBuffertoBase64(encrypted.keydata),
-                                    new_file = new File([encrypted.payload], file.name, {type: file.type, iv: iv, key: key});
-                                var a = document.createElement("a");
-                                let ffffile = new Blob([encrypted.payload], {type: file.type});
-                                a.href = URL.createObjectURL(ffffile);
-                                a.download = ffffile.name;
-                                a.click();
-                                new_files.push(new_file);
+                                    encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                encrypted_file.iv = iv;
+                                encrypted_file.key = key;
+                                new_files.push(encrypted_file);
                                 file_counter++;
                                 if (file_counter === files.length)
                                     deferred_all.resolve(new_files);
@@ -3989,11 +3990,14 @@ define("xabber-chats", function () {
             $message.find('.progress').show();
             var files_count = 0;
             $(message.get('files')).each(function(idx, file) {
+                let enc_file = new File([file], file.name);
+                enc_file.iv && (delete enc_file.iv);
+                enc_file.key && (delete enc_file.key);
                 var iq = $iq({type: 'get', to: message.get('upload_service')})
                         .c('request', {xmlns: Strophe.NS.HTTP_UPLOAD})
-                        .c('filename').t(file.name).up()
-                        .c('size').t(file.size).up()
-                        .c('content-type').t(file.type).up(),
+                        .c('filename').t(enc_file.name).up()
+                        .c('size').t(enc_file.size).up()
+                        .c('content-type').t(enc_file.type).up(),
                     deferred = new $.Deferred(), self = this;
                 this.account.sendIQ(iq,
                     function (result) {
@@ -4049,9 +4053,6 @@ define("xabber-chats", function () {
                         xhr.abort();
                     } else {
                         xhr.open("PUT", data.put_url, true);
-                        let enc_file = _.clone(file);
-                        delete enc_file.iv;
-                        delete enc_file.key;
                         xhr.send(enc_file);
                     }
                 }.bind(this));
@@ -4073,6 +4074,8 @@ define("xabber-chats", function () {
                     size: file_.size,
                     sources: [file_.url]
                 };
+                file_.iv && (file_new_format.iv = file_.iv);
+                file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
                 if (this.isImageType(file_.type)) {

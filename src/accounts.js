@@ -1701,11 +1701,14 @@ define("xabber-accounts", function () {
                     data_id = $target.data('device-id'),
                     omemo =  this.model.connection.omemo,
                     devices = omemo.devices;
-                delete devices[data_id];
-                omemo.publishDevice(null, null, function () {
-                    $target.detach();
+                utils.dialogs.ask("Delete device", "Do you really want to delete device?", null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        delete devices[data_id];
+                        omemo.publishDevice(null, null, function () {
+                            $target.detach();
+                        }.bind(this));
+                    }
                 }.bind(this));
-
             },
 
             updateReconnectButton: function () {
