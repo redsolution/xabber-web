@@ -267,12 +267,12 @@ define("xabber-omemo", function () {
                         let trust = (result !== 'revoke');
                         this.$('tr.selected').each(function (i, tr) {
                             let fingerprint = $(tr).children('.fingerprint').text(),
-                                is_trusted = $(tr).children('th[data-trust]').data('trust'),
+                                is_trusted = $(tr).children('th[data-trust]').attr('data-trust'),
                                 device_id = Number($(tr).children('th.device-id').text());
                             $(tr).children('th[data-trust]').attr('data-trust', trust).text(trust);
                             this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, trust);
-                            let device = this.model.getDevice(device_id);
-                            if (is_trusted != trust) {
+                            let device = this.model.devices[device_id] || this.model.own_devices[device_id];
+                            if (device && is_trusted != trust) {
                                 device.set('trusted', trust);
                                 device.is_session_initiated = false;
                                 device.preKeys = null;
