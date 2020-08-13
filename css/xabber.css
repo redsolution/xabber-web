@@ -746,6 +746,10 @@ body .client-body-wrap.hidden + #modals {
     z-index: -1;
 }
 
+body .lean-overlay + .client-body-wrap.hidden ~ #modals {
+    z-index: 1500;
+}
+
 .toolbar {
     position: absolute;
     top: 0;
