@@ -235,7 +235,7 @@ define("xabber-chats", function () {
                 },
                 mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [];
 
-            options.encrypted && (attrs.encrypted = true);
+            options.encrypted && _.extend(attrs, {encrypted: true});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -398,6 +398,9 @@ define("xabber-chats", function () {
             }
 
             message = this.create(attrs);
+
+            (options.encrypted && options.is_unread) && message.set('is_unread', true);
+
             return message;
         },
 

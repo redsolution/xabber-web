@@ -1701,7 +1701,7 @@ define("xabber-accounts", function () {
                     data_id = $target.data('device-id'),
                     omemo =  this.model.connection.omemo,
                     devices = omemo.devices;
-                utils.dialogs.ask("Delete device", "Do you really want to delete device?", null, { ok_button_text: 'delete'}).done(function (result) {
+                utils.dialogs.ask("Delete device", `Do you really want to delete device ${data_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         delete devices[data_id];
                         omemo.publishDevice(null, null, function () {
