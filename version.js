@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.0.2 (13)","version_description":""}'
+'{"version_number":"2.1.0","version_description":"Improved group chats, client synchronization. Changed client rendering logic. Fixed configuration parameters and added new ones"}'
 )});
