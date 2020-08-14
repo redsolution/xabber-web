@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <div class="panel-header black-text">Create group chat</div>
+    <div class="panel-header black-text">Create group</div>
 </div>
 <div class="modal-content">
     <div class="row account-field">
@@ -27,7 +27,7 @@
     <div class="row name-field">
         <i class="field-icon mdi mdi-24px mdi-pencil"></i>
         <div class="input-field input-group-chat-name">
-            <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group chat name" required>
+            <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group name" required>
         </div>
     </div>
     <div class="row jid-field">
@@ -53,16 +53,8 @@
     <div class="row incognito-field">
         <i class="field-icon mdi mdi-24px mdi-incognito"></i>
         <div class="property-field incognito-dropdown-wrap">
-            <div class="dropdown-button" data-activates="select-incognito">
-                <div class="incognito-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>
-                <div class="caret">
-                    <i class="mdi mdi-20px mdi-menu-down"></i>
-                </div>
-            </div>
-            <div id="select-incognito" class="dropdown-content noselect">
-                <div data-value="public" class="property-variant default-value">Public</div>
-                <div data-value="incognito" class="property-variant">Incognito</div>
-            </div>
+           <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>
+           <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">Incognito</div></div>
         </div>
     </div>
     <div class="row global-field">
@@ -101,7 +93,7 @@
     <div class="row description-field">
         <i class="field-icon mdi mdi-24px mdi-sort-variant"></i>
         <div class="input-field input-message">
-            <div class="rich-textarea-wrap">
+            <div class="rich-textarea-wrap notranslate">
                 <div class="rich-textarea" tabindex="2" contenteditable=""></div>
                 <div class="placeholder">Write a description...</div>
             </div>

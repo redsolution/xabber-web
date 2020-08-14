@@ -14,10 +14,11 @@
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/" target="_blank" class="btn-flat btn-main btn-forgot-password">Register an XMPP account</a>
+            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{REGISTER_XMPP_ACCOUNT}}" target="_blank" class="btn-flat btn-main btn-forgot-password">Register an XMPP account</a>{[}]}
             <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>
         </div>
         <div class="clearfix"></div>
+        {[if (constants.USE_SOCIAL_AUTH){]}
         <div class="social-auth-wrap">
             <div class="social-header">
                 <div class="divider"></div>
@@ -38,7 +39,5 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div class="login-panel-footer">
-        <div class="footer-text">Connection to XMPP server is done via auxiliary websocket server maintained by <a class="redsolution-src" href="http://www.redsolution.com" target="_blank"><span class="red-part">red</span>solution</a>. Theoretically we can intercept your XMPP passwords, however, we don’t do that. This won’t be a problem when more servers will support OAuth2 authentication and allow token-based connectivity.</div>
+        {[}]}
     </div>

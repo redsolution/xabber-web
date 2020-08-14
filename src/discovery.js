@@ -52,6 +52,7 @@ define("xabber-discovery", function () {
             this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
+            this.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);

@@ -13,6 +13,8 @@
         defaults: {
             version_number: env.version_number,
             actual_version_number: env.version_number,
+            audio: false,
+            video: false,
             client_id: uuid().substring(0, 8),
             client_name: 'Xabber for Web ' + env.version_number
         },
@@ -21,12 +23,15 @@
             this.env = env;
             this.fetchURLParams();
             this.cleanUpStorage();
+            this.detectMediaDevices();
+            window.navigator.mediaDevices && (window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this));
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.settings = this._settings.attributes;
             this._cache = new Backbone.ModelWithStorage({id: 'cache'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cacheFavicons();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -80,7 +85,38 @@
         },
 
         onQuit: function () {
-            window.localStorage.clear();
+            var full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            for (var key in window.localStorage) {
+                if (key.startsWith(full_storage_name)) {
+                    window.localStorage.removeItem(key);
+                }
+            }
+        },
+
+        cacheFavicons: async function () {
+            this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
+            this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
+        },
+
+        detectMediaDevices: function () {
+            this.getMediaDevices(function (media_devices) {
+                this.set(media_devices);
+            }.bind(this));
+        },
+
+        getMediaDevices: function (callback, errback) {
+            if (window.navigator && window.navigator.mediaDevices) {
+                window.navigator.mediaDevices.enumerateDevices()
+                    .then(function (devices) {
+                        let media_devices = {audio: false, video: false};
+                        (devices.find(device => device.kind === 'audioinput')) && (media_devices.audio = true);
+                        (devices.find(device => device.kind === 'videoinput')) && (media_devices.video = true);
+                        callback && callback(media_devices);
+                    })
+                    .catch(function (err) {
+                        errback && errback(err);
+                    });
+            }
         },
 
         throwNewVersion: function () {
@@ -96,7 +132,6 @@
                 {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
-                    // window.localStorage.clear();
                     window.location.reload(true);
                 }
             });
@@ -109,6 +144,8 @@
                 message_preview: false,
                 sound: true,
                 sound_on_message: 'beep_up',
+                call_attention: true,
+                sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',
                 load_history: true,
@@ -135,8 +172,10 @@
                 'LOG_LEVEL',
                 'DEBUG',
                 'XABBER_ACCOUNT_URL',
+                'REGISTER_XMPP_ACCOUNT',
                 'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
+                'CONTAINER',
                 'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',

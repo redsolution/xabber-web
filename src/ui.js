@@ -2,10 +2,7 @@ define("xabber-ui", function () {
   return function (xabber) {
     var env = xabber.env,
         constants = env.constants,
-        templates = env.templates,
-        utils = env.utils,
-        $ = env.$,
-        _ = env._;
+        $ = env.$;
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
@@ -173,9 +170,8 @@ define("xabber-ui", function () {
         var path_chat_head = new this.ViewPath('chat_item.content.head'),
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
-            path_contact_details = new this.ViewPath('contact.details_view'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
-            path_private_invitation = new this.ViewPath('contact.private_invitation'),
+            path_contact_details = new this.ViewPath('contact.details_view'),
             path_participant_messages = new this.ViewPath('contact.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
@@ -216,15 +212,14 @@ define("xabber-ui", function () {
 
 
         this.right_panel.patchTree = function (tree, options) {
+            if (options.right === undefined)
+                return;
             if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
                 return {
                     chat_head: path_chat_head,
                     chat_body: path_participant_messages,
                     chat_bottom: path_chat_bottom
                 };
-            }
-            if (options.right === 'private_invitation') {
-                return { details: path_private_invitation };
             }
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };

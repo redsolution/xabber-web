@@ -66,7 +66,6 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/invited_member_item.html",
     "text!templates/contacts/group_chats/participant_rights.html",
     "text!templates/contacts/group_chats/restriction_item.html",
-    "text!templates/contacts/group_chats/permission_item.html",
     "text!templates/contacts/group_chats/right_expire_variants.html",
     "text!templates/contacts/group_chats/pinned_message.html",
     "text!templates/contacts/group_chats/participant_details_item.html",
@@ -74,6 +73,9 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/participants.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
     "text!templates/contacts/group_chats/private_participant_details.html",
+    "text!templates/contacts/group_chats/set_status.html",
+    "text!templates/contacts/group_chats/status_item.html",
+    "text!templates/contacts/group_chats/group_status.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
@@ -81,6 +83,7 @@ define("xabber-templates", [
     "text!templates/chats/chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_bottom.html",
+    "text!templates/chats/subscription_buttons.html",
     "text!templates/chats/forward_panel.html",
     "text!templates/chats/chat_placeholder.html",
     "text!templates/chats/message_item.html",
@@ -112,6 +115,16 @@ define("xabber-templates", [
     "text!templates/svg/xmpp.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
+    "text!templates/svg/ic-invitation-chat.html",
+    "text!templates/svg/ic-group-contact.html",
+    "text!templates/svg/ic-group-chat.html",
+    "text!templates/svg/ic-blocked.html",
+    "text!templates/svg/ic-incognito-contact.html",
+    "text!templates/svg/ic-incognito-chat.html",
+    "text!templates/svg/ic-bot-contact.html",
+    "text!templates/svg/ic-bot-chat.html",
+    "text!templates/svg/ic-private-contact.html",
+    "text!templates/svg/ic-private-chat.html",
     "text!templates/svg/volume-off-variant.html",
     "text!templates/svg/message-group.html",
     "text!templates/svg/xabber-offline.html",
@@ -228,7 +241,6 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.invited_member_item');
     addTemplate('contacts.group_chats.participant_rights');
     addTemplate('contacts.group_chats.restriction_item');
-    addTemplate('contacts.group_chats.permission_item');
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
     addTemplate('contacts.group_chats.participant_details_item');
@@ -236,6 +248,9 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.participants');
     addTemplate('contacts.group_chats.badge_edit_view');
     addTemplate('contacts.group_chats.private_participant_details');
+    addTemplate('contacts.group_chats.set_status');
+    addTemplate('contacts.group_chats.status_item');
+    addTemplate('contacts.group_chats.group_status');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');
@@ -243,6 +258,7 @@ define("xabber-templates", [
     addTemplate('chats.chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_bottom');
+    addTemplate('chats.subscription_buttons');
     addTemplate('chats.forward_panel');
     addTemplate('chats.chat_placeholder');
     addTemplate('chats.message_item');
@@ -274,6 +290,16 @@ define("xabber-templates", [
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
+    addSvgTemplate('svg.ic-invitation-chat');
+    addSvgTemplate('svg.ic-group-contact');
+    addSvgTemplate('svg.ic-group-chat');
+    addSvgTemplate('svg.ic-blocked');
+    addSvgTemplate('svg.ic-incognito-contact');
+    addSvgTemplate('svg.ic-incognito-chat');
+    addSvgTemplate('svg.ic-bot-contact');
+    addSvgTemplate('svg.ic-bot-chat');
+    addSvgTemplate('svg.ic-private-contact');
+    addSvgTemplate('svg.ic-private-chat');
     addSvgTemplate('svg.volume-off-variant');
     addSvgTemplate('svg.message-group');
     addSvgTemplate('svg.xabber-offline');

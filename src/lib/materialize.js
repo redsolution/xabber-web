@@ -745,6 +745,7 @@ if ($) {
         $(document).on('keyup.leanModal' + overlayID, function(e) {
           if (e.keyCode === 27) {   // ESC key
             $modal.closeModal(options);
+            e.preventDefault();
           }
         });
       }

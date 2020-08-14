@@ -203,15 +203,40 @@
                     <span class="block-name">Blocked contacts</span>
                 </div>
                 <div class="blocklist-wrap">
-                    <div class="blocked-contacts">
+                    <div class="blocked-items">
                         <div class="placeholder">No blocked contacts yet</div>
+                        <div class="blocked-domains-wrap hidden">
+                            <div class="blocked-item domains-item">
+                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
+                                <div class="blocked-item-header one-line">Blocked domains</div>
+                                <div class="blocked-item-description one-line"/>
+                            </div>
+                            <div class="blocked-domains blocked-list hidden"/>
+                        </div>
+                        <div class="blocked-invitations-wrap hidden">
+                            <div class="blocked-item invitations-item">
+                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
+                                <div class="blocked-item-header one-line">Group invitations</div>
+                                <div class="blocked-item-description">Blocking is used to mark group invitations as 'read'</div>
+                            </div>
+                            <div class="blocked-invitations blocked-list hidden"/>
+                        </div>
+                        <div class="blocked-contacts-wrap hidden">
+                            <div class="blocked-item contacts-item">
+                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
+                                <div class="blocked-item-header one-line">Blocked contacts</div>
+                                <div class="blocked-item-description one-line"/>
+                            </div>
+                            <div class="blocked-contacts blocked-list hidden"/>
+                        </div>
+                        <button class="btn-block btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Block</button>
                     </div>
                 </div>
             </div>
 
             <div class="settings-block-wrap groups-info">
                 <div class="block-header">
-                    <span class="block-name">Groups</span>
+                    <span class="block-name">Circles</span>
                 </div>
                 <div class="groups-wrap">
                     <div class="groups">

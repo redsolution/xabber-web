@@ -1,9 +1,29 @@
-<div class="list-item group-chat-participant" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
-    <div class="member-item">
-        <div class="circle-avatar"><!--<img>--></div>
-        <div class="participant-info"><div class="top-line"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div class="badge one-line">{{badge}}</div>{[}]}</div>{[if (jid) {]}<p title="{{jid}}" class="jid hidden one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id hidden one-line">{{id}}</p>{[}]}
-        <div class="last-seen one-line" {[if (present === 'now') { ]} data-present="true">Online{[} else {]}>Last seen: {{present}}{[}]}</div></div>
-        {[ if (role == 'Owner') {]}<div title="Owner" class="role-star"><i class="mdi mdi-20px mdi-star"></i></div>{[}]}
-        {[ if (role == 'Admin') {]}<div title="Admin" class="role-star"><i class="mdi mdi-20px mdi-star-outline"></i></div>{[}]}
-    </div>
-</div>
+<tr class="participant-wrap" data-id="{{id}}" data-jid="{{jid}}">
+    <td class="list-item group-chat-participant">
+        <div class="member-item">
+            <div class="circle-avatar"/>
+            <div class="participant-info">
+            <div class="top-line"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div class="badge one-line">{{badge}}</div>{[}]}</div>
+            {[if (jid) {]}<p class="jid one-line">{{jid}}</p>{[} else {]}<p class="id one-line">{{id}}</p>{[}]}
+            </div>
+        </div>
+    </td>
+    <td class="last-seen">{[if (!present) {]}<span class="online-status text-color-green-700">Online</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}</td>
+    <td class="role">{[if (role !== 'member') {]}{{role}}{[}]}</td>
+    <td>
+        {[if (is_me) {]}
+        <span style="font-size:12px" class="text-color-500">this is you</span>
+        {[} else {]}
+        <div class="buttons-wrap">
+            <div title="Kick" class="btn-kick">
+                <i class="mdi mdi-24px mdi-account-remove"></i>
+            </div>
+            <div title="Block" class="btn-block">
+                <svg class="mdi mdi-24px" viewBox="0 0 24 24">
+                    <path fill="#9e9e9e" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />
+                </svg>
+            </div>
+        </div>
+        {[}]}
+    </td>
+</tr>

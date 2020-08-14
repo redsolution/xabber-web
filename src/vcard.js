@@ -78,7 +78,8 @@ define("xabber-vcard", function () {
         $vcard.find('ADR').each(function () {
             var $this = $(this);
             var address = {
-                extadd: $this.find('EXTADD').text().trim(),
+                pobox: $this.find('POBOX').text().trim(),
+                extadd: $this.find('EXTADR').text().trim(),
                 street: $this.find('STREET').text().trim(),
                 locality: $this.find('LOCALITY').text().trim(),
                 region: $this.find('REGION').text().trim(),
@@ -141,7 +142,8 @@ define("xabber-vcard", function () {
         _.each(vcard.address, function (address, type) {
             $vcard.c("ADR");
             type !== 'default' && $vcard.c(type.toUpperCase()).up();
-            address.extadd && $vcard.c("EXTADD").t(address.extadd).up();
+            address.pobox && $vcard.c("POBOX").t(address.pobox).up();
+            address.extadd && $vcard.c("EXTADR").t(address.extadd).up();
             address.street && $vcard.c("STREET").t(address.street).up();
             address.locality && $vcard.c("LOCALITY").t(address.locality).up();
             address.region && $vcard.c("REGION").t(address.region).up();
@@ -209,22 +211,26 @@ define("xabber-vcard", function () {
             $info.showIf(vcard.jabber_id);
 
             $info = this.$('.personal-info-wrap');
-            $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
             $info.find('.fullname').showIf(vcard.fullname).find('.value').text(vcard.fullname);
             $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
             $info.find('.middle-name').showIf(vcard.middle_name).find('.value').text(vcard.middle_name);
             $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
-            $info.showIf(vcard.nickname || vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
+            $info.showIf(vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
+
+            $info = this.$('.nickname-info-wrap');
+            $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
+            $info.showIf(vcard.nickname);
 
             $info = this.$('.birthday-info-wrap');
             $info.find('.birthday').showIf(vcard.birthday).find('.value').text(vcard.birthday);
             $info.showIf(vcard.birthday);
 
             $info = this.$('.job-info-wrap');
+            $info.find('.role').showIf(vcard.role).find('.value').text(vcard.role);
             $info.find('.job-title').showIf(vcard.job_title).find('.value').text(vcard.job_title);
             $info.find('.org-name').showIf(vcard.org.name).find('.value').text(vcard.org.name);
             $info.find('.org-unit').showIf(vcard.org.unit).find('.value').text(vcard.org.unit);
-            $info.showIf(vcard.job_title || vcard.org.name || vcard.org.unit);
+            $info.showIf(vcard.role || vcard.job_title || vcard.org.name || vcard.org.unit);
 
             $info = this.$('.site-info-wrap');
             $info.find('.url').showIf(vcard.url).find('.value').text(vcard.url).hyperlinkify();
@@ -240,13 +246,14 @@ define("xabber-vcard", function () {
             $addr_info.find('.info').addClass('hidden');
             _.each(address, function (addr, type) {
                 $info = $addr_info.find('.address-'+type);
+                $info.find('.pobox').showIf(addr.pobox).text(addr.pobox);
                 $info.find('.extadd').showIf(addr.extadd).text(addr.extadd);
                 $info.find('.street').showIf(addr.street).text(addr.street);
                 $info.find('.locality').showIf(addr.locality).text(addr.locality);
                 $info.find('.region').showIf(addr.region).text(addr.region);
                 $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
                 $info.find('.country').showIf(addr.country).text(addr.country);
-                var show = (addr.extadd || addr.street || addr.locality ||
+                var show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
                              addr.region || addr.pcode || addr.country);
                 show && (show_addr_block = true);
                 $info.showIf(show);
@@ -306,10 +313,11 @@ define("xabber-vcard", function () {
         className: 'account-vcard-edit-wrap',
         template: templates.vcard_edit,
         ps_selector: '.panel-content',
-        avatar_size: constants.AVATAR_SIZES.ACCOUNT_VCARD_EDIT,
 
         events: {
-            "change .circle-avatar input": "changeAvatar",
+            "input .first-name input": "changePlaceholder",
+            "input .middle-name input": "changePlaceholder",
+            "input .last-name input": "changePlaceholder",
             "click .btn-vcard-save": "save",
             "click .btn-vcard-back": "back"
         },
@@ -341,7 +349,13 @@ define("xabber-vcard", function () {
             this.data.set('saving', false);
             this.setData();
             Materialize.updateTextFields();
+            this.changePlaceholder();
             this.updateScrollBar();
+        },
+
+        changePlaceholder: function () {
+            let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim() || this.model.get('jid');
+            this.$('.nickname input').attr('placeholder', nickname_placeholder);
         },
 
         setData: function () {
@@ -353,10 +367,9 @@ define("xabber-vcard", function () {
             this.$('.last-name input').val(vcard.last_name);
             this.$('.middle-name input').val(vcard.middle_name);
 
-            this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
-
             this.$('.birthday input').val(vcard.birthday);
 
+            this.$('.role input').val(vcard.role);
             this.$('.job-title input').val(vcard.job_title);
             this.$('.org-name input').val(vcard.org.name);
             this.$('.org-unit input').val(vcard.org.unit);
@@ -374,6 +387,7 @@ define("xabber-vcard", function () {
 
             var addr = vcard.address.work || {},
                 $info = this.$('.address-work-wrap');
+            $info.find('.pobox input').val(addr.pobox);
             $info.find('.extadd input').val(addr.extadd);
             $info.find('.street input').val(addr.street);
             $info.find('.locality input').val(addr.locality);
@@ -383,6 +397,7 @@ define("xabber-vcard", function () {
 
             addr = vcard.address.home || {};
             $info = this.$('.address-home-wrap');
+            $info.find('.pobox input').val(addr.pobox);
             $info.find('.extadd input').val(addr.extadd);
             $info.find('.street input').val(addr.street);
             $info.find('.locality input').val(addr.locality);
@@ -400,10 +415,9 @@ define("xabber-vcard", function () {
             vcard.last_name = this.$('.last-name input').val();
             vcard.middle_name = this.$('.middle-name input').val();
 
-            // this.avatar && (vcard.photo.image = this.avatar);
-
             vcard.birthday = this.$('.birthday input').val();
 
+            vcard.role = this.$('.role input').val();
             vcard.job_title = this.$('.job-title input').val();
             vcard.org.name = this.$('.org-name input').val();
             vcard.org.unit = this.$('.org-unit input').val();
@@ -422,6 +436,7 @@ define("xabber-vcard", function () {
             vcard.address.work = {};
             var addr = vcard.address.work,
                 $info = this.$('.address-work-wrap');
+            addr.pobox = $info.find('.pobox input').val();
             addr.extadd = $info.find('.extadd input').val();
             addr.street = $info.find('.street input').val();
             addr.locality = $info.find('.locality input').val();
@@ -432,6 +447,7 @@ define("xabber-vcard", function () {
             vcard.address.home = {};
             addr = vcard.address.home;
             $info = this.$('.address-home-wrap');
+            addr.pobox = $info.find('.pobox input').val();
             addr.extadd = $info.find('.extadd input').val();
             addr.street = $info.find('.street input').val();
             addr.locality = $info.find('.locality input').val();
@@ -439,30 +455,6 @@ define("xabber-vcard", function () {
             addr.pcode = $info.find('.pcode input').val();
             addr.country = $info.find('.country input').val();
             return vcard;
-        },
-
-        changeAvatar: function (ev) {
-            var field = ev.target;
-            if (!field.files.length) {
-                return;
-            }
-            var file = field.files[0];
-            field.value = '';
-            if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
-                utils.dialogs.error('File is too large');
-                return;
-            } else if (!file.type.startsWith('image')) {
-                utils.dialogs.error('Wrong image');
-                return;
-            }
-            utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
-                if (image) {
-                    this.avatar = {base64: image, hash: hash, size: size};
-                    this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                } else {
-                    utils.dialogs.error('Wrong image');
-                }
-            }.bind(this));
         },
 
         updateSaveButton: function () {
@@ -474,7 +466,6 @@ define("xabber-vcard", function () {
                 return;
             }
             this.data.set('saving', true);
-            this.avatar && this.model.pubAvatar(this.avatar);
             this.model.setVCard(this.getData(),
                 function () {
                     this.model.getVCard();

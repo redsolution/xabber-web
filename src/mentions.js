@@ -5,13 +5,8 @@ define("xabber-mentions", function () {
             templates = env.templates.mentions,
             utils = env.utils,
             $ = env.$,
-            $iq = env.$iq,
-            $msg = env.$msg,
-            $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
-            moment = env.moment,
-            uuid = env.uuid,
             Images = utils.images;
 
 
@@ -25,7 +20,7 @@ define("xabber-mentions", function () {
             initialize: function (attrs, options) {
                 this.contact = options.contact;
                 this.message = options.message;
-                this.id = this.message.get('msgid');
+                this.id = this.message.get('unique_id');
                 this.set('timestamp', this.message.get('timestamp'));
                 this.account = this.contact.account;
                 this.item_view = new xabber.MentionItemView({model: this});
@@ -50,7 +45,7 @@ define("xabber-mentions", function () {
 
         xabber.Mentions = xabber.MentionsBase.extend({
             comparator: 'timestamp',
-            initialize: function (models, options) {
+            initialize: function () {
                 this.collections = [];
                 this.on("add", _.bind(this.updateInCollections, this, 'add'));
                 this.on("change", _.bind(this.updateInCollections, this, 'change'));
@@ -82,6 +77,7 @@ define("xabber-mentions", function () {
                 this.model.on("destroy", this.onMentionRemoved, this);
                 xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
                 this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+                this.$('input').on('input', this.updateSearch.bind(this));
             },
 
             render: function (options) {
@@ -323,7 +319,7 @@ define("xabber-mentions", function () {
                 else {
                     this.$('.last-msg').text(msg_text);
                 }
-                this.$el.emojify('.last-msg', {emoji_size: 14});
+                this.$el.emojify('.last-msg', {emoji_size: 16});
                 this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
                     .attr('title', utils.pretty_datetime(msg_time));
             },
@@ -338,7 +334,7 @@ define("xabber-mentions", function () {
                     image;
                 if (user_info) {
                     if (user_info.avatar) {
-                        image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.avatar);
+                        image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.id);
                         if (image) {
                             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                         }
@@ -366,14 +362,12 @@ define("xabber-mentions", function () {
             },
 
             openByClick: function () {
-                let msgid = this.model.message.get('msgid'),
-                    archive_id = this.model.message.get('archive_id'),
-                    contact_archive_id = this.model.message.get('contact_archive_id'),
+                let message = this.model.message,
                     chat = this.account.chats.getChat(this.contact);
                 this.model.message.set('is_unread', false);
-                chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
+                chat.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
                 this.model.set('active', true);
-                this.contact.trigger("open_mention", this.contact, msgid);
+                this.contact.trigger("open_mention", this.contact, message.get('unique_id'));
             },
 
             updateColorScheme: function () {

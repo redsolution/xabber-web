@@ -4,6 +4,7 @@ define("xabber-views", function () {
         constants = env.constants,
         templates = env.templates.base,
         utils = env.utils,
+        uuid = env.uuid,
         $ = env.$,
         _ = env._;
 
@@ -112,7 +113,7 @@ define("xabber-views", function () {
             var view = this.children[name];
             if (view) {
                 delete this.children[name];
-                options.soft ? view.detach() : view.remove();
+                options.soft ? view.detach() : (view.trigger("remove") && view.remove());
             }
         },
 
@@ -218,7 +219,9 @@ define("xabber-views", function () {
             tree = this.patchTree(tree, options) || tree;
             _.each(this.children, function (view, name) {
                 if (_.has(tree, name)) {
-                    this.$el.append(view.$el);
+                    if (name !== 'login')
+                        this.$el.append(view.$el);
+                    this.$el.switchClass('hidden', name === 'login');
                     view.show(options, tree[name]);
                 }
             }.bind(this));
@@ -260,7 +263,6 @@ define("xabber-views", function () {
     });
 
     xabber.SearchView = xabber.BasicView.extend({
-
         events: {
             "keydown .search-input": "keyUpOnSearch",
             "focusout .search-input": "clearSearchSelection",
@@ -524,18 +526,26 @@ define("xabber-views", function () {
                   let jid = chat.get('jid').toLowerCase(),
                       name = chat.contact.get('roster_name') || chat.contact.get('name');
                   name && (name = name.toLowerCase());
-                  if ((name.indexOf(query) > -1 || jid.indexOf(query) > -1) && chat.get('timestamp')) {
-                      let chat_item = xabber.chats_view.child(chat.get('id'));
-                      chat_item && (chat_item = chat_item.$el.clone());
-                      if (chat_item) {
-                          this.$('.chats-list-wrap').removeClass('hidden');
-                          this.$('.chats-list').prepend(chat_item);
-                          this.updateChatItem(chat_item);
-                          chat_item.click(function () {
-                              this.$('.list-item.active').removeClass('active');
-                              xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
-                              chat_item.addClass('active');
-                          }.bind(this));
+                  if (chat.get('timestamp')) {
+                      if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
+                          let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
+                              chat_item = xabber.chats_view.child(chat.get('id'));
+                          chat_item && (chat_item = chat_item.$el.clone().addClass(searched_by));
+                          if (chat_item) {
+                              this.$('.chats-list-wrap').removeClass('hidden');
+                              if (searched_by === 'by-name')
+                                  this.$('.chats-list').prepend(chat_item);
+                              else if (this.$('.chats-list .by-jid').length)
+                                  chat_item.insertBefore(this.$('.chats-list .by-jid').first());
+                              else
+                                  this.$('.chats-list').append(chat_item);
+                              this.updateChatItem(chat_item);
+                              chat_item.click(function () {
+                                  this.$('.list-item.active').removeClass('active');
+                                  xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
+                                  chat_item.addClass('active');
+                              }.bind(this));
+                          }
                       }
                   }
               }.bind(this));
@@ -548,9 +558,15 @@ define("xabber-views", function () {
                       name && (name = name.toLowerCase());
                       if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
                           if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
-                              let item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').clone().data('account-jid', account.get('jid'));
-                              item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).prepend($('<div class="account-indicator ground-color-700"/>'));
-                              this.$('.contacts-list').append(item_list);
+                              let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
+                                  item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').first().clone().data('account-jid', account.get('jid'));
+                              item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).addClass(searched_by).prepend($('<div class="account-indicator ground-color-700"/>'));
+                              if (searched_by === 'by-name')
+                                  this.$('.contacts-list').prepend(item_list);
+                              else if (this.$('.contacts-list .by-jid').length)
+                                  item_list.insertBefore(this.$('.contacts-list .by-jid').first());
+                              else
+                                  this.$('.contacts-list').append(item_list);
                               item_list.click(function () {
                                   this.$('.list-item.active').removeClass('active');
                                   let chat = account.chats.get(contact.hash_id);
@@ -572,10 +588,10 @@ define("xabber-views", function () {
           },
 
           updateChatItem: function (chat_item) {
-              var date_width = chat_item.find('.last-msg-date').width();
+              /*var date_width = chat_item.find('.last-msg-date').width();
               chat_item.find('.chat-title-wrap').css('padding-right', date_width + 5);
               var title_width = chat_item.find('.chat-title-wrap').width();
-              chat_item.find('.chat-title').css('max-width', title_width);
+              chat_item.find('.chat-title').css('max-width', title_width);*/
           },
 
           searchMessages: function (query, options) {
@@ -590,7 +606,11 @@ define("xabber-views", function () {
                   account.searched_msgs_loaded = false;
                   options.account = account;
                   this.MAMRequest(query, options, function (messages) {
+                      if (!this.query_text)
+                          return;
                       _.each(messages, function (message) {
+                          if (!this.query_text)
+                              return;
                           let message_from_stanza = account.chats.receiveChatMessage(message,
                               _.extend({is_searched: true}, options)
                               ),
@@ -619,7 +639,7 @@ define("xabber-views", function () {
                   queryid = uuid(),
                   iq = $iq({from: account.get('jid'), type: 'set'})
                       .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                      .c('x', {xmlns: Strophe.NS.XDATA, type: 'submit'})
+                      .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                       .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                       .c('value').t(Strophe.NS.MAM).up().up()
                       .c('field', {'var': 'withtext'})
@@ -676,6 +696,7 @@ define("xabber-views", function () {
 
         events: {
             "click .field-text": "showInput",
+            "click .btn-rename": "showInput",
             "keydown .field-input": "keyDown",
             "keyup .field-input": "keyUp",
             "focusout .field-input": "changeValue"
@@ -688,6 +709,7 @@ define("xabber-views", function () {
                 placeholder: this.placeholder
             }));
             this.$value = this.$('.field-text');
+            this.$btn = this.$('.btn-rename');
             this.$input = this.$('.field-input');
             this.updateValue();
             this.data = new Backbone.Model({input_mode: false});
@@ -707,6 +729,7 @@ define("xabber-views", function () {
         onChangedInputMode: function () {
             var input_mode = this.data.get('input_mode');
             this.$value.hideIf(input_mode);
+            this.$btn.hideIf(input_mode);
             this.$input.showIf(input_mode).focus();
         },
 
@@ -759,6 +782,7 @@ define("xabber-views", function () {
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
             $('body').append(this.$el);
+            $('#modals').insertAfter(this.$el);
         },
 
         addScreen: function (name, attrs) {
@@ -766,6 +790,8 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
+            $('body').switchClass('login', name === 'login');
+            $('body').switchClass('on-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
@@ -812,7 +838,8 @@ define("xabber-views", function () {
             "click .settings":              "showSettings",
             "click .add-variant.contact":   "showAddContactView",
             "click .add-variant.account":   "showAddAccountView",
-            "click .add-variant.groupchat": "showAddGroupChatView",
+            "click .add-variant.public-groupchat": "showAddPublicGroupChatView",
+            "click .add-variant.incognito-groupchat": "showAddIncognitoGroupChatView",
             "click .about":                 "showAbout"
         },
 
@@ -861,42 +888,45 @@ define("xabber-views", function () {
                     this.$('.toolbar-item.archive-chats').hasClass('active')))) {
                 return;
             }
-            this.$('.toolbar-item').removeClass('active');
+            this.$('.toolbar-item').removeClass('active unread');
             if (_.contains(['all-chats', 'contacts', 'mentions',
                             'settings', 'search', 'about'], name)) {
                 this.$('.toolbar-item.'+name).addClass('active');
             }
         },
 
-        showAllChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.all-chats').addClass('active');
+        showAllChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.all-chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
         },
 
-        showChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.chats').addClass('active');
+        showChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_chats');
         },
 
-        showGroupChats: function () {
-            this.$('.toolbar-item').removeClass('active')
-                .filter('.group-chats').addClass('active');
+        showGroupChats: function (ev) {
+            let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
+            this.$('.toolbar-item').removeClass('active unread')
+                .filter('.group-chats').addClass('active').switchClass('unread', is_active);
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_group_chats');
         },
 
         showArchive: function () {
-            this.$('.toolbar-item').removeClass('active')
+            this.$('.toolbar-item').removeClass('active unread')
                 .filter('.archive-chats').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_archive_chats');
         },
 
         showChatsByAccount: function (account) {
-            this.$('.toolbar-item').removeClass('active')
+            this.$('.toolbar-item').removeClass('active unread')
                 .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
             xabber.body.setScreen('all-chats', {right: null});
             xabber.trigger('show_account_chats', [account]);
@@ -926,8 +956,12 @@ define("xabber-views", function () {
             xabber.trigger('add_account', {right: null});
         },
 
-        showAddGroupChatView: function () {
-            xabber.trigger('add_group_chat', {right: null});
+        showAddIncognitoGroupChatView: function () {
+            xabber.trigger('add_group_chat', {incognito: true, right: null});
+        },
+
+        showAddPublicGroupChatView: function () {
+            xabber.trigger('add_group_chat', {public: true, right: null});
         },
 
         showAbout: function () {
@@ -1002,6 +1036,8 @@ define("xabber-views", function () {
             this.model.on('destroy', this.onDestroy, this);
             this.contact = this.model.contact;
             this.account = this.contact.account;
+            this.model.on('change:state', this.updateCallingStatus, this);
+            this.model.on('change:status', this.updateBackground, this);
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
             this.model.on('change:video_live', this.updateButtons, this);
@@ -1013,7 +1049,12 @@ define("xabber-views", function () {
             options = options || {};
             this.updateName();
             this.updateCallingStatus(options.status);
-            (options.status === 'in') && this.updateStatusText('Calling...');
+            if (options.status === 'in') {
+                this.updateStatusText('Calling...');
+            }
+            else {
+                this.model.set('status', 'calling');
+            }
             this.updateAccountJid();
             this.updateButtons();
             this.$el.openModal({
@@ -1084,6 +1125,7 @@ define("xabber-views", function () {
 
         updateButtons: function () {
             this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
+            this.$('.btn-share-screen').switchClass('active', this.model.get('video_screen'));
             this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
             this.$('.btn-video').switchClass('mdi-video', this.model.get('video_live'))
                 .switchClass('mdi-video-off', !this.model.get('video_live'));
@@ -1098,11 +1140,13 @@ define("xabber-views", function () {
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
+        updateBackground: function () {
+            let status = this.model.get('status');
+            this.$el.attr('data-state', status);
+        },
+
         updateCallingStatus: function (status) {
             this.$('.buttons-wrap').switchClass('incoming', (status === 'in'));
-            this.$('.contact-info').switchClass('hidden', (status === 'in' || status === constants.JINGLE_MSG_PROPOSE));
-            this.$('.default-screen .name').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
-            this.$('.call-header').switchClass('hidden', (status !== 'in' && status !== constants.JINGLE_MSG_PROPOSE));
         },
 
         updateStatusText: function (status) {
@@ -1153,7 +1197,6 @@ define("xabber-views", function () {
             }
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
-            this.$el.children().toggle();
             this.$el.toggleClass('collapsed');
             if (this.$el.hasClass('collapsed'))
                 (this.model.get('video') || this.model.get('video_in')) && this.$el.addClass('collapsed-video');
@@ -1174,8 +1217,11 @@ define("xabber-views", function () {
         },
 
         onDestroy: function () {
-            this.close();
-            this.$el.detach();
+            this.updateStatusText("Disconnected");
+            setTimeout(function () {
+                this.close();
+                this.$el.detach();
+            }.bind(this), 3000);
         },
 
         videoCall: function () {
@@ -1202,6 +1248,7 @@ define("xabber-views", function () {
             "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
             "mousedown .setting.notifications label": "setNotifications",
             "mousedown .setting.message-preview label": "setMessagePreview",
+            "mousedown .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
@@ -1218,6 +1265,8 @@ define("xabber-views", function () {
             });
             this.$('.message-preview input[type=checkbox]')
                 .prop({checked: settings.message_preview});
+            this.$('.call-attention input[type=checkbox]')
+                .prop({checked: settings.call_attention});
             var sound_value = settings.sound ? settings.sound_on_message : '';
             this.$('.sound input[type=radio][name=sound][value="'+sound_value+'"]')
                     .prop('checked', true);
@@ -1248,6 +1297,13 @@ define("xabber-views", function () {
         setMessagePreview: function (ev) {
             var value = !this.model.get('message_preview');
             this.model.save('message_preview', value);
+            ev.preventDefault();
+            $(ev.target).closest('input').prop('checked', value);
+        },
+
+        setCallAttention: function (ev) {
+            var value = !this.model.get('call_attention');
+            this.model.save('call_attention', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);
         },
@@ -1449,24 +1505,24 @@ define("xabber-views", function () {
         },
 
         startBlinkingFavicon: function () {
-            if (this._blink_interval) {
+            if (this._blink_interval)
                 return;
-            }
             this._blink_interval = setInterval(function () {
-                var $icon = $("link[rel='shortcut icon']");
-                if ($icon.attr('href') === constants.FAVICON_DEFAULT) {
-                    $icon.attr('href', constants.FAVICON_MESSAGE);
-                } else {
-                    $icon.attr('href', constants.FAVICON_DEFAULT);
-                }
-            }, 500);
+                var $icon = $("link[rel='shortcut icon']"), url;
+                if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1)
+                    url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
+                else
+                    url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $icon.attr('href', url);
+            }.bind(this), 1000);
         },
 
         stopBlinkingFavicon: function () {
             if (this._blink_interval) {
                 clearInterval(this._blink_interval);
                 this._blink_interval = null;
-                $("link[rel='shortcut icon']").attr("href", constants.FAVICON_DEFAULT);
+                let url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                $("link[rel='shortcut icon']").attr("href", url);
             }
         },
 
@@ -1581,7 +1637,7 @@ define("xabber-views", function () {
         this.body = new this.Body({model: this});
 
         this.login_page = this.body.addChild('login', this.NodeView, {
-            classlist: 'login-page-wrap'});
+            classlist: 'login-page-wrap', el: $(document).find('.login-container')[0]});
 
         this.toolbar_view = this.body.addChild('toolbar', this.ToolbarView);
 

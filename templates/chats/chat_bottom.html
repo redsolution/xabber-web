@@ -16,9 +16,7 @@
             </div>
             <div class="input-field input-message">
                 <div class="mentions-list"></div>
-                <div class="rich-textarea-wrap">
-                    <!--<div class="rich-textarea" tabindex="2" contenteditable></div>
-                    <div class="placeholder">Write a message...</div>-->
+                <div class="rich-textarea-wrap notranslate">
                 </div>
                 <div class="scrollbar-cover"></div>
                 <div class="insert-emoticon">
@@ -26,6 +24,22 @@
                 </div>
                 <div class="emoticons-panel-wrap">
                     <div class="emoticons-panel"></div>
+                    <div class="emoji-menu"></div>
+                    <div class="uploading-emoticons">
+                    <div class="preloader-wrapper preloader-20px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
                 </div>
             </div>
             <div class="input-voice-message">
@@ -52,6 +66,7 @@
             <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>
         </div>
     </div>
+    <div class="blocked-msg hidden">blocked</div>
     <div class="message-actions-panel noselect hidden">
         <div class="button-wrap reply-message-wrap">
             <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>
