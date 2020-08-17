@@ -716,10 +716,19 @@ define("xabber-omemo", function () {
                 if (!this.get('device_id'))
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
+                this.storeSessions();
                 this.account.on('device_published', this.publishBundle, this);
                 this.store.on('prekey_removed', this.removePreKey, this);
                 this.on("quit", this.onQuit, this);
                 this.store.on('session_stored', this.cacheSession, this);
+            },
+
+            storeSessions: function () {
+                let sessions = this.get('sessions');
+                for (let session_id in sessions) {
+                    let session = sessions[session_id];
+                    session && this.store.put(session_id, session);
+                }
             },
 
             onConnected: function () {
@@ -923,7 +932,7 @@ define("xabber-omemo", function () {
                         jid = Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from')),
                         contact = this.account.contacts.get(jid),
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
-                        cached_msg = this.cached_messages.getMessage(contact, stanza_id);
+                        cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
                     if (cached_msg) {
                         options.encrypted = true;
@@ -936,7 +945,7 @@ define("xabber-omemo", function () {
                     this.decrypt(message).then((decrypted_msg) => {
                         if (decrypted_msg) {
                             options.encrypted = true;
-                            this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                            stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
                             $message.find('body').remove();
                         }
                         else
