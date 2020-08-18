@@ -1540,6 +1540,7 @@ define("xabber-accounts", function () {
                 this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
+                this.model.on("devices_updated", this.updateDevices, this);
                 this.model.on("destroy", this.remove, this);
             },
 
