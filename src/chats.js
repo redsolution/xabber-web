@@ -1287,7 +1287,7 @@ define("xabber-chats", function () {
                 return;
             var marked_msg_id = $displayed.attr('id') || $received.attr('id'),
                 marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                msg = this.account.messages.find(m => m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id || m.get('msgid') === marked_msg_id);
+                msg = this.account.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
             if (!msg)
                 return;
             if (msg.isSenderMe()) {
@@ -1332,7 +1332,7 @@ define("xabber-chats", function () {
         receiveCarbonsMarker: function ($marker) {
             let stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 msg_id = $marker.attr('id'),
-                msg = this.messages.find(m => m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id || m.get('msgid') === msg_id), msg_idx;
+                msg = this.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id), msg_idx;
             msg && (msg_idx = this.messages.indexOf(msg));
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
