@@ -779,7 +779,7 @@ define("xabber-omemo", function () {
                     let omemo = this.connection.omemo;
                     if (omemo.devices.length) {
                         let device = omemo.devices[device_id];
-                        if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                        if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                             let label = this.account.settings.get('device_label_text');
                             omemo.publishDevice(device_id, label, function () {
                                 this.account.trigger('device_published');
@@ -792,7 +792,7 @@ define("xabber-omemo", function () {
                         omemo.getDevicesNode(null, function (cb) {
                             omemo.devices = omemo.getUserDevices($(cb));
                             let device = omemo.devices[device_id];
-                            if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                            if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
                                 omemo.publishDevice(device_id, label, function () {
                                     this.account.trigger('device_published');
@@ -896,7 +896,7 @@ define("xabber-omemo", function () {
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.account.omemo.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
-                            if (!device || device && device.label != this.account.settings.get('device_label_text')) {
+                            if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
                                 this.account.connection.omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
