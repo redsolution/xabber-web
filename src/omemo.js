@@ -587,14 +587,13 @@ define("xabber-omemo", function () {
                 try {
                     let sessionCipher = new SessionCipher(this.store, this.address), plainText;
 
-                    if (!this.store.hasSession(this.address.toString())) {
-                        let session = this.getCachedSession();
-                        session && await this.store.storeSession(this.address.toString(), session);
-                    }
-
                     if (preKey)
                         plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
                     else {
+                        if (!this.store.hasSession(this.address.toString())) {
+                            let session = this.getCachedSession();
+                            session && await this.store.storeSession(this.address.toString(), session);
+                        }
                         plainText = await sessionCipher.decryptWhisperMessage(cipherText, 'binary');
                     }
 
@@ -638,7 +637,8 @@ define("xabber-omemo", function () {
                     return {
                         preKey: ciphertext.type === 3,
                         ciphertext: ciphertext,
-                        deviceId: this.address.getDeviceId()
+                        deviceId: this.address.getDeviceId(),
+                        preKeyMsg: ciphertext.preKeyMsg
                     };
                 } catch (e) {
                     console.log('Error:', e);
@@ -716,7 +716,7 @@ define("xabber-omemo", function () {
                 if (!this.get('device_id'))
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
-                this.storeSessions();
+                // this.storeSessions();
                 this.account.on('device_published', this.publishBundle, this);
                 this.store.on('prekey_removed', this.removePreKey, this);
                 this.on("quit", this.onQuit, this);
@@ -860,10 +860,25 @@ define("xabber-omemo", function () {
                             attrs.kex = true;
                         }
 
-                        if (peer.devices[key.deviceId])
-                            encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-                        else
-                            myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                        if (peer.devices[key.deviceId]) {
+                            encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up()
+                                .c('help-info', {rid: key.deviceId})
+                                .c('baseKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.baseKey)).up()
+                                .c('identityKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.identityKey)).up()
+                                .c('preKeyId').t(key.preKeyMsg.preKeyId).up()
+                                .c('registrationId').t(key.preKeyMsg.registrationId).up()
+                                .c('signedPreKeyId').t(key.preKeyMsg.signedPreKeyId).up().up();
+                        }
+                        else {
+                            myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up()
+                                .c('help-info', {rid: key.deviceId})
+                                .c('baseKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.baseKey)).up()
+                                .c('identityKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.identityKey)).up()
+                                .c('preKeyId').t(key.preKeyMsg.preKeyId).up()
+                                .c('registrationId').t(key.preKeyMsg.registrationId).up()
+                                .c('signedPreKeyId').t(key.preKeyMsg.signedPreKeyId).up().up();
+                        }
+
                     }
                     encryptedElement.up().cnode(myKeys.tree());
 

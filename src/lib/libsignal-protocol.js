@@ -36126,14 +36126,18 @@ SessionCipher.prototype = {
               return {
                   type           : 3,
                   body           : result,
-                  registrationId : session.registrationId
+                  registrationId : session.registrationId,
+                  preKeyMsg: preKeyMsg,
+                  session: session
               };
 
           } else {
               return {
                   type           : 1,
                   body           : util.toString(message),
-                  registrationId : session.registrationId
+                  registrationId : session.registrationId,
+                  preKeyMsg: preKeyMsg,
+                  session: session
               };
           }
       });
