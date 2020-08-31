@@ -236,6 +236,7 @@ define("xabber-chats", function () {
                 mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [];
 
             options.encrypted && _.extend(attrs, {encrypted: true});
+            options.help_info && _.extend(attrs, {help_info: options.help_info});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -3261,7 +3262,7 @@ define("xabber-chats", function () {
 
             var classes = [
                 attrs.forwarded_message && 'forwarding',
-                attrs.encrypted && 'encrypted'
+                (attrs.encrypted || this.model.get('encrypted')) && 'encrypted'
             ];
 
             let markup_body = utils.markupBodyMessage(message);
@@ -3271,6 +3272,15 @@ define("xabber-chats", function () {
                 message: markup_body,
                 classlist: classes.join(' ')
             })));
+
+            if (attrs.help_info) {
+                let $debug_info = $('<div class="debug-info"/>'), debug_info = "";
+                for (let i in attrs.help_info) {
+                    debug_info && (debug_info += '\n');
+                    debug_info += (i + ': ' + attrs.help_info[i]);
+                }
+                $message.children('.msg-wrap').append($debug_info.text(debug_info));
+            }
 
             if (is_image) {
                 if (images.length > 1) {

@@ -4192,12 +4192,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-message .chat-msg-media-content,
+.chat-message .debug-info,
 .chat-message .chat-msg-content {
     width: 100%;
     font-size: 12px;
     line-height: 20px;
     color: #212121;
     white-space: pre-wrap;
+}
+
+.chat-message .debug-info {
+    color: #9E9E9E;
 }
 
 .chat-message .chat-msg-content .quote {

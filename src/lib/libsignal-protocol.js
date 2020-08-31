@@ -36128,7 +36128,7 @@ SessionCipher.prototype = {
                   body           : result,
                   registrationId : session.registrationId,
                   preKeyMsg: preKeyMsg,
-                  session: session
+                  session: {baseKey: util.toArrayBuffer(session.indexInfo.baseKey), identityKey: util.toArrayBuffer(session.indexInfo.remoteIdentityKey), registrationId: session.registrationId}
               };
 
           } else {
@@ -36136,8 +36136,7 @@ SessionCipher.prototype = {
                   type           : 1,
                   body           : util.toString(message),
                   registrationId : session.registrationId,
-                  preKeyMsg: preKeyMsg,
-                  session: session
+                  session: {baseKey: util.toArrayBuffer(session.indexInfo.baseKey), identityKey: util.toArrayBuffer(session.indexInfo.remoteIdentityKey), registrationId: session.registrationId}
               };
           }
       });

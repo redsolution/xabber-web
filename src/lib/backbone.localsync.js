@@ -24,7 +24,7 @@
         this.records = this.from_string(data, []);
     };
 
-    var IndexedDB = function (options) {
+    var IndexedDB = function (options, callback) {
         this.version = options.version || 1;
         this.name = options.name;
         var request = indexedDB.open(this.name, this.version);
@@ -34,6 +34,7 @@
         }.bind(this);
         request.onsuccess = function() {
             this.db = request.result;
+            callback && callback();
         }.bind(this);
 
         this.createStore = function (db) {
@@ -235,7 +236,9 @@
 
     Backbone.ModelWithDataBase = Backbone.Model.extend({
         initialize: function (attrs, options) {
-            this.database = new IndexedDB(options);
+            this.database = new IndexedDB(options, function () {
+                this.trigger('initialized');
+            }.bind(this));
             this._initialize && this._initialize(attrs, options);
             this.on("quit", this.onQuit, this);
         },
