@@ -1289,8 +1289,13 @@ define("xabber-chats", function () {
             var marked_msg_id = $displayed.attr('id') || $received.attr('id'),
                 marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 msg = this.account.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
-            if (!msg)
+            if (!msg) {
+                let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
+                    enc_msg = enc_chat.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
+                if (enc_msg)
+                    enc_chat.receiveMarker($message, tag, carbon_copied);
                 return;
+            }
             if (msg.isSenderMe()) {
                 if ($received.length) {
                     let msg_state = msg.get('state');
@@ -1335,6 +1340,13 @@ define("xabber-chats", function () {
                 msg_id = $marker.attr('id'),
                 msg = this.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id), msg_idx;
             msg && (msg_idx = this.messages.indexOf(msg));
+            if (!msg) {
+                let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
+                    enc_msg = enc_chat.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id);
+                if (enc_msg)
+                    enc_chat.receiveCarbonsMarker($marker);
+                return;
+            }
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
                 for (var i = msg_idx; i >= 0; i--) {

@@ -826,7 +826,7 @@ define("xabber-omemo", function () {
                                     .c('signedPreKeyId').t(key.preKeyMsg.signedPreKeyId).up().up();
                             } else if (key.session) {
                                 myKeys.c('help', {rid: key.deviceId})
-                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.session.indexInfo.baseKey)).up()
+                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.session.baseKey)).up()
                                     .c('identityKey').t(utils.ArrayBuffertoBase64(key.session.identityKey)).up()
                                     .c('registrationId').t(key.session.registrationId).up().up();
                             }
