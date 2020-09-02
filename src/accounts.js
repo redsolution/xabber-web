@@ -1734,7 +1734,7 @@ define("xabber-accounts", function () {
             },
 
             initOmemo: function () {
-                this.model.own_used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                this.model.own_used_prekeys = new xabber.UsedPreKeys(null, {
                     name: `cached-used-own-prekeys-list-${this.model.get('jid')}`,
                     objStoreName: 'prekeys',
                     primKey: 'id'
@@ -1745,12 +1745,12 @@ define("xabber-accounts", function () {
                     fetch: 'before'
                 });
                 setTimeout(function () {
-                    this.model.ownprekeys = new xabber.OwnPreKeys(null, {
+                    this.model.ownprekeys = new xabber.UsedPreKeys(null, {
                         name: `cached-prekeys-list-${this.model.get('jid')}`,
                         objStoreName: 'prekeys',
                         primKey: 'id'
                     });
-                    this.model.used_prekeys = new xabber.OwnUsedPreKeys(null, {
+                    this.model.used_prekeys = new xabber.UsedPreKeys(null, {
                         name: `cached-used-prekeys-list-${this.model.get('jid')}`,
                         objStoreName: 'prekeys',
                         primKey: 'id'
@@ -1766,7 +1766,7 @@ define("xabber-accounts", function () {
             updateDevices: function () {
                 this.$('.omemo-settings-wrap .own-devices').html("");
                 let conn = this.model.connection;
-                if (conn && conn.omemo)
+                if (conn && conn.omemo && this.model.omemo)
                     for (let i in conn.omemo.devices) {
                         let device = conn.omemo.devices[i],
                             attrs = _.clone(device);
