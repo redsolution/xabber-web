@@ -237,6 +237,7 @@ define("xabber-chats", function () {
 
             options.encrypted && _.extend(attrs, {encrypted: true});
             options.help_info && _.extend(attrs, {help_info: options.help_info});
+            options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -3284,6 +3285,9 @@ define("xabber-chats", function () {
                 message: markup_body,
                 classlist: classes.join(' ')
             })));
+
+            if (attrs.hasOwnProperty('is_trusted'))
+                $message.attr('data-trust', attrs.is_trusted);
 
             if (attrs.help_info) {
                 let $debug_info = $('<div class="debug-info"/>'), debug_info = "";
@@ -6634,6 +6638,8 @@ define("xabber-chats", function () {
         },
 
         _initialize: function (options) {
+            this.view = options.content;
+            this.model = this.view.model;
             let rich_textarea_wrap = this.$('.rich-textarea-wrap');
             let bindings = {
                 enter: {
@@ -6725,13 +6731,11 @@ define("xabber-chats", function () {
                     ]
                 },
                 formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
-                placeholder: 'Write a message...',
+                placeholder: (this.model.get('encrypted')) ? 'Write an encrypted message...' : 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
-            this.view = options.content;
-            this.model = this.view.model;
             this.contact = this.view.contact;
             this.account = this.view.account;
             this.fwd_messages = [];

@@ -475,6 +475,8 @@ define("xabber-omemo", function () {
             },
 
             generateFingerprint: function () {
+                if (!this.get('ik'))
+                    return;
                 let generator = new FingerprintGenerator(1024),
                     localPub = utils.fromBase64toArrayBuffer(JSON.parse(this.account.omemo.get('identityKey')).pubKey);
                 return generator.createFor(String(this.account.omemo.get('device_id')), localPub, String(this.id), this.get('ik'));
@@ -914,13 +916,19 @@ define("xabber-omemo", function () {
 
                     if (cached_msg) {
                         options.encrypted = true;
-                        $message.find('body').remove();
-                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
-                        this.account.chats.receiveChatMessage($message[0], options);
+                        this.getTrusted($message).then((is_trusted) => {
+                            options.is_trusted = is_trusted;
+                            $message.find('body').remove();
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                            this.account.chats.receiveChatMessage($message[0], options);
+                        });
                         return;
                     }
 
-                    this.decrypt(message).then((decrypted_msg) => {
+                    this.getTrusted($message).then((is_trusted) => {
+                        options.is_trusted = is_trusted;
+                        return this.decrypt(message);
+                    }).then((decrypted_msg) => {
                         if (decrypted_msg) {
                             options.encrypted = true;
                             stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
@@ -931,6 +939,26 @@ define("xabber-omemo", function () {
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
+                }
+            },
+
+            getTrusted: async function ($message) {
+                let device_id = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid'),
+                    $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
+                    jid = Strophe.getBareJidFromJid($msg.attr('from')),
+                    peer = this.getPeer(jid),
+                    device = peer.getDevice(device_id), fingerprint;
+                if (device.fingerprint) {
+                    return this.isTrusted(jid, device.fingerprint);
+                } else {
+                    if (device.get('ik')) {
+                        fingerprint = await device.generateFingerprint();
+                    }
+                    else {
+                        let {pk, spk, ik} = await device.getBundle();
+                        fingerprint = await device.generateFingerprint();
+                    }
+                    return this.isTrusted(jid, fingerprint);
                 }
             },
 
