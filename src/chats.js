@@ -1292,7 +1292,7 @@ define("xabber-chats", function () {
                 msg = this.account.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
             if (!msg) {
                 let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
-                    enc_msg = enc_chat.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
+                    enc_msg = enc_chat && enc_chat.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
                 if (enc_msg)
                     enc_chat.receiveMarker($message, tag, carbon_copied);
                 return;
@@ -1343,7 +1343,7 @@ define("xabber-chats", function () {
             msg && (msg_idx = this.messages.indexOf(msg));
             if (!msg) {
                 let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
-                    enc_msg = enc_chat.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id);
+                    enc_msg = enc_chat && enc_chat.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id);
                 if (enc_msg)
                     enc_chat.receiveCarbonsMarker($marker);
                 return;

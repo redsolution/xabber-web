@@ -243,8 +243,8 @@
             this.on("quit", this.onQuit, this);
         },
 
-        clearDataBase: function () {
-            this.database.clear();
+        clearDataBase: function (name) {
+            this.database.clear_database(name);
         },
 
         onQuit: function () {

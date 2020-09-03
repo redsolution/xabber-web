@@ -561,13 +561,11 @@ define("xabber-omemo", function () {
                     if (this.get('trusted') === false && (this.id != this.account.omemo.get('device_id')))
                         return null;
                     if (!this.store.hasSession(this.address.toString()) || !this.is_session_initiated) { // this.preKeys ??
-                        if (!this.preKeys) {
-                            this.is_session_initiated = true;
-                            let s = await this.initSession();
-                            if (!s)
-                                return null;
-                        }
-                        else
+                        if (this.preKeys && !this.preKeys.length)
+                            return null;
+                        this.is_session_initiated = true;
+                        let s = await this.initSession();
+                        if (!s)
                             return null;
                     }
 
@@ -657,10 +655,9 @@ define("xabber-omemo", function () {
                 if (!this.get('device_id'))
                     this.set('device_id', this.generateDeviceId());
                 this.store = new xabber.SignalProtocolStore();
-                // this.storeSessions();
                 this.account.on('device_published', this.publishBundle, this);
                 this.store.on('prekey_removed', this.removePreKey, this);
-                this.on("quit", this.onQuit, this);
+                xabber.on("quit", this.onQuit, this);
                 this.store.on('session_stored', this.cacheSession, this);
             },
 
@@ -709,9 +706,9 @@ define("xabber-omemo", function () {
             },
 
             onQuit: function () {
-                window.indexedDB.databases().then((dbs) => {
-                    dbs.forEach(db => { window.indexedDB.deleteDatabase(db.name) })
-                });
+                this.account.ownprekeys && this.account.ownprekeys.clearDataBase('prekeys');
+                this.account.used_prekeys && this.account.used_prekeys.clearDataBase('prekeys');
+                this.account.own_used_prekeys && this.account.own_used_prekeys.clearDataBase('prekeys');
             },
 
             addDevice: function () {
