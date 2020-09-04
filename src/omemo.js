@@ -75,7 +75,8 @@ define("xabber-omemo", function () {
 
             encrypt: async function (message) {
                 let enc_promises = [],
-                    aes = await utils.AES.encrypt(message);
+                    aes = await utils.AES.encrypt(message),
+                    is_trusted = true;
 
                 if (!_.keys(this.devices).length)
                     await this.getDevicesNode();
@@ -91,10 +92,18 @@ define("xabber-omemo", function () {
 
                 keys = keys.filter(key => key !== null);
 
+                for (let device in this.devices) {
+                    if (this.devices[device].get('trusted') === false)
+                        is_trusted = false;
+                    if (is_trusted && this.devices[device].get('trusted') === undefined)
+                        is_trusted = undefined;
+                }
+
                 return {
                     keys: keys,
                     iv: aes.iv,
-                    payload: aes.payload
+                    payload: aes.payload,
+                    is_trusted: is_trusted
                 };
             },
 
@@ -204,7 +213,8 @@ define("xabber-omemo", function () {
                     let device = devices[device_id];
                     if (device.get('ik')) {
                         let f = await device.generateFingerprint(),
-                            is_trusted = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
+                            fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
+                            is_trusted = fing && fing.trusted ? true : false;
                         $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
                         if (devices_count == counter)
@@ -218,7 +228,8 @@ define("xabber-omemo", function () {
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = await device.generateFingerprint(),
-                                    is_trusted = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).indexOf(f) < 0 ? false : true;
+                                    fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
+                                    is_trusted = fing && fing.trusted ? true : false;
                                 $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
                             counter++;
@@ -601,12 +612,10 @@ define("xabber-omemo", function () {
                     this.account.used_prekeys.putPreKey({id, pk, spk, ik});
                 this.set({'pk': utils.fromBase64toArrayBuffer(pk.key), 'ik': utils.fromBase64toArrayBuffer(ik)});
                 this.fingerprint = await this.generateFingerprint();
-                if ((this.id != this.account.omemo.get('device_id')) && !this.account.omemo.isTrusted(this.jid, this.fingerprint)) {
-                    this.set('trusted', false);
+                let trusted = this.account.omemo.isTrusted(this.jid, this.fingerprint);
+                this.set('trusted', trusted);
+                if ((this.id != this.account.omemo.get('device_id')) && !trusted)
                     return false;
-                }
-                else
-                    this.set('trusted', true);
                 this.processPreKey({
                     registrationId: Number(id),
                     identityKey: utils.fromBase64toArrayBuffer(ik),
@@ -681,27 +690,32 @@ define("xabber-omemo", function () {
                 this.addDevice();
             },
 
-            updateFingerprints: function (contact, fingerprint, trust) {
+            updateFingerprints: function (contact, fingerprint, trusted) {
                 let fingerprints = _.clone(this.get('fingerprints'));
                 if (!fingerprints[contact])
                     fingerprints[contact] = [];
                 let contact_fingerprints = fingerprints[contact],
-                    idx = contact_fingerprints.indexOf(fingerprint);
-                if (trust && idx < 0)
-                    contact_fingerprints.push(fingerprint);
-                if (!trust && idx >= 0)
+                    finger = contact_fingerprints.find(f => f.fingerprint == fingerprint),
+                    idx = contact_fingerprints.indexOf(finger);
+                if (idx >= 0)
                     contact_fingerprints.splice(idx, 1);
+                contact_fingerprints.push({fingerprint, trusted});
                 this.save('fingerprints', fingerprints);
             },
 
             isTrusted: function (jid, fingerprint) {
                 let fingerprints = _.clone(this.get('fingerprints'));
                 if (!fingerprints[jid])
-                    return false;
-                else if (fingerprints[jid].indexOf(fingerprint) >= 0)
-                    return true;
+                    return;
+                let fing = fingerprints[jid].find(f => f.fingerprint == fingerprint);
+                if (fing) {
+                    if (fing.trusted === undefined)
+                        return;
+                    else
+                        return fing.trusted;
+                }
                 else
-                    return false;
+                    return;
 
             },
 
@@ -846,7 +860,7 @@ define("xabber-omemo", function () {
                     }).up()
                         .c('body').t('This message is encrypted using OMEMO end-to-end encryption.').up();
 
-                    return message;
+                    return {message: message, is_trusted: encryptedMessage.is_trusted};
                 }).catch((msg) => {
                     console.log(msg);
                 });
@@ -945,6 +959,8 @@ define("xabber-omemo", function () {
                     jid = Strophe.getBareJidFromJid($msg.attr('from')),
                     peer = this.getPeer(jid),
                     device = peer.getDevice(device_id), fingerprint;
+                if (device_id == this.get('device_id'))
+                    return true;
                 if (device.fingerprint) {
                     return this.isTrusted(jid, device.fingerprint);
                 } else {
@@ -953,6 +969,7 @@ define("xabber-omemo", function () {
                     }
                     else {
                         let {pk, spk, ik} = await device.getBundle();
+                        device.set('ik', utils.fromBase64toArrayBuffer(ik));
                         fingerprint = await device.generateFingerprint();
                     }
                     return this.isTrusted(jid, fingerprint);

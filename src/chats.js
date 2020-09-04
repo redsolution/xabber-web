@@ -2291,6 +2291,7 @@ define("xabber-chats", function () {
             this.model.messages.on("change:state", this.onChangedMessageState, this);
             this.model.messages.on("change:is_unread", this.onChangedReadState, this);
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
+            this.model.messages.on("change:trusted", this.onTrustedChanged, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
             this.contact.on("change:group_chat", this.updateGroupChat, this);
@@ -2320,6 +2321,13 @@ define("xabber-chats", function () {
             if (_.has(changed, 'status')) this.updateMyStatus();
             if (_.has(changed, 'image')) this.updateMyAvatar();
         },
+
+          onTrustedChanged: function (message) {
+              let trusted = message.get('trusted'),
+                  $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]');
+              (trusted == null) && (trusted = 'none');
+              $message.attr('data-trust', trusted);
+          },
 
         updateGroupChat: function () {
             this._loading_history = false;
@@ -3764,7 +3772,11 @@ define("xabber-chats", function () {
             }
 
             if (message.get('encrypted') && this.account.omemo) {
-                this.account.omemo.encrypt(this.contact, stanza).then((stanza) => {
+                this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
+                    if (msg) {
+                        stanza = msg.message;
+                        message.set('trusted', msg.is_trusted === undefined ? null : msg.is_trusted);
+                    }
                     let msg_sending_timestamp = moment.now();
                     this.account.sendMsg(stanza, function () {
                         if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
