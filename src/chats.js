@@ -7715,14 +7715,13 @@ define("xabber-chats", function () {
                 markups = text_markups.markup_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')})
-                .c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id})
-                .c('message');
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+                $message = $build('message');
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
                     gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end);
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
-                    .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
+                    .c('forwarded', {xmlns: Strophe.NS.FORWARD})
                     .c('delay', {
                         xmlns: 'urn:xmpp:delay',
                         stamp: fwd_msg.get('time')
@@ -7730,24 +7729,32 @@ define("xabber-chats", function () {
                 forwarded_body += original_body.slice(fwd.start, fwd.end);
             }.bind(this));
             markups.forEach(function (markup) {
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + forwarded_body.length, end: markup.end + forwarded_body.length, type: 'decoration'});
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + forwarded_body.length, end: markup.end + forwarded_body.length, type: 'decoration'});
                 for (let idx in markup.markup)
-                    iq.c(markup.markup[idx], {xmlns: Strophe.NS.MARKUP}).up();
-                iq.up();
+                    $message.c(markup.markup[idx], {xmlns: Strophe.NS.MARKUP}).up();
+                $message.up();
             }.bind(this));
             blockquotes.forEach(function (blockquote) {
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + forwarded_body.length, end: blockquote.end + forwarded_body.length, type: 'decoration'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + forwarded_body.length, end: blockquote.end + forwarded_body.length, type: 'decoration'})
                     .c('quote', {xmlns: Strophe.NS.MARKUP}).up().up();
             }.bind(this));
             mentions.forEach(function (mention) {
                 let mention_attrs = {xmlns: Strophe.NS.MARKUP};
                 mention.is_gc && (mention_attrs = Strophe.NS.GROUP_CHAT);
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + forwarded_body.length, end: mention.end + forwarded_body.length, type: 'decoration'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + forwarded_body.length, end: mention.end + forwarded_body.length, type: 'decoration'})
                     .c('mention', mention_attrs).t(mention.target).up().up();
             }.bind(this));
-            iq.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
+            $message.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
             this.unsetForwardedMessages();
-            this.account.sendIQ(iq);
+            if (this.model.get('encrypted')) {
+                this.account.omemo.encrypt(this.contact, $message).then((msg) => {
+                    iq.cnode(msg.message.tree());
+                    this.account.sendIQ(iq);
+                });
+            } else {
+                iq.cnode($message.tree());
+                this.account.sendIQ(iq);
+            }
         },
 
         showEditPanel: function () {

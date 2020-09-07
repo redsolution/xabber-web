@@ -785,7 +785,7 @@ define("xabber-omemo", function () {
                 let peer = this.getPeer(contact.get('jid')),
                     $msg = $(message.tree()),
                     origin_id = $msg.children('origin-id').attr('id'),
-                    plaintext = $msg.children('body')[0].outerHTML;
+                    plaintext = Strophe.serialize($msg.children('body')[0]) || "";
 
                 $msg.children('reference').each(function (i, ref) {
                     plaintext += ref.outerHTML;
