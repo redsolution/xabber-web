@@ -4037,7 +4037,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-message.encrypted {
     background-size: 4px 4px;
     background-position: center;
-    background-image: linear-gradient(to right, rgba(207,216,220,.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(207,216,220,.3) 1px, transparent 1px);
+    background-image: linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%, rgba(207,216,220,.3)), linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%,rgba(207,216,220,.3));
 }
 
 .chat-message.encrypted[data-trust=true] {

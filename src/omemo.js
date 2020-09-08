@@ -614,7 +614,7 @@ define("xabber-omemo", function () {
                 this.fingerprint = await this.generateFingerprint();
                 let trusted = this.account.omemo.isTrusted(this.jid, this.fingerprint);
                 this.set('trusted', trusted);
-                if ((this.id != this.account.omemo.get('device_id')) && !trusted)
+                if ((this.id != this.account.omemo.get('device_id')) && trusted === false)
                     return false;
                 this.processPreKey({
                     registrationId: Number(id),
@@ -788,7 +788,7 @@ define("xabber-omemo", function () {
                     plaintext = Strophe.serialize($msg.children('body')[0]) || "";
 
                 $msg.children('reference').each(function (i, ref) {
-                    plaintext += ref.outerHTML;
+                    plaintext += Strophe.serialize(ref);
                 }.bind(this));
 
                 this.cached_messages.putMessage(contact, origin_id, plaintext);
@@ -797,7 +797,8 @@ define("xabber-omemo", function () {
 
                     let encryptedElement = $build('encrypted', {xmlns: Strophe.NS.OMEMO})
                         .c('header', {
-                            sid: this.get('device_id')
+                            sid: this.get('device_id'),
+                            label: this.account.settings.get('device_label_text')
                         }),
                         myKeys = $build('keys', {jid: this.account.get('jid')});
 
@@ -891,8 +892,8 @@ define("xabber-omemo", function () {
                         return;
                     }
                     if (node == `${Strophe.NS.OMEMO}:bundles`) {
-                        let id = $message.find('item').attr('id');
-                        this.getPeer(from_jid).getDevice(id);
+                        /*let id = $message.find('item').attr('id');
+                        this.getPeer(from_jid).getDevice(id);*/
                     }
                 }
             },
@@ -921,8 +922,11 @@ define("xabber-omemo", function () {
                             identityKey = $help_info.children('identityKey').text(),
                             preKeyId = $help_info.children('preKeyId').text(),
                             registrationId = $help_info.children('registrationId').text(),
-                            signedPreKeyId = $help_info.children('signedPreKeyId').text();
-                        options.help_info = {baseKey, identityKey, preKeyId, registrationId, signedPreKeyId};
+                            signedPreKeyId = $help_info.children('signedPreKeyId').text(),
+                            $header = $message.find('header'),
+                            device_id = $header.attr('sid'),
+                            label = $header.attr('label') || "";
+                        options.help_info = {baseKey, identityKey, preKeyId, registrationId, signedPreKeyId, device_id, label};
                     }
 
                     if (cached_msg) {

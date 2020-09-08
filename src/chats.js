@@ -7716,7 +7716,7 @@ define("xabber-chats", function () {
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
                 iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
-                $message = $build('message');
+                $message = $build('message').attrs({xmlns: undefined});
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
                     gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end);
