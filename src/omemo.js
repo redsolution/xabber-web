@@ -949,8 +949,10 @@ define("xabber-omemo", function () {
                             stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
                             $message.find('body').remove();
                         }
-                        else
+                        else {
                             options.not_encrypted = true;
+                            delete options.is_trusted;
+                        }
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
@@ -1059,9 +1061,10 @@ define("xabber-omemo", function () {
                         pubKey = utils.ArrayBuffertoBase64(pk.keyPair.pubKey),
                         privKey = utils.ArrayBuffertoBase64(pk.keyPair.privKey),
                         key = JSON.stringify({pubKey, privKey});
-                    if (!pk.signature)
+                    if (!pk.signature) {
                         prekeys.push({id: id, key: pubKey});
-                    this.account.ownprekeys.putPreKey({id, key})
+                        this.account.ownprekeys.putPreKey({id, key});
+                    }
                 }.bind(this));
                 conn_omemo.publishBundle({
                     spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},

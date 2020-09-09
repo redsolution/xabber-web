@@ -237,7 +237,7 @@ define("xabber-chats", function () {
 
             options.encrypted && _.extend(attrs, {encrypted: true});
             options.help_info && _.extend(attrs, {help_info: options.help_info});
-            options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
+            options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted === undefined ? null : options.is_trusted});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -3295,7 +3295,7 @@ define("xabber-chats", function () {
             })));
 
             if (attrs.hasOwnProperty('is_trusted'))
-                $message.attr('data-trust', attrs.is_trusted);
+                $message.attr('data-trust', attrs.is_trusted === null ? 'none' : attrs.is_trusted);
 
             if (attrs.help_info) {
                 let $debug_info = $('<div class="debug-info"/>'), debug_info = "";
