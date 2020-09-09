@@ -5930,7 +5930,7 @@ define("xabber-chats", function () {
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
                 .c('send').t(is_member_only).up()
-                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat participants'));
+                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat members'));
             this.account.sendIQ(iq,
                 function () {
                     !is_member_only && this.sendInviteMessage(contact_jid);
@@ -5960,7 +5960,7 @@ define("xabber-chats", function () {
                     type: 'chat',
                     id: uuid()
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
-                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
+                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat members')).up().up()
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
                     .c('privacy').t(this.contact.get('group_info').anonymous).up().up()
                     .c('body').t(body).up();
