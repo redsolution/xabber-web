@@ -77,9 +77,9 @@ define("xabber-contacts", function () {
                 } else if (this.get('group_info')) {
                     status_text = this.get('group_info').members_num;
                     if (this.get('group_info').members_num > 1)
-                        status_text += ' participants';
+                        status_text += ' members';
                     else
-                        status_text += ' participant';
+                        status_text += ' member';
                     if (this.get('group_info').online_members_num > 0)
                         status_text += ', ' + this.get('group_info').online_members_num + ' online';
                 } else
@@ -436,7 +436,7 @@ define("xabber-contacts", function () {
                     this.set('group_info', group_chat_info);
                     if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
                         this.set('name', group_chat_info.name);
-                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' participants, ' + group_chat_info.online_members_num + ' online')});
+                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
                 }
             },
 
@@ -1919,7 +1919,7 @@ define("xabber-contacts", function () {
 
             blockParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Block participant", "Do you want to block "+
+                utils.dialogs.ask("Block member", "Do you want to block "+
                     $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
                         let iq = $iq({type: 'set', to: this.model.get('jid')})
@@ -1931,7 +1931,7 @@ define("xabber-contacts", function () {
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to block participants");
+                                    utils.dialogs.error("You have no permission to block members");
                             });
                     }
                 }.bind(this));
@@ -1939,7 +1939,7 @@ define("xabber-contacts", function () {
 
             kickParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Kick participant", "Do you want to kick "+
+                utils.dialogs.ask("Kick member", "Do you want to kick "+
                     $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'kick'}).done(function (result) {
                     if (result) {
                         let iq = $iq({type: 'set', to: this.model.get('jid')})
@@ -1951,7 +1951,7 @@ define("xabber-contacts", function () {
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to kick participants");
+                                    utils.dialogs.error("You have no permission to kick members");
                             });
                     }
                 }.bind(this));
@@ -2317,7 +2317,7 @@ define("xabber-contacts", function () {
             },
 
             block: function () {
-                utils.dialogs.ask("Block participant", "Do you want to block "+
+                utils.dialogs.ask("Block member", "Do you want to block "+
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
                         this.participant.block(function () {
@@ -2327,14 +2327,14 @@ define("xabber-contacts", function () {
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to block participants");
+                                    utils.dialogs.error("You have no permission to block members");
                             });
                     }
                 }.bind(this));
             },
 
             kick: function () {
-                utils.dialogs.ask("Kick participant", "Do you want to kick "+
+                utils.dialogs.ask("Kick member", "Do you want to kick "+
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'kick'}).done(function (result) {
                     if (result) {
                         this.participant.kick(function () {
@@ -2344,7 +2344,7 @@ define("xabber-contacts", function () {
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to kick participants");
+                                    utils.dialogs.error("You have no permission to kick members");
                             });
                     }
                 }.bind(this));
@@ -2534,7 +2534,7 @@ define("xabber-contacts", function () {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.close();
                             if ($(error).find('not-allowed').length) {
-                                utils.dialogs.error("You have no permission to change participant's info");
+                                utils.dialogs.error("You have no permission to change member's info");
                             }
                         }.bind(this));
                 if (rights_changed) {
@@ -2547,7 +2547,7 @@ define("xabber-contacts", function () {
                         function (error) {
                             this.close();
                             if ($(error).find('not-allowed').length)
-                                utils.dialogs.error("You have no permission to change participant's info");
+                                utils.dialogs.error("You have no permission to change member's info");
                         }.bind(this));
                 }
                 $btn.blur();
@@ -3149,7 +3149,7 @@ define("xabber-contacts", function () {
 
             _initialize: function (options) {
                 this.account = this.model.account;
-                this.$('.invite-msg-text').text('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+                this.$('.invite-msg-text').text('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat members');
                 this.message = options.message;
                 this.model.on("change", this.update, this);
             },
