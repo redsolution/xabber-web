@@ -4035,9 +4035,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-message.encrypted {
-    background-size: 4px 4px;
-    background-position: center;
     background-image: linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%, rgba(207,216,220,.3)), linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%,rgba(207,216,220,.3));
+    background-size: 4px 4px;
+    background-position: 0px 0, 2px 2px;
 }
 
 .chat-message.encrypted[data-trust=true] {
@@ -4053,7 +4053,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-message.encrypted[data-trust=none] {
-    background-image: linear-gradient( 45deg,#FFFDE7 25%, transparent 25%, transparent 74%, #FFFDE7 75%, #FFFDE7), linear-gradient( 45deg,#FFFDE7 25%, transparent 25%, transparent 74%, #FFFDE7 75%, #FFFDE7);
+    background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }

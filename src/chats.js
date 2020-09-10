@@ -204,6 +204,11 @@ define("xabber-chats", function () {
                 message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
+                let converstion = $message.children('replace').attr('conversation');
+                if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: converstion}));
+                    return;
+                }
                 $message = $message.children('replace').children('message');
                 body = $message.children('body').text();
                 let sid = $message.children('stanza-id').first().attr('id');

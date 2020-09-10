@@ -911,7 +911,7 @@ define("xabber-omemo", function () {
                         options.carbon_copied = true;
 
                     let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
-                        jid = Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from')),
+                        jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || options.from_jid,
                         contact = this.account.contacts.get(jid),
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                         cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
@@ -929,7 +929,7 @@ define("xabber-omemo", function () {
                         options.help_info = {baseKey, identityKey, preKeyId, registrationId, signedPreKeyId, device_id, label};
                     }
 
-                    if (cached_msg) {
+                    if (cached_msg && !options.replaced) {
                         options.encrypted = true;
                         this.getTrusted($message).then((is_trusted) => {
                             options.is_trusted = is_trusted;
@@ -940,22 +940,44 @@ define("xabber-omemo", function () {
                         return;
                     }
 
-                    this.getTrusted($message).then((is_trusted) => {
-                        options.is_trusted = is_trusted;
-                        return this.decrypt(message);
-                    }).then((decrypted_msg) => {
-                        if (decrypted_msg) {
-                            options.encrypted = true;
-                            stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
-                            $message.find('body').remove();
-                        }
-                        else {
-                            options.not_encrypted = true;
-                            delete options.is_trusted;
-                        }
-                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
-                        this.account.chats.receiveChatMessage($message[0], options);
-                    });
+                    if (options.replaced) {
+                        this.decrypt(message.children('replace').children('message'), options).then((decrypted_msg) => {
+                            if (decrypted_msg) {
+                                options.encrypted = true;
+                                stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                                $message.find('body').remove();
+                            }
+                            else {
+                                options.not_encrypted = true;
+                                delete options.is_trusted;
+                            }
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                            let chat = this.account.chats.getChat(contact, 'encrypted');
+                            chat && chat.messages.createFromStanza($message, options);
+                            let msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id);
+                            if (msg_item) {
+                                msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                chat && chat.item_view.updateLastMessage(chat.last_message);
+                            }
+                        });
+                    } else {
+                        this.getTrusted($message).then((is_trusted) => {
+                            options.is_trusted = is_trusted;
+                            return this.decrypt(message);
+                        }).then((decrypted_msg) => {
+                            if (decrypted_msg) {
+                                options.encrypted = true;
+                                stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                                $message.find('body').remove();
+                            }
+                            else {
+                                options.not_encrypted = true;
+                                delete options.is_trusted;
+                            }
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                            this.account.chats.receiveChatMessage($message[0], options);
+                        });
+                    }
                 }
             },
 
@@ -1014,9 +1036,9 @@ define("xabber-omemo", function () {
                 return this.peers.get(jid);
             },
 
-            decrypt: async function (message) {
+            decrypt: async function (message, options) {
                 let $message = $(message),
-                    from_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                    from_jid = Strophe.getBareJidFromJid($message.attr('from')) || options.from_jid,
                     $encrypted;
 
                 if ($message.find('result[xmlns="'+Strophe.NS.MAM+'"]').length) {
