@@ -1819,12 +1819,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 /* ------------- CONTACTS --------------- */
 
-[data-status=offline] {
-    background-color: #616161;
+[data-status=offline],
+[data-status=unavailable] {
+    background-color: #9E9E9E;
 }
 
-[data-status=offline] svg circle {
-    fill: #616161;
+[data-status=offline] svg circle,
+[data-status=unavailable] svg circle {
+    fill: #9E9E9E;
 }
 
 [data-status=offline].hide-offline {
@@ -1832,20 +1834,22 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 [data-status=chat] {
-    background-color: #689F38;
+    background-color: #8BC34A;
 }
 
 [data-status=chat] svg circle {
-    fill: #689F38;
+    fill: #8BC34A;
 }
 
 [data-status=active],
+[data-status=nil],
 [data-status=online] {
     background-color: #388E3C;
 }
 
 .chat-icon svg circle,
 [data-status=active] svg circle,
+[data-status=nil] svg circle,
 [data-status=online] svg circle {
     fill: #388E3C;
 }
@@ -1859,11 +1863,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 [data-status=xa] {
-    background-color: #1976D2;
+    background-color: #2196F3;
 }
 
 [data-status=xa] svg circle {
-    fill: #1976D2;
+    fill: #2196F3;
 }
 
 [data-status=resolved],
@@ -1876,10 +1880,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-status=inactive] svg circle,
 [data-status=dnd] svg circle {
     fill: #D32F2F;
-}
-
-[data-status=eating] {
-    background-color: #D94C2A;
 }
 
 .roster-right-container .collapsed-wrap {
