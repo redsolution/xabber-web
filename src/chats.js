@@ -5040,7 +5040,6 @@ define("xabber-chats", function () {
             contact && (chat = this.account.chats.getChat(contact));
 
             if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
-                // return this.attention();
                 if (!chat)
                     return;
                 return chat.messages.createSystemMessage({from_jid: msg_from, message: 'Attention was requested', attention: true});
@@ -8022,7 +8021,7 @@ define("xabber-chats", function () {
 
         this.connection.deleteTimedHandler(this._get_msg_handler);
         this._get_msg_handler = this.connection.addTimedHandler(60000, function () {
-            if (this.connection && !this.connection.handlers.find(h => !h.ns && h.name === 'message')) {
+            if (this.connection && !this.connection.handlers.find(h => !h.ns && !h.options.encrypted && h.name === 'message')) {
                 let last_msg_timestamp = this.last_msg_timestamp;
                 this.chats.registerMessageHandler();
                 this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000});

@@ -1708,6 +1708,7 @@ define("xabber-accounts", function () {
                         omemo.publishDevice(null, null, function () {
                             $target.detach();
                         }.bind(this));
+                        omemo.removeNode(`${Strophe.NS.OMEMO}:bundles:${data_id}`);
                     }
                 }.bind(this));
             },

@@ -53,6 +53,13 @@
             createNode.call(this, Strophe.NS.OMEMO + ':devices', null, callback);
         };
 
+        var removeNode = function (node, callback) {
+            let iq = $iq({from:this._connection.jid, type:'set'})
+                .c('pubsub', {xmlns:Strophe.NS.PUBSUB + '#owner'})
+                .c('delete',{node:node});
+            this._connection.sendIQ(iq, callback);
+        };
+
         var createBundleNode = function (id, callback) {
             createNode.call(this, `${Strophe.NS.OMEMO}:bundles:${id}`, null, callback);
         };
@@ -124,6 +131,7 @@
             createBundleNode: createBundleNode,
             createDeviceNode: createDeviceNode,
             publishBundle: publishBundle,
+            removeNode: removeNode,
             getBundleInfo: getBundleInfo
         };
     })());

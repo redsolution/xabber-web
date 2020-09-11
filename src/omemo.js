@@ -778,7 +778,7 @@ define("xabber-omemo", function () {
                 this._msg_handler = this.account.connection.addHandler(function (message) {
                     this.receiveMessage(message);
                     return true;
-                }.bind(this), null, 'message');
+                }.bind(this), null, 'message', null, null, null, {'encrypted': true});
             },
 
             encrypt: function (contact, message) {
@@ -946,18 +946,14 @@ define("xabber-omemo", function () {
                                 options.encrypted = true;
                                 stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
                                 $message.find('body').remove();
-                            }
-                            else {
-                                options.not_encrypted = true;
-                                delete options.is_trusted;
-                            }
-                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
-                            let chat = this.account.chats.getChat(contact, 'encrypted');
-                            chat && chat.messages.createFromStanza($message, options);
-                            let msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id);
-                            if (msg_item) {
-                                msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
-                                chat && chat.item_view.updateLastMessage(chat.last_message);
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                                let chat = this.account.chats.getChat(contact, 'encrypted');
+                                chat && chat.messages.createFromStanza($message, options);
+                                let msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id);
+                                if (msg_item) {
+                                    msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                    chat && chat.item_view.updateLastMessage(chat.last_message);
+                                }
                             }
                         });
                     } else {
