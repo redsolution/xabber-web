@@ -373,46 +373,43 @@ define("xabber-omemo", function () {
             },
 
             getPreKeys: async function () {
-                if (this.model.account.ownprekeys.database.db)
-                    this.model.account.ownprekeys.getAll(null, async function (cb) {
-                        if (cb && cb.length >= constants.MIN_PREKEYS_COUNT) {
-                            cb.forEach(async function (pk) {
-                                let id = pk.id,
-                                    prekey = JSON.parse(pk.key),
-                                    priv_pk = utils.fromBase64toArrayBuffer(prekey.privKey),
-                                    pub_pk = utils.fromBase64toArrayBuffer(prekey.pubKey),
-                                    key_pair = {pubKey: pub_pk, privKey: priv_pk};
-                                this.preKeys.push({keyId: id, keyPair: key_pair});
-                                this.store.storePreKey(id, key_pair);
-                            }.bind(this));
-                            this.getUsedPreKeys();
-                            let spk = await this.getSignedPreKey();
-                            this.preKeys.push(spk);
-                            this.store.storeSignedPreKey(spk.keyId, spk.keyPair);
-                        }
-                        else {
-                            this.generatePreKeys().then((prekeys) => {
-                                this.preKeys = prekeys;
-                                this.getUsedPreKeys();
-                            });
-                        }
-                    }.bind(this));
-                else
-                    this.model.account.ownprekeys.on('initialized', this.getPreKeys, this);
+                let prekeys = this.model.prekeys.getAll();
+                if (Object.keys(prekeys).length >= constants.MIN_PREKEYS_COUNT) {
+                    for (let p in prekeys) {
+                        let pk = prekeys[p],
+                            id = pk.id,
+                            prekey = JSON.parse(pk.key),
+                            priv_pk = utils.fromBase64toArrayBuffer(prekey.privKey),
+                            pub_pk = utils.fromBase64toArrayBuffer(prekey.pubKey),
+                            key_pair = {pubKey: pub_pk, privKey: priv_pk};
+                        this.preKeys.push({keyId: id, keyPair: key_pair});
+                        this.store.storePreKey(id, key_pair);
+                    }
+                    this.getUsedPreKeys();
+                    let spk = await this.getSignedPreKey();
+                    this.preKeys.push(spk);
+                    this.store.storeSignedPreKey(spk.keyId, spk.keyPair);
+                }
+                else {
+                    this.generatePreKeys().then((prekeys) => {
+                        this.preKeys = prekeys;
+                        this.getUsedPreKeys();
+                    });
+                }
             },
 
             getUsedPreKeys: function () {
-                this.model.account.own_used_prekeys.getAll(null, async function (cb) {
-                    if (cb && cb.length) {
-                        cb.forEach(async function (pk) {
-                            let id = pk.id,
-                                prekey = JSON.parse(pk.key),
-                                privKey = utils.fromBase64toArrayBuffer(prekey.privKey),
-                                pubKey = utils.fromBase64toArrayBuffer(prekey.pubKey);
-                            this.store.storePreKey(id, {pubKey, privKey});
-                        }.bind(this));
+                let prekeys = this.model.own_used_prekeys.getAll();
+                if (Object.keys(prekeys).length) {
+                    for (let p in prekeys) {
+                        let pk = prekeys[p],
+                            id = pk.id,
+                            prekey = JSON.parse(pk.key),
+                            privKey = utils.fromBase64toArrayBuffer(prekey.privKey),
+                            pubKey = utils.fromBase64toArrayBuffer(prekey.pubKey);
+                        this.store.storePreKey(id, {pubKey, privKey});
                     }
-                }.bind(this));
+                }
             },
 
             generatePreKey: async function (id) {
@@ -443,35 +440,37 @@ define("xabber-omemo", function () {
             }
 
         });
-
-        xabber.UsedPreKeys = Backbone.ModelWithDataBase.extend({
-            defaults: {
-                preKeys: []
+        
+        xabber.Prekeys = Backbone.Model.extend({
+            initialize: function (options) {
+                this.name = options.name;
+                this.model = options.model;
             },
 
-            putPreKey: function (value, callback) {
-                this.database.put('prekeys', value, function (response_value) {
-                    callback && callback(response_value);
-                });
+            get: function (id) {
+                let prekeys = _.clone(this.model.get(this.name));
+                return prekeys[id];
             },
 
-            getPreKey: function (value, callback) {
-                this.database.get('prekeys', value, function (response_value) {
-                    callback && callback(response_value);
-                });
+            put: function (prekey) {
+                if (!prekey.id)
+                    return;
+                let prekeys = _.clone(this.model.get(this.name));
+                prekeys[prekey.id] = prekey;
+                this.model.save(this.name, prekeys);
             },
 
-            getAll: function (value, callback) {
-                !value && (value = null);
-                this.database.get_all('prekeys', value, function (response_value) {
-                    callback && callback(response_value);
-                });
+            getAll: function () {
+                let prekeys = _.clone(this.model.get(this.name));
+                return prekeys;
             },
 
-            removePreKey: function (value, callback) {
-                this.database.remove('prekeys', value, function (response_value) {
-                    callback && callback(response_value);
-                });
+            remove: function (id) {
+                if (!id)
+                    return;
+                let prekeys = _.clone(this.model.get(this.name));
+                delete prekeys[id];
+                this.model.save(this.name, prekeys);
             }
         });
 
@@ -556,11 +555,8 @@ define("xabber-omemo", function () {
             },
 
             getPreKey: function () {
-                return new Promise((resolve, reject) => {
-                    this.account.used_prekeys.getPreKey(String(this.id), function (pk) {
-                        resolve(pk);
-                    }.bind(this));
-                });
+                let pk = this.account.omemo.used_prekeys.get(String(this.id));
+                return pk;
             },
 
             getCachedSession: function () {
@@ -600,16 +596,16 @@ define("xabber-omemo", function () {
 
             initSession: async function () {
                 let {pk, spk, ik} = await this.getBundle(),
-                    cached_pk = await this.getPreKey(),
+                    cached_pk = this.getPreKey(),
                     id = this.id;
                 if (cached_pk) {
                     if (!spk || spk && JSON.stringify(spk) == JSON.stringify(cached_pk.spk) && JSON.stringify(ik) == JSON.stringify(cached_pk.ik))
                         pk = cached_pk.pk;
                     else
-                        this.account.used_prekeys.putPreKey({id, pk, spk, ik});
+                        this.account.omemo.used_prekeys.put({id, pk, spk, ik});
                 }
                 else
-                    this.account.used_prekeys.putPreKey({id, pk, spk, ik});
+                    this.account.omemo.used_prekeys.put({id, pk, spk, ik});
                 this.set({'pk': utils.fromBase64toArrayBuffer(pk.key), 'ik': utils.fromBase64toArrayBuffer(ik)});
                 this.fingerprint = await this.generateFingerprint();
                 let trusted = this.account.omemo.isTrusted(this.jid, this.fingerprint);
@@ -654,6 +650,9 @@ define("xabber-omemo", function () {
             defaults: {
                 sessions: {},
                 fingerprints: {},
+                prekeys: {},
+                used_prekeys: {},
+                own_used_prekeys: {},
                 device_id: ""
             },
 
@@ -666,7 +665,6 @@ define("xabber-omemo", function () {
                 this.store = new xabber.SignalProtocolStore();
                 this.account.on('device_published', this.publishBundle, this);
                 this.store.on('prekey_removed', this.removePreKey, this);
-                xabber.on("quit", this.onQuit, this);
                 this.store.on('session_stored', this.cacheSession, this);
             },
 
@@ -679,6 +677,9 @@ define("xabber-omemo", function () {
             },
 
             onConnected: function () {
+                this.prekeys = new xabber.Prekeys({name: 'prekeys', model: this});
+                this.used_prekeys = new xabber.Prekeys({name: 'used_prekeys', model: this});
+                this.own_used_prekeys = new xabber.Prekeys({name: 'own_used_prekeys', model: this});
                 this.cached_messages = new xabber.DecryptedMessages({id: 'decrypted-messages'}, {
                     account: this.account,
                     storage_name: xabber.getStorageName() + '-decrypted-messages-' + this.account.get('jid'),
@@ -688,6 +689,24 @@ define("xabber-omemo", function () {
                 this.connection = this.account.connection;
                 this.registerMessageHandler();
                 this.addDevice();
+            },
+
+            getMyTrusted: function () {
+                let conn = this.account.connection;
+                if (conn) {
+                    if (conn.omemo) {
+                        if (conn.omemo.devices) {
+                            conn.omemo.devices.forEach(function (device) {
+
+                            });
+                        } else {
+                            conn.omemo.getDevicesNode(null, function (cb) {
+                                conn.omemo.devices = conn.omemo.getUserDevices($(cb));
+                            }.bind(this));
+                        }
+                    }
+                }
+                return false;
             },
 
             updateFingerprints: function (contact, fingerprint, trusted) {
@@ -717,12 +736,6 @@ define("xabber-omemo", function () {
                 else
                     return;
 
-            },
-
-            onQuit: function () {
-                this.account.ownprekeys && this.account.ownprekeys.clearDataBase('prekeys');
-                this.account.used_prekeys && this.account.used_prekeys.clearDataBase('prekeys');
-                this.account.own_used_prekeys && this.account.own_used_prekeys.clearDataBase('prekeys');
             },
 
             addDevice: function () {
@@ -928,6 +941,21 @@ define("xabber-omemo", function () {
                             label = $header.attr('label') || "";
                         options.help_info = {baseKey, identityKey, preKeyId, registrationId, signedPreKeyId, device_id, label};
                     }
+                    let devices_ids = {};
+                    $message.find('keys').each(function (idx, keys) {
+                        let $keys = $(keys),
+                            jid_devices = [];
+                        $keys.children('key').each(function (idx1, key) {
+                            jid_devices.push($(key).attr('rid'));
+                        }.bind(this));
+                        devices_ids[$keys.attr('jid')] = jid_devices;
+                    }.bind(this));
+                    if (Object.keys(devices_ids).length) {
+                        if (options.help_info)
+                            options.help_info = _.extend(options.help_info, {all_devices: devices_ids});
+                        else
+                            options.help_info = {all_devices: devices_ids};
+                    }
 
                     if (cached_msg && !options.replaced) {
                         options.encrypted = true;
@@ -1081,7 +1109,7 @@ define("xabber-omemo", function () {
                         key = JSON.stringify({pubKey, privKey});
                     if (!pk.signature) {
                         prekeys.push({id: id, key: pubKey});
-                        this.account.ownprekeys.putPreKey({id, key});
+                        this.prekeys.put({id, key});
                     }
                 }.bind(this));
                 conn_omemo.publishBundle({
@@ -1105,8 +1133,8 @@ define("xabber-omemo", function () {
                     key = JSON.stringify({pubKey, privKey}),
                     idx = this.bundle.preKeys.indexOf(removed_pk);
                 bundle.preKeys.splice(idx, 1);
-                this.account.own_used_prekeys.putPreKey({id, key});
-                this.account.ownprekeys.removePreKey(id);
+                this.own_used_prekeys.put({id, key});
+                this.prekeys.remove(id);
                 if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
                     let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
                         last_id = _.sortBy(xabber.accounts.connected[0].omemo.bundle.preKeys, 'keyId').last().keyId;
@@ -1344,11 +1372,6 @@ define("xabber-omemo", function () {
         xabber.Account.addInitPlugin(function () {
             if (!this.settings.get('omemo'))
                 return;
-            this.own_used_prekeys = new xabber.UsedPreKeys(null, {
-                name: `cached-used-own-prekeys-list-${this.get('jid')}`,
-                objStoreName: 'prekeys',
-                primKey: 'id'
-            });
             this.omemo = new xabber.Omemo({id: 'omemo'}, {
                 account: this,
                 storage_name: xabber.getStorageName() + '-omemo-settings-' + this.get('jid'),
@@ -1359,16 +1382,6 @@ define("xabber-omemo", function () {
         xabber.Account.addConnPlugin(function () {
             if (!this.settings.get('omemo'))
                 return;
-            this.ownprekeys = new xabber.UsedPreKeys(null, {
-                name: `cached-prekeys-list-${this.get('jid')}`,
-                objStoreName: 'prekeys',
-                primKey: 'id'
-            });
-            this.used_prekeys = new xabber.UsedPreKeys(null, {
-                name: `cached-used-prekeys-list-${this.get('jid')}`,
-                objStoreName: 'prekeys',
-                primKey: 'id'
-            });
             this.omemo.onConnected();
         }, true, true);
 

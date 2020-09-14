@@ -236,9 +236,7 @@
 
     Backbone.ModelWithDataBase = Backbone.Model.extend({
         initialize: function (attrs, options) {
-            this.database = new IndexedDB(options, function () {
-                this.trigger('initialized');
-            }.bind(this));
+            this.database = new IndexedDB(options);
             this._initialize && this._initialize(attrs, options);
             this.on("quit", this.onQuit, this);
         },

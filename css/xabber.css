@@ -3732,7 +3732,19 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     cursor: pointer;
 }
 
-.chat-head-wrap .contact-info {
+.chat-head-wrap .contact-name-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.chat-head-wrap .encrypted-icon {
+    margin-right: 4px;
+    display: none;
+}
+
+.chat-head-wrap.encrypted .encrypted-icon {
+    display: block !important;
+    color: #388E3C !important;
 }
 
 .chat-head-wrap .contact-info p {
@@ -3748,6 +3760,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     line-height: 21px;
     color: #212121;
     cursor: pointer;
+}
+
+.chat-head-wrap.encrypted .contact-name {
+    color: #388E3C !important;
 }
 
 .name-is-custom {

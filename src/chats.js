@@ -3306,7 +3306,17 @@ define("xabber-chats", function () {
                 let $debug_info = $('<div class="debug-info"/>'), debug_info = "";
                 for (let i in attrs.help_info) {
                     debug_info && (debug_info += '\n');
-                    debug_info += (i + ': ' + attrs.help_info[i]);
+                    if (i == 'all_devices') {
+                        debug_info += ('All devices: ');
+                        for (let j in attrs.help_info[i]) {
+                            debug_info += `${j} - `;
+                            attrs.help_info[i][j].forEach(function (dev_id, idx) {
+                                debug_info += idx > 0 ? `, ${dev_id}` : dev_id;
+                            }.bind(this));
+                            debug_info += `; `;
+                        }
+                    } else
+                        debug_info += (i + ': ' + attrs.help_info[i]);
                 }
                 $message.children('.msg-wrap').append($debug_info.text(debug_info));
             }
@@ -6327,9 +6337,11 @@ define("xabber-chats", function () {
             this.account = this.model.account;
             this.updateName();
             this.updateStatus();
+            this.updateEncrypted();
             this.updateAvatar();
             this.updateNotifications();
             this.updateArchiveButton();
+            this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("close_chat", this.closeChat, this);
             this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
@@ -6356,6 +6368,10 @@ define("xabber-chats", function () {
             this.updateStatusMsg();
             this.updateGroupChatHead();
             return this;
+        },
+
+        updateEncrypted: function () {
+            this.$el.switchClass('encrypted', this.model.get('encrypted'));
         },
 
         updateName: function () {
