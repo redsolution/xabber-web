@@ -214,7 +214,7 @@ define("xabber-omemo", function () {
                     if (device.get('ik')) {
                         let f = await device.generateFingerprint(),
                             fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
-                            is_trusted = fing && fing.trusted ? true : false;
+                            is_trusted = fing ? (fing.trusted ? 'trusted' : 'ignore') : 'unknown';
                         $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
                         if (devices_count == counter)
@@ -229,7 +229,7 @@ define("xabber-omemo", function () {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = await device.generateFingerprint(),
                                     fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
-                                    is_trusted = fing && fing.trusted ? true : false;
+                                    is_trusted = fing ? (fing.trusted ? 'trusted' : 'ignore') : 'unknown';
                                 $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
                             counter++;
@@ -295,8 +295,9 @@ define("xabber-omemo", function () {
                 let $row = $('<tr/>');
                 $row.append($('<th class="device-id"/>').text(id));
                 $row.append($('<th/>').text(label || ""));
-                $row.append($(`<th data-trust="${trust}"/>`).text(trust));
                 $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint));
+                $row.append($(`<th data-trust="${trust}"/>`).text(trust));
+                $row.append($(`<th class="buttons"/>`).append($('<button class="btn-flat btn-main btn-trust">trust</button>')).append($('<button class="btn-flat btn-main btn-ignore">ignore</button>')));
                 return $row;
             }
         });

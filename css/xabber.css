@@ -1545,7 +1545,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 /* ----------------------- MODAL FINGERPRINTS ---------------------- */
 
 .fingerprints-wrap {
-    width: 600px !important;
+    width: 760px !important;
 }
 
 .fingerprints-wrap table {
@@ -1610,22 +1610,31 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #f44336;
 }
 
+.fingerprints-wrap th[data-trust="unknown"] {
+    color: #FFC107;
+}
+
 .fingerprints-wrap .empty-table td {
     text-align: center;
 }
 
 .fingerprints-wrap tr>th:first-child {
     padding-left: 24px;
-    width: 20%;
+    width: 128px;
 }
 
 .fingerprints-wrap tr>th:nth-child(3) {
-    width: 10%;
+    width: 312px;
 }
 
 .fingerprints-wrap tr>th:last-child {
     padding-right: 24px;
-    width: 50%;
+    width: 128px;
+}
+
+.fingerprints-wrap tr>th.buttons button {
+    font-size: 10px;
+    padding: 0 4px;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap >div {
