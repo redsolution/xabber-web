@@ -277,43 +277,35 @@ define("xabber-omemo", function () {
             },
 
             trustDevice: function (ev) {
-                utils.dialogs.ask_extended("Trust fingerprint", "Do you really want to trust the fingerprints", null, { ok_button_text: 'trust'}).done(function (result) {
-                    if (result) {
-                        let $target = $(ev.target).closest('tr'),
-                            fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
-                            is_trusted = $target.children('th[data-trust]').attr('data-trust'),
-                            device_id = Number($target.children('th.device-id').text());
-                        $target.children('th[data-trust]').attr('data-trust', 'trust');
-                        $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
-                        this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, true);
-                        let device = this.model.devices[device_id] || this.model.own_devices[device_id];
-                        if (device && is_trusted != 'trusted') {
-                            device.set('trusted', true);
-                            device.is_session_initiated = false;
-                            device.preKeys = null;
-                        }
-                    }
-                }.bind(this));
+                let $target = $(ev.target).closest('tr'),
+                    fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
+                    is_trusted = $target.children('th[data-trust]').attr('data-trust'),
+                    device_id = Number($target.children('th.device-id').text());
+                $target.children('th[data-trust]').attr('data-trust', 'trust');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
+                this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, true);
+                let device = this.model.devices[device_id] || this.model.own_devices[device_id];
+                if (device && is_trusted != 'trusted') {
+                    device.set('trusted', true);
+                    device.is_session_initiated = false;
+                    device.preKeys = null;
+                }
             },
 
             ignoreDevice: function (ev) {
-                utils.dialogs.ask_extended("Ignore fingerprint", "Do you really want to ignore the fingerprints", null, { ok_button_text: 'ignore'}).done(function (result) {
-                    if (result) {
-                        let $target = $(ev.target).closest('tr'),
-                            fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
-                            is_trusted = $target.children('th[data-trust]').attr('data-trust'),
-                            device_id = Number($target.children('th.device-id').text());
-                        $target.children('th[data-trust]').attr('data-trust', 'ignore');
-                        $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
-                        this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, false);
-                        let device = this.model.devices[device_id] || this.model.own_devices[device_id];
-                        if (device && is_trusted != 'ignore') {
-                            device.set('trusted', false);
-                            device.is_session_initiated = false;
-                            device.preKeys = null;
-                        }
-                    }
-                }.bind(this));
+                let $target = $(ev.target).closest('tr'),
+                    fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
+                    is_trusted = $target.children('th[data-trust]').attr('data-trust'),
+                    device_id = Number($target.children('th.device-id').text());
+                $target.children('th[data-trust]').attr('data-trust', 'ignore');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
+                this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, false);
+                let device = this.model.devices[device_id] || this.model.own_devices[device_id];
+                if (device && is_trusted != 'ignore') {
+                    device.set('trusted', false);
+                    device.is_session_initiated = false;
+                    device.preKeys = null;
+                }
             },
 
             addRow: function (id, label, trust, fingerprint) {

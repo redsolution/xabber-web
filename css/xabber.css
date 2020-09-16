@@ -1545,7 +1545,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 /* ----------------------- MODAL FINGERPRINTS ---------------------- */
 
 .fingerprints-wrap {
-    width: 760px !important;
+    width: 884px !important;
 }
 
 .fingerprints-wrap table {
@@ -1643,7 +1643,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .fingerprints-wrap tr>th:nth-child(3) {
-    width: 396px;
+    width: 512px;
 }
 
 .fingerprints-wrap tr>th:last-child {
