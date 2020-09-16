@@ -313,7 +313,7 @@ define("xabber-omemo", function () {
                 let $row = $('<tr/>');
                 $row.append($('<th class="device-id"/>').text(id));
                 $row.append($('<th/>').text(label || ""));
-                $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint.match(/.{1,8}/g).join(" ")));
+                $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint));
                 // $row.append($(`<th data-trust="${trust}"/>`).text(trust));
                 $row.append($(`<th data-trust="${trust}" class="buttons"/>`).append(
                     $(`<div class="dropdown-button" data-activates='select-status-${id}'>
