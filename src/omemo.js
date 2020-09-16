@@ -158,7 +158,7 @@ define("xabber-omemo", function () {
 
             events: {
                 'click .btn-trust': "trustDevice",
-                'click tbody tr': "selectItem",
+                'click .btn-ignore': "ignoreDevice",
                 'click .btn-cancel': "close",
                 'click .fingerprints-header>div': "selectTable"
             },
@@ -207,14 +207,25 @@ define("xabber-omemo", function () {
                 let counter = 0,
                     devices_count = _.keys(devices).length,
                     dfd = new $.Deferred();
-                dfd.done((f_count) => {if (!f_count) $container.html($('<tr class="empty-table"><td colspan="3">No fingerprints yet</td></tr>'))});
+                dfd.done((f_count) => {
+                    if (!f_count)
+                        $container.html($('<tr class="empty-table"><td colspan="3">No fingerprints yet</td></tr>'));
+                    else
+                        this.$('.dropdown-button').dropdown({
+                            inDuration: 100,
+                            outDuration: 100,
+                            constrainWidth: false,
+                            hover: false,
+                            alignment: 'left'
+                        });
+                });
                 $container.html("");
                 for (var device_id in devices) {
                     let device = devices[device_id];
                     if (device.get('ik')) {
-                        let f = await device.generateFingerprint(),
+                        let f = device.generateFingerprint(),
                             fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
-                            is_trusted = fing ? (fing.trusted ? 'trusted' : 'ignore') : 'unknown';
+                            is_trusted = fing ? (fing.trusted ? 'trust' : 'ignore') : 'unknown';
                         $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
                         if (devices_count == counter)
@@ -227,9 +238,9 @@ define("xabber-omemo", function () {
                                 ik = $bundle.find(`ik`).text();
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                let f = await device.generateFingerprint(),
+                                let f = device.generateFingerprint(),
                                     fing = (this.omemo.get('fingerprints')[(this.model.devices[device_id] ? this.jid : this.account.get('jid'))] || []).find(a => a.fingerprint == f),
-                                    is_trusted = fing ? (fing.trusted ? 'trusted' : 'ignore') : 'unknown';
+                                    is_trusted = fing ? (fing.trusted ? 'trust' : 'ignore') : 'unknown';
                                 $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
                             counter++;
@@ -265,39 +276,61 @@ define("xabber-omemo", function () {
                 return deferred.promise();
             },
 
-            selectItem: function (ev) {
-                $(ev.target).closest('tr').toggleClass('selected');
+            trustDevice: function (ev) {
+                utils.dialogs.ask_extended("Trust fingerprint", "Do you really want to trust the fingerprints", null, { ok_button_text: 'trust'}).done(function (result) {
+                    if (result) {
+                        let $target = $(ev.target).closest('tr'),
+                            fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
+                            is_trusted = $target.children('th[data-trust]').attr('data-trust'),
+                            device_id = Number($target.children('th.device-id').text());
+                        $target.children('th[data-trust]').attr('data-trust', 'trust');
+                        $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
+                        this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, true);
+                        let device = this.model.devices[device_id] || this.model.own_devices[device_id];
+                        if (device && is_trusted != 'trusted') {
+                            device.set('trusted', true);
+                            device.is_session_initiated = false;
+                            device.preKeys = null;
+                        }
+                    }
+                }.bind(this));
             },
 
-            trustDevice: function () {
-                utils.dialogs.ask_extended("Trust/revoke fingerprint", "Do you really want to trust the fingerprints", null, { ok_button_text: 'trust', optional_button: 'revoke'}).done(function (result) {
+            ignoreDevice: function (ev) {
+                utils.dialogs.ask_extended("Ignore fingerprint", "Do you really want to ignore the fingerprints", null, { ok_button_text: 'ignore'}).done(function (result) {
                     if (result) {
-                        let trust = (result !== 'revoke');
-                        this.$('tr.selected').each(function (i, tr) {
-                            let fingerprint = $(tr).children('.fingerprint').text(),
-                                is_trusted = $(tr).children('th[data-trust]').attr('data-trust'),
-                                device_id = Number($(tr).children('th.device-id').text());
-                            $(tr).children('th[data-trust]').attr('data-trust', trust).text(trust);
-                            this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, trust);
-                            let device = this.model.devices[device_id] || this.model.own_devices[device_id];
-                            if (device && is_trusted != trust) {
-                                device.set('trusted', trust);
-                                device.is_session_initiated = false;
-                                device.preKeys = null;
-                            }
-                        }.bind(this));
+                        let $target = $(ev.target).closest('tr'),
+                            fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
+                            is_trusted = $target.children('th[data-trust]').attr('data-trust'),
+                            device_id = Number($target.children('th.device-id').text());
+                        $target.children('th[data-trust]').attr('data-trust', 'ignore');
+                        $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
+                        this.omemo.updateFingerprints((this.model.devices[device_id] ? this.jid : this.account.get('jid')), fingerprint, false);
+                        let device = this.model.devices[device_id] || this.model.own_devices[device_id];
+                        if (device && is_trusted != 'ignore') {
+                            device.set('trusted', false);
+                            device.is_session_initiated = false;
+                            device.preKeys = null;
+                        }
                     }
-                    this.$('tr.selected').removeClass('selected');
                 }.bind(this));
             },
 
             addRow: function (id, label, trust, fingerprint) {
+                fingerprint = fingerprint.match(/.{1,8}/g).join(" ");
                 let $row = $('<tr/>');
                 $row.append($('<th class="device-id"/>').text(id));
                 $row.append($('<th/>').text(label || ""));
-                $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint));
-                $row.append($(`<th data-trust="${trust}"/>`).text(trust));
-                $row.append($(`<th class="buttons"/>`).append($('<button class="btn-flat btn-main btn-trust">trust</button>')).append($('<button class="btn-flat btn-main btn-ignore">ignore</button>')));
+                $row.append($(`<th title="${fingerprint}" class="fingerprint"/>`).text(fingerprint.match(/.{1,8}/g).join(" ")));
+                // $row.append($(`<th data-trust="${trust}"/>`).text(trust));
+                $row.append($(`<th data-trust="${trust}" class="buttons"/>`).append(
+                    $(`<div class="dropdown-button" data-activates='select-status-${id}'>
+<div class="trust-item-wrap btn-main btn-flat">
+<div data-value='${trust}' class="">${trust}</div></div></div>
+<div id='select-status-${id}' class="dropdown-content noselect">
+<div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">Ignore</div>
+<div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">Trust</div></div>`)
+                ));
                 return $row;
             }
         });
@@ -486,11 +519,12 @@ define("xabber-omemo", function () {
             },
 
             generateFingerprint: function () {
-                if (!this.get('ik'))
+                let identityKey = this.get('ik');
+                if (!identityKey)
                     return;
-                let generator = new FingerprintGenerator(1024),
-                    localPub = utils.fromBase64toArrayBuffer(JSON.parse(this.account.omemo.get('identityKey')).pubKey);
-                return generator.createFor(String(this.account.omemo.get('device_id')), localPub, String(this.id), this.get('ik'));
+                if (identityKey.byteLength == 33)
+                    identityKey = identityKey.slice(1);
+                return Array.from(new Uint8Array(identityKey)).map (b => b.toString(16).padStart(2, "0")).join("");
             },
 
             closeSession: function (reason) {
@@ -608,7 +642,7 @@ define("xabber-omemo", function () {
                 else
                     this.account.omemo.used_prekeys.put({id, pk, spk, ik});
                 this.set({'pk': utils.fromBase64toArrayBuffer(pk.key), 'ik': utils.fromBase64toArrayBuffer(ik)});
-                this.fingerprint = await this.generateFingerprint();
+                this.fingerprint = this.generateFingerprint();
                 let trusted = this.account.omemo.isTrusted(this.jid, this.fingerprint);
                 this.set('trusted', trusted);
                 if ((this.id != this.account.omemo.get('device_id')) && trusted === false)
@@ -1001,6 +1035,11 @@ define("xabber-omemo", function () {
                             }
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                             this.account.chats.receiveChatMessage($message[0], options);
+                        }).catch(() => {
+                            options.not_encrypted = true;
+                            delete options.is_trusted;
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
+                            this.account.chats.receiveChatMessage($message[0], options);
                         });
                     }
                 }
@@ -1018,12 +1057,12 @@ define("xabber-omemo", function () {
                     return this.isTrusted(jid, device.fingerprint);
                 } else {
                     if (device.get('ik')) {
-                        fingerprint = await device.generateFingerprint();
+                        fingerprint = device.generateFingerprint();
                     }
                     else {
                         let {pk, spk, ik} = await device.getBundle();
                         device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                        fingerprint = await device.generateFingerprint();
+                        fingerprint = device.generateFingerprint();
                     }
                     return this.isTrusted(jid, fingerprint);
                 }

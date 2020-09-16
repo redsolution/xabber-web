@@ -1594,20 +1594,39 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.fingerprints-wrap tr.selected {
-    background-color: #F5F5F5;
-}
 
 .fingerprints-wrap th.fingerprint {
     font-size: 12px;
+    text-transform: uppercase;
 }
 
-.fingerprints-wrap th[data-trust="true"] {
+.fingerprints-wrap .dropdown-content .btn-main {
+    display: block !important;
+}
+
+.fingerprints-wrap .dropdown-button .btn-main {
+    color: inherit;
+}
+
+.fingerprints-wrap .dropdown-button {
+    display: inline-block;
+}
+
+.fingerprints-wrap .dropdown-button .btn-main:hover {
+    background-color: transparent;
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    line-height: 34px;
+    box-sizing: border-box;
+    padding: 0 9px;
+}
+
+.fingerprints-wrap th[data-trust="trust"] {
     color: #4CAF50;
 }
 
-.fingerprints-wrap th[data-trust="false"] {
-    color: #f44336;
+.fingerprints-wrap th[data-trust="ignore"] {
+    color: #9E9E9E;
 }
 
 .fingerprints-wrap th[data-trust="unknown"] {
@@ -1624,7 +1643,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .fingerprints-wrap tr>th:nth-child(3) {
-    width: 312px;
+    width: 396px;
 }
 
 .fingerprints-wrap tr>th:last-child {
