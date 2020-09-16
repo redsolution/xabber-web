@@ -3992,9 +3992,11 @@ define("xabber-contacts", function () {
                     if (jid === this.account.get('jid'))
                         return;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
-                        contact = this.contacts.mergeContact(jid),
-                        is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
-                        chat = this.account.chats.getChat(contact),
+                        type = $item.attr('type'),
+                        is_group_chat =  type === 'groupchat',
+                        encrypted = type === 'encrypted-chat',
+                        contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat}),
+                        chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
                         $unread_messages = $sync_metadata.children('unread'),
@@ -4003,7 +4005,6 @@ define("xabber-contacts", function () {
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
-                    contact.set('group_chat', is_group_chat);
                     if ($sync_metadata.children('deleted').length) {
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
