@@ -4,6 +4,7 @@ define("xabber-templates", [
 
     "text!templates/base/dialog.html",
     "text!templates/base/fingerprints.html",
+    "text!templates/base/fingerprint_item.html",
     "text!templates/base/jingle_message_calling.html",
     "text!templates/base/input_widget.html",
     "text!templates/base/toolbar.html",
@@ -182,6 +183,7 @@ define("xabber-templates", [
 
     addTemplate('base.dialog');
     addTemplate('base.fingerprints');
+    addTemplate('base.fingerprint_item');
     addTemplate('base.jingle_message_calling');
     addTemplate('base.input_widget');
     addTemplate('base.toolbar');

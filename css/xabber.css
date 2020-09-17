@@ -1545,11 +1545,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 /* ----------------------- MODAL FINGERPRINTS ---------------------- */
 
 .fingerprints-wrap {
-    width: 864px !important;
-}
-
-.fingerprints-wrap table {
-    table-layout: fixed;
+    width: 720px !important;
 }
 
 .fingerprints-wrap .fingerprints-header {
@@ -1581,23 +1577,80 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     overflow: hidden;
 }
 
-.fingerprints-wrap thead,
-.fingerprints-wrap tbody {
-    border-bottom: 1px solid #eee !important;
+.fingerprints-wrap .fingerprints-content .row {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin: 10px auto !important;
 }
 
-.fingerprints-wrap tbody th {
-    font-weight: 300;
+.fingerprints-wrap .row .buttons,
+.fingerprints-wrap .row .device-wrap {
+    width: 25%;
+}
+
+.fingerprints-wrap .row .device-wrap .label {
+    font-size: 16px;
+}
+
+.fingerprints-wrap .row .device-wrap .device-id {
+    color: #000;
+    font-size: 16px;
+}
+
+.fingerprints-wrap .row .device-wrap .label+.device-id {
     font-size: 14px;
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: #757575;
 }
 
-.fingerprints-wrap th.fingerprint {
-    font-size: 12px;
-    text-transform: uppercase;
+.fingerprints-wrap .row>div:first-child {
+    padding: 0 16px 0 24px;
+}
+
+.fingerprints-wrap .row>div:last-child {
+    padding: 0 24px 0 16px;
+    text-align: center;
+}
+
+.fingerprints-wrap .row .fingerprint {
+    width: 50%;
+    white-space: pre-wrap;
+    padding: 0 16px;
+    font-size: 14px;
+    color: #757575;
+}
+
+.fingerprints-wrap .this-device-header-wrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.fingerprints-wrap .this-device-header-wrap .divider {
+    position: absolute;
+    width: 100%;
+    color: #EEEEEE;
+}
+
+.fingerprints-wrap .this-device-header-wrap .this-device-header {
+    margin: 0 auto;
+    background-color: #FFF;
+    z-index: 0;
+    color: #9E9E9E;
+    padding: 0 16px;
+}
+
+.fingerprints-wrap .fingerprints-description-wrap {
+    padding: 24px;
+    text-align: center;
+    color: #757575;
+}
+
+.fingerprints-wrap .fingerprints-description-wrap .link-about-encryption {
+    margin: 24px 0 0;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .fingerprints-wrap .dropdown-content .btn-main {
@@ -1621,39 +1674,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     padding: 0 9px;
 }
 
-.fingerprints-wrap th[data-trust="trust"] {
+.fingerprints-wrap .buttons[data-trust="trust"] {
     color: #4CAF50;
 }
 
-.fingerprints-wrap th[data-trust="ignore"] {
+.fingerprints-wrap .buttons[data-trust="ignore"] {
     color: #9E9E9E;
 }
 
-.fingerprints-wrap th[data-trust="unknown"] {
+.fingerprints-wrap .buttons[data-trust="unknown"] {
     color: #FFC107;
-}
-
-.fingerprints-wrap .empty-table td {
-    text-align: center;
-}
-
-.fingerprints-wrap tr>th:first-child {
-    padding-left: 24px;
-    width: 128px;
-}
-
-.fingerprints-wrap tr>th:nth-child(3) {
-    width: 496px;
-}
-
-.fingerprints-wrap tr>th:last-child {
-    padding-right: 24px;
-    width: 128px;
-}
-
-.fingerprints-wrap tr>th.buttons button {
-    font-size: 10px;
-    padding: 0 4px;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap >div {
@@ -4084,18 +4114,24 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-position: 0px 0, 2px 2px;
 }
 
+.chat-bottom-wrap[data-trust=true] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-trust=true],
 .chat-message.encrypted[data-trust=true] {
     background-image: linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9), linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
 
+.chat-bottom-wrap[data-trust=false] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-trust=false],
 .chat-message.encrypted[data-trust=false] {
     background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
 
+.chat-bottom-wrap[data-trust=none] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-trust=none],
 .chat-message.encrypted[data-trust=none] {
     background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;

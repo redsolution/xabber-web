@@ -6905,6 +6905,7 @@ define("xabber-chats", function () {
             this.$('.blocked-msg').showIf(options.blocked);
             this.$el.switchClass('chat-bottom-blocked-wrap', options.blocked);
             this.updateAvatar();
+            this.updateEncrypted();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
             this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
             this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
@@ -6922,6 +6923,26 @@ define("xabber-chats", function () {
             xabber.chat_body.updateHeight();
             this.manageSelectedMessages();
             return this;
+        },
+
+        updateEncrypted: function () {
+            if (!this.model.get('encrypted'))
+                return;
+            let is_trusted = true;
+            if (this.account.omemo) {
+                if (this.account.omemo.own_devices)
+                for (let device_id in this.account.omemo.own_devices) {
+                    let device = this.account.omemo.own_devices[device_id];
+                    if (device.get('fingerprint')) {
+                        let trusted = this.account.omemo.isTrusted(this.account.get('jid'), device.get('fingerprint'));
+                        if (trusted === false)
+                            is_trusted = false;
+                        if (is_trusted && trusted == undefined)
+                            is_trusted = undefined;
+                    }
+                }
+            }
+            this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);
         },
 
         onBlockedUpdate: function () {
@@ -7786,8 +7807,10 @@ define("xabber-chats", function () {
             $message.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
             this.unsetForwardedMessages();
             if (this.model.get('encrypted')) {
+                let decrypted_msg = $message.tree().innerHTML;
                 this.account.omemo.encrypt(this.contact, $message).then((msg) => {
                     iq.cnode(msg.message.tree());
+                    this.account.omemo.cached_messages.putMessage(this.contact, stanza_id, decrypted_msg);
                     this.account.sendIQ(iq);
                 });
             } else {
