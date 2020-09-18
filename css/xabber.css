@@ -1551,32 +1551,38 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .fingerprints-wrap .fingerprints-header {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
     font-size: 16px;
     line-height: 20px;
     height: 64px;
-    border-bottom: 1px solid #EEE;
 }
 
-.fingerprints-wrap .fingerprints-header>div {
-    padding: 0 4px;
-    cursor: pointer;
-    border-bottom: 1px solid transparent;
+.fingerprints-wrap .fingerprints-header .header {
+    font-weight: 500;
 }
 
-.fingerprints-wrap .fingerprints-header>div:hover {
-    border-bottom: 1px solid #E0E0E0;
-}
-
-.fingerprints-wrap .fingerprints-header .active {
-    border-bottom: 1px solid #212121 !important;
+.fingerprints-wrap .fingerprints-header .additional-info {
+    color: #9E9E9E;
+    font-size: 14px;
 }
 
 .fingerprints-wrap .fingerprints-content {
     overflow: hidden;
+    max-height: 312px;
+    min-height: 128px;
+    position: relative;
+    padding: 4px 0;
 }
 
+.fingerprints-wrap .fingerprints-content .empty-table {
+    text-align: center;
+    color: #616161;
+    font-style: italic;
+    padding: 32px;
+}
+
+.fingerprints-wrap .this-device-content .row,
 .fingerprints-wrap .fingerprints-content .row {
     display: flex;
     flex-direction: row;
@@ -1595,12 +1601,18 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .fingerprints-wrap .row .device-wrap .device-id {
     color: #000;
-    font-size: 16px;
+    font-size: 14px;
 }
 
+.fingerprints-wrap .row .device-wrap .device-id-label,
 .fingerprints-wrap .row .device-wrap .label+.device-id {
-    font-size: 14px;
+    font-size: 12px;
     color: #757575;
+}
+
+.fingerprints-wrap .row .device-wrap .set-label+.label,
+.fingerprints-wrap .row .device-wrap .set-label+.device-id {
+
 }
 
 .fingerprints-wrap .row>div:first-child {
@@ -1609,14 +1621,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .fingerprints-wrap .row>div:last-child {
     padding: 0 24px 0 16px;
-    text-align: center;
+    text-align: left;
 }
 
 .fingerprints-wrap .row .fingerprint {
     width: 50%;
     white-space: pre-wrap;
     padding: 0 16px;
+    text-align-last: justify;
+    text-align: justify;
     font-size: 14px;
+    letter-spacing: 1px;
     color: #757575;
 }
 
@@ -1630,7 +1645,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .fingerprints-wrap .this-device-header-wrap .divider {
     position: absolute;
     width: 100%;
-    color: #EEEEEE;
+    background-color: #F5F5F5;
 }
 
 .fingerprints-wrap .this-device-header-wrap .this-device-header {
@@ -1639,6 +1654,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 0;
     color: #9E9E9E;
     padding: 0 16px;
+}
+
+.fingerprints-wrap .fingerprints-bottom .this-device-wrap {
+    padding: 12px 0 0;
 }
 
 .fingerprints-wrap .fingerprints-description-wrap {
@@ -1651,6 +1670,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     margin: 24px 0 0;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.fingerprints-wrap .fingerprints-description-wrap .link-about-encryption a {
+    color: inherit !important;
 }
 
 .fingerprints-wrap .dropdown-content .btn-main {
@@ -1675,7 +1698,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .fingerprints-wrap .buttons[data-trust="trust"] {
-    color: #4CAF50;
+    color: #388E3C;
 }
 
 .fingerprints-wrap .buttons[data-trust="ignore"] {
@@ -1683,10 +1706,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .fingerprints-wrap .buttons[data-trust="unknown"] {
-    color: #FFC107;
+    color: #FFA000;
 }
 
-.fingerprints-wrap .own-fingerprint-wrap >div {
+.fingerprints-wrap .own-fingerprint-wrap>div {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -2117,7 +2140,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border: 1px solid #979797;
 }
 
-
 .contact-list-wrap {
     position: absolute;
     top: 56px;
@@ -2276,11 +2298,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .roster-contact.invisible {
     display: none !important;
 }
-
-/*.group-head:hover,
-.roster-contact:hover {
-    background-color: rgba(183, 28, 28, 0.1);
-}*/
 
 .roster-contact .circle-avatar {
     position: absolute;
@@ -4125,7 +4142,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=false] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=false],
 .chat-message.encrypted[data-trust=false] {
-    background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
+    background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
@@ -4133,9 +4150,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=none] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=none],
 .chat-message.encrypted[data-trust=none] {
-    background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
+    background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
+}
+
+.chat-bottom-wrap.blocked {
+    height: 104px;
+}
+
+.chat-bottom-wrap.blocked>div {
+    display: none;
 }
 
 .chat-message.selected {
@@ -6541,75 +6566,13 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 38px 6px 38px;
 }
 
-.details-panel .omemo-settings-wrap .device-wrap,
-.details-panel .omemo-settings-wrap .device-id-wrap,
-.details-panel .omemo-settings-wrap .label-wrap,
 .details-panel .omemo-settings-wrap .setting-wrap {
     display: flex;
     position: relative;
     align-items: center;
-}
-
-.details-panel .omemo-settings-wrap .device-info-wrap {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    width: calc(100% - 36px);
-}
-
-.details-panel .omemo-settings-wrap .setting-wrap,
-.details-panel .omemo-settings-wrap .device-wrap {
     min-height: 36px;
     margin: 4px 0;
     justify-content: space-between;
-}
-
-.details-panel .omemo-settings-wrap .own-devices-wrap {
-    padding: 8px 0;
-}
-
-.details-panel .omemo-settings-wrap .flag {
-    /*margin-left: 8px;
-    color: #0f9d58;
-    font-size: 12px;*/
-    position: absolute;
-    right: 0;
-    font-size: 10px;
-    bottom: -10px;
-    color: #9E9E9E;
-}
-
-.details-panel .omemo-settings-wrap .label {
-    font-weight: 300;
-    color: #9E9E9E;
-    width: 64px;
-    margin-right: 8px;
-}
-
-.details-panel .omemo-settings-wrap .device,
-.details-panel .omemo-settings-wrap .description {
-    font-weight: 300;
-}
-
-.details-panel .omemo-settings-wrap .description {
-    color: #424242;
-    padding: 0 0 0 16px;
-}
-
-.details-panel .omemo-settings-wrap input.description {
-    padding: 0 4px;
-    margin: 0 0 0 12px;
-    height: 24px;
-}
-
-.details-panel .own-devices-wrap .block-name {
-    font-size: 16px;
-}
-
-.details-panel .own-devices-wrap .btn-remove-device {
-    cursor: pointer;
-    color: #757575;
 }
 
 .details-panel .groups-wrap {

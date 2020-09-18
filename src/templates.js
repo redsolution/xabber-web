@@ -29,7 +29,6 @@ define("xabber-templates", [
     "text!templates/accounts/resource.html",
     "text!templates/accounts/global_settings_item.html",
     "text!templates/accounts/change_status.html",
-    "text!templates/accounts/device_item.html",
     "text!templates/accounts/token_item.html",
     "text!templates/accounts/current_token_item.html",
 
@@ -208,7 +207,6 @@ define("xabber-templates", [
     addTemplate('accounts.resource');
     addTemplate('accounts.global_settings_item');
     addTemplate('accounts.change_status');
-    addTemplate('accounts.device_item');
     addTemplate('accounts.token_item');
     addTemplate('accounts.current_token_item');
 

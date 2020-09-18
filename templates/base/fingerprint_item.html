@@ -1,10 +1,13 @@
 <div class="row">
-    <div class="device-wrap">
+    <div title="Device ID: {{id}}&#10;Label: {[if (label) {]}{{label}}{[}else{]}none{[}]}&#10;Device ID is a unique identifier for your contact's device. You maintain separate encryption session with each device." class="device-wrap">
+        {[if (edit_setting) {]}<input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}
         {[if (label) {]}<div title="{{label}}" class="label">{{label}}</div>{[}]}
-        <div title="{{id}}" class="device-id">{{id}}</div>
+        <div class="device-id">{{id}}</div>
+        {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}
     </div>
-    <div title="{{fingerprint}}" class="fingerprint">{{fingerprint}}</div>
+    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
     <div data-trust="{{trust}}" class="buttons">
+        {[if (trust !== null) {]}
         <div class="dropdown-button" data-activates="select-status-{{id}}">
             <div class="trust-item-wrap btn-main btn-flat">
                 <div data-value="{{trust}}">{{trust}}</div>
@@ -13,6 +16,10 @@
         <div id="select-status-{{id}}" class="dropdown-content noselect">
             <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">Ignore</div>
             <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">Trust</div>
+            {[if (delete_button){]}
+            <div class="btn-main btn-flat btn-delete text-color-red-500">Delete</div>
+            {[}]}
         </div>
+        {[}]}
     </div>
 </div>

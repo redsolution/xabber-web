@@ -1516,7 +1516,7 @@ define("xabber-accounts", function () {
                 "click .color-values .color-value": "changeColor",
                 "click .token-wrap .btn-revoke-token": "revokeXToken",
                 "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
-                "click .omemo-info .btn-remove-device": "removeDevice"
+                "click .omemo-info .btn-manage-devices": "openDevicesWindow"
             },
 
             _initialize: function () {
@@ -1529,7 +1529,7 @@ define("xabber-accounts", function () {
                 this.updateView();
                 this.showConnectionStatus();
                 this.updateSynchronizationBlock();
-                // this.model.getAllXTokens();
+
                 this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
                 this.model.settings.on("change:to_sync", this.updateSyncOption, this);
@@ -1540,7 +1540,6 @@ define("xabber-accounts", function () {
                 this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
-                this.model.on("devices_updated", this.updateDevices, this);
                 this.model.on("destroy", this.remove, this);
             },
 
@@ -1548,7 +1547,6 @@ define("xabber-accounts", function () {
                 this.updateEnabledOmemo();
                 this.updateEnabled();
                 this.updateXTokens();
-                this.updateDevices();
                 this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
@@ -1697,22 +1695,6 @@ define("xabber-accounts", function () {
                 this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);
             },
 
-            removeDevice: function (ev) {
-                let $target = $(ev.target).closest('.device-wrap'),
-                    data_id = $target.data('device-id'),
-                    omemo =  this.model.connection.omemo,
-                    devices = omemo.devices;
-                utils.dialogs.ask("Delete device", `Do you really want to delete device ${data_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        delete devices[data_id];
-                        omemo.publishDevice(null, null, function () {
-                            $target.detach();
-                        }.bind(this));
-                        omemo.removeNode(`${Strophe.NS.OMEMO}:bundles:${data_id}`);
-                    }
-                }.bind(this));
-            },
-
             updateReconnectButton: function () {
                 this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
             },
@@ -1764,24 +1746,14 @@ define("xabber-accounts", function () {
                 this.model.omemo = undefined;
             },
 
-            updateDevices: function () {
-                this.$('.omemo-settings-wrap .own-devices').html("");
-                let conn = this.model.connection;
-                if (conn && conn.omemo && this.model.omemo)
-                    for (let i in conn.omemo.devices) {
-                        let device = conn.omemo.devices[i],
-                            attrs = _.clone(device);
-                        attrs.this_device = this.model.omemo.get('device_id') == device.id;
-                        let tmpl = templates.device_item(attrs);
-                        this.$('.omemo-settings-wrap .own-devices').append(tmpl);
-                        if (attrs.this_device) {
-                            this.$('.omemo-settings-wrap .own-devices input.description')[0].onblur = function (ev) {
-                                let label = ev.target.value;
-                                this.model.settings.save('device_label_text', label);
-                                this.model.connection.omemo.publishDevice($(ev.target).closest('.device-wrap').data('device-id'), label);
-                            }.bind(this);
-                        }
-                    }
+            openDevicesWindow: function () {
+                if (this.model.omemo) {
+                    if (!this.omemo_devices)
+                        this.omemo_devices = new xabber.Fingerprints({model: this.model.omemo});
+                    this.omemo_devices.open();
+                }
+                else
+                    utils.dialogs.error('OMEMO encryption is disabled');
             },
 
             showConnectionStatus: function () {

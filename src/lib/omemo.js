@@ -18,7 +18,7 @@
             this._connection.disco.addFeature(Strophe.NS.OMEMO + ':bundles+notify');
         };
 
-        var getUserDevices = function ($stanza) {
+        var parseUserDevices = function ($stanza) {
             let devices = {};
             $stanza.find(`devices[xmlns="${Strophe.NS.OMEMO}"] device`).each(function(idx, device) {
                 let $device = $(device),
@@ -125,7 +125,7 @@
 
         return {
             init: init,
-            getUserDevices: getUserDevices,
+            parseUserDevices: parseUserDevices,
             getDevicesNode: getDevicesNode,
             publishDevice: publishDevice,
             createBundleNode: createBundleNode,

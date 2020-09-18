@@ -6925,24 +6925,64 @@ define("xabber-chats", function () {
             return this;
         },
 
-        updateEncrypted: function () {
-            if (!this.model.get('encrypted'))
-                return;
-            let is_trusted = true;
-            if (this.account.omemo) {
-                if (this.account.omemo.own_devices)
-                for (let device_id in this.account.omemo.own_devices) {
-                    let device = this.account.omemo.own_devices[device_id];
+        checkOwnFingerprints: function () {
+            let is_trusted = true,
+                omemo = this.account.omemo;
+            if (Object.keys(omemo.own_devices).length) {
+                for (let device_id in omemo.own_devices) {
+                    let device = omemo.own_devices[device_id];
                     if (device.get('fingerprint')) {
-                        let trusted = this.account.omemo.isTrusted(this.account.get('jid'), device.get('fingerprint'));
-                        if (trusted === false)
-                            is_trusted = false;
-                        if (is_trusted && trusted == undefined)
+                        let trusted = omemo.isTrusted(this.account.get('jid'), device.get('fingerprint'));
+                        if (trusted == undefined)
                             is_trusted = undefined;
                     }
                 }
+                this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);
+            }
+            else {
+
+            }
+            if (is_trusted == undefined)
+                this.$el.addClass('blocked');
+        },
+
+        checkContactFingerprints: function () {
+            let is_trusted = true,
+                omemo = this.account.omemo,
+                peer = omemo.getPeer(this.contact.get('jid'));
+            if (Object.keys(peer.devices).length) {
+                for (let device_id in peer.devices) {
+                    let device = peer.devices[device_id];
+                }
+            } else {
+                peer.getDevicesNode().then(() => {
+                    for (let device_id in peer.devices) {
+                        let device = peer.devices[device_id];
+                        device.getBundle().then(({pk, spk, ik}) => {
+                            device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                            device.set('fingerprint', device.generateFingerprint());
+
+                        }).catch(() => {
+                        });
+                    }
+                });
+
             }
             this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);
+            if (is_trusted == undefined)
+                this.$el.addClass('blocked');
+        },
+
+        updateEncrypted: function () {
+            /*if (!this.model.get('encrypted'))
+                return;
+            let is_trusted = true,
+                omemo = this.account.omemo;
+            if (omemo) {
+                this.checkOwnFingerprints();
+                this.checkContactFingerprints();
+            }
+            this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);*/
         },
 
         onBlockedUpdate: function () {
