@@ -1,8 +1,8 @@
 <div class="row">
     <div title="Device ID: {{id}}&#10;Label: {[if (label) {]}{{label}}{[}else{]}none{[}]}&#10;Device ID is a unique identifier for your contact's device. You maintain separate encryption session with each device." class="device-wrap">
         {[if (edit_setting) {]}<input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}
-        {[if (label) {]}<div title="{{label}}" class="label">{{label}}</div>{[}]}
-        <div class="device-id">{{id}}</div>
+        {[if (label) {]}<div title="{{label}}" class="one-line label">{{label}}</div>{[}]}
+        <div class="device-id one-line">{{id}}</div>
         {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}
     </div>
     <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
