@@ -1575,6 +1575,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     padding: 4px 0;
 }
 
+.fingerprints-wrap .fingerprints-content .preloader-wrapper {
+    margin: 24px auto;
+}
+
+.fingerprints-wrap .fingerprints-content .preloader-wrapper ~ .row {
+    display: none;
+}
+
 .fingerprints-wrap .fingerprints-content .empty-table {
     text-align: center;
     color: #616161;
@@ -1595,28 +1603,62 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 25%;
 }
 
+.fingerprints-wrap .row .device-wrap>div {
+    padding: 0 0 0 4px;
+}
+
 .fingerprints-wrap .row .device-wrap .label {
     font-size: 16px;
 }
 
 .fingerprints-wrap .row .device-wrap .device-id {
     color: #000;
-    font-size: 14px;
+    font-size: 16px;
 }
 
+.fingerprints-wrap .row .device-wrap .set-label:not(.hidden) ~ .device-id,
+.fingerprints-wrap .row .device-wrap .set-label-label,
 .fingerprints-wrap .row .device-wrap .device-id-label,
 .fingerprints-wrap .row .device-wrap .label+.device-id {
     font-size: 12px;
     color: #757575;
 }
 
-.fingerprints-wrap .row .device-wrap .set-label+.label,
-.fingerprints-wrap .row .device-wrap .set-label+.device-id {
+.fingerprints-wrap .row .device-wrap .set-label {
+    height: 23px;
+    line-height: 24px;
+    margin: 0 2px;
+    padding: 0 2px;
+    font-size: 16px;
+    border-bottom: 1px dotted;
+    box-shadow: none;
+}
 
+.fingerprints-wrap .row .device-wrap .set-label.hidden + .label:hover,
+.fingerprints-wrap .row .device-wrap .set-label.hidden + .device-id:hover {
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    line-height: 22px;
+    padding: 0 0 0 3px;
+}
+
+.fingerprints-wrap .row .device-wrap .set-label + .label:hover ~ .device-id,
+.fingerprints-wrap .row .device-wrap .set-label + .device-id:hover ~ .device-id-label {
+    display: none;
+}
+
+.fingerprints-wrap .row .device-wrap .set-label.hidden + .label:hover ~ .set-label-label,
+.fingerprints-wrap .row .device-wrap .set-label.hidden + .device-id:hover ~ .set-label-label {
+    display: block !important;
+}
+
+.fingerprints-wrap .row .device-wrap .set-label:not(.hidden) ~ .label,
+.fingerprints-wrap .row .device-wrap .set-label:not(.hidden) ~ .device-id-label {
+    display: none;
 }
 
 .fingerprints-wrap .row>div:first-child {
-    padding: 0 16px 0 24px;
+    padding: 0 16px 0 20px;
 }
 
 .fingerprints-wrap .row>div:last-child {

@@ -130,6 +130,7 @@ define("xabber-omemo", function () {
                 'click .btn-trust': "trustDevice",
                 'click .btn-ignore': "ignoreDevice",
                 'click .btn-delete': "deleteDevice",
+                "click .set-label + div": "editLabel",
                 'click .btn-cancel': "close"
             },
 
@@ -157,6 +158,7 @@ define("xabber-omemo", function () {
                 this.$('.header').text(`${name} fingerprints`);
                 this.data.set('visible', true);
                 this.show();
+                this.$('div.fingerprints-content').html(env.templates.contacts.preloader());
                 if (this.is_own_devices)
                     this.renderOwnDevices();
                 else
@@ -188,6 +190,30 @@ define("xabber-omemo", function () {
                 });
             },
 
+            editLabel: function () {
+                this.$('.set-label').removeClass('hidden');
+                this.$('.set-label').focus();
+                let saveLabel = function (ev) {
+                    let label = ev.target.value.trim();
+                    this.saveLabel(label);
+                }.bind(this);
+                this.$('.set-label')[0].onblur = saveLabel;
+                this.$('input.set-label')[0].onkeydown = function (ev) {
+                    if (ev.keyCode == constants.KEY_ENTER)
+                        saveLabel(ev);
+                }.bind(this);
+            },
+
+            saveLabel: function (label) {
+                this.$('.set-label').addClass('hidden');
+                if (label == this.account.settings.get('device_label_text'))
+                    return;
+                this.account.settings.save('device_label_text', label);
+                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                    this.updateOwnFingerprint();
+                }.bind(this));
+            },
+
             updateFingerprints: async function (devices) {
                 let counter = 0,
                     devices_count = _.keys(devices).length,
@@ -205,8 +231,8 @@ define("xabber-omemo", function () {
                             container: this.$('.fingerprints-content')[0],
                             alignment: 'left'
                         });
+                    $container.find('.preloader-wrapper').detach();
                 });
-                $container.html("");
                 for (var device_id in devices) {
                     if (device_id == this.omemo.get('device_id')) {
                         counter++;
@@ -332,10 +358,7 @@ define("xabber-omemo", function () {
 
             deleteDevice: function (ev) {
                 let $target = $(ev.target).closest('div.row'),
-                    // fingerprint = $target.children('.fingerprint').text().replace(/ /g, ""),
-                    // is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
                     device_id = Number($target.find('div.device-id').text());
-                // this.omemo.updateFingerprints(this.jid, fingerprint, false);
                 utils.dialogs.ask("Delete device", `Do you really want to delete device ${device_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         $target.detach();
