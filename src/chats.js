@@ -6927,7 +6927,11 @@ define("xabber-chats", function () {
 
         checkOwnFingerprints: function () {
             let is_trusted = true,
-                omemo = this.account.omemo;
+                omemo = this.account.omemo,
+                dfd = new $.Deferred();
+            dfd.done(() => {
+                this.$el.attr('data-trust', is_trusted == undefined ? 'none' : is_trusted);
+            });
             if (Object.keys(omemo.own_devices).length) {
                 for (let device_id in omemo.own_devices) {
                     let device = omemo.own_devices[device_id];
@@ -6937,22 +6941,42 @@ define("xabber-chats", function () {
                             is_trusted = undefined;
                     }
                 }
-                this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);
             }
             else {
 
             }
-            if (is_trusted == undefined)
-                this.$el.addClass('blocked');
         },
 
         checkContactFingerprints: function () {
             let is_trusted = true,
                 omemo = this.account.omemo,
-                peer = omemo.getPeer(this.contact.get('jid'));
+                peer = omemo.getPeer(this.contact.get('jid')),
+                dfd = new $.Deferred();
+            dfd.done(() => {
+                this.$el.attr('data-trust', is_trusted == undefined ? 'none' : is_trusted);
+            });
             if (Object.keys(peer.devices).length) {
                 for (let device_id in peer.devices) {
                     let device = peer.devices[device_id];
+                    if (device.get('fingerprint')) {
+                        let trusted = omemo.isTrusted(this.contact.get('jid'), device.get('fingerprint'));
+                        if (trusted == undefined)
+                            is_trusted = undefined;
+                    } else if (device.get('ik')) {
+                        device.set('fingerprint', device.generateFingerprint());
+                        let trusted = omemo.isTrusted(this.contact.get('jid'), device.get('fingerprint'));
+                        if (trusted == undefined)
+                            is_trusted = undefined;
+                    } else {
+                        device.getBundle().then(({pk, spk, ik}) => {
+                            device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                            device.set('fingerprint', device.generateFingerprint());
+                            let trusted = omemo.isTrusted(this.contact.get('jid'), device.get('fingerprint'));
+                            if (trusted == undefined)
+                                is_trusted = undefined;
+                        }).catch(() => {
+                        });
+                    }
                 }
             } else {
                 peer.getDevicesNode().then(() => {
@@ -6961,16 +6985,15 @@ define("xabber-chats", function () {
                         device.getBundle().then(({pk, spk, ik}) => {
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
-
+                            let trusted = omemo.isTrusted(this.contact.get('jid'), device.get('fingerprint'));
+                            if (trusted == undefined)
+                                is_trusted = undefined;
                         }).catch(() => {
                         });
                     }
                 });
 
             }
-            this.$el.attr('data-trust', is_trusted === undefined ? 'none' : is_trusted);
-            if (is_trusted == undefined)
-                this.$el.addClass('blocked');
         },
 
         updateEncrypted: function () {
