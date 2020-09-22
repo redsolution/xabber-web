@@ -4180,17 +4180,60 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-position: 0px 0, 2px 2px;
 }
 
-.chat-bottom-wrap[data-trust=false] .input-message .scrollbar-cover,
-.chat-bottom-wrap[data-trust=false],
-.chat-message.encrypted[data-trust=false] {
+.chat-bottom-wrap.loading {
+    border-top: 1px solid #FAFAFA;
+    padding: 42px 0 !important;
+    height: 104px !important;
+}
+
+.chat-bottom-wrap[data-trust=error],
+.chat-bottom-wrap[data-trust=none] {
+    height: 104px !important;
+}
+
+.chat-bottom-wrap[data-trust=error]>div:not(.warning-wrap),
+.chat-bottom-wrap[data-trust=none]>div:not(.warning-wrap),
+.chat-bottom-wrap.loading>div:not(.preloader-wrapper) {
+    display: none !important;
+}
+
+.chat-bottom-wrap .warning-wrap {
+    position: relative;
+    height: 100%;
+    padding: 4px 0;
+}
+
+.chat-bottom-wrap .warning-wrap .warning-message {
+    text-align: center;
+    color: #424242;
+    padding: 0 48px;
+    font-size: 14px;
+    margin: 8px 0;
+    position: relative;
+}
+
+.chat-bottom-wrap .warning-wrap .btn-manage-devices {
+    margin: 0 auto;
+    display: block;
+}
+
+.chat-bottom-wrap.loading>div.preloader-wrapper {
+    margin: 0 auto;
+}
+
+.chat-bottom-wrap[data-trust=none] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-trust=none],
+.chat-bottom-wrap[data-contact-trust=none] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-contact-trust=none],
+.chat-message.encrypted[data-trust=none] {
     background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
 
-.chat-bottom-wrap[data-trust=none] .input-message .scrollbar-cover,
-.chat-bottom-wrap[data-trust=none],
-.chat-message.encrypted[data-trust=none] {
+.chat-bottom-wrap[data-trust=error] .input-message .scrollbar-cover,
+.chat-bottom-wrap[data-trust=error],
+.chat-message.encrypted[data-trust=error] {
     background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;

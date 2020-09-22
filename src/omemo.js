@@ -71,10 +71,10 @@ define("xabber-omemo", function () {
                 keys = keys.filter(key => key !== null);
 
                 for (let device in this.devices) {
-                    if (this.devices[device].get('trusted') === false)
-                        is_trusted = false;
+                    if (this.devices[device].get('trusted') === null)
+                        is_trusted = 'error';
                     if (is_trusted && this.devices[device].get('trusted') === undefined)
-                        is_trusted = undefined;
+                        is_trusted = 'none';
                 }
 
                 return {
@@ -243,7 +243,7 @@ define("xabber-omemo", function () {
                     let device = devices[device_id];
                     if (device.get('ik')) {
                         let f = device.generateFingerprint(),
-                            fing = (this.omemo.get('fingerprints')[this.jid] || []).find(a => a.fingerprint == f),
+                            fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
                             is_trusted = fing ? (fing.trusted ? 'trust' : 'ignore') : 'unknown';
                         $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                         counter++;
@@ -258,7 +258,7 @@ define("xabber-omemo", function () {
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 let f = device.generateFingerprint(),
-                                    fing = (this.omemo.get('fingerprints')[this.jid] || []).find(a => a.fingerprint == f),
+                                    fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
                                     is_trusted = fing ? (fing.trusted ? 'trust' : 'ignore') : 'unknown';
                                 $container.append(this.addRow(device.id, device.get('label'), is_trusted, f));
                             }
@@ -323,12 +323,14 @@ define("xabber-omemo", function () {
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
                 $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
-                this.omemo.updateFingerprints(this.jid, fingerprint, true);
+                this.omemo.updateFingerprints(this.jid, device_id, fingerprint, true);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'trusted') {
                     device.set('trusted', true);
                     device.is_session_initiated = false;
                     device.preKeys = null;
+                    if (this.jid == this.omemo.account.get('jid'))
+                        this.account.trigger('trusting_updated');
                 }
             },
 
@@ -339,12 +341,14 @@ define("xabber-omemo", function () {
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
                 $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
-                this.omemo.updateFingerprints(this.jid, fingerprint, false);
+                this.omemo.updateFingerprints(this.jid, device_id, fingerprint, false);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'ignore') {
                     device.set('trusted', false);
                     device.is_session_initiated = false;
                     device.preKeys = null;
+                    if (this.jid == this.omemo.account.get('jid'))
+                        this.account.trigger('trusting_updated');
                 }
             },
 
@@ -684,7 +688,7 @@ define("xabber-omemo", function () {
                     this.account.omemo.used_prekeys.put({id, pk, spk, ik});
                 this.set({'pk': utils.fromBase64toArrayBuffer(pk.key), 'ik': utils.fromBase64toArrayBuffer(ik)});
                 this.fingerprint = this.generateFingerprint();
-                let trusted = this.account.omemo.isTrusted(this.jid, this.fingerprint);
+                let trusted = this.account.omemo.isTrusted(this.jid, id, this.fingerprint);
                 this.set('trusted', trusted);
                 if ((this.id != this.account.omemo.get('device_id')) && trusted === false)
                     return false;
@@ -769,50 +773,46 @@ define("xabber-omemo", function () {
                 this.addDevice();
             },
 
-            getMyTrusted: function () {
-                let conn = this.account.connection;
-                if (conn) {
-                    if (conn.omemo) {
-                        if (conn.omemo.devices) {
-                            conn.omemo.devices.forEach(function (device) {
-
-                            });
-                        } else {
+            getMyDevices: async function () {
+                return new Promise((resolve, reject) => {
+                    let conn = this.account.connection;
+                    if (conn) {
+                        if (conn.omemo) {
                             conn.omemo.getDevicesNode(null, function (cb) {
                                 conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
+                                resolve();
                             }.bind(this));
                         }
                     }
-                }
-                return false;
+                });
             },
 
-            updateFingerprints: function (contact, fingerprint, trusted) {
+            updateFingerprints: function (contact, device_id, fingerprint, trusted) {
                 let fingerprints = _.clone(this.get('fingerprints'));
                 if (!fingerprints[contact])
-                    fingerprints[contact] = [];
-                let contact_fingerprints = fingerprints[contact],
-                    finger = contact_fingerprints.find(f => f.fingerprint == fingerprint),
-                    idx = contact_fingerprints.indexOf(finger);
-                if (idx >= 0)
-                    contact_fingerprints.splice(idx, 1);
-                contact_fingerprints.push({fingerprint, trusted});
+                    fingerprints[contact] = {};
+                let contact_fingerprints = fingerprints[contact];
+                contact_fingerprints[device_id] = {fingerprint, trusted};
                 this.save('fingerprints', fingerprints);
             },
 
-            isTrusted: function (jid, fingerprint) {
+            isTrusted: function (jid, device_id, fingerprint) {
                 let fingerprints = _.clone(this.get('fingerprints'));
                 if (!fingerprints[jid])
                     return;
-                let fing = fingerprints[jid].find(f => f.fingerprint == fingerprint);
-                if (fing) {
-                    if (fing.trusted === undefined)
-                        return;
-                    else
-                        return fing.trusted;
-                }
-                else
+                if (!fingerprints[jid][device_id])
                     return;
+                let fing = fingerprints[jid][device_id];
+                if (fing) {
+                    if (fing.fingerprint == fingerprint) {
+                        if (fing.trusted === undefined)
+                            return;
+                        else
+                            return fing.trusted;
+                    }
+                    else
+                        return null;
+                }
             },
 
             addDevice: function () {
@@ -1052,7 +1052,7 @@ define("xabber-omemo", function () {
                         if (!options.replaced) {
                             options.encrypted = true;
                             this.getTrusted($message).then((is_trusted) => {
-                                options.is_trusted = is_trusted;
+                                options.is_trusted = is_trusted === null ? 'error' : (is_trusted === undefined ? 'none' : is_trusted);
                                 $message.find('body').remove();
                                 $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
                                 this.account.chats.receiveChatMessage($message[0], options);
@@ -1092,7 +1092,7 @@ define("xabber-omemo", function () {
                         });
                     } else {
                         this.getTrusted($message).then((is_trusted) => {
-                            options.is_trusted = is_trusted;
+                            options.is_trusted = is_trusted === null ? 'error' : (is_trusted === undefined ? 'none' : is_trusted);
                             return this.decrypt(message);
                         }).then((decrypted_msg) => {
                             if (decrypted_msg) {
@@ -1124,18 +1124,20 @@ define("xabber-omemo", function () {
                     device = peer.getDevice(device_id), fingerprint;
                 if (device_id == this.get('device_id'))
                     return true;
-                if (device.fingerprint) {
-                    return this.isTrusted(jid, device.fingerprint);
+                if (device.get('fingerprint')) {
+                    return this.isTrusted(jid, device_id, device.get('fingerprint'));
                 } else {
                     if (device.get('ik')) {
                         fingerprint = device.generateFingerprint();
+                        device.set({fingerprint});
                     }
                     else {
                         let {pk, spk, ik} = await device.getBundle();
                         device.set('ik', utils.fromBase64toArrayBuffer(ik));
                         fingerprint = device.generateFingerprint();
+                        device.set({fingerprint});
                     }
-                    return this.isTrusted(jid, fingerprint);
+                    return this.isTrusted(jid, device_id, fingerprint);
                 }
             },
 
@@ -1290,30 +1292,47 @@ define("xabber-omemo", function () {
                     }.bind(this));
             },
 
-            onOwnDevicesUpdated: function () {
-                let conn = this.account.connection;
-                if (conn && conn.omemo && conn.omemo.devices) {
-                    for (let d in this.own_devices) {
-                        if (!conn.omemo.devices[d])
-                            delete this.own_devices[d];
+            onOwnDevicesUpdated: async function () {
+                return new Promise((resolve, reject) => {
+                    let conn = this.account.connection;
+                    if (conn && conn.omemo && conn.omemo.devices) {
+                        for (let d in this.own_devices) {
+                            if (!conn.omemo.devices[d])
+                                delete this.own_devices[d];
+                        }
+                        let counter = Object.keys(conn.omemo.devices).length;
+                        for (let device_id in conn.omemo.devices) {
+                            if (!this.own_devices[device_id])
+                                this.own_devices[device_id] = new xabber.Device({
+                                    jid: this.account.get('jid'),
+                                    id: device_id
+                                }, {account: this.account, store: this.store});
+                            let device = this.own_devices[device_id],
+                                label = conn.omemo.devices[device_id].label;
+                            if (!device.get('ik'))
+                                device.getBundle().then(({pk, spk, ik}) => {
+                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                    let fingerprint = device.generateFingerprint();
+                                    if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
+                                        device.set('fingerprint', fingerprint);
+                                    counter--;
+                                    !counter && resolve();
+                                }).catch(() => {
+                                    counter--;
+                                    !counter && resolve();
+                                });
+                            else if (!device.get('fingerprint')) {
+                                device.set('fingerprint', device.generateFingerprint());
+                                counter--;
+                                !counter && resolve();
+                            } else {
+                                counter--;
+                                !counter && resolve();
+                            }
+                            label && device.set('label', label);
+                        }
                     }
-                    for (let device_id in conn.omemo.devices) {
-                        if (!this.own_devices[device_id])
-                            this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
-                        let device = this.own_devices[device_id],
-                            label = conn.omemo.devices[device_id].label;
-                        if (!device.get('ik'))
-                            device.getBundle().then(({pk, spk, ik}) => {
-                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                let fingerprint = device.generateFingerprint();
-                                if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
-                                    device.set('fingerprint', fingerprint);
-                            });
-                        else if (!device.get('fingerprint'))
-                            device.set('fingerprint', device.generateFingerprint());
-                        label && device.set('label', label);
-                    }
-                }
+                });
             }
         });
 
