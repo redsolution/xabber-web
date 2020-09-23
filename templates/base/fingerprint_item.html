@@ -7,7 +7,10 @@
         {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}
         {[if (edit_setting) {]}<div class="set-label-label hidden">set label</div>{[}]}
     </div>
+    <div class="fingerprint-wrap">
     <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
+    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}
+    </div>
     <div data-trust="{{trust}}" class="buttons">
         {[if (trust !== null) {]}
         <div class="dropdown-button" data-activates="select-status-{{id}}">

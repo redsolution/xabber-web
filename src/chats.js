@@ -2266,7 +2266,8 @@ define("xabber-chats", function () {
             "keyup .messages-search-form": "keyupSearch",
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
-            "click .btn-retry-send-message": "retrySendMessage"
+            "click .btn-retry-send-message": "retrySendMessage",
+            "click .encryption-warning": "openDevicesWindow"
         },
 
         _initialize: function (options) {
@@ -2309,6 +2310,11 @@ define("xabber-chats", function () {
             }.bind(this));
             return this;
         },
+
+          openDevicesWindow: function () {
+              let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+              peer.fingerprints.open();
+          },
 
         defineMouseWheelEvent: function () {
             if (!_.isUndefined(window.onwheel)) {
@@ -6927,156 +6933,9 @@ define("xabber-chats", function () {
             return this;
         },
 
-        checkOwnFingerprints: async function () {
-            return new Promise((resolve, reject) => {
-                let is_trusted = true,
-                    omemo = this.account.omemo,
-                    dfd = new $.Deferred(), counter = 0;
-                dfd.done(() => {
-                    is_trusted = is_trusted === null ? 'error' : (is_trusted == undefined ? 'none' : is_trusted);
-                    resolve(is_trusted);
-                });
-                if (Object.keys(omemo.own_devices).length) {
-                    counter = Object.keys(omemo.own_devices).length;
-                    for (let device_id in omemo.own_devices) {
-                        let device = omemo.own_devices[device_id];
-                        if (device_id == omemo.get('device_id')) {
-                            counter--;
-                            !counter && dfd.resolve();
-                            continue;
-                        }
-                        if (device.get('fingerprint')) {
-                            let trusted = omemo.isTrusted(this.account.get('jid'), device_id, device.get('fingerprint'));
-                            if (trusted == undefined && is_trusted !== null)
-                                is_trusted = undefined;
-                            if (trusted === null)
-                                is_trusted = null;
-                            counter--;
-                            !counter && dfd.resolve();
-                        } else if (device.get('ik')) {
-                            device.set('fingerprint', device.generateFingerprint());
-                            let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                            if (trusted == undefined && is_trusted !== null)
-                                is_trusted = undefined;
-                            if (trusted === null)
-                                is_trusted = null;
-                            counter--;
-                            !counter && dfd.resolve();
-                        } else {
-                            device.getBundle().then(({pk, spk, ik}) => {
-                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                device.set('fingerprint', device.generateFingerprint());
-                                let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                                if (trusted == undefined && is_trusted !== null)
-                                    is_trusted = undefined;
-                                if (trusted === null)
-                                    is_trusted = null;
-                                counter--;
-                                !counter && dfd.resolve();
-                            }).catch(() => {
-                                counter--;
-                                !counter && dfd.resolve();
-                            });
-                        }
-                    }
-                }
-                else {
-                    omemo.getMyDevices().then(() => {
-                        counter = Object.keys(omemo.own_devices).length;
-                        omemo.onOwnDevicesUpdated().then(() => {
-                            counter = Object.keys(omemo.own_devices).length;
-                            for (let device_id in omemo.own_devices) {
-                                let device = omemo.own_devices[device_id];
-                                if (device.get('fingerprint')) {
-                                    let trusted = omemo.isTrusted(this.account.get('jid'), device_id, device.get('fingerprint'));
-                                    if (trusted == undefined && is_trusted !== null)
-                                        is_trusted = undefined;
-                                    if (trusted === null)
-                                        is_trusted = null;
-                                    counter--;
-                                    !counter && dfd.resolve();
-                                } else {
-                                    counter--;
-                                    !counter && dfd.resolve();
-                                }
-                            }
-                        });
-                    });
-                }
-            });
-        },
-
-        checkContactFingerprints: function () {
-            return new Promise((resolve, reject) => {
-                let is_trusted = true,
-                    omemo = this.account.omemo,
-                    peer = omemo.getPeer(this.contact.get('jid')),
-                    dfd = new $.Deferred(), counter = 0;
-                dfd.done(() => {
-                    is_trusted = is_trusted === null ? 'error' : (is_trusted == undefined ? 'none' : is_trusted);
-                    resolve(is_trusted);
-                });
-                if (Object.keys(peer.devices).length) {
-                    counter = Object.keys(peer.devices).length;
-                    for (let device_id in peer.devices) {
-                        let device = peer.devices[device_id];
-                        if (device.get('fingerprint')) {
-                            let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                            if (trusted == undefined && is_trusted !== null)
-                                is_trusted = undefined;
-                            if (trusted === null)
-                                is_trusted = null;
-                            counter--;
-                            !counter && dfd.resolve();
-                        } else if (device.get('ik')) {
-                            device.set('fingerprint', device.generateFingerprint());
-                            let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                            if (trusted == undefined && is_trusted !== null)
-                                is_trusted = undefined;
-                            if (trusted === null)
-                                is_trusted = null;
-                            counter--;
-                            !counter && dfd.resolve();
-                        } else {
-                            device.getBundle().then(({pk, spk, ik}) => {
-                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                device.set('fingerprint', device.generateFingerprint());
-                                let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                                if (trusted == undefined && is_trusted !== null)
-                                    is_trusted = undefined;
-                                if (trusted === null)
-                                    is_trusted = null;
-                                counter--;
-                                !counter && dfd.resolve();
-                            }).catch(() => {
-                            });
-                        }
-                    }
-                } else {
-                    peer.getDevicesNode().then(() => {
-                        counter = Object.keys(peer.devices).length;
-                        for (let device_id in peer.devices) {
-                            let device = peer.devices[device_id];
-                            device.getBundle().then(({pk, spk, ik}) => {
-                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                device.set('fingerprint', device.generateFingerprint());
-                                let trusted = omemo.isTrusted(this.contact.get('jid'), device_id, device.get('fingerprint'));
-                                if (trusted == undefined && is_trusted !== null)
-                                    is_trusted = undefined;
-                                if (trusted === null)
-                                    is_trusted = null;
-                                counter--;
-                                !counter && dfd.resolve();
-                            }).catch(() => {
-                            });
-                        }
-                    });
-
-                }
-            });
-        },
-
         updateEncrypted: function () {
+            this.$el.children('.preloader-wrapper').detach();
+            this.view.$('.chat-notification .warning-wrap').length && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').find('.warning-wrap').detach();
             this.$el.attr('data-trust', null);
             this.$el.attr('data-contact-trust', null);
             this.$el.find('.warning-wrap').detach();
@@ -7085,8 +6944,9 @@ define("xabber-chats", function () {
             if (this.account.omemo) {
                 this.$el.addClass('loading');
                 this.$el.prepend(env.templates.contacts.preloader());
-                this.checkOwnFingerprints().then((is_trusted) => {
+                this.account.omemo.checkOwnFingerprints().then((is_trusted) => {
                     if (is_trusted == 'none' || is_trusted == 'error') {
+                        let is_scrolled_bottom = this.view.isScrolledToBottom();
                         this.$el.attr('data-trust', is_trusted);
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
@@ -7094,18 +6954,23 @@ define("xabber-chats", function () {
                             this.$el.prepend(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for your account. If it wasn\'t you, it looks like you might have a problem.'}));
                         else
                             this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your device you previously trusted have changed. This <i>should not</i> be happening, ever. You are likely being hacked, or your software is severely malfunctioning.'}));
+                        xabber.chat_body.updateHeight();
+                        is_scrolled_bottom && this.view.scrollToBottom();
                     } else {
-                        this.checkContactFingerprints().then((is_contact_trusted) => {
+                        this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
+                            let is_scrolled_bottom = this.view.isScrolledToBottom();
                             this.$el.removeClass('loading');
                             this.$el.children('.preloader-wrapper').detach();
-                            if (is_trusted == 'error') {
+                            if (is_contact_trusted === 'error') {
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                                 this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your partner\'s device that you previously trusted have changed. This <i>should not</i> be happening, ever. He is likely being hacked, or his software is severely malfunctioning.'}));
                             } else {
+                                if (is_contact_trusted === 'none')
+                                    this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for partner.'}));
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
-
                             }
-
+                            xabber.chat_body.updateHeight();
+                            is_scrolled_bottom && this.view.scrollToBottom();
                         });
                     }
                 });
@@ -7902,9 +7767,9 @@ define("xabber-chats", function () {
                 $message_actions.find('.pin-message-wrap').showIf(this.contact.get('group_chat')).switchClass('non-active', ((length !== 1) && this.contact.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.contact.get('blocked'));
                 $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.contact.get('blocked'));
-                this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
+                !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {
-                this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
+                !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
                 this.focusOnInput();
             }
         },
@@ -8100,7 +7965,7 @@ define("xabber-chats", function () {
         },
 
         showChatNotification: function (message, is_colored) {
-            if (!this.view.$('.chat-notification').hasClass('msgs-counter')) {
+            if (!this.view.$('.chat-notification').hasClass('msgs-counter') && !this.view.$('.chat-notification').hasClass('encryption-warning')) {
                 this.view.$('.chat-notification').switchClass('hidden', !message).text(message)
                     .switchClass('text-color-300', is_colored);
             }
