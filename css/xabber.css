@@ -4306,7 +4306,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-notification.encryption-warning {
-    width: fit-content;
+    width: min-content;
     margin: 0 auto;
     cursor: pointer;
     display: block;
@@ -4315,7 +4315,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-notification.encryption-warning:hover {
-    background-color: #FFD54F;
+    background-color: #FFECB3;
 }
 
 .chat-notification .warning-wrap {
