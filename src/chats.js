@@ -1464,6 +1464,7 @@ define("xabber-chats", function () {
                 iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? this.contact.get('jid') : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
+            this.get('encryped') && (retract_attrs.type = 'encrypted');
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
                     var all_messages = this.messages.models;
@@ -1489,9 +1490,11 @@ define("xabber-chats", function () {
         },
 
         deleteFromSynchronization: function (callback, errback) {
+            let conversation_options = {jid: this.get('jid')};
+            this.model.get('encrypted') && (conversation_options.encrypted = true);
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
-                .c('conversation', {jid: this.get('jid')});
+                .c('conversation', conversation_options);
             this.account.sendIQ(iq, function (success) {
                 callback && callback(success);
             }.bind(this), function (error) {
@@ -1521,6 +1524,7 @@ define("xabber-chats", function () {
             this.updateMutedState();
             this.updateArchivedState();
             this.updateColorScheme();
+            this.updateGroupChats();
             this.updateIcon();
             this.updateEncrypted();
             this.model.on("change:active", this.updateActiveStatus, this);
@@ -2308,6 +2312,7 @@ define("xabber-chats", function () {
             this.account.dfd_presence.done(function () {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             }.bind(this));
+            this.updateGroupChat();
             return this;
         },
 
@@ -5125,19 +5130,14 @@ define("xabber-chats", function () {
                 chat.item_view.updateLastMessage(chat.last_message);
             }
             if ($message.find('retract-all').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact));
+                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('encrypted') && 'encrypted'));
                 if (!chat)
                     return;
-                let enc_chat = this.getChat(contact, 'encrypted'), enc_messages = enc_chat.messages.models;
                 var all_messages = chat.messages.models;
                 $(all_messages).each(function (idx, item) {
                     chat.item_view.content.removeMessage(item);
                 }.bind(this));
-                $(enc_messages).each(function (idx, item) {
-                    enc_chat.item_view.content.removeMessage(item);
-                }.bind(this));
                 chat.item_view.updateLastMessage();
-                enc_messages && enc_chat.item_view.updateLastMessage();
             }
             if ($message.find('confirm[xmlns="' + Strophe.NS.HTTP_AUTH + '"]').length) {
                 let code =  $message.find('confirm').attr('id');
@@ -6428,7 +6428,7 @@ define("xabber-chats", function () {
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat);
-            this.$('.btn-call-attention').hideIf(is_group_chat);
+            this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-open-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
@@ -6803,7 +6803,6 @@ define("xabber-chats", function () {
             this.contact.on("pin_selected_message", this.pinMessage, this);
             this.contact.on('update_my_info', this.updateInfoInBottom, this);
             this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
-            this.model.on("change:encrypted", this.onChangeEncrypted, this);
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
@@ -6948,6 +6947,7 @@ define("xabber-chats", function () {
                     if (is_trusted == 'none' || is_trusted == 'error') {
                         let is_scrolled_bottom = this.view.isScrolledToBottom();
                         this.$el.attr('data-trust', is_trusted);
+                        this.view.$('.chat-message').attr('data-trust', is_trusted);
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
                         if (is_trusted == 'none')
@@ -6969,6 +6969,7 @@ define("xabber-chats", function () {
                                     this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for partner.'}));
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                             }
+                            this.view.$('.chat-message').attr('data-trust', is_contact_trusted);
                             xabber.chat_body.updateHeight();
                             is_scrolled_bottom && this.view.scrollToBottom();
                         });
@@ -7775,6 +7776,8 @@ define("xabber-chats", function () {
         },
 
         pinMessage: function () {
+            if (!this.model.get('active'))
+                return;
             if (this.$('.pin-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
@@ -7801,6 +7804,8 @@ define("xabber-chats", function () {
         },
 
         copyMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
@@ -7866,6 +7871,8 @@ define("xabber-chats", function () {
         },
 
         showEditPanel: function () {
+            if (!this.model.get('active'))
+                return;
             if (this.$('.edit-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
@@ -7876,6 +7883,8 @@ define("xabber-chats", function () {
         },
 
         deleteMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [],
                 my_msgs = 0,
@@ -7943,6 +7952,8 @@ define("xabber-chats", function () {
         },
 
         replyMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
@@ -7954,6 +7965,8 @@ define("xabber-chats", function () {
         },
 
         forwardMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {

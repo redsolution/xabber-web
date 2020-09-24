@@ -39,6 +39,7 @@ define("xabber-contacts", function () {
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
+                this.onChangedGroupchat();
                 this.domain = Strophe.getDomainFromJid(this.get('jid'));
                 this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
@@ -866,6 +867,7 @@ define("xabber-contacts", function () {
                 this.updateDisplayStatus();
                 this.updateBlockedState();
                 this.updateMutedState();
+                this.updateGroupChat();
                 this.model.on("change:display", this.updateDisplayStatus, this);
                 this.model.on("change:blocked", this.updateBlockedState, this);
                 this.model.on("change:muted", this.updateMutedState, this);
@@ -1152,7 +1154,9 @@ define("xabber-contacts", function () {
             openChat: function (ev) {
                 if (ev && ($(ev.target).closest('.button-wrap').hasClass('non-active') || $(ev.target).closest('.button-wrap').length && this.model.get('blocked')))
                     return;
-                this.model.trigger("open_chat", this.model);
+                let options = {};
+                (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.get('jid') === this.model.get('jid') && xabber.chats_view.active_chat.model.get('encrypted')) && (options.encrypted = true);
+                this.model.trigger("open_chat", this.model, options);
             },
 
             voiceCall: function (ev) {
