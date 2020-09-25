@@ -2400,7 +2400,7 @@ define("xabber-contacts", function () {
                         .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
                     this.account.sendIQ(iq, function (iq_response) {
-                        let group_jid = $(iq_response).find('created jid').text(),
+                        let group_jid = $(iq_response).find('query jid').text(),
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
                         contact.pres('subscribed');
