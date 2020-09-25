@@ -3983,12 +3983,23 @@ define("xabber-contacts", function () {
 
             onSyncIQ: function (iq, request_with_stamp) {
                 this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
-                let last_chat_msg_id = $(iq).find('set last');
+                let last_chat_msg_id = $(iq).find('set last'),
+                    encrypted_retract_version = $(iq).find('synchronization conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
+                    retract_version = $(iq).find('synchronization conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
                     xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                     return;
+                }
+                if (request_with_stamp) {
+                    if (this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
+                        this.account.getAllMessageRetractions(true);
+                    else if (this.account.retraction_version < retract_version)
+                        this.account.getAllMessageRetractions();
+                } else {
+                   this.account.omemo && this.account.omemo.cacheRetractVersion(encrypted_retract_version);
+                   this.account.retraction_version = retract_version;
                 }
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
@@ -4025,18 +4036,12 @@ define("xabber-contacts", function () {
                         chat.set('timestamp', Math.trunc(Number($item.attr('stamp')))/1000);
                         chat.item_view.updateEmptyChat();
                     }
-                    if (request_with_stamp) {
-                        let unread_messages = _.clone(chat.messages_unread.models);
-                        chat.trigger('get_missed_history', request_with_stamp/1000);
-                        chat.set('unread', 0);
-                        chat.set('const_unread', 0);
-                        _.each(unread_messages, function (unread_msg) {
-                            unread_msg.set('is_unread', false);
-                        }.bind(this));
-                        if (chat.message_retraction_version != msg_retraction_version)
-                            chat.trigger("get_retractions_list");
-                    } else {
-                        chat.message_retraction_version = msg_retraction_version;
+                    if (is_group_chat) {
+                        if (request_with_stamp) {
+                            if (chat.retraction_version < msg_retraction_version)
+                                chat.trigger("get_retractions_list");
+                        } else
+                            chat.retraction_version = msg_retraction_version;
                     }
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);

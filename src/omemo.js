@@ -19,6 +19,7 @@ define("xabber-omemo", function () {
                 attrs = attrs || {};
                 this.account = options.account;
                 this.devices = {};
+                this.store = this.account.omemo.store;
                 this.fingerprints = new xabber.Fingerprints({model: this});
                 this.updateDevices(attrs.devices);
                 this.set({
@@ -30,8 +31,10 @@ define("xabber-omemo", function () {
                 if (!devices)
                     return;
                 for (let d in this.devices) {
-                    if (!devices[d])
+                    if (!devices[d]) {
+                        this.account.omemo.removeSession('session' + this.devices[d].address.toString());
                         delete this.devices[d];
+                    }
                 }
                 for (let d in devices) {
                     let device = this.getDevice(d),
@@ -93,7 +96,7 @@ define("xabber-omemo", function () {
 
             getDevice: function (id) {
                 if (!this.devices[id]) {
-                    this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.account.omemo.store});
+                    this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.store});
                 }
 
                 return this.devices[id];
@@ -255,7 +258,7 @@ define("xabber-omemo", function () {
                     else {
                         this.account.connection.omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
                             let $iq = $(iq),
-                                $bundle = $iq.find(`item bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                                $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
                             if (ik) {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
@@ -594,11 +597,13 @@ define("xabber-omemo", function () {
                 return new Promise((resolve, reject) => {
                     this.account.connection.omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
                         let $iq = $(iq),
-                            $bundle = $iq.find(`item bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                            $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                             $spk = $bundle.find('spk'),
                             spk = {id: $spk.attr('id'), key: $spk.text(), signature: $bundle.find('spks').text()},
                             ik =  $bundle.find(`ik`).text();
                         this.preKeys = [];
+                        if (!ik)
+                            this.set('ik', null);
                         $bundle.find('prekeys pk').each((i, pk) => {
                             let $pk = $(pk);
                             this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
@@ -742,6 +747,7 @@ define("xabber-omemo", function () {
                 sessions: {},
                 fingerprints: {},
                 prekeys: {},
+                retract_version: null,
                 used_prekeys: {},
                 own_used_prekeys: {},
                 device_id: ""
@@ -827,6 +833,14 @@ define("xabber-omemo", function () {
                     else
                         return null;
                 }
+            },
+
+            cacheRetractVersion: function (version) {
+                this.save('retract_version', version);
+            },
+
+            getRetractVersion: function () {
+                return this.get('retract_version');
             },
 
             addDevice: function () {
@@ -980,7 +994,7 @@ define("xabber-omemo", function () {
                         let devices = this.account.connection.omemo.parseUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
                             this.account.connection.omemo.devices = devices;
-                            let device_id = this.account.omemo.get('device_id'),
+                            let device_id = this.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
                             if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
@@ -995,9 +1009,9 @@ define("xabber-omemo", function () {
                         }
                         return;
                     }
-                    if (node.indexOf(`${Strophe.NS.OMEMO}:bundles`) == 0) {
+                    if (node == `${Strophe.NS.OMEMO}:bundles`) {
                         if (from_jid === this.account.get('jid')) {
-                            let device_id = node.slice(`${Strophe.NS.OMEMO}:bundles`.length + 1);
+                            let device_id = $message.find('items item').first().attr('id');
                             if (this.account.connection.omemo.devices && this.account.connection.omemo.devices[device_id]) {
                                 if (!this.own_devices[device_id])
                                     this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
@@ -1010,7 +1024,7 @@ define("xabber-omemo", function () {
                                     device.set('fingerprint', fingerprint);
                             }
                         } else {
-                            let id = $message.find('item').attr('id'),
+                            let id = $message.find('items item').first().attr('id'),
                                 peer = this.peers.get(from_jid);
                             if (peer) {
                                 let device = peer.devices[id];
@@ -1041,7 +1055,7 @@ define("xabber-omemo", function () {
 
                     let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
                         jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || options.from_jid,
-                        contact = this.account.contacts.get(jid),
+                        contact = this.account.contacts.get(options.conversation ? options.conversation : jid),
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                         cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
@@ -1449,6 +1463,13 @@ define("xabber-omemo", function () {
                 this.save('sessions', sessions);
             },
 
+            removeSession: function (id) {
+                let sessions = _.clone(this.get('sessions'));
+                _.isArray(sessions) && (sessions = {});
+                delete sessions[id];
+                this.save('sessions', sessions);
+            },
+
             getSession: function (id) {
                 let sessions = _.clone(this.get('sessions'));
                 return sessions[id];
@@ -1467,7 +1488,7 @@ define("xabber-omemo", function () {
                     }.bind(this),
                     function (err) {
                         if (($(err).find('error').attr('code') == 404))
-                            this.account.connection.omemo.createBundleNode(this.get('device_id'), function () {
+                            this.account.connection.omemo.createBundleNode(function () {
                                 this.publish(spk, ik.pubKey, pks);
                             }.bind(this));
                     }.bind(this));
@@ -1478,8 +1499,10 @@ define("xabber-omemo", function () {
                     let conn = this.account.connection;
                     if (conn && conn.omemo && conn.omemo.devices) {
                         for (let d in this.own_devices) {
-                            if (!conn.omemo.devices[d])
+                            if (!conn.omemo.devices[d]) {
+                                this.account.omemo.removeSession('session' + this.devices[d].address.toString());
                                 delete this.own_devices[d];
+                            }
                         }
                         let counter = Object.keys(conn.omemo.devices).length;
                         for (let device_id in conn.omemo.devices) {

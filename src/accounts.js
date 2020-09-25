@@ -27,6 +27,7 @@ define("xabber-accounts", function () {
                 },
 
                 initialize: function (_attrs, options) {
+                    this.retraction_version = null;
                     options || (options = {});
                     if (_attrs.is_new && !options.auth_view) {
                         this.is_invalid = true;
@@ -576,9 +577,12 @@ define("xabber-accounts", function () {
                     }.bind(this), 5000);*/
                 },
 
-                activateXabberRewrite: function () {
-                    var retractions_query = $iq({from: this.get('jid'), type: 'set', to: this.get('jid')})
-                        .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE});
+                getAllMessageRetractions: function (encrypted) {
+                    let query_options = {xmlns: Strophe.NS.REWRITE, version: (encrypted && this.omemo) ? this.omemo.getRetractVersion() : this.retraction_version};
+                    encrypted && (query_options.type = 'encrypted');
+                    let retractions_query = $iq({type: 'get'})
+                        .c('query', query_options);
+                    this.account.sendIQ(retractions_query);
                     this.sendIQ(retractions_query);
                 },
 

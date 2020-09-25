@@ -204,9 +204,10 @@ define("xabber-chats", function () {
                 message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
-                let converstion = $message.children('replace').attr('conversation');
+                let by_jid = $message.children('replace').attr('by'),
+                    converstion = $message.children('replace').attr('conversation');
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: converstion}));
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: converstion}));
                     return;
                 }
                 $message = $message.children('replace').children('message');
@@ -929,7 +930,7 @@ define("xabber-chats", function () {
                 jid: jid
             });
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
-            this.message_retraction_version = 0;
+            this.retraction_version = 0;
             this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
             this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
             this.messages = new xabber.Messages(null, {account: this.account});
@@ -1049,8 +1050,10 @@ define("xabber-chats", function () {
         },
 
         getAllMessageRetractions: function () {
-            var retractions_query = $iq({from: this.account.connection.jid, type: 'set', to: this.contact.get('jid')})
-                .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version});
+            if (!this.contact.get('group_chat'))
+                return;
+            let retractions_query = $iq({type: 'get', to: this.contact.get('jid')})
+                .c('query', {xmlns: Strophe.NS.REWRITE, version: this.retraction_version});
             this.account.sendIQ(retractions_query);
         },
 
@@ -5100,23 +5103,25 @@ define("xabber-chats", function () {
                 }
             }
             if ($message.find('retract-message').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+                let is_encrypted = $message.find('retract-message').attr('type') == 'encrypted';
+                !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
                 if (!chat)
                     return;
                 let $retracted_msg = $message.find('retract-message'),
                     retracted_msg_id = $retracted_msg.attr('id'),
+                    retract_version = $retracted_msg.attr('version'),
                     msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
-                if (!msg_item) {
-                    chat = this.account.chats.getChat(contact, 'encrypted');
-                    msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
-                }
                 if (msg_item) {
                     msg_item.set('is_unread', false);
                     chat.item_view.content.removeMessage(msg_item);
                     chat.item_view.updateLastMessage(chat.last_message);
                 }
-                if ($retracted_msg.attr('version') > chat.message_retraction_version)
-                    chat.message_retraction_version = $retracted_msg.attr('version');
+                if (retract_version > this.account.retraction_version) {
+                    if (chat.get('encrypted') && this.account.omemo)
+                        this.account.omemo.cacheRetractVersion(retract_version);
+                    else
+                        this.account.retraction_version = retract_version;
+                }
             }
             if ($message.find('retract-user').length) {
                 var $retracted_user_msgs = $message.find('retract-user'),
@@ -5130,7 +5135,7 @@ define("xabber-chats", function () {
                 chat.item_view.updateLastMessage(chat.last_message);
             }
             if ($message.find('retract-all').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('encrypted') && 'encrypted'));
+                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('type') == 'encrypted' && 'encrypted'));
                 if (!chat)
                     return;
                 var all_messages = chat.messages.models;

@@ -60,8 +60,8 @@
             this._connection.sendIQ(iq, callback);
         };
 
-        var createBundleNode = function (id, callback) {
-            createNode.call(this, `${Strophe.NS.OMEMO}:bundles:${id}`, null, callback);
+        var createBundleNode = function (callback) {
+            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, null, callback);
         };
 
         var createNode = function(node, options, callback) {
@@ -86,11 +86,18 @@
             for (var i in this.devices) {
                 let device = this.devices[i];
                 if (!device.id)
-                    return;
+                    continue;
                 let attrs = {id: device.id};
                 device.label && (attrs.label = device.label);
                 stanza.c('device', attrs).up();
             }
+            stanza.up().up().up()
+                .c('publish-options')
+                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
+                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
+                .c('field', {var: 'pubsub#access_model'})
+                .c('value').t('open');
             this._connection.sendIQ(stanza, callback, errback);
         };
 
@@ -99,8 +106,8 @@
                 spk = attrs.spk,
                 stanza = $iq({from: this._connection.jid, type: 'set'})
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                    .c('publish', {node: `${Strophe.NS.OMEMO}:bundles:${attrs.device_id}`})
-                    .c('item')
+                    .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
+                    .c('item', {id: attrs.device_id})
                     .c('bundle', {xmlns: Strophe.NS.OMEMO})
                     .c('spk', {id: spk.id}).t(spk.key).up()
                     .c('spks').t(attrs.spks).up()
@@ -110,16 +117,25 @@
                 let preKey = preKeys[i];
                 stanza.c('pk', {id: preKey.id}).t(preKey.key).up()
             }
+            stanza.up().up().up()
+                .c('publish-options')
+                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
+                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
+                .c('field', {var: 'pubsub#access_model'})
+                .c('value').t('open').up().up()
+                .c('field', {var: 'pubsub#max_items'})
+                .c('value').t(32)
+            ;
             this._connection.sendIQ(stanza, callback, errback);
         };
 
         var getBundleInfo = function (attrs, callback, errback) {
             let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB});
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
             if (attrs.id)
-                iq.c('items', {node: `${Strophe.NS.OMEMO}:bundles:${attrs.id}`});
-            else
-                iq.c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
+                iq.c('item', {id: attrs.id});
             this._connection.sendIQ(iq, callback, errback);
         };
 
