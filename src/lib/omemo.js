@@ -101,6 +101,17 @@
             this._connection.sendIQ(stanza, callback, errback);
         };
 
+        var configNode = function (callback) {
+            let iq = $iq({from: this._connection.jid, type: 'set'})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB + '#owner'})
+                .c('configure', {node: `${Strophe.NS.OMEMO}:bundles`})
+                .c('x', {type:'submit', xmlns:'jabber:x:data'})
+                .c('field', {var:'FORM_TYPE', type:'hidden'}).c('value').t('http://jabber.org/protocol/pubsub#node_config').up().up()
+                .c('field', {var: 'pubsub#max_items', type:'text-single'})
+                .c('value').t(10);
+            this._connection.sendIQ(iq, callback, callback);
+        };
+
         var publishBundle = function (attrs, callback, errback) {
             let preKeys = attrs.pks,
                 spk = attrs.spk,
@@ -125,9 +136,8 @@
                 .c('field', {var: 'pubsub#access_model'})
                 .c('value').t('open').up().up()
                 .c('field', {var: 'pubsub#max_items'})
-                .c('value').t(32)
-            ;
-            this._connection.sendIQ(stanza, callback, errback);
+                .c('value').t(10);
+                this._connection.sendIQ(stanza, callback, errback);
         };
 
         var getBundleInfo = function (attrs, callback, errback) {
@@ -143,6 +153,7 @@
             init: init,
             parseUserDevices: parseUserDevices,
             getDevicesNode: getDevicesNode,
+            configNode: configNode,
             publishDevice: publishDevice,
             createBundleNode: createBundleNode,
             createDeviceNode: createDeviceNode,

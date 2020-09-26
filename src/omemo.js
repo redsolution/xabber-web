@@ -73,10 +73,13 @@ define("xabber-omemo", function () {
 
                 keys = keys.filter(key => key !== null);
 
-                for (let device in this.devices) {
-                    if (this.devices[device].get('trusted') === null)
+                for (let device_id in this.devices) {
+                    let device = this.devices[device_id];
+                    if (device.get('ik') === null)
+                        continue;
+                    if (device.get('trusted') === null)
                         is_trusted = 'error';
-                    if (is_trusted && this.devices[device].get('trusted') === undefined)
+                    if (is_trusted && device.get('trusted') === undefined)
                         is_trusted = 'none';
                 }
 
@@ -1010,32 +1013,34 @@ define("xabber-omemo", function () {
                         return;
                     }
                     if (node == `${Strophe.NS.OMEMO}:bundles`) {
+                        let $item = $message.find('items item').first(),
+                            device_id = $item.attr('id'),
+                            $bundle = $item.children(`bundle[xmlns="${Strophe.NS.OMEMO}"]`), device;
                         if (from_jid === this.account.get('jid')) {
-                            let device_id = $message.find('items item').first().attr('id');
                             if (this.account.connection.omemo.devices && this.account.connection.omemo.devices[device_id]) {
                                 if (!this.own_devices[device_id])
                                     this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
-                                let device = this.own_devices[device_id],
-                                    ik = $message.find(`bundle[xmlns="${Strophe.NS.OMEMO}"] ik`).text();
-                                if (!device.get('ik'))
-                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                let fingerprint = device.generateFingerprint();
-                                if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
-                                    device.set('fingerprint', fingerprint);
+                                device = this.own_devices[device_id];
                             }
                         } else {
-                            let id = $message.find('items item').first().attr('id'),
-                                peer = this.peers.get(from_jid);
+                            let peer = this.peers.get(from_jid);
                             if (peer) {
-                                let device = peer.devices[id];
-                                if (device) {
-                                    let ik = $message.find(`bundle[xmlns="${Strophe.NS.OMEMO}"] ik`).text();
-                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                                    let fingerprint = device.generateFingerprint();
-                                    if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
-                                        device.set('fingerprint', fingerprint);
-                                }
+                                device = peer.devices[device_id];
                             }
+                        }
+                        if (device) {
+                            let ik =  $bundle.find(`ik`).text(), preKeys = [];
+                            if (!ik) {
+                                device.set('ik', null);
+                                return;
+                            }
+                            $bundle.find('prekeys pk').each((i, pk) => {
+                                let $pk = $(pk);
+                                preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                            });
+                            device.preKeys = preKeys;
+                            device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                            device.set('fingerprint', device.generateFingerprint());
                         }
                     }
                 }
@@ -1332,8 +1337,20 @@ define("xabber-omemo", function () {
                     return own_trusted;
                 } else if (contact_trusted === 'error' || contact_trusted === 'none') {
                     return contact_trusted;
-                } else
+                } else {
+                    let device_id = $message.find('encrypted header').attr('sid'),
+                        peer = this.getPeer(contact.get('jid')),
+                        device = peer.devices[device_id];
+                    if (device) {
+                        if (device.get('fingerprint')) {
+                            let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                            if (trusted === false) {
+                                return 'none';
+                            }
+                        }
+                    }
                     return true;
+                }
             },
 
             receiveMessage: function (message) {
@@ -1420,12 +1437,14 @@ define("xabber-omemo", function () {
                         this.prekeys.put({id, key});
                     }
                 }.bind(this));
-                conn_omemo.publishBundle({
-                    spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},
-                    spks: utils.ArrayBuffertoBase64(spk.signature),
-                    ik:  utils.ArrayBuffertoBase64(ik),
-                    pks: prekeys,
-                    device_id: this.get('device_id')
+                conn_omemo.configNode(() => {
+                    conn_omemo.publishBundle({
+                        spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},
+                        spks: utils.ArrayBuffertoBase64(spk.signature),
+                        ik:  utils.ArrayBuffertoBase64(ik),
+                        pks: prekeys,
+                        device_id: this.get('device_id')
+                    });
                 });
             },
 
