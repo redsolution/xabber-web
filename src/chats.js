@@ -1606,7 +1606,12 @@ define("xabber-chats", function () {
             else {
                 if (msg.get('type') == 'system') {
                     msg_from = "";
-                    msg.get('invite') && (msg_text = 'Invitation to group chat');
+                    if (msg.get('invite')) {
+                        if (this.contact.get('incognito_chat'))
+                            msg_text = 'Invitation to incognito group';
+                        else
+                            msg_text = 'Invitation to public group';
+                    }
                     msg.get('private_invite') && (msg_text = 'Invitation to private chat');
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
@@ -4224,10 +4229,22 @@ define("xabber-chats", function () {
             utils.copyTextToClipboard(files_links, 'Link copied to clipboard', 'ERROR: Link not copied to clipboard');
         },
 
-        showParticipantProperties: function (participant_id) {
+        showParticipantProperties: function (participant_id, options) {
+            options = options || {};
             let participant = this.contact.participants.get(participant_id);
-            if (!participant)
+            if (!participant) {
+                this.contact.details_view.getBlockedParticipants(function (response) {
+                    _.extend(options, {present: null, subscription: null});
+                    if ($(response).find(`query user:has(${participant_id})`).length)
+                        options.blocked = true;
+                    else
+                        options.blocked = false;
+                    participant = new xabber.Participant(options, {contact: this.contact});
+                    this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
+                    this.contact.participants.participant_properties_panel.open(participant, {});
+                }.bind(this));
                 return;
+            }
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
             this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
             this.contact.membersRequest({id: participant_id}, function (response) {
@@ -4298,8 +4315,11 @@ define("xabber-chats", function () {
                 if ($elem.hasClass('circle-avatar')) {
                     let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
                     if (this.contact.get('group_chat')) {
-                        let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id');
-                        member_id && this.showParticipantProperties(member_id);
+                        let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id'),
+                            unique_id = (is_forwarded) ? $fwd_message.attr('data-uniqueid') : $msg.attr('data-uniqueid'),
+                            msg = this.model.messages.get(unique_id),
+                            user_info = msg.get('user_info');
+                        member_id && this.showParticipantProperties(member_id, user_info);
                         return;
                     }
                     else if (from_jid === this.account.get('jid')) {
@@ -6170,7 +6190,7 @@ define("xabber-chats", function () {
 
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
-            this.$('.btn-invite-users').showIf(is_group_chat);
+            this.$('.btn-invite-users').showIf(is_group_chat && ! this.contact.get('private_chat'));
             this.$('.btn-call-attention').hideIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
