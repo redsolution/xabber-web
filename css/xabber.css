@@ -3022,6 +3022,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .edit-rights .participant-details-item .jid.one-line,
+.edit-rights .participant-details-item .role.one-line,
 .edit-rights .participant-details-item .id.one-line {
     margin: 8px 0 0 0;
     line-height: 19px;
@@ -3054,7 +3055,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     margin: 0 4px;
 }
 
-.edit-rights .participant-details-item .nickname.one-line:hover {
+.edit-rights .participant-details-item:not(.unsubscribed) .nickname.one-line:hover {
     border-bottom: 1px dotted #9E9E9E;
 }
 
@@ -3062,7 +3063,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border: none;
 }
 
-.edit-rights-private .participant-details-item .is-myself.nickname:hover {
+.edit-rights-private .participant-details-item:not(.unsubscribed) .is-myself.nickname:hover {
     border-bottom: 1px dotted #9E9E9E;
 }
 
@@ -5727,9 +5728,12 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .button-wrap.non-active i,
 .message-actions-panel .button-wrap.non-active .action-button,
-.edit-rights .button-wrap.non-active i {
+.edit-rights .button-wrap.non-active i,
+.edit-rights .button-wrap.non-active svg {
     background-color: #9E9E9E !important;
     cursor: auto !important;
+    color: #FFF !important;
+    fill: #FFF !important;
 }
 
 .details-panel .btn-block-wrap i.btn-block {
