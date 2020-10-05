@@ -12,6 +12,7 @@
             this._connection = c;
             this.devices = {};
             Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
+            Strophe.addNamespace('PUBSUB_NODE_CONFIG', "http://jabber.org/protocol/pubsub#node_config");
             this._connection.disco.addFeature(Strophe.NS.OMEMO);
             this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');
             this._connection.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
@@ -50,7 +51,7 @@
         };
 
         var createDeviceNode = function (callback) {
-            createNode.call(this, Strophe.NS.OMEMO + ':devices', null, callback);
+            createNode.call(this, Strophe.NS.OMEMO + ':devices', {'pubsub#access_model': 'open'}, callback);
         };
 
         var removeNode = function (node, callback) {
@@ -61,7 +62,7 @@
         };
 
         var createBundleNode = function (callback) {
-            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, null, callback);
+            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, {'pubsub#access_model': 'open', 'pubsub#max_items': 10}, callback);
         };
 
         var createNode = function(node, options, callback) {
@@ -105,10 +106,9 @@
             let iq = $iq({from: this._connection.jid, type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB + '#owner'})
                 .c('configure', {node: `${Strophe.NS.OMEMO}:bundles`})
-                .c('x', {type:'submit', xmlns:'jabber:x:data'})
-                .c('field', {var:'FORM_TYPE', type:'hidden'}).c('value').t('http://jabber.org/protocol/pubsub#node_config').up().up()
-                .c('field', {var: 'pubsub#max_items', type:'text-single'})
-                .c('value').t(10);
+                .form(Strophe.NS.PUBSUB_NODE_CONFIG, {
+                    'pubsub#max_items': 10
+                });
             this._connection.sendIQ(iq, callback, callback);
         };
 
@@ -128,16 +128,7 @@
                 let preKey = preKeys[i];
                 stanza.c('pk', {id: preKey.id}).t(preKey.key).up()
             }
-            stanza.up().up().up()
-                .c('publish-options')
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
-                .c('field', {var: 'pubsub#access_model'})
-                .c('value').t('open').up().up()
-                .c('field', {var: 'pubsub#max_items'})
-                .c('value').t(10);
-                this._connection.sendIQ(stanza, callback, errback);
+            this._connection.sendIQ(stanza, callback, errback);
         };
 
         var getBundleInfo = function (attrs, callback, errback) {
