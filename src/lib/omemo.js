@@ -92,13 +92,6 @@
                 device.label && (attrs.label = device.label);
                 stanza.c('device', attrs).up();
             }
-            stanza.up().up().up()
-                .c('publish-options')
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {var: 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.PUBSUB + '#publish-options').up().up()
-                .c('field', {var: 'pubsub#access_model'})
-                .c('value').t('open');
             this._connection.sendIQ(stanza, callback, errback);
         };
 

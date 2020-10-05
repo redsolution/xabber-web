@@ -308,7 +308,7 @@ define("xabber-omemo", function () {
                             let pubKey = ik.pubKey;
                             if (pubKey.byteLength == 33)
                                 pubKey.slice(1);
-                            let fingerprint = Array.from(new Uint8Array(identityKey)).map(b => b.toString(16).padStart(2, "0")).join("");
+                            let fingerprint = Array.from(new Uint8Array(ik)).map(b => b.toString(16).padStart(2, "0")).join("");
                             this.$('.this-device-content').append(this.addRow(omemo.get('device_id'), this.account.settings.get('device_label_text'), null, fingerprint));
                         });
                     }
