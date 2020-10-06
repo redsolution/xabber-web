@@ -4009,11 +4009,12 @@ define("xabber-contacts", function () {
                         return;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
-                        is_group_chat =  type === 'groupchat',
-                        encrypted = type === 'encrypted-chat',
+                        is_group_chat =  type === 'group',
+                        encrypted = type === 'encrypted',
                         contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat}),
                         chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
+                        $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
                         $unread_messages = $sync_metadata.children('unread'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
@@ -4026,6 +4027,9 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                    }
+                    if ($group_metadata.length) {
+                        contact.participants && contact.participants.createFromStanza($group_metadata);
                     }
                     if (current_call.length) {
                         let $jingle_message = current_call.children('message'),
