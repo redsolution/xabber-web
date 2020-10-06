@@ -390,7 +390,7 @@ define("xabber-chats", function () {
             if (options.context_message)
                 return this.account.context_messages.create(attrs);
 
-            if (options.echo_msg || options.replaced && message) {
+            if ((options.echo_msg || options.replaced) && message) {
                 message.set(attrs);
                 if (options.replaced)
                     return;
@@ -5333,6 +5333,9 @@ define("xabber-chats", function () {
                 if (!contact.get('in_roster'))
                     contact.pushInRoster();
             }
+
+            if (chat.contact.get('group_chat') && options.carbon_copied)
+                return;
 
             return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
         },

@@ -129,7 +129,7 @@
                 'New version '+version_number+' is available. '
                 +'<div class="new-version-description">'+version_description+'</div>'
                 +' Reload page to fetch this changes?',
-                {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
+                {ok_button: {text: 'reload'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
                     window.location.reload(true);

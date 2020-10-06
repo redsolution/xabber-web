@@ -4030,6 +4030,7 @@ define("xabber-contacts", function () {
                         chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
+                        $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         $unread_messages = $sync_metadata.children('unread'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
@@ -4041,6 +4042,9 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                    }
+                    if ($group_metadata.length) {
+                        contact.participants && contact.participants.createFromStanza($group_metadata);
                     }
                     if (current_call.length) {
                         let $jingle_message = current_call.children('message'),
