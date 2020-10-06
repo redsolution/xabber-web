@@ -6975,7 +6975,7 @@ define("xabber-chats", function () {
                     if (is_trusted == 'none' || is_trusted == 'error') {
                         let is_scrolled_bottom = this.view.isScrolledToBottom();
                         this.$el.attr('data-trust', is_trusted);
-                        // this.view.$('.chat-message').attr('data-trust', is_trusted);
+                        this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_trusted);
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
                         if (is_trusted == 'none')
@@ -6997,7 +6997,7 @@ define("xabber-chats", function () {
                                     this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for partner.'}));
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                             }
-                            // this.view.$('.chat-message').attr('data-trust', is_contact_trusted);
+                            this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
                             xabber.chat_body.updateHeight();
                             is_scrolled_bottom && this.view.scrollToBottom();
                         });

@@ -100,7 +100,7 @@
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB + '#owner'})
                 .c('configure', {node: `${Strophe.NS.OMEMO}:bundles`})
                 .form(Strophe.NS.PUBSUB_NODE_CONFIG, {
-                    'pubsub#max_items': 10
+                    'pubsub#max_items': 32
                 });
             this._connection.sendIQ(iq, callback, callback);
         };

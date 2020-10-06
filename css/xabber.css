@@ -4245,6 +4245,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=none],
 .chat-bottom-wrap[data-contact-trust=none] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-contact-trust=none],
+.chat-message.encrypted[data-trust=untrusted],
 .chat-message.encrypted[data-trust=none] {
     background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;

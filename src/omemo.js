@@ -1345,7 +1345,7 @@ define("xabber-omemo", function () {
                         if (device.get('fingerprint')) {
                             let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                             if (trusted === false) {
-                                return 'none';
+                                return 'untrusted';
                             }
                         }
                     }
