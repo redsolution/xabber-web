@@ -2680,23 +2680,13 @@ define("xabber-chats", function () {
         },
 
         unpinMessage: function () {
-            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-            this.account.sendIQ(iq_get_properties, function (properties) {
-                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                let iq_set_pinned_msg = $iq({to: this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
-                    pinned_msg_field = data_form.fields.find(field => field.var === 'pinned-message'),
-                    idx = data_form.fields.indexOf(pinned_msg_field);
-                pinned_msg_field.values = [];
-                data_form.fields[idx] = pinned_msg_field;
-                iq_set_pinned_msg = this.account.addDataFormToStanza(iq_set_pinned_msg, data_form);
-                this.account.sendIQ(iq_set_pinned_msg, function () {},
-                    function (error) {
-                        if ($(error).find('not-allowed').length)
-                            utils.dialogs.error('You have no permission to pin/unpin message');
-                    });
-            }.bind(this));
+            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
+                .c('pinned-message');
+            this.account.sendIQ(iq, function () {}, function (error) {
+                if ($(error).find('error not-allowed').length)
+                    utils.dialogs.error('You have no permission to pin/unpin message');
+            });
         },
 
         hideHistoryFeedback: function () {
@@ -7459,23 +7449,14 @@ define("xabber-chats", function () {
                 pinned_msg = this.messages_arr.get($msg.data('uniqueid')),
                 msg_id = pinned_msg.get('stanza_id');
             this.resetSelectedMessages();
-            let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-            this.account.sendIQ(iq_get_properties, function (properties) {
-                let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                let iq_set_pinned_msg = $iq({to: this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
-                    pinned_msg_field = data_form.fields.find(field => field.var === 'pinned-message'),
-                    idx = data_form.fields.indexOf(pinned_msg_field);
-                pinned_msg_field.values = [msg_id];
-                data_form.fields[idx] = pinned_msg_field;
-                iq_set_pinned_msg = this.account.addDataFormToStanza(iq_set_pinned_msg, data_form);
-                this.account.sendIQ(iq_set_pinned_msg, function () {},
-                    function (error) {
-                        if ($(error).find('not-allowed').length)
-                            utils.dialogs.error('You have no permission to pin/unpin message');
-                    });
-            }.bind(this));
+            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
+                .c('pinned-message').t(msg_id);
+            this.account.sendIQ(iq, function () {},
+                function (error) {
+                    if ($(error).find('not-allowed').length)
+                        utils.dialogs.error('You have no permission to pin/unpin message');
+                });
         },
 
         copyMessages: function () {
