@@ -388,7 +388,7 @@ define("xabber-omemo", function () {
                             conn.omemo.publishDevice(null, null, function () {
                                 $target.detach();
                             }.bind(this));
-                            conn.omemo.removeNode(`${Strophe.NS.OMEMO}:bundles:${device_id}`);
+                            conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
                         }
                     }
                 }.bind(this));
@@ -1145,6 +1145,8 @@ define("xabber-omemo", function () {
                                 $message.find('body').remove();
                             }
                             else {
+                                if (decrypted_msg === null)
+                                    return;
                                 options.not_encrypted = true;
                                 delete options.is_trusted;
                             }
@@ -1254,6 +1256,7 @@ define("xabber-omemo", function () {
                         dfd = new $.Deferred(), counter = 0;
                     dfd.done((t) => {
                         let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
+                        contact.trigger('update_trusted', trust);
                         resolve(trust);
                     });
                     if (Object.keys(peer.devices).length) {
@@ -1405,7 +1408,7 @@ define("xabber-omemo", function () {
                     ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
                     ownPreKey = ownPreKeysArr[0];
                 if (!ownPreKey)
-                    return;
+                    return null;
                 let peer = this.getPeer(from_jid),
                     exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey);
                 if (!exportedKey)

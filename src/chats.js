@@ -301,6 +301,11 @@ define("xabber-chats", function () {
                                     console.log(fff);
                                 });
                             }.bind(this));
+                            images.forEach(function (file) {
+                                this.decryptFile(file.sources[0]).then(function (fff) {
+                                    console.log(fff);
+                                });
+                            }.bind(this));
                         }
                     }
                 } else if (type === 'data') {}
@@ -416,9 +421,10 @@ define("xabber-chats", function () {
               return new Promise((resolve, reject) => {
                   let uri = file.replace(/^aesgcm/, 'https'),
                       iv_and_key = uri.slice(uri.length - 44 - 16),
-                      iv = iv_and_key.slice(0, 17),
-                      key = iv_and_key.slice(16);
+                      iv = utils.fromBase64toArrayBuffer(iv_and_key.slice(0, 16)),
+                      key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
                   uri = uri.slice(0, uri.length - 44 - 16 - 1);
+                  let fname = uri.slice(uri.lastIndexOf('/') + 1);
 
                   fetch(uri).then((r) => {
                       r.blob().then((blob) => {
@@ -426,8 +432,8 @@ define("xabber-chats", function () {
                           filereader.onloadend = function () {
                               let arrayBuffer = filereader.result;
                               utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
-                                  let new_file = new File([enc_file]);
-                                  resolve(new_file);
+                                  let new_file = new File([enc_file], fname);
+                                  resolve(URL.createObjectURL(new_file));
                               });
                           }.bind(this);
                           filereader.readAsArrayBuffer(blob);
@@ -1549,6 +1555,7 @@ define("xabber-chats", function () {
             this.contact.on("change:group_chat", this.updateGroupChats, this);
             this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
             this.contact.on("remove_invite", this.removeInvite, this);
+            this.contact.on("update_trusted", this.updateEncryptedColor, this);
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -1589,6 +1596,10 @@ define("xabber-chats", function () {
 
         updateEncrypted: function () {
             this.$el.switchClass('encrypted', this.model.get('encrypted'));
+        },
+
+        updateEncryptedColor: function (encrypted) {
+            this.$el.attr('data-trust', encrypted);
         },
 
         updateIcon: function () {
@@ -3290,6 +3301,7 @@ define("xabber-chats", function () {
                 badge: badge,
                 from_id: from_id
             });
+            attrs.encrypted = attrs.encrypted || this.model.get('encrypted');
             if (attrs.type === 'file_upload') {
                 return $(templates.messages.file_upload(attrs));
             }
@@ -6390,6 +6402,7 @@ define("xabber-chats", function () {
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:in_roster", this.updateMenu, this);
+            this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
         },
 
@@ -6410,6 +6423,10 @@ define("xabber-chats", function () {
 
         updateEncrypted: function () {
             this.$el.switchClass('encrypted', this.model.get('encrypted'));
+        },
+
+        updateEncryptedColor: function (encrypted) {
+            this.$el.attr('data-trust', encrypted);
         },
 
         updateName: function () {
@@ -6978,6 +6995,7 @@ define("xabber-chats", function () {
                             this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your device you previously trusted have changed. This <i>should not</i> be happening, ever. You are likely being hacked, or your software is severely malfunctioning.'}));
                         xabber.chat_body.updateHeight();
                         is_scrolled_bottom && this.view.scrollToBottom();
+                        this.account.omemo.checkContactFingerprints(this.contact);
                     } else {
                         this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
                             let is_scrolled_bottom = this.view.isScrolledToBottom();

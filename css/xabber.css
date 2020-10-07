@@ -3741,6 +3741,20 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     margin-right: 4px;
 }
 
+.chat-head-wrap.encrypted[data-trust=none] .contact-name,
+.chat-head-wrap[data-trust=none] .encrypted-icon,
+.chat-item.encrypted[data-trust=none] .chat-title,
+.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon {
+    color: #FFA000 !important;
+}
+
+.chat-head-wrap.encrypted[data-trust=error] .contact-name,
+.chat-head-wrap[data-trust=error] .encrypted-icon,
+.chat-item.encrypted[data-trust=error] .chat-title,
+.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon {
+    color: #d32f2f !important;
+}
+
 .message-item.encrypted .chat-title-wrap .encrypted-icon,
 .mention-item.encrypted .chat-title-wrap .encrypted-icon,
 .chat-item.encrypted .chat-title-wrap .encrypted-icon {
@@ -3876,7 +3890,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .chat-head-wrap.encrypted .encrypted-icon {
     display: block !important;
-    color: #388E3C !important;
+    color: #388E3C;
 }
 
 .chat-head-wrap .contact-info p {
@@ -3895,7 +3909,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-head-wrap.encrypted .contact-name {
-    color: #388E3C !important;
+    color: #388E3C;
 }
 
 .name-is-custom {
