@@ -349,14 +349,14 @@ define("xabber-chats", function () {
                 attrs.participants_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
             }
 
-            if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
-                $message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"] field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
+            if ($message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
+                $message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]').find('field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
                 let addresses = [];
                 $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address').each(function (idx, address) {
                     let $address = $(address);
                     addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
                 }.bind(this));
-                attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
+                attrs.data_form = _.extend(this.account.parseDataForm($message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
             }
 
             body && (body = utils.slice_pretty_body(body, mutable_content));
@@ -3456,6 +3456,10 @@ define("xabber-chats", function () {
                                 $f_message.find('.chat-msg-media-content').append(template_for_file_content);
                             }.bind(this));
                         }
+                    }
+                    if (fwd_msg.get('data_form')) {
+                        let data_form = utils.render_data_form(fwd_msg.get('data_form'));
+                        $f_message.find('.chat-msg-content').append(data_form);
                     }
                     $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
