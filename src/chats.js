@@ -262,7 +262,7 @@ define("xabber-chats", function () {
                         markup.length && markups.push({start: begin, end: end, markup: markup});
                     }
                 } else if (type === 'mutable') {
-                    let $file_sharing = $reference.find('file-sharing[xmlns="' + Strophe.NS.OTB + '"]').first();
+                    let $file_sharing = $reference.find('file-sharing[xmlns="' + Strophe.NS.FILES + '"]').first();
                     if ($reference.children('forwarded').length)
                         mutable_content.push({ start: begin, end: end, type: 'forward'});
                     else if ($file_sharing.length) {
@@ -3650,7 +3650,7 @@ define("xabber-chats", function () {
                         end: end_idx
                     });
                     file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
-                    stanza.c('file-sharing', {xmlns: Strophe.NS.OTB}).c('file');
+                    stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();
