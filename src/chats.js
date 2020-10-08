@@ -298,12 +298,10 @@ define("xabber-chats", function () {
                         if (options.encrypted) {
                             files.forEach(function (file) {
                                 this.decryptFile(file.sources[0]).then(function (fff) {
-                                    console.log(fff);
                                 });
                             }.bind(this));
                             images.forEach(function (file) {
                                 this.decryptFile(file.sources[0]).then(function (fff) {
-                                    console.log(fff);
                                 });
                             }.bind(this));
                         }
@@ -432,12 +430,13 @@ define("xabber-chats", function () {
                           filereader.onloadend = function () {
                               let arrayBuffer = filereader.result;
                               utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
-                                  let new_file = new File([enc_file], fname);
-                                  resolve(URL.createObjectURL(new_file));
+                                  resolve({enc_file, fname});
                               });
                           }.bind(this);
                           filereader.readAsArrayBuffer(blob);
                       });
+                  }).catch(() => {
+                      resolve(null)
                   });
 
               });
@@ -4481,7 +4480,18 @@ define("xabber-chats", function () {
             let $elem = $(ev.target);
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
-                xabber.openWindow($elem.attr('href'));
+                if ($elem.closest('.chat-message').hasClass('encrypted')) {
+                    this.model.messages.decryptFile($elem.attr('href')).then(({enc_file, fname}) => {
+                        if (enc_file === null)
+                            return;
+                        let download = document.createElement("a");
+                        download.href = enc_file;
+                        download.download = fname;
+                        download.click();
+                    });
+                    return;
+                } else
+                    xabber.openWindow($elem.attr('href'));
             }
             if ($elem.hasClass('msg-delivering-state')) {
                 return;

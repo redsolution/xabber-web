@@ -3998,10 +3998,10 @@ define("xabber-contacts", function () {
             },
 
             onSyncIQ: function (iq, request_with_stamp) {
-                this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
+                this.account.last_msg_timestamp = Math.round($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')/1000);
                 let last_chat_msg_id = $(iq).find('set last'),
-                    encrypted_retract_version = $(iq).find('synchronization conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-                    retract_version = $(iq).find('synchronization conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
+                    encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
+                    retract_version = $(iq).find('query conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
