@@ -4029,7 +4029,7 @@ define("xabber-contacts", function () {
                         xabber.chats_view.clearSearch();
                     }
                     if ($group_metadata.length) {
-                        contact.participants && contact.participants.createFromStanza($group_metadata);
+                        contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
                     }
                     if (current_call.length) {
                         let $jingle_message = current_call.children('message'),
