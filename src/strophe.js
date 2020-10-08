@@ -219,7 +219,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
         Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
         Strophe.addNamespace('ARCHIVE', 'https://xabber.com/protocol/archive');
-        Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
+        Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
         Strophe.addNamespace('DATAFORM', 'jabber:x:data');
         Strophe.addNamespace('CHAT_MARKERS', 'urn:xmpp:chat-markers:0');
