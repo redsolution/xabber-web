@@ -4969,9 +4969,7 @@ define("xabber-chats", function () {
             }
 
             if (!from_jid) {
-                xabber.warn('Message without "from" attribute');
-                xabber.warn(message);
-                return;
+                from_jid = this.account.get('jid');
             }
             let from_bare_jid = Strophe.getBareJidFromJid(from_jid),
                 is_sender = from_bare_jid === this.account.get('jid');
