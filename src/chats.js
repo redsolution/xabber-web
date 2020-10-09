@@ -295,7 +295,7 @@ define("xabber-chats", function () {
                             images.push(file_attrs);
                         else
                             files.push(file_attrs);
-                        if (options.encrypted) {
+                        /*if (options.encrypted) {
                             files.forEach(function (file) {
                                 this.decryptFile(file.sources[0]).then(function (fff) {
                                 });
@@ -304,7 +304,7 @@ define("xabber-chats", function () {
                                 this.decryptFile(file.sources[0]).then(function (fff) {
                                 });
                             }.bind(this));
-                        }
+                        }*/
                     }
                 } else if (type === 'data') {}
             }.bind(this));
