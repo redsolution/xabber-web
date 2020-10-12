@@ -4038,7 +4038,7 @@ define("xabber-contacts", function () {
                         chat.initIncomingCall(full_jid, session_id);
                     }
                     if (!message.length) {
-                        chat.set('timestamp', Math.trunc(Number($item.attr('stamp')))/1000);
+                        chat.set('timestamp', Math.trunc(Number($item.attr('stamp'))/1000));
                         chat.item_view.updateEmptyChat();
                     }
                     if (request_with_stamp) {

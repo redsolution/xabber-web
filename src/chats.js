@@ -1567,14 +1567,14 @@ define("xabber-chats", function () {
         updateEmptyChat: function () {
             let msg_time = this.model.get('timestamp');
             this.$('.last-msg').html('No messages'.italics());
-            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+            this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
         },
 
         updateLastMessage: function (msg) {
             msg || (msg = this.model.last_message);
             if (!msg) {
-                !this.model.messages.length && this.$('.last-msg').html('No messages'.italics());
+                !this.model.messages.length && this.updateEmptyChat();
                 return;
             }
             let msg_time = msg.get('time'),
