@@ -4701,6 +4701,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background: linear-gradient(rgba(33, 33, 33, 0.8), rgba(33, 33, 33, 0.7), rgba(33, 33, 33, 0.5), rgba(33, 33, 33, 0));
 }
 
+.mfp-arrow:focus,
 .mfp-close:focus {
     background-color: transparent !important;
 }

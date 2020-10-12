@@ -3001,6 +3001,40 @@ define("xabber-chats", function () {
             }
         },
 
+
+          decryptImages: function (message) {
+            let unique_id = message.get('unique_id');
+              if (this.model.get('encrypted') || message.get('encrypted')) {
+                  let images = message.get('images') || [];
+                  if (images.length) {
+                      /*let dfd = new $.Deferred(), counter = 0;
+                      dfd.done(() => {
+
+                      });*/
+                      images.forEach((img) => {
+                          let source = img.sources[0];
+                          this.model.messages.decryptFile(source).then((result) => {
+                              if (result === null)
+                                  return;
+                              let enc_file = result.enc_file,
+                                  fname = result.fname;
+                              /* counter++;
+                              (counter == images.length) && dfd.resolve();*/
+                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              if ($msg.length) {
+                                  $msg[0].src = enc_file;
+                                  $msg.attr('data-mfp-src', enc_file);
+                              }
+                          });
+                      });
+                  }
+                  if (message.get('forwarded_message')) {
+
+                  }
+
+              }
+          },
+
         addMessage: function (message) {
             if (message.get('auth_request')) {
                 // return;
@@ -3479,22 +3513,9 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            /*if (attrs.encrypted) {
-                if (is_image) {
-                    let dfd = new $.Deferred(), counter = 0;
-                    dfd.done(() => {
-                        return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
-                    });
-                    images.forEach((img) => {
-                        let source = img.sources[0];
-                        this.model.messages.decryptFile(source).then(({enc_file, fname}) => {
-                            counter++;
-                            (counter == images.length) && dfd.resolve();
-                        });
-                    });
-                } else
-                    return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
-            } else*/
+            if (attrs.encrypted || this.model.get('encrypted')) {
+                this.decryptImages(message);
+            }
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
 
@@ -3790,7 +3811,7 @@ define("xabber-chats", function () {
                     images = message.get('images') || [],
                     all_files = files.concat(images);
                 all_files.forEach(function (file, idx) {
-                    legacy_body = (this.model.get('encrypted') ? (file.sources[0].replace(/^(https|http)/, 'aesgcm') + '#' + file.iv + file.key) : file.sources[0]) + ((idx != all_files.length - 1) ? '\n' : "");
+                    legacy_body = file.sources[0] + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
                         end_idx = (body + legacy_body).length;
                     stanza.c('reference', {
@@ -3810,7 +3831,6 @@ define("xabber-chats", function () {
                     file.description && stanza.c('desc').t(file.description).up();
                     stanza.up().c('sources');
                     file.sources.forEach(function (u) {
-                        this.model.get('encrypted') && (u = u.replace(/^(https|http)/, 'aesgcm') + '#' + file.iv + file.key);
                         stanza.c('uri').t(u).up()
                     }.bind(this));
                     stanza.up().up().up();
@@ -4174,11 +4194,11 @@ define("xabber-chats", function () {
                 self = this, is_audio = false,
                 images = [], files_ = [], body_message = "";
             $(files).each(function(idx, file_) {
-                var file_new_format = {
+                let file_new_format = {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
-                    sources: [file_.url]
+                    sources: [file_.url.replace(/^(https|http)/, 'aesgcm') + '#' + file_.iv + file_.key]
                 };
                 file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
@@ -4250,6 +4270,9 @@ define("xabber-chats", function () {
             this.initPopup($message);
             message.set('images', images);
             message.set('files', files_);
+            if ((message.get('encrypted') || this.model.get('encrypted')) && message.get('images').length) {
+                this.decryptImages(message);
+            }
             this.sendMessage(message);
             this.scrollToBottom();
         },
@@ -4497,9 +4520,11 @@ define("xabber-chats", function () {
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
                 if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                    this.model.messages.decryptFile($elem.attr('href')).then(({enc_file, fname}) => {
-                        if (enc_file === null)
+                    this.model.messages.decryptFile($elem.attr('href')).then((result) => {
+                        if (result === null)
                             return;
+                        let enc_file = result.enc_file,
+                            fname = result.fname;
                         let download = document.createElement("a");
                         download.href = enc_file;
                         download.download = fname;
