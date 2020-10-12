@@ -3479,6 +3479,22 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
+            /*if (attrs.encrypted) {
+                if (is_image) {
+                    let dfd = new $.Deferred(), counter = 0;
+                    dfd.done(() => {
+                        return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+                    });
+                    images.forEach((img) => {
+                        let source = img.sources[0];
+                        this.model.messages.decryptFile(source).then(({enc_file, fname}) => {
+                            counter++;
+                            (counter == images.length) && dfd.resolve();
+                        });
+                    });
+                } else
+                    return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+            } else*/
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
 
