@@ -582,7 +582,6 @@ define("xabber-accounts", function () {
                     encrypted && (query_options.type = 'encrypted');
                     let retractions_query = $iq({type: 'get'})
                         .c('query', query_options);
-                    this.account.sendIQ(retractions_query);
                     this.sendIQ(retractions_query);
                 },
 

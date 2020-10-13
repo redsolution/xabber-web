@@ -295,16 +295,6 @@ define("xabber-chats", function () {
                             images.push(file_attrs);
                         else
                             files.push(file_attrs);
-                        /*if (options.encrypted) {
-                            files.forEach(function (file) {
-                                this.decryptFile(file.sources[0]).then(function (fff) {
-                                });
-                            }.bind(this));
-                            images.forEach(function (file) {
-                                this.decryptFile(file.sources[0]).then(function (fff) {
-                                });
-                            }.bind(this));
-                        }*/
                     }
                 } else if (type === 'data') {}
             }.bind(this));
@@ -417,6 +407,8 @@ define("xabber-chats", function () {
 
           decryptFile: async function (file) {
               return new Promise((resolve, reject) => {
+                  if (file.indexOf('aesgcm') != 0)
+                      resolve(file);
                   let uri = file.replace(/^aesgcm/, 'https'),
                       iv_and_key = uri.slice(uri.length - 44 - 16),
                       iv = utils.fromBase64toArrayBuffer(iv_and_key.slice(0, 16)),
@@ -3007,19 +2999,15 @@ define("xabber-chats", function () {
               if (this.model.get('encrypted') || message.get('encrypted')) {
                   let images = message.get('images') || [];
                   if (images.length) {
-                      /*let dfd = new $.Deferred(), counter = 0;
-                      dfd.done(() => {
-
-                      });*/
                       images.forEach((img) => {
                           let source = img.sources[0];
+                          if (source.indexOf('aesgcm') != 0)
+                              return;
                           this.model.messages.decryptFile(source).then((result) => {
                               if (result === null)
                                   return;
                               let enc_file = result.enc_file,
                                   fname = result.fname;
-                              /* counter++;
-                              (counter == images.length) && dfd.resolve();*/
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = enc_file;
@@ -3028,10 +3016,27 @@ define("xabber-chats", function () {
                           });
                       });
                   }
-                  if (message.get('forwarded_message')) {
-
-                  }
-
+                  let fwd_msgs = message.get('forwarded_message') || [];
+                  fwd_msgs.forEach((fwd_msg) => {
+                      let fwd_images = fwd_msg.get('images') || [],
+                          fwd_unique_id = fwd_msg.get('unique_id');
+                      fwd_images.forEach((img) => {
+                          let source = img.sources[0];
+                          if (source.indexOf('aesgcm') != 0)
+                              return;
+                          this.model.messages.decryptFile(source).then((result) => {
+                              if (result === null)
+                                  return;
+                              let enc_file = result.enc_file,
+                                  fname = result.fname;
+                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid={fwd_unique_id}"] img[src="${source}"]`);
+                              if ($msg.length) {
+                                  $msg[0].src = enc_file;
+                                  $msg.attr('data-mfp-src', enc_file);
+                              }
+                          });
+                      });
+                  });
               }
           },
 
@@ -4089,6 +4094,8 @@ define("xabber-chats", function () {
                                 let iv = utils.ArrayBuffertoBase64(encrypted.iv),
                                     key = utils.ArrayBuffertoBase64(encrypted.keydata),
                                     encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                file.voice && (encrypted_file.voice = true);
+                                file.duration && (encrypted_file.duration = file.duration);
                                 encrypted_file.iv = iv;
                                 encrypted_file.key = key;
                                 new_files.push(encrypted_file);
@@ -4198,7 +4205,7 @@ define("xabber-chats", function () {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
-                    sources: [file_.url.replace(/^(https|http)/, 'aesgcm') + '#' + file_.iv + file_.key]
+                    sources: [(this.model.get('encrypted') || message.get('encrypted')) ? (file_.url.replace(/^(https|http)/, 'aesgcm') + '#' + file_.iv + file_.key) : file_.url]
                 };
                 file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
@@ -4634,9 +4641,21 @@ define("xabber-chats", function () {
                     let $audio_elem = $elem.closest('.link-file'),
                         f_url = $audio_elem.find('.file-link-download').attr('href');
                     $audio_elem.find('.mdi-play').removeClass('no-uploaded');
-                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
-                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
-                    this.prev_audio_message = $audio_elem[0];
+                    if ($elem.closest('.chat-message').hasClass('encrypted')) {
+                        this.model.messages.decryptFile(f_url).then((result) => {
+                            let decrypted_url = result.enc_file,
+                                fname = result.fname;
+                            if (result === null)
+                                return;
+                            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], decrypted_url);
+                            this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                            this.prev_audio_message = $audio_elem[0];
+                        });
+                    } else {
+                        $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+                        this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                        this.prev_audio_message = $audio_elem[0];
+                    }
                     return;
                 }
 
