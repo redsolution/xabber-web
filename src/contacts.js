@@ -127,7 +127,13 @@ define("xabber-contacts", function () {
                     is_callback = _.isFunction(callback);
                 this.account.connection.vcard.get(jid,
                     function (vcard) {
-                        var attrs = {
+                        if (vcard.group_info) {
+                            let group_info = this.get('group_info') || {};
+                            group_info = _.extend(group_info, vcard.group_info);
+                            this.set({group_info});
+                            delete vcard.group_info;
+                        }
+                        let attrs = {
                             vcard: vcard,
                             vcard_updated: moment.now(),
                             name: this.get('roster_name')
@@ -444,7 +450,7 @@ define("xabber-contacts", function () {
                 var $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
                     name = $group_chat.find('name').text(),
                     model = $group_chat.find('membership').text(),
-                    status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'inactive' : 'active'),
+                    status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'unavailable' : 'online'),
                     status_msg = $presence.children('status').text(),
                     anonymous = $group_chat.find('privacy').text(),
                     searchable = $group_chat.find('index').text(),
@@ -1605,6 +1611,8 @@ define("xabber-contacts", function () {
             },
 
             render: function () {
+                if (!this.model.get('vcard_updated'))
+                    this.model.vcard.refresh();
                 this.update();
             },
 

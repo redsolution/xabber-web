@@ -1824,8 +1824,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: #9E9E9E;
 }
 
-[data-status=offline] svg circle,
-[data-status=unavailable] svg circle {
+[data-status=offline] svg circle:not(.invitation):not(.server),
+[data-status=unavailable] svg circle:not(.invitation):not(.server) {
     fill: #9E9E9E;
 }
 
@@ -1847,7 +1847,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: #388E3C;
 }
 
-.chat-icon svg circle,
 [data-status=active] svg circle,
 [data-status=nil] svg circle,
 [data-status=online] svg circle {
