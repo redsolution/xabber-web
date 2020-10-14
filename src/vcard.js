@@ -12,7 +12,7 @@ define("xabber-vcard", function () {
         utils = env.utils;
 
     var xmlToObject = function ($vcard) {
-        var vcard = {
+        let vcard = {
             nickname: $vcard.find('NICKNAME').text().trim(),
             fullname: $vcard.find('FN').text().trim(),
             first_name: $vcard.find('N GIVEN').text().trim(),
@@ -31,21 +31,34 @@ define("xabber-vcard", function () {
             email: {}
         };
 
-        var $org = $vcard.find('ORG');
+        if ($vcard.find('X-PRIVACY').length || $vcard.find('X-MEMBERSHIP').length || $vcard.find('X-INDEX').length) {
+            vcard.group_info = {
+                jid: vcard.jabber_id,
+                description: vcard.description,
+                name: vcard.nickname,
+                anonymous: $vcard.find('X-PRIVACY').text().trim(),
+                searchable: $vcard.find('X-INDEX').text().trim(),
+                model: $vcard.find('X-MEMBERSHIP').text().trim(),
+                status_msg: $vcard.find('X-STATUS').text().trim(),
+                members_num: $vcard.find('X-MEMBERS').text().trim()
+            };
+        }
+
+        let $org = $vcard.find('ORG');
         if ($org.length) {
             vcard.org.name = $org.find('ORGNAME').text().trim();
             vcard.org.unit = $org.find('ORGUNIT').text().trim();
         }
 
-        var $photo = $vcard.find('PHOTO');
+        let $photo = $vcard.find('PHOTO');
         if ($photo.length) {
             vcard.photo.image = $photo.find('BINVAL').text().trim();
             vcard.photo.type = $photo.find('TYPE').text().trim();
         }
 
         $vcard.find('TEL').each(function () {
-            var $this = $(this);
-            var number = $this.find('NUMBER').text().trim();
+            let $this = $(this),
+                number = $this.find('NUMBER').text().trim();
             if (!number) {
                 return;
             }

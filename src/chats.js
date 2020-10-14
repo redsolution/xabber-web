@@ -2397,9 +2397,10 @@ define("xabber-chats", function () {
         },
 
         onChangedActiveStatus: function () {
-            this.sendChatState(this.model.get('active') ? 'active' : 'inactive');
+            let active = this.model.get('active');
+            this.sendChatState(active ? 'active' : 'inactive');
             if (this.contact.get('group_chat')) {
-                if (this.model.get('active'))
+                if (active)
                     this.contact.sendPresent();
                 else
                     this.contact.sendNotPresent();
@@ -7356,7 +7357,6 @@ define("xabber-chats", function () {
                         else
                             this.displaySend();
                         $rich_textarea.flushRichTextarea();
-                        this.view.sendChatState('active');
                     }
                 }
                 if (ev.keyCode === constants.KEY_SPACE) {
@@ -7731,7 +7731,6 @@ define("xabber-chats", function () {
                 this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
-            this.view.sendChatState('active');
             xabber.chats_view.clearSearch();
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
