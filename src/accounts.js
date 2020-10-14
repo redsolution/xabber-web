@@ -577,12 +577,12 @@ define("xabber-accounts", function () {
                     }.bind(this), 5000);*/
                 },
 
-                getAllMessageRetractions: function (encrypted) {
+                getAllMessageRetractions: function (encrypted, callback) {
                     let query_options = {xmlns: Strophe.NS.REWRITE, version: (encrypted && this.omemo) ? this.omemo.getRetractVersion() : this.retraction_version};
                     encrypted && (query_options.type = 'encrypted');
                     let retractions_query = $iq({type: 'get'})
                         .c('query', query_options);
-                    this.sendIQ(retractions_query);
+                    this.sendIQ(retractions_query, callback);
                 },
 
                 sendPendingStanzas: function () {
