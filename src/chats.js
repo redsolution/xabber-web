@@ -7065,6 +7065,7 @@ define("xabber-chats", function () {
                         xabber.chat_body.updateHeight();
                         is_scrolled_bottom && this.view.scrollToBottom();
                         this.account.omemo.checkContactFingerprints(this.contact);
+                        this.focusOnInput();
                     } else {
                         this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
                             let is_scrolled_bottom = this.view.isScrolledToBottom();
@@ -7081,6 +7082,7 @@ define("xabber-chats", function () {
                             this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
                             xabber.chat_body.updateHeight();
                             is_scrolled_bottom && this.view.scrollToBottom();
+                            this.focusOnInput();
                         });
                     }
                 });
