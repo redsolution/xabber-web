@@ -4008,14 +4008,15 @@ define("xabber-contacts", function () {
                     xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                     return;
                 }
-                if (request_with_stamp) {
-                    if (this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
-                        this.account.getAllMessageRetractions(true);
-                    else if (this.account.retraction_version < retract_version)
-                        this.account.getAllMessageRetractions();
-                } else {
-                   this.account.omemo && this.account.omemo.cacheRetractVersion(encrypted_retract_version);
-                   this.account.retraction_version = retract_version;
+                if (this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
+                    this.account.getAllMessageRetractions(true);
+                else {
+                    if (request_with_stamp) {
+                        if (this.account.retraction_version < retract_version)
+                            this.account.getAllMessageRetractions();
+                    } else {
+                        this.account.retraction_version = retract_version;
+                    }
                 }
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),

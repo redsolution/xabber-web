@@ -3029,7 +3029,7 @@ define("xabber-chats", function () {
                                   return;
                               let enc_file = result.enc_file,
                                   fname = result.fname;
-                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid={fwd_unique_id}"] img[src="${source}"]`);
+                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = enc_file;
                                   $msg.attr('data-mfp-src', enc_file);
