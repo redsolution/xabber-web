@@ -43,7 +43,7 @@ define([
         $query.each(function (i, obj) {
             var $obj = $(obj),
                 html_concat = "",
-                url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
+                url_regexp = /(((ftp|http|https):\/\/)|(www\.)|(\b))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?(\.net|\.edu|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.al|\.asia|\.bb|\.ca|\.co|\.ec|\.fr|\.ht|\.in|\.ie|\.jo|\.mr|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.ag|\.be|\.bg|\.cl|\.cd|\.cz|\.eu|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.kr|\.ch|\.us|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.is|\.ir|\.jp|\.lv|\.me|\.pk|\.pe|\.pt|\.sk|\.es|\.tw|\.ua|\.uz)(\/|\/([\w+#!:.?+=&%@!\-\/]))?(\S+)?/g;
             $obj[0].childNodes.forEach(function (node) {
                 let $node = $(node),
                     x = node.outerHTML;

@@ -4406,8 +4406,12 @@ define("xabber-chats", function () {
                 }
 
                 let processClick = function () {
+                    let $prev_selected = $msg.siblings('.selected');
+                    !$prev_selected.length && ($prev_selected = $msg.prevAll('.chat-message').last());
                     if (!no_select_message) {
                         $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        if (xabber.shiftctrl_pressed && $prev_selected.length)
+                            $prev_selected.addClass('selected').nextUntil($msg, '.chat-message').addClass('selected');
                         this.bottom.manageSelectedMessages();
                     }
                 }.bind(this);
