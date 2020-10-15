@@ -2996,7 +2996,8 @@ define("xabber-chats", function () {
 
 
           decryptImages: function (message) {
-            let unique_id = message.get('unique_id');
+            let scrolled_from_bottom = this.getScrollBottom(),
+                unique_id = message.get('unique_id');
               if (this.model.get('encrypted') || message.get('encrypted')) {
                   let images = message.get('images') || [];
                   if (images.length) {
@@ -3012,6 +3013,12 @@ define("xabber-chats", function () {
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = enc_file;
+                                  $msg[0].onload = function () {
+                                      if (!scrolled_from_bottom)
+                                          this.scrollToBottom();
+                                      else
+                                          this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                                  }.bind(this);
                                   $msg.attr('data-mfp-src', enc_file);
                               }
                           });
@@ -3033,6 +3040,12 @@ define("xabber-chats", function () {
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = enc_file;
+                                  $msg[0].onload = function () {
+                                      if (!scrolled_from_bottom)
+                                          this.scrollToBottom();
+                                      else
+                                          this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                                  }.bind(this);
                                   $msg.attr('data-mfp-src', enc_file);
                               }
                           });
