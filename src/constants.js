@@ -22,6 +22,8 @@ var constants = {
     KEY_BACKSPACE: 8,
     KEY_TAB: 9,
     KEY_ENTER: 13,
+    KEY_SHIFT: 16,
+    KEY_CTRL: 17,
     KEY_ESCAPE: 27,
     KEY_SPACE: 32,
     KEY_ARROW_LEFT: 37,
