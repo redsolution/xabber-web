@@ -167,7 +167,6 @@
         configure: function (config) {
             _.extend(constants, _.pick(config, [
                 'CONNECTION_URL',
-                'XMPP_SERVER_GROUPCHATS',
                 'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'DEBUG',
@@ -188,6 +187,13 @@
             if (constants.DEBUG) {
                 window.xabber = this;
                 _.extend(window, env);
+            }
+
+            if (config.TURN_SERVERS_LIST) {
+                if (_.isArray(config.TURN_SERVERS_LIST))
+                    _.extend(constants, {TURN_SERVERS_LIST: config.TURN_SERVERS_LIST});
+                else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
+                    _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
             }
 
             if (utils.isMobile.any()) {

@@ -438,13 +438,8 @@ define("xabber-chats", function () {
                   iceServers: [
                       {
                           urls: "stun:stun.l.google.com:19302"
-                      },
-                      {
-                          urls: 'turn:192.158.29.39:3478?transport=udp',
-                          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                          username: '28224511:1379330808'
                       }
-                  ],
+                  ].concat(constants.TURN_SERVERS_LIST),
                   sdpSemantics: 'unified-plan'
               });
               this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
@@ -2124,8 +2119,10 @@ define("xabber-chats", function () {
           },
 
           render: function () {
-              if (this.contact.get('group_chat'))
+              if (this.contact.get('group_chat')) {
+                  this.$el.addClass('hidden');
                   return;
+              }
               let subscription = this.contact.get('subscription'),
                   in_request = this.contact.get('subscription_request_in'),
                   out_request = this.contact.get('subscription_request_out');
@@ -5568,7 +5565,7 @@ define("xabber-chats", function () {
                     chat_item: view,
                     blocked: view.contact.get('blocked')
                 });
-                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
             }

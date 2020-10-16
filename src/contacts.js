@@ -1612,7 +1612,7 @@ define("xabber-contacts", function () {
 
             render: function () {
                 if (!this.model.get('vcard_updated'))
-                    this.model.vcard.refresh();
+                    this.model.vcard &&  this.model.vcard.refresh();
                 this.update();
             },
 
