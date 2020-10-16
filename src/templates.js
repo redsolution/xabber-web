@@ -10,6 +10,8 @@ define("xabber-templates", [
     "text!templates/base/toolbar.html",
     "text!templates/base/settings.html",
     "text!templates/base/about.html",
+    "text!templates/base/omemo_enable.html",
+    "text!templates/base/omemo_item.html",
 
     "text!templates/api_service/xabber_login.html",
     "text!templates/api_service/xabber_login_by_email.html",
@@ -189,6 +191,8 @@ define("xabber-templates", [
     addTemplate('base.toolbar');
     addTemplate('base.settings');
     addTemplate('base.about');
+    addTemplate('base.omemo_enable');
+    addTemplate('base.omemo_item');
 
     addTemplate('api_service.xabber_login');
     addTemplate('api_service.xabber_login_by_email');
@@ -289,7 +293,7 @@ define("xabber-templates", [
     addTemplate('chats.encryption_warning');
 
 
-        addTemplate('mentions.mentions_panel');
+    addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');
     addTemplate('mentions.mention_item');
 

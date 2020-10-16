@@ -8259,6 +8259,9 @@ define("xabber-chats", function () {
             }
             return true;
         }.bind(this));
+        if (_.isUndefined(this.settings.get('omemo'))) {
+            this.omemo_enable_view = new xabber.OMEMOEnableView({account: this});
+        }
     }, true, true);
 
     xabber.once("start", function () {

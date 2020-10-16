@@ -1756,6 +1756,70 @@ define("xabber-omemo", function () {
             }
         });
 
+        xabber.OMEMOItemView = xabber.BasicView.extend({
+            className: 'omemo-item list-item',
+            template: templates.omemo_item,
+
+            events: {
+                'click': 'openByClick'
+            },
+
+            _initialize: function (options) {
+                this.model = options.model;
+                this.account = this.model.account;
+                this.$el.attr('data-id', this.account.id);
+                this.updateColorScheme();
+                xabber.chats_view.$('.chat-list').prepend(this.$el);
+                this.account.settings.on("change:color", this.updateColorScheme, this);
+            },
+
+            openByClick: function () {
+
+            },
+
+            updateColorScheme: function () {
+                var color = this.account.settings.get('color');
+                this.$el.attr('data-color', color);
+            },
+
+            close: function () {
+                xabber.chats_view.removeChild(this.account.id);
+            }
+        });
+
+        xabber.OMEMOEnableView = xabber.BasicView.extend({
+            className: 'details-panel omemo-enable-view',
+            template: templates.omemo_enable,
+            ps_selector: '.panel-content',
+            avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
+
+            events: {
+                'click .btn-enable': 'enableOmemo',
+                'click .btn-cancel': 'disableOmemo'
+            },
+
+            _initialize: function (options) {
+                this.account = options.account;
+                this.addChatItem();
+            },
+
+            addChatItem: function () {
+                this.chat_item = new xabber.OMEMOItemView({model: this});
+            },
+
+            enableOmemo: function () {
+                this.account.settings.save('omemo', true);
+            },
+
+            disableOmemo: function () {
+                this.account.settings.save('omemo', false);
+            },
+
+            close: function () {
+
+            }
+        });
+
         xabber.Account.addInitPlugin(function () {
             if (!this.settings.get('omemo'))
                 return;

@@ -590,6 +590,13 @@ input[type=file] {
     line-height: 36px;
 }
 
+.mdi.mdi-32px {
+    width: 32px;
+    height: 32px;
+    font-size: 32px;
+    line-height: 32px;
+}
+
 .mdi.mdi-28px {
     width: 28px;
     height: 28px;
@@ -3842,6 +3849,30 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-item .muted-chat-counter {
     background-color: #BDBDBD !important;
 }
+
+/* ------------------ OMEMO enable ------------------ */
+
+.list-item.omemo-item {
+    height: 42px;
+    padding: 9px 7px 9px 60px;
+    position: relative;
+    cursor: pointer;
+}
+
+.list-item.omemo-item .encryption-icon {
+    position: absolute;
+    left: 10px;
+    top: 5px;
+    width: 36px;
+    height: 36px;
+    color: #424242;
+}
+
+.list-item.omemo-item .last-msg {
+    margin: 0;
+    line-height: 24px;
+}
+
 
 /* ------------------ CHAT BOX ---------------------- */
 
