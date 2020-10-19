@@ -3177,7 +3177,7 @@ define("xabber-contacts", function () {
 
             _initialize: function (options) {
                 this.account = this.model.account;
-                this.$('.invite-msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : 'You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat members');
+                this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : 'You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat members');
                 this.message = options.message;
                 this.model.on("change", this.update, this);
             },

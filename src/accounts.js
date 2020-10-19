@@ -1719,27 +1719,12 @@ define("xabber-accounts", function () {
             },
 
             initOmemo: function () {
-                this.model.own_used_prekeys = new xabber.UsedPreKeys(null, {
-                    name: `cached-used-own-prekeys-list-${this.model.get('jid')}`,
-                    objStoreName: 'prekeys',
-                    primKey: 'id'
-                });
                 this.model.omemo = new xabber.Omemo({id: 'omemo'}, {
                     account: this.model,
                     storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
                     fetch: 'before'
                 });
                 setTimeout(function () {
-                    this.model.ownprekeys = new xabber.UsedPreKeys(null, {
-                        name: `cached-prekeys-list-${this.model.get('jid')}`,
-                        objStoreName: 'prekeys',
-                        primKey: 'id'
-                    });
-                    this.model.used_prekeys = new xabber.UsedPreKeys(null, {
-                        name: `cached-used-prekeys-list-${this.model.get('jid')}`,
-                        objStoreName: 'prekeys',
-                        primKey: 'id'
-                    });
                     this.model.omemo.onConnected();
                 }.bind(this), 2000);
             },

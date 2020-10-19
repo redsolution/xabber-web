@@ -3618,6 +3618,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .mention-info-wrap:hover,
 .mention-info-wrap:hover .chat-icon,
 .chat-item:hover,
+.omemo-item:hover,
 .message-item:hover,
 .message-item:hover .chat-icon,
 .chat-item:hover .chat-icon {
@@ -3627,6 +3628,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .mention-info-wrap.active,
 .mention-info-wrap.active:hover,
 .chat-item.active,
+.omemo-item.active,
 .message-item.active,
 .message-item.active:hover,
 .message-item.active .chat-icon,
@@ -3853,7 +3855,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 /* ------------------ OMEMO enable ------------------ */
 
 .list-item.omemo-item {
-    height: 42px;
+    height: 48px;
     padding: 9px 7px 9px 60px;
     position: relative;
     cursor: pointer;
@@ -3861,16 +3863,27 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .list-item.omemo-item .encryption-icon {
     position: absolute;
-    left: 10px;
-    top: 5px;
-    width: 36px;
-    height: 36px;
+    left: 18px;
+    top: 12px;
+    width: 24px;
+    height: 24px;
     color: #424242;
 }
 
-.list-item.omemo-item .last-msg {
+.list-item.omemo-item .encryption-icon svg {
+    fill: #212121;
+}
+
+.list-item.omemo-item .recent-chat-info .last-msg {
     margin: 0;
-    line-height: 24px;
+    line-height: 18px;
+}
+
+.list-item.omemo-item .recent-chat-info .account-jid {
+    font-size: 10px;
+    color: #9E9E9E;
+    line-height: 14px;
+    margin: 0;
 }
 
 
@@ -7490,6 +7503,7 @@ input[type='range'].voice-message-volume:focus {
     font-size: 14px;
 }
 
+.omemo-enable-view .main-info .circle-avatar,
 .invitation-view .main-info .circle-avatar,
 .details-panel .main-info .avatar-wrap {
     margin: 48px 0 12px 0 !important;
@@ -7500,6 +7514,21 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 auto;
     width: 192px;
     height: 192px;
+}
+
+.omemo-enable-view.details-panel .main-info .circle-avatar {
+    border: 3px dashed;
+}
+
+.omemo-enable-view.details-panel .main-info .circle-avatar .avatar {
+    width: 174px;
+    height: 174px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 50%;
+    background-position: center center;
+    background-repeat: no-repeat no-repeat;
+    margin: 6px auto;
 }
 
 .details-panel .main-info .status {
@@ -7740,7 +7769,7 @@ input[type='range'].voice-message-volume:focus {
     color: #9E9E9E;
 }
 
-.right-panel-wrap .invitation-view .invite-msg {
+.right-panel-wrap .details-panel .msg-wrap {
     position: relative;
     margin: 0 auto;
     width: 100%;
@@ -7748,7 +7777,7 @@ input[type='range'].voice-message-volume:focus {
     display: inline-block;
 }
 
-.right-panel-wrap .invitation-view .invite-msg .invite-msg-text {
+.right-panel-wrap .details-panel .msg-wrap .msg-text {
     color: #616161;
     font-style: italic;
     width: 80%;
@@ -7758,9 +7787,11 @@ input[type='range'].voice-message-volume:focus {
     position: relative !important;
     top: 0px;
 }
+.right-panel-wrap .omemo-enable-view .panel-footer,
 .right-panel-wrap .invitation-view .panel-footer {
     position: relative !important;
 }
+.right-panel-wrap .omemo-enable-view .panel-footer .buttons-wrap,
 .right-panel-wrap .invitation-view .panel-footer .buttons-wrap {
     margin: 0 auto;
     display: flex;

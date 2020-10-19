@@ -1769,12 +1769,19 @@ define("xabber-omemo", function () {
                 this.account = this.model.account;
                 this.$el.attr('data-id', this.account.id);
                 this.updateColorScheme();
-                xabber.chats_view.$('.chat-list').prepend(this.$el);
+                this.$('.account-jid').text(this.account.get('jid'));
+                xabber.chats_view.addChild(this.account.id, this);
+                xabber.chats_view.$('.chat-list-wrap').prepend(this.$el);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
             },
 
             openByClick: function () {
-
+                if (xabber.chats_view.active_chat) {
+                    xabber.chats_view.active_chat.model.set('active', false);
+                    xabber.chats_view.active_chat = null;
+                }
+                this.$el.addClass('active');
+                xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'enable_encryption', chat_item: null, omemo_item: this});
             },
 
             updateColorScheme: function () {
@@ -1790,33 +1797,63 @@ define("xabber-omemo", function () {
         xabber.OMEMOEnableView = xabber.BasicView.extend({
             className: 'details-panel omemo-enable-view',
             template: templates.omemo_enable,
-            ps_selector: '.panel-content',
-            avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
+            avatar_size: constants.AVATAR_SIZES.OMEMO_ENABLE_SETTING,
 
             events: {
                 'click .btn-enable': 'enableOmemo',
-                'click .btn-cancel': 'disableOmemo'
+                'click .btn-cancel': 'disableOmemo',
+                'click .btn-escape': 'close'
             },
 
             _initialize: function (options) {
                 this.account = options.account;
+                this.updateColorScheme();
+                this.$('.msg-text').text(`Enable end-to-end encryption for account ${this.account.get('jid')}\n\nThis will allow you an your contacts exchange messages privately using encrypted chats.`);
                 this.addChatItem();
+                this.updateAvatar();
+                xabber.on("update_screen", this.onUpdatedScreen, this);
+                this.account.on("change:image", this.updateAvatar, this);
+                this.account.settings.on("change:color", this.updateColorScheme, this);
+            },
+
+            updateAvatar: function () {
+                this.$('.circle-avatar .avatar').setAvatar(this.account.cached_image, this.avatar_size);
             },
 
             addChatItem: function () {
                 this.chat_item = new xabber.OMEMOItemView({model: this});
             },
 
+            updateColorScheme: function () {
+                var color = this.account.settings.get('color');
+                this.$el.attr('data-color', color);
+            },
+
+            onUpdatedScreen: function () {
+                if (this.isVisible())
+                    this.chat_item.$el.addClass('active');
+            },
+
+            onChangedVisibility: function () {
+                if (!this.isVisible())
+                    this.chat_item.$el.removeClass('active');
+            },
+
             enableOmemo: function () {
                 this.account.settings.save('omemo', true);
+                this.close();
+                this.account.settings_right && this.account.settings_right.initOmemo();
             },
 
             disableOmemo: function () {
                 this.account.settings.save('omemo', false);
+                this.close();
             },
 
             close: function () {
-
+                this.chat_item.close();
+                this.trigger('remove') && this.remove();
+                this.account.omemo_enable_view = undefined;
             }
         });
 

@@ -5959,6 +5959,7 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && chat.get('timestamp') && !chat.contact.get('archived'));
+            this.$(`.omemo-item:not([data-id="${account.get('jid')}"])`).addClass('hidden');
             account_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
@@ -6644,6 +6645,7 @@ define("xabber-chats", function () {
 
         getActiveScreen: function () {
             var active_screen = xabber.toolbar_view.$('.active');
+            this.$('.omemo-item').removeClass('hidden');
             if (active_screen.hasClass('archive-chats')) {
                 xabber.toolbar_view.showArchive();
                 return;
@@ -8259,7 +8261,7 @@ define("xabber-chats", function () {
             }
             return true;
         }.bind(this));
-        if (_.isUndefined(this.settings.get('omemo'))) {
+        if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_view) {
             this.omemo_enable_view = new xabber.OMEMOEnableView({account: this});
         }
     }, true, true);

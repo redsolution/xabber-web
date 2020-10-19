@@ -176,6 +176,7 @@ define("xabber-ui", function () {
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
+            path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_participant_messages = new this.ViewPath('contact.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
@@ -226,6 +227,9 @@ define("xabber-ui", function () {
                     chat_bottom: path_chat_bottom
                 };
             }
+            /*if (options.right === 'enable_encryption') {
+                return { details: path_enable_view };
+            }*/
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };
             }
@@ -240,6 +244,9 @@ define("xabber-ui", function () {
                     chat_body: path_chat_body,
                     chat_bottom: path_chat_bottom
                 };
+            }
+            if (options.right === 'enable_encryption' || options.omemo_item) {
+                return { details: path_enable_view };
             }
         };
 
