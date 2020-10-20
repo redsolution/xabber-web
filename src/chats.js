@@ -3850,7 +3850,7 @@ define("xabber-chats", function () {
                     file.sources.forEach(function (u) {
                         if (file.iv && file.key)
                             u = u.replace(/^(https|http)/, 'aesgcm') + '#' + utils.ArrayBuffertoBase64(file.iv) + utils.ArrayBuffertoBase64(file.key);
-                        stanza.c('uri').t(u).up()
+                        stanza.c('uri').t(u).up();
                     }.bind(this));
                     stanza.up().up().up();
                     file.voice && stanza.up();
@@ -4219,7 +4219,7 @@ define("xabber-chats", function () {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
-                    sources: file_.url
+                    sources: [file_.url]
                 };
                 file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
