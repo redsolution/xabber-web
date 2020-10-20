@@ -1808,7 +1808,7 @@ define("xabber-omemo", function () {
             _initialize: function (options) {
                 this.account = options.account;
                 this.updateColorScheme();
-                this.$('.msg-text').text(`Enable end-to-end encryption for account ${this.account.get('jid')}\n\nThis will allow you an your contacts exchange messages privately using encrypted chats.`);
+                this.$('.msg-text').html(`<b>Enable end-to-end encryption for account ${this.account.get('jid')}?</b>\n\nThis will allow you and your contacts exchange private messages using encrypted chats. Remember to always verify the identity of your chat partners by verifying digital fingerprints of their devices.`);
                 this.addChatItem();
                 this.updateAvatar();
                 xabber.on("update_screen", this.onUpdatedScreen, this);

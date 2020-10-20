@@ -1649,6 +1649,13 @@ define("xabber-chats", function () {
                 .attr('title', utils.pretty_datetime(msg_time));
         },
 
+        updateEncryptedChat: function () {
+            let msg_time = this.model.get('timestamp');
+            this.$('.last-msg').html('Decrypting messages'.italics());
+            this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
+                .attr('title', utils.pretty_datetime(msg_time));
+        },
+
         updateLastMessage: function (msg) {
             msg || (msg = this.model.last_message);
             if (!msg) {
@@ -6456,7 +6463,8 @@ define("xabber-chats", function () {
             "click .btn-export-history": "exportHistory",
             "click .btn-show-fingerprints": "showFingerprints",
             "click .btn-start-encryption": "startEncryptedChat",
-            "click .btn-open-encryption": "openEncryptedChat",
+            "click .btn-open-encrypted-chat": "openEncryptedChat",
+            "click .btn-open-regular-chat": "openRegularChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -6553,7 +6561,8 @@ define("xabber-chats", function () {
             this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat'));
             this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
-            this.$('.btn-open-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
             this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
@@ -6776,6 +6785,11 @@ define("xabber-chats", function () {
         openEncryptedChat: function () {
             this.model.set('opened', true);
             this.account.chats.openChat(this.contact, {encrypted: true});
+        },
+
+        openRegularChat: function () {
+            this.model.set('opened', true);
+            this.account.chats.openChat(this.contact);
         }
     });
 

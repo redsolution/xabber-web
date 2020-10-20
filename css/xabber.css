@@ -3738,18 +3738,33 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .message-item.encrypted .chat-title,
 .mention-item.encrypted .chat-title,
 .chat-item.encrypted .chat-title {
+    color: #9E9E9E;
+}
+
+.message-item.encrypted[data-trust=true] .chat-title,
+.mention-item.encrypted[data-trust=true] .chat-title,
+.chat-item.encrypted[data-trust=true] .chat-title {
     color: #388E3C !important;
 }
 
 .message-item .chat-title-wrap .encrypted-icon,
 .mention-item .chat-title-wrap .encrypted-icon,
 .chat-item .chat-title-wrap .encrypted-icon {
-    color: #388E3C !important;
     display: none;
     margin-right: 4px;
+    color: #9E9E9E;
+}
+
+.chat-head-wrap.encrypted[data-trust=true] .contact-name,
+.chat-head-wrap.encrypted[data-trust=true] .encrypted-icon,
+.message-item[data-trust=true] .chat-title-wrap .encrypted-icon,
+.mention-item[data-trust=true] .chat-title-wrap .encrypted-icon,
+.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon {
+    color: #388E3C !important;
 }
 
 .chat-head-wrap.encrypted[data-trust=none] .contact-name,
+.chat-head-wrap.encrypted[data-trust=none] .encrypted-icon,
 .chat-head-wrap[data-trust=none] .encrypted-icon,
 .chat-item.encrypted[data-trust=none] .chat-title,
 .chat-item[data-trust=none] .chat-title-wrap .encrypted-icon {
@@ -3757,6 +3772,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-head-wrap.encrypted[data-trust=error] .contact-name,
+.chat-head-wrap.encrypted[data-trust=error] .encrypted-icon,
 .chat-head-wrap[data-trust=error] .encrypted-icon,
 .chat-item.encrypted[data-trust=error] .chat-title,
 .chat-item[data-trust=error] .chat-title-wrap .encrypted-icon {
@@ -3933,7 +3949,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .chat-head-wrap.encrypted .encrypted-icon {
     display: block !important;
-    color: #388E3C;
+    color: #9E9E9E;
 }
 
 .chat-head-wrap .contact-info p {
@@ -3952,7 +3968,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-head-wrap.encrypted .contact-name {
-    color: #388E3C;
+    color: #9E9E9E;
 }
 
 .name-is-custom {
@@ -7524,6 +7540,7 @@ input[type='range'].voice-message-volume:focus {
     width: 174px;
     height: 174px;
     position: relative;
+    border: 3px solid;
     overflow: hidden;
     border-radius: 50%;
     background-position: center center;

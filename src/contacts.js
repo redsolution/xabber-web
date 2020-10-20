@@ -4041,6 +4041,7 @@ define("xabber-contacts", function () {
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         $unread_messages = $sync_metadata.children('unread'),
+                        chat_timestamp = Math.trunc(Number($item.attr('stamp'))/1000),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
@@ -4051,6 +4052,10 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                    } else if (encrypted) {
+                        chat.set('timestamp', chat_timestamp);
+                        chat.set('opened', true);
+                        chat.item_view.updateEncryptedChat();
                     }
                     if ($group_metadata.length) {
                         contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
@@ -4062,7 +4067,7 @@ define("xabber-contacts", function () {
                         chat.initIncomingCall(full_jid, session_id);
                     }
                     if (!message.length) {
-                        chat.set('timestamp', Math.trunc(Number($item.attr('stamp'))/1000));
+                        chat.set('timestamp', chat_timestamp);
                         chat.item_view.updateEmptyChat();
                     }
                     if (is_group_chat) {
