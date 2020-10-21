@@ -6,8 +6,10 @@ define("xabber-ui", function () {
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
-            if (ev.ctrlKey && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL)
+            if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL) {
                 this.shiftctrl_pressed = true;
+                ev.preventDefault();
+            }
             let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 if (xabber.body.$el.siblings('#modals').children().length)

@@ -4137,7 +4137,7 @@ define("xabber-chats", function () {
             $message.find('.progress').show();
             var files_count = 0;
             $(message.get('files')).each(function(idx, file) {
-                let enc_file = new File([file], file.name);
+                let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
                 enc_file.iv && (delete enc_file.iv);
                 enc_file.key && (delete enc_file.key);
                 var iq = $iq({type: 'get', to: message.get('upload_service')})
@@ -4725,12 +4725,24 @@ define("xabber-chats", function () {
                 }
 
                 let processClick = function () {
-                    let $prev_selected = $msg.siblings('.selected');
-                    !$prev_selected.length && ($prev_selected = $msg.prevAll('.chat-message').last());
+                    let $prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').last() : $msg.prevAll('.chat-message.selected').first();
+                    !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.nextAll('.chat-message.selected').last() : $msg.nextAll('.chat-message.selected').first());
+                    !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').first() : $msg.prevAll('.chat-message.selected').last());
+                    if (xabber.shiftctrl_pressed && $prev_selected.length) {
+                        let $all_msgs = [];
+                        if ($prev_selected.attr('data-time') < $msg.attr('data-time'))
+                            $all_msgs = $prev_selected.nextUntil($msg, '.chat-message:not(.system)');
+                        else
+                            $all_msgs = $msg.nextUntil($prev_selected, '.chat-message:not(.system)');
+                        $prev_selected.switchClass('selected', !$msg.hasClass('selected'));
+                        $all_msgs.switchClass('selected', !$msg.hasClass('selected'));
+                        $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        ev.preventDefault();
+                        this.bottom.manageSelectedMessages();
+                        return false;
+                    }
                     if (!no_select_message) {
                         $msg.switchClass('selected', !$msg.hasClass('selected'));
-                        if (xabber.shiftctrl_pressed && $prev_selected.length)
-                            $prev_selected.addClass('selected').nextUntil($msg, '.chat-message').addClass('selected');
                         this.bottom.manageSelectedMessages();
                     }
                 }.bind(this);
@@ -8283,7 +8295,13 @@ define("xabber-chats", function () {
     }, true, true);
 
     xabber.once("start", function () {
-
+        ["keyup","keydown"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return !(e.ctrlKey && e.shiftKey || (e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL);
+                }
+            });
+        });
         this.chats = new this.Chats;
         this.chats.addCollection(this.opened_chats = new this.OpenedChats);
         this.chats.addCollection(this.closed_chats = new this.ClosedChats);

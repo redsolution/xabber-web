@@ -7537,15 +7537,15 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .omemo-enable-view.details-panel .main-info .circle-avatar .avatar {
-    width: 174px;
-    height: 174px;
+    width: 182px;
+    height: 182px;
     position: relative;
     border: 3px solid;
     overflow: hidden;
     border-radius: 50%;
     background-position: center center;
     background-repeat: no-repeat no-repeat;
-    margin: 6px auto;
+    margin: 2px auto;
 }
 
 .details-panel .main-info .status {
@@ -7800,6 +7800,12 @@ input[type='range'].voice-message-volume:focus {
     width: 80%;
     margin: 24px auto 0 auto;
 }
+
+.right-panel-wrap .details-panel .msg-wrap .msg-text .msg-header {
+    margin: 0 0 8px 0;
+    font-weight: 600;
+}
+
 .right-panel-wrap .invitation-view .panel-content {
     position: relative !important;
     top: 0px;

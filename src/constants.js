@@ -163,7 +163,7 @@ var constants = {
         CHAT_MESSAGE:                   32,
         CHAT_BOTTOM:                    48,
         XABBER_VOICE_CALL_VIEW:         128,
-        OMEMO_ENABLE_SETTING:           174
+        OMEMO_ENABLE_SETTING:           182
     },
 
     SOUNDS: {
