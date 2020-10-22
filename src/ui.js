@@ -7,7 +7,11 @@ define("xabber-ui", function () {
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
             if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL) {
+                this.shift_pressed = null;
                 this.shiftctrl_pressed = true;
+                ev.preventDefault();
+            } else if (ev.keyCode == constants.KEY_SHIFT) {
+                this.shift_pressed = true;
                 ev.preventDefault();
             }
             let attrs = xabber.body.screen.attributes;
@@ -49,8 +53,13 @@ define("xabber-ui", function () {
             }
             }.bind(this));
         $(window).on("keyup", function (ev) {
-            this.shiftctrl_pressed = null;
-            }.bind(this));
+            if (!(ev.shiftKey && ev.ctrlKey))
+                this.shiftctrl_pressed = null;
+            if (ev.shiftKey && !ev.ctrlKey)
+                this.shift_pressed = true;
+            if (!ev.shiftKey)
+                this.shift_pressed = null;
+        }.bind(this));
 
         this.updateLayout = function (options) {
             options || (options = {});

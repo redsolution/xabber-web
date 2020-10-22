@@ -4728,15 +4728,16 @@ define("xabber-chats", function () {
                     let $prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').last() : $msg.prevAll('.chat-message.selected').first();
                     !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.nextAll('.chat-message.selected').last() : $msg.nextAll('.chat-message.selected').first());
                     !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').first() : $msg.prevAll('.chat-message.selected').last());
-                    if (xabber.shiftctrl_pressed && $prev_selected.length) {
-                        let $all_msgs = [];
+                    if ((xabber.shiftctrl_pressed || xabber.shift_pressed) && $prev_selected.length) {
+                        let $all_msgs = [], is_selected = $msg.hasClass('selected');
                         if ($prev_selected.attr('data-time') < $msg.attr('data-time'))
                             $all_msgs = $prev_selected.nextUntil($msg, '.chat-message:not(.system)');
                         else
                             $all_msgs = $msg.nextUntil($prev_selected, '.chat-message:not(.system)');
-                        $prev_selected.switchClass('selected', !$msg.hasClass('selected'));
-                        $all_msgs.switchClass('selected', !$msg.hasClass('selected'));
-                        $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        xabber.shift_pressed && this.$('.chat-message').removeClass('selected');
+                        $prev_selected.switchClass('selected', !is_selected);
+                        $all_msgs.switchClass('selected', !is_selected);
+                        $msg.switchClass('selected', !is_selected);
                         ev.preventDefault();
                         this.bottom.manageSelectedMessages();
                         return false;
@@ -8298,7 +8299,7 @@ define("xabber-chats", function () {
         ["keyup","keydown"].forEach((event) => {
             window.addEventListener(event, (e) => {
                 document.onselectstart = function() {
-                    return !(e.ctrlKey && e.shiftKey || (e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL);
+                    return !(e.ctrlKey && e.shiftKey || (e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
                 }
             });
         });
