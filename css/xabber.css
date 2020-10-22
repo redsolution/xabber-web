@@ -3933,17 +3933,18 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-notification {
     position: relative;
     line-height: 14px;
-    padding: 4px 8px;
+    padding: 4px 16px;
     height: 22px;
     background-color: #fff;
-    display: inline-block;
+    display: block;
     border-radius: 50px;
     opacity: .9;
     font-size: 12px;
     bottom: 24px;
     color: #9E9E9E;
-    margin: 0;
-    width: 100%;
+    margin: 0 auto;
+    max-width: 100%;
+    width: min-content;
     text-align: center;
 }
 
@@ -5284,7 +5285,7 @@ input[type='range'].voice-message-volume:focus {
 .message-actions-panel,
 .non-authorized-panel {
     position: relative;
-    height: 104px;
+    height: 112px;
     width: 100%;
     padding: 30px 10px;
     background-color: #FFFFFF;
