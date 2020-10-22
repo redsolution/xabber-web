@@ -8299,7 +8299,7 @@ define("xabber-chats", function () {
         ["keyup","keydown"].forEach((event) => {
             window.addEventListener(event, (e) => {
                 document.onselectstart = function() {
-                    return !(e.ctrlKey && e.shiftKey || (e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
+                    return !((e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
                 }
             });
         });

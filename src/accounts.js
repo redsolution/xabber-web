@@ -1689,9 +1689,10 @@ define("xabber-accounts", function () {
             updateEnabledOmemo: function () {
                 let enabled = this.model.settings.get('omemo');
                 if (_.isUndefined(enabled)) {
-                    enabled = true;
-                    this.model.save('enabled', enabled);
+                    enabled = false;
                 }
+                if (enabled && this.model.omemo_enable_view)
+                    this.model.omemo_enable_view.close();
                 this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
                 this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
                 this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);

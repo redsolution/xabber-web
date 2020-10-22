@@ -996,19 +996,26 @@ define("xabber-omemo", function () {
                     if (node == `${Strophe.NS.OMEMO}:devices`) {
                         let devices = this.account.connection.omemo.parseUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
+                            let has_devices = this.own_devices && Object.keys(this.own_devices).length;
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
-                            if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                            /*if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
                                 this.account.connection.omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
                                 });
-                            }
+                            }*/
                             this.account.trigger("devices_updated");
+                            if (has_devices)
+                                this.account.trigger('trusting_updated');
                         }
                         else {
-                            this.getPeer(from_jid).updateDevices(devices);
+                            let peer = this.getPeer(from_jid),
+                                has_devices = peer.devices && Object.keys(peer.devices).length;
+                            peer.updateDevices(devices);
+                            if (has_devices)
+                                this.account.trigger('trusting_updated');
                         }
                         return;
                     }
@@ -1029,7 +1036,7 @@ define("xabber-omemo", function () {
                             }
                         }
                         if (device) {
-                            let ik =  $bundle.find(`ik`).text(), preKeys = [];
+                            let ik = $bundle.find(`ik`).text(), preKeys = [];
                             if (!ik) {
                                 device.set('ik', null);
                                 return;
@@ -1041,6 +1048,7 @@ define("xabber-omemo", function () {
                             device.preKeys = preKeys;
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
+                            this.account.trigger('trusting_updated');
                         }
                     }
                 }
