@@ -7080,8 +7080,8 @@ define("xabber-chats", function () {
                 this.$('.account-role').hide();
             }
             this.focusOnInput();
-            xabber.chat_body.updateHeight();
             this.manageSelectedMessages();
+            xabber.chat_body.updateHeight();
             return this;
         },
 
