@@ -111,6 +111,7 @@ define("xabber-templates", [
     "text!templates/chats/group_chats/invitation_panel_view.html",
     "text!templates/chats/group_chats/mention_item.html",
     "text!templates/chats/encryption_warning.html",
+    "text!templates/chats/content_encryption_warning.html",
 
     "text!templates/mentions/mentions_panel.html",
     "text!templates/mentions/mentions_placeholder.html",
@@ -291,6 +292,7 @@ define("xabber-templates", [
     addTemplate('chats.group_chats.invitation_panel_view');
     addTemplate('chats.group_chats.mention_item');
     addTemplate('chats.encryption_warning');
+    addTemplate('chats.content_encryption_warning');
 
 
     addTemplate('mentions.mentions_panel');

@@ -2328,6 +2328,15 @@ define("xabber-chats", function () {
             return this;
         },
 
+          render: function () {
+              this.cancelSearch();
+              this.scrollToBottom();
+              this.onScroll();
+              this.updateContactStatus();
+              this.updatePinnedMessage();
+              this.subscription_buttons.render();
+          },
+
           openDevicesWindow: function () {
               let peer = this.account.omemo.getPeer(this.contact.get('jid'));
               peer.fingerprints.open();
@@ -2361,15 +2370,6 @@ define("xabber-chats", function () {
             this._loading_history = false;
             this.model.set('history_loaded', false);
             // this.loadLastHistory();
-        },
-
-        render: function () {
-            this.cancelSearch();
-            this.scrollToBottom();
-            this.onScroll();
-            this.updateContactStatus();
-            this.updatePinnedMessage();
-            this.subscription_buttons.render();
         },
 
         cancelSearch: function () {
@@ -7087,6 +7087,7 @@ define("xabber-chats", function () {
 
         updateEncrypted: function () {
             this.$el.children('.preloader-wrapper').detach();
+            this.view.$el.removeClass('encrypted');
             this.view.$('.chat-notification .warning-wrap').length && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').find('.warning-wrap').detach();
             this.$el.attr('data-trust', null);
             this.$el.attr('data-contact-trust', null);
@@ -7120,8 +7121,10 @@ define("xabber-chats", function () {
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                                 this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your partner\'s device that you previously trusted have changed. This <i>should not</i> be happening, ever. He is likely being hacked, or his software is severely malfunctioning.'}));
                             } else {
-                                if (is_contact_trusted === 'none')
-                                    this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for partner.'}));
+                                if (is_contact_trusted === 'none') {
+                                    this.view.$el.addClass('encrypted');
+                                    this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.content_encryption_warning({message: 'Your chat partner has unverified devices with published encryption keys. Please, review the list of devices and perform verification of digital fingerprints. It is <u>very</u> important.'}));
+                                }
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                             }
                             this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);

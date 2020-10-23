@@ -4230,6 +4230,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     bottom: 0;
 }
 
+.encrypted .chat-content::after {
+    padding-bottom: 64px;
+}
+
 .chat-content .ps-scrollbar-y-rail {
     z-index: 2;
 }
@@ -4382,42 +4386,45 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-notification.encryption-warning {
-    width: min-content;
-    margin: 0 auto;
-    cursor: pointer;
-    display: block;
-    background-color: #EEE;
-    color: #212121 !important
-}
-
-.chat-notification.encryption-warning:hover {
-    background-color: #FFECB3;
-}
-
-.chat-notification .warning-wrap {
+    width: 100%;
+    border-radius: unset;
     display: flex;
     flex-direction: row;
-    height: 100%;
-    margin: 0 4px;
-    align-items: center;
-    font-weight: 500;
-    justify-content: center;
-}
-
-.chat-notification .warning-wrap .warning-message {
-    padding: 0 4px 0 0;
-    margin: 0;
-}
-
-.chat-notification .warning-wrap .btn-manage-devices {
-    font-size: 12px;
-    line-height: 18px;
-    height: 18px;
-    background-color: transparent !important;
-    text-transform: initial;
-    font-weight: 500;
-    padding: 0;
+    margin: 0 auto;
+    height: 64px;
+    bottom: 64px;
+    display: block;
+    background-color: #FFA000;
     color: #212121 !important;
+}
+
+.chat-notification.encryption-warning {
+    width: 100%;
+    border-radius: unset;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 16px 0 8px;
+    flex-direction: row;
+    margin: 0 auto;
+    height: 64px;
+    bottom: 64px;
+    display: block;
+    background-color: #FFB300;
+    color: #212121 !important;
+}
+
+.chat-notification.encryption-warning .btn-manage-devices {
+    background-color: #FFCA28;
+}
+
+.chat-notification.encryption-warning .warning-message {
+    padding: 0 4px;
+    margin: 0;
+    width: calc(100% - 192px);
+    text-align: left;
+    overflow: hidden;
+    white-space: pre-wrap;
 }
 
 .fixed-day-indicator-wrap {
