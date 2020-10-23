@@ -3491,6 +3491,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.55);
 }
 
+.encryption-warning ~ .back-to-bottom {
+    bottom: 76px;
+}
+
 /* -------------- DATA FORM IN MESSAGE ------------------ */
 
 .chat-message .chat-msg-content .data-form {
