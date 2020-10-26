@@ -1589,7 +1589,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
@@ -2675,7 +2675,7 @@ define("xabber-chats", function () {
                                 this.contact.getMyInfo();
                         }
                         else {
-                            if (!this.contact.get('last_seen') && !this.contact.get('is_server'))
+                            if (!this.contact.get('last_seen') && !this.contact.get('server'))
                                 this.contact.getLastSeen();
                         }
                         if ((messages.length < query.max) && success) {
@@ -6067,7 +6067,7 @@ define("xabber-chats", function () {
           updateIcon: function () {
               this.$('.chat-icon').addClass('hidden');
               let ic_name = this.contact.getIcon();
-              ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+              ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
           },
 
           updateColorScheme: function () {
@@ -6711,7 +6711,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
         },
 
         inviteUsers: function () {

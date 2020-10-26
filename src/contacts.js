@@ -30,7 +30,7 @@ define("xabber-contacts", function () {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
                 var attrs = _.clone(_attrs);
-                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
+                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, bot: true});
                 attrs.name = attrs.roster_name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
@@ -90,18 +90,20 @@ define("xabber-contacts", function () {
 
             getIcon: function () {
                 if (this.get('blocked'))
-                    return 'ic-blocked';
+                    return 'blocked';
                 if (this.get('invitation'))
-                    return 'ic-invitation-chat';
+                    return 'group-invite';
                 if (this.get('group_chat')) {
                     if (this.get('private_chat'))
-                        return 'ic-private-chat';
+                        return 'group-private';
                     if (this.get('incognito_chat'))
-                        return 'ic-incognito-chat';
-                    return 'ic-group-chat';
+                        return 'group-incognito';
+                    return 'group-public';
                 }
+                if (this.get('server'))
+                    return 'server';
                 if (this.get('bot'))
-                    return 'ic-bot-chat';
+                    return 'bot';
                 return;
             },
 
@@ -809,24 +811,11 @@ define("xabber-contacts", function () {
             },
 
             updateIcon: function () {
-                let ic_name;
+                let ic_name = this.model.getIcon();
                 this.$('.chat-icon').addClass('hidden');
-                if (this.model.get('blocked')) {
-                    ic_name = 'ic-blocked';
-                } else {
-                    if (this.model.get('invitation')) {
-                        return;
-                    } else if (this.model.get('group_chat')) {
-                        if (this.model.get('private_chat'))
-                            ic_name = 'ic-private-contact';
-                        else if (this.model.get('incognito_chat'))
-                            ic_name = 'ic-incognito-contact';
-                        else
-                            ic_name = 'ic-group-contact';
-                    } else if (this.model.get('bot'))
-                        ic_name = 'ic-bot-contact';
-                }
-                ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+                if (this.model.get('invitation'))
+                    returnж
+                ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
             },
 
             updateStatusMsg: function() {
@@ -1081,7 +1070,7 @@ define("xabber-contacts", function () {
             updateButtons: function () {
                 var in_roster = this.model.get('in_roster'),
                     is_blocked = this.model.get('blocked'),
-                    is_server = this.model.get('is_server'),
+                    is_server = this.model.get('server'),
                     subscription = this.model.get('subscription');
                 this.$('.btn-add').hideIf(in_roster);
                 this.$('.btn-delete').showIf(in_roster);

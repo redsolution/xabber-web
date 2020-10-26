@@ -2065,67 +2065,75 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 /* ------------- CONTACTS --------------- */
 
+[data-status=offline] svg,
 [data-status=offline],
 [data-status=unavailable] {
     background-color: #9E9E9E;
 }
-
+/*
 [data-status=offline] svg circle:not(.invitation):not(.server),
 [data-status=unavailable] svg circle:not(.invitation):not(.server) {
     fill: #9E9E9E;
-}
+}*/
 
 [data-status=offline].hide-offline {
     display: none;
 }
 
+[data-status=chat] svg,
 [data-status=chat] {
     background-color: #8BC34A;
 }
-
+/*
 [data-status=chat] svg circle {
     fill: #8BC34A;
-}
+}*/
 
+[data-status=active] svg,
+[data-status=nil] svg,
+[data-status=online] svg,
 [data-status=active],
 [data-status=nil],
 [data-status=online] {
     background-color: #388E3C;
 }
 
-[data-status=active] svg circle,
+/*[data-status=active] svg circle,
 [data-status=nil] svg circle,
 [data-status=online] svg circle {
     fill: #388E3C;
-}
+}*/
 
+[data-status=away] svg,
 [data-status=away] {
     background-color: #FFA000;
 }
-
+/*
 [data-status=away] svg circle {
     fill: #FFA000;
-}
+}*/
 
+[data-status=xa] svg,
 [data-status=xa] {
     background-color: #2196F3;
 }
-
+/*
 [data-status=xa] svg circle {
     fill: #2196F3;
-}
+}*/
 
+[data-status=resolved] svg,
 [data-status=resolved],
 [data-status=inactive],
 [data-status=dnd] {
     background-color: #D32F2F;
 }
-
+/*
 [data-status=resolved] svg circle,
 [data-status=inactive] svg circle,
 [data-status=dnd] svg circle {
     fill: #D32F2F;
-}
+}*/
 
 .roster-right-container .collapsed-wrap {
     position: absolute;
@@ -2592,7 +2600,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .roster-left-container .roster-contact .chat-icon,
 .forward-panel-modal .roster-contact .chat-icon {
-    top: 19px;
+    top: 20px;
     right: 10px;
 }
 
@@ -3699,6 +3707,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border-radius: 50%;
     top: 33px;
     margin: 0;
+    padding: 1px;
     box-sizing: content-box;
     left: 35px;
     width: 16px !important;
@@ -3710,8 +3719,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-item .chat-icon svg,
 .chat-head-wrap .chat-icon svg {
     position: absolute;
-    top: -1px;
-    left: -1px;
+    border-radius: 50%;
+}
+
+.roster-contact .chat-icon svg {
+    border-radius: 50%;
+}
+
+.chat-icon svg path {
+    fill: #FFF;
 }
 
 .mention-item .mention-info,
