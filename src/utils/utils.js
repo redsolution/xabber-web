@@ -53,7 +53,8 @@ define([
         $query.each(function (i, obj) {
             var $obj = $(obj),
                 html_concat = "",
-                url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)((\w+)([\w#!:.?+=&%@!\-\/])(\w+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/\w+)|(\S+)|\/|\/([\w#!:.?+=&%@!\-\/]))?)/g;
+                url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
+                // url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)((\w+)([\w#!:.?+=&%@!\-\/])(\w+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/\w+)|(\S+)|\/|\/([\w#!:.?+=&%@!\-\/]))?)/g;
             $obj[0].childNodes.forEach(function (node) {
                 let $node = $(node),
                     x = node.outerHTML;
