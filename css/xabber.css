@@ -2065,75 +2065,50 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 /* ------------- CONTACTS --------------- */
 
-[data-status=offline] svg,
+.roster-contact [data-status=offline] svg,
 [data-status=offline],
 [data-status=unavailable] {
     background-color: #9E9E9E;
 }
-/*
-[data-status=offline] svg circle:not(.invitation):not(.server),
-[data-status=unavailable] svg circle:not(.invitation):not(.server) {
-    fill: #9E9E9E;
-}*/
-
 [data-status=offline].hide-offline {
     display: none;
 }
 
-[data-status=chat] svg,
+.roster-contact [data-status=chat] svg,
 [data-status=chat] {
     background-color: #8BC34A;
 }
-/*
-[data-status=chat] svg circle {
-    fill: #8BC34A;
-}*/
 
-[data-status=active] svg,
-[data-status=nil] svg,
-[data-status=online] svg,
+.roster-contact [data-status=active] svg,
+.roster-contact [data-status=nil] svg,
+.roster-contact [data-status=online] svg,
 [data-status=active],
 [data-status=nil],
 [data-status=online] {
     background-color: #388E3C;
 }
 
-/*[data-status=active] svg circle,
-[data-status=nil] svg circle,
-[data-status=online] svg circle {
-    fill: #388E3C;
-}*/
-
-[data-status=away] svg,
+.roster-contact [data-status=away] svg,
 [data-status=away] {
     background-color: #FFA000;
 }
-/*
-[data-status=away] svg circle {
-    fill: #FFA000;
-}*/
 
-[data-status=xa] svg,
+.roster-contact [data-status=xa] svg,
 [data-status=xa] {
     background-color: #2196F3;
 }
-/*
-[data-status=xa] svg circle {
-    fill: #2196F3;
-}*/
 
-[data-status=resolved] svg,
+.roster-contact [data-status=resolved] svg,
 [data-status=resolved],
 [data-status=inactive],
 [data-status=dnd] {
     background-color: #D32F2F;
 }
-/*
-[data-status=resolved] svg circle,
-[data-status=inactive] svg circle,
-[data-status=dnd] svg circle {
-    fill: #D32F2F;
-}*/
+
+.chat-icon.group-invite,
+.chat-icon.server {
+    background-color: #388E3C !important;
+}
 
 .roster-right-container .collapsed-wrap {
     position: absolute;
@@ -3628,13 +3603,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .mention-info-wrap:hover,
-.mention-info-wrap:hover .chat-icon,
 .chat-item:hover,
 .omemo-item:hover,
-.message-item:hover,
+.message-item:hover {
+    background-color: #F8F8F8;
+}
+
+.mention-info-wrap:hover .chat-icon,
 .message-item:hover .chat-icon,
 .chat-item:hover .chat-icon {
-    background-color: #F8F8F8;
+    border-color: #F8F8F8;
 }
 
 .mention-info-wrap.active,
@@ -3643,12 +3621,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .omemo-item.active,
 .message-item.active,
 .message-item.active:hover,
+.chat-item.active:hover {
+    background-color: #FFEBEE;
+}
+
+
 .message-item.active .chat-icon,
 .message-item.active:hover .chat-icon,
-.chat-item.active:hover,
 .chat-item.active .chat-icon,
 .chat-item.active:hover .chat-icon {
-    background-color: #FFEBEE;
+    border-color: #FFEBEE;
 }
 
 .message-item .circle-avatar,
@@ -3708,18 +3690,20 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     top: 33px;
     margin: 0;
     padding: 1px;
-    box-sizing: content-box;
+    /*box-sizing: content-box;*/
     left: 35px;
+    border: 1px solid #FFF;
     width: 16px !important;
     height: 16px !important;
-    background-color: white;
+    /*background-color: white;*/
 }
 
 .message-item .chat-icon svg,
 .chat-item .chat-icon svg,
 .chat-head-wrap .chat-icon svg {
     position: absolute;
-    border-radius: 50%;
+    top: -1px;
+    left: -1px;
 }
 
 .roster-contact .chat-icon svg {

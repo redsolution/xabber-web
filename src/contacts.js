@@ -30,7 +30,7 @@ define("xabber-contacts", function () {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
                 var attrs = _.clone(_attrs);
-                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, bot: true});
+                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, status: 'online'});
                 attrs.name = attrs.roster_name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
@@ -814,8 +814,8 @@ define("xabber-contacts", function () {
                 let ic_name = this.model.getIcon();
                 this.$('.chat-icon').addClass('hidden');
                 if (this.model.get('invitation'))
-                    returnж
-                ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
+                    return;
+                ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name == 'server').html(env.templates.svg[ic_name]());
             },
 
             updateStatusMsg: function() {

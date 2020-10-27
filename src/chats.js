@@ -1589,7 +1589,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
@@ -6040,7 +6040,9 @@ define("xabber-chats", function () {
               this.updateColorScheme();
               this.updateGroupChats();
               this.updateIcon();
+              this.updateStatus();
               this.account.settings.on("change:color", this.updateColorScheme, this);
+              this.contact.on("change:status", this.updateStatus, this);
               this.contact.on("change:name", this.updateName, this);
           },
 
@@ -6051,6 +6053,14 @@ define("xabber-chats", function () {
           updateAvatar: function () {
               var image = this.contact.cached_image;
               this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+          },
+
+          updateStatus: function () {
+              let status = this.contact.get('status'),
+                  status_message = this.contact.getStatusMessage();
+              this.$('.contact-status').attr('data-status', status);
+              this.$('.chat-icon').attr('data-status', status);
+              this.contact.get('blocked') ? this.$('.contact-status-message').text('Contact blocked') : this.$('.contact-status-message').text(status_message);
           },
 
           updateGroupChats: function () {
@@ -6067,7 +6077,7 @@ define("xabber-chats", function () {
           updateIcon: function () {
               this.$('.chat-icon').addClass('hidden');
               let ic_name = this.contact.getIcon();
-              ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
+              ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
           },
 
           updateColorScheme: function () {
@@ -6711,7 +6721,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
         },
 
         inviteUsers: function () {
