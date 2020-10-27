@@ -2110,6 +2110,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: #388E3C !important;
 }
 
+.chat-icon.blocked {
+    background-color: #FFF !important;
+}
+
+.chat-icon.blocked svg path {
+    fill: #d32f2f;
+}
+
 .roster-right-container .collapsed-wrap {
     position: absolute;
     right: 0;

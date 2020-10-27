@@ -815,7 +815,7 @@ define("xabber-contacts", function () {
                 this.$('.chat-icon').addClass('hidden');
                 if (this.model.get('invitation'))
                     return;
-                ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name == 'server').html(env.templates.svg[ic_name]());
+                ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name == 'server' || ic_name == 'blocked').html(env.templates.svg[ic_name]());
             },
 
             updateStatusMsg: function() {

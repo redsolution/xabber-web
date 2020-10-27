@@ -1589,7 +1589,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
@@ -6077,7 +6077,7 @@ define("xabber-chats", function () {
           updateIcon: function () {
               this.$('.chat-icon').addClass('hidden');
               let ic_name = this.contact.getIcon();
-              ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
+              ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
           },
 
           updateColorScheme: function () {
@@ -6721,7 +6721,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server')).html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         inviteUsers: function () {
