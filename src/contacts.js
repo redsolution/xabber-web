@@ -679,7 +679,7 @@ define("xabber-contacts", function () {
                     let $status_item = $(templates.group_chats.status_item({option: option}));
                     this.$('.status-values').append($status_item);
                 }.bind(this));
-                this.highlightStatus(this.contact.get('group_info').status);
+                this.highlightStatus(this.contact.get('status'));
             },
 
             changeStatus: function (ev) {
@@ -1585,7 +1585,7 @@ define("xabber-contacts", function () {
                 this.model.get('group_info') && (group_info = this.model.get('group_info'));
                 if (!group_info)
                     return;
-                this.$('.status').attr('data-status', group_info.status);
+                this.$('.status').attr('data-status', this.model.get('status'));
                 this.$('.status-message').text(group_info.status_msg);
             },
 

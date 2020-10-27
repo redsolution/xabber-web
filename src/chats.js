@@ -7787,7 +7787,20 @@ define("xabber-chats", function () {
     }, true, true);
 
     xabber.once("start", function () {
-
+        ["keydown"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return !((e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
+                }
+            });
+        });
+        ["keyup"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return true;
+                }
+            });
+        });
         this.chats = new this.Chats;
         this.chats.addCollection(this.opened_chats = new this.OpenedChats);
         this.chats.addCollection(this.closed_chats = new this.ClosedChats);
