@@ -8309,10 +8309,17 @@ define("xabber-chats", function () {
     }, true, true);
 
     xabber.once("start", function () {
-        ["keyup","keydown"].forEach((event) => {
+        ["keydown"].forEach((event) => {
             window.addEventListener(event, (e) => {
                 document.onselectstart = function() {
                     return !((e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
+                }
+            });
+        });
+        ["keyup"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return true;
                 }
             });
         });
