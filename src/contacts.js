@@ -663,7 +663,7 @@ define("xabber-contacts", function () {
 
             getStatuses: function () {
                 let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'});
                 this.account.sendIQ(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                     let options = this.data_form.fields.find(field => field.var == 'status').options || [];
@@ -707,7 +707,7 @@ define("xabber-contacts", function () {
                 if (!this.data_form || this.contact.get('group_info').status === status)
                     return;
                 let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'}),
                     status_field = this.data_form.fields.find(field => field.var === 'status'),
                     idx = this.data_form.fields.indexOf(status_field);
                 status_field.values = [status];
