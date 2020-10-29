@@ -5330,8 +5330,9 @@ define("xabber-chats", function () {
                 to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
                 from_jid = $message.attr('from') || options.from_jid;
 
-            if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                this.account.omemo.receiveChatMessage(message, options);
+            if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
+                if (this.account.omemo)
+                    this.account.omemo.receiveChatMessage(message, options);
                 return;
             }
 
@@ -7097,6 +7098,7 @@ define("xabber-chats", function () {
 
         updateEncrypted: function () {
             this.$el.children('.preloader-wrapper').detach();
+            this.$el.children('.omemo-disabled').detach();
             this.view.$el.removeClass('encrypted');
             this.view.$('.chat-notification .warning-wrap').length && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').find('.warning-wrap').detach();
             this.$el.attr('data-trust', null);
@@ -7144,6 +7146,9 @@ define("xabber-chats", function () {
                         });
                     }
                 });
+            } else {
+                this.$el.addClass('loading');
+                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text('OMEMO disabled'));
             }
         },
 

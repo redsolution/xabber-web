@@ -4302,8 +4302,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-contact-trust=error]>div:not(.warning-wrap),
 .chat-bottom-wrap[data-trust=error]>div:not(.warning-wrap),
 .chat-bottom-wrap[data-trust=none]>div:not(.warning-wrap),
-.chat-bottom-wrap.loading>div:not(.preloader-wrapper) {
+.chat-bottom-wrap.loading>div:not(.preloader-wrapper):not(.omemo-disabled) {
     display: none !important;
+}
+
+.chat-bottom-wrap>.omemo-disabled {
+    text-align: center;
+    color: #616161;
 }
 
 .chat-bottom-wrap .warning-wrap {

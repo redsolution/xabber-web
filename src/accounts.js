@@ -1518,7 +1518,8 @@ define("xabber-accounts", function () {
                 "click .color-values .color-value": "changeColor",
                 "click .token-wrap .btn-revoke-token": "revokeXToken",
                 "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
-                "click .omemo-info .btn-manage-devices": "openDevicesWindow"
+                "click .omemo-info .btn-manage-devices": "openDevicesWindow",
+                "click .omemo-info .btn-purge-keys": "purgeKeys"
             },
 
             _initialize: function () {
@@ -1687,7 +1688,18 @@ define("xabber-accounts", function () {
             },
 
             updateEnabledOmemo: function () {
-                let enabled = this.model.settings.get('omemo');
+                let enabled = this.model.settings.get('omemo'), has_keys = false;
+                if (this.model.omemo) {
+                    has_keys = Object.keys(this.model.omemo.get('prekeys')).length;
+                } else {
+                    let omemo = new xabber.Omemo({id: 'omemo'}, {
+                        account: this.model,
+                        storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                        fetch: 'before'
+                    });
+                    has_keys = Object.keys(omemo.get('prekeys')).length;
+                    omemo.destroy();
+                }
                 if (_.isUndefined(enabled)) {
                     enabled = false;
                 }
@@ -1695,7 +1707,7 @@ define("xabber-accounts", function () {
                     this.model.omemo_enable_view.close();
                 this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
                 this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
-                this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);
+                this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', !has_keys);
             },
 
             updateReconnectButton: function () {
@@ -1712,7 +1724,6 @@ define("xabber-accounts", function () {
                 let enabled = this.$('.setting-use-omemo input').prop('checked');
                 this.model.settings.save('omemo', enabled);
                 this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
-                this.$('.omemo-settings-wrap .own-devices-wrap').switchClass('hidden', !enabled);
                 if (enabled)
                     this.initOmemo();
                 else
@@ -1742,6 +1753,34 @@ define("xabber-accounts", function () {
                 }
                 else
                     utils.dialogs.error('OMEMO encryption is disabled');
+            },
+
+            purgeKeys: function () {
+                utils.dialogs.ask("Purge encryption keys", `This will unpublish all encryption keys and remove them from your server and this device. All decrypted will be permanently deleted, you will not be able to recover them in the future. To resume encrypted messaging you will have to perform fingerprint verification procedures again, with each of your contacts.\n\nUse this measure only as a last resort.`,
+                    null, { ok_button_text: 'purge keys'}).done(function (result) {
+                    if (result) {
+                        if (this.model.omemo) {
+                            let device_id = this.model.omemo.get('device_id');
+                            this.model.omemo.save('prekeys', {});
+                            this.model.omemo.bundle && (this.model.omemo.bundle.preKeys = []);
+                            if (this.model.omemo.own_devices[device_id]) {
+                                this.model.omemo.own_devices[device_id].preKeys = [];
+                                this.model.omemo.own_devices[device_id].set({ik: null, fingerprint: null});
+                            }
+                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
+                        } else {
+                            let omemo = new xabber.Omemo({id: 'omemo'}, {
+                                account: this.model,
+                                storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                                fetch: 'before'
+                            });
+                            omemo.save('prekeys', {});
+                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
+                            omemo.destroy();
+                        }
+                        this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', true);
+                    }
+                }.bind(this));
             },
 
             showConnectionStatus: function () {

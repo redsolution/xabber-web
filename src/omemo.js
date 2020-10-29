@@ -1153,8 +1153,10 @@ define("xabber-omemo", function () {
                                 $message.find('body').remove();
                             }
                             else {
-                                if (decrypted_msg === null)
+                                if (decrypted_msg === null) {
+                                    this.account.chats.getChat(contact, 'encrypted').item_view.updateLastMessage();
                                     return;
+                                }
                                 options.not_encrypted = true;
                                 delete options.is_trusted;
                             }
@@ -1530,7 +1532,7 @@ define("xabber-omemo", function () {
                     if (conn && conn.omemo && conn.omemo.devices) {
                         for (let d in this.own_devices) {
                             if (!conn.omemo.devices[d]) {
-                                this.account.omemo.removeSession('session' + this.devices[d].address.toString());
+                                this.account.omemo.removeSession('session' + this.own_devices[d].address.toString());
                                 delete this.own_devices[d];
                             }
                         }

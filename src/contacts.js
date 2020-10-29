@@ -4041,7 +4041,7 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
-                    } else if (encrypted) {
+                    } else if (encrypted && this.account.omemo) {
                         chat.set('timestamp', chat_timestamp);
                         chat.set('opened', true);
                         chat.item_view.updateEncryptedChat();
