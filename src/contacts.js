@@ -666,8 +666,9 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'});
                 this.account.sendIQ(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                    let options = this.data_form.fields.find(field => field.var == 'status').options || [];
-                    if (!options.length) {
+                    let status_field = this.data_form.fields.find(field => field.var == 'status'),
+                        options = status_field && status_field.options || [];
+                    if (!options.length || status_field.type == 'fixed') {
                         this.closeModal();
                         utils.dialogs.error("You have no permission to set group chat's status");
                         return;
