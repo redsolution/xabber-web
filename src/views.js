@@ -1199,7 +1199,7 @@ define("xabber-views", function () {
             $overlay.toggle();
             this.$el.toggleClass('collapsed');
             if (this.$el.hasClass('collapsed'))
-                (this.model.get('video') || this.model.get('video_in')) && this.$el.addClass('collapsed-video');
+                this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
             else
                 this.$el.css('right', "");
             this.windowResized();

@@ -7538,7 +7538,7 @@ define("xabber-chats", function () {
                 msg.isSenderMe() && my_msgs++;
             }.bind(this));
             if (this.account.server_features.get(Strophe.NS.REWRITE) || this.contact.get('group_chat')) {
-                (!this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
+                (!this.contact.get('group_chat') && my_msgs == $msgs.length && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
                     name: 'symmetric_deletion',
                     checked: false,
                     text: 'Delete for all'
