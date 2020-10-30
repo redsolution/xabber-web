@@ -7100,7 +7100,7 @@ define("xabber-chats", function () {
             this.$el.children('.preloader-wrapper').detach();
             this.$el.children('.omemo-disabled').detach();
             this.view.$el.removeClass('encrypted');
-            this.view.$('.chat-notification .warning-wrap').length && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').find('.warning-wrap').detach();
+            this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').html("");
             this.$el.attr('data-trust', null);
             this.$el.attr('data-contact-trust', null);
             this.$el.find('.warning-wrap').detach();
