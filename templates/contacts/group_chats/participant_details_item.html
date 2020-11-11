@@ -33,7 +33,10 @@
             {[if (subscription !== null) {]}<div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>{[}]}
             <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>
             <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
-            {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}
+            {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[}]}
+            {[ if (is_myself) {]}
+            <div class="my-flag one-line text-color-red-700">this is you</div>
+            {[}]}
             {[if (subscription === null) {]}<p class="role selectable-text one-line">{[if (blocked) {]}Blocked{[}else{]}Not a member{[}]}</p>{[}]}
         </div>
     <div class="buttons-wrap">

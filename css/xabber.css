@@ -3030,6 +3030,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     font-weight: 300;
 }
 
+.edit-rights .participant-details-item .my-flag.one-line {
+    margin: 4px 0 0 0;
+    line-height: 14px;
+    height: 14px;
+    cursor: default;
+    font-size: 12px;
+    font-weight: 300;
+}
+
 .edit-rights .participant-details-item .nickname.one-line {
     height: 26px;
     margin: 0 8px 2px 8px;
@@ -7925,8 +7934,11 @@ input[type='range'].voice-message-volume:focus {
 
 .groupchat-details-panel .list-item .participant-info {
     width: calc(100% - 96px);
-    height: auto;
+    height: calc(100% - 12px);
     top: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .groupchat-details-panel .member-item .revoke-invitation,

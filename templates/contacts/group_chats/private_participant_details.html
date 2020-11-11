@@ -30,5 +30,8 @@
         {[}]}
         <div title="{{nickname}}" class="{{is_myself && 'is-myself'}} nickname one-line">{{nickname}}</div>
         <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
+        {[ if (is_myself) {]}
+        <div class="my-flag one-line text-color-red-700">this is you</div>
+        {[}]}
     </div>
 </div>
