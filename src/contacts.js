@@ -378,6 +378,21 @@ define("xabber-contacts", function () {
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
+                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                    if (!this.get('group_chat')) {
+                        this.set('group_chat', true);
+                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
+                    }
+                    if (!this.details_view.child('participants')) {
+                        this.details_view = new xabber.GroupChatDetailsView({model: this});
+                    }
+                    let group_chat_info = this.parseGroupInfo($(presence));
+                    this.set('group_info', group_chat_info);
+                    if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
+                        this.set('name', group_chat_info.name);
+                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
+                }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
                     if (this.get('in_roster') || this.get('subscription_preapproved')) {
@@ -431,21 +446,6 @@ define("xabber-contacts", function () {
                             resource_obj.set(attrs);
                         }
                     }
-                }
-                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
-                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
-                    if (!this.get('group_chat')) {
-                        this.set('group_chat', true);
-                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
-                    }
-                    if (!this.details_view.child('participants')) {
-                        this.details_view = new xabber.GroupChatDetailsView({model: this});
-                    }
-                    let group_chat_info = this.parseGroupInfo($(presence));
-                    this.set('group_info', group_chat_info);
-                    if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
-                        this.set('name', group_chat_info.name);
-                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
                 }
             },
 
