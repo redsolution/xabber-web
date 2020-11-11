@@ -1600,7 +1600,7 @@ define("xabber-contacts", function () {
                 this.$el.html(this.template());
                 this.contact = this.model;
                 this.account = this.model.account;
-                this.model.on("change:name", this.updateName, this);
+                this.model.on("change:name", this.update, this);
                 this.model.on("change:group_info", this.update, this);
             },
 
@@ -1682,7 +1682,9 @@ define("xabber-contacts", function () {
             close: function () {
                 this.$el.closeModal({
                     complete: function () {
-                        this.hide.bind(this);
+                        this.$el.detach();
+                        this.$('.modal-content').css('height', '100%');
+                        this.data.set('visible', false);
                     }.bind(this)
                 });
             },
