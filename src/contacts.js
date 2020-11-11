@@ -1600,7 +1600,6 @@ define("xabber-contacts", function () {
                 this.$el.html(this.template());
                 this.contact = this.model;
                 this.account = this.model.account;
-                this.model.on("change:name", this.update, this);
                 this.model.on("change:group_info", this.update, this);
             },
 
