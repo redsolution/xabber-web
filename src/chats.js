@@ -2207,6 +2207,7 @@ define("xabber-chats", function () {
           },
 
           render: function () {
+              this.$el.closest('.chat-content-wrap').children('.chat-content').removeClass('with-before');
               if (this.contact.get('group_chat')) {
                   this.$el.addClass('hidden');
                   return;
@@ -2231,16 +2232,22 @@ define("xabber-chats", function () {
                   return;
               }
               this.$el.removeClass('hidden');
+              this.$el.closest('.chat-content-wrap').children('.chat-content').addClass('with-before');
+          },
+
+          hideElement: function () {
+              this.$el.addClass('hidden');
+              this.$el.closest('.chat-content-wrap').children('.chat-content').removeClass('with-before');
           },
 
           declineSubscription: function () {
               this.contact.declineSubscribe();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           allowSubscription: function () {
               this.contact.acceptRequest();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           addContact: function () {
@@ -2250,7 +2257,7 @@ define("xabber-chats", function () {
                   }.bind(this));
               else
                   this.sendAndAskSubscription();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           sendAndAskSubscription: function () {
@@ -2260,7 +2267,7 @@ define("xabber-chats", function () {
 
           blockContact: function () {
               this.contact.blockRequest();
-              this.$el.addClass('hidden');
+              this.hideElement();
           }
 
       });

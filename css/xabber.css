@@ -4244,6 +4244,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     cursor: pointer;
 }
 
+.chat-content.with-before::before {
+    content: '';
+    display: block;
+    padding-top: 36px;
+    width: 100%;
+    top: 0;
+}
+
 .chat-content::after {
     content: '';
     display: block;
