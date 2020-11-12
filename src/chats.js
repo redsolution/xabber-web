@@ -2806,7 +2806,13 @@ define("xabber-chats", function () {
             if ($chat_state.length) {
                 if (!is_sender) {
                     let $subtype = $chat_state.children('subtype');
-                    this.showChatState($chat_state[0].tagName.toLowerCase(), $subtype.attr('type'), $subtype.attr('mime-type'));
+                    if ($subtype.attr('type') == 'encrypted') {
+                        var view = xabber.chats_view.child(`${this.contact.hash_id}:encrypted`);
+                        if (view && view.content) {
+                            view.content.showChatState($chat_state[0].tagName.toLowerCase());
+                        }
+                    } else
+                        this.showChatState($chat_state[0].tagName.toLowerCase(), $subtype.attr('type'), $subtype.attr('mime-type'));
                 }
             }
         },
@@ -4363,6 +4369,7 @@ define("xabber-chats", function () {
             clearTimeout(this._chatstate_send_timeout);
             this.chat_state = false;
             let stanza = $msg({to: this.model.get('jid'), type: 'chat'}).c(state, {xmlns: Strophe.NS.CHATSTATES});
+            this.model.get('encrypted') && (type = 'encrypted');
             type && stanza.c('subtype', {xmlns: Strophe.NS.EXTENDED_CHATSTATES, type: type});
             (state === 'composing') && (this.chat_state = true);
             this.account.sendMsg(stanza);
