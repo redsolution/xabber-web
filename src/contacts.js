@@ -1611,7 +1611,7 @@ define("xabber-contacts", function () {
 
             update: function () {
                 let info = this.model.get('group_info') || {};
-                this.$('.block-name').text(this.contact.get('group_info').anonymous + " group");
+                this.$('.block-name').text((info.anonymous || (this.model.get('incognito_group') || this.model.get('private_group')) && 'Incognito') + " group");
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
