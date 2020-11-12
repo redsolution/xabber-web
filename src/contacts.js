@@ -4017,9 +4017,11 @@ define("xabber-contacts", function () {
                         return;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
-                        is_group_chat =  type === 'group',
+                        is_private =  type === 'private',
+                        is_incognito =  type === 'incognito',
+                        is_group_chat =  type === 'group' || is_private || is_incognito,
                         encrypted = type === 'encrypted',
-                        contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat}),
+                        contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
                         chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
