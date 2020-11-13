@@ -1143,7 +1143,7 @@ define("xabber-chats", function () {
                     if (contact.get('subscription') == 'both')
                         return;
                 if (this.account.connection && this.account.connection.do_synchronization) {
-                    if (options.synced_msg || !options.synced_msg && options.is_archived)
+                    if (options.synced_msg || !options.synced_msg && !options.is_archived)
                         return this.messages.createInvitationFromStanza($message, options);
                 } else {
                     var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
