@@ -1142,34 +1142,39 @@ define("xabber-chats", function () {
                 if (contact)
                     if (contact.get('subscription') == 'both')
                         return;
-                var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
-                this.account.sendIQ(iq,
-                    function (iq) {
-                        var items = $(iq).find('item'),
-                            current_timestamp = Number(moment($message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now())),
-                            last_blocking_timestamp,
-                            has_blocking = false;
-                        if (items.length > 0) {
-                            items.each(function (idx, item) {
-                                let $item = $(item),
-                                    item_jid = $item.attr('jid'), blocking_timestamp = "";
-                                if (item_jid.indexOf(group_jid) > -1) {
-                                    has_blocking = true;
-                                    blocking_timestamp = item_jid.substr(item_jid.lastIndexOf("/") + 1, item_jid.length - group_jid.length);
-                                    if (!blocking_timestamp) {
-                                        last_blocking_timestamp = "";
-                                        return false;
-                                    } else if (!last_blocking_timestamp || last_blocking_timestamp < blocking_timestamp)
-                                        last_blocking_timestamp = blocking_timestamp;
-                                }
-                            }.bind(this));
-                        }
-                        if (_.isUndefined(last_blocking_timestamp) || last_blocking_timestamp && last_blocking_timestamp < current_timestamp)
-                            return this.messages.createInvitationFromStanza($message, options);
-                    }.bind(this),
-                    function () {
+                if (this.account.connection && this.account.connection.do_synchronization) {
+                    if (options.synced_msg || !options.synced_msg && options.is_archived)
                         return this.messages.createInvitationFromStanza($message, options);
-                    }.bind(this));
+                } else {
+                    var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
+                    this.account.sendIQ(iq,
+                        function (iq) {
+                            var items = $(iq).find('item'),
+                                current_timestamp = Number(moment($message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now())),
+                                last_blocking_timestamp,
+                                has_blocking = false;
+                            if (items.length > 0) {
+                                items.each(function (idx, item) {
+                                    let $item = $(item),
+                                        item_jid = $item.attr('jid'), blocking_timestamp = "";
+                                    if (item_jid.indexOf(group_jid) > -1) {
+                                        has_blocking = true;
+                                        blocking_timestamp = item_jid.substr(item_jid.lastIndexOf("/") + 1, item_jid.length - group_jid.length);
+                                        if (!blocking_timestamp) {
+                                            last_blocking_timestamp = "";
+                                            return false;
+                                        } else if (!last_blocking_timestamp || last_blocking_timestamp < blocking_timestamp)
+                                            last_blocking_timestamp = blocking_timestamp;
+                                    }
+                                }.bind(this));
+                            }
+                            if (_.isUndefined(last_blocking_timestamp) || last_blocking_timestamp && last_blocking_timestamp < current_timestamp)
+                                return this.messages.createInvitationFromStanza($message, options);
+                        }.bind(this),
+                        function () {
+                            return this.messages.createInvitationFromStanza($message, options);
+                        }.bind(this));
+                }
             }
             else
                 return this.messages.createFromStanza($message, options);
@@ -1659,6 +1664,8 @@ define("xabber-chats", function () {
         },
 
         removeInvite: function (options) {
+            if (!this.account.server_features.get(Strophe.NS.REWRITE))
+                return;
             options || (options = {});
             let msgs = _.clone(this.model.messages.models);
             this.model.set({'last_archive_id': undefined, 'first_archive_id': undefined});
