@@ -4805,7 +4805,7 @@ define("xabber-chats", function () {
             var $message = $(message),
                 msg_from = Strophe.getBareJidFromJid($message.attr('from')),
                 $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]'),
-                $echo_msg = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"][type="echo"]').children('message');
+                $echo_msg = $message.children('x[xmlns="' + Strophe.NS.DELIVERY + '"]').children('message');
             if ($stanza_received.length) {
                 let stanza_id = $stanza_received.children('stanza-id').attr('id'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id');
