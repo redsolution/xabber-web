@@ -3193,9 +3193,8 @@ define("xabber-contacts", function () {
             closeChat: function () {
                 let chat = this.account.chats.getChat(this.model);
                 chat.set({'opened': false, 'display': false, 'active': false});
-                chat.deleteFromSynchronization(function () {
-                    xabber.body.setScreen('all-chats', { right: undefined });
-                }.bind(this));
+                xabber.body.setScreen('all-chats', { right: undefined });
+                chat.item_view.content.readMessages();
             },
 
             updateAvatar: function () {
@@ -3249,7 +3248,7 @@ define("xabber-contacts", function () {
             },
 
             joinGroupChat: function () {
-                var contact = this.model;
+                let contact = this.model;
                 contact.acceptRequest();
                 contact.pushInRoster(null, function () {
                     contact.askRequest();
@@ -3262,11 +3261,14 @@ define("xabber-contacts", function () {
             },
 
             declineContact: function () {
-                var contact = this.model;
-                contact.declineRequest();
-                this.blockInvitation();
-                contact.trigger('remove_invite', contact);
+                let contact = this.model;
                 this.closeChat();
+                let iq = $iq({to: contact.get('jid'), type: 'set'})
+                    .c('decline', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`});
+                this.account.sendIQ(iq, () => {}, () => {
+                    contact.declineRequest();
+                    this.blockInvitation();
+                });
             },
 
             declineAll: function () {
