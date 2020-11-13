@@ -3223,6 +3223,8 @@ define("xabber-contacts", function () {
             },
 
             blockInvitation: function () {
+                if (this.account.connection && this.account.connection.do_synchronization)
+                    return;
                 let contact_jid = this.model.get('jid'),
                     iq_get_blocking = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING}),
                     iq_unblocking = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING}),
