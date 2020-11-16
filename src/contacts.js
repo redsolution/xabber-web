@@ -40,7 +40,7 @@ define("xabber-contacts", function () {
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
                 this.domain = Strophe.getDomainFromJid(this.get('jid'));
-                this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
+                !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
                 this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});

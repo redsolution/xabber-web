@@ -155,9 +155,8 @@ define("xabber-chats", function () {
             $delay.length && (attrs.time = $delay.attr('stamp'));
             body && (attrs.message = body);
 
-            let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
+            let contact = this.account.contacts.mergeContact({jid: Strophe.getBareJidFromJid(from_jid), group_chat: true}),
                 chat = this.account.chats.getChat(contact);
-            contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
             if ($group_info.length) {
@@ -3053,6 +3052,7 @@ define("xabber-chats", function () {
             }
             $message.prev('.chat-day-indicator').remove();
             $message.remove();
+            this.bottom.manageSelectedMessages();
             if (!this._clearing_history) {
                 this.updateScrollBar();
             }
@@ -6182,7 +6182,7 @@ define("xabber-chats", function () {
             let changed = this.contact.changed;
             if (_.has(changed, 'subscription_request_in') || _.has(changed, 'subscription_request_out') || _.has(changed, 'subscription') || _.has(changed, 'status_message'))
                 this.updateStatusMsg();
-            if (_.has(changed, 'private_chat') || _.has(changed, 'incognito_chat'))
+            if (_.has(changed, 'private_chat') || _.has(changed, 'incognito_chat') || _.has(changed, 'invitation'))
                 this.updateIcon();
         },
 
@@ -7562,12 +7562,13 @@ define("xabber-chats", function () {
                 }.bind(this));
             }
             else {
-                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Message" + (msgs.length > 1) ? "s" : "" +" will be deleted only locally.").fontcolor('#E53935'),
+                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Message" + ((msgs.length > 1) ? "s" : "") +" will be deleted only locally.").fontcolor('#E53935'),
                     dialog_options, {ok_button_text: 'delete locally'}).done(function (res) {
                     if (!res) {
                         this._clearing_history = false;
                         return;
                     }
+                    this.resetSelectedMessages();
                     msgs.forEach(function (item) { this.view.removeMessage(item); }.bind(this))
                 }.bind(this));
             }
