@@ -6869,10 +6869,6 @@ input[type='range'].voice-message-volume:focus {
     top: 0.8em;
 }
 
-.vcard .input-field .datepicker:not(.picker--opened) {
-    color: transparent;
-}
-
 .vcard .input-field .datepicker {
     width: 100px;
 }
