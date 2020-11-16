@@ -336,7 +336,7 @@ define("xabber-vcard", function () {
         },
 
         _initialize: function () {
-            this.$('.datepicker').pickadate({
+            var $input = this.$('.datepicker').pickadate({
                 selectMonths: true,
                 selectYears: 100,
                 // min = 100 years ago
@@ -354,6 +354,9 @@ define("xabber-vcard", function () {
                     buttonClear: 'btn-flat btn-main btn-dark',
                     buttonClose: 'btn-flat btn-main text-color-700'
                 }
+            });
+            $input.on('mousedown', function cancelEvent(evt) {
+                evt.preventDefault();
             });
             this.data.on("change:saving", this.updateSaveButton, this);
         },

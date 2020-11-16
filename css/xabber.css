@@ -4873,6 +4873,10 @@ img.fwd-img-preview {
     white-space: initial;
 }
 
+.chat-message.auth-request {
+    display: none !important;
+}
+
 .chat-message.auth-request .chat-msg-content {
     font-style: italic;
 }
