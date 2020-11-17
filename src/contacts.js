@@ -39,6 +39,7 @@ define("xabber-contacts", function () {
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
+                this.onChangedGroupchat();
                 this.domain = Strophe.getDomainFromJid(this.get('jid'));
                 !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
