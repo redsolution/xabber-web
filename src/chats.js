@@ -241,7 +241,6 @@ define("xabber-chats", function () {
                 mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [];
 
             options.encrypted && _.extend(attrs, {encrypted: true});
-            options.help_info && _.extend(attrs, {help_info: options.help_info});
             options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
@@ -3403,25 +3402,6 @@ define("xabber-chats", function () {
             if (attrs.hasOwnProperty('is_trusted'))
                 $message.attr('data-trust', attrs.is_trusted);
 
-            if (attrs.help_info) {
-                let $debug_info = $('<div class="debug-info"/>'), debug_info = "";
-                for (let i in attrs.help_info) {
-                    debug_info && (debug_info += '\n');
-                    if (i == 'all_devices') {
-                        debug_info += ('All devices: ');
-                        for (let j in attrs.help_info[i]) {
-                            debug_info += `${j} - `;
-                            attrs.help_info[i][j].forEach(function (dev_id, idx) {
-                                debug_info += idx > 0 ? `, ${dev_id}` : dev_id;
-                            }.bind(this));
-                            debug_info += `; `;
-                        }
-                    } else
-                        debug_info += (i + ': ' + attrs.help_info[i]);
-                }
-                $message.children('.msg-wrap').append($debug_info.text(debug_info));
-            }
-
             if (is_image) {
                 if (images.length > 1) {
                     $message.find('.chat-msg-media-content').html(template_for_images);
@@ -4383,7 +4363,12 @@ define("xabber-chats", function () {
             clearTimeout(this._chatstate_send_timeout);
             this.chat_state = false;
             let stanza = $msg({to: this.model.get('jid'), type: 'chat'}).c(state, {xmlns: Strophe.NS.CHATSTATES});
-            this.model.get('encrypted') && (type = 'encrypted');
+            if (this.model.get('encrypted')) {
+                if (this.account.settings.get('encrypted_chatstates'))
+                    type = 'encrypted';
+                else
+                    return;
+            }
             type && stanza.c('subtype', {xmlns: Strophe.NS.EXTENDED_CHATSTATES, type: type});
             (state === 'composing') && (this.chat_state = true);
             this.account.sendMsg(stanza);

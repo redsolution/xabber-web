@@ -681,9 +681,7 @@ define("xabber-omemo", function () {
                     return {
                         preKey: ciphertext.type === 3,
                         ciphertext: ciphertext,
-                        deviceId: this.address.getDeviceId(),
-                        preKeyMsg: ciphertext.preKeyMsg,
-                        session: ciphertext.session
+                        deviceId: this.address.getDeviceId()
                     };
                 } catch (e) {
                     console.log('Error:', e);
@@ -934,38 +932,10 @@ define("xabber-omemo", function () {
                             attrs.kex = true;
                         }
 
-                        if (peer.devices[key.deviceId]) {
+                        if (peer.devices[key.deviceId])
                             encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-                            if (key.preKeyMsg) {
-                                encryptedElement.c('help', {rid: key.deviceId})
-                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.baseKey)).up()
-                                    .c('identityKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.identityKey)).up()
-                                    .c('preKeyId').t(key.preKeyMsg.preKeyId).up()
-                                    .c('registrationId').t(key.preKeyMsg.registrationId).up()
-                                    .c('signedPreKeyId').t(key.preKeyMsg.signedPreKeyId).up().up();
-                            } else if (key.session) {
-                                encryptedElement.c('help', {rid: key.deviceId})
-                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.session.baseKey)).up()
-                                    .c('identityKey').t(utils.ArrayBuffertoBase64(key.session.identityKey)).up()
-                                    .c('registrationId').t(key.session.registrationId).up().up();
-                            }
-                        }
-                        else {
+                        else
                             myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-                            if (key.preKeyMsg) {
-                                myKeys.c('help', {rid: key.deviceId})
-                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.baseKey)).up()
-                                    .c('identityKey').t(utils.ArrayBuffertoBase64(key.preKeyMsg.identityKey)).up()
-                                    .c('preKeyId').t(key.preKeyMsg.preKeyId).up()
-                                    .c('registrationId').t(key.preKeyMsg.registrationId).up()
-                                    .c('signedPreKeyId').t(key.preKeyMsg.signedPreKeyId).up().up();
-                            } else if (key.session) {
-                                myKeys.c('help', {rid: key.deviceId})
-                                    .c('baseKey').t(utils.ArrayBuffertoBase64(key.session.baseKey)).up()
-                                    .c('identityKey').t(utils.ArrayBuffertoBase64(key.session.identityKey)).up()
-                                    .c('registrationId').t(key.session.registrationId).up().up();
-                            }
-                        }
 
                     }
                     encryptedElement.up().cnode(myKeys.tree());
@@ -1072,18 +1042,6 @@ define("xabber-omemo", function () {
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                         cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
-                    let $help_info = $message.find(`help[rid="${this.get('device_id')}"]`);
-                    if ($help_info.length) {
-                        let baseKey = $help_info.children('baseKey').text(),
-                            identityKey = $help_info.children('identityKey').text(),
-                            preKeyId = $help_info.children('preKeyId').text(),
-                            registrationId = $help_info.children('registrationId').text(),
-                            signedPreKeyId = $help_info.children('signedPreKeyId').text(),
-                            $header = $message.find('header'),
-                            device_id = $header.attr('sid'),
-                            label = $header.attr('label') || "";
-                        options.help_info = {baseKey, identityKey, preKeyId, registrationId, signedPreKeyId, device_id, label};
-                    }
                     let devices_ids = {};
                     $message.find('keys').each(function (idx, keys) {
                         let $keys = $(keys),
@@ -1093,12 +1051,6 @@ define("xabber-omemo", function () {
                         }.bind(this));
                         devices_ids[$keys.attr('jid')] = jid_devices;
                     }.bind(this));
-                    if (Object.keys(devices_ids).length) {
-                        if (options.help_info)
-                            options.help_info = _.extend(options.help_info, {all_devices: devices_ids});
-                        else
-                            options.help_info = {all_devices: devices_ids};
-                    }
 
                     if (cached_msg) {
                         if (!options.replaced) {

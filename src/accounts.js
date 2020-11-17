@@ -1510,6 +1510,7 @@ define("xabber-accounts", function () {
 
             events: {
                 "change .enabled-state input": "setEnabled",
+                "change .setting-send-chat-states input": "setTypingNotification",
                 "change .setting-use-omemo input": "setEnabledOmemo",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
@@ -1541,6 +1542,7 @@ define("xabber-accounts", function () {
                 xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
                 this.model.on("change:enabled", this.updateEnabled, this);
                 this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
+                this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
@@ -1548,6 +1550,7 @@ define("xabber-accounts", function () {
 
             render: function (options) {
                 this.updateEnabledOmemo();
+                this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
                 this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
@@ -1710,6 +1713,11 @@ define("xabber-accounts", function () {
                 this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', !has_keys);
             },
 
+            updateEncryptedChatstates: function () {
+                let enabled = this.model.settings.get('encrypted_chatstates');
+                this.$('.setting-send-chat-states input[type=checkbox]').prop('checked', enabled);
+            },
+
             updateReconnectButton: function () {
                 this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
             },
@@ -1728,6 +1736,11 @@ define("xabber-accounts", function () {
                     this.initOmemo();
                 else
                     this.destroyOmemo();
+            },
+
+            setTypingNotification: function () {
+                let enabled = this.$('.setting-send-chat-states input').prop('checked');
+                this.model.settings.save('encrypted_chatstates', enabled);
             },
 
             initOmemo: function () {
