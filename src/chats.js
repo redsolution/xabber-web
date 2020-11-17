@@ -5452,7 +5452,7 @@ define("xabber-chats", function () {
                     contact.pushInRoster();
             }
 
-            if (chat.contact.get('group_chat') && options.carbon_copied)
+            if (chat.contact.get('group_chat') && options.carbon_copied && !$message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]').length)
                 return;
 
             return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
