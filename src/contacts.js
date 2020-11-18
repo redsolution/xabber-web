@@ -401,6 +401,7 @@ define("xabber-contacts", function () {
                         }.bind(this));
                     }
                 } else if (type === 'unsubscribed') {
+                    this.set('subscription_request_out', false);
                     // this.trigger('presence', this, 'unsubscribed');
                 } else {
                     var jid = presence.getAttribute('from'),
@@ -664,7 +665,7 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 this.account.sendIQ(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                    let options = this.data_form.fields.find(field => field.var == 'status').options || [];
+                    let options = (this.data_form.fields.find(field => field.var == 'status') || []).options || [];
                     if (!options.length) {
                         this.closeModal();
                         utils.dialogs.error("You have no permission to set group chat's status");
@@ -1335,6 +1336,8 @@ define("xabber-contacts", function () {
                 let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator') && permission.values),
                     is_blocked = this.model.get('blocked');
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
+                this.$('.btn-leave-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
+                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat'));
                 this.$('.btn-block').hideIf(is_blocked);
@@ -1412,6 +1415,8 @@ define("xabber-contacts", function () {
             },
 
             leaveGroupChat: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    return;
                 var contact = this.model;
                 utils.dialogs.ask("Leave groupchat", "Do you want to leave groupchat "+
                     contact.get('name')+"?", null, { ok_button_text: 'leave'}).done(function (result) {
@@ -4869,6 +4874,7 @@ define("xabber-contacts", function () {
                     contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, function () {
                         contact.pres('subscribe');
+                        contact.trigger('presence', contact, 'subscribe_from');
                         contact.trigger("open_chat", contact);
                     }.bind(this), function () {
                         contact.destroy();

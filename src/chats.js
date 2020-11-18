@@ -6194,7 +6194,7 @@ define("xabber-chats", function () {
 
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
-            this.$('.btn-invite-users').showIf(is_group_chat && ! this.contact.get('private_chat'));
+            this.$('.btn-invite-users').showIf(is_group_chat && ! this.contact.get('private_chat') && this.contact.get('subscription') != 'both');
             this.$('.btn-call-attention').hideIf(is_group_chat);
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));

@@ -6999,6 +6999,13 @@ input[type='range'].voice-message-volume:focus {
     padding: 0;
 }
 
+.groupchat-details-panel .main-info .btn-leave-wrap.non-active .btn-leave {
+    background-color: #9E9E9E !important;
+    cursor: auto !important;
+    color: #FFF !important;
+    fill: #FFF !important;
+}
+
 .edit-rights .participant-details-item .buttons-wrap .btn-kick-participant {
     padding: 12px;
 }
