@@ -6590,7 +6590,7 @@ define("xabber-chats", function () {
 
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
-            this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') != 'both');
+            this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') == 'both');
             this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
