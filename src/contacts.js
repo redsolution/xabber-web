@@ -1330,9 +1330,8 @@ define("xabber-contacts", function () {
                     is_blocked = this.model.get('blocked');
                 this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
                 this.$('.btn-leave-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
-                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
+                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat') || this.model.get('subscription') != 'both');
                 this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
-                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat'));
                 this.$('.btn-block').hideIf(is_blocked);
                 this.$('.btn-unblock').showIf(is_blocked);
             },
