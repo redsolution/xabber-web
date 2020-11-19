@@ -2404,6 +2404,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: relative;
     width: 100%;
     height: 32px;
+    text-transform: capitalize;
     padding: 0 24px;
     cursor: pointer;
 }

@@ -162,18 +162,18 @@ define("xabber-chats", function () {
             if ($group_info.length) {
                 let name = $group_info.find('name').text(),
                     model = $group_info.find('membership').text(),
-                    anonymous = $group_info.find('privacy').text(),
+                    privacy = $group_info.find('privacy').text(),
                     searchable = $group_info.find('index').text(),
                     parent_chat = $group_info.find('parent-chat').text(),
                     description = $group_info.find('description').text();
                 name && (group_info_attributes.name = name);
                 model && (group_info_attributes.model = name);
-                anonymous && (group_info_attributes.anonymous = anonymous);
+                privacy && (group_info_attributes.privacy = privacy);
                 searchable && (group_info_attributes.searchable = searchable);
                 description && (group_info_attributes.description = description);
                 parent_chat.length && (is_private_invitation = true);
                 is_private_invitation && contact.set('private_chat', true);
-                anonymous === 'incognito' && contact.set('incognito_chat', true);
+                privacy === 'incognito' && contact.set('incognito_chat', true);
                 contact.set('group_info', group_info_attributes);
             }
 
@@ -5270,14 +5270,14 @@ define("xabber-chats", function () {
             var my_jid = this.account.resources.connection.jid,
                 name = this.$('input[name=chat_name]').val(),
                 chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
-                anonymous = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
+                privacy = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 searchable = this.$('.global-field .property-value').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
                 model = this.$('.membership-field .property-value').attr('data-value'),
                 iq = $iq({from: my_jid, type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                     .c('name').t(name).up()
-                    .c('privacy').t(anonymous).up()
+                    .c('privacy').t(privacy).up()
                     .c('index').t(searchable).up()
                     .c('description').t(description).up()
                     .c('membership').t(model).up();
@@ -5964,7 +5964,7 @@ define("xabber-chats", function () {
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
                 .c('send').t(is_member_only).up()
-                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat members'));
+                .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat members'));
             this.account.sendIQ(iq,
                 function () {
                     !is_member_only && this.sendInviteMessage(contact_jid);
@@ -5994,9 +5994,9 @@ define("xabber-chats", function () {
                     type: 'chat',
                     id: uuid()
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
-                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat members')).up().up()
+                    .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat members')).up().up()
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
-                    .c('privacy').t(this.contact.get('group_info').anonymous).up().up()
+                    .c('privacy').t(this.contact.get('group_info').privacy).up().up()
                     .c('body').t(body).up();
             this.account.sendMsg(stanza);
         },

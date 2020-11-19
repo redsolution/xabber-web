@@ -193,9 +193,9 @@ define("xabber-searching", function () {
                 this.account.sendIQ(request_iq, function (iq_response) {
                     var $iq_response = $(iq_response),
                         description = $iq_response.find('field[var="description"] value').text(),
-                        anonymous = $iq_response.find('field[var="anonymous"] value').text(),
+                        privacy = $iq_response.find('field[var="anonymous"] value').text(),
                         membership = $iq_response.find('field[var="model"] value').text(),
-                        chat_properties = {jid: jid, name: name, anonymous: anonymous, description: description, membership: membership};
+                        chat_properties = {jid: jid, name: name, privacy: privacy, description: description, membership: membership};
                     this.more_info_view = this.addChild('groupchat_properties', xabber.MoreInfoView,
                         {model: this, chat_properties: chat_properties, el: this.$('.searching-more')[0]})
                 }.bind(this));
