@@ -1614,17 +1614,18 @@ define("xabber-contacts", function () {
                 this.account = this.model.account;
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:group_info", this.update, this);
+                this.model.on("change:vcard_updated", this.update, this);
             },
 
             render: function () {
                 if (!this.model.get('vcard_updated'))
-                    this.model.vcard &&  this.model.vcard.refresh();
+                    this.model.vcard && this.model.vcard.refresh();
                 this.update();
             },
 
             update: function () {
                 let info = this.model.get('group_info') || {};
-                this.$('.block-name').text((info.privacy || (this.model.get('incognito_group') || this.model.get('private_group')) && 'Incognito') + " group");
+                this.$('.block-name').text((info.privacy ? info.privacy : (this.model.get('incognito_group') ? 'incognito' : 'public')) + " group");
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
