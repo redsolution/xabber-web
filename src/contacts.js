@@ -387,8 +387,12 @@ define("xabber-contacts", function () {
                     if (!this.details_view.child('participants')) {
                         this.details_view = new xabber.GroupChatDetailsView({model: this});
                     }
-                    let group_chat_info = this.parseGroupInfo($(presence));
-                    this.set('group_info', group_chat_info);
+                    let group_chat_info = this.parseGroupInfo($(presence)),
+                        prev_group_info = this.get('group_info') || {};
+                    if (this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
+                        this.trigger('update_participants');
+                    _.extend(prev_group_info, group_chat_info);
+                    this.set('group_info', prev_group_info);
                     if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
                         this.set('name', group_chat_info.name);
                     this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
@@ -451,47 +455,43 @@ define("xabber-contacts", function () {
             },
 
             parseGroupInfo: function ($presence) {
-                var $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
+                let jid = this.get('jid'),
+                    $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
                     name = $group_chat.find('name').text(),
-                    model = $group_chat.find('membership').text(),
+                    $model = $group_chat.find('membership'),
                     status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'unavailable' : 'online'),
                     status_msg = $presence.children('status').text(),
-                    anonymous = $group_chat.find('privacy').text(),
-                    searchable = $group_chat.find('index').text(),
-                    description = $group_chat.find('description').text(),
+                    privacy = $group_chat.find('privacy').text(),
+                    $index = $group_chat.find('index'),
+                    $description = $group_chat.find('description'),
                     pinned_message = Number($group_chat.find('pinned-message').text()),
+                    prev_pinned_message = this.get('pinned_message') ? this.get('pinned_message').get('stanza_id') : 0,
                     private_chat = $group_chat.find('parent-chat').text() || false,
                     members_num = parseInt($group_chat.find('members').text()),
-                    online_members_num = parseInt($group_chat.find('present').text()),
-                    info = {
-                        jid: this.get('jid'),
-                        name: name,
-                        anonymous: anonymous,
-                        searchable: searchable,
-                        model: model,
-                        status: status,
-                        status_msg: status_msg || status,
-                        description: description,
-                        members_num: members_num,
-                        online_members_num: online_members_num
-                    };
+                    $online_members_num = $group_chat.find('present'),
+                    info = {jid, name, status_msg, privacy, status, members_num};
+                $index.length && (info.searchable = $index.text());
+                $model.length && (info.model = $model.text());
+                $description.length && (info.description = $description.text());
+                $online_members_num.length && (info.online_members_num = parseInt($online_members_num.text()));
                 private_chat && this.set('private_chat', private_chat);
-                anonymous === 'incognito' && this.set('incognito_chat', true);
-                var chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
-                if (chat)
-                    pinned_msg_elem = chat.item_view.content.$pinned_message;
-                if (pinned_msg_elem) {
-                    if (pinned_message) {
-                        this.getMessageByStanzaId(pinned_message, function ($message) {
-                            this.parsePinnedMessage($message, pinned_msg_elem);
-                        }.bind(this));
-                    }
-                    else {
-                        this.set('pinned_message', undefined);
-                        this.parsePinnedMessage(undefined, pinned_msg_elem);
+                privacy === 'incognito' && this.set('incognito_chat', true);
+                let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
+                if (prev_pinned_message != pinned_message) {
+                    if (chat)
+                        pinned_msg_elem = chat.item_view.content.$pinned_message;
+                    if (pinned_msg_elem) {
+                        if (pinned_message) {
+                            this.getMessageByStanzaId(pinned_message, function ($message) {
+                                this.parsePinnedMessage($message, pinned_msg_elem);
+                            }.bind(this));
+                        }
+                        else {
+                            this.set('pinned_message', undefined);
+                            this.parsePinnedMessage(undefined, pinned_msg_elem);
+                        }
                     }
                 }
-
                 return info;
             },
 
@@ -1605,17 +1605,18 @@ define("xabber-contacts", function () {
                 this.contact = this.model;
                 this.account = this.model.account;
                 this.model.on("change:group_info", this.update, this);
+                this.model.on("change:vcard_updated", this.update, this);
             },
 
             render: function () {
                 if (!this.model.get('vcard_updated'))
-                    this.model.vcard &&  this.model.vcard.refresh();
+                    this.model.vcard && this.model.vcard.refresh();
                 this.update();
             },
 
             update: function () {
                 let info = this.model.get('group_info') || {};
-                this.$('.block-name').text((info.anonymous || (this.model.get('incognito_group') || this.model.get('private_group')) && 'Incognito') + " group");
+                this.$('.block-name').text((info.privacy ? info.privacy : (this.model.get('incognito_group') ? 'incognito' : 'public')) + " group");
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
@@ -1668,7 +1669,7 @@ define("xabber-contacts", function () {
 
             open: function (data_form) {
                 this.data_form = data_form;
-                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').anonymous), jid: this.model.get('jid')}));
+                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').privacy), jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
@@ -2157,7 +2158,7 @@ define("xabber-contacts", function () {
                 attrs.subscription = attrs.subscription === null ? null : 'both';
                 attrs.badge = _.escape(attrs.badge);
                 attrs.is_myself = attrs.jid === this.account.get('jid');
-                attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').anonymous === 'incognito') ? true : false;
+                attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').privacy === 'incognito') ? true : false;
                 let $member_info_view;
                 if (this.contact.get('private_chat')) {
                     this.$el.addClass('edit-rights-private');
@@ -2590,6 +2591,7 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model.contact;
+                this.$el.attr('data-color', this.account.settings.get('color'));
                 this.participant = this.model.participant;
                 this.$el.openModal({
                     ready: function () {

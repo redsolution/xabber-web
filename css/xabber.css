@@ -7735,7 +7735,15 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .edit-badge .rich-textarea {
-    max-height: 30px;
+    min-height: 33px;
+    max-height: 64px;
+    background-color: #f5f5f5;
+    border-bottom: none;
+}
+
+.edit-badge .modal-content .textarea-header {
+    font-size: 16px;
+    margin-bottom: 4px;
 }
 
 .edit-rights .panel-footer, .edit-badge .panel-footer {
@@ -7772,7 +7780,12 @@ input[type='range'].voice-message-volume:focus {
 
 .edit-badge .badge-text {
     margin: 0;
-    padding-top: 5px;
+    padding: 5px 0 0 4px;
+}
+
+.edit-badge .error {
+    padding: 4px;
+    color: #616161;
 }
 
 .edit-badge .badge-text .emoji {
