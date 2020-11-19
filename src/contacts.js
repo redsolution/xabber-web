@@ -2596,6 +2596,7 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model.contact;
+                this.$el.attr('data-color', this.account.settings.get('color'));
                 this.participant = this.model.participant;
                 this.$el.openModal({
                     ready: function () {
