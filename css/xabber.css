@@ -4299,6 +4299,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-contact-trust=true],
 .chat-bottom-wrap[data-trust=true] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=true],
+.chat-day-indicator[data-trust=true],
 .chat-message.encrypted[data-trust=true] {
     background-image: linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9), linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9);
     background-size: 4px 4px;
@@ -4357,6 +4358,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=none],
 .chat-bottom-wrap[data-contact-trust=none] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-contact-trust=none],
+.chat-day-indicator[data-trust=untrusted],
+.chat-day-indicator[data-trust=none],
 .chat-message.encrypted[data-trust=untrusted],
 .chat-message.encrypted[data-trust=none] {
     background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
@@ -4368,6 +4371,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-contact-trust=error],
 .chat-bottom-wrap[data-trust=error] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=error],
+.chat-day-indicator[data-trust=error],
 .chat-message.encrypted[data-trust=error] {
     background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
     background-size: 4px 4px;
