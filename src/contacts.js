@@ -1695,7 +1695,9 @@ define("xabber-contacts", function () {
             close: function () {
                 this.$el.closeModal({
                     complete: function () {
-                        this.hide.bind(this);
+                        this.$el.detach();
+                        this.$('.modal-content').css('height', '100%');
+                        this.data.set('visible', false);
                     }.bind(this)
                 });
             },
