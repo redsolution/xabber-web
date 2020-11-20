@@ -855,7 +855,10 @@ define("xabber-accounts", function () {
                     if (is_deleted) {
                         let contact = this.contacts.mergeContact(chat_jid),
                             chat = this.chats.getChat(contact);
+                        contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
+                        chat.set('const_unread', 0);
+                        xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
                     }
 			return true;

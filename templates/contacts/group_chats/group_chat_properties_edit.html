@@ -10,7 +10,9 @@
     </div>
     {[fields.forEach(function (field) { if (field.type === 'hidden' || field.type === 'jid-multi') return;]}
     <div class="property-wrap {{field.var}}-field">
+        {[if (!(field.type == 'fixed' && field.values[0] === "")) {]}
         <div class="property-header">{{field.label}}</div>
+        {[}]}
         {[if (field.type === 'text-single') {]}
         <div class="input-field input-group-chat-name">
             <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder="Input Chat Name" class="text-field">
@@ -22,7 +24,11 @@
             <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{field.var}}" type="radio" class="with-gap" required="">
             <label class="{{option.value}}-label" for="{{option.value}}">{{option.label}}</label>
         </div>
-        {[});}]}
+        {[});} else  if (field.type === 'fixed' && field.values[0] !== "") {]}
+        <div class="fixed-field{[if (field.var === 'description'){]} description{[}]}">
+            <div class="value">{{field.values[0]}}</div>
+        </div>
+        {[}]}
         {[if (field.var === 'index'){]}
         <p class="property-description">Locally indexed chats can be discovered by searching host server. Globally indexed chats can be discovered by searching global index</p>
         {[} else if (field.var === 'membership') {]}
@@ -33,7 +39,9 @@
 </div>
 <div class="modal-footer">
     <div class="buttons-wrap">
+        {[if (!all_fixed){]}
         <button class="btn-save btn-flat btn-main non-active">Save</button>
+        {[}]}
         <button class="btn-cancel btn-flat btn-dark btn-main">Cancel</button>
     </div>
 </div>

@@ -7116,8 +7116,10 @@ input[type='range'].voice-message-volume:focus {
     margin-bottom: 4px;
 }
 
+.group-chat-properties-edit .fixed-field,
 .group-chat-properties-edit .jabber-id {
     display: inline-flex;
+    align-items: center;
     line-height: 42px;
     height: 42px;
     width: 100%;
@@ -7126,6 +7128,15 @@ input[type='range'].voice-message-volume:focus {
     padding: 0px 8px;
     font-size: 16px;
     color: #424242;
+}
+
+.group-chat-properties-edit .fixed-field.description {
+    min-height: 42px;
+    line-height: 24px;
+    height: unset;
+    max-height: 256px;
+    padding: 4px 8px;
+    white-space: pre-wrap;
 }
 
 .group-chat-properties-edit textarea {
