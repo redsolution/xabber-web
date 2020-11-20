@@ -384,6 +384,9 @@ define("xabber-contacts", function () {
                         this.trigger('presence', this, 'subscribe');
                     }
                 } else if (type === 'subscribed') {
+                    if (this.get('group_chat') && (this.get('subscription_request_out') || this.get('subscription') === 'to')) {
+
+                    }
                     if (this.get('subscription') === 'to') {
                         // this.pres('subscribed');
                     }
@@ -1678,7 +1681,8 @@ define("xabber-contacts", function () {
 
             open: function (data_form) {
                 this.data_form = data_form;
-                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').privacy), jid: this.model.get('jid')}));
+                let all_fixed = this.data_form.fields.filter(f => f.type == 'fixed' || f.type == 'hidden').length == this.data_form.fields.length;
+                this.$el.html(templates.group_chats.group_chat_properties_edit({all_fixed: all_fixed, fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').privacy), jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});

@@ -6546,6 +6546,7 @@ define("xabber-chats", function () {
             this.contact.on("pin_selected_message", this.pinMessage, this);
             this.contact.on('update_my_info', this.updateInfoInBottom, this);
             this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
+            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
