@@ -1438,7 +1438,6 @@ define("xabber-accounts", function () {
             },
 
             changeAvatar: function (ev) {
-                this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 var field = ev.target;
                 if (!field.files.length) {
                     return;
@@ -1452,6 +1451,7 @@ define("xabber-accounts", function () {
                     utils.dialogs.error('Wrong image');
                     return;
                 }
+                this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                     if (image) {
                         this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type},
