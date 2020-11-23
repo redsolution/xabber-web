@@ -958,6 +958,17 @@ define("xabber-omemo", function () {
                 });
             },
 
+            hasChanges: function (o1, o2) {
+                let obj1 = _.clone(o1), obj2 = _.clone(o2);
+                for (let d in obj1) {
+                    delete obj2[d];
+                }
+                for (let d in obj2) {
+                    delete obj1[d];
+                }
+                return Object.keys(obj1).length || Object.keys(obj2).length;
+            },
+
             receiveHeadlineMessage: function (message) {
                 var $message = $(message),
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
@@ -966,7 +977,8 @@ define("xabber-omemo", function () {
                     if (node == `${Strophe.NS.OMEMO}:devices`) {
                         let devices = this.account.connection.omemo.parseUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
-                            let has_devices = this.own_devices && Object.keys(this.own_devices).length;
+                            let has_devices = this.own_devices && Object.keys(this.own_devices).length,
+                                has_changes = this.hasChanges(this.own_devices, devices);
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
@@ -976,16 +988,21 @@ define("xabber-omemo", function () {
                                     this.account.trigger('device_published');
                                 });
                             }*/
-                            this.account.trigger("devices_updated");
-                            if (has_devices)
+                            if (has_changes) {
+                                this.account.trigger("devices_updated");
+                            }
+                            if (has_devices && has_changes) {
                                 this.account.trigger('trusting_updated');
+                            }
                         }
                         else {
                             let peer = this.getPeer(from_jid),
-                                has_devices = peer.devices && Object.keys(peer.devices).length;
+                                has_devices = peer.devices && Object.keys(peer.devices).length,
+                                has_changes = this.hasChanges(peer.devices, devices);
                             peer.updateDevices(devices);
-                            if (has_devices)
+                            if (has_devices && has_changes) {
                                 this.account.trigger('trusting_updated');
+                            }
                         }
                         return;
                     }
@@ -1006,7 +1023,8 @@ define("xabber-omemo", function () {
                             }
                         }
                         if (device) {
-                            let ik = $bundle.find(`ik`).text(), preKeys = [];
+                            let ik = $bundle.find(`ik`).text(),
+                                device_ik = device.get(`ik`), preKeys = [];
                             if (!ik) {
                                 device.set('ik', null);
                                 return;
@@ -1018,7 +1036,9 @@ define("xabber-omemo", function () {
                             device.preKeys = preKeys;
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
-                            this.account.trigger('trusting_updated');
+                            device_ik && (device_ik = utils.ArrayBuffertoBase64(device_ik));
+                            if (!_.isUndefined(device_ik) && device_ik != ik)
+                                this.account.trigger('trusting_updated');
                         }
                     }
                 }

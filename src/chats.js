@@ -3538,7 +3538,7 @@ define("xabber-chats", function () {
 
         getDateIndicator: function (date) {
             var day_date = moment(date).startOf('day');
-            return $('<div class="chat-day-indicator one-line noselect" data-time="'+
+            return $('<div class="chat-day-indicator one-line noselect"' + (this.model.get('encrypted') ? (' data-trust="' + (this.bottom.$el.attr('data-trust') || this.bottom.$el.attr('data-contact-trust')) + '"') : "") + ' data-time="'+
                 day_date.format('x')+'">'+utils.pretty_date(day_date)+'</div>');
         },
 
