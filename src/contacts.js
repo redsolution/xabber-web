@@ -1543,15 +1543,16 @@ define("xabber-contacts", function () {
                 if (!field.files.length) {
                     return;
                 }
-                $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 var file = field.files[0];
                 field.value = '';
                 if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
                     utils.dialogs.error('File is too large');
+                    return;
                 } else if (!file.type.startsWith('image')) {
                     utils.dialogs.error('Wrong image');
+                    return;
                 }
-
+                $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done(function (image) {
                     if (image) {
                         file.base64 = image;
@@ -2247,8 +2248,10 @@ define("xabber-contacts", function () {
                 field.value = '';
                 if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
                     utils.dialogs.error('File is too large');
+                    return;
                 } else if (!file.type.startsWith('image')) {
                     utils.dialogs.error('Wrong image');
+                    return;
                 }
 
                 utils.images.getAvatarFromFile(file).done(function (image) {

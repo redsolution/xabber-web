@@ -127,7 +127,7 @@ var constants = {
         "light-green", "amber", "deep-orange", "brown", "blue-grey"
     ],
 
-    MAX_AVATAR_FILE_SIZE: 20000000,
+    MAX_AVATAR_FILE_SIZE: 64000,
 
     AVATAR_PRIORITIES: {
         VCARD_AVATAR: 0,
