@@ -1358,7 +1358,7 @@ define("xabber-chats", function () {
                 let stanza_id = item.get('stanza_id'),
                     contact_stanza_id = item.get('contact_stanza_id');
                 if (stanza_id || contact_stanza_id) {
-                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
+                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
                         .c('retract-message', {id: (this.contact.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
@@ -1376,7 +1376,7 @@ define("xabber-chats", function () {
         },
 
         retractMessagesByUser: function (user_id) {
-            var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
+            var iq_retraction = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('retract-user', {id: user_id, xmlns: Strophe.NS.REWRITE, symmetric: true});
             this.account.sendIQ(iq_retraction, function (success) {
                     var user_msgs = this.messages.filter(msg => msg.get('user_info') && (msg.get('user_info').id == user_id));
@@ -1392,7 +1392,7 @@ define("xabber-chats", function () {
 
         retractAllMessages: function (symmetric, callback, errback) {
             let is_group_chat = this.contact.get('group_chat'),
-                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? this.contact.get('jid') : this.account.get('jid')}),
+                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
             iq_retraction.c('retract-all', retract_attrs);
@@ -2495,7 +2495,7 @@ define("xabber-chats", function () {
                 messages = [], queryid = uuid(),
                 is_groupchat = contact.get('group_chat'), success = true, iq;
             if (is_groupchat)
-                iq = $iq({type: 'set', to: contact.get('jid')});
+                iq = $iq({type: 'set', to: contact.get('full_jid') || contact.get('jid')});
             else
                 iq = $iq({type: 'set'});
             iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
@@ -2684,7 +2684,7 @@ define("xabber-chats", function () {
         },
 
         unpinMessage: function () {
-            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('pinned-message');
             this.account.sendIQ(iq, function () {}, function (error) {
@@ -5296,9 +5296,11 @@ define("xabber-chats", function () {
                         xabber.chats_view.updateScreenAllChats();
                         contact.sendPresent();
                         contact.trigger("open_chat", contact);
-                        let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
-                            .c('item', {jid: group_jid + '/' + moment.now()});
-                        this.account.sendIQ(iq_set_blocking);
+                        if (!(this.account.connection && this.account.connection.do_synchronization)) {
+                            let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                                .c('item', {jid: group_jid + '/' + moment.now()});
+                            this.account.sendIQ(iq_set_blocking);
+                        }
                     }.bind(this));
                 }.bind(this),
                 function () {
@@ -7459,7 +7461,7 @@ define("xabber-chats", function () {
                 pinned_msg = this.messages_arr.get($msg.data('uniqueid')),
                 msg_id = pinned_msg.get('stanza_id');
             this.resetSelectedMessages();
-            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('pinned-message').t(msg_id);
             this.account.sendIQ(iq, function () {},

@@ -201,7 +201,7 @@ define("xabber-contacts", function () {
                 options = options || {};
                 let participant_id = options.id,
                     version = options.version || 0;
-                var iq = $iq({from: this.account.get('jid'), to: this.get('jid'), type: 'get'});
+                var iq = $iq({from: this.account.get('jid'), to: this.get('full_jid') || this.get('jid'), type: 'get'});
                 if (participant_id != undefined) {
                     if (!participant_id) {
                         if (options.properties)
@@ -436,6 +436,7 @@ define("xabber-contacts", function () {
                 }
                 let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
                 if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                    this.set('full_jid', $presence.attr('from'));
                     if (!this.get('group_chat')) {
                         this.set('group_chat', true);
                         this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
@@ -497,7 +498,7 @@ define("xabber-contacts", function () {
             },
 
             getAllRights: function (callback) {
-                let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') })
+                let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('full_jid') || this.get('jid') })
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights' });
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
                     var all_permissions = $(iq_all_rights).find('permission'),
@@ -509,7 +510,7 @@ define("xabber-contacts", function () {
 
             getMessageByStanzaId: function (stanza_id, callback) {
                 var queryid = uuid(),
-                    iq = $iq({type: 'set', to: this.get('jid')})
+                    iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
                         .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                         .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                         .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
@@ -664,7 +665,7 @@ define("xabber-contacts", function () {
             },
 
             getStatuses: function () {
-                let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
+                let iq_get_properties = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'get'})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'});
                 this.account.sendIQ(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
@@ -709,7 +710,7 @@ define("xabber-contacts", function () {
             setStatus: function (status) {
                 if (!this.data_form || this.contact.get('group_info').status === status)
                     return;
-                let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
+                let iq_set_status = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
                     status_field = this.data_form.fields.find(field => field.var === 'status'),
                     idx = this.data_form.fields.indexOf(status_field);
@@ -1403,7 +1404,7 @@ define("xabber-contacts", function () {
 
             editProperties: function (ev) {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
-                        let iq_get_properties = $iq({to: this.model.get('jid'), type: 'get'})
+                        let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                         this.account.sendIQ(iq_get_properties, function (properties) {
                             let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
@@ -1478,7 +1479,7 @@ define("xabber-contacts", function () {
             getInvitations: function (callback, errback) {
                 let iq = $iq({
                     type: 'get',
-                    to: this.model.get('jid')})
+                    to: this.model.get('full_jid') || this.model.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
                 this.account.sendIQ(iq, callback, errback);
             },
@@ -1486,7 +1487,7 @@ define("xabber-contacts", function () {
             getBlockedParticipants: function (callback, errback) {
                 let iq = $iq({
                     type: 'get',
-                    to: this.model.get('jid')})
+                    to: this.model.get('full_jid') || this.model.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
                 this.account.sendIQ(iq, callback, errback);
             },
@@ -1716,7 +1717,7 @@ define("xabber-contacts", function () {
                     return;
 
                 let has_changes = false,
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 this.data_form.fields.forEach(function (field) {
                     if (field.type === 'hidden' || field.type === 'fixed')
@@ -1825,7 +1826,7 @@ define("xabber-contacts", function () {
             revokeInvitation: function (ev) {
                 let $member_item = $(ev.target).closest('.invitations-user'),
                     member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
+                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                         .c('jid').t(member_jid);
                 this.account.sendIQ(iq, function () {
@@ -1877,7 +1878,7 @@ define("xabber-contacts", function () {
             unblockUser: function (ev) {
                 var $member_item = $(ev.target).closest('.blocked-user'),
                     member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid') })
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('unblock', {xmlns: Strophe.NS.GROUP_CHAT + '#block' })
                         .c('jid').t(member_jid);
                 this.account.sendIQ(iq, function () {
@@ -2432,7 +2433,7 @@ define("xabber-contacts", function () {
                 let participant_jid = this.participant.get('jid'),
                     participant_in_roster = this.account.contacts.get(participant_jid);
                 if (!participant_jid || this.contact.get('incognito_chat')) {
-                    let iq = $iq({from: this.account.get('jid'), to: this.contact.domain, type: 'set'})
+                    let iq = $iq({to: this.contact.domain, type: 'set'})
                         .c('query', { xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
                     this.account.sendIQ(iq, function (iq_response) {
@@ -2518,7 +2519,7 @@ define("xabber-contacts", function () {
                     changed_avatar = this.new_avatar,
                     rights_changed = false,
                     has_changes = false,
-                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                         .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
                 this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
@@ -2578,7 +2579,7 @@ define("xabber-contacts", function () {
                             }
                         }.bind(this));
                 if (rights_changed) {
-                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
                     this.account.sendIQ(iq_rights_changes, function () {
@@ -2691,7 +2692,7 @@ define("xabber-contacts", function () {
                 }
                 else {
                     if (new_badge != this.participant.get('badge')) {
-                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                             .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
@@ -2767,7 +2768,7 @@ define("xabber-contacts", function () {
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
                 this.$('button').blur();
-                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
+                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
                     this.showDefaultRestrictions(iq_all_rights);
@@ -2881,7 +2882,7 @@ define("xabber-contacts", function () {
                 if (this.$('.btn-default-restrictions-save').hasClass('non-active'))
                     return;
                 this.$('button').blur();
-                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
+                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'}),
                     has_new_default_restrictions = false,
                     data_form = _.clone(this.default_restrictions);
@@ -2967,7 +2968,7 @@ define("xabber-contacts", function () {
             kick: function (callback, errback) {
                 let id = this.get('id'),
                     jid = this.get('jid'),
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('kick', {xmlns: Strophe.NS.GROUP_CHAT});
                 if (jid)
                     iq.c('jid').t(jid);
@@ -2982,7 +2983,7 @@ define("xabber-contacts", function () {
 
             block: function (callback, errback) {
                 let id = this.get('id'),
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
                         .c('id').t(id);
                 this.account.sendIQ(iq, function () {
@@ -3285,7 +3286,7 @@ define("xabber-contacts", function () {
             declineContact: function () {
                 let contact = this.model;
                 this.closeChat();
-                let iq = $iq({to: contact.get('jid'), type: 'set'})
+                let iq = $iq({to: contact.get('full_jid') || contact.get('jid'), type: 'set'})
                     .c('decline', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`});
                 this.account.sendIQ(iq, () => {}, () => {
                     contact.declineRequest();
