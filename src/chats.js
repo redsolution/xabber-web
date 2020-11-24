@@ -7124,6 +7124,7 @@ define("xabber-chats", function () {
                         this.$el.attr('data-trust', is_trusted);
                         this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_trusted);
                         this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_trusted);
+                        this.view.$el.attr('data-trust', is_trusted);
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
                         if (is_trusted == 'none')
@@ -7139,6 +7140,11 @@ define("xabber-chats", function () {
                             let is_scrolled_bottom = this.view.isScrolledToBottom();
                             this.$el.removeClass('loading');
                             this.$el.children('.preloader-wrapper').detach();
+                            if (is_contact_trusted === 'nil') {
+                                this.$el.prepend($('<div class="warning-wrap no-fingerprints">No fingerprints yet</div>'));
+                                this.$el.attr('data-contact-trust', is_contact_trusted);
+                                return;
+                            }
                             if (is_contact_trusted === 'error') {
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                                 this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your partner\'s device that you previously trusted have changed. This <i>should not</i> be happening, ever. He is likely being hacked, or his software is severely malfunctioning.'}));
@@ -7149,6 +7155,7 @@ define("xabber-chats", function () {
                                 }
                                 this.$el.attr('data-contact-trust', is_contact_trusted);
                             }
+                            this.view.$el.attr('data-trust', is_contact_trusted);
                             this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
                             this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
                             xabber.chat_body.updateHeight();

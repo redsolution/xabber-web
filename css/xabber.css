@@ -4280,7 +4280,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: relative;
     width: 100%;
     padding: 7px 0;
-    margin: 1px 0;
+    border-top: 1px solid #FFF;
+    border-bottom: 1px solid #FFF;
     cursor: pointer;
     -webkit-transition: background-color .3s;
     -moz-transition: background-color .3s;
@@ -4290,7 +4291,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .chat-message.encrypted {
-    background-image: linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%, rgba(207,216,220,.3)), linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%,rgba(207,216,220,.3));
+    background-image: linear-gradient( 45deg,rgba(207,216,220,.3) 25%, transparent 25%, transparent 74%, rgba(207,216,220,.3) 75%, rgba(207,216,220,.3)), linear-gradient( 45deg,rgba(207,216,220,.3) 25%, #FFF 25%, #FFF 74%, rgba(207,216,220,.3) 75%,rgba(207,216,220,.3));
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
@@ -4300,8 +4301,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=true] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=true],
 .chat-day-indicator[data-trust=true],
+[data-trust=true].chat-content-wrap .load-history-feedback,
+[data-trust=true] .chat-content,
 .chat-message.encrypted[data-trust=true] {
-    background-image: linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9), linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9);
+    background-image: linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9), linear-gradient( 45deg,#E8F5E9 25%, #FFF 25%, #FFF 74%, #E8F5E9 75%, #E8F5E9);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
@@ -4314,12 +4317,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .chat-bottom-wrap[data-contact-trust=error],
 .chat-bottom-wrap[data-trust=error],
+.chat-bottom-wrap[data-contact-trust=nil],
 .chat-bottom-wrap[data-trust=none] {
     height: 104px !important;
 }
 
 .chat-bottom-wrap[data-contact-trust=error]>div:not(.warning-wrap),
 .chat-bottom-wrap[data-trust=error]>div:not(.warning-wrap),
+.chat-bottom-wrap[data-contact-trust=nil]>div:not(.warning-wrap),
 .chat-bottom-wrap[data-trust=none]>div:not(.warning-wrap),
 .chat-bottom-wrap.loading>div:not(.preloader-wrapper):not(.omemo-disabled) {
     display: none !important;
@@ -4334,6 +4339,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: relative;
     height: 100%;
     padding: 4px 0;
+}
+
+.chat-bottom-wrap .warning-wrap.no-fingerprints {
+    color: #424242;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    font-style: italic;
+    border-top: 1px solid #EEE;
 }
 
 .chat-bottom-wrap .warning-wrap .warning-message {
@@ -4360,9 +4374,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-contact-trust=none],
 .chat-day-indicator[data-trust=untrusted],
 .chat-day-indicator[data-trust=none],
+[data-trust=untrusted] .chat-content,
+[data-trust=none] .chat-content,
+[data-trust=untrusted].chat-content-wrap .load-history-feedback,
+[data-trust=none].chat-content-wrap .load-history-feedback,
 .chat-message.encrypted[data-trust=untrusted],
 .chat-message.encrypted[data-trust=none] {
-    background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3);
+    background-image: linear-gradient( 45deg,#FFECB3 25%, transparent 25%, transparent 74%, #FFECB3 75%, #FFECB3), linear-gradient( 45deg,#FFECB3 25%, #FFF 25%, #FFF 74%, #FFECB3 75%, #FFECB3);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
@@ -4372,8 +4390,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-wrap[data-trust=error] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=error],
 .chat-day-indicator[data-trust=error],
+[data-trust=error].chat-content-wrap .load-history-feedback,
+[data-trust=error] .chat-content,
 .chat-message.encrypted[data-trust=error] {
-    background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee);
+    background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, #FFF 25%, #FFF 74%, #ffebee 75%, #ffebee);
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
@@ -4388,6 +4408,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .chat-message.selected {
     background-color: #FFEBEE;
+    background-image: unset !important;
     -webkit-transition: background-color 0s;
     -moz-transition: background-color 0s;
     -ms-transition: background-color 0s;

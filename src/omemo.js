@@ -1265,7 +1265,11 @@ define("xabber-omemo", function () {
                             } else {
                                 if (device.get('ik') === null) {
                                     counter--;
-                                    !counter && dfd.resolve(is_trusted);
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
                                     continue;
                                 }
                                 device.getBundle().then(({pk, spk, ik}) => {
@@ -1280,7 +1284,11 @@ define("xabber-omemo", function () {
                                     !counter && dfd.resolve(is_trusted);
                                 }).catch(() => {
                                     counter--;
-                                    !counter && dfd.resolve(is_trusted);
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
                                 });
                             }
                         }
@@ -1295,13 +1303,21 @@ define("xabber-omemo", function () {
                                     let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                                     if (trusted === undefined && is_trusted !== null)
                                         is_trusted = undefined;
-                                    if (trusted === null)
-                                        is_trusted = null;
+                                    if (trusted === null) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        else
+                                            is_trusted = null;
+                                    }
                                     counter--;
                                     !counter && dfd.resolve(is_trusted);
                                 }).catch(() => {
                                     counter--;
-                                    !counter && dfd.resolve(is_trusted);
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
                                 });
                             }
                         });
