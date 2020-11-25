@@ -479,18 +479,20 @@ define("xabber-contacts", function () {
                 private_chat && this.set('private_chat', private_chat);
                 privacy === 'incognito' && this.set('incognito_chat', true);
                 let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
-                if (prev_pinned_message != pinned_message) {
-                    if (chat)
-                        pinned_msg_elem = chat.item_view.content.$pinned_message;
-                    if (pinned_msg_elem) {
-                        if (pinned_message) {
-                            this.getMessageByStanzaId(pinned_message, function ($message) {
-                                this.parsePinnedMessage($message, pinned_msg_elem);
-                            }.bind(this));
-                        }
-                        else {
-                            this.set('pinned_message', undefined);
-                            this.parsePinnedMessage(undefined, pinned_msg_elem);
+                if ($group_chat.find('pinned-message').length) {
+                    if (prev_pinned_message != pinned_message) {
+                        if (chat)
+                            pinned_msg_elem = chat.item_view.content.$pinned_message;
+                        if (pinned_msg_elem) {
+                            if (pinned_message) {
+                                this.getMessageByStanzaId(pinned_message, function ($message) {
+                                    this.parsePinnedMessage($message, pinned_msg_elem);
+                                }.bind(this));
+                            }
+                            else {
+                                this.set('pinned_message', undefined);
+                                this.parsePinnedMessage(undefined, pinned_msg_elem);
+                            }
                         }
                     }
                 }
