@@ -339,11 +339,16 @@ define("xabber-vcard", function () {
             var $input = this.$('.datepicker').pickadate({
                 selectMonths: true,
                 selectYears: 100,
+                autoOk: false,
                 // min = 100 years ago
                 min: new Date(moment.now() - 3153600000000),
                 max: new Date(moment.now() - 86400000),
                 format: 'dd.mm.yyyy',
+                allowKeyboardControl: false,
                 today: '',
+                onClose: function(){
+                    $(document.activeElement).blur();
+                },
                 klass: {
                     weekday_display: 'picker__weekday-display ground-color-700',
                     date_display: 'picker__date-display ground-color-500',
