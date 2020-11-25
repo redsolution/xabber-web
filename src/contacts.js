@@ -481,18 +481,20 @@ define("xabber-contacts", function () {
                 private_chat && this.set('private_chat', private_chat);
                 privacy === 'incognito' && this.set('incognito_chat', true);
                 let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
-                if (prev_pinned_message != pinned_message) {
-                    if (chat)
-                        pinned_msg_elem = chat.item_view.content.$pinned_message;
-                    if (pinned_msg_elem) {
-                        if (pinned_message) {
-                            this.getMessageByStanzaId(pinned_message, function ($message) {
-                                this.parsePinnedMessage($message, pinned_msg_elem);
-                            }.bind(this));
-                        }
-                        else {
-                            this.set('pinned_message', undefined);
-                            this.parsePinnedMessage(undefined, pinned_msg_elem);
+                if ($group_chat.find('pinned-message').length) {
+                    if (prev_pinned_message != pinned_message) {
+                        if (chat)
+                            pinned_msg_elem = chat.item_view.content.$pinned_message;
+                        if (pinned_msg_elem) {
+                            if (pinned_message) {
+                                this.getMessageByStanzaId(pinned_message, function ($message) {
+                                    this.parsePinnedMessage($message, pinned_msg_elem);
+                                }.bind(this));
+                            }
+                            else {
+                                this.set('pinned_message', undefined);
+                                this.parsePinnedMessage(undefined, pinned_msg_elem);
+                            }
                         }
                     }
                 }
@@ -4015,7 +4017,9 @@ define("xabber-contacts", function () {
             },
 
             onSyncIQ: function (iq, request_with_stamp) {
-                this.account.last_msg_timestamp = Math.round($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')/1000);
+                let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp'));
+                this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
+                this.account.set('last_sync', sync_timestamp);
                 let last_chat_msg_id = $(iq).find('set last'),
                     encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                     retract_version = $(iq).find('query conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
@@ -4113,6 +4117,7 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
+                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync')});
                     if (!$(iq).children('query').find('item').length)
                         this.account.cached_roster.getAllFromRoster(function (roster_items) {
                             $(roster_items).each(function (idx, roster_item) {
