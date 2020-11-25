@@ -4026,7 +4026,9 @@ define("xabber-contacts", function () {
             },
 
             onSyncIQ: function (iq, request_with_stamp) {
-                this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
+                let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp'));
+                this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
+                this.account.set('last_sync', sync_timestamp);
                 let last_chat_msg_id = $(iq).find('set last');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
@@ -4113,6 +4115,7 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
+                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync')});
                     if (!$(iq).children('query').find('item').length)
                         this.account.cached_roster.getAllFromRoster(function (roster_items) {
                             $(roster_items).each(function (idx, roster_item) {
