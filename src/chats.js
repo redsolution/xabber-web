@@ -2930,13 +2930,17 @@ define("xabber-chats", function () {
         },
 
         initMagnificPopup: function ($elem) {
+            var self = this;
             $elem.magnificPopup({
                 type: 'image',
                 closeOnContentClick: true,
                 fixedContentPos: true,
                 mainClass: 'mfp-no-margins mfp-with-zoom',
                 image: {
-                    verticalFit: true
+                    verticalFit: true,
+                    titleSrc: function(item) {
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>' + ' ' + item.el.attr('title');
+                    }
                 },
                 zoom: {
                     enabled: true,
@@ -2956,7 +2960,7 @@ define("xabber-chats", function () {
                 image: {
                     verticalFit: true,
                     titleSrc: function(item) {
-                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>';
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>' + ' ' + item.el.attr('title');
                     }
                 },
                 gallery: {
@@ -3940,6 +3944,7 @@ define("xabber-chats", function () {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
+                    description: file_.description || '',
                     sources: [file_.url]
                 };
                 file_.voice && (file_new_format.voice = true);
@@ -4042,7 +4047,7 @@ define("xabber-chats", function () {
                 imgContent.width = image.width;
             imgContent.src = image.sources[0];
             $(imgContent).addClass('uploaded-img popup-img');
-            $(imgContent).attr('data-mfp-src', image.sources[0]);
+            $(imgContent).attr({'data-mfp-src': image.sources[0], title: (image.description || '')});
             if (imgContent.height && imgContent.width) {
                 if (imgContent.width > maxWidth) {
                     imgContent.height = imgContent.height * (maxWidth/imgContent.width);
