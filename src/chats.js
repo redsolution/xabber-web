@@ -2742,6 +2742,7 @@ define("xabber-chats", function () {
                 }
             } else if (state === 'paused') {
                 this.showChatState();
+                return;
             } else {
                 this.bottom.showChatNotification('');
                 this.chat_item.updateLastMessage();
