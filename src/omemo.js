@@ -1062,16 +1062,6 @@ define("xabber-omemo", function () {
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                         cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
-                    let devices_ids = {};
-                    $message.find('keys').each(function (idx, keys) {
-                        let $keys = $(keys),
-                            jid_devices = [];
-                        $keys.children('key').each(function (idx1, key) {
-                            jid_devices.push($(key).attr('rid'));
-                        }.bind(this));
-                        devices_ids[$keys.attr('jid')] = jid_devices;
-                    }.bind(this));
-
                     if (cached_msg) {
                         if (!options.replaced) {
                             options.encrypted = true;
