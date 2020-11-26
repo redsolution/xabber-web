@@ -44,14 +44,28 @@ define("xabber-omemo", function () {
             },
 
             getDevicesNode: async function () {
-                return new Promise((resolve, reject) => {
-                    this.account.connection.omemo.getDevicesNode(this.get('jid'), function (cb) {
-                        this.updateDevices(this.account.connection.omemo.parseUserDevices($(cb)));
-                        resolve();
-                    }.bind(this), function () {
-                        resolve();
+                if (!this._pending_devices) {
+                    this._pending_devices = true;
+                    this._dfd_devices = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        this.account.connection.omemo.getDevicesNode(this.get('jid'), function (cb) {
+                            this.updateDevices(this.account.connection.omemo.parseUserDevices($(cb)));
+                            this._pending_devices = false;
+                            this._dfd_devices.resolve();
+                            resolve();
+                        }.bind(this), function () {
+                            this._pending_devices = false;
+                            this._dfd_devices.resolve();
+                            resolve();
+                        });
                     });
-                });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_devices.done(() => {
+                            resolve();
+                        });
+                    });
+                }
             },
 
             encrypt: async function (message) {
@@ -597,31 +611,51 @@ define("xabber-omemo", function () {
             },
 
             getBundle: async function () {
-                return new Promise((resolve, reject) => {
-                    this.account.connection.omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
-                        let $iq = $(iq),
-                            $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
-                            $spk = $bundle.find('spk'),
-                            spk = {id: $spk.attr('id'), key: $spk.text(), signature: $bundle.find('spks').text()},
-                            ik =  $bundle.find(`ik`).text();
-                        this.preKeys = [];
-                        if (!ik)
+                if (!this._pending_bundle) {
+                    this._pending_bundle = true;
+                    this._dfd_bundle = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        this.account.connection.omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
+                            let $iq = $(iq),
+                                $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                                $spk = $bundle.find('spk'),
+                                spk = {id: $spk.attr('id'), key: $spk.text(), signature: $bundle.find('spks').text()},
+                                ik = $bundle.find(`ik`).text();
+                            this.preKeys = [];
+                            if (!ik)
+                                this.set('ik', null);
+                            $bundle.find('prekeys pk').each((i, pk) => {
+                                let $pk = $(pk);
+                                this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                            });
+                            this._pending_bundle = false;
+                            let pk = this.getRandomPreKey();
+                            if (!pk) {
+                                this._dfd_bundle.reject();
+                                reject();
+                            }
+                            else {
+                                this._dfd_bundle.resolve({pk, spk, ik});
+                                resolve({pk, spk, ik});
+                            }
+                        }.bind(this), function () {
                             this.set('ik', null);
-                        $bundle.find('prekeys pk').each((i, pk) => {
-                            let $pk = $(pk);
-                            this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
-                        });
-                        let pk = this.getRandomPreKey();
-                        if (!pk)
+                            this.preKeys = [];
+                            this._dfd_bundle.reject();
+                            this._pending_bundle = false;
                             reject();
-                        else
+                        }.bind(this));
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_bundle.done(({pk, spk, ik}) => {
                             resolve({pk, spk, ik});
-                    }.bind(this), function () {
-                        this.set('ik', null);
-                        this.preKeys = [];
-                        reject();
-                    }.bind(this));
-                });
+                        });
+                        this._dfd_bundle.fail(() => {
+                            reject();
+                        });
+                    });
+                }
             },
 
             getRandomPreKey: function () {
@@ -792,17 +826,35 @@ define("xabber-omemo", function () {
             },
 
             getMyDevices: async function () {
-                return new Promise((resolve, reject) => {
-                    let conn = this.account.connection;
-                    if (conn) {
-                        if (conn.omemo) {
-                            conn.omemo.getDevicesNode(null, function (cb) {
-                                conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
-                                resolve();
-                            }.bind(this));
-                        }
-                    }
-                });
+                if (!this._pending_own_devices) {
+                    this._pending_own_devices = true;
+                    this._dfd_own_devices = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        let conn = this.account.connection;
+                        if (conn) {
+                            if (conn.omemo) {
+                                conn.omemo.getDevicesNode(null, function (cb) {
+                                    conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
+                                    this._pending_own_devices = false;
+                                    this._dfd_own_devices.resolve();
+                                    resolve();
+                                }.bind(this), function () {
+                                    this._pending_own_devices = false;
+                                    this._dfd_own_devices.resolve();
+                                    resolve();
+                                });
+                            } else
+                                this._pending_own_devices = false;
+                        } else
+                            this._pending_own_devices = false;
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_own_devices.done(() => {
+                            resolve();
+                        });
+                    });
+                }
             },
 
             updateFingerprints: function (contact, device_id, fingerprint, trusted) {
