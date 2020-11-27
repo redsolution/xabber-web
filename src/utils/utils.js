@@ -263,7 +263,7 @@ define([
                 return ("0:0" + duration);
             if (duration < 60)
                 return ("0:" + duration);
-            if (duration > 60)
+            if (duration >= 60)
                 return (Math.trunc(duration/60) + ":" + ((duration%60 < 10) ? ("0" + (duration%60)) : duration%60));
         },
 
