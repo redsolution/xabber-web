@@ -370,12 +370,32 @@ define("xabber-contacts", function () {
                 this.account.sendPres(pres);
             },
 
-            handlePresence: function (presence) {
+                handlePresence: function (presence) {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
+                    let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
+                    if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                        this.set('full_jid', $presence.attr('from'));
+                        if (!this.get('group_chat')) {
+                            this.set('group_chat', true);
+                            this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
+                        }
+                        if (!this.details_view.child('participants')) {
+                            this.details_view = new xabber.GroupChatDetailsView({model: this});
+                        }
+                        let group_chat_info = this.parseGroupInfo($(presence)),
+                            prev_group_info = this.get('group_info') || {};
+                        if (this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
+                            this.trigger('update_participants');
+                        _.extend(prev_group_info, group_chat_info);
+                        this.set('group_info', prev_group_info);
+                        if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
+                            this.set('name', prev_group_info.name);
+                        this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
+                    }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
                     if (this.get('in_roster') || this.get('subscription_preapproved')) {
@@ -433,26 +453,6 @@ define("xabber-contacts", function () {
                             resource_obj.set(attrs);
                         }
                     }
-                }
-                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
-                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
-                    this.set('full_jid', $presence.attr('from'));
-                    if (!this.get('group_chat')) {
-                        this.set('group_chat', true);
-                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
-                    }
-                    if (!this.details_view.child('participants')) {
-                        this.details_view = new xabber.GroupChatDetailsView({model: this});
-                    }
-                    let group_chat_info = this.parseGroupInfo($(presence)),
-                        prev_group_info = this.get('group_info') || {};
-                    if (this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
-                        this.trigger('update_participants');
-                    _.extend(prev_group_info, group_chat_info);
-                    this.set('group_info', prev_group_info);
-                    if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
-                        this.set('name', group_chat_info.name);
-                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
                 }
             },
 
@@ -685,7 +685,13 @@ define("xabber-contacts", function () {
             renderStatuses: function (options) {
                 this.$('.status-values').html("");
                 options.forEach(function (option) {
-                    let $status_item = $(templates.group_chats.status_item({option: option}));
+                    let status = option,
+                        status_field = this.data_form.fields.find(f => f.var == status.value);
+                    if (status_field)
+                        status.show = status_field.values[0];
+                    else
+                        status.show = status.value;
+                    let $status_item = $(templates.group_chats.status_item({status}));
                     this.$('.status-values').append($status_item);
                 }.bind(this));
                 this.highlightStatus(this.contact.get('status'));
@@ -713,7 +719,7 @@ define("xabber-contacts", function () {
                 if (!this.data_form || this.contact.get('group_info').status === status)
                     return;
                 let iq_set_status = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'}),
                     status_field = this.data_form.fields.find(field => field.var === 'status'),
                     idx = this.data_form.fields.indexOf(status_field);
                 status_field.values = [status];
@@ -1590,15 +1596,15 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.$el.html(this.template());
                 this.render();
+                this.model.on("change:status", this.render, this);
                 this.model.on("change:group_info", this.render, this);
             },
 
             render: function () {
-                let group_info;
-                this.model.get('group_info') && (group_info = this.model.get('group_info'));
+                let group_info = this.model.get('group_info');
                 if (!group_info)
                     return;
-                this.$('.status').attr('data-status', this.model.get('status'));
+                this.$('.status').attr('data-status', group_info.status || this.model.get('status'));
                 this.$('.status-message').text(group_info.status_msg);
             },
 

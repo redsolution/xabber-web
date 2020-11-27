@@ -174,7 +174,9 @@ define("xabber-chats", function () {
                 parent_chat.length && (is_private_invitation = true);
                 is_private_invitation && contact.set('private_chat', true);
                 privacy === 'incognito' && contact.set('incognito_chat', true);
-                contact.set('group_info', group_info_attributes);
+                let prev_group_info = contact.get('group_info') || {};
+                _.extend(prev_group_info, group_info_attributes);
+                contact.set('group_info', prev_group_info);
             }
 
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
