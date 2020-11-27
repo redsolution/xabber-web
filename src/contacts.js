@@ -394,9 +394,9 @@ define("xabber-contacts", function () {
                         this.trigger('update_participants');
                     _.extend(prev_group_info, group_chat_info);
                     this.set('group_info', prev_group_info);
-                    if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
-                        this.set('name', group_chat_info.name);
-                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' members, ' + group_chat_info.online_members_num + ' online')});
+                    if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
+                        this.set('name', prev_group_info.name);
+                    this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
                 }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
@@ -687,7 +687,13 @@ define("xabber-contacts", function () {
             renderStatuses: function (options) {
                 this.$('.status-values').html("");
                 options.forEach(function (option) {
-                    let $status_item = $(templates.group_chats.status_item({option: option}));
+                    let status = option,
+                        status_field = this.data_form.fields.find(f => f.var == status.value);
+                    if (status_field)
+                        status.show = status_field.values[0];
+                    else
+                        status.show = status.value;
+                    let $status_item = $(templates.group_chats.status_item({status}));
                     this.$('.status-values').append($status_item);
                 }.bind(this));
                 this.highlightStatus(this.contact.get('status'));
@@ -1582,15 +1588,15 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.$el.html(this.template());
                 this.render();
+                this.model.on("change:status", this.render, this);
                 this.model.on("change:group_info", this.render, this);
             },
 
             render: function () {
-                let group_info;
-                this.model.get('group_info') && (group_info = this.model.get('group_info'));
+                let group_info = this.model.get('group_info');
                 if (!group_info)
                     return;
-                this.$('.status').attr('data-status', this.model.get('status'));
+                this.$('.status').attr('data-status', group_info.status || this.model.get('status'));
                 this.$('.status-message').text(group_info.status_msg);
             },
 
