@@ -7743,72 +7743,79 @@ define("xabber-chats", function () {
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
-            this.quill.getContents().forEach(function (content) {
-                if (content.attributes) {
-                    let content_attrs = [],
-                        start_idx = content_concat.length,
-                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
-                    for (let attr in content.attributes)
-                        (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
-                    if (content_attrs.indexOf('mention') > -1) {
-                        let mention_idx = content_attrs.indexOf('mention'),
-                            is_gc = this.contact.get('group_chat'),
-                            target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
-                        content_attrs.splice(mention_idx, mention_idx + 1);
-                        target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
-                        mentions.push({
+            if (text.length) {
+                this.quill.getContents().forEach(function (content) {
+                    if (content.attributes) {
+                        let content_attrs = [],
+                            start_idx = content_concat.length,
+                            end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
+                        for (let attr in content.attributes)
+                            (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
+                        if (content_attrs.indexOf('mention') > -1) {
+                            let mention_idx = content_attrs.indexOf('mention'),
+                                is_gc = this.contact.get('group_chat'),
+                                target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
+                            content_attrs.splice(mention_idx, mention_idx + 1);
+                            target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
+                            mentions.push({
+                                start: start_idx,
+                                end: end_idx,
+                                target: target,
+                                is_gc: is_gc
+                            });
+                        }
+                        if (content.attributes.blockquote) {
+                            if (content_concat.length) {
+                                Array.from(content.insert).forEach(function (ins) {
+                                    let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
+                                        quote_end_idx = content_concat.length;
+                                    blockquotes.push({
+                                        marker: constants.QUOTE_MARKER,
+                                        start: quote_start_idx,
+                                        end: quote_end_idx + constants.QUOTE_MARKER.length
+                                    });
+                                    text = Array.from(_.escape(text));
+
+                                    if (quote_start_idx === quote_end_idx) {
+                                        text[quote_start_idx - 1] += constants.QUOTE_MARKER;
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER;
+                                    }
+                                    else {
+                                        text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
+                                    }
+                                    (quote_end_idx > text.length) && (quote_end_idx = text.length);
+                                    text[quote_end_idx - 1] += '\n';
+
+                                    text = _.unescape(text.join(""));
+                                    content_concat = Array.from(content_concat.join(""));
+
+                                    markup_references.forEach(function (markup_ref) {
+                                        if (markup_ref.start >= quote_start_idx) {
+                                            markup_ref.start += constants.QUOTE_MARKER.length;
+                                            markup_ref.end += constants.QUOTE_MARKER.length;
+                                        }
+                                    }.bind(this));
+
+                                    content_concat = content_concat.concat(Array.from(_.escape(ins)));
+                                }.bind(this))
+                            }
+                        }
+                        content_attrs.length && markup_references.push({
                             start: start_idx,
                             end: end_idx,
-                            target: target,
-                            is_gc: is_gc
+                            markup: content_attrs
                         });
                     }
-                    if (content.attributes.blockquote) {
-                        if (content_concat.length) {
-                            Array.from(content.insert).forEach(function (ins) {
-                                let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
-                                    quote_end_idx = content_concat.length;
-                                blockquotes.push({
-                                    marker: constants.QUOTE_MARKER,
-                                    start: quote_start_idx,
-                                    end: quote_end_idx + constants.QUOTE_MARKER.length
-                                });
-                                text = Array.from(_.escape(text));
-
-                                if (quote_start_idx === quote_end_idx) {
-                                    text[quote_start_idx - 1] += constants.QUOTE_MARKER;
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER;
-                                }
-                                else {
-                                    text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
-                                }
-                                (quote_end_idx > text.length) && (quote_end_idx = text.length);
-                                text[quote_end_idx - 1] += '\n';
-
-                                text = _.unescape(text.join(""));
-                                content_concat = Array.from(content_concat.join(""));
-
-                                markup_references.forEach(function (markup_ref) {
-                                    if (markup_ref.start >= quote_start_idx) {
-                                        markup_ref.start += constants.QUOTE_MARKER.length;
-                                        markup_ref.end += constants.QUOTE_MARKER.length;
-                                    }
-                                }.bind(this));
-
-                                content_concat = content_concat.concat(Array.from(_.escape(ins)));
-                            }.bind(this))
-                        }
+                    if (content.insert && content.insert.emoji) {
+                        content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
                     }
-                    content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markup: content_attrs});
-                }
-                if (content.insert && content.insert.emoji) {
-                    content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
-                }
-                else if (content.attributes && content.attributes.blockquote) {}
-                else
-                    content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
-            }.bind(this));
+                    else if (content.attributes && content.attributes.blockquote) {
+                    }
+                    else
+                        content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
+                }.bind(this));
+            }
             $rich_textarea.flushRichTextarea();
             this.quill.focus();
             this.displayMicrophone();
