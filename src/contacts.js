@@ -370,7 +370,7 @@ define("xabber-contacts", function () {
                 this.account.sendPres(pres);
             },
 
-                handlePresence: function (presence) {
+            handlePresence: function (presence) {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');

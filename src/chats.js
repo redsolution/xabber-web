@@ -1705,7 +1705,7 @@ define("xabber-chats", function () {
               this.model = options.model;
               this.contact = options.contact;
               this.account = this.contact.account;
-              this.chat = this.account.chats.get(this.contact.hash_id);
+              this.chat = this.account.chats.getChat(this.contact.hash_id);
               let color = this.account.settings.get('color');
               this.$el.attr('data-color', color);
               this.$search_form = this.$('.search-form-header');
@@ -1715,7 +1715,7 @@ define("xabber-chats", function () {
               this.last_msg_id = 0;
               this._scrolltop = this.getScrollTop();
               this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
-              this.chat_content = options.chat_content || this.account.chats.get(this.contact.hash_id).item_view.content;
+              this.chat_content = options.chat_content || this.chat.item_view.content;
               let wheel_ev = this.defineMouseWheelEvent();
               this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
               this.$('.back-to-bottom').click(this.backToBottom.bind(this));
@@ -4652,7 +4652,7 @@ define("xabber-chats", function () {
             this.account = options.account;
             this.mam_requests = 0;
             this.deferred_mam_requests = [];
-            this.account.contacts.on("add_to_roster", this.getChat, this);
+            // this.account.contacts.on("add_to_roster", this.getChat, this);
             this.account.contacts.on("open_chat", this.openChat, this);
             this.account.contacts.on("open_mention", this.openMention, this);
             this.account.contacts.on("presence", this.onPresence, this);
@@ -4825,7 +4825,7 @@ define("xabber-chats", function () {
                     msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                     let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
                     if (pending_message) {
-                        this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, stanza_id);
+                        this.account.chats.getChat(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, stanza_id);
                         this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
                     }
                 }
