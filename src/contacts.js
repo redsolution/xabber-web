@@ -29,13 +29,15 @@ define("xabber-contacts", function () {
             initialize: function (_attrs, options) {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
-                var attrs = _.clone(_attrs);
+                let attrs = _.clone(_attrs);
                 (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, status: 'online'});
                 attrs.name = attrs.roster_name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
                     attrs.image = Images.getDefaultAvatar(attrs.name);
                 }
+                if (this.account.blocklist.isBlocked(attrs.jid))
+                    attrs.blocked = true;
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
@@ -351,6 +353,7 @@ define("xabber-contacts", function () {
                 var iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
+                this.set('blocked', true);
                 this.set('known', false);
             },
 
@@ -358,6 +361,7 @@ define("xabber-contacts", function () {
                 var iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
+                this.set('blocked', false);
             },
 
             sendPresent: function () {
@@ -767,6 +771,7 @@ define("xabber-contacts", function () {
                 this.model.on("change:private_chat", this.updateIcon, this);
                 this.model.on("change:incognito_chat", this.updateIcon, this);
                 this.model.on("change:bot", this.updateIcon, this);
+                this.model.on("change:blocked", this.onBlocked, this);
                 this.model.on("change:status_message", this.updateStatusMsg, this);
                 this.model.on("change:last_seen", this.lastSeenUpdated, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
@@ -795,6 +800,11 @@ define("xabber-contacts", function () {
                     this.model.set({ status_message: new_status });
                     }
                 }
+            },
+
+            onBlocked: function () {
+                this.updateIcon();
+                this.$el.switchClass('blocked', this.model.get('blocked'));
             },
 
             selectView: function () {
@@ -3830,13 +3840,25 @@ define("xabber-contacts", function () {
                 if (typeof attrs !== "object") {
                     attrs = {jid: attrs};
                 }
-                var contact = this.get(attrs.jid);
+                let contact = this.get(attrs.jid);
                 if (contact) {
                     contact.set(attrs);
                 } else {
                     contact = this.create(attrs, {account: this.account});
                 }
                 return contact;
+            },
+
+            blockContact: function (jid, callback, errback) {
+                let iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                    .c('item', {jid: jid});
+                this.account.sendIQ(iq, callback, errback);
+            },
+
+            unblockContact: function (jid, callback, errback) {
+                let iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
+                    .c('item', {jid: jid});
+                this.account.sendIQ(iq, callback, errback);
             },
 
             removeAllContacts: function () {
@@ -3846,33 +3868,34 @@ define("xabber-contacts", function () {
             },
 
             handlePresence: function (presence, jid) {
-                var contact = this.mergeContact(jid);
+                let contact = this.mergeContact(jid);
                 contact.handlePresence(presence);
             }
         });
 
-        xabber.BlockList = xabber.ContactsBase.extend({
+        xabber.BlockList = Backbone.Model.extend({
             initialize: function (models, options) {
                 this.account = options.account;
+                this.list = {};
                 this.contacts = this.account.contacts;
+                this.contacts.on("add_to_blocklist", this.onContactAdded, this);
                 this.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
             },
 
-            update: function (contact, event) {
-                var contains = contact.get('blocked');
-                if (contains) {
-                    if (!this.get(contact)) {
-                        this.add(contact);
-                        contact.trigger("add_to_blocklist", contact);
-                    }
-                } else if (this.get(contact)) {
-                    this.remove(contact);
-                    contact.trigger("remove_from_blocklist", contact);
-                }
+            length: function () {
+                return Object.keys(this.list).length;
             },
 
-            onContactRemoved: function (contact) {
-                contact.getVCard();
+            isBlocked: function (jid) {
+                return this.list.hasOwnProperty(jid);
+            },
+
+            onContactRemoved: function (jid) {
+                delete this.list[jid];
+            },
+
+            onContactAdded: function (attrs) {
+                this.list[attrs.jid] = attrs;
             },
 
             registerHandler: function () {
@@ -3889,17 +3912,24 @@ define("xabber-contacts", function () {
             },
 
             onBlockingIQ: function (iq) {
-                var $elem = $(iq).find('[xmlns="' + Strophe.NS.BLOCKING + '"]'),
+                let $elem = $(iq).find('[xmlns="' + Strophe.NS.BLOCKING + '"]'),
                     tag = $elem[0].tagName.toLowerCase(),
                     blocked = tag.startsWith('block');
                 $elem.find('item').each(function (idx, item) {
-                    var jid = item.getAttribute('jid'),
+                    let jid = item.getAttribute('jid'),
                         resource = Strophe.getResourceFromJid(jid),
                         domain = Strophe.getDomainFromJid(jid),
-                        attrs = {jid: jid, blocked: blocked};
+                        attrs = {jid},
+                        contact = this.contacts.get(jid);
                     resource && (attrs.resource = true);
                     (domain === jid) && (attrs.domain = true);
-                    this.account.contacts.mergeContact(attrs);
+                    if (blocked)
+                        this.contacts.trigger("add_to_blocklist", attrs);
+                    else {
+                        this.contacts.trigger("remove_from_blocklist", jid);
+                        contact && contact.trigger("remove_from_blocklist", contact);
+                    }
+                    contact && contact.set('blocked', blocked);
                 }.bind(this));
                 return true;
             }
@@ -4365,47 +4395,43 @@ define("xabber-contacts", function () {
             avatar_size: constants.AVATAR_SIZES.CONTACT_BLOCKED_ITEM,
 
             events: {
-                "click .btn-unblock": "unblockContact",
-                "click": "showDetails"
+                "click .btn-unblock": "unblockContact"
             },
 
-            _initialize: function (options) {
-                if (this.model.get('resource')) {
+            _initialize: function (attrs) {
+                this.contact = attrs.contact;
+                let cached_image = Images.getDefaultAvatar(this.contact.jid);
+                if (this.contact.resource) {
                     this.parent.$('.blocked-invitations-wrap').removeClass('hidden');
                     this.$el.appendTo(this.parent.$('.blocked-invitations'));
                 }
-                else if (this.model.get('domain')) {
+                else if (this.contact.domain) {
                     this.parent.$('.blocked-domains-wrap').removeClass('hidden');
                     let $desc = this.parent.$('.blocked-domains-wrap .blocked-item-description');
-                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.model.get('jid'));
+                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.contact.jid);
                     this.parent.$('.blocked-item-description').text();
                     this.$el.appendTo(this.parent.$('.blocked-domains'));
                 }
                 else {
                     this.parent.$('.blocked-contacts-wrap').removeClass('hidden');
                     let $desc = this.parent.$('.blocked-contacts-wrap .blocked-item-description');
-                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.model.get('jid'));
+                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.contact.jid);
                     this.$el.appendTo(this.parent.$('.blocked-contacts'));
                 }
-                this.$el.attr({'data-jid': this.model.get('jid')});
-                this.$('.jid').text(this.model.get('jid'));
-                this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
+                this.$el.attr({'data-jid': this.contact.jid});
+                this.$('.jid').text(this.contact.jid);
+                this.$('.circle-avatar').setAvatar(cached_image, this.avatar_size);
                 this.on("remove", this.onRemoved, this);
             },
 
             unblockContact: function (ev) {
                 ev.stopPropagation();
-                this.model.unblock();
-            },
-
-            showDetails: function (ev) {
-                if (!$(ev.target).closest('.blocked-invitations-wrap').length)
-                    this.model.showDetails();
+                this.parent.trigger('unblock', this.contact.jid);
             },
 
             onRemoved: function () {
                 let blocked_list = this.$el.closest('.blocked-list'),
-                    jid = this.model.get('jid'),
+                    jid = this.contact.jid,
                     reg = new RegExp(('\\,\\s' + jid + '|' + jid + '\\,\\s' + '|' + jid)),
                     blocked_contacts_desc = this.$el.closest('.blocked-contacts-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description'),
                     blocked_domains_desc = this.$el.closest('.blocked-domains-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description');
@@ -4425,6 +4451,7 @@ define("xabber-contacts", function () {
                 this.account = options.account;
                 this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
                 this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
+                this.on('unblock', this.unblockContact, this);
             },
 
             toggleItems: function (ev) {
@@ -4436,27 +4463,38 @@ define("xabber-contacts", function () {
                 this.parent.updateScrollBar();
             },
 
-            onContactAdded: function (contact) {
-                if (!contact.get('group_chat')) {
-                    this.addChild(contact.get('jid'), xabber.BlockedItemView, {model: contact});
-                    this.$('.placeholder').addClass('hidden');
-                    this.parent.updateScrollBar();
-                }
+            onContactAdded: function (attrs) {
+                this.addChild(attrs.jid, xabber.BlockedItemView, {contact: attrs});
+                this.$('.placeholder').addClass('hidden');
+                this.parent.updateScrollBar();
             },
 
-            onContactRemoved: function (contact) {
-                this.removeChild(contact.get('jid'));
-                this.$('.placeholder').hideIf(this.account.blocklist.length);
+            onContactRemoved: function (jid) {
+                this.removeChild(jid);
+                this.$('.placeholder').hideIf(this.account.blocklist.length());
                 this.parent.updateScrollBar();
             },
 
             openBlockWindow: function () {
                 utils.dialogs.ask_enter_value("Block", "Block a specific xmpp address", {input_placeholder_value: 'name@example.com'}, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
-                        let contact = this.account.contacts.mergeContact(result);
-                        contact.block();
+                        let contact = this.account.contacts.get(result);
+                        if (contact)
+                            contact.block();
+                        else {
+                            this.account.contacts.blockContact(result);
+                        }
                     }
                 }.bind(this));
+            },
+
+            unblockContact: function (jid) {
+                let contact = this.account.contacts.get(jid);
+                if (contact)
+                    contact.unblock();
+                else {
+                    this.account.contacts.unblockContact(jid);
+                }
             }
         });
 
@@ -5017,7 +5055,7 @@ define("xabber-contacts", function () {
             this.groups = new xabber.Groups(null, {account: this});
             this.contacts = new xabber.Contacts(null, {account: this});
             this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this}));
-            this.contacts.addCollection(this.blocklist = new xabber.BlockList(null, {account: this}));
+            this.blocklist = new xabber.BlockList(null, {account: this});
 
             this.settings_right.addChild('blocklist', xabber.BlockListView,
                 {account: this, el: this.settings_right.$('.blocklist-info')[0]});
