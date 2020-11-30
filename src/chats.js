@@ -4652,7 +4652,6 @@ define("xabber-chats", function () {
             this.account = options.account;
             this.mam_requests = 0;
             this.deferred_mam_requests = [];
-            // this.account.contacts.on("add_to_roster", this.getChat, this);
             this.account.contacts.on("open_chat", this.openChat, this);
             this.account.contacts.on("open_mention", this.openMention, this);
             this.account.contacts.on("presence", this.onPresence, this);
