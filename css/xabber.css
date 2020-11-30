@@ -2405,6 +2405,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: unset !important;
 }
 
+.roster-contact .chat-icon.blocked svg {
+    background-color: unset !important;
+}
+
 .roster-account-info .circle-avatar {
     position: absolute;
     width: 40px;
