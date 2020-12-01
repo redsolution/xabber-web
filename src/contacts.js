@@ -46,7 +46,6 @@ define("xabber-contacts", function () {
                 !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
-                this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
                 this.on("change:photo_hash", this.getContactInfo, this);
                 this.on("change:roster_name", this.updateName, this);
                 !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
@@ -177,6 +176,14 @@ define("xabber-contacts", function () {
                     this.updateCounters();
                     this.participants = new xabber.Participants(null, {contact: this});
                 }
+            },
+
+            getBlockedParticipants: function (callback, errback) {
+                let iq = $iq({
+                    type: 'get',
+                    to: this.get('full_jid') || this.get('jid')})
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
+                this.account.sendIQ(iq, callback, errback);
             },
 
             updateCounters: function () {
@@ -347,6 +354,76 @@ define("xabber-contacts", function () {
                 this.pres('unsubscribed');
             },
 
+            deleteWithDialog: function () {
+                let is_group = this.get('group_chat'),
+                    header = is_group ? "Delete group" : "Delete contact",
+                    msg_text = is_group ? `Do you really want to delete group ${this.get('name').bold()}?` : `Do you really want to delete ${this.get('name').bold()} from contacts?`,
+                    optional_buttons = is_group ? null : [{ name: 'delete_history', checked: false, text: 'Delete chat history'}];
+                utils.dialogs.ask(header, msg_text, optional_buttons, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        if (is_group) {
+                            let domain = this.domain,
+                                localpart = Strophe.getNodeFromJid(this.get('jid')),
+                                iq = $iq({to: domain, type: 'set'})
+                                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'}).t(localpart);
+                            this.account.sendIQ(iq, function () {
+                                this.declineSubscription();
+                                this.removeFromRoster();
+                                let chat = this.account.chats.getChat(this);
+                                chat.trigger("close_chat");
+                                xabber.body.setScreen('all-chats', {right: undefined});
+                            }.bind(this));
+                        } else {
+                            this.removeFromRoster();
+                            if (result.delete_history) {
+                                let chat = this.account.chats.getChat(this);
+                                chat.retractAllMessages(false);
+                                chat.deleteFromSynchronization();
+                                xabber.body.setScreen('all-chats', {right: undefined});
+                            }
+                            xabber.trigger("clear_search");
+                        }
+                    }
+                });
+            },
+
+            blockWithDialog: function () {
+                let is_group = this.get('group_chat'),
+                    header = is_group ? "Block group" : "Block contact",
+                    buttons = { ok_button_text: 'block'},
+                    msg_text = `Do you really want to block ${this.get('name').bold()}?`;
+                if (!is_group) {
+                    buttons.optional_button = 'block & delete';
+                    msg_text += `?\nYou will be unable to exchange messages and presence updates with ${this.get('jid').bold()}`;
+                }
+                utils.dialogs.ask(header, msg_text, null, buttons).done(function (result) {
+                    if (result) {
+                       if (!is_group) {
+                            let chat = this.account.chats.getChat(this);
+                            if (result === 'block & delete') {
+                                this.removeFromRoster();
+                                chat.retractAllMessages(false);
+                                chat.deleteFromSynchronization();
+                                chat.set('active', false);
+                            }
+                        }
+                        this.blockRequest();
+                        xabber.trigger("clear_search");
+                        if (!is_group)
+                            xabber.body.setScreen('all-chats', {right: undefined});
+                    }
+                });
+            },
+
+            unblockWithDialog: function () {
+                utils.dialogs.ask("Unblock contact", `Do you really want to unblock ${this.get('name')}?`, null, { ok_button_text: 'unblock'}).done(function (result) {
+                    if (result) {
+                        this.unblock();
+                        xabber.trigger("clear_search");
+                    }
+                });
+            },
+
             block: function (callback, errback) {
                 var iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
@@ -387,12 +464,12 @@ define("xabber-contacts", function () {
                             this.set('group_chat', true);
                             this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
                         }
-                        if (!this.details_view.child('participants')) {
+                        if (this.details_view && !this.details_view.child('participants')) {
                             this.details_view = new xabber.GroupChatDetailsView({model: this});
                         }
                         let group_chat_info = this.parseGroupInfo($(presence)),
                             prev_group_info = this.get('group_info') || {};
-                        if (this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
+                        if (this.details_view && this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
                             this.trigger('update_participants');
                         _.extend(prev_group_info, group_chat_info);
                         this.set('group_info', prev_group_info);
@@ -645,6 +722,8 @@ define("xabber-contacts", function () {
             },
 
             showDetails: function (screen) {
+                if (!this.details_view)
+                    this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
                 screen || (screen = 'contacts');
                 xabber.body.setScreen(screen, {right: 'contact_details', contact: this});
             }
@@ -1203,6 +1282,18 @@ define("xabber-contacts", function () {
                 chat.item_view.content.initJingleMessage();
             },
 
+            deleteContact: function () {
+                this.model.deleteWithDialog();
+            },
+
+            blockContact: function () {
+                this.model.blockWithDialog();
+            },
+
+            unblockContact: function () {
+                this.model.unblockWithDialog();
+            },
+
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
@@ -1213,58 +1304,6 @@ define("xabber-contacts", function () {
 
             addContact: function () {
                 xabber.add_contact_view.show({account: this.account, jid: this.model.get('jid')});
-            },
-
-            deleteContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Delete contact", "Do you really want to delete contact "+ contact.get('name').bold() +
-                    " from account " + this.account.get('jid').bold() + "?",
-                    [{ name: 'delete_history', checked: false, text: 'Delete chat history'}],
-                    { ok_button_text: 'delete'}).done(function (result) {
-                        if (result) {
-                            contact.removeFromRoster();
-                            if (result.delete_history) {
-                                let chat = this.account.chats.getChat(contact);
-                                chat.retractAllMessages(false);
-                                chat.deleteFromSynchronization();
-                                xabber.body.setScreen('all-chats', {right: undefined});
-                            }
-                            xabber.trigger("clear_search");
-                        }
-                    }.bind(this));
-            },
-
-            blockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask_extended("Block contact", "Do you really want to block " + contact.get('name').bold() +
-                    " from account " + this.account.get('jid').bold() +
-                    "?\nYou will be unable to exchange messages and presence updates with " + contact.get('jid').bold(), null,
-                    { ok_button_text: 'block', optional_button: 'block & delete'}).done(function (result) {
-                    if (result) {
-                        let chat = this.account.chats.getChat(contact);
-                        if (result === 'block & delete') {
-                            contact.removeFromRoster();
-                            chat.retractAllMessages(false);
-                            chat.deleteFromSynchronization();
-                        }
-                        contact.blockRequest();
-                        xabber.trigger("clear_search");
-                        xabber.body.setScreen('all-chats', {right: undefined});
-                        chat.set('active', false);
-                    }
-                }.bind(this));
-            },
-
-            unblockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Unblock contact", "Do you really want to unblock "+
-                    " from account " + this.account.get('jid').bold() + "?", null,
-                    { ok_button_text: 'unblock'}).done(function (result) {
-                    if (result) {
-                        contact.unblock();
-                        xabber.trigger("clear_search");
-                    }
-                });
             },
 
             requestAuthorization: function () {
@@ -1286,7 +1325,7 @@ define("xabber-contacts", function () {
                 "click .btn-qr-code": "showQRCode",
                 "click .btn-leave": "leaveGroupChat",
                 "click .btn-invite": "inviteUser",
-                "click .btn-delete-group": "deleteGroupChat",
+                "click .btn-delete-group": "deleteGroup",
                 "click .btn-edit-settings": "editProperties",
                 "click .btn-default-restrictions": "editDefaultRestrictions",
                 "click .btn-chat": "openChat",
@@ -1387,27 +1426,6 @@ define("xabber-contacts", function () {
                 this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
-            deleteGroupChat: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Delete groupchat", "Do you want to delete groupchat "+
-                    contact.get('name')+"?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        let jid = contact.get('jid'),
-                            domain = Strophe.getDomainFromJid(jid),
-                            localpart = Strophe.getNodeFromJid(jid),
-                            iq = $iq({to: domain, type: 'set'})
-                                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'}).t(localpart);
-                        this.account.sendIQ(iq, function () {
-                            contact.declineSubscription();
-                            contact.removeFromRoster();
-                            let chat = this.account.chats.getChat(contact);
-                            chat.trigger("close_chat");
-                            xabber.body.setScreen('all-chats', {right: undefined});
-                        }.bind(this));
-                    }
-                }.bind(this));
-            },
-
             showQRCode: function () {
                 let qrcode = new VanillaQR({
                     url: 'xmpp:' + this.model.get('jid'),
@@ -1502,46 +1520,16 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, callback, errback);
             },
 
-            getBlockedParticipants: function (callback, errback) {
-                let iq = $iq({
-                    type: 'get',
-                    to: this.model.get('full_jid') || this.model.get('jid')})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
-                this.account.sendIQ(iq, callback, errback);
-            },
-
-            deleteContact: function (ev) {
-                var contact = this.model;
-                utils.dialogs.ask("Delete contact", "Do you want to delete "+
-                    contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        contact.removeFromRoster();
-                        contact.trigger('archive_chat');
-                        xabber.trigger("clear_search");
-                    }
-                });
+            deleteGroup: function () {
+                this.model.deleteWithDialog();
             },
 
             blockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Block group chat", "Do you want to block "+
-                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
-                    if (result) {
-                        contact.blockRequest();
-                        xabber.trigger("clear_search");
-                    }
-                });
+                this.model.blockWithDialog();
             },
 
             unblockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Unblock contact", "Do you want to unblock "+
-                    contact.get('name')+"?", null, { ok_button_text: 'unblock'}).done(function (result) {
-                    if (result) {
-                        contact.unblock();
-                        xabber.trigger("clear_search");
-                    }
-                });
+                this.model.unblockWithDialog();
             },
 
             updateStatus: function () {
@@ -1873,7 +1861,7 @@ define("xabber-contacts", function () {
             },
 
             updateBlockedParticipants: function () {
-                this.parent.getBlockedParticipants(function (response) {
+                this.contact.getBlockedParticipants(function (response) {
                         if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active')) {
                             this.$el.html("");
                             $(response).find('query').find('user').each(function (idx, item) {
@@ -2137,8 +2125,8 @@ define("xabber-contacts", function () {
             },
 
             _initialize: function () {
+                this.contact = this.model;
                 this.account = this.model.account;
-                this.contact = this.model.model;
             },
 
             open: function (participant, data_form) {
@@ -2366,7 +2354,7 @@ define("xabber-contacts", function () {
                 utils.dialogs.ask("User messages retraction", "Do you want to delete all messages of " + (this.participant.get('nickname') || this.participant.get('jid') || this.participant.get('id')) + " in this groupchat?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         if (this.participant.get('id')) {
-                            let group_chat = this.account.chats.getChat(this.model.model);
+                            let group_chat = this.account.chats.getChat(this.contact);
                             group_chat.retractMessagesByUser(this.participant.get('id'));
                         }
                     }
@@ -2379,8 +2367,8 @@ define("xabber-contacts", function () {
                     if (result) {
                         this.participant.block(function () {
                                 this.close();
-                                this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
@@ -2398,8 +2386,8 @@ define("xabber-contacts", function () {
                     if (result) {
                         this.participant.kick(function () {
                                 this.close();
-                                this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
@@ -2573,7 +2561,7 @@ define("xabber-contacts", function () {
                     this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
                         this.$('.buttons-wrap button').removeClass('non-active');
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
+                        // this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
                         this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
                         this.close();
                     }.bind(this), function (error) {
@@ -4095,7 +4083,7 @@ define("xabber-contacts", function () {
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     if ($sync_metadata.children('deleted').length) {
-                        contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
