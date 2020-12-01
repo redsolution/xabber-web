@@ -479,16 +479,6 @@ define("xabber-contacts", function () {
                         this.set('name', prev_group_info.name);
                     this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
                 }
-                    let group_chat_info = this.parseGroupInfo($(presence)),
-                        prev_group_info = this.get('group_info') || {};
-                    if (this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
-                        this.trigger('update_participants');
-                    _.extend(prev_group_info, group_chat_info);
-                    this.set('group_info', prev_group_info);
-                    if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
-                        this.set('name', prev_group_info.name);
-                    this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
-                }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
                     if (this.get('in_roster') || this.get('subscription_preapproved')) {
