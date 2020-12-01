@@ -4528,25 +4528,24 @@ define("xabber-chats", function () {
 
         showParticipantProperties: function (participant_id, options) {
             options = options || {};
-            let participant = this.contact.participants.get(participant_id);
+            let participant = this.contact.participants.get(participant_id),
+                participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
             if (!participant) {
-                this.contact.details_view.getBlockedParticipants(function (response) {
+                this.contact.getBlockedParticipants(function (response) {
                     _.extend(options, {present: null, subscription: null});
                     if ($(response).find(`query user:has(${participant_id})`).length)
                         options.blocked = true;
                     else
                         options.blocked = false;
                     participant = new xabber.Participant(options, {contact: this.contact});
-                    this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
-                    this.contact.participants.participant_properties_panel.open(participant, {});
+                    participant_properties_panel.open(participant, {});
                 }.bind(this));
                 return;
             }
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
-            this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
             this.contact.membersRequest({id: participant_id}, function (response) {
                 let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                this.contact.participants.participant_properties_panel.open(participant, data_form);
+                participant_properties_panel.open(participant, data_form);
             }.bind(this));
         },
 
@@ -6609,7 +6608,7 @@ define("xabber-chats", function () {
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
-            this.$('.btn-delete-contact').showIf(this.contact.get('in_roster'));
+            this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
         },
 
         renderSearchPanel: function () {
@@ -6795,15 +6794,15 @@ define("xabber-chats", function () {
         },
 
         deleteContact: function () {
-            this.contact.details_view.deleteContact();
+            this.contact.deleteWithDialog();
         },
 
         blockContact: function () {
-            this.contact.details_view.blockContact();
+            this.contact.blockWithDialog();
         },
 
         unblockContact: function () {
-            this.contact.details_view.unblockContact();
+            this.contact.unblockWithDialog();
         },
 
         exportHistory: function () {
@@ -7402,12 +7401,12 @@ define("xabber-chats", function () {
 
         showAccountSettings: function () {
             if (this.contact.get('group_chat')) {
-                this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
+                let participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
                 if (this.contact.my_info && this.contact.my_rights) {
-                    this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                    participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                 } else
                     this.contact.getMyInfo(function () {
-                        this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                        participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                     }.bind(this));
             } else {
                 this.account.showSettings();
@@ -7480,9 +7479,9 @@ define("xabber-chats", function () {
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentionsList(mention_text);
                             } else {
-                                this.contact.details_view.participants.participantsRequest(function () {
+                                /*this.contact.details_view.participants.participantsRequest(function () {
                                     this.updateMentionsList(mention_text);
-                                }.bind(this));
+                                }.bind(this));*/
                             }
                     }
                     else
