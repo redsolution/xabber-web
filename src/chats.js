@@ -1705,7 +1705,7 @@ define("xabber-chats", function () {
               this.model = options.model;
               this.contact = options.contact;
               this.account = this.contact.account;
-              this.chat = this.account.chats.getChat(this.contact.hash_id);
+              this.chat = this.account.chats.getChat(this.contact);
               let color = this.account.settings.get('color');
               this.$el.attr('data-color', color);
               this.$search_form = this.$('.search-form-header');
@@ -4824,7 +4824,8 @@ define("xabber-chats", function () {
                     msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                     let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
                     if (pending_message) {
-                        this.account.chats.getChat(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, stanza_id);
+                        let chat = this.account.chats.get(pending_message.chat_hash_id);
+                        chat && chat.setStanzaId(pending_message.unique_id, stanza_id);
                         this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
                     }
                 }
