@@ -1918,7 +1918,7 @@ define("xabber-contacts", function () {
 
             _render: function () {
                 this.$el.html(this.template()).addClass('request-waiting');
-                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this});
+                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.model});
                 this.updateParticipants();
                 this.$('.members-list-wrap').perfectScrollbar({theme: 'item-list'});
                 if (!this.model.all_rights)

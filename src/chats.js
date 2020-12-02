@@ -6968,9 +6968,9 @@ define("xabber-chats", function () {
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentionsList(mention_text);
                             } else {
-                                /*this.contact.details_view.participants.participantsRequest(function () {
+                                this.contact.membersRequest({version: 0}, function () {
                                     this.updateMentionsList(mention_text);
-                                }.bind(this));*/
+                                }.bind(this));
                             }
                     }
                     else
