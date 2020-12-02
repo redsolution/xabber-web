@@ -1909,7 +1909,7 @@ define("xabber-contacts", function () {
 
             _render: function () {
                 this.$el.html(this.template()).addClass('request-waiting');
-                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this});
+                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.model});
                 this.updateParticipants();
                 this.$('.members-list-wrap').perfectScrollbar({theme: 'item-list'});
                 if (!this.model.all_rights)
@@ -4135,23 +4135,25 @@ define("xabber-contacts", function () {
                 return true;
             },
 
+            getRoster: function () {
+                let request_ver = this.roster_version;
+                this.account.cached_roster.getAllFromRoster(function (roster_items) {
+                    $(roster_items).each(function (idx, roster_item) {
+                        this.contacts.mergeContact(roster_item);
+                    }.bind(this));
+                    if (!roster_items.length && request_ver != 0) {
+                        this.roster_version = 0;
+                    }
+                    this.getFromServer();
+                }.bind(this));
+            },
+
             getFromServer: function () {
-                let request_ver = this.roster_version,
-                    iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: request_ver});
+                let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
                     this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync')});
-                    if (!$(iq).children('query').find('item').length)
-                        this.account.cached_roster.getAllFromRoster(function (roster_items) {
-                            $(roster_items).each(function (idx, roster_item) {
-                                this.contacts.mergeContact(roster_item);
-                            }.bind(this));
-                            if (!roster_items.length && request_ver != 0) {
-                                this.roster_version = 0;
-                                this.getFromServer();
-                            }
-                        }.bind(this));
                     this.account.dfd_presence.resolve();
                 }.bind(this));
             },
@@ -5062,7 +5064,7 @@ define("xabber-contacts", function () {
                     !this.roster.last_chat_msg_id && (options.max = max_count);
                     this.roster.syncFromServer(options);
                 }
-                this.roster.getFromServer();
+                this.roster.getRoster();
                 this.blocklist.getFromServer();
             }, this);
         });
