@@ -5207,7 +5207,7 @@ define("xabber-chats", function () {
                         (token_idx > -1) && this.account.x_tokens_list.splice(token_idx, 1);
                     }
                 }.bind(this));
-                this.account.settings_right.updateXTokens();
+                this.account.settings_right && this.account.settings_right.updateXTokens();
                 return;
             }
 

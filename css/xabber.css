@@ -6770,19 +6770,10 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .blocked-contact {
-    cursor: pointer;
     position: relative;
     width: 100%;
     height: 44px;
-    padding: 14px 80px 14px 44px;
-}
-
-.blocked-contact .circle-avatar {
-    position: absolute;
-    width: 32px;
-    height: 32px;
-    left: 4px;
-    top: 6px;
+    padding: 14px 80px 14px 12px;
 }
 
 .blocked-contact p {
@@ -6799,6 +6790,7 @@ input[type='range'].voice-message-volume:focus {
 
 .blocked-contact .btn-unblock {
     position: absolute;
+    cursor: pointer;
     top: 14px;
     right: 10px;
     height: 16px;

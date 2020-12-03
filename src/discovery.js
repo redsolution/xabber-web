@@ -39,6 +39,7 @@ define("xabber-discovery", function () {
 
         initialize: function (models, options) {
             this.account = options.account;
+            this.account.on('render_settings', this.render, this);
             this.connection = this.account.connection;
             this.connection.disco.addIdentity(
                 'client',
@@ -56,7 +57,6 @@ define("xabber-discovery", function () {
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
-            // this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA);
             this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         },
@@ -67,7 +67,12 @@ define("xabber-discovery", function () {
                 verbose_name: verbose_name
             });
             this.connection.disco.addFeature(namespace);
-            var view = new xabber.FeatureView({model: feature});
+        },
+
+        render: function () {
+            this.models.forEach((feature) => {
+                let view = new xabber.FeatureView({model: feature});
+            });
         }
     });
 

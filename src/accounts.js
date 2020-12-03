@@ -78,8 +78,6 @@ define("xabber-accounts", function () {
                     this.dfd_presence = new $.Deferred();
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
-                    this.settings_left = new xabber.AccountSettingsLeftView({model: this});
-                    this.settings_right = new xabber.AccountSettingsRightView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
                     this.updateColorScheme();
                     this.settings.on("change:color", this.updateColorScheme, this);
@@ -511,7 +509,7 @@ define("xabber-accounts", function () {
                             tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                         }.bind(this));
                         this.x_tokens_list = tokens_list;
-                        this.settings_right.updateXTokens();
+                        this.settings_right && this.settings_right.updateXTokens();
                     }.bind(this));
                 },
 
@@ -746,17 +744,32 @@ define("xabber-accounts", function () {
                 },
 
                 showSettings: function (right, block_name) {
+                    let has_settings_right = !_.isUndefined(this.settings_right);
+                    if (!this.settings_left)
+                        this.settings_left = new xabber.AccountSettingsLeftView({model: this});
+                    if (!has_settings_right)
+                        this.settings_right = new xabber.AccountSettingsRightView({model: this});
+                    this.updateColorScheme();
                     xabber.body.setScreen('account_settings', {
                         account: this, right: right, block_name: block_name
                     });
                     this.trigger('open_settings');
+                    if (!has_settings_right) {
+                        this.trigger('render_settings');
+                        this.settings_right.addChild('blocklist', xabber.BlockListView, {
+                            account: this,
+                            el: this.settings_right.$('.blocklist-info')[0]
+                        });
+                    }
                 },
 
                 updateColorScheme: function () {
                     let color = this.settings.get('color');
-                    this.settings_left.$el.attr('data-color', color);
-                    this.settings_right.$el.attr('data-color', color);
-                    this.settings_right.$('.account-color .current-color-name').text(color);
+                    this.settings_left && this.settings_left.$el.attr('data-color', color);
+                    if (this.settings_right) {
+                        this.settings_right.$el.attr('data-color', color);
+                        this.settings_right.$('.account-color .current-color-name').text(color);
+                    }
                     this.vcard_edit.$el.attr('data-color', color);
                 },
 
@@ -847,7 +860,7 @@ define("xabber-accounts", function () {
                         }.bind(this), null, 'presence', null);
                 },
 
-            onSyncedIQ: function (iq) {
+                onSyncedIQ: function (iq) {
                     let $synced_iq = $(iq),
                         $conversation = $synced_iq.find('conversation'),
                         chat_jid = $conversation.attr('jid'),
@@ -861,8 +874,8 @@ define("xabber-accounts", function () {
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
                     }
-			return true;
-            },
+                    return true;
+                },
 
                 onGetIQ: function (iq) {
                     let $incoming_iq = $(iq),
