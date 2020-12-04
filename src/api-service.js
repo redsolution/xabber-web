@@ -407,6 +407,8 @@ define("xabber-api-service", function () {
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
+                if (!xabber.sync_settings_view)
+                    xabber.sync_settings_view = new xabber.SyncSettingsView({model: this});
                 this.trigger('open_sync_window', data);
             } else {
                 this.fetch_from_server(data);
@@ -1259,7 +1261,6 @@ define("xabber-api-service", function () {
 
         this.xabber_login_panel = xabber.login_page.addChild(
             'xabber_login', this.XabberLoginPanel, {model: this.api_account});
-        this.sync_settings_view = new this.SyncSettingsView({model: this.api_account});
 
         this.settings_view.addChild('api-account', this.APIAccountView,
             {model: this.api_account});

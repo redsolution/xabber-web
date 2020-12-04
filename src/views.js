@@ -965,6 +965,8 @@ define("xabber-views", function () {
         },
 
         showAbout: function () {
+            if (!xabber.about_view)
+                xabber.about_view = xabber.wide_panel.addChild('about', xabber.AboutView, {model: xabber});
             xabber.body.setScreen('about');
         },
 
@@ -1651,8 +1653,6 @@ define("xabber-views", function () {
             'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
         this.settings_view = this.wide_panel.addChild(
             'settings', this.SettingsView, {model: this._settings});
-        this.about_view = this.wide_panel.addChild(
-            'about', this.AboutView, {model: this});
     }, xabber);
 
     return xabber;
