@@ -4755,20 +4755,20 @@ define("xabber-chats", function () {
                     if (!photo_id) {
                         let image = Images.getDefaultAvatar(contact.get('name'));
                         contact.cached_image = Images.getCachedImage(image);
-                        xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: "", avatar: image, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                         contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
                         contact.set('photo_hash', null);
                         contact.set('image', image);
+                        contact.updateCachedInfo();
                         return;
                     }
                     if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
                         return;
                     contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
                         contact.cached_image = Images.getCachedImage(data_avatar);
-                        xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: photo_id, avatar: data_avatar, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                         contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
                         contact.set('photo_hash', photo_id);
                         contact.set('image', data_avatar);
+                        contact.updateCachedInfo();
                     }.bind(this));
                 }
             }

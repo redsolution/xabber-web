@@ -51,8 +51,12 @@ define("xabber-strophe", function () {
             return utf16to8(auth_str);
         };
 
-        Strophe.ConnectionManager = function (CONNECTION_URL) {
-            this.connection = new Strophe.Connection(CONNECTION_URL);
+        Strophe.ConnectionManager = function (CONNECTION_URL, options) {
+            options = options || {};
+            if (options['x-token'])
+                this.connection = new Strophe.ConnectionByToken(CONNECTION_URL);
+            else
+                this.connection = new Strophe.Connection(CONNECTION_URL);
         };
 
         Strophe.ConnectionManager.prototype = {
@@ -84,7 +88,10 @@ define("xabber-strophe", function () {
             }
         };
 
-        _.extend(Strophe.Connection.prototype, {
+        Strophe.ConnectionByToken = Strophe.Connection;
+        Strophe.ConnectionByToken.prototype = _.clone(Strophe.Connection.prototype);
+
+        _.extend(Strophe.ConnectionByToken.prototype, {
             _sasl_auth1_cb: function (elem) {
                 this.features = elem;
                 var i, child;

@@ -68,7 +68,7 @@ define("xabber-accounts", function () {
                     this.xabber_auth = {};
                     this.session.on("change:connected", this.onChangedConnected, this);
                     this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
-                    this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                    this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
                     this.connection = this.conn_manager.connection;
                     this.get('x_token') && (this.connection.x_token = this.get('x_token'));
                     this.on("destroy", this.onDestroy, this);
@@ -96,7 +96,7 @@ define("xabber-accounts", function () {
                     this.once("start", this.start, this);
                     xabber.api_account.on("settings_result", function (result) {
                         if (result && this.settings.get('token')) {
-                            this.save({auth_type: 'token', password: ''});
+                            this.save({auth_type: 'token'/*, password: ''*/});
                         }
                         this.trigger('start');
                     }, this);
@@ -280,9 +280,27 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
+                createOptionalConnection: function (auth_type, callback) {
+                    let jid = this.get('jid'),
+                        password = this.getPassword();
+                    auth_type = auth_type || 'password';
+                    let optional_connection = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                    optional_connection.connect(auth_type, jid, password, callback);
+                    return optional_connection;
+                },
+
+                createInterfaceConnection: function () {
+                    this.interface_conn_manager = this.createOptionalConnection();
+                },
+
+
+                createBackgroundConnection: function () {
+                    this.background_conn_manager = this.createOptionalConnection();
+                },
+
                 connect: function (options) {
                     options = options || {};
-                    var jid = this.get('jid'),
+                    let jid = this.get('jid'),
                         auth_type = this.get('auth_type'),
                         password;
                     jid += '/xabber-web-' + xabber.get('client_id');
@@ -350,7 +368,7 @@ define("xabber-accounts", function () {
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
                         if (this.connection.x_token) {
-                            this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
+                            this.save({auth_type: 'x-token', x_token: this.connection.x_token/*, password: null*/});
                             this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
