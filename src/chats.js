@@ -2927,11 +2927,13 @@ define("xabber-chats", function () {
                 this.startUploadFile(message, $message);
             }
 
-            if (is_scrolled_to_bottom || message.get('submitted_here')) {
-                this.scrollToBottom();
-            } else {
-                this.updateScrollBar();
-                this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+            if (this.isVisible()) {
+                if (is_scrolled_to_bottom || message.get('submitted_here')) {
+                    this.scrollToBottom();
+                } else {
+                    this.updateScrollBar();
+                    this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+                }
             }
 
             if (!(message.get('synced_from_server') || message.get('is_archived'))) {
@@ -6741,6 +6743,8 @@ define("xabber-chats", function () {
         },
 
         inviteUsers: function () {
+            if (!xabber.invite_panel)
+                xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
             xabber.invite_panel.open(this.account, this.contact);
         },
 
@@ -8170,6 +8174,8 @@ define("xabber-chats", function () {
                 msg && msgs.push(msg);
             }.bind(this));
             this.resetSelectedMessages();
+            if (!xabber.forward_panel)
+                xabber.forward_panel = new xabber.ForwardPanelView({ model: xabber.opened_chats });
             xabber.forward_panel.open(msgs, this.account);
         },
 
@@ -8376,13 +8382,10 @@ define("xabber-chats", function () {
                 this.ChatBottomContainer);
         this.chat_placeholder = this.right_panel.addChild('chat_placeholder',
                 this.ChatPlaceholderView);
-        this.forward_panel = new this.ForwardPanelView({ model: this.opened_chats });
-
-        this.invite_panel = new this.InvitationPanelView({ model: this.opened_chats });
-
-        this.add_group_chat_view = new this.AddGroupChatView();
 
         this.on("add_group_chat", function (attrs) {
+            if (!this.add_group_chat_view)
+                this.add_group_chat_view = new this.AddGroupChatView();
             this.add_group_chat_view.show(attrs);
         }, this);
 

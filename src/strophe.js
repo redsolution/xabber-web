@@ -51,8 +51,9 @@ define("xabber-strophe", function () {
             return utf16to8(auth_str);
         };
 
-        Strophe.ConnectionManager = function (CONNECTION_URL) {
-            this.connection = new Strophe.Connection(CONNECTION_URL);
+        Strophe.ConnectionManager = function (CONNECTION_URL, options) {
+            options = options || {};
+            this.connection = new Strophe.Connection(CONNECTION_URL, options);
         };
 
         Strophe.ConnectionManager.prototype = {
@@ -87,7 +88,7 @@ define("xabber-strophe", function () {
         _.extend(Strophe.Connection.prototype, {
             _sasl_auth1_cb: function (elem) {
                 this.features = elem;
-                var i, child;
+                let i, child;
                 for (i = 0; i < elem.childNodes.length; i++) {
                     child = elem.childNodes[i];
                     if (child.nodeName === 'bind') {
@@ -98,7 +99,7 @@ define("xabber-strophe", function () {
                         this.do_session = true;
                     }
 
-                    if ((child.nodeName === 'x-token') && (child.namespaceURI === Strophe.NS.AUTH_TOKENS)) {
+                    if ((child.nodeName === 'x-token') && child.namespaceURI === Strophe.NS.AUTH_TOKENS && this.options['x-token']) {
                         this.x_token_auth = true;
                     }
 

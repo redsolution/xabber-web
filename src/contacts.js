@@ -46,12 +46,12 @@ define("xabber-contacts", function () {
                 !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
-                this.on("change:photo_hash", this.getContactInfo, this);
+                this.on("update_avatar", this.updateAvatar, this);
                 this.on("change:roster_name", this.updateName, this);
                 !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
                 this.account.dfd_presence.done(function () {
-                    if (!this.get('blocked'))
-                        this.getContactInfo();
+                    if (!this.get('blocked') && !this.get('vcard_updated'))
+                        this.getVCard();
                 }.bind(this));
             },
 
@@ -108,28 +108,18 @@ define("xabber-contacts", function () {
                 return;
             },
 
-            getContactInfo: function () {
-                xabber.cached_contacts_info.getContactInfo(this.get('jid'), function (contact_info) {
-                    if (!_.isNull(contact_info)) {
-                        if ((contact_info.hash === this.get('photo_hash')) || contact_info.hash && !this.get('photo_hash') && !_.isNull(this.get('photo_hash'))) {
-                            this.cached_image = Images.getCachedImage(contact_info.avatar);
-                            contact_info.avatar_priority && this.set('avatar_priority', contact_info.avatar_priority);
-                            this.set('photo_hash', contact_info.hash);
-                            this.set('image', contact_info.avatar);
-                        }
-                        if (!this.get('roster_name') && contact_info.name)
-                            this.set('name', contact_info.name);
+            updateAvatar: function () {
+                this.account.cached_roster.getFromRoster(this.get('jid'), (cached_info) => {
+                    if (cached_info && this.get('photo_hash') === cached_info.photo_hash)
                         return;
-                    }
-                    if (!this.get('group_chat'))
-                        this.getVCard();
-                }.bind(this));
+                    this.getVCard();
+                });
             },
 
             getVCard: function (callback) {
-                var jid = this.get('jid'),
+                let jid = this.get('jid'),
                     is_callback = _.isFunction(callback);
-                this.account.connection.vcard.get(jid,
+                (this.account.background_connection || this.account.connection).vcard.get(jid,
                     function (vcard) {
                         if (vcard.group_info) {
                             let group_info = this.get('group_info') || {};
@@ -158,19 +148,36 @@ define("xabber-contacts", function () {
                             this.cached_image = Images.getCachedImage(attrs.image);
                         }
                         this.set(attrs);
-                        let cached_info = {
-                            jid: this.get('jid'),
-                            name: this.get('name')
-                        };
-                        if (this.get('photo_hash') || vcard.photo.image)
-                            _.extend(cached_info, {hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar_priority: this.get('avatar_priority'), avatar: this.get('image')});
-                        xabber.cached_contacts_info.putContactInfo(cached_info);
+                        if (this.get('in_roster')) {
+                            this.updateCachedInfo();
+                        }
                         is_callback && callback(vcard);
                     }.bind(this),
                     function () {
                         is_callback && callback(null);
                     }
                 );
+            },
+
+            updateCachedInfo: function () {
+                let roster_info = {
+                    jid: this.get('jid'),
+                    in_roster: this.get('in_roster'),
+                    groups: this.get('groups'),
+                    subscription: this.get('subscription'),
+                    roster_name: this.get('roster_name'),
+                    subscription_request_out: this.get('subscription_request_out'),
+                    subscription_request_in: this.get('subscription_request_in'),
+                    name: this.get('name'),
+                    vcard_updated: this.get('vcard_updated')
+                };
+                if (this.get('photo_hash') || this.get('image'))
+                    _.extend(roster_info, {
+                        photo_hash: (this.get('photo_hash') || this.account.getAvatarHash(this.get('image'))),
+                        avatar_priority: this.get('avatar_priority'),
+                        avatar: this.get('image')
+                    });
+                this.account.cached_roster.putInRoster(roster_info);
             },
 
             onChangedGroupchat: function () {
@@ -254,7 +261,7 @@ define("xabber-contacts", function () {
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
-                this.account.sendIQ(iq_request_avatar, function (iq) {
+                this.account.sendIQinBackground(iq_request_avatar, function (iq) {
                     var pubsub_avatar = $(iq).find('data').text();
                     if (pubsub_avatar == "")
                         errback && errback("Node is empty");
@@ -276,8 +283,8 @@ define("xabber-contacts", function () {
                         .c('item', {id: avatar_hash})
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                this.account.sendIQ(iq_pub_data, function () {
-                        this.account.sendIQ(iq_pub_metadata, function () {
+                this.account.sendIQinBackground(iq_pub_data, function () {
+                        this.account.sendIQinBackground(iq_pub_metadata, function () {
                                 callback && callback(avatar_hash);
                             }.bind(this),
                             function (data_error) {
@@ -321,7 +328,7 @@ define("xabber-contacts", function () {
                 var iq = $iq({type: 'set'})
                     .c('query', {xmlns: Strophe.NS.ROSTER})
                     .c('item', {jid: this.get('jid'), subscription: "remove"});
-                this.account.cached_roster.removeFromCachedRoster(this.get('jid'));
+                this.account.cached_roster.removeFromRoster(this.get('jid'));
                 this.account.sendIQ(iq, callback, errback);
                 this.set('known', false);
                 return this;
@@ -459,6 +466,7 @@ define("xabber-contacts", function () {
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                     this.set('photo_hash', $vcard_update.find('photo').text());
+                this.trigger('update_avatar');
                 let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
                 if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
                     this.set('full_jid', $presence.attr('from'));
@@ -4205,7 +4213,7 @@ define("xabber-contacts", function () {
                         subscription: undefined,
                         subscription_request_out: false
                     });
-                    this.account.cached_roster.removeFromCachedRoster(jid);
+                    this.account.cached_roster.removeFromRoster(jid);
                     return;
                 }
                 var groups = [];
@@ -4213,7 +4221,7 @@ define("xabber-contacts", function () {
                     var group = $(this).text();
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
-                var attrs = {
+                let attrs = {
                     subscription: subscription,
                     in_roster: true,
                     roster_name: item.getAttribute("name"),
@@ -4229,9 +4237,9 @@ define("xabber-contacts", function () {
                     attrs.subscription_request_out = false;
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
-                this.account.cached_roster.putInRoster(_.extend(_.clone(attrs), {jid: jid}));
                 attrs.roster_name && (attrs.name = attrs.roster_name);
                 contact.set(attrs);
+                contact.updateCachedInfo();
             }
         });
 
@@ -4963,24 +4971,6 @@ define("xabber-contacts", function () {
             }
         });
 
-        xabber.CachedContactsInfo = Backbone.ModelWithDataBase.extend({
-            defaults: {
-                contacts: []
-            },
-
-            putContactInfo: function (value, callback) {
-                this.database.put('contacts', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            },
-
-            getContactInfo: function (value, callback) {
-                this.database.get('contacts', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            }
-        });
-
         xabber.CachedRoster = Backbone.ModelWithDataBase.extend({
             putInRoster: function (value, callback) {
                 this.database.put('roster_items', value, function (response_value) {
@@ -4988,7 +4978,7 @@ define("xabber-contacts", function () {
                 });
             },
 
-            getItemFromRoster: function (value, callback) {
+            getFromRoster: function (value, callback) {
                 this.database.get('roster_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
@@ -5000,7 +4990,7 @@ define("xabber-contacts", function () {
                 });
             },
 
-            removeFromCachedRoster: function (value, callback) {
+            removeFromRoster: function (value, callback) {
                 this.database.remove('roster_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
@@ -5064,11 +5054,6 @@ define("xabber-contacts", function () {
             this.settings.roster = this._roster_settings.attributes;
             this.roster_settings_view = xabber.settings_view.addChild(
                 'roster_settings', this.RosterSettingsView, {model: this._roster_settings});
-            this.cached_contacts_info = new xabber.CachedContactsInfo(null, {
-                name:'cached-contacts-list',
-                objStoreName: 'contacts',
-                primKey: 'jid'
-            });
             this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
                 {model: this.accounts});
             this.roster_view = this.body.addChild('roster', this.RosterRightView,
