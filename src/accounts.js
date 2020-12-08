@@ -194,11 +194,19 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQ: function () {
-                    var res = this.connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
                         this.connection.sendIQ.apply(this.connection, arguments);
                     } else {
                         this._pending_stanzas.push({stanza: arguments});
+                    }
+                    return res;
+                },
+
+                sendIQinBackground: function () {
+                    let res = this.background_connection.authenticated && this.get('status') !== 'offline';
+                    if (res) {
+                        this.background_connection.sendIQ.apply(this.background_connection, arguments);
                     }
                     return res;
                 },
@@ -280,22 +288,13 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                createOptionalConnection: function (auth_type, callback) {
+                createBackgroundConnection: function (auth_type) {
                     let jid = this.get('jid'),
                         password = this.getPassword();
                     auth_type = auth_type || 'password';
-                    let optional_connection = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                    optional_connection.connect(auth_type, jid, password, callback);
-                    return optional_connection;
-                },
-
-                createInterfaceConnection: function () {
-                    this.interface_conn_manager = this.createOptionalConnection();
-                },
-
-
-                createBackgroundConnection: function () {
-                    this.background_conn_manager = this.createOptionalConnection();
+                    this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                    this.background_connection = this.background_conn_manager.connection;
+                    this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
                 },
 
                 connect: function (options) {
@@ -331,6 +330,7 @@ define("xabber-accounts", function () {
                     });
                     this.restoreStatus();
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
+                    this.createBackgroundConnection();
                 },
 
                 reconnect: function () {
@@ -574,6 +574,12 @@ define("xabber-accounts", function () {
                     }.bind(this));
                 },
 
+                onBackgroundConnected: function () {
+                    _.each(this._after_background_connected_plugins, function (plugin) {
+                        plugin.call(this);
+                    }.bind(this));
+                },
+
                 onReconnected: function () {
                     this.connFeedback('Connected');
                     this.afterConnected();
@@ -590,12 +596,6 @@ define("xabber-accounts", function () {
                     /*setTimeout(function () {
                         this.sendPendingMessages();
                     }.bind(this), 5000);*/
-                },
-
-                activateXabberRewrite: function () {
-                    var retractions_query = $iq({from: this.get('jid'), type: 'set', to: this.get('jid')})
-                        .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE});
-                    this.sendIQ(retractions_query);
                 },
 
                 sendPendingStanzas: function () {
@@ -620,6 +620,8 @@ define("xabber-accounts", function () {
 
                 _after_connected_plugins: [],
                 _after_reconnected_plugins: [],
+                _after_background_connected_plugins: [],
+                _after_background_reconnected_plugins: [],
 
                 onDisconnected: function () {
                     this.disconnected_timestamp = this.last_stanza_timestamp;
@@ -1001,6 +1003,11 @@ define("xabber-accounts", function () {
                 addConnPlugin: function (func, conn, reconn) {
                     conn && this.prototype._after_connected_plugins.push(func);
                     reconn && this.prototype._after_reconnected_plugins.push(func);
+                },
+
+                addBackgorundConnPlugin: function (func, conn, reconn) {
+                    conn && this.prototype._after_background_connected_plugins.push(func);
+                    reconn && this.prototype._after_background_reconnected_plugins.push(func);
                 }
             });
 

@@ -115,9 +115,9 @@ define("xabber-contacts", function () {
             },
 
             getVCard: function (callback) {
-                var jid = this.get('jid'),
+                let jid = this.get('jid'),
                     is_callback = _.isFunction(callback);
-                this.account.connection.vcard.get(jid,
+                (this.account.background_connection || this.account.connection).vcard.get(jid,
                     function (vcard) {
                         if (vcard.group_info) {
                             let group_info = this.get('group_info') || {};
@@ -259,7 +259,7 @@ define("xabber-contacts", function () {
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
-                this.account.sendIQ(iq_request_avatar, function (iq) {
+                this.account.sendIQinBackground(iq_request_avatar, function (iq) {
                     var pubsub_avatar = $(iq).find('data').text();
                     if (pubsub_avatar == "")
                         errback && errback("Node is empty");
@@ -281,8 +281,8 @@ define("xabber-contacts", function () {
                         .c('item', {id: avatar_hash})
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                this.account.sendIQ(iq_pub_data, function () {
-                        this.account.sendIQ(iq_pub_metadata, function () {
+                this.account.sendIQinBackground(iq_pub_data, function () {
+                        this.account.sendIQinBackground(iq_pub_metadata, function () {
                                 callback && callback(avatar_hash);
                             }.bind(this),
                             function (data_error) {
@@ -5052,11 +5052,6 @@ define("xabber-contacts", function () {
             this.settings.roster = this._roster_settings.attributes;
             this.roster_settings_view = xabber.settings_view.addChild(
                 'roster_settings', this.RosterSettingsView, {model: this._roster_settings});
-            /*this.cached_contacts_info = new xabber.CachedContactsInfo(null, {
-                name:'cached-contacts-list',
-                objStoreName: 'contacts',
-                primKey: 'jid'
-            });*/
             this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
                 {model: this.accounts});
             this.roster_view = this.body.addChild('roster', this.RosterRightView,
