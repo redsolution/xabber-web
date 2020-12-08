@@ -204,11 +204,12 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQinBackground: function () {
-                    let res = this.background_connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.background_connection && this.background_connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
                         this.background_connection.sendIQ.apply(this.background_connection, arguments);
-                    }
-                    return res;
+                        return res;
+                    } else
+                        return this.sendIQ.apply(this, arguments);
                 },
 
                 parseDataForm: function ($dataform, options) {
@@ -291,9 +292,14 @@ define("xabber-accounts", function () {
                 createBackgroundConnection: function (auth_type) {
                     let jid = this.get('jid'),
                         password = this.getPassword();
+                    if (!password)
+                        return;
                     auth_type = auth_type || 'password';
-                    this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                    this.background_connection = this.background_conn_manager.connection;
+                    if (!this.background_conn_manager) {
+                        this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                        this.background_connection = this.background_conn_manager.connection;
+                    } else
+                        this.background_connection.disconnect();
                     this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
                 },
 
@@ -349,6 +355,7 @@ define("xabber-accounts", function () {
                         this.connFeedback('Connecting...');
                         this.restoreStatus();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
+                        this.createBackgroundConnection();
                     }.bind(this), timeout);
                 },
 
@@ -574,10 +581,15 @@ define("xabber-accounts", function () {
                     }.bind(this));
                 },
 
-                onBackgroundConnected: function () {
-                    _.each(this._after_background_connected_plugins, function (plugin) {
-                        plugin.call(this);
-                    }.bind(this));
+                onBackgroundConnected: function (status) {
+                    if (status === Strophe.Status.CONNECTED) {
+                        _.each(this._after_background_connected_plugins, function (plugin) {
+                            plugin.call(this);
+                        }.bind(this));
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.background_conn_manager = undefined;
+                        this.background_connection = undefined;
+                    }
                 },
 
                 onReconnected: function () {
@@ -1005,7 +1017,7 @@ define("xabber-accounts", function () {
                     reconn && this.prototype._after_reconnected_plugins.push(func);
                 },
 
-                addBackgorundConnPlugin: function (func, conn, reconn) {
+                addBackgroundConnPlugin: function (func, conn, reconn) {
                     conn && this.prototype._after_background_connected_plugins.push(func);
                     reconn && this.prototype._after_background_reconnected_plugins.push(func);
                 }
