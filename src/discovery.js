@@ -244,7 +244,7 @@ define("xabber-discovery", function () {
         this.server_features.request();
     }, true, true);
 
-    xabber.Account.addBackgorundConnPlugin(function () {
+    xabber.Account.addBackgroundConnPlugin(function () {
         this.last_background_stanza_timestamp = moment.now();
 
         this.background_connection.deleteHandler(this._last_background_stanza_handler);
