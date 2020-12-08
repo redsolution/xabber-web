@@ -326,6 +326,7 @@ define("xabber-accounts", function () {
                         this.password_view.show(attrs);
                         return;
                     }
+                    this.createBackgroundConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -336,7 +337,6 @@ define("xabber-accounts", function () {
                     });
                     this.restoreStatus();
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
-                    this.createBackgroundConnection();
                 },
 
                 reconnect: function () {
@@ -608,6 +608,14 @@ define("xabber-accounts", function () {
                     /*setTimeout(function () {
                         this.sendPendingMessages();
                     }.bind(this), 5000);*/
+                },
+
+                getAllMessageRetractions: function (encrypted, callback) {
+                    let query_options = {xmlns: Strophe.NS.REWRITE, version: (encrypted && this.omemo) ? this.omemo.getRetractVersion() : this.retraction_version};
+                    encrypted && (query_options.type = 'encrypted');
+                    let retractions_query = $iq({type: 'get'})
+                        .c('query', query_options);
+                    this.sendIQ(retractions_query, callback);
                 },
 
                 sendPendingStanzas: function () {
