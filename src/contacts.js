@@ -462,29 +462,30 @@ define("xabber-contacts", function () {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
+                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                     this.set('photo_hash', $vcard_update.find('photo').text());
                     this.trigger('update_avatar');
-                    let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
-                    if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
-                        this.set('full_jid', $presence.attr('from'));
-                        if (!this.get('group_chat')) {
-                            this.set('group_chat', true);
-                            this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
-                        }
-                        if (this.details_view && !this.details_view.child('participants')) {
-                            this.details_view = new xabber.GroupChatDetailsView({model: this});
-                        }
-                        let group_chat_info = this.parseGroupInfo($(presence)),
-                            prev_group_info = this.get('group_info') || {};
-                        if (this.details_view && this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
-                            this.trigger('update_participants');
-                        _.extend(prev_group_info, group_chat_info);
-                        this.set('group_info', prev_group_info);
-                        if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
-                            this.set('name', prev_group_info.name);
-                        this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
+                }
+                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                    this.set('full_jid', $presence.attr('from'));
+                    if (!this.get('group_chat')) {
+                        this.set('group_chat', true);
+                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
                     }
+                    if (this.details_view && !this.details_view.child('participants')) {
+                        this.details_view = new xabber.GroupChatDetailsView({model: this});
+                    }
+                    let group_chat_info = this.parseGroupInfo($(presence)),
+                        prev_group_info = this.get('group_info') || {};
+                    if (this.details_view && this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
+                        this.trigger('update_participants');
+                    _.extend(prev_group_info, group_chat_info);
+                    this.set('group_info', prev_group_info);
+                    if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
+                        this.set('name', prev_group_info.name);
+                    this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
+                }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
                     if (this.get('in_roster') || this.get('subscription_preapproved')) {

@@ -3574,7 +3574,7 @@ define("xabber-chats", function () {
                 unique_id = message.get('unique_id'),
                 msg_id = message.get('msgid'),
                 stanza = $msg({
-                    from: this.account.jid,
+                    // from: this.account.jid,
                     to: this.model.get('jid'),
                     type: 'chat',
                     id: msg_id
@@ -3698,7 +3698,7 @@ define("xabber-chats", function () {
             }
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
-            this.account.sendMsg(stanza, function () {
+            this.account.sendMsgFastly(stanza, function () {
                 if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                     setTimeout(function () {
                         if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -4685,6 +4685,14 @@ define("xabber-chats", function () {
         registerMessageHandler: function () {
             this.account.connection.deleteHandler(this._msg_handler);
             this._msg_handler = this.account.connection.addHandler(function (message) {
+                this.receiveMessage(message);
+                return true;
+            }.bind(this), null, 'message');
+        },
+
+        registerFastMessageHandler: function () {
+            this.account.fast_connection.deleteHandler(this._fast_msg_handler);
+            this._fast_msg_handler = this.account.fast_connection.addHandler(function (message) {
                 this.receiveMessage(message);
                 return true;
             }.bind(this), null, 'message');
@@ -7815,6 +7823,10 @@ define("xabber-chats", function () {
             }
             return true;
         }.bind(this));
+    }, true, true);
+
+    xabber.Account.addFastConnPlugin(function () {
+        this.chats.registerFastMessageHandler();
     }, true, true);
 
     xabber.once("start", function () {

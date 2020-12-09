@@ -274,6 +274,39 @@ define("xabber-discovery", function () {
         }.bind(this));
     }, true, true);
 
+    xabber.Account.addFastConnPlugin(function () {
+        this.last_fast_stanza_timestamp = moment.now();
+
+        this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
+        this._last_fast_stanza_handler = this.fast_connection.addHandler(function () {
+            this.last_fast_stanza_timestamp = moment.now();
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteHandler(this._fast_pong_handler);
+        this._fast_pong_handler = this.fast_connection.ping.addPingHandler(function (ping) {
+            this.last_fast_stanza_timestamp = moment.now();
+            this.fast_connection.ping.pong(ping);
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
+        this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, function () {
+            let downtime = moment.now() - this.last_fast_stanza_timestamp;
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                if (this.fast_connection.connected)
+                    this.fast_connection.disconnect();
+                else
+                    this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
+                this.fast_connection.ping.ping(this.fast_connection.jid);
+            }
+            return true;
+        }.bind(this));
+    }, true, true);
+
     xabber.Account.addConnPlugin(function () {
         var disco = this.connection.disco;
         this.connection.addHandler(disco._onDiscoInfo.bind(disco),

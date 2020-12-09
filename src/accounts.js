@@ -135,6 +135,17 @@ define("xabber-accounts", function () {
                     return res;
                 },
 
+                sendMsgFastly: function (stanza, callback) {
+                    var res = this.fast_connection && this.fast_connection.authenticated && this.get('status') !== 'offline';
+                    if (res) {
+                        this.fast_connection.send(stanza);
+                        callback && callback();
+                        return res;
+                    } else {
+                        return this.sendMsg(stanza, callback);
+                    }
+                },
+
                 pubAvatar: function (image, callback, errback) {
                     if (!image) {
                         this.removeAvatar(callback, errback);
@@ -301,6 +312,20 @@ define("xabber-accounts", function () {
                     } else
                         this.background_connection.disconnect();
                     this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
+                },
+
+                createFastConnection: function (auth_type) {
+                    let jid = this.get('jid'),
+                        password = this.getPassword();
+                    if (!password)
+                        return;
+                    auth_type = auth_type || 'password';
+                    if (!this.fast_conn_manager) {
+                        this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                        this.fast_connection = this.fast_conn_manager.connection;
+                    } else
+                        this.fast_connection.disconnect();
+                    this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
                 },
 
                 connect: function (options) {
@@ -592,6 +617,17 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                onFastConnected: function (status) {
+                    if (status === Strophe.Status.CONNECTED) {
+                        _.each(this._after_fast_connected_plugins, function (plugin) {
+                            plugin.call(this);
+                        }.bind(this));
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.fast_conn_manager = undefined;
+                        this.fast_connection = undefined;
+                    }
+                },
+
                 onReconnected: function () {
                     this.connFeedback('Connected');
                     this.afterConnected();
@@ -633,7 +669,7 @@ define("xabber-accounts", function () {
                 _after_connected_plugins: [],
                 _after_reconnected_plugins: [],
                 _after_background_connected_plugins: [],
-                _after_background_reconnected_plugins: [],
+                _after_fast_connected_plugins: [],
 
                 onDisconnected: function () {
                     this.disconnected_timestamp = this.last_stanza_timestamp;
@@ -1019,7 +1055,10 @@ define("xabber-accounts", function () {
 
                 addBackgroundConnPlugin: function (func, conn, reconn) {
                     conn && this.prototype._after_background_connected_plugins.push(func);
-                    reconn && this.prototype._after_background_reconnected_plugins.push(func);
+                },
+
+                addFastConnPlugin: function (func, conn, reconn) {
+                    conn && this.prototype._after_fast_connected_plugins.push(func);
                 }
             });
 
