@@ -464,9 +464,10 @@ define("xabber-contacts", function () {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
+                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                     this.set('photo_hash', $vcard_update.find('photo').text());
-                this.trigger('update_avatar');
+                    this.trigger('update_avatar');
+                }
                 let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
                 if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
                     this.set('full_jid', $presence.attr('from'));

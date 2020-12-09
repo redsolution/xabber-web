@@ -10,37 +10,37 @@
 
       Strophe.addConnectionPlugin('caps', (function() {
         var addFeature, conn, createCapsNode, generateVerificationString, init, propertySort, removeFeature, sendPres;
-        conn = null;
+        this._connection = null;
         init = function(c) {
-          conn = c;
+          this._connection = c;
           Strophe.addNamespace('CAPS', "http://jabber.org/protocol/caps");
-          if (conn.disco === void 0) {
+          if (this._connection.disco === void 0) {
             throw new Error("disco plugin required!");
           }
           if (b64_sha1 === void 0) {
             throw new Error("SHA-1 library required!");
           }
-          conn.disco.addFeature(Strophe.NS.CAPS);
-          conn.disco.addFeature(Strophe.NS.DISCO_INFO);
+          this._connection.disco.addFeature(Strophe.NS.CAPS);
+          this._connection.disco.addFeature(Strophe.NS.DISCO_INFO);
         };
         addFeature = function(feature) {
-          return conn.disco.addFeature(feature);
+          return this._connection.disco.addFeature(feature);
         };
         removeFeature = function(feature) {
-          return conn.disco.removeFeature(feature);
+          return this._connection.disco.removeFeature(feature);
         };
         getPres = function () {
           return $pres().cnode(createCapsNode());
         };
         sendPres = function() {
-          return conn.send($pres().cnode(createCapsNode().tree()));
+          return this._connection.send($pres().cnode(createCapsNode().tree()));
         };
         createCapsNode = function(options) {
           options || (options = {});
           var node = options.node;
           if (!node) {
-            if (conn.disco._identities.length > 0) {
-              node = conn.disco._identities[0].name || "";
+            if (this._connection.disco._identities.length > 0) {
+              node = this._connection.disco._identities[0].name || "";
             } else {
               node = "strophejs";
             }
@@ -49,7 +49,7 @@
             xmlns: Strophe.NS.CAPS,
             hash: "sha-1",
             node: node,
-            ver: generateVerificationString()
+            ver: generateVerificationString.call(this)
           });
         };
         propertySort = function(array, property) {
@@ -64,13 +64,13 @@
         generateVerificationString = function() {
           var S, features, i, id, ids, k, key, ns, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
           ids = [];
-          _ref = conn.disco._identities;
+          _ref = this._connection.disco._identities;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             i = _ref[_i];
             ids.push(i);
           }
           features = [];
-          _ref1 = conn.disco._features;
+          _ref1 = this._connection.disco._features;
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             k = _ref1[_j];
             features.push(k);

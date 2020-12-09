@@ -3757,7 +3757,7 @@ define("xabber-chats", function () {
                 unique_id = message.get('unique_id'),
                 msg_id = message.get('msgid'),
                 stanza = $msg({
-                    from: this.account.jid,
+                    // from: this.account.jid,
                     to: this.model.get('jid'),
                     type: 'chat',
                     id: msg_id
@@ -3891,7 +3891,7 @@ define("xabber-chats", function () {
                         message.set('trusted', msg.is_trusted);
                     }
                     let msg_sending_timestamp = moment.now();
-                    this.account.sendMsg(stanza, function () {
+                    this.account.sendMsgFastly(stanza, function () {
                         if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                             setTimeout(function () {
                                 if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -3923,7 +3923,7 @@ define("xabber-chats", function () {
                 return;
             } else {
                 let msg_sending_timestamp = moment.now();
-                this.account.sendMsg(stanza, function () {
+                this.account.sendMsgFastly(stanza, function () {
                     if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                         setTimeout(function () {
                             if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -5030,6 +5030,14 @@ define("xabber-chats", function () {
             }.bind(this), null, 'message');
         },
 
+        registerFastMessageHandler: function () {
+            this.account.fast_connection.deleteHandler(this._fast_msg_handler);
+            this._fast_msg_handler = this.account.fast_connection.addHandler(function (message) {
+                this.receiveMessage(message);
+                return true;
+            }.bind(this), null, 'message');
+        },
+
         onStartedMAMRequest : function (deferred) {
             this.deferred_mam_requests.push(deferred);
             this.runMAMRequests();
@@ -5892,7 +5900,7 @@ define("xabber-chats", function () {
                     selection.addClass('active');
                 }
                 if (selection.hasClass('roster-contact')) {
-                    view = xabber.accounts.get(selection.data('account')).chats.get(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')).hash_id);
+                    view = xabber.accounts.get(selection.data('account')).chats.getChat(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')));
                     view && (view = view.item_view);
                     view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                     selection.addClass('active');
@@ -8335,6 +8343,10 @@ define("xabber-chats", function () {
         if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_view) {
             this.omemo_enable_view = new xabber.OMEMOEnableView({account: this});
         }
+    }, true, true);
+
+    xabber.Account.addFastConnPlugin(function () {
+        this.chats.registerFastMessageHandler();
     }, true, true);
 
     xabber.once("start", function () {

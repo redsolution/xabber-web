@@ -53,7 +53,7 @@ define("xabber-discovery", function () {
             this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
-            this.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
+            this.connection.disco.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
@@ -272,6 +272,39 @@ define("xabber-discovery", function () {
             }
             if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
                 this.background_connection.ping.ping(this.background_connection.jid);
+            }
+            return true;
+        }.bind(this));
+    }, true, true);
+
+    xabber.Account.addFastConnPlugin(function () {
+        this.last_fast_stanza_timestamp = moment.now();
+
+        this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
+        this._last_fast_stanza_handler = this.fast_connection.addHandler(function () {
+            this.last_fast_stanza_timestamp = moment.now();
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteHandler(this._fast_pong_handler);
+        this._fast_pong_handler = this.fast_connection.ping.addPingHandler(function (ping) {
+            this.last_fast_stanza_timestamp = moment.now();
+            this.fast_connection.ping.pong(ping);
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
+        this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, function () {
+            let downtime = moment.now() - this.last_fast_stanza_timestamp;
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                if (this.fast_connection.connected)
+                    this.fast_connection.disconnect();
+                else
+                    this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
+                this.fast_connection.ping.ping(this.fast_connection.jid);
             }
             return true;
         }.bind(this));
