@@ -569,7 +569,7 @@ define("xabber-views", function () {
                                   this.$('.contacts-list').append(item_list);
                               item_list.click(function () {
                                   this.$('.list-item.active').removeClass('active');
-                                  let chat = account.chats.get(contact.hash_id);
+                                  let chat = account.chats.getChat(contact);
                                   chat && xabber.chats_view.openChat(chat.item_view, {clear_search: false, screen: xabber.body.screen.get('name')});
                                   item_list.addClass('active');
                               }.bind(this));
