@@ -2343,6 +2343,8 @@ define("xabber-chats", function () {
         },
 
           render: function () {
+              if (!this.account.fast_connection)
+                  this.account.createFastConnection();
               this.cancelSearch();
               this.scrollToBottom();
               this.onScroll();
