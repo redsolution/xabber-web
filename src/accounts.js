@@ -135,7 +135,7 @@ define("xabber-accounts", function () {
                     return res;
                 },
 
-                sendMsgFastly: function (stanza, callback) {
+                sendMsgFast: function (stanza, callback) {
                     var res = this.fast_connection && this.fast_connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
                         this.fast_connection.send(stanza);
@@ -143,6 +143,23 @@ define("xabber-accounts", function () {
                         return res;
                     } else {
                         return this.sendMsg(stanza, callback);
+                    }
+                },
+
+                sendIQFast: function () {
+                    let res = this.fast_connection && this.fast_connection.authenticated && this.get('status') !== 'offline';
+                    if (res) {
+                        this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
+                        return res;
+                    } else
+                        return this.sendIQ.apply(this, arguments);
+                },
+
+                sendFast: function (stanza, callback, errback) {
+                    if ($(stanza.nodeTree).first().is('message')) {
+                        this.sendMsgFast(stanza, callback);
+                    } else {
+                        this.sendIQFast(stanza, callback, errback);
                     }
                 },
 
@@ -362,6 +379,7 @@ define("xabber-accounts", function () {
                     });
                     this.restoreStatus();
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
+                    this.createFastConnection();
                 },
 
                 reconnect: function () {
