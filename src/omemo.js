@@ -1853,6 +1853,7 @@ define("xabber-omemo", function () {
                 this.updateAvatar();
                 xabber.on("update_screen", this.onUpdatedScreen, this);
                 this.account.on("change:image", this.updateAvatar, this);
+                this.account.session.on("change:connected", this.updateConnected, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
             },
 
@@ -1877,6 +1878,11 @@ define("xabber-omemo", function () {
             onChangedVisibility: function () {
                 if (!this.isVisible())
                     this.chat_item.$el.removeClass('active');
+            },
+
+            updateConnected: function () {
+                if (!this.account.isConnected())
+                    this.close();
             },
 
             enableOmemo: function () {

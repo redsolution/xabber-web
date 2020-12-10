@@ -4071,15 +4071,13 @@ define("xabber-contacts", function () {
                     xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                     return;
                 }
-                if (this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
+                if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
                     this.account.getAllMessageRetractions(true);
-                else {
-                    if (request_with_stamp) {
-                        if (this.account.retraction_version < retract_version)
-                            this.account.getAllMessageRetractions();
-                    } else {
-                        this.account.retraction_version = retract_version;
-                    }
+                if (request_with_stamp) {
+                    if (this.account.retraction_version < retract_version)
+                        this.account.getAllMessageRetractions();
+                } else {
+                    this.account.retraction_version = retract_version;
                 }
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
