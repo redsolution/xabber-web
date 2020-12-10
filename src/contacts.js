@@ -31,7 +31,7 @@ define("xabber-contacts", function () {
                 this.account = options.account;
                 let attrs = _.clone(_attrs);
                 (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
-                attrs.name = attrs.roster_name || attrs.jid;
+                attrs.name = attrs.roster_name || attrs.name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
                     attrs.image = Images.getDefaultAvatar(attrs.name);
