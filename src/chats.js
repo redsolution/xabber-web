@@ -3928,7 +3928,7 @@ define("xabber-chats", function () {
                 return;
             } else {
                 let msg_sending_timestamp = moment.now();
-                this.account.sendMsgFastly(stanza, function () {
+                this.account.sendFast(stanza, function () {
                     if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                         setTimeout(function () {
                             if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
