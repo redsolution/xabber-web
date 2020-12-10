@@ -2269,8 +2269,6 @@ define("xabber-chats", function () {
         },
 
         render: function () {
-            if (!this.account.fast_connection)
-                this.account.createFastConnection();
             this.cancelSearch();
             this.scrollToBottom();
             this.onScroll();
@@ -2495,9 +2493,12 @@ define("xabber-chats", function () {
 
         MAMRequest: function (options, callback, errback) {
             var account = this.account,
+                is_fast = options.fast,
+                conn = is_fast ? account.fast_connection : account.connection,
                 contact = this.contact,
                 messages = [], queryid = uuid(),
                 is_groupchat = contact.get('group_chat'), success = true, iq;
+            delete options.fast;
             if (is_groupchat)
                 iq = $iq({type: 'set', to: contact.get('full_jid') || contact.get('jid')});
             else
@@ -2518,7 +2519,7 @@ define("xabber-chats", function () {
             var deferred = new $.Deferred();
             account.chats.onStartedMAMRequest(deferred);
             deferred.done(function () {
-                var handler = account.connection.addHandler(function (message) {
+                var handler = conn.addHandler(function (message) {
                     if (is_groupchat == contact.get('group_chat')) {
                         var $msg = $(message);
                         if ($msg.find('result').attr('queryid') === queryid) {
@@ -2531,9 +2532,8 @@ define("xabber-chats", function () {
                     }
                     return true;
                 }, Strophe.NS.MAM);
-                account.sendIQ(iq,
-                    function (res) {
-                        account.connection.deleteHandler(handler);
+                var callb = function (res) {
+                        conn.deleteHandler(handler);
                         account.chats.onCompletedMAMRequest(deferred);
                         var $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
                         if ($fin.length && $fin.attr('queryid') === queryid) {
@@ -2542,14 +2542,17 @@ define("xabber-chats", function () {
                             callback && callback(success, messages, rsm);
                         }
                     },
-                    function (err) {
-                        account.connection.deleteHandler(handler);
+                    errb = function (err) {
+                        conn.deleteHandler(handler);
                         xabber.error("MAM error");
                         xabber.error(err);
                         account.chats.onCompletedMAMRequest(deferred);
                         errback && errback(err);
-                    }
-                );
+                    };
+                if (is_fast)
+                    account.sendFast(iq, callb, errb);
+                else
+                    account.sendIQ(iq, callb, errb);
             });
         },
 
@@ -2640,8 +2643,9 @@ define("xabber-chats", function () {
                 return;
             }
             this.getMessageArchive({
-                max: xabber.settings.mam_messages_limit,
-                before: this.model.get('first_archive_id') || '' },
+                    fast: true,
+                    max: xabber.settings.mam_messages_limit,
+                    before: this.model.get('first_archive_id') || '' },
                 {previous_history: true
                 });
         },
@@ -3700,7 +3704,7 @@ define("xabber-chats", function () {
             }
             message.set({xml: stanza.tree()});
             let msg_sending_timestamp = moment.now();
-            this.account.sendMsgFastly(stanza, function () {
+            this.account.sendFast(stanza, function () {
                 if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                     setTimeout(function () {
                         if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
