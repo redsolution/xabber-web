@@ -29,6 +29,10 @@ define("xabber-contacts", function () {
             initialize: function (_attrs, options) {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
+                if (_attrs.avatar) {
+                    _attrs.image = _attrs.avatar;
+                    delete _attrs.avatar;
+                }
                 let attrs = _.clone(_attrs);
                 (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
                 attrs.name = attrs.roster_name || attrs.name || attrs.jid;
@@ -216,8 +220,8 @@ define("xabber-contacts", function () {
             membersRequest: function (options, callback) {
                 options = options || {};
                 let participant_id = options.id,
-                    version = options.version || 0;
-                var iq = $iq({from: this.account.get('jid'), to: this.get('full_jid') || this.get('jid'), type: 'get'});
+                    version = options.version || 0,
+                    iq = $iq({from: this.account.get('jid'), to: this.get('full_jid') || this.get('jid'), type: 'get'});
                 if (participant_id != undefined) {
                     if (!participant_id) {
                         if (options.properties)
@@ -233,7 +237,7 @@ define("xabber-contacts", function () {
                 }
                 else
                     iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
-                this.account.sendIQ(iq, function (response) {
+                this.account.sendFast(iq, function (response) {
                     callback && callback(response);
                 });
             },
@@ -4193,11 +4197,11 @@ define("xabber-contacts", function () {
             },
 
             onRosterItem: function (item) {
-                var jid = item.getAttribute('jid');
+                let jid = item.getAttribute('jid');
                 if (jid === this.account.get('jid'))
                     return;
-                var contact = this.contacts.mergeContact(jid);
-                var subscription = item.getAttribute("subscription"),
+                let contact = this.contacts.mergeContact(jid),
+                    subscription = item.getAttribute("subscription"),
                     ask = item.getAttribute("ask");
                 if (contact.get('invitation') && (subscription === 'both' || subscription === 'to')) {
                     contact.set('invitation', false);
@@ -4215,7 +4219,7 @@ define("xabber-contacts", function () {
                     this.account.cached_roster.removeFromRoster(jid);
                     return;
                 }
-                var groups = [];
+                let groups = [];
                 $(item).find('group').each(function () {
                     var group = $(this).text();
                     groups.indexOf(group) < 0 && groups.push(group);
