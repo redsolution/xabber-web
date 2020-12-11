@@ -34,6 +34,11 @@ define("xabber-contacts", function () {
                     delete _attrs.avatar;
                 }
                 let attrs = _.clone(_attrs);
+                if (attrs.resource) {
+                    attrs.full_jid = attrs.jid + '/' + attrs.resource;
+                } /*else if (attrs.group_chat) {
+                    attrs.full_jid = attrs.jid + '/Group';
+                }*/
                 (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
                 attrs.name = attrs.roster_name || attrs.name || attrs.jid;
                 if (!attrs.image) {
@@ -51,6 +56,7 @@ define("xabber-contacts", function () {
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
                 this.on("update_avatar", this.updateAvatar, this);
+                this.on("change:full_jid", this.updateCachedInfo, this);
                 this.on("change:roster_name", this.updateName, this);
                 !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
                 this.account.dfd_presence.done(function () {
@@ -172,13 +178,15 @@ define("xabber-contacts", function () {
                     subscription_request_in: this.get('subscription_request_in'),
                     name: this.get('name'),
                     vcard_updated: this.get('vcard_updated')
-                };
+                }, full_jid = this.get('full_jid');
                 if (this.get('photo_hash') || this.get('image'))
                     _.extend(roster_info, {
                         photo_hash: (this.get('photo_hash') || this.account.getAvatarHash(this.get('image'))),
                         avatar_priority: this.get('avatar_priority'),
                         avatar: this.get('image')
                     });
+                if (full_jid)
+                    roster_info.resource = Strophe.getResourceFromJid(full_jid);
                 this.account.cached_roster.putInRoster(roster_info);
             },
 
@@ -194,7 +202,7 @@ define("xabber-contacts", function () {
                     type: 'get',
                     to: this.get('full_jid') || this.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendFast(iq, callback, errback);
             },
 
             updateCounters: function () {
@@ -765,7 +773,7 @@ define("xabber-contacts", function () {
             getStatuses: function () {
                 let iq_get_properties = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'get'})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'});
-                this.account.sendIQ(iq_get_properties, function (properties) {
+                this.account.sendFast(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                     let status_field = this.data_form.fields.find(field => field.var == 'status'),
                         options = (this.data_form.fields.find(field => field.var == 'status') || []).options || [];
@@ -821,7 +829,7 @@ define("xabber-contacts", function () {
                 status_field.values = [status];
                 this.data_form.fields[idx] = status_field;
                 iq_set_status = this.account.addDataFormToStanza(iq_set_status, this.data_form);
-                this.account.sendIQ(iq_set_status);
+                this.account.sendFast(iq_set_status);
             },
 
             onHide: function () {
@@ -1530,7 +1538,7 @@ define("xabber-contacts", function () {
                     type: 'get',
                     to: this.model.get('full_jid') || this.model.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendFast(iq, callback, errback);
             },
 
             deleteGroup: function () {
@@ -1900,7 +1908,7 @@ define("xabber-contacts", function () {
                     iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('unblock', {xmlns: Strophe.NS.GROUP_CHAT + '#block' })
                         .c('jid').t(member_jid);
-                this.account.sendIQ(iq, function () {
+                this.account.sendFast(iq, function () {
                     $member_item.remove();
                     !this.$el.children().length && this.$el.html(this.$error.text('Block list is empty'));
                 }.bind(this));
@@ -2789,7 +2797,7 @@ define("xabber-contacts", function () {
                 this.$('button').blur();
                 let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
-                this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
+                this.account.sendFast(iq_get_rights, function(iq_all_rights) {
                     this.showDefaultRestrictions(iq_all_rights);
                     let dropdown_settings = {
                         inDuration: 100,
@@ -3202,9 +3210,9 @@ define("xabber-contacts", function () {
 
             events: {
                 "click .btn-chat": "openChat",
-                "click .btn-accept": "joinGroupChat",
-                "click .btn-join": "joinGroupChat",
-                "click .btn-decline": "declineContact",
+                "click .btn-accept": "join",
+                "click .btn-join": "join",
+                "click .btn-decline": "reject",
                 "click .btn-decline-all": "declineAll",
                 "click .btn-block": "blockContact",
                 "click .btn-escape": "closeInvitationView"
@@ -3291,7 +3299,7 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            joinGroupChat: function () {
+            join: function () {
                 let contact = this.model;
                 contact.acceptRequest();
                 contact.pushInRoster(null, function () {
@@ -3304,12 +3312,12 @@ define("xabber-contacts", function () {
                 this.openChat();
             },
 
-            declineContact: function () {
+            reject: function () {
                 let contact = this.model;
                 this.closeChat();
                 let iq = $iq({to: contact.get('full_jid') || contact.get('jid'), type: 'set'})
                     .c('decline', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`});
-                this.account.sendIQ(iq, () => {}, () => {
+                this.account.sendFast(iq, () => {}, () => {
                     contact.declineRequest();
                     this.blockInvitation();
                 });
@@ -3861,6 +3869,10 @@ define("xabber-contacts", function () {
                 }
                 let contact = this.get(attrs.jid);
                 if (contact) {
+                    if (attrs.avatar) {
+                        attrs.image = attrs.avatar;
+                        delete attrs.avatar;
+                    }
                     contact.set(attrs);
                 } else {
                     contact = this.create(attrs, {account: this.account});
@@ -4066,7 +4078,7 @@ define("xabber-contacts", function () {
                 }
                 delete(options.stamp);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
-                this.account.sendIQ(iq, function (response) {
+                this.account.sendFast(iq, function (response) {
                     this.onSyncIQ(response, request_attrs.stamp);
                 }.bind(this));
             },
