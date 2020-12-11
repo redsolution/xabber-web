@@ -2602,7 +2602,7 @@ define("xabber-chats", function () {
 
         MAMRequest: function (options, callback, errback) {
             var account = this.account,
-                is_fast = options.fast,
+                is_fast = options.fast && account.fast_connection,
                 conn = is_fast ? account.fast_connection : account.connection,
                 contact = this.contact,
                 messages = [], queryid = uuid(),

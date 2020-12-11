@@ -180,8 +180,8 @@ define("xabber-accounts", function () {
                             .c('item', {id: avatar_hash})
                             .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                             .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                    this.sendIQ(iq_pub_data, function () {
-                            this.sendIQ(iq_pub_metadata, function () {
+                    this.sendIQinBackground(iq_pub_data, function () {
+                            this.sendIQinBackground(iq_pub_metadata, function () {
                                     callback && callback(avatar_hash);
                                 }.bind(this),
                                 function (data_error) {
@@ -199,7 +199,7 @@ define("xabber-accounts", function () {
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('item')
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA});
-                    this.sendIQ(iq_pub_metadata, function () {
+                    this.sendIQinBackground(iq_pub_metadata, function () {
                             callback && callback();
                         }.bind(this),
                         function () {
@@ -212,7 +212,7 @@ define("xabber-accounts", function () {
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
                         .c('item', {id: avatar});
-                    this.sendIQ(iq_request_avatar, function (iq) {
+                    this.sendIQinBackground(iq_request_avatar, function (iq) {
                         var pubsub_avatar = $(iq).find('data').text();
                         if (pubsub_avatar == "")
                             errback && errback("Node is empty");
