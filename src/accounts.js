@@ -369,6 +369,7 @@ define("xabber-accounts", function () {
                         return;
                     }
                     this.createBackgroundConnection();
+                    this.createFastConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -379,7 +380,6 @@ define("xabber-accounts", function () {
                     });
                     this.restoreStatus();
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
-                    this.createFastConnection();
                 },
 
                 reconnect: function () {
