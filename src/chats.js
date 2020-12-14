@@ -1566,8 +1566,9 @@ define("xabber-chats", function () {
         },
 
         updateEmptyChat: function () {
-            let msg_time = this.model.get('timestamp');
-            this.$('.last-msg').html('No messages'.italics());
+            let msg_time = this.model.get('timestamp'),
+                is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg'));
+            this.$('.last-msg').html((is_empty ? 'Message retracted' : 'No messages').italics());
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
         },

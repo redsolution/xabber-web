@@ -4111,6 +4111,7 @@ define("xabber-contacts", function () {
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
                         $unread_messages = $sync_metadata.children('unread'),
+                        last_read_msg = $unread_messages.attr('after'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
@@ -4132,6 +4133,9 @@ define("xabber-contacts", function () {
                             session_id = $jingle_message.children('propose').attr('id');
                         chat.initIncomingCall(full_jid, session_id);
                     }
+                    chat.set('last_delivered_id', last_delivered_msg);
+                    chat.set('last_displayed_id', last_displayed_msg);
+                    chat.set('last_read_msg', last_read_msg);
                     if (!message.length) {
                         chat.set('timestamp', Math.trunc(Number($item.attr('stamp'))/1000));
                         chat.item_view.updateEmptyChat();
@@ -4149,8 +4153,6 @@ define("xabber-contacts", function () {
                     } else {
                         chat.message_retraction_version = msg_retraction_version;
                     }
-                    chat.set('last_delivered_id', last_delivered_msg);
-                    chat.set('last_displayed_id', last_displayed_msg);
                     unread_msgs_count && (options.is_unread = true);
                     options.delay = message.children('time');
                     unread_msgs_count && unread_msgs_count--;
