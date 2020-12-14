@@ -2914,6 +2914,8 @@ define("xabber-chats", function () {
         onMessage: function (message) {
             this.updateMentions(message);
             this.account.messages.add(message);
+            let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                scrolled_from_bottom = this.getScrollBottom();
             if (!_.isUndefined(message.get('is_accepted'))) {
                 this.model.set('is_accepted', false);
             }
@@ -2933,8 +2935,6 @@ define("xabber-chats", function () {
             }
 
             if (this.isVisible()) {
-                let is_scrolled_to_bottom = this.isScrolledToBottom(),
-                    scrolled_from_bottom = this.getScrollBottom();
                 if (is_scrolled_to_bottom || message.get('submitted_here')) {
                     this.scrollToBottom();
                 } else {
