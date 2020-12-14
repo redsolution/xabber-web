@@ -399,6 +399,7 @@ define("xabber-accounts", function () {
                         this.restoreStatus();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                         this.createBackgroundConnection();
+                        this.createFastConnection();
                     }.bind(this), timeout);
                 },
 

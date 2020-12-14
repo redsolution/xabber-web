@@ -2793,7 +2793,6 @@ define("xabber-chats", function () {
 
         onMessage: function (message) {
             this.updateMentions(message);
-            let scrolled_from_bottom = this.getScrollBottom();
             this.account.messages.add(message);
             if (!_.isUndefined(message.get('is_accepted'))) {
                 this.model.set('is_accepted', false);
@@ -2807,14 +2806,15 @@ define("xabber-chats", function () {
                     this.contact.trigger('update_participants');
             }
 
-            let is_scrolled_to_bottom = this.isScrolledToBottom(),
-                $message = this.addMessage(message);
+            let $message = this.addMessage(message);
 
             if (message.get('type') === 'file_upload') {
                 this.startUploadFile(message, $message);
             }
 
             if (this.isVisible()) {
+                let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                    scrolled_from_bottom = this.getScrollBottom();
                 if (is_scrolled_to_bottom || message.get('submitted_here')) {
                     this.scrollToBottom();
                 } else {
