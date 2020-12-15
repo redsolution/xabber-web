@@ -4187,7 +4187,7 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
-                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync')});
+                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: 20});
                     this.account.dfd_presence.resolve();
                 }.bind(this));
             },
