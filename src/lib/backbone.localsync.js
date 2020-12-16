@@ -34,6 +34,7 @@
         }.bind(this);
         request.onsuccess = function() {
             this.db = request.result;
+            options.model.trigger("database_opened");
         }.bind(this);
 
         this.createStore = function (db) {
@@ -235,7 +236,8 @@
 
     Backbone.ModelWithDataBase = Backbone.Model.extend({
         initialize: function (attrs, options) {
-            this.database = new IndexedDB(options);
+            options = options || {};
+            this.database = new IndexedDB(_.extend(options, {model: this}));
             this._initialize && this._initialize(attrs, options);
         },
 
