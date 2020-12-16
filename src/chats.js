@@ -905,7 +905,7 @@ define("xabber-chats", function () {
                     last_delivered_id: this.get('last_delivered_id'),
                     last_message: this.last_message ? _.clone(this.last_message).attributes : null
                 };
-            attrs.last_message && (attrs.last_message.xml = attrs.last_message.xml.outerHTML);
+            (attrs.last_message && attrs.last_message.xml) && (attrs.last_message.xml = attrs.last_message.xml.outerHTML);
             this.account.cached_chats.putChat(attrs);
         },
 
@@ -7876,7 +7876,7 @@ define("xabber-chats", function () {
                         last_message = chat.last_message;
                     created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
                     if (last_message) {
-                        last_message.xml = $(last_message)[0];
+                        last_message.xml = $(last_message.xml)[0];
                         created_chat.messages.create(chat.last_message);
                     } else {
                         created_chat.item_view.updateEmptyChat();
