@@ -905,6 +905,10 @@ define("xabber-chats", function () {
                     last_delivered_id: this.get('last_delivered_id'),
                     last_message: this.last_message ? _.clone(this.last_message).attributes : null
                 };
+            if (attrs.last_message && attrs.last_message.forwarded_message) {
+                if (attrs.last_message.forwarded_message.length)
+                    return;
+            }
             (attrs.last_message && attrs.last_message.xml) && (attrs.last_message.xml = attrs.last_message.xml.outerHTML);
             this.account.cached_chats.putChat(attrs);
         },
