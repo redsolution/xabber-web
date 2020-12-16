@@ -914,7 +914,7 @@ define("xabber-chats", function () {
         initialize: function (attrs, options) {
             this.contact = options.contact;
             this.account = this.contact.account;
-            var jid = this.contact.get('jid');
+            let jid = this.contact.get('jid');
             this.set({
                 id: attrs && attrs.id || this.contact.hash_id,
                 jid: jid
@@ -928,6 +928,25 @@ define("xabber-chats", function () {
             this.item_view = new xabber.ChatItemView({model: this});
             this.contact.on("destroy", this.onContactDestroyed, this);
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
+            this.on("change:timestamp", this.onChangedTimestamp, this);
+        },
+
+        onChangedTimestamp: function () {
+            if (this.get('timestamp') != this.get('cached_timestamp'))
+                this.cacheChat();
+        },
+
+        cacheChat: function () {
+            let jid = this.get('jid'),
+                attrs = {
+                    jid: this.get('encrypted') ? `${jid}:encrypted` : jid,
+                    timestamp: this.get('timestamp'),
+                    last_displayed_id: this.get('last_displayed_id'),
+                    last_delivered_id: this.get('last_delivered_id'),
+                    last_message: this.last_message ? _.clone(this.last_message).attributes : null
+                };
+            attrs.last_message && (attrs.last_message.xml = attrs.last_message.xml.outerHTML);
+            this.account.cached_chats.putChat(attrs);
         },
 
         recountUnread: function () {
@@ -2603,7 +2622,7 @@ define("xabber-chats", function () {
 
         MAMRequest: function (options, callback, errback) {
             var account = this.account,
-                is_fast = options.fast && account.fast_connection,
+                is_fast = options.fast && account.fast_connection && account.fast_connection.connected,
                 conn = is_fast ? account.fast_connection : account.connection,
                 contact = this.contact,
                 messages = [], queryid = uuid(),
@@ -5970,7 +5989,7 @@ define("xabber-chats", function () {
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
                 this.onUpdatedScreen();
-            } 
+            }
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
@@ -8311,6 +8330,36 @@ define("xabber-chats", function () {
         }
     });
 
+    xabber.CachedChats = Backbone.ModelWithDataBase.extend({
+        putChat: function (value, callback) {
+            this.database.put('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        getChat: function (value, callback) {
+            this.database.get('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        getAllChats: function (callback) {
+            this.database.get_all('chats_items', null, function (response_value) {
+                callback && callback(response_value || []);
+            });
+        },
+
+        removeChat: function (value, callback) {
+            this.database.remove('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        clearDataBase: function () {
+            this.database.clear_database('roster_items');
+        }
+    });
+
     xabber.Account.addInitPlugin(function () {
         this.chat_settings = new xabber.ChatSettings({id: 'chat-settings'}, {
             account: this,
@@ -8325,6 +8374,33 @@ define("xabber-chats", function () {
     });
 
     xabber.Account.addConnPlugin(function () {
+        this.cached_chats = new xabber.CachedChats(null, {
+            name:'cached-chats-list-' + this.get('jid'),
+            objStoreName: 'chats_items',
+            primKey: 'jid'
+        });
+
+        this.cached_chats.on("database_opened", () => {
+            this.cached_chats.getAllChats((chats) => {
+                chats.forEach((chat) => {
+                    let is_encrypted = chat.jid.indexOf(':encrypted') == chat.jid.length - ':encrypted'.length,
+                        jid = is_encrypted ? (chat.jid.slice(0, chat.jid.length - ':encrypted'.length)) : chat.jid,
+                        contact = this.contacts.mergeContact(jid);
+                    if (this.chats.get(contact.hash_id))
+                        return;
+                    let created_chat = this.chats.getChat(contact, is_encrypted && 'encrypted'),
+                        last_message = chat.last_message;
+                    created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
+                    if (last_message) {
+                        last_message.xml = $(last_message)[0];
+                        created_chat.messages.create(chat.last_message);
+                    } else {
+                        created_chat.item_view.updateEmptyChat();
+                    }
+                });
+            });
+        });
+
         let timestamp = this.last_msg_timestamp || this.disconnected_timestamp;
         this.chats.registerMessageHandler();
         this.chats.each(function (chat) {

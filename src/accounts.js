@@ -370,6 +370,7 @@ define("xabber-accounts", function () {
                     }
                     this.createBackgroundConnection();
                     this.createFastConnection();
+                    this.createBackgroundConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -397,9 +398,9 @@ define("xabber-accounts", function () {
                     setTimeout(function () {
                         this.connFeedback('Connecting...');
                         this.restoreStatus();
-                        this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                         this.createBackgroundConnection();
                         this.createFastConnection();
+                        this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                     }.bind(this), timeout);
                 },
 
@@ -1587,6 +1588,8 @@ define("xabber-accounts", function () {
             },
 
             openChangeStatus: function (ev) {
+                if (!xabber.change_status_view)
+                    xabber.change_status_view = new xabber.ChangeStatusView();
                 xabber.change_status_view.open(this.model);
             },
 
@@ -2600,9 +2603,9 @@ define("xabber-accounts", function () {
                 {model: this.accounts, el: this.settings_view.$('.xmpp-accounts')[0]});
 
 
-            this.add_account_view = new this.AddAccountView();
-            this.change_status_view = new this.ChangeStatusView();
             this.on("add_account", function () {
+                if (!this.add_account_view)
+                    this.add_account_view = new this.AddAccountView();
                 this.add_account_view.show();
             }, this);
 
