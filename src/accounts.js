@@ -370,7 +370,6 @@ define("xabber-accounts", function () {
                     }
                     this.createBackgroundConnection();
                     this.createFastConnection();
-                    this.createBackgroundConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
