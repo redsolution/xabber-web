@@ -3863,6 +3863,7 @@ define("xabber-contacts", function () {
                     if (attrs.avatar) {
                         attrs.image = attrs.avatar;
                         delete attrs.avatar;
+                        contact.cached_image = Images.getCachedImage(attrs.image);
                     }
                     contact.set(attrs);
                 } else {
@@ -4347,6 +4348,8 @@ define("xabber-contacts", function () {
             },
 
             openChangeStatus: function (ev) {
+                if (!xabber.change_status_view)
+                    xabber.change_status_view = new xabber.ChangeStatusView();
                 xabber.change_status_view.open(this.account);
             }
         });
