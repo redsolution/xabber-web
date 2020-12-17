@@ -1397,10 +1397,17 @@ define("xabber-accounts", function () {
 
         xabber.ResourcesView = xabber.BasicView.extend({
             _initialize: function () {
+                this.renderByInit();
                 this.model.on("add", this.onResourceAdded, this);
                 this.model.on("remove", this.onResourceRemoved, this);
                 this.model.on("reset", this.onReset, this);
                 this.model.on("change:priority", this.onPriorityChanged, this);
+            },
+
+            renderByInit: function () {
+                this.model.each((resource) => {
+                    this.onResourceAdded(resource);
+                });
             },
 
             onResourceAdded: function (resource) {
