@@ -8383,7 +8383,7 @@ define("xabber-chats", function () {
         });
 
         this.cached_chats.on("database_opened", () => {
-            this.cached_chats.getAllChats((chats) => {
+            /*this.cached_chats.getAllChats((chats) => {
                 chats.forEach((chat) => {
                     let is_encrypted = chat.jid.indexOf(':encrypted') == chat.jid.length - ':encrypted'.length,
                         jid = is_encrypted ? (chat.jid.slice(0, chat.jid.length - ':encrypted'.length)) : chat.jid,
@@ -8401,7 +8401,7 @@ define("xabber-chats", function () {
                         created_chat.item_view.updateEmptyChat();
                     }
                 });
-            });
+            });*/
         });
 
         let timestamp = this.last_msg_timestamp || this.disconnected_timestamp;
