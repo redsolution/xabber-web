@@ -6270,7 +6270,7 @@ define("xabber-chats", function () {
         onEnterPressed: function (selection) {
             let chat_item;
             if (selection.hasClass('roster-contact'))
-                chat_item = xabber.chats_view.child(this.account.contacts.get(selection.data('jid')).hash_id);
+                chat_item = this.account.chats.getChat(this.account.contacts.get(selection.data('jid'))).item_view;
             if (selection.hasClass('chat-item'))
                 chat_item = xabber.chats_view.child(selection.data('id'));
             chat_item && this.forwardTo(chat_item);
