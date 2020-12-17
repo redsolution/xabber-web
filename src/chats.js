@@ -938,18 +938,16 @@ define("xabber-chats", function () {
 
         cacheChat: function () {
             let jid = this.get('jid'),
-                attrs = {
-                    jid: this.get('encrypted') ? `${jid}:encrypted` : jid,
-                    timestamp: this.get('timestamp'),
-                    last_displayed_id: this.get('last_displayed_id'),
-                    last_delivered_id: this.get('last_delivered_id'),
-                    last_message: this.last_message ? _.clone(this.last_message).attributes : null
-                };
-            if (attrs.last_message && attrs.last_message.forwarded_message) {
-                if (attrs.last_message.forwarded_message.length)
-                    return;
-            }
-            (attrs.last_message && attrs.last_message.xml) && (attrs.last_message.xml = attrs.last_message.xml.outerHTML);
+                last_message = this.last_message ? _.clone(this.last_message).get('xml') : null;
+            if (_.isUndefined(last_message))
+                return;
+            let attrs = {
+                jid: this.get('encrypted') ? `${jid}:encrypted` : jid,
+                timestamp: this.get('timestamp'),
+                last_displayed_id: this.get('last_displayed_id'),
+                last_delivered_id: this.get('last_delivered_id'),
+                last_message: last_message ? last_message.outerHTML : null
+            };
             this.account.cached_chats.putChat(attrs);
         },
 
@@ -8394,10 +8392,11 @@ define("xabber-chats", function () {
                         return;
                     let created_chat = this.chats.getChat(contact, is_encrypted && 'encrypted'),
                         last_message = chat.last_message;
+                    if (typeof(last_message) !== 'string')
+                        return;
                     created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
                     if (last_message) {
-                        last_message.xml = $(last_message.xml)[0];
-                        created_chat.messages.create(chat.last_message);
+                        this.chats.receiveMessage($(last_message)[0]);
                     } else {
                         created_chat.item_view.updateEmptyChat();
                     }
