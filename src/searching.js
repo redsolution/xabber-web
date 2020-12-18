@@ -223,7 +223,13 @@ define("xabber-searching", function () {
             joinChat: function () {
                 let contact = this.account.contacts.mergeContact(this.chat_properties.jid);
                 contact.set('group_chat', true);
-                contact.invitation.join();
+                contact.acceptRequest();
+                contact.pushInRoster(null, function () {
+                    contact.askRequest();
+                    contact.getMyInfo();
+                    contact.sendPresent();
+                }.bind(this));
+                contact.trigger("open_chat", contact);
             }
         });
 
