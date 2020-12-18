@@ -7880,7 +7880,7 @@ define("xabber-chats", function () {
                         return;
                     created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
                     if (last_message) {
-                        this.chats.receiveMessage($(last_message)[0]);
+                        this.chats.receiveMessage(Strophe.xmlHtmlNode(last_message).documentElement);
                     } else {
                         created_chat.item_view.updateEmptyChat();
                     }
