@@ -368,8 +368,8 @@ define("xabber-accounts", function () {
                         this.password_view.show(attrs);
                         return;
                     }
-                    this.createBackgroundConnection();
-                    this.createFastConnection();
+                    // this.createBackgroundConnection();
+                    // this.createFastConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -397,8 +397,8 @@ define("xabber-accounts", function () {
                     setTimeout(function () {
                         this.connFeedback('Connecting...');
                         this.restoreStatus();
-                        this.createBackgroundConnection();
-                        this.createFastConnection();
+                        // this.createBackgroundConnection();
+                        // this.createFastConnection();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                     }.bind(this), timeout);
                 },
