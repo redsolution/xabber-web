@@ -1489,8 +1489,11 @@ define("xabber-contacts", function () {
             },
 
             inviteUser: function (ev) {
-                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
+                    if (!xabber.invite_panel)
+                        xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
                     xabber.invite_panel.open(this.account, this.model);
+                }
             },
 
             changeList: function (ev) {
