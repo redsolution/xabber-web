@@ -3911,6 +3911,11 @@ define("xabber-chats", function () {
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
                 message.set('state', constants.MSG_PENDING);
             }
+            if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
+                utils.dialogs.error('Too big xml-stanza');
+                this.removeMessage(message);
+                return;
+            }
             if (message.get('encrypted') && this.account.omemo) {
                 this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
                     if (msg) {
@@ -3918,78 +3923,43 @@ define("xabber-chats", function () {
                         message.set('trusted', msg.is_trusted);
                     }
                     let msg_sending_timestamp = moment.now();
-                    if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
-                        utils.dialogs.error('Too big xml-stanza');
-                        this.removeMessage(message);
-                        return;
-                    }
-                    this.account.sendFast(stanza, function () {
-                        if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
-                            setTimeout(function () {
-                                if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
-                                    message.set('state', constants.MSG_SENT);
-                                } else {
-                                    this.account.connection.ping.ping(this.account.get('jid'), function () {
-                                        (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
-                                    }.bind(this));
-                                    setTimeout(function () {
-                                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
-                                            message.set('state', constants.MSG_ERROR);
-                                    }.bind(this), 5000);
-                                }
-                            }.bind(this), 1000);
-                        }
-                        else {
-                            let _pending_time = 5, _interval = setInterval(function () {
-                                if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
-                                    message.set('state', constants.MSG_ERROR);
-                                    clearInterval(_interval);
-                                }
-                                else if (message.get('state') !== constants.MSG_PENDING)
-                                    clearInterval(_interval);
-                                _pending_time += 10;
-                            }.bind(this), 10000);
-                        }
-                    }.bind(this));
+                    this.account.sendFast(stanza, this.msgCallback.bind(this, msg_sending_timestamp, message));
                 });
                 return;
             } else {
                 let msg_sending_timestamp = moment.now();
-                if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
-                    utils.dialogs.error('Too big xml-stanza');
-                    this.removeMessage(message);
-                    return;
-                }
-                this.account.sendFast(stanza, function () {
-                    if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
-                        setTimeout(function () {
-                            if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
-                                message.set('state', constants.MSG_SENT);
-                            } else {
-                                this.account.connection.ping.ping(this.account.get('jid'), function () {
-                                    (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
-                                }.bind(this));
-                                setTimeout(function () {
-                                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
-                                        message.set('state', constants.MSG_ERROR);
-                                }.bind(this), 5000);
-                            }
-                        }.bind(this), 1000);
-                    }
-                    else {
-                        let _pending_time = 5, _interval = setInterval(function () {
-                            if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
-                                message.set('state', constants.MSG_ERROR);
-                                clearInterval(_interval);
-                            }
-                            else if (message.get('state') !== constants.MSG_PENDING)
-                                clearInterval(_interval);
-                            _pending_time += 10;
-                        }.bind(this), 10000);
-                    }
-                }.bind(this));
+                this.account.sendFast(stanza, this.msgCallback.bind(this, msg_sending_timestamp, message));
             }
         },
+
+          msgCallback: function (msg_sending_timestamp, message) {
+              if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
+                  setTimeout(function () {
+                      if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                          message.set('state', constants.MSG_SENT);
+                      } else {
+                          this.account.connection.ping.ping(this.account.get('jid'), function () {
+                              (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
+                          }.bind(this));
+                          setTimeout(function () {
+                              if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                                  message.set('state', constants.MSG_ERROR);
+                          }.bind(this), 5000);
+                      }
+                  }.bind(this), 1000);
+              }
+              else {
+                  let _pending_time = 5, _interval = setInterval(function () {
+                      if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                          message.set('state', constants.MSG_ERROR);
+                          clearInterval(_interval);
+                      }
+                      else if (message.get('state') !== constants.MSG_PENDING)
+                          clearInterval(_interval);
+                      _pending_time += 10;
+                  }.bind(this), 10000);
+              }
+          },
 
         isImageType: function(type) {
             if (type.indexOf('image') != -1)
