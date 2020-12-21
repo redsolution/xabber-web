@@ -349,7 +349,8 @@ var constants = {
 
     GCM_SENDER_ID: '868637702480',
     GCM_API_KEY: 'AIzaSyC1JCBB3LLf_4DG_vRWMEEe0I4X5msEU-M',
-    MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive'
+    MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive',
+    STANZA_MAX_SIZE: Math.pow(2,16)
 };
 
 constants.JINGLE_MSG_STATE = {};

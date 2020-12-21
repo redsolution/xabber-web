@@ -24,7 +24,9 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
             } else {
                 this.throw();
             }
-            document.addEventListener("keyup", this.clickHandler.bind(this));
+            setTimeout(() => {
+                document.addEventListener("keyup", this.clickHandler.bind(this));
+            }, 500);
             return this.closed.promise();
         },
 

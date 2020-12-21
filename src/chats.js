@@ -3918,6 +3918,11 @@ define("xabber-chats", function () {
                         message.set('trusted', msg.is_trusted);
                     }
                     let msg_sending_timestamp = moment.now();
+                    if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
+                        utils.dialogs.error('Too big xml-stanza');
+                        this.removeMessage(message);
+                        return;
+                    }
                     this.account.sendFast(stanza, function () {
                         if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                             setTimeout(function () {
@@ -3950,6 +3955,11 @@ define("xabber-chats", function () {
                 return;
             } else {
                 let msg_sending_timestamp = moment.now();
+                if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
+                    utils.dialogs.error('Too big xml-stanza');
+                    this.removeMessage(message);
+                    return;
+                }
                 this.account.sendFast(stanza, function () {
                     if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                         setTimeout(function () {
@@ -7768,6 +7778,11 @@ define("xabber-chats", function () {
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
+            if (text.length >= constants.STANZA_MAX_SIZE) {
+                utils.dialogs.error('Too big xml-stanza');
+                $rich_textarea.flushRichTextarea();
+                return;
+            }
             if (text.length) {
                 this.quill.getContents().forEach(function (content) {
                     if (content.attributes) {
