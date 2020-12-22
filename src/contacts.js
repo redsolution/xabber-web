@@ -316,7 +316,7 @@ define("xabber-contacts", function () {
             },
 
             pres: function (type) {
-                var pres = $pres({to: this.get('jid'), type: type});
+                let pres = $pres({to: this.jid, from: this.account.get('jid'), type: type});
                 this.account.sendPres(pres);
                 return this;
             },
@@ -3301,9 +3301,9 @@ define("xabber-contacts", function () {
                     this.blockInvitation();
                     contact.getMyInfo();
                     contact.sendPresent();
+                    this.openChat();
                 }.bind(this));
                 contact.trigger('remove_invite', contact);
-                this.openChat();
             },
 
             reject: function () {

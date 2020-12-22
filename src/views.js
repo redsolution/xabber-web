@@ -1043,6 +1043,7 @@ define("xabber-views", function () {
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
             this.model.on('change:video_live', this.updateButtons, this);
+            this.model.on('change:video_screen', this.updateButtons, this);
             this.model.on('change:video_in', this.updateCollapsedWindow, this);
             this.model.on('change:audio', this.updateButtons, this);
         },
@@ -1129,11 +1130,11 @@ define("xabber-views", function () {
             this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
             this.$('.btn-share-screen').switchClass('active', this.model.get('video_screen'));
             this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
-            this.$('.btn-video').switchClass('mdi-video', this.model.get('video_live'))
+            this.$('.btn-video').switchClass('mdi-video active', this.model.get('video_live'))
                 .switchClass('mdi-video-off', !this.model.get('video_live'));
-            this.$('.btn-volume').switchClass('mdi-volume-high', this.model.get('volume_on'))
+            this.$('.btn-volume').switchClass('mdi-volume-high active', this.model.get('volume_on'))
                 .switchClass('mdi-volume-off', !this.model.get('volume_on'));
-            this.$('.btn-microphone').switchClass('mdi-microphone', this.model.get('audio'))
+            this.$('.btn-microphone').switchClass('active mdi-microphone', this.model.get('audio'))
                 .switchClass('mdi-microphone-off', !this.model.get('audio'));
         },
 

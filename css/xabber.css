@@ -3398,6 +3398,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     right: 16px;
 }
 
+.jingle-message-view .btn-video.active,
+.jingle-message-view .btn-volume.active,
+.jingle-message-view .btn-microphone.active,
 .jingle-message-view .btn-share-screen.active {
     background-color: rgba(3, 169, 244, .6);
 }

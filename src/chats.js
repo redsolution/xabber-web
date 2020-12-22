@@ -6354,7 +6354,7 @@ define("xabber-chats", function () {
 
         sendInvite: function (contact_jid) {
             let is_member_only = this.contact.get('group_info').model === 'member-only',
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
                 .c('send').t(is_member_only).up()
