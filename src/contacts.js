@@ -405,7 +405,7 @@ define("xabber-contacts", function () {
                             xabber.trigger("clear_search");
                         }
                     }
-                });
+                }.bind(this));
             },
 
             blockWithDialog: function () {
@@ -433,7 +433,7 @@ define("xabber-contacts", function () {
                         if (!is_group)
                             xabber.body.setScreen('all-chats', {right: undefined});
                     }
-                });
+                }.bind(this));
             },
 
             unblockWithDialog: function () {
@@ -442,7 +442,7 @@ define("xabber-contacts", function () {
                         this.unblock();
                         xabber.trigger("clear_search");
                     }
-                });
+                }.bind(this));
             },
 
             block: function (callback, errback) {
