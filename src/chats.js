@@ -5400,6 +5400,8 @@ define("xabber-chats", function () {
                         $message = $forwarded.children('message');
                     if ($carbons.find('request[xmlns="' + Strophe.NS.DELIVERY + '"][to="' + to_bare_jid + '"]').length)
                         return;
+                    if (this.account.fast_connection && ($message.attr('from') === this.account.fast_connection.jid))
+                        return;
                     return this.receiveChatMessage($message[0], _.extend(options, {
                         carbon_copied: true
                     }));

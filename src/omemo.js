@@ -1006,7 +1006,6 @@ define("xabber-omemo", function () {
 
                     return {message: message, is_trusted: encryptedMessage.is_trusted};
                 }).catch((msg) => {
-                    console.log(msg);
                 });
             },
 
@@ -1177,6 +1176,10 @@ define("xabber-omemo", function () {
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                             this.account.chats.receiveChatMessage($message[0], options);
                         }).catch(() => {
+                            if (options.synced_msg && !options.decryption_retry) {
+                                this.receiveChatMessage($message[0], _.extend(options, {decryption_retry: true}));
+                                return;
+                            }
                             options.not_encrypted = true;
                             delete options.is_trusted;
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
