@@ -316,7 +316,7 @@ define("xabber-contacts", function () {
             },
 
             pres: function (type) {
-                let pres = $pres({to: this.jid, from: this.account.get('jid'), type: type});
+                let pres = $pres({to: this.get('jid'), from: this.account.jid, type: type});
                 this.account.sendPres(pres);
                 return this;
             },
