@@ -136,7 +136,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendMsgFast: function (stanza, callback) {
-                    var res = this.fast_connection && this.fast_connection.authenticated && this.get('status') !== 'offline';
+                    var res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.fast_connection.send(stanza);
                         callback && callback();
@@ -147,7 +147,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQFast: function () {
-                    let res = this.fast_connection && this.fast_connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
                         return res;
@@ -232,7 +232,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQinBackground: function () {
-                    let res = this.background_connection && this.background_connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.background_connection && this.background_connection.authenticated && this.background_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.background_connection.sendIQ.apply(this.background_connection, arguments);
                         return res;
@@ -732,7 +732,7 @@ define("xabber-accounts", function () {
                 getVCard: function (callback) {
                     var jid = this.get('jid'),
                         is_callback = _.isFunction(callback);
-                    this.connection.vcard.get(jid,
+                    ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
                         function (vcard) {
                             var attrs = {
                                 vcard: vcard,
@@ -961,7 +961,7 @@ define("xabber-accounts", function () {
                     if (is_deleted) {
                         let contact = this.contacts.mergeContact(chat_jid),
                             chat = this.chats.getChat(contact);
-                        contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();

@@ -129,7 +129,7 @@ define("xabber-contacts", function () {
             getVCard: function (callback) {
                 let jid = this.get('jid'),
                     is_callback = _.isFunction(callback);
-                (this.account.background_connection || this.account.connection).vcard.get(jid,
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid,
                     function (vcard) {
                         if (vcard.group_info) {
                             let group_info = this.get('group_info') || {};
