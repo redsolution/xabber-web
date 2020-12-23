@@ -790,8 +790,8 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
-            $('body').switchClass('login', name === 'login');
-            $('body').switchClass('on-login', name !== 'login');
+            $('body').switchClass('xabber-login', name === 'login');
+            $('body').switchClass('on-xabber-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
