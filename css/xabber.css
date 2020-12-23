@@ -722,11 +722,11 @@ body {
     overflow: hidden;
 }
 
-body.on-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
+body.on-xabber-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
     display: none;
 }
 
-body.login > div.login-container {
+body.xabber-login > div.login-container {
     display: block;
 }
 
