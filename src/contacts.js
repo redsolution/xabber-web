@@ -3989,7 +3989,6 @@ define("xabber-contacts", function () {
 
             onContactAdded: function (contact) {
                 if (!contact.get('in_roster')) {
-                    this.addContactToGroup(contact, constants.NON_ROSTER_GROUP_ID);
                     return;
                 }
                 var groups = contact.get('groups');
@@ -4013,8 +4012,6 @@ define("xabber-contacts", function () {
                             groups.push(constants.GENERAL_GROUP_ID);
                         }
                     } else if (contact.get('known')) {
-                        groups = [constants.NON_ROSTER_GROUP_ID];
-                    } else {
                         groups = [];
                     }
                     // TODO: optimize
