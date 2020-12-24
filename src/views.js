@@ -1220,7 +1220,7 @@ define("xabber-views", function () {
         },
 
         onDestroy: function () {
-            this.updateStatusText("Disconnected");
+            this.updateStatusText(this.model.get('status') == 'busy' ? "Line busy" : "Disconnected");
             setTimeout(function () {
                 this.close();
                 this.$el.detach();

@@ -3161,6 +3161,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: rgba(198, 40, 40, .6);
 }
 
+.jingle-message-view[data-state=busy] {
+    background-color: rgba(239, 108, 0, .6);
+}
+
 .jingle-message-view .call-header {
     text-align: center;
     display: none;

@@ -789,15 +789,17 @@ define("xabber-chats", function () {
               this.audio_notifiation = xabber.playAudio('connecting', true);
           },
 
-          reject: function () {
+          reject: function (reason) {
               if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
                   return;
               let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
                   let end = moment.now(),
-                      duration = Math.round((end - this.get('jingle_start'))/1000);
-                  $reject_msg.c('call', {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration}).up();
+                      duration = Math.round((end - this.get('jingle_start'))/1000),
+                      call_attrs = {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration};
+                  reason && (call_attrs.reason = reason);
+                  $reject_msg.c('call', call_attrs).up();
               }
               $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -1034,7 +1036,8 @@ define("xabber-chats", function () {
                 type: 'chat',
                 to: msg_to
             })
-                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id}).up()
+                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id})
+                    .c('call', {reason: options.reason}).up().up()
                 .c('store', {xmlns: Strophe.NS.HINTS}).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
@@ -1081,7 +1084,7 @@ define("xabber-chats", function () {
             if ($jingle_msg_propose.length) {
                 if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
                     if (xabber.current_voip_call)
-                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id')});
+                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id'), reason: 'busy'});
                     return;
                 }
                 if (options.is_archived || options.synced_msg)
@@ -1091,7 +1094,7 @@ define("xabber-chats", function () {
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
                         if (xabber.current_voip_call) {
-                            this.sendReject({session_id: session_id});
+                            this.sendReject({session_id: session_id, reason: 'busy'});
                             this.messages.createSystemMessage({
                                 from_jid: this.account.get('jid'),
                                 message: 'Cancelled call'
@@ -1128,7 +1131,10 @@ define("xabber-chats", function () {
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
+                    if (duration && initiator)
+                        msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
+                    else
+                        msg_text = 'Cancelled call';
                 }
                 else
                     msg_text = 'Cancelled call';
@@ -1147,7 +1153,7 @@ define("xabber-chats", function () {
                     setTimeout(function () {
                         xabber.stopAudio(busy_audio);
                     }.bind(this), 1500);
-                    this.endCall('disconnected');
+                    this.endCall($jingle_msg_reject.children('call').attr('reason') == 'busy' ? 'busy' : 'disconnected');
                 }
                 return message;
             }
@@ -7744,7 +7750,7 @@ define("xabber-chats", function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                text = $rich_textarea.getTextFromRichTextarea().trim();
+                text = $rich_textarea.getTextFromRichTextarea();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
@@ -7828,6 +7834,24 @@ define("xabber-chats", function () {
                         content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
                 }.bind(this));
             }
+            let start_length = text.length;
+            text = text.trimStart();
+            if (start_length > text.length) {
+                let delta = start_length - text.length;
+                mentions.forEach((mention) => {
+                    mention.start -= delta;
+                    mention.end -= delta;
+                });
+                markup_references.forEach((markup_reference) => {
+                    markup_reference.start -= delta;
+                    markup_reference.end -= delta;
+                });
+                blockquotes.forEach((blockquote) => {
+                    blockquote.start -= delta;
+                    blockquote.end -= delta;
+                });
+            }
+            text = text.trimEnd();
             $rich_textarea.flushRichTextarea();
             this.quill.focus();
             this.displayMicrophone();
