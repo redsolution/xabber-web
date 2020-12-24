@@ -2312,11 +2312,12 @@ define("xabber-accounts", function () {
                 }
                 this.data.set('authentication', true);
                 this.authFeedback({});
-                var jid = this.model.get('jid'),
+                let jid = this.model.get('jid'),
                     password = this.$password_input.val();
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
+                password = password.trim();
                 this.authFeedback({password: 'Authentication with password...'});
                 if (this.model.connection.connected) {
                     this.model.once('deactivate', function () {
@@ -2421,20 +2422,22 @@ define("xabber-accounts", function () {
                 }
                 this.data.set('authentication', true);
                 this.authFeedback({});
-                var jid = this.$jid_input.val(),
+                let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (!jid) {
                     return this.errorFeedback({jid: 'Please input username!'});
                 }
+                jid = jid.trim();
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
-                var at_idx = jid.indexOf('@');
+                password = password.trim();
+                let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
                     return this.errorFeedback({jid: 'Wrong username format!'});
                 }
                 jid = Strophe.getBareJidFromJid(jid).toLowerCase();
-                var account = xabber.accounts.get(jid);
+                let account = xabber.accounts.get(jid);
                 if (account) {
                     this.errorFeedback({jid: 'This account already added to Xabber web'});
                 } else {
@@ -2523,7 +2526,7 @@ define("xabber-accounts", function () {
             },
 
             updateButtons: function () {
-                                var authentication = this.data.get('authentication');
+                let authentication = this.data.get('authentication');
                 this.$('.btn-log-in').switchClass('disabled', authentication);
                 this.$('.btn-cancel').showIf(authentication);
             },

@@ -493,9 +493,11 @@ define("xabber-api-service", function () {
             if (!username) {
                 return this.errorFeedback({username: 'Please input username!'});
             }
+            username = username.trim();
             if (!password)  {
                 return this.errorFeedback({password: 'Please input password!'});
             }
+            password = password.trim();
             this.authFeedback({password: 'Authentication...'});
             this.model.login(username, password);
         },
