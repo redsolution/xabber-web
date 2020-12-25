@@ -1242,7 +1242,7 @@ define("xabber-contacts", function () {
                     $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
                 }
-                if (in_request) {
+                if (in_request && subscription !== 'both') {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', false);
                 }
                 if (out_request) {
@@ -1408,12 +1408,14 @@ define("xabber-contacts", function () {
             },
 
             updateButtons: function () {
-                let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator') && permission.values),
+                let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'owner' && permission.values),
+                    change_group = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'change-group' && permission.values),
                     is_blocked = this.model.get('blocked');
-                this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
+                this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
+                this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
                 this.$('.btn-leave-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
                 this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat') || this.model.get('subscription') != 'both');
-                this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
+                this.$('.btn-default-restrictions-wrap').switchClass('non-active', !is_owner);
                 this.$('.btn-block').hideIf(is_blocked);
                 this.$('.btn-unblock').showIf(is_blocked);
             },
@@ -1455,10 +1457,12 @@ define("xabber-contacts", function () {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
                         let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-                        this.account.sendIQ(iq_get_properties, function (properties) {
+                        this.account.sendIQ(iq_get_properties, (properties) => {
                             let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                             this.group_chat_properties_edit.open(data_form);
-                        }.bind(this));
+                        }, () => {
+                            utils.callback_popup_message("You have no permission to edit group properties", 3000);
+                        });
                 }
             },
 
@@ -4938,8 +4942,8 @@ define("xabber-contacts", function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
-                    contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, function () {
+                        contact.pres('subscribed');
                         contact.pres('subscribe');
                         contact.trigger('presence', contact, 'subscribe_from');
                         contact.trigger("open_chat", contact);

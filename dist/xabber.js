@@ -15655,6 +15655,10 @@ return jQuery;
 });
 
 //! moment.js
+//! version : 2.27.0
+//! authors : Tim Wood, Iskren Chernev, Moment.js contributors
+//! license : MIT
+//! momentjs.com
 
 ;(function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -15664,33 +15668,43 @@ return jQuery;
 
     var hookCallback;
 
-    function hooks () {
+    function hooks() {
         return hookCallback.apply(null, arguments);
     }
 
     // This is done to register the method called with moment()
     // without creating circular dependencies.
-    function setHookCallback (callback) {
+    function setHookCallback(callback) {
         hookCallback = callback;
     }
 
     function isArray(input) {
-        return input instanceof Array || Object.prototype.toString.call(input) === '[object Array]';
+        return (
+            input instanceof Array ||
+            Object.prototype.toString.call(input) === '[object Array]'
+        );
     }
 
     function isObject(input) {
         // IE8 will treat undefined and null as object if it wasn't for
         // input != null
-        return input != null && Object.prototype.toString.call(input) === '[object Object]';
+        return (
+            input != null &&
+            Object.prototype.toString.call(input) === '[object Object]'
+        );
+    }
+
+    function hasOwnProp(a, b) {
+        return Object.prototype.hasOwnProperty.call(a, b);
     }
 
     function isObjectEmpty(obj) {
         if (Object.getOwnPropertyNames) {
-            return (Object.getOwnPropertyNames(obj).length === 0);
+            return Object.getOwnPropertyNames(obj).length === 0;
         } else {
             var k;
             for (k in obj) {
-                if (obj.hasOwnProperty(k)) {
+                if (hasOwnProp(obj, k)) {
                     return false;
                 }
             }
@@ -15703,23 +15717,26 @@ return jQuery;
     }
 
     function isNumber(input) {
-        return typeof input === 'number' || Object.prototype.toString.call(input) === '[object Number]';
+        return (
+            typeof input === 'number' ||
+            Object.prototype.toString.call(input) === '[object Number]'
+        );
     }
 
     function isDate(input) {
-        return input instanceof Date || Object.prototype.toString.call(input) === '[object Date]';
+        return (
+            input instanceof Date ||
+            Object.prototype.toString.call(input) === '[object Date]'
+        );
     }
 
     function map(arr, fn) {
-        var res = [], i;
+        var res = [],
+            i;
         for (i = 0; i < arr.length; ++i) {
             res.push(fn(arr[i], i));
         }
         return res;
-    }
-
-    function hasOwnProp(a, b) {
-        return Object.prototype.hasOwnProperty.call(a, b);
     }
 
     function extend(a, b) {
@@ -15740,27 +15757,29 @@ return jQuery;
         return a;
     }
 
-    function createUTC (input, format, locale, strict) {
+    function createUTC(input, format, locale, strict) {
         return createLocalOrUTC(input, format, locale, strict, true).utc();
     }
 
     function defaultParsingFlags() {
         // We need to deep clone this object.
         return {
-            empty           : false,
-            unusedTokens    : [],
-            unusedInput     : [],
-            overflow        : -2,
-            charsLeftOver   : 0,
-            nullInput       : false,
-            invalidMonth    : null,
-            invalidFormat   : false,
-            userInvalidated : false,
-            iso             : false,
-            parsedDateParts : [],
-            meridiem        : null,
-            rfc2822         : false,
-            weekdayMismatch : false
+            empty: false,
+            unusedTokens: [],
+            unusedInput: [],
+            overflow: -2,
+            charsLeftOver: 0,
+            nullInput: false,
+            invalidEra: null,
+            invalidMonth: null,
+            invalidFormat: false,
+            userInvalidated: false,
+            iso: false,
+            parsedDateParts: [],
+            era: null,
+            meridiem: null,
+            rfc2822: false,
+            weekdayMismatch: false,
         };
     }
 
@@ -15776,10 +15795,11 @@ return jQuery;
         some = Array.prototype.some;
     } else {
         some = function (fun) {
-            var t = Object(this);
-            var len = t.length >>> 0;
+            var t = Object(this),
+                len = t.length >>> 0,
+                i;
 
-            for (var i = 0; i < len; i++) {
+            for (i = 0; i < len; i++) {
                 if (i in t && fun.call(this, t[i], i, t)) {
                     return true;
                 }
@@ -15791,23 +15811,26 @@ return jQuery;
 
     function isValid(m) {
         if (m._isValid == null) {
-            var flags = getParsingFlags(m);
-            var parsedParts = some.call(flags.parsedDateParts, function (i) {
-                return i != null;
-            });
-            var isNowValid = !isNaN(m._d.getTime()) &&
-                flags.overflow < 0 &&
-                !flags.empty &&
-                !flags.invalidMonth &&
-                !flags.invalidWeekday &&
-                !flags.weekdayMismatch &&
-                !flags.nullInput &&
-                !flags.invalidFormat &&
-                !flags.userInvalidated &&
-                (!flags.meridiem || (flags.meridiem && parsedParts));
+            var flags = getParsingFlags(m),
+                parsedParts = some.call(flags.parsedDateParts, function (i) {
+                    return i != null;
+                }),
+                isNowValid =
+                    !isNaN(m._d.getTime()) &&
+                    flags.overflow < 0 &&
+                    !flags.empty &&
+                    !flags.invalidEra &&
+                    !flags.invalidMonth &&
+                    !flags.invalidWeekday &&
+                    !flags.weekdayMismatch &&
+                    !flags.nullInput &&
+                    !flags.invalidFormat &&
+                    !flags.userInvalidated &&
+                    (!flags.meridiem || (flags.meridiem && parsedParts));
 
             if (m._strict) {
-                isNowValid = isNowValid &&
+                isNowValid =
+                    isNowValid &&
                     flags.charsLeftOver === 0 &&
                     flags.unusedTokens.length === 0 &&
                     flags.bigHour === undefined;
@@ -15815,20 +15838,18 @@ return jQuery;
 
             if (Object.isFrozen == null || !Object.isFrozen(m)) {
                 m._isValid = isNowValid;
-            }
-            else {
+            } else {
                 return isNowValid;
             }
         }
         return m._isValid;
     }
 
-    function createInvalid (flags) {
+    function createInvalid(flags) {
         var m = createUTC(NaN);
         if (flags != null) {
             extend(getParsingFlags(m), flags);
-        }
-        else {
+        } else {
             getParsingFlags(m).userInvalidated = true;
         }
 
@@ -15837,7 +15858,8 @@ return jQuery;
 
     // Plugins that add properties should also add the key here (null value),
     // so we can properly clone ourselves.
-    var momentProperties = hooks.momentProperties = [];
+    var momentProperties = (hooks.momentProperties = []),
+        updateInProgress = false;
 
     function copyConfig(to, from) {
         var i, prop, val;
@@ -15886,8 +15908,6 @@ return jQuery;
         return to;
     }
 
-    var updateInProgress = false;
-
     // Moment prototype object
     function Moment(config) {
         copyConfig(this, config);
@@ -15904,48 +15924,18 @@ return jQuery;
         }
     }
 
-    function isMoment (obj) {
-        return obj instanceof Moment || (obj != null && obj._isAMomentObject != null);
-    }
-
-    function absFloor (number) {
-        if (number < 0) {
-            // -0 -> 0
-            return Math.ceil(number) || 0;
-        } else {
-            return Math.floor(number);
-        }
-    }
-
-    function toInt(argumentForCoercion) {
-        var coercedNumber = +argumentForCoercion,
-            value = 0;
-
-        if (coercedNumber !== 0 && isFinite(coercedNumber)) {
-            value = absFloor(coercedNumber);
-        }
-
-        return value;
-    }
-
-    // compare two arrays, return the number of differences
-    function compareArrays(array1, array2, dontConvert) {
-        var len = Math.min(array1.length, array2.length),
-            lengthDiff = Math.abs(array1.length - array2.length),
-            diffs = 0,
-            i;
-        for (i = 0; i < len; i++) {
-            if ((dontConvert && array1[i] !== array2[i]) ||
-                (!dontConvert && toInt(array1[i]) !== toInt(array2[i]))) {
-                diffs++;
-            }
-        }
-        return diffs + lengthDiff;
+    function isMoment(obj) {
+        return (
+            obj instanceof Moment || (obj != null && obj._isAMomentObject != null)
+        );
     }
 
     function warn(msg) {
-        if (hooks.suppressDeprecationWarnings === false &&
-                (typeof console !==  'undefined') && console.warn) {
+        if (
+            hooks.suppressDeprecationWarnings === false &&
+            typeof console !== 'undefined' &&
+            console.warn
+        ) {
             console.warn('Deprecation warning: ' + msg);
         }
     }
@@ -15958,14 +15948,18 @@ return jQuery;
                 hooks.deprecationHandler(null, msg);
             }
             if (firstTime) {
-                var args = [];
-                var arg;
-                for (var i = 0; i < arguments.length; i++) {
+                var args = [],
+                    arg,
+                    i,
+                    key;
+                for (i = 0; i < arguments.length; i++) {
                     arg = '';
                     if (typeof arguments[i] === 'object') {
                         arg += '\n[' + i + '] ';
-                        for (var key in arguments[0]) {
-                            arg += key + ': ' + arguments[0][key] + ', ';
+                        for (key in arguments[0]) {
+                            if (hasOwnProp(arguments[0], key)) {
+                                arg += key + ': ' + arguments[0][key] + ', ';
+                            }
                         }
                         arg = arg.slice(0, -2); // Remove trailing comma and space
                     } else {
@@ -15973,7 +15967,13 @@ return jQuery;
                     }
                     args.push(arg);
                 }
-                warn(msg + '\nArguments: ' + Array.prototype.slice.call(args).join('') + '\n' + (new Error()).stack);
+                warn(
+                    msg +
+                        '\nArguments: ' +
+                        Array.prototype.slice.call(args).join('') +
+                        '\n' +
+                        new Error().stack
+                );
                 firstTime = false;
             }
             return fn.apply(this, arguments);
@@ -15996,17 +15996,22 @@ return jQuery;
     hooks.deprecationHandler = null;
 
     function isFunction(input) {
-        return input instanceof Function || Object.prototype.toString.call(input) === '[object Function]';
+        return (
+            (typeof Function !== 'undefined' && input instanceof Function) ||
+            Object.prototype.toString.call(input) === '[object Function]'
+        );
     }
 
-    function set (config) {
+    function set(config) {
         var prop, i;
         for (i in config) {
-            prop = config[i];
-            if (isFunction(prop)) {
-                this[i] = prop;
-            } else {
-                this['_' + i] = prop;
+            if (hasOwnProp(config, i)) {
+                prop = config[i];
+                if (isFunction(prop)) {
+                    this[i] = prop;
+                } else {
+                    this['_' + i] = prop;
+                }
             }
         }
         this._config = config;
@@ -16015,11 +16020,14 @@ return jQuery;
         // TODO: Remove "ordinalParse" fallback in next major release.
         this._dayOfMonthOrdinalParseLenient = new RegExp(
             (this._dayOfMonthOrdinalParse.source || this._ordinalParse.source) +
-                '|' + (/\d{1,2}/).source);
+                '|' +
+                /\d{1,2}/.source
+        );
     }
 
     function mergeConfigs(parentConfig, childConfig) {
-        var res = extend({}, parentConfig), prop;
+        var res = extend({}, parentConfig),
+            prop;
         for (prop in childConfig) {
             if (hasOwnProp(childConfig, prop)) {
                 if (isObject(parentConfig[prop]) && isObject(childConfig[prop])) {
@@ -16034,9 +16042,11 @@ return jQuery;
             }
         }
         for (prop in parentConfig) {
-            if (hasOwnProp(parentConfig, prop) &&
-                    !hasOwnProp(childConfig, prop) &&
-                    isObject(parentConfig[prop])) {
+            if (
+                hasOwnProp(parentConfig, prop) &&
+                !hasOwnProp(childConfig, prop) &&
+                isObject(parentConfig[prop])
+            ) {
                 // make sure changes to properties don't modify parent config
                 res[prop] = extend({}, res[prop]);
             }
@@ -16056,7 +16066,8 @@ return jQuery;
         keys = Object.keys;
     } else {
         keys = function (obj) {
-            var i, res = [];
+            var i,
+                res = [];
             for (i in obj) {
                 if (hasOwnProp(obj, i)) {
                     res.push(i);
@@ -16067,29 +16078,139 @@ return jQuery;
     }
 
     var defaultCalendar = {
-        sameDay : '[Today at] LT',
-        nextDay : '[Tomorrow at] LT',
-        nextWeek : 'dddd [at] LT',
-        lastDay : '[Yesterday at] LT',
-        lastWeek : '[Last] dddd [at] LT',
-        sameElse : 'L'
+        sameDay: '[Today at] LT',
+        nextDay: '[Tomorrow at] LT',
+        nextWeek: 'dddd [at] LT',
+        lastDay: '[Yesterday at] LT',
+        lastWeek: '[Last] dddd [at] LT',
+        sameElse: 'L',
     };
 
-    function calendar (key, mom, now) {
+    function calendar(key, mom, now) {
         var output = this._calendar[key] || this._calendar['sameElse'];
         return isFunction(output) ? output.call(mom, now) : output;
     }
 
+    function zeroFill(number, targetLength, forceSign) {
+        var absNumber = '' + Math.abs(number),
+            zerosToFill = targetLength - absNumber.length,
+            sign = number >= 0;
+        return (
+            (sign ? (forceSign ? '+' : '') : '-') +
+            Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) +
+            absNumber
+        );
+    }
+
+    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g,
+        localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g,
+        formatFunctions = {},
+        formatTokenFunctions = {};
+
+    // token:    'M'
+    // padded:   ['MM', 2]
+    // ordinal:  'Mo'
+    // callback: function () { this.month() + 1 }
+    function addFormatToken(token, padded, ordinal, callback) {
+        var func = callback;
+        if (typeof callback === 'string') {
+            func = function () {
+                return this[callback]();
+            };
+        }
+        if (token) {
+            formatTokenFunctions[token] = func;
+        }
+        if (padded) {
+            formatTokenFunctions[padded[0]] = function () {
+                return zeroFill(func.apply(this, arguments), padded[1], padded[2]);
+            };
+        }
+        if (ordinal) {
+            formatTokenFunctions[ordinal] = function () {
+                return this.localeData().ordinal(
+                    func.apply(this, arguments),
+                    token
+                );
+            };
+        }
+    }
+
+    function removeFormattingTokens(input) {
+        if (input.match(/\[[\s\S]/)) {
+            return input.replace(/^\[|\]$/g, '');
+        }
+        return input.replace(/\\/g, '');
+    }
+
+    function makeFormatFunction(format) {
+        var array = format.match(formattingTokens),
+            i,
+            length;
+
+        for (i = 0, length = array.length; i < length; i++) {
+            if (formatTokenFunctions[array[i]]) {
+                array[i] = formatTokenFunctions[array[i]];
+            } else {
+                array[i] = removeFormattingTokens(array[i]);
+            }
+        }
+
+        return function (mom) {
+            var output = '',
+                i;
+            for (i = 0; i < length; i++) {
+                output += isFunction(array[i])
+                    ? array[i].call(mom, format)
+                    : array[i];
+            }
+            return output;
+        };
+    }
+
+    // format date using native date object
+    function formatMoment(m, format) {
+        if (!m.isValid()) {
+            return m.localeData().invalidDate();
+        }
+
+        format = expandFormat(format, m.localeData());
+        formatFunctions[format] =
+            formatFunctions[format] || makeFormatFunction(format);
+
+        return formatFunctions[format](m);
+    }
+
+    function expandFormat(format, locale) {
+        var i = 5;
+
+        function replaceLongDateFormatTokens(input) {
+            return locale.longDateFormat(input) || input;
+        }
+
+        localFormattingTokens.lastIndex = 0;
+        while (i >= 0 && localFormattingTokens.test(format)) {
+            format = format.replace(
+                localFormattingTokens,
+                replaceLongDateFormatTokens
+            );
+            localFormattingTokens.lastIndex = 0;
+            i -= 1;
+        }
+
+        return format;
+    }
+
     var defaultLongDateFormat = {
-        LTS  : 'h:mm:ss A',
-        LT   : 'h:mm A',
-        L    : 'MM/DD/YYYY',
-        LL   : 'MMMM D, YYYY',
-        LLL  : 'MMMM D, YYYY h:mm A',
-        LLLL : 'dddd, MMMM D, YYYY h:mm A'
+        LTS: 'h:mm:ss A',
+        LT: 'h:mm A',
+        L: 'MM/DD/YYYY',
+        LL: 'MMMM D, YYYY',
+        LLL: 'MMMM D, YYYY h:mm A',
+        LLLL: 'dddd, MMMM D, YYYY h:mm A',
     };
 
-    function longDateFormat (key) {
+    function longDateFormat(key) {
         var format = this._longDateFormat[key],
             formatUpper = this._longDateFormat[key.toUpperCase()];
 
@@ -16097,64 +16218,79 @@ return jQuery;
             return format;
         }
 
-        this._longDateFormat[key] = formatUpper.replace(/MMMM|MM|DD|dddd/g, function (val) {
-            return val.slice(1);
-        });
+        this._longDateFormat[key] = formatUpper
+            .match(formattingTokens)
+            .map(function (tok) {
+                if (
+                    tok === 'MMMM' ||
+                    tok === 'MM' ||
+                    tok === 'DD' ||
+                    tok === 'dddd'
+                ) {
+                    return tok.slice(1);
+                }
+                return tok;
+            })
+            .join('');
 
         return this._longDateFormat[key];
     }
 
     var defaultInvalidDate = 'Invalid date';
 
-    function invalidDate () {
+    function invalidDate() {
         return this._invalidDate;
     }
 
-    var defaultOrdinal = '%d';
-    var defaultDayOfMonthOrdinalParse = /\d{1,2}/;
+    var defaultOrdinal = '%d',
+        defaultDayOfMonthOrdinalParse = /\d{1,2}/;
 
-    function ordinal (number) {
+    function ordinal(number) {
         return this._ordinal.replace('%d', number);
     }
 
     var defaultRelativeTime = {
-        future : 'in %s',
-        past   : '%s ago',
-        s  : 'a few seconds',
-        ss : '%d seconds',
-        m  : 'a minute',
-        mm : '%d minutes',
-        h  : 'an hour',
-        hh : '%d hours',
-        d  : 'a day',
-        dd : '%d days',
-        M  : 'a month',
-        MM : '%d months',
-        y  : 'a year',
-        yy : '%d years'
+        future: 'in %s',
+        past: '%s ago',
+        s: 'a few seconds',
+        ss: '%d seconds',
+        m: 'a minute',
+        mm: '%d minutes',
+        h: 'an hour',
+        hh: '%d hours',
+        d: 'a day',
+        dd: '%d days',
+        w: 'a week',
+        ww: '%d weeks',
+        M: 'a month',
+        MM: '%d months',
+        y: 'a year',
+        yy: '%d years',
     };
 
-    function relativeTime (number, withoutSuffix, string, isFuture) {
+    function relativeTime(number, withoutSuffix, string, isFuture) {
         var output = this._relativeTime[string];
-        return (isFunction(output)) ?
-            output(number, withoutSuffix, string, isFuture) :
-            output.replace(/%d/i, number);
+        return isFunction(output)
+            ? output(number, withoutSuffix, string, isFuture)
+            : output.replace(/%d/i, number);
     }
 
-    function pastFuture (diff, output) {
+    function pastFuture(diff, output) {
         var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
         return isFunction(format) ? format(output) : format.replace(/%s/i, output);
     }
 
     var aliases = {};
 
-    function addUnitAlias (unit, shorthand) {
+    function addUnitAlias(unit, shorthand) {
         var lowerCase = unit.toLowerCase();
         aliases[lowerCase] = aliases[lowerCase + 's'] = aliases[shorthand] = unit;
     }
 
     function normalizeUnits(units) {
-        return typeof units === 'string' ? aliases[units] || aliases[units.toLowerCase()] : undefined;
+        return typeof units === 'string'
+            ? aliases[units] || aliases[units.toLowerCase()]
+            : undefined;
     }
 
     function normalizeObjectUnits(inputObject) {
@@ -16181,9 +16317,12 @@ return jQuery;
     }
 
     function getPrioritizedUnits(unitsObj) {
-        var units = [];
-        for (var u in unitsObj) {
-            units.push({unit: u, priority: priorities[u]});
+        var units = [],
+            u;
+        for (u in unitsObj) {
+            if (hasOwnProp(unitsObj, u)) {
+                units.push({ unit: u, priority: priorities[u] });
+            }
         }
         units.sort(function (a, b) {
             return a.priority - b.priority;
@@ -16191,137 +16330,127 @@ return jQuery;
         return units;
     }
 
-    function zeroFill(number, targetLength, forceSign) {
-        var absNumber = '' + Math.abs(number),
-            zerosToFill = targetLength - absNumber.length,
-            sign = number >= 0;
-        return (sign ? (forceSign ? '+' : '') : '-') +
-            Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
+    function isLeapYear(year) {
+        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     }
 
-    var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
-
-    var localFormattingTokens = /(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4})/g;
-
-    var formatFunctions = {};
-
-    var formatTokenFunctions = {};
-
-    // token:    'M'
-    // padded:   ['MM', 2]
-    // ordinal:  'Mo'
-    // callback: function () { this.month() + 1 }
-    function addFormatToken (token, padded, ordinal, callback) {
-        var func = callback;
-        if (typeof callback === 'string') {
-            func = function () {
-                return this[callback]();
-            };
-        }
-        if (token) {
-            formatTokenFunctions[token] = func;
-        }
-        if (padded) {
-            formatTokenFunctions[padded[0]] = function () {
-                return zeroFill(func.apply(this, arguments), padded[1], padded[2]);
-            };
-        }
-        if (ordinal) {
-            formatTokenFunctions[ordinal] = function () {
-                return this.localeData().ordinal(func.apply(this, arguments), token);
-            };
+    function absFloor(number) {
+        if (number < 0) {
+            // -0 -> 0
+            return Math.ceil(number) || 0;
+        } else {
+            return Math.floor(number);
         }
     }
 
-    function removeFormattingTokens(input) {
-        if (input.match(/\[[\s\S]/)) {
-            return input.replace(/^\[|\]$/g, '');
+    function toInt(argumentForCoercion) {
+        var coercedNumber = +argumentForCoercion,
+            value = 0;
+
+        if (coercedNumber !== 0 && isFinite(coercedNumber)) {
+            value = absFloor(coercedNumber);
         }
-        return input.replace(/\\/g, '');
+
+        return value;
     }
 
-    function makeFormatFunction(format) {
-        var array = format.match(formattingTokens), i, length;
-
-        for (i = 0, length = array.length; i < length; i++) {
-            if (formatTokenFunctions[array[i]]) {
-                array[i] = formatTokenFunctions[array[i]];
+    function makeGetSet(unit, keepTime) {
+        return function (value) {
+            if (value != null) {
+                set$1(this, unit, value);
+                hooks.updateOffset(this, keepTime);
+                return this;
             } else {
-                array[i] = removeFormattingTokens(array[i]);
+                return get(this, unit);
             }
-        }
-
-        return function (mom) {
-            var output = '', i;
-            for (i = 0; i < length; i++) {
-                output += isFunction(array[i]) ? array[i].call(mom, format) : array[i];
-            }
-            return output;
         };
     }
 
-    // format date using native date object
-    function formatMoment(m, format) {
-        if (!m.isValid()) {
-            return m.localeData().invalidDate();
-        }
-
-        format = expandFormat(format, m.localeData());
-        formatFunctions[format] = formatFunctions[format] || makeFormatFunction(format);
-
-        return formatFunctions[format](m);
+    function get(mom, unit) {
+        return mom.isValid()
+            ? mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]()
+            : NaN;
     }
 
-    function expandFormat(format, locale) {
-        var i = 5;
-
-        function replaceLongDateFormatTokens(input) {
-            return locale.longDateFormat(input) || input;
+    function set$1(mom, unit, value) {
+        if (mom.isValid() && !isNaN(value)) {
+            if (
+                unit === 'FullYear' &&
+                isLeapYear(mom.year()) &&
+                mom.month() === 1 &&
+                mom.date() === 29
+            ) {
+                value = toInt(value);
+                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](
+                    value,
+                    mom.month(),
+                    daysInMonth(value, mom.month())
+                );
+            } else {
+                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
+            }
         }
-
-        localFormattingTokens.lastIndex = 0;
-        while (i >= 0 && localFormattingTokens.test(format)) {
-            format = format.replace(localFormattingTokens, replaceLongDateFormatTokens);
-            localFormattingTokens.lastIndex = 0;
-            i -= 1;
-        }
-
-        return format;
     }
 
-    var match1         = /\d/;            //       0 - 9
-    var match2         = /\d\d/;          //      00 - 99
-    var match3         = /\d{3}/;         //     000 - 999
-    var match4         = /\d{4}/;         //    0000 - 9999
-    var match6         = /[+-]?\d{6}/;    // -999999 - 999999
-    var match1to2      = /\d\d?/;         //       0 - 99
-    var match3to4      = /\d\d\d\d?/;     //     999 - 9999
-    var match5to6      = /\d\d\d\d\d\d?/; //   99999 - 999999
-    var match1to3      = /\d{1,3}/;       //       0 - 999
-    var match1to4      = /\d{1,4}/;       //       0 - 9999
-    var match1to6      = /[+-]?\d{1,6}/;  // -999999 - 999999
+    // MOMENTS
 
-    var matchUnsigned  = /\d+/;           //       0 - inf
-    var matchSigned    = /[+-]?\d+/;      //    -inf - inf
-
-    var matchOffset    = /Z|[+-]\d\d:?\d\d/gi; // +00:00 -00:00 +0000 -0000 or Z
-    var matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi; // +00 -00 +00:00 -00:00 +0000 -0000 or Z
-
-    var matchTimestamp = /[+-]?\d+(\.\d{1,3})?/; // 123456789 123456789.123
-
-    // any word (or two) characters or numbers including two/three word month in arabic.
-    // includes scottish gaelic two word and hyphenated months
-    var matchWord = /[0-9]{0,256}['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFF07\uFF10-\uFFEF]{1,256}|[\u0600-\u06FF\/]{1,256}(\s*?[\u0600-\u06FF]{1,256}){1,2}/i;
-
-    var regexes = {};
-
-    function addRegexToken (token, regex, strictRegex) {
-        regexes[token] = isFunction(regex) ? regex : function (isStrict, localeData) {
-            return (isStrict && strictRegex) ? strictRegex : regex;
-        };
+    function stringGet(units) {
+        units = normalizeUnits(units);
+        if (isFunction(this[units])) {
+            return this[units]();
+        }
+        return this;
     }
 
-    function getParseRegexForToken (token, config) {
+    function stringSet(units, value) {
+        if (typeof units === 'object') {
+            units = normalizeObjectUnits(units);
+            var prioritized = getPrioritizedUnits(units),
+                i;
+            for (i = 0; i < prioritized.length; i++) {
+                this[prioritized[i].unit](units[prioritized[i].unit]);
+            }
+        } else {
+            units = normalizeUnits(units);
+            if (isFunction(this[units])) {
+                return this[units](value);
+            }
+        }
+        return this;
+    }
+
+    var match1 = /\d/, //       0 - 9
+        match2 = /\d\d/, //      00 - 99
+        match3 = /\d{3}/, //     000 - 999
+        match4 = /\d{4}/, //    0000 - 9999
+        match6 = /[+-]?\d{6}/, // -999999 - 999999
+        match1to2 = /\d\d?/, //       0 - 99
+        match3to4 = /\d\d\d\d?/, //     999 - 9999
+        match5to6 = /\d\d\d\d\d\d?/, //   99999 - 999999
+        match1to3 = /\d{1,3}/, //       0 - 999
+        match1to4 = /\d{1,4}/, //       0 - 9999
+        match1to6 = /[+-]?\d{1,6}/, // -999999 - 999999
+        matchUnsigned = /\d+/, //       0 - inf
+        matchSigned = /[+-]?\d+/, //    -inf - inf
+        matchOffset = /Z|[+-]\d\d:?\d\d/gi, // +00:00 -00:00 +0000 -0000 or Z
+        matchShortOffset = /Z|[+-]\d\d(?::?\d\d)?/gi, // +00 -00 +00:00 -00:00 +0000 -0000 or Z
+        matchTimestamp = /[+-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
+        // any word (or two) characters or numbers including two/three word month in arabic.
+        // includes scottish gaelic two word and hyphenated months
+        matchWord = /[0-9]{0,256}['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFF07\uFF10-\uFFEF]{1,256}|[\u0600-\u06FF\/]{1,256}(\s*?[\u0600-\u06FF]{1,256}){1,2}/i,
+        regexes;
+
+    regexes = {};
+
+    function addRegexToken(token, regex, strictRegex) {
+        regexes[token] = isFunction(regex)
+            ? regex
+            : function (isStrict, localeData) {
+                  return isStrict && strictRegex ? strictRegex : regex;
+              };
+    }
+
+    function getParseRegexForToken(token, config) {
         if (!hasOwnProp(regexes, token)) {
             return new RegExp(unescapeFormat(token));
         }
@@ -16331,9 +16460,19 @@ return jQuery;
 
     // Code from http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
     function unescapeFormat(s) {
-        return regexEscape(s.replace('\\', '').replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (matched, p1, p2, p3, p4) {
-            return p1 || p2 || p3 || p4;
-        }));
+        return regexEscape(
+            s
+                .replace('\\', '')
+                .replace(/\\(\[)|\\(\])|\[([^\]\[]*)\]|\\(.)/g, function (
+                    matched,
+                    p1,
+                    p2,
+                    p3,
+                    p4
+                ) {
+                    return p1 || p2 || p3 || p4;
+                })
+        );
     }
 
     function regexEscape(s) {
@@ -16342,8 +16481,9 @@ return jQuery;
 
     var tokens = {};
 
-    function addParseToken (token, callback) {
-        var i, func = callback;
+    function addParseToken(token, callback) {
+        var i,
+            func = callback;
         if (typeof token === 'string') {
             token = [token];
         }
@@ -16357,7 +16497,7 @@ return jQuery;
         }
     }
 
-    function addWeekParseToken (token, callback) {
+    function addWeekParseToken(token, callback) {
         addParseToken(token, function (input, array, config, token) {
             config._w = config._w || {};
             callback(input, config._w, config, token);
@@ -16370,136 +16510,15 @@ return jQuery;
         }
     }
 
-    var YEAR = 0;
-    var MONTH = 1;
-    var DATE = 2;
-    var HOUR = 3;
-    var MINUTE = 4;
-    var SECOND = 5;
-    var MILLISECOND = 6;
-    var WEEK = 7;
-    var WEEKDAY = 8;
-
-    // FORMATTING
-
-    addFormatToken('Y', 0, 0, function () {
-        var y = this.year();
-        return y <= 9999 ? '' + y : '+' + y;
-    });
-
-    addFormatToken(0, ['YY', 2], 0, function () {
-        return this.year() % 100;
-    });
-
-    addFormatToken(0, ['YYYY',   4],       0, 'year');
-    addFormatToken(0, ['YYYYY',  5],       0, 'year');
-    addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
-
-    // ALIASES
-
-    addUnitAlias('year', 'y');
-
-    // PRIORITIES
-
-    addUnitPriority('year', 1);
-
-    // PARSING
-
-    addRegexToken('Y',      matchSigned);
-    addRegexToken('YY',     match1to2, match2);
-    addRegexToken('YYYY',   match1to4, match4);
-    addRegexToken('YYYYY',  match1to6, match6);
-    addRegexToken('YYYYYY', match1to6, match6);
-
-    addParseToken(['YYYYY', 'YYYYYY'], YEAR);
-    addParseToken('YYYY', function (input, array) {
-        array[YEAR] = input.length === 2 ? hooks.parseTwoDigitYear(input) : toInt(input);
-    });
-    addParseToken('YY', function (input, array) {
-        array[YEAR] = hooks.parseTwoDigitYear(input);
-    });
-    addParseToken('Y', function (input, array) {
-        array[YEAR] = parseInt(input, 10);
-    });
-
-    // HELPERS
-
-    function daysInYear(year) {
-        return isLeapYear(year) ? 366 : 365;
-    }
-
-    function isLeapYear(year) {
-        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    }
-
-    // HOOKS
-
-    hooks.parseTwoDigitYear = function (input) {
-        return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
-    };
-
-    // MOMENTS
-
-    var getSetYear = makeGetSet('FullYear', true);
-
-    function getIsLeapYear () {
-        return isLeapYear(this.year());
-    }
-
-    function makeGetSet (unit, keepTime) {
-        return function (value) {
-            if (value != null) {
-                set$1(this, unit, value);
-                hooks.updateOffset(this, keepTime);
-                return this;
-            } else {
-                return get(this, unit);
-            }
-        };
-    }
-
-    function get (mom, unit) {
-        return mom.isValid() ?
-            mom._d['get' + (mom._isUTC ? 'UTC' : '') + unit]() : NaN;
-    }
-
-    function set$1 (mom, unit, value) {
-        if (mom.isValid() && !isNaN(value)) {
-            if (unit === 'FullYear' && isLeapYear(mom.year()) && mom.month() === 1 && mom.date() === 29) {
-                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value, mom.month(), daysInMonth(value, mom.month()));
-            }
-            else {
-                mom._d['set' + (mom._isUTC ? 'UTC' : '') + unit](value);
-            }
-        }
-    }
-
-    // MOMENTS
-
-    function stringGet (units) {
-        units = normalizeUnits(units);
-        if (isFunction(this[units])) {
-            return this[units]();
-        }
-        return this;
-    }
-
-
-    function stringSet (units, value) {
-        if (typeof units === 'object') {
-            units = normalizeObjectUnits(units);
-            var prioritized = getPrioritizedUnits(units);
-            for (var i = 0; i < prioritized.length; i++) {
-                this[prioritized[i].unit](units[prioritized[i].unit]);
-            }
-        } else {
-            units = normalizeUnits(units);
-            if (isFunction(this[units])) {
-                return this[units](value);
-            }
-        }
-        return this;
-    }
+    var YEAR = 0,
+        MONTH = 1,
+        DATE = 2,
+        HOUR = 3,
+        MINUTE = 4,
+        SECOND = 5,
+        MILLISECOND = 6,
+        WEEK = 7,
+        WEEKDAY = 8;
 
     function mod(n, x) {
         return ((n % x) + x) % x;
@@ -16528,7 +16547,11 @@ return jQuery;
         }
         var modMonth = mod(month, 12);
         year += (month - modMonth) / 12;
-        return modMonth === 1 ? (isLeapYear(year) ? 29 : 28) : (31 - modMonth % 7 % 2);
+        return modMonth === 1
+            ? isLeapYear(year)
+                ? 29
+                : 28
+            : 31 - ((modMonth % 7) % 2);
     }
 
     // FORMATTING
@@ -16555,9 +16578,9 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('M',    match1to2);
-    addRegexToken('MM',   match1to2, match2);
-    addRegexToken('MMM',  function (isStrict, locale) {
+    addRegexToken('M', match1to2);
+    addRegexToken('MM', match1to2, match2);
+    addRegexToken('MMM', function (isStrict, locale) {
         return locale.monthsShortRegex(isStrict);
     });
     addRegexToken('MMMM', function (isStrict, locale) {
@@ -16580,29 +16603,49 @@ return jQuery;
 
     // LOCALES
 
-    var MONTHS_IN_FORMAT = /D[oD]?(\[[^\[\]]*\]|\s)+MMMM?/;
-    var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_');
-    function localeMonths (m, format) {
+    var defaultLocaleMonths = 'January_February_March_April_May_June_July_August_September_October_November_December'.split(
+            '_'
+        ),
+        defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split(
+            '_'
+        ),
+        MONTHS_IN_FORMAT = /D[oD]?(\[[^\[\]]*\]|\s)+MMMM?/,
+        defaultMonthsShortRegex = matchWord,
+        defaultMonthsRegex = matchWord;
+
+    function localeMonths(m, format) {
         if (!m) {
-            return isArray(this._months) ? this._months :
-                this._months['standalone'];
+            return isArray(this._months)
+                ? this._months
+                : this._months['standalone'];
         }
-        return isArray(this._months) ? this._months[m.month()] :
-            this._months[(this._months.isFormat || MONTHS_IN_FORMAT).test(format) ? 'format' : 'standalone'][m.month()];
+        return isArray(this._months)
+            ? this._months[m.month()]
+            : this._months[
+                  (this._months.isFormat || MONTHS_IN_FORMAT).test(format)
+                      ? 'format'
+                      : 'standalone'
+              ][m.month()];
     }
 
-    var defaultLocaleMonthsShort = 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_');
-    function localeMonthsShort (m, format) {
+    function localeMonthsShort(m, format) {
         if (!m) {
-            return isArray(this._monthsShort) ? this._monthsShort :
-                this._monthsShort['standalone'];
+            return isArray(this._monthsShort)
+                ? this._monthsShort
+                : this._monthsShort['standalone'];
         }
-        return isArray(this._monthsShort) ? this._monthsShort[m.month()] :
-            this._monthsShort[MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'][m.month()];
+        return isArray(this._monthsShort)
+            ? this._monthsShort[m.month()]
+            : this._monthsShort[
+                  MONTHS_IN_FORMAT.test(format) ? 'format' : 'standalone'
+              ][m.month()];
     }
 
     function handleStrictParse(monthName, format, strict) {
-        var i, ii, mom, llc = monthName.toLocaleLowerCase();
+        var i,
+            ii,
+            mom,
+            llc = monthName.toLocaleLowerCase();
         if (!this._monthsParse) {
             // this is not used
             this._monthsParse = [];
@@ -16610,7 +16653,10 @@ return jQuery;
             this._shortMonthsParse = [];
             for (i = 0; i < 12; ++i) {
                 mom = createUTC([2000, i]);
-                this._shortMonthsParse[i] = this.monthsShort(mom, '').toLocaleLowerCase();
+                this._shortMonthsParse[i] = this.monthsShort(
+                    mom,
+                    ''
+                ).toLocaleLowerCase();
                 this._longMonthsParse[i] = this.months(mom, '').toLocaleLowerCase();
             }
         }
@@ -16642,7 +16688,7 @@ return jQuery;
         }
     }
 
-    function localeMonthsParse (monthName, format, strict) {
+    function localeMonthsParse(monthName, format, strict) {
         var i, mom, regex;
 
         if (this._monthsParseExact) {
@@ -16662,17 +16708,32 @@ return jQuery;
             // make the regex if we don't have it already
             mom = createUTC([2000, i]);
             if (strict && !this._longMonthsParse[i]) {
-                this._longMonthsParse[i] = new RegExp('^' + this.months(mom, '').replace('.', '') + '$', 'i');
-                this._shortMonthsParse[i] = new RegExp('^' + this.monthsShort(mom, '').replace('.', '') + '$', 'i');
+                this._longMonthsParse[i] = new RegExp(
+                    '^' + this.months(mom, '').replace('.', '') + '$',
+                    'i'
+                );
+                this._shortMonthsParse[i] = new RegExp(
+                    '^' + this.monthsShort(mom, '').replace('.', '') + '$',
+                    'i'
+                );
             }
             if (!strict && !this._monthsParse[i]) {
-                regex = '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                regex =
+                    '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
                 this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
             }
             // test the regex
-            if (strict && format === 'MMMM' && this._longMonthsParse[i].test(monthName)) {
+            if (
+                strict &&
+                format === 'MMMM' &&
+                this._longMonthsParse[i].test(monthName)
+            ) {
                 return i;
-            } else if (strict && format === 'MMM' && this._shortMonthsParse[i].test(monthName)) {
+            } else if (
+                strict &&
+                format === 'MMM' &&
+                this._shortMonthsParse[i].test(monthName)
+            ) {
                 return i;
             } else if (!strict && this._monthsParse[i].test(monthName)) {
                 return i;
@@ -16682,7 +16743,7 @@ return jQuery;
 
     // MOMENTS
 
-    function setMonth (mom, value) {
+    function setMonth(mom, value) {
         var dayOfMonth;
 
         if (!mom.isValid()) {
@@ -16707,7 +16768,7 @@ return jQuery;
         return mom;
     }
 
-    function getSetMonth (value) {
+    function getSetMonth(value) {
         if (value != null) {
             setMonth(this, value);
             hooks.updateOffset(this, true);
@@ -16717,12 +16778,11 @@ return jQuery;
         }
     }
 
-    function getDaysInMonth () {
+    function getDaysInMonth() {
         return daysInMonth(this.year(), this.month());
     }
 
-    var defaultMonthsShortRegex = matchWord;
-    function monthsShortRegex (isStrict) {
+    function monthsShortRegex(isStrict) {
         if (this._monthsParseExact) {
             if (!hasOwnProp(this, '_monthsRegex')) {
                 computeMonthsParse.call(this);
@@ -16736,13 +16796,13 @@ return jQuery;
             if (!hasOwnProp(this, '_monthsShortRegex')) {
                 this._monthsShortRegex = defaultMonthsShortRegex;
             }
-            return this._monthsShortStrictRegex && isStrict ?
-                this._monthsShortStrictRegex : this._monthsShortRegex;
+            return this._monthsShortStrictRegex && isStrict
+                ? this._monthsShortStrictRegex
+                : this._monthsShortRegex;
         }
     }
 
-    var defaultMonthsRegex = matchWord;
-    function monthsRegex (isStrict) {
+    function monthsRegex(isStrict) {
         if (this._monthsParseExact) {
             if (!hasOwnProp(this, '_monthsRegex')) {
                 computeMonthsParse.call(this);
@@ -16756,18 +16816,22 @@ return jQuery;
             if (!hasOwnProp(this, '_monthsRegex')) {
                 this._monthsRegex = defaultMonthsRegex;
             }
-            return this._monthsStrictRegex && isStrict ?
-                this._monthsStrictRegex : this._monthsRegex;
+            return this._monthsStrictRegex && isStrict
+                ? this._monthsStrictRegex
+                : this._monthsRegex;
         }
     }
 
-    function computeMonthsParse () {
+    function computeMonthsParse() {
         function cmpLenRev(a, b) {
             return b.length - a.length;
         }
 
-        var shortPieces = [], longPieces = [], mixedPieces = [],
-            i, mom;
+        var shortPieces = [],
+            longPieces = [],
+            mixedPieces = [],
+            i,
+            mom;
         for (i = 0; i < 12; i++) {
             // make the regex if we don't have it already
             mom = createUTC([2000, i]);
@@ -16791,11 +16855,80 @@ return jQuery;
 
         this._monthsRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
         this._monthsShortRegex = this._monthsRegex;
-        this._monthsStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
-        this._monthsShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
+        this._monthsStrictRegex = new RegExp(
+            '^(' + longPieces.join('|') + ')',
+            'i'
+        );
+        this._monthsShortStrictRegex = new RegExp(
+            '^(' + shortPieces.join('|') + ')',
+            'i'
+        );
     }
 
-    function createDate (y, m, d, h, M, s, ms) {
+    // FORMATTING
+
+    addFormatToken('Y', 0, 0, function () {
+        var y = this.year();
+        return y <= 9999 ? zeroFill(y, 4) : '+' + y;
+    });
+
+    addFormatToken(0, ['YY', 2], 0, function () {
+        return this.year() % 100;
+    });
+
+    addFormatToken(0, ['YYYY', 4], 0, 'year');
+    addFormatToken(0, ['YYYYY', 5], 0, 'year');
+    addFormatToken(0, ['YYYYYY', 6, true], 0, 'year');
+
+    // ALIASES
+
+    addUnitAlias('year', 'y');
+
+    // PRIORITIES
+
+    addUnitPriority('year', 1);
+
+    // PARSING
+
+    addRegexToken('Y', matchSigned);
+    addRegexToken('YY', match1to2, match2);
+    addRegexToken('YYYY', match1to4, match4);
+    addRegexToken('YYYYY', match1to6, match6);
+    addRegexToken('YYYYYY', match1to6, match6);
+
+    addParseToken(['YYYYY', 'YYYYYY'], YEAR);
+    addParseToken('YYYY', function (input, array) {
+        array[YEAR] =
+            input.length === 2 ? hooks.parseTwoDigitYear(input) : toInt(input);
+    });
+    addParseToken('YY', function (input, array) {
+        array[YEAR] = hooks.parseTwoDigitYear(input);
+    });
+    addParseToken('Y', function (input, array) {
+        array[YEAR] = parseInt(input, 10);
+    });
+
+    // HELPERS
+
+    function daysInYear(year) {
+        return isLeapYear(year) ? 366 : 365;
+    }
+
+    // HOOKS
+
+    hooks.parseTwoDigitYear = function (input) {
+        return toInt(input) + (toInt(input) > 68 ? 1900 : 2000);
+    };
+
+    // MOMENTS
+
+    var getSetYear = makeGetSet('FullYear', true);
+
+    function getIsLeapYear() {
+        return isLeapYear(this.year());
+    }
+
+    function createDate(y, m, d, h, M, s, ms) {
         // can't just apply() to create a date:
         // https://stackoverflow.com/q/181348
         var date;
@@ -16813,11 +16946,11 @@ return jQuery;
         return date;
     }
 
-    function createUTCDate (y) {
-        var date;
+    function createUTCDate(y) {
+        var date, args;
         // the Date.UTC function remaps years 0-99 to 1900-1999
         if (y < 100 && y >= 0) {
-            var args = Array.prototype.slice.call(arguments);
+            args = Array.prototype.slice.call(arguments);
             // preserve leap years using a full 400 year cycle, then reset
             args[0] = y + 400;
             date = new Date(Date.UTC.apply(null, args));
@@ -16846,7 +16979,8 @@ return jQuery;
         var localWeekday = (7 + weekday - dow) % 7,
             weekOffset = firstWeekOffset(year, dow, doy),
             dayOfYear = 1 + 7 * (week - 1) + localWeekday + weekOffset,
-            resYear, resDayOfYear;
+            resYear,
+            resDayOfYear;
 
         if (dayOfYear <= 0) {
             resYear = year - 1;
@@ -16861,14 +16995,15 @@ return jQuery;
 
         return {
             year: resYear,
-            dayOfYear: resDayOfYear
+            dayOfYear: resDayOfYear,
         };
     }
 
     function weekOfYear(mom, dow, doy) {
         var weekOffset = firstWeekOffset(mom.year(), dow, doy),
             week = Math.floor((mom.dayOfYear() - weekOffset - 1) / 7) + 1,
-            resWeek, resYear;
+            resWeek,
+            resYear;
 
         if (week < 1) {
             resYear = mom.year() - 1;
@@ -16883,7 +17018,7 @@ return jQuery;
 
         return {
             week: resWeek,
-            year: resYear
+            year: resYear,
         };
     }
 
@@ -16910,12 +17045,17 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('w',  match1to2);
+    addRegexToken('w', match1to2);
     addRegexToken('ww', match1to2, match2);
-    addRegexToken('W',  match1to2);
+    addRegexToken('W', match1to2);
     addRegexToken('WW', match1to2, match2);
 
-    addWeekParseToken(['w', 'ww', 'W', 'WW'], function (input, week, config, token) {
+    addWeekParseToken(['w', 'ww', 'W', 'WW'], function (
+        input,
+        week,
+        config,
+        token
+    ) {
         week[token.substr(0, 1)] = toInt(input);
     });
 
@@ -16923,31 +17063,31 @@ return jQuery;
 
     // LOCALES
 
-    function localeWeek (mom) {
+    function localeWeek(mom) {
         return weekOfYear(mom, this._week.dow, this._week.doy).week;
     }
 
     var defaultLocaleWeek = {
-        dow : 0, // Sunday is the first day of the week.
-        doy : 6  // The week that contains Jan 6th is the first week of the year.
+        dow: 0, // Sunday is the first day of the week.
+        doy: 6, // The week that contains Jan 6th is the first week of the year.
     };
 
-    function localeFirstDayOfWeek () {
+    function localeFirstDayOfWeek() {
         return this._week.dow;
     }
 
-    function localeFirstDayOfYear () {
+    function localeFirstDayOfYear() {
         return this._week.doy;
     }
 
     // MOMENTS
 
-    function getSetWeek (input) {
+    function getSetWeek(input) {
         var week = this.localeData().week(this);
         return input == null ? week : this.add((input - week) * 7, 'd');
     }
 
-    function getSetISOWeek (input) {
+    function getSetISOWeek(input) {
         var week = weekOfYear(this, 1, 4).week;
         return input == null ? week : this.add((input - week) * 7, 'd');
     }
@@ -16984,16 +17124,16 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('d',    match1to2);
-    addRegexToken('e',    match1to2);
-    addRegexToken('E',    match1to2);
-    addRegexToken('dd',   function (isStrict, locale) {
+    addRegexToken('d', match1to2);
+    addRegexToken('e', match1to2);
+    addRegexToken('E', match1to2);
+    addRegexToken('dd', function (isStrict, locale) {
         return locale.weekdaysMinRegex(isStrict);
     });
-    addRegexToken('ddd',   function (isStrict, locale) {
+    addRegexToken('ddd', function (isStrict, locale) {
         return locale.weekdaysShortRegex(isStrict);
     });
-    addRegexToken('dddd',   function (isStrict, locale) {
+    addRegexToken('dddd', function (isStrict, locale) {
         return locale.weekdaysRegex(isStrict);
     });
 
@@ -17038,32 +17178,55 @@ return jQuery;
     }
 
     // LOCALES
-    function shiftWeekdays (ws, n) {
+    function shiftWeekdays(ws, n) {
         return ws.slice(n, 7).concat(ws.slice(0, n));
     }
 
-    var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_');
-    function localeWeekdays (m, format) {
-        var weekdays = isArray(this._weekdays) ? this._weekdays :
-            this._weekdays[(m && m !== true && this._weekdays.isFormat.test(format)) ? 'format' : 'standalone'];
-        return (m === true) ? shiftWeekdays(weekdays, this._week.dow)
-            : (m) ? weekdays[m.day()] : weekdays;
+    var defaultLocaleWeekdays = 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split(
+            '_'
+        ),
+        defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
+        defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
+        defaultWeekdaysRegex = matchWord,
+        defaultWeekdaysShortRegex = matchWord,
+        defaultWeekdaysMinRegex = matchWord;
+
+    function localeWeekdays(m, format) {
+        var weekdays = isArray(this._weekdays)
+            ? this._weekdays
+            : this._weekdays[
+                  m && m !== true && this._weekdays.isFormat.test(format)
+                      ? 'format'
+                      : 'standalone'
+              ];
+        return m === true
+            ? shiftWeekdays(weekdays, this._week.dow)
+            : m
+            ? weekdays[m.day()]
+            : weekdays;
     }
 
-    var defaultLocaleWeekdaysShort = 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_');
-    function localeWeekdaysShort (m) {
-        return (m === true) ? shiftWeekdays(this._weekdaysShort, this._week.dow)
-            : (m) ? this._weekdaysShort[m.day()] : this._weekdaysShort;
+    function localeWeekdaysShort(m) {
+        return m === true
+            ? shiftWeekdays(this._weekdaysShort, this._week.dow)
+            : m
+            ? this._weekdaysShort[m.day()]
+            : this._weekdaysShort;
     }
 
-    var defaultLocaleWeekdaysMin = 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_');
-    function localeWeekdaysMin (m) {
-        return (m === true) ? shiftWeekdays(this._weekdaysMin, this._week.dow)
-            : (m) ? this._weekdaysMin[m.day()] : this._weekdaysMin;
+    function localeWeekdaysMin(m) {
+        return m === true
+            ? shiftWeekdays(this._weekdaysMin, this._week.dow)
+            : m
+            ? this._weekdaysMin[m.day()]
+            : this._weekdaysMin;
     }
 
     function handleStrictParse$1(weekdayName, format, strict) {
-        var i, ii, mom, llc = weekdayName.toLocaleLowerCase();
+        var i,
+            ii,
+            mom,
+            llc = weekdayName.toLocaleLowerCase();
         if (!this._weekdaysParse) {
             this._weekdaysParse = [];
             this._shortWeekdaysParse = [];
@@ -17071,8 +17234,14 @@ return jQuery;
 
             for (i = 0; i < 7; ++i) {
                 mom = createUTC([2000, 1]).day(i);
-                this._minWeekdaysParse[i] = this.weekdaysMin(mom, '').toLocaleLowerCase();
-                this._shortWeekdaysParse[i] = this.weekdaysShort(mom, '').toLocaleLowerCase();
+                this._minWeekdaysParse[i] = this.weekdaysMin(
+                    mom,
+                    ''
+                ).toLocaleLowerCase();
+                this._shortWeekdaysParse[i] = this.weekdaysShort(
+                    mom,
+                    ''
+                ).toLocaleLowerCase();
                 this._weekdaysParse[i] = this.weekdays(mom, '').toLocaleLowerCase();
             }
         }
@@ -17126,7 +17295,7 @@ return jQuery;
         }
     }
 
-    function localeWeekdaysParse (weekdayName, format, strict) {
+    function localeWeekdaysParse(weekdayName, format, strict) {
         var i, mom, regex;
 
         if (this._weekdaysParseExact) {
@@ -17145,20 +17314,47 @@ return jQuery;
 
             mom = createUTC([2000, 1]).day(i);
             if (strict && !this._fullWeekdaysParse[i]) {
-                this._fullWeekdaysParse[i] = new RegExp('^' + this.weekdays(mom, '').replace('.', '\\.?') + '$', 'i');
-                this._shortWeekdaysParse[i] = new RegExp('^' + this.weekdaysShort(mom, '').replace('.', '\\.?') + '$', 'i');
-                this._minWeekdaysParse[i] = new RegExp('^' + this.weekdaysMin(mom, '').replace('.', '\\.?') + '$', 'i');
+                this._fullWeekdaysParse[i] = new RegExp(
+                    '^' + this.weekdays(mom, '').replace('.', '\\.?') + '$',
+                    'i'
+                );
+                this._shortWeekdaysParse[i] = new RegExp(
+                    '^' + this.weekdaysShort(mom, '').replace('.', '\\.?') + '$',
+                    'i'
+                );
+                this._minWeekdaysParse[i] = new RegExp(
+                    '^' + this.weekdaysMin(mom, '').replace('.', '\\.?') + '$',
+                    'i'
+                );
             }
             if (!this._weekdaysParse[i]) {
-                regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                regex =
+                    '^' +
+                    this.weekdays(mom, '') +
+                    '|^' +
+                    this.weekdaysShort(mom, '') +
+                    '|^' +
+                    this.weekdaysMin(mom, '');
                 this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
             }
             // test the regex
-            if (strict && format === 'dddd' && this._fullWeekdaysParse[i].test(weekdayName)) {
+            if (
+                strict &&
+                format === 'dddd' &&
+                this._fullWeekdaysParse[i].test(weekdayName)
+            ) {
                 return i;
-            } else if (strict && format === 'ddd' && this._shortWeekdaysParse[i].test(weekdayName)) {
+            } else if (
+                strict &&
+                format === 'ddd' &&
+                this._shortWeekdaysParse[i].test(weekdayName)
+            ) {
                 return i;
-            } else if (strict && format === 'dd' && this._minWeekdaysParse[i].test(weekdayName)) {
+            } else if (
+                strict &&
+                format === 'dd' &&
+                this._minWeekdaysParse[i].test(weekdayName)
+            ) {
                 return i;
             } else if (!strict && this._weekdaysParse[i].test(weekdayName)) {
                 return i;
@@ -17168,7 +17364,7 @@ return jQuery;
 
     // MOMENTS
 
-    function getSetDayOfWeek (input) {
+    function getSetDayOfWeek(input) {
         if (!this.isValid()) {
             return input != null ? this : NaN;
         }
@@ -17181,7 +17377,7 @@ return jQuery;
         }
     }
 
-    function getSetLocaleDayOfWeek (input) {
+    function getSetLocaleDayOfWeek(input) {
         if (!this.isValid()) {
             return input != null ? this : NaN;
         }
@@ -17189,7 +17385,7 @@ return jQuery;
         return input == null ? weekday : this.add(input - weekday, 'd');
     }
 
-    function getSetISODayOfWeek (input) {
+    function getSetISODayOfWeek(input) {
         if (!this.isValid()) {
             return input != null ? this : NaN;
         }
@@ -17206,8 +17402,7 @@ return jQuery;
         }
     }
 
-    var defaultWeekdaysRegex = matchWord;
-    function weekdaysRegex (isStrict) {
+    function weekdaysRegex(isStrict) {
         if (this._weekdaysParseExact) {
             if (!hasOwnProp(this, '_weekdaysRegex')) {
                 computeWeekdaysParse.call(this);
@@ -17221,13 +17416,13 @@ return jQuery;
             if (!hasOwnProp(this, '_weekdaysRegex')) {
                 this._weekdaysRegex = defaultWeekdaysRegex;
             }
-            return this._weekdaysStrictRegex && isStrict ?
-                this._weekdaysStrictRegex : this._weekdaysRegex;
+            return this._weekdaysStrictRegex && isStrict
+                ? this._weekdaysStrictRegex
+                : this._weekdaysRegex;
         }
     }
 
-    var defaultWeekdaysShortRegex = matchWord;
-    function weekdaysShortRegex (isStrict) {
+    function weekdaysShortRegex(isStrict) {
         if (this._weekdaysParseExact) {
             if (!hasOwnProp(this, '_weekdaysRegex')) {
                 computeWeekdaysParse.call(this);
@@ -17241,13 +17436,13 @@ return jQuery;
             if (!hasOwnProp(this, '_weekdaysShortRegex')) {
                 this._weekdaysShortRegex = defaultWeekdaysShortRegex;
             }
-            return this._weekdaysShortStrictRegex && isStrict ?
-                this._weekdaysShortStrictRegex : this._weekdaysShortRegex;
+            return this._weekdaysShortStrictRegex && isStrict
+                ? this._weekdaysShortStrictRegex
+                : this._weekdaysShortRegex;
         }
     }
 
-    var defaultWeekdaysMinRegex = matchWord;
-    function weekdaysMinRegex (isStrict) {
+    function weekdaysMinRegex(isStrict) {
         if (this._weekdaysParseExact) {
             if (!hasOwnProp(this, '_weekdaysRegex')) {
                 computeWeekdaysParse.call(this);
@@ -17261,25 +17456,32 @@ return jQuery;
             if (!hasOwnProp(this, '_weekdaysMinRegex')) {
                 this._weekdaysMinRegex = defaultWeekdaysMinRegex;
             }
-            return this._weekdaysMinStrictRegex && isStrict ?
-                this._weekdaysMinStrictRegex : this._weekdaysMinRegex;
+            return this._weekdaysMinStrictRegex && isStrict
+                ? this._weekdaysMinStrictRegex
+                : this._weekdaysMinRegex;
         }
     }
 
-
-    function computeWeekdaysParse () {
+    function computeWeekdaysParse() {
         function cmpLenRev(a, b) {
             return b.length - a.length;
         }
 
-        var minPieces = [], shortPieces = [], longPieces = [], mixedPieces = [],
-            i, mom, minp, shortp, longp;
+        var minPieces = [],
+            shortPieces = [],
+            longPieces = [],
+            mixedPieces = [],
+            i,
+            mom,
+            minp,
+            shortp,
+            longp;
         for (i = 0; i < 7; i++) {
             // make the regex if we don't have it already
             mom = createUTC([2000, 1]).day(i);
-            minp = this.weekdaysMin(mom, '');
-            shortp = this.weekdaysShort(mom, '');
-            longp = this.weekdays(mom, '');
+            minp = regexEscape(this.weekdaysMin(mom, ''));
+            shortp = regexEscape(this.weekdaysShort(mom, ''));
+            longp = regexEscape(this.weekdays(mom, ''));
             minPieces.push(minp);
             shortPieces.push(shortp);
             longPieces.push(longp);
@@ -17293,19 +17495,23 @@ return jQuery;
         shortPieces.sort(cmpLenRev);
         longPieces.sort(cmpLenRev);
         mixedPieces.sort(cmpLenRev);
-        for (i = 0; i < 7; i++) {
-            shortPieces[i] = regexEscape(shortPieces[i]);
-            longPieces[i] = regexEscape(longPieces[i]);
-            mixedPieces[i] = regexEscape(mixedPieces[i]);
-        }
 
         this._weekdaysRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
         this._weekdaysShortRegex = this._weekdaysRegex;
         this._weekdaysMinRegex = this._weekdaysRegex;
 
-        this._weekdaysStrictRegex = new RegExp('^(' + longPieces.join('|') + ')', 'i');
-        this._weekdaysShortStrictRegex = new RegExp('^(' + shortPieces.join('|') + ')', 'i');
-        this._weekdaysMinStrictRegex = new RegExp('^(' + minPieces.join('|') + ')', 'i');
+        this._weekdaysStrictRegex = new RegExp(
+            '^(' + longPieces.join('|') + ')',
+            'i'
+        );
+        this._weekdaysShortStrictRegex = new RegExp(
+            '^(' + shortPieces.join('|') + ')',
+            'i'
+        );
+        this._weekdaysMinStrictRegex = new RegExp(
+            '^(' + minPieces.join('|') + ')',
+            'i'
+        );
     }
 
     // FORMATTING
@@ -17327,8 +17533,12 @@ return jQuery;
     });
 
     addFormatToken('hmmss', 0, 0, function () {
-        return '' + hFormat.apply(this) + zeroFill(this.minutes(), 2) +
-            zeroFill(this.seconds(), 2);
+        return (
+            '' +
+            hFormat.apply(this) +
+            zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2)
+        );
     });
 
     addFormatToken('Hmm', 0, 0, function () {
@@ -17336,13 +17546,21 @@ return jQuery;
     });
 
     addFormatToken('Hmmss', 0, 0, function () {
-        return '' + this.hours() + zeroFill(this.minutes(), 2) +
-            zeroFill(this.seconds(), 2);
+        return (
+            '' +
+            this.hours() +
+            zeroFill(this.minutes(), 2) +
+            zeroFill(this.seconds(), 2)
+        );
     });
 
-    function meridiem (token, lowercase) {
+    function meridiem(token, lowercase) {
         addFormatToken(token, 0, 0, function () {
-            return this.localeData().meridiem(this.hours(), this.minutes(), lowercase);
+            return this.localeData().meridiem(
+                this.hours(),
+                this.minutes(),
+                lowercase
+            );
         });
     }
 
@@ -17358,15 +17576,15 @@ return jQuery;
 
     // PARSING
 
-    function matchMeridiem (isStrict, locale) {
+    function matchMeridiem(isStrict, locale) {
         return locale._meridiemParse;
     }
 
-    addRegexToken('a',  matchMeridiem);
-    addRegexToken('A',  matchMeridiem);
-    addRegexToken('H',  match1to2);
-    addRegexToken('h',  match1to2);
-    addRegexToken('k',  match1to2);
+    addRegexToken('a', matchMeridiem);
+    addRegexToken('A', matchMeridiem);
+    addRegexToken('H', match1to2);
+    addRegexToken('h', match1to2);
+    addRegexToken('k', match1to2);
     addRegexToken('HH', match1to2, match2);
     addRegexToken('hh', match1to2, match2);
     addRegexToken('kk', match1to2, match2);
@@ -17396,8 +17614,8 @@ return jQuery;
         getParsingFlags(config).bigHour = true;
     });
     addParseToken('hmmss', function (input, array, config) {
-        var pos1 = input.length - 4;
-        var pos2 = input.length - 2;
+        var pos1 = input.length - 4,
+            pos2 = input.length - 2;
         array[HOUR] = toInt(input.substr(0, pos1));
         array[MINUTE] = toInt(input.substr(pos1, 2));
         array[SECOND] = toInt(input.substr(pos2));
@@ -17409,8 +17627,8 @@ return jQuery;
         array[MINUTE] = toInt(input.substr(pos));
     });
     addParseToken('Hmmss', function (input, array, config) {
-        var pos1 = input.length - 4;
-        var pos2 = input.length - 2;
+        var pos1 = input.length - 4,
+            pos2 = input.length - 2;
         array[HOUR] = toInt(input.substr(0, pos1));
         array[MINUTE] = toInt(input.substr(pos1, 2));
         array[SECOND] = toInt(input.substr(pos2));
@@ -17418,29 +17636,26 @@ return jQuery;
 
     // LOCALES
 
-    function localeIsPM (input) {
+    function localeIsPM(input) {
         // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
         // Using charAt should be more compatible.
-        return ((input + '').toLowerCase().charAt(0) === 'p');
+        return (input + '').toLowerCase().charAt(0) === 'p';
     }
 
-    var defaultLocaleMeridiemParse = /[ap]\.?m?\.?/i;
-    function localeMeridiem (hours, minutes, isLower) {
+    var defaultLocaleMeridiemParse = /[ap]\.?m?\.?/i,
+        // Setting the hour should keep the time, because the user explicitly
+        // specified which hour they want. So trying to maintain the same hour (in
+        // a new timezone) makes sense. Adding/subtracting hours does not follow
+        // this rule.
+        getSetHour = makeGetSet('Hours', true);
+
+    function localeMeridiem(hours, minutes, isLower) {
         if (hours > 11) {
             return isLower ? 'pm' : 'PM';
         } else {
             return isLower ? 'am' : 'AM';
         }
     }
-
-
-    // MOMENTS
-
-    // Setting the hour should keep the time, because the user explicitly
-    // specified which hour they want. So trying to maintain the same hour (in
-    // a new timezone) makes sense. Adding/subtracting hours does not follow
-    // this rule.
-    var getSetHour = makeGetSet('Hours', true);
 
     var baseConfig = {
         calendar: defaultCalendar,
@@ -17459,13 +17674,24 @@ return jQuery;
         weekdaysMin: defaultLocaleWeekdaysMin,
         weekdaysShort: defaultLocaleWeekdaysShort,
 
-        meridiemParse: defaultLocaleMeridiemParse
+        meridiemParse: defaultLocaleMeridiemParse,
     };
 
     // internal storage for locale config files
-    var locales = {};
-    var localeFamilies = {};
-    var globalLocale;
+    var locales = {},
+        localeFamilies = {},
+        globalLocale;
+
+    function commonPrefix(arr1, arr2) {
+        var i,
+            minl = Math.min(arr1.length, arr2.length);
+        for (i = 0; i < minl; i += 1) {
+            if (arr1[i] !== arr2[i]) {
+                return i;
+            }
+        }
+        return minl;
+    }
 
     function normalizeLocale(key) {
         return key ? key.toLowerCase().replace('_', '-') : key;
@@ -17475,7 +17701,11 @@ return jQuery;
     // try ['en-au', 'en-gb'] as 'en-au', 'en-gb', 'en', as in move through the list trying each
     // substring from most specific to least, but move to the next array item if it's a more specific variant than the current root
     function chooseLocale(names) {
-        var i = 0, j, next, locale, split;
+        var i = 0,
+            j,
+            next,
+            locale,
+            split;
 
         while (i < names.length) {
             split = normalizeLocale(names[i]).split('-');
@@ -17487,7 +17717,11 @@ return jQuery;
                 if (locale) {
                     return locale;
                 }
-                if (next && next.length >= j && compareArrays(split, next, true) >= j - 1) {
+                if (
+                    next &&
+                    next.length >= j &&
+                    commonPrefix(split, next) >= j - 1
+                ) {
                     //the next array item is better than a shallower substring of this one
                     break;
                 }
@@ -17499,16 +17733,25 @@ return jQuery;
     }
 
     function loadLocale(name) {
-        var oldLocale = null;
+        var oldLocale = null,
+            aliasedRequire;
         // TODO: Find a better way to register and load all the locales in Node
-        if (!locales[name] && (typeof module !== 'undefined') &&
-                module && module.exports) {
+        if (
+            locales[name] === undefined &&
+            typeof module !== 'undefined' &&
+            module &&
+            module.exports
+        ) {
             try {
                 oldLocale = globalLocale._abbr;
-                var aliasedRequire = require;
+                aliasedRequire = require;
                 aliasedRequire('./locale/' + name);
                 getSetGlobalLocale(oldLocale);
-            } catch (e) {}
+            } catch (e) {
+                // mark as not found to avoid repeating expensive file require call causing high CPU
+                // when trying to find en-US, en_US, en-us for every format call
+                locales[name] = null; // null means not found
+            }
         }
         return locales[name];
     }
@@ -17516,24 +17759,24 @@ return jQuery;
     // This function will load locale and then set the global locale.  If
     // no arguments are passed in, it will simply return the current global
     // locale key.
-    function getSetGlobalLocale (key, values) {
+    function getSetGlobalLocale(key, values) {
         var data;
         if (key) {
             if (isUndefined(values)) {
                 data = getLocale(key);
-            }
-            else {
+            } else {
                 data = defineLocale(key, values);
             }
 
             if (data) {
                 // moment.duration._locale = moment._locale = data;
                 globalLocale = data;
-            }
-            else {
-                if ((typeof console !==  'undefined') && console.warn) {
+            } else {
+                if (typeof console !== 'undefined' && console.warn) {
                     //warn user if arguments are passed but the locale could not be set
-                    console.warn('Locale ' + key +  ' not found. Did you forget to load it?');
+                    console.warn(
+                        'Locale ' + key + ' not found. Did you forget to load it?'
+                    );
                 }
             }
         }
@@ -17541,16 +17784,19 @@ return jQuery;
         return globalLocale._abbr;
     }
 
-    function defineLocale (name, config) {
+    function defineLocale(name, config) {
         if (config !== null) {
-            var locale, parentConfig = baseConfig;
+            var locale,
+                parentConfig = baseConfig;
             config.abbr = name;
             if (locales[name] != null) {
-                deprecateSimple('defineLocaleOverride',
-                        'use moment.updateLocale(localeName, config) to change ' +
+                deprecateSimple(
+                    'defineLocaleOverride',
+                    'use moment.updateLocale(localeName, config) to change ' +
                         'an existing locale. moment.defineLocale(localeName, ' +
                         'config) should only be used for creating a new locale ' +
-                        'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.');
+                        'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.'
+                );
                 parentConfig = locales[name]._config;
             } else if (config.parentLocale != null) {
                 if (locales[config.parentLocale] != null) {
@@ -17565,7 +17811,7 @@ return jQuery;
                         }
                         localeFamilies[config.parentLocale].push({
                             name: name,
-                            config: config
+                            config: config,
                         });
                         return null;
                     }
@@ -17584,7 +17830,6 @@ return jQuery;
             // created, so we won't end up with the child locale set.
             getSetGlobalLocale(name);
 
-
             return locales[name];
         } else {
             // useful for testing
@@ -17595,16 +17840,30 @@ return jQuery;
 
     function updateLocale(name, config) {
         if (config != null) {
-            var locale, tmpLocale, parentConfig = baseConfig;
-            // MERGE
-            tmpLocale = loadLocale(name);
-            if (tmpLocale != null) {
-                parentConfig = tmpLocale._config;
+            var locale,
+                tmpLocale,
+                parentConfig = baseConfig;
+
+            if (locales[name] != null && locales[name].parentLocale != null) {
+                // Update existing child locale in-place to avoid memory-leaks
+                locales[name].set(mergeConfigs(locales[name]._config, config));
+            } else {
+                // MERGE
+                tmpLocale = loadLocale(name);
+                if (tmpLocale != null) {
+                    parentConfig = tmpLocale._config;
+                }
+                config = mergeConfigs(parentConfig, config);
+                if (tmpLocale == null) {
+                    // updateLocale is called for creating a new locale
+                    // Set abbr so it will have a name (getters return
+                    // undefined otherwise).
+                    config.abbr = name;
+                }
+                locale = new Locale(config);
+                locale.parentLocale = locales[name];
+                locales[name] = locale;
             }
-            config = mergeConfigs(parentConfig, config);
-            locale = new Locale(config);
-            locale.parentLocale = locales[name];
-            locales[name] = locale;
 
             // backwards compat for now: also set the locale
             getSetGlobalLocale(name);
@@ -17613,6 +17872,9 @@ return jQuery;
             if (locales[name] != null) {
                 if (locales[name].parentLocale != null) {
                     locales[name] = locales[name].parentLocale;
+                    if (name === getSetGlobalLocale()) {
+                        getSetGlobalLocale(name);
+                    }
                 } else if (locales[name] != null) {
                     delete locales[name];
                 }
@@ -17622,7 +17884,7 @@ return jQuery;
     }
 
     // returns locale data
-    function getLocale (key) {
+    function getLocale(key) {
         var locale;
 
         if (key && key._locale && key._locale._abbr) {
@@ -17649,21 +17911,35 @@ return jQuery;
         return keys(locales);
     }
 
-    function checkOverflow (m) {
-        var overflow;
-        var a = m._a;
+    function checkOverflow(m) {
+        var overflow,
+            a = m._a;
 
         if (a && getParsingFlags(m).overflow === -2) {
             overflow =
-                a[MONTH]       < 0 || a[MONTH]       > 11  ? MONTH :
-                a[DATE]        < 1 || a[DATE]        > daysInMonth(a[YEAR], a[MONTH]) ? DATE :
-                a[HOUR]        < 0 || a[HOUR]        > 24 || (a[HOUR] === 24 && (a[MINUTE] !== 0 || a[SECOND] !== 0 || a[MILLISECOND] !== 0)) ? HOUR :
-                a[MINUTE]      < 0 || a[MINUTE]      > 59  ? MINUTE :
-                a[SECOND]      < 0 || a[SECOND]      > 59  ? SECOND :
-                a[MILLISECOND] < 0 || a[MILLISECOND] > 999 ? MILLISECOND :
-                -1;
+                a[MONTH] < 0 || a[MONTH] > 11
+                    ? MONTH
+                    : a[DATE] < 1 || a[DATE] > daysInMonth(a[YEAR], a[MONTH])
+                    ? DATE
+                    : a[HOUR] < 0 ||
+                      a[HOUR] > 24 ||
+                      (a[HOUR] === 24 &&
+                          (a[MINUTE] !== 0 ||
+                              a[SECOND] !== 0 ||
+                              a[MILLISECOND] !== 0))
+                    ? HOUR
+                    : a[MINUTE] < 0 || a[MINUTE] > 59
+                    ? MINUTE
+                    : a[SECOND] < 0 || a[SECOND] > 59
+                    ? SECOND
+                    : a[MILLISECOND] < 0 || a[MILLISECOND] > 999
+                    ? MILLISECOND
+                    : -1;
 
-            if (getParsingFlags(m)._overflowDayOfYear && (overflow < YEAR || overflow > DATE)) {
+            if (
+                getParsingFlags(m)._overflowDayOfYear &&
+                (overflow < YEAR || overflow > DATE)
+            ) {
                 overflow = DATE;
             }
             if (getParsingFlags(m)._overflowWeeks && overflow === -1) {
@@ -17679,199 +17955,64 @@ return jQuery;
         return m;
     }
 
-    // Pick the first defined of two or three arguments.
-    function defaults(a, b, c) {
-        if (a != null) {
-            return a;
-        }
-        if (b != null) {
-            return b;
-        }
-        return c;
-    }
-
-    function currentDateArray(config) {
-        // hooks is actually the exported moment object
-        var nowValue = new Date(hooks.now());
-        if (config._useUTC) {
-            return [nowValue.getUTCFullYear(), nowValue.getUTCMonth(), nowValue.getUTCDate()];
-        }
-        return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
-    }
-
-    // convert an array to a date.
-    // the array should mirror the parameters below
-    // note: all values past the year are optional and will default to the lowest possible value.
-    // [year, month, day , hour, minute, second, millisecond]
-    function configFromArray (config) {
-        var i, date, input = [], currentDate, expectedWeekday, yearToUse;
-
-        if (config._d) {
-            return;
-        }
-
-        currentDate = currentDateArray(config);
-
-        //compute day of the year from weeks and weekdays
-        if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
-            dayOfYearFromWeekInfo(config);
-        }
-
-        //if the day of the year is set, figure out what it is
-        if (config._dayOfYear != null) {
-            yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
-
-            if (config._dayOfYear > daysInYear(yearToUse) || config._dayOfYear === 0) {
-                getParsingFlags(config)._overflowDayOfYear = true;
-            }
-
-            date = createUTCDate(yearToUse, 0, config._dayOfYear);
-            config._a[MONTH] = date.getUTCMonth();
-            config._a[DATE] = date.getUTCDate();
-        }
-
-        // Default to current date.
-        // * if no year, month, day of month are given, default to today
-        // * if day of month is given, default month and year
-        // * if month is given, default only year
-        // * if year is given, don't default anything
-        for (i = 0; i < 3 && config._a[i] == null; ++i) {
-            config._a[i] = input[i] = currentDate[i];
-        }
-
-        // Zero out whatever was not defaulted, including time
-        for (; i < 7; i++) {
-            config._a[i] = input[i] = (config._a[i] == null) ? (i === 2 ? 1 : 0) : config._a[i];
-        }
-
-        // Check for 24:00:00.000
-        if (config._a[HOUR] === 24 &&
-                config._a[MINUTE] === 0 &&
-                config._a[SECOND] === 0 &&
-                config._a[MILLISECOND] === 0) {
-            config._nextDay = true;
-            config._a[HOUR] = 0;
-        }
-
-        config._d = (config._useUTC ? createUTCDate : createDate).apply(null, input);
-        expectedWeekday = config._useUTC ? config._d.getUTCDay() : config._d.getDay();
-
-        // Apply timezone offset from input. The actual utcOffset can be changed
-        // with parseZone.
-        if (config._tzm != null) {
-            config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
-        }
-
-        if (config._nextDay) {
-            config._a[HOUR] = 24;
-        }
-
-        // check for mismatching day of week
-        if (config._w && typeof config._w.d !== 'undefined' && config._w.d !== expectedWeekday) {
-            getParsingFlags(config).weekdayMismatch = true;
-        }
-    }
-
-    function dayOfYearFromWeekInfo(config) {
-        var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow;
-
-        w = config._w;
-        if (w.GG != null || w.W != null || w.E != null) {
-            dow = 1;
-            doy = 4;
-
-            // TODO: We need to take the current isoWeekYear, but that depends on
-            // how we interpret now (local, utc, fixed offset). So create
-            // a now version of current config (take local/utc/offset flags, and
-            // create now).
-            weekYear = defaults(w.GG, config._a[YEAR], weekOfYear(createLocal(), 1, 4).year);
-            week = defaults(w.W, 1);
-            weekday = defaults(w.E, 1);
-            if (weekday < 1 || weekday > 7) {
-                weekdayOverflow = true;
-            }
-        } else {
-            dow = config._locale._week.dow;
-            doy = config._locale._week.doy;
-
-            var curWeek = weekOfYear(createLocal(), dow, doy);
-
-            weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
-
-            // Default to current week.
-            week = defaults(w.w, curWeek.week);
-
-            if (w.d != null) {
-                // weekday -- low day numbers are considered next week
-                weekday = w.d;
-                if (weekday < 0 || weekday > 6) {
-                    weekdayOverflow = true;
-                }
-            } else if (w.e != null) {
-                // local weekday -- counting starts from beginning of week
-                weekday = w.e + dow;
-                if (w.e < 0 || w.e > 6) {
-                    weekdayOverflow = true;
-                }
-            } else {
-                // default to beginning of week
-                weekday = dow;
-            }
-        }
-        if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
-            getParsingFlags(config)._overflowWeeks = true;
-        } else if (weekdayOverflow != null) {
-            getParsingFlags(config)._overflowWeekday = true;
-        } else {
-            temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
-            config._a[YEAR] = temp.year;
-            config._dayOfYear = temp.dayOfYear;
-        }
-    }
-
     // iso 8601 regex
     // 0000-00-00 0000-W00 or 0000-W00-0 + T + 00 or 00:00 or 00:00:00 or 00:00:00.000 + +00:00 or +0000 or +00)
-    var extendedIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
-    var basicIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([\+\-]\d\d(?::?\d\d)?|\s*Z)?)?$/;
-
-    var tzRegex = /Z|[+-]\d\d(?::?\d\d)?/;
-
-    var isoDates = [
-        ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
-        ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
-        ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
-        ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
-        ['YYYY-DDD', /\d{4}-\d{3}/],
-        ['YYYY-MM', /\d{4}-\d\d/, false],
-        ['YYYYYYMMDD', /[+-]\d{10}/],
-        ['YYYYMMDD', /\d{8}/],
-        // YYYYMM is NOT allowed by the standard
-        ['GGGG[W]WWE', /\d{4}W\d{3}/],
-        ['GGGG[W]WW', /\d{4}W\d{2}/, false],
-        ['YYYYDDD', /\d{7}/]
-    ];
-
-    // iso time formats and regexes
-    var isoTimes = [
-        ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
-        ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
-        ['HH:mm:ss', /\d\d:\d\d:\d\d/],
-        ['HH:mm', /\d\d:\d\d/],
-        ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
-        ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
-        ['HHmmss', /\d\d\d\d\d\d/],
-        ['HHmm', /\d\d\d\d/],
-        ['HH', /\d\d/]
-    ];
-
-    var aspNetJsonRegex = /^\/?Date\((\-?\d+)/i;
+    var extendedIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})-(?:\d\d-\d\d|W\d\d-\d|W\d\d|\d\d\d|\d\d))(?:(T| )(\d\d(?::\d\d(?::\d\d(?:[.,]\d+)?)?)?)([+-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+        basicIsoRegex = /^\s*((?:[+-]\d{6}|\d{4})(?:\d\d\d\d|W\d\d\d|W\d\d|\d\d\d|\d\d|))(?:(T| )(\d\d(?:\d\d(?:\d\d(?:[.,]\d+)?)?)?)([+-]\d\d(?::?\d\d)?|\s*Z)?)?$/,
+        tzRegex = /Z|[+-]\d\d(?::?\d\d)?/,
+        isoDates = [
+            ['YYYYYY-MM-DD', /[+-]\d{6}-\d\d-\d\d/],
+            ['YYYY-MM-DD', /\d{4}-\d\d-\d\d/],
+            ['GGGG-[W]WW-E', /\d{4}-W\d\d-\d/],
+            ['GGGG-[W]WW', /\d{4}-W\d\d/, false],
+            ['YYYY-DDD', /\d{4}-\d{3}/],
+            ['YYYY-MM', /\d{4}-\d\d/, false],
+            ['YYYYYYMMDD', /[+-]\d{10}/],
+            ['YYYYMMDD', /\d{8}/],
+            ['GGGG[W]WWE', /\d{4}W\d{3}/],
+            ['GGGG[W]WW', /\d{4}W\d{2}/, false],
+            ['YYYYDDD', /\d{7}/],
+            ['YYYYMM', /\d{6}/, false],
+            ['YYYY', /\d{4}/, false],
+        ],
+        // iso time formats and regexes
+        isoTimes = [
+            ['HH:mm:ss.SSSS', /\d\d:\d\d:\d\d\.\d+/],
+            ['HH:mm:ss,SSSS', /\d\d:\d\d:\d\d,\d+/],
+            ['HH:mm:ss', /\d\d:\d\d:\d\d/],
+            ['HH:mm', /\d\d:\d\d/],
+            ['HHmmss.SSSS', /\d\d\d\d\d\d\.\d+/],
+            ['HHmmss,SSSS', /\d\d\d\d\d\d,\d+/],
+            ['HHmmss', /\d\d\d\d\d\d/],
+            ['HHmm', /\d\d\d\d/],
+            ['HH', /\d\d/],
+        ],
+        aspNetJsonRegex = /^\/?Date\((-?\d+)/i,
+        // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
+        rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/,
+        obsOffsets = {
+            UT: 0,
+            GMT: 0,
+            EDT: -4 * 60,
+            EST: -5 * 60,
+            CDT: -5 * 60,
+            CST: -6 * 60,
+            MDT: -6 * 60,
+            MST: -7 * 60,
+            PDT: -7 * 60,
+            PST: -8 * 60,
+        };
 
     // date from iso format
     function configFromISO(config) {
-        var i, l,
+        var i,
+            l,
             string = config._i,
             match = extendedIsoRegex.exec(string) || basicIsoRegex.exec(string),
-            allowTime, dateFormat, timeFormat, tzFormat;
+            allowTime,
+            dateFormat,
+            timeFormat,
+            tzFormat;
 
         if (match) {
             getParsingFlags(config).iso = true;
@@ -17919,16 +18060,20 @@ return jQuery;
         }
     }
 
-    // RFC 2822 regex: For details see https://tools.ietf.org/html/rfc2822#section-3.3
-    var rfc2822 = /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun),?\s)?(\d{1,2})\s(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s(\d{2,4})\s(\d\d):(\d\d)(?::(\d\d))?\s(?:(UT|GMT|[ECMP][SD]T)|([Zz])|([+-]\d{4}))$/;
-
-    function extractFromRFC2822Strings(yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr) {
+    function extractFromRFC2822Strings(
+        yearStr,
+        monthStr,
+        dayStr,
+        hourStr,
+        minuteStr,
+        secondStr
+    ) {
         var result = [
             untruncateYear(yearStr),
             defaultLocaleMonthsShort.indexOf(monthStr),
             parseInt(dayStr, 10),
             parseInt(hourStr, 10),
-            parseInt(minuteStr, 10)
+            parseInt(minuteStr, 10),
         ];
 
         if (secondStr) {
@@ -17950,14 +18095,22 @@ return jQuery;
 
     function preprocessRFC2822(s) {
         // Remove comments and folding whitespace and replace multiple-spaces with a single space
-        return s.replace(/\([^)]*\)|[\n\t]/g, ' ').replace(/(\s\s+)/g, ' ').replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+        return s
+            .replace(/\([^)]*\)|[\n\t]/g, ' ')
+            .replace(/(\s\s+)/g, ' ')
+            .replace(/^\s\s*/, '')
+            .replace(/\s\s*$/, '');
     }
 
     function checkWeekday(weekdayStr, parsedInput, config) {
         if (weekdayStr) {
-            // TODO: Replace the vanilla JS Date object with an indepentent day-of-week check.
+            // TODO: Replace the vanilla JS Date object with an independent day-of-week check.
             var weekdayProvided = defaultLocaleWeekdaysShort.indexOf(weekdayStr),
-                weekdayActual = new Date(parsedInput[0], parsedInput[1], parsedInput[2]).getDay();
+                weekdayActual = new Date(
+                    parsedInput[0],
+                    parsedInput[1],
+                    parsedInput[2]
+                ).getDay();
             if (weekdayProvided !== weekdayActual) {
                 getParsingFlags(config).weekdayMismatch = true;
                 config._isValid = false;
@@ -17967,19 +18120,6 @@ return jQuery;
         return true;
     }
 
-    var obsOffsets = {
-        UT: 0,
-        GMT: 0,
-        EDT: -4 * 60,
-        EST: -5 * 60,
-        CDT: -5 * 60,
-        CST: -6 * 60,
-        MDT: -6 * 60,
-        MST: -7 * 60,
-        PDT: -7 * 60,
-        PST: -8 * 60
-    };
-
     function calculateOffset(obsOffset, militaryOffset, numOffset) {
         if (obsOffset) {
             return obsOffsets[obsOffset];
@@ -17987,17 +18127,26 @@ return jQuery;
             // the only allowed military tz is Z
             return 0;
         } else {
-            var hm = parseInt(numOffset, 10);
-            var m = hm % 100, h = (hm - m) / 100;
+            var hm = parseInt(numOffset, 10),
+                m = hm % 100,
+                h = (hm - m) / 100;
             return h * 60 + m;
         }
     }
 
     // date and time from ref 2822 format
     function configFromRFC2822(config) {
-        var match = rfc2822.exec(preprocessRFC2822(config._i));
+        var match = rfc2822.exec(preprocessRFC2822(config._i)),
+            parsedArray;
         if (match) {
-            var parsedArray = extractFromRFC2822Strings(match[4], match[3], match[2], match[5], match[6], match[7]);
+            parsedArray = extractFromRFC2822Strings(
+                match[4],
+                match[3],
+                match[2],
+                match[5],
+                match[6],
+                match[7]
+            );
             if (!checkWeekday(match[1], parsedArray, config)) {
                 return;
             }
@@ -18014,10 +18163,9 @@ return jQuery;
         }
     }
 
-    // date from iso format or fallback
+    // date from 1) ASP.NET, 2) ISO, 3) RFC 2822 formats, or 4) optional fallback if parsing isn't strict
     function configFromString(config) {
         var matched = aspNetJsonRegex.exec(config._i);
-
         if (matched !== null) {
             config._d = new Date(+matched[1]);
             return;
@@ -18037,19 +18185,201 @@ return jQuery;
             return;
         }
 
-        // Final attempt, use Input Fallback
-        hooks.createFromInputFallback(config);
+        if (config._strict) {
+            config._isValid = false;
+        } else {
+            // Final attempt, use Input Fallback
+            hooks.createFromInputFallback(config);
+        }
     }
 
     hooks.createFromInputFallback = deprecate(
         'value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' +
-        'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
-        'discouraged and will be removed in an upcoming major release. Please refer to ' +
-        'http://momentjs.com/guides/#/warnings/js-date/ for more info.',
+            'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
+            'discouraged and will be removed in an upcoming major release. Please refer to ' +
+            'http://momentjs.com/guides/#/warnings/js-date/ for more info.',
         function (config) {
             config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
         }
     );
+
+    // Pick the first defined of two or three arguments.
+    function defaults(a, b, c) {
+        if (a != null) {
+            return a;
+        }
+        if (b != null) {
+            return b;
+        }
+        return c;
+    }
+
+    function currentDateArray(config) {
+        // hooks is actually the exported moment object
+        var nowValue = new Date(hooks.now());
+        if (config._useUTC) {
+            return [
+                nowValue.getUTCFullYear(),
+                nowValue.getUTCMonth(),
+                nowValue.getUTCDate(),
+            ];
+        }
+        return [nowValue.getFullYear(), nowValue.getMonth(), nowValue.getDate()];
+    }
+
+    // convert an array to a date.
+    // the array should mirror the parameters below
+    // note: all values past the year are optional and will default to the lowest possible value.
+    // [year, month, day , hour, minute, second, millisecond]
+    function configFromArray(config) {
+        var i,
+            date,
+            input = [],
+            currentDate,
+            expectedWeekday,
+            yearToUse;
+
+        if (config._d) {
+            return;
+        }
+
+        currentDate = currentDateArray(config);
+
+        //compute day of the year from weeks and weekdays
+        if (config._w && config._a[DATE] == null && config._a[MONTH] == null) {
+            dayOfYearFromWeekInfo(config);
+        }
+
+        //if the day of the year is set, figure out what it is
+        if (config._dayOfYear != null) {
+            yearToUse = defaults(config._a[YEAR], currentDate[YEAR]);
+
+            if (
+                config._dayOfYear > daysInYear(yearToUse) ||
+                config._dayOfYear === 0
+            ) {
+                getParsingFlags(config)._overflowDayOfYear = true;
+            }
+
+            date = createUTCDate(yearToUse, 0, config._dayOfYear);
+            config._a[MONTH] = date.getUTCMonth();
+            config._a[DATE] = date.getUTCDate();
+        }
+
+        // Default to current date.
+        // * if no year, month, day of month are given, default to today
+        // * if day of month is given, default month and year
+        // * if month is given, default only year
+        // * if year is given, don't default anything
+        for (i = 0; i < 3 && config._a[i] == null; ++i) {
+            config._a[i] = input[i] = currentDate[i];
+        }
+
+        // Zero out whatever was not defaulted, including time
+        for (; i < 7; i++) {
+            config._a[i] = input[i] =
+                config._a[i] == null ? (i === 2 ? 1 : 0) : config._a[i];
+        }
+
+        // Check for 24:00:00.000
+        if (
+            config._a[HOUR] === 24 &&
+            config._a[MINUTE] === 0 &&
+            config._a[SECOND] === 0 &&
+            config._a[MILLISECOND] === 0
+        ) {
+            config._nextDay = true;
+            config._a[HOUR] = 0;
+        }
+
+        config._d = (config._useUTC ? createUTCDate : createDate).apply(
+            null,
+            input
+        );
+        expectedWeekday = config._useUTC
+            ? config._d.getUTCDay()
+            : config._d.getDay();
+
+        // Apply timezone offset from input. The actual utcOffset can be changed
+        // with parseZone.
+        if (config._tzm != null) {
+            config._d.setUTCMinutes(config._d.getUTCMinutes() - config._tzm);
+        }
+
+        if (config._nextDay) {
+            config._a[HOUR] = 24;
+        }
+
+        // check for mismatching day of week
+        if (
+            config._w &&
+            typeof config._w.d !== 'undefined' &&
+            config._w.d !== expectedWeekday
+        ) {
+            getParsingFlags(config).weekdayMismatch = true;
+        }
+    }
+
+    function dayOfYearFromWeekInfo(config) {
+        var w, weekYear, week, weekday, dow, doy, temp, weekdayOverflow, curWeek;
+
+        w = config._w;
+        if (w.GG != null || w.W != null || w.E != null) {
+            dow = 1;
+            doy = 4;
+
+            // TODO: We need to take the current isoWeekYear, but that depends on
+            // how we interpret now (local, utc, fixed offset). So create
+            // a now version of current config (take local/utc/offset flags, and
+            // create now).
+            weekYear = defaults(
+                w.GG,
+                config._a[YEAR],
+                weekOfYear(createLocal(), 1, 4).year
+            );
+            week = defaults(w.W, 1);
+            weekday = defaults(w.E, 1);
+            if (weekday < 1 || weekday > 7) {
+                weekdayOverflow = true;
+            }
+        } else {
+            dow = config._locale._week.dow;
+            doy = config._locale._week.doy;
+
+            curWeek = weekOfYear(createLocal(), dow, doy);
+
+            weekYear = defaults(w.gg, config._a[YEAR], curWeek.year);
+
+            // Default to current week.
+            week = defaults(w.w, curWeek.week);
+
+            if (w.d != null) {
+                // weekday -- low day numbers are considered next week
+                weekday = w.d;
+                if (weekday < 0 || weekday > 6) {
+                    weekdayOverflow = true;
+                }
+            } else if (w.e != null) {
+                // local weekday -- counting starts from beginning of week
+                weekday = w.e + dow;
+                if (w.e < 0 || w.e > 6) {
+                    weekdayOverflow = true;
+                }
+            } else {
+                // default to beginning of week
+                weekday = dow;
+            }
+        }
+        if (week < 1 || week > weeksInYear(weekYear, dow, doy)) {
+            getParsingFlags(config)._overflowWeeks = true;
+        } else if (weekdayOverflow != null) {
+            getParsingFlags(config)._overflowWeekday = true;
+        } else {
+            temp = dayOfYearFromWeeks(weekYear, week, weekday, dow, doy);
+            config._a[YEAR] = temp.year;
+            config._dayOfYear = temp.dayOfYear;
+        }
+    }
 
     // constant that refers to the ISO standard
     hooks.ISO_8601 = function () {};
@@ -18073,64 +18403,81 @@ return jQuery;
 
         // This array is used to make a Date, either with `new Date` or `Date.UTC`
         var string = '' + config._i,
-            i, parsedInput, tokens, token, skipped,
+            i,
+            parsedInput,
+            tokens,
+            token,
+            skipped,
             stringLength = string.length,
-            totalParsedInputLength = 0;
+            totalParsedInputLength = 0,
+            era;
 
-        tokens = expandFormat(config._f, config._locale).match(formattingTokens) || [];
+        tokens =
+            expandFormat(config._f, config._locale).match(formattingTokens) || [];
 
         for (i = 0; i < tokens.length; i++) {
             token = tokens[i];
-            parsedInput = (string.match(getParseRegexForToken(token, config)) || [])[0];
-            // console.log('token', token, 'parsedInput', parsedInput,
-            //         'regex', getParseRegexForToken(token, config));
+            parsedInput = (string.match(getParseRegexForToken(token, config)) ||
+                [])[0];
             if (parsedInput) {
                 skipped = string.substr(0, string.indexOf(parsedInput));
                 if (skipped.length > 0) {
                     getParsingFlags(config).unusedInput.push(skipped);
                 }
-                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+                string = string.slice(
+                    string.indexOf(parsedInput) + parsedInput.length
+                );
                 totalParsedInputLength += parsedInput.length;
             }
             // don't parse if it's not a known token
             if (formatTokenFunctions[token]) {
                 if (parsedInput) {
                     getParsingFlags(config).empty = false;
-                }
-                else {
+                } else {
                     getParsingFlags(config).unusedTokens.push(token);
                 }
                 addTimeToArrayFromToken(token, parsedInput, config);
-            }
-            else if (config._strict && !parsedInput) {
+            } else if (config._strict && !parsedInput) {
                 getParsingFlags(config).unusedTokens.push(token);
             }
         }
 
         // add remaining unparsed input length to the string
-        getParsingFlags(config).charsLeftOver = stringLength - totalParsedInputLength;
+        getParsingFlags(config).charsLeftOver =
+            stringLength - totalParsedInputLength;
         if (string.length > 0) {
             getParsingFlags(config).unusedInput.push(string);
         }
 
         // clear _12h flag if hour is <= 12
-        if (config._a[HOUR] <= 12 &&
+        if (
+            config._a[HOUR] <= 12 &&
             getParsingFlags(config).bigHour === true &&
-            config._a[HOUR] > 0) {
+            config._a[HOUR] > 0
+        ) {
             getParsingFlags(config).bigHour = undefined;
         }
 
         getParsingFlags(config).parsedDateParts = config._a.slice(0);
         getParsingFlags(config).meridiem = config._meridiem;
         // handle meridiem
-        config._a[HOUR] = meridiemFixWrap(config._locale, config._a[HOUR], config._meridiem);
+        config._a[HOUR] = meridiemFixWrap(
+            config._locale,
+            config._a[HOUR],
+            config._meridiem
+        );
+
+        // handle era
+        era = getParsingFlags(config).era;
+        if (era !== null) {
+            config._a[YEAR] = config._locale.erasConvertYear(era, config._a[YEAR]);
+        }
 
         configFromArray(config);
         checkOverflow(config);
     }
 
-
-    function meridiemFixWrap (locale, hour, meridiem) {
+    function meridiemFixWrap(locale, hour, meridiem) {
         var isPm;
 
         if (meridiem == null) {
@@ -18159,10 +18506,11 @@ return jQuery;
     function configFromStringAndArray(config) {
         var tempConfig,
             bestMoment,
-
             scoreToBeat,
             i,
-            currentScore;
+            currentScore,
+            validFormatFound,
+            bestFormatIsValid = false;
 
         if (config._f.length === 0) {
             getParsingFlags(config).invalidFormat = true;
@@ -18172,6 +18520,7 @@ return jQuery;
 
         for (i = 0; i < config._f.length; i++) {
             currentScore = 0;
+            validFormatFound = false;
             tempConfig = copyConfig({}, config);
             if (config._useUTC != null) {
                 tempConfig._useUTC = config._useUTC;
@@ -18179,8 +18528,8 @@ return jQuery;
             tempConfig._f = config._f[i];
             configFromStringAndFormat(tempConfig);
 
-            if (!isValid(tempConfig)) {
-                continue;
+            if (isValid(tempConfig)) {
+                validFormatFound = true;
             }
 
             // if there is any input that was not parsed add a penalty for that format
@@ -18191,9 +18540,23 @@ return jQuery;
 
             getParsingFlags(tempConfig).score = currentScore;
 
-            if (scoreToBeat == null || currentScore < scoreToBeat) {
-                scoreToBeat = currentScore;
-                bestMoment = tempConfig;
+            if (!bestFormatIsValid) {
+                if (
+                    scoreToBeat == null ||
+                    currentScore < scoreToBeat ||
+                    validFormatFound
+                ) {
+                    scoreToBeat = currentScore;
+                    bestMoment = tempConfig;
+                    if (validFormatFound) {
+                        bestFormatIsValid = true;
+                    }
+                }
+            } else {
+                if (currentScore < scoreToBeat) {
+                    scoreToBeat = currentScore;
+                    bestMoment = tempConfig;
+                }
             }
         }
 
@@ -18205,15 +18568,19 @@ return jQuery;
             return;
         }
 
-        var i = normalizeObjectUnits(config._i);
-        config._a = map([i.year, i.month, i.day || i.date, i.hour, i.minute, i.second, i.millisecond], function (obj) {
-            return obj && parseInt(obj, 10);
-        });
+        var i = normalizeObjectUnits(config._i),
+            dayOrDate = i.day === undefined ? i.date : i.day;
+        config._a = map(
+            [i.year, i.month, dayOrDate, i.hour, i.minute, i.second, i.millisecond],
+            function (obj) {
+                return obj && parseInt(obj, 10);
+            }
+        );
 
         configFromArray(config);
     }
 
-    function createFromConfig (config) {
+    function createFromConfig(config) {
         var res = new Moment(checkOverflow(prepareConfig(config)));
         if (res._nextDay) {
             // Adding is smart enough around DST
@@ -18224,14 +18591,14 @@ return jQuery;
         return res;
     }
 
-    function prepareConfig (config) {
+    function prepareConfig(config) {
         var input = config._i,
             format = config._f;
 
         config._locale = config._locale || getLocale(config._l);
 
         if (input === null || (format === undefined && input === '')) {
-            return createInvalid({nullInput: true});
+            return createInvalid({ nullInput: true });
         }
 
         if (typeof input === 'string') {
@@ -18246,7 +18613,7 @@ return jQuery;
             configFromStringAndArray(config);
         } else if (format) {
             configFromStringAndFormat(config);
-        }  else {
+        } else {
             configFromInput(config);
         }
 
@@ -18280,16 +18647,23 @@ return jQuery;
         }
     }
 
-    function createLocalOrUTC (input, format, locale, strict, isUTC) {
+    function createLocalOrUTC(input, format, locale, strict, isUTC) {
         var c = {};
+
+        if (format === true || format === false) {
+            strict = format;
+            format = undefined;
+        }
 
         if (locale === true || locale === false) {
             strict = locale;
             locale = undefined;
         }
 
-        if ((isObject(input) && isObjectEmpty(input)) ||
-                (isArray(input) && input.length === 0)) {
+        if (
+            (isObject(input) && isObjectEmpty(input)) ||
+            (isArray(input) && input.length === 0)
+        ) {
             input = undefined;
         }
         // object construction must be done this way.
@@ -18304,33 +18678,32 @@ return jQuery;
         return createFromConfig(c);
     }
 
-    function createLocal (input, format, locale, strict) {
+    function createLocal(input, format, locale, strict) {
         return createLocalOrUTC(input, format, locale, strict, false);
     }
 
     var prototypeMin = deprecate(
-        'moment().min is deprecated, use moment.max instead. http://momentjs.com/guides/#/warnings/min-max/',
-        function () {
-            var other = createLocal.apply(null, arguments);
-            if (this.isValid() && other.isValid()) {
-                return other < this ? this : other;
-            } else {
-                return createInvalid();
+            'moment().min is deprecated, use moment.max instead. http://momentjs.com/guides/#/warnings/min-max/',
+            function () {
+                var other = createLocal.apply(null, arguments);
+                if (this.isValid() && other.isValid()) {
+                    return other < this ? this : other;
+                } else {
+                    return createInvalid();
+                }
             }
-        }
-    );
-
-    var prototypeMax = deprecate(
-        'moment().max is deprecated, use moment.min instead. http://momentjs.com/guides/#/warnings/min-max/',
-        function () {
-            var other = createLocal.apply(null, arguments);
-            if (this.isValid() && other.isValid()) {
-                return other > this ? this : other;
-            } else {
-                return createInvalid();
+        ),
+        prototypeMax = deprecate(
+            'moment().max is deprecated, use moment.min instead. http://momentjs.com/guides/#/warnings/min-max/',
+            function () {
+                var other = createLocal.apply(null, arguments);
+                if (this.isValid() && other.isValid()) {
+                    return other > this ? this : other;
+                } else {
+                    return createInvalid();
+                }
             }
-        }
-    );
+        );
 
     // Pick a moment m from moments so that m[fn](other) is true for all
     // other. This relies on the function fn to be transitive.
@@ -18355,33 +18728,51 @@ return jQuery;
     }
 
     // TODO: Use [].sort instead?
-    function min () {
+    function min() {
         var args = [].slice.call(arguments, 0);
 
         return pickBy('isBefore', args);
     }
 
-    function max () {
+    function max() {
         var args = [].slice.call(arguments, 0);
 
         return pickBy('isAfter', args);
     }
 
     var now = function () {
-        return Date.now ? Date.now() : +(new Date());
+        return Date.now ? Date.now() : +new Date();
     };
 
-    var ordering = ['year', 'quarter', 'month', 'week', 'day', 'hour', 'minute', 'second', 'millisecond'];
+    var ordering = [
+        'year',
+        'quarter',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+        'millisecond',
+    ];
 
     function isDurationValid(m) {
-        for (var key in m) {
-            if (!(indexOf.call(ordering, key) !== -1 && (m[key] == null || !isNaN(m[key])))) {
+        var key,
+            unitHasDecimal = false,
+            i;
+        for (key in m) {
+            if (
+                hasOwnProp(m, key) &&
+                !(
+                    indexOf.call(ordering, key) !== -1 &&
+                    (m[key] == null || !isNaN(m[key]))
+                )
+            ) {
                 return false;
             }
         }
 
-        var unitHasDecimal = false;
-        for (var i = 0; i < ordering.length; ++i) {
+        for (i = 0; i < ordering.length; ++i) {
             if (m[ordering[i]]) {
                 if (unitHasDecimal) {
                     return false; // only allow non-integers for smallest unit
@@ -18403,7 +18794,7 @@ return jQuery;
         return createDuration(NaN);
     }
 
-    function Duration (duration) {
+    function Duration(duration) {
         var normalizedInput = normalizeObjectUnits(duration),
             years = normalizedInput.year || 0,
             quarters = normalizedInput.quarter || 0,
@@ -18418,20 +18809,18 @@ return jQuery;
         this._isValid = isDurationValid(normalizedInput);
 
         // representation for dateAddRemove
-        this._milliseconds = +milliseconds +
+        this._milliseconds =
+            +milliseconds +
             seconds * 1e3 + // 1000
             minutes * 6e4 + // 1000 * 60
             hours * 1000 * 60 * 60; //using 1000 * 60 * 60 instead of 36e5 to avoid floating point rounding errors https://github.com/moment/moment/issues/2978
         // Because of dateAddRemove treats 24 hours as different from a
         // day when working around DST, we need to store them separately
-        this._days = +days +
-            weeks * 7;
+        this._days = +days + weeks * 7;
         // It is impossible to translate months into days without knowing
         // which months you are are talking about, so we have to store
         // it separately.
-        this._months = +months +
-            quarters * 3 +
-            years * 12;
+        this._months = +months + quarters * 3 + years * 12;
 
         this._data = {};
 
@@ -18440,11 +18829,11 @@ return jQuery;
         this._bubble();
     }
 
-    function isDuration (obj) {
+    function isDuration(obj) {
         return obj instanceof Duration;
     }
 
-    function absRound (number) {
+    function absRound(number) {
         if (number < 0) {
             return Math.round(-1 * number) * -1;
         } else {
@@ -18452,17 +18841,39 @@ return jQuery;
         }
     }
 
+    // compare two arrays, return the number of differences
+    function compareArrays(array1, array2, dontConvert) {
+        var len = Math.min(array1.length, array2.length),
+            lengthDiff = Math.abs(array1.length - array2.length),
+            diffs = 0,
+            i;
+        for (i = 0; i < len; i++) {
+            if (
+                (dontConvert && array1[i] !== array2[i]) ||
+                (!dontConvert && toInt(array1[i]) !== toInt(array2[i]))
+            ) {
+                diffs++;
+            }
+        }
+        return diffs + lengthDiff;
+    }
+
     // FORMATTING
 
-    function offset (token, separator) {
+    function offset(token, separator) {
         addFormatToken(token, 0, 0, function () {
-            var offset = this.utcOffset();
-            var sign = '+';
+            var offset = this.utcOffset(),
+                sign = '+';
             if (offset < 0) {
                 offset = -offset;
                 sign = '-';
             }
-            return sign + zeroFill(~~(offset / 60), 2) + separator + zeroFill(~~(offset) % 60, 2);
+            return (
+                sign +
+                zeroFill(~~(offset / 60), 2) +
+                separator +
+                zeroFill(~~offset % 60, 2)
+            );
         });
     }
 
@@ -18471,7 +18882,7 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('Z',  matchShortOffset);
+    addRegexToken('Z', matchShortOffset);
     addRegexToken('ZZ', matchShortOffset);
     addParseToken(['Z', 'ZZ'], function (input, array, config) {
         config._useUTC = true;
@@ -18486,19 +18897,20 @@ return jQuery;
     var chunkOffset = /([\+\-]|\d\d)/gi;
 
     function offsetFromString(matcher, string) {
-        var matches = (string || '').match(matcher);
+        var matches = (string || '').match(matcher),
+            chunk,
+            parts,
+            minutes;
 
         if (matches === null) {
             return null;
         }
 
-        var chunk   = matches[matches.length - 1] || [];
-        var parts   = (chunk + '').match(chunkOffset) || ['-', 0, 0];
-        var minutes = +(parts[1] * 60) + toInt(parts[2]);
+        chunk = matches[matches.length - 1] || [];
+        parts = (chunk + '').match(chunkOffset) || ['-', 0, 0];
+        minutes = +(parts[1] * 60) + toInt(parts[2]);
 
-        return minutes === 0 ?
-          0 :
-          parts[0] === '+' ? minutes : -minutes;
+        return minutes === 0 ? 0 : parts[0] === '+' ? minutes : -minutes;
     }
 
     // Return a moment from input, that is local/utc/zone equivalent to model.
@@ -18506,7 +18918,10 @@ return jQuery;
         var res, diff;
         if (model._isUTC) {
             res = model.clone();
-            diff = (isMoment(input) || isDate(input) ? input.valueOf() : createLocal(input).valueOf()) - res.valueOf();
+            diff =
+                (isMoment(input) || isDate(input)
+                    ? input.valueOf()
+                    : createLocal(input).valueOf()) - res.valueOf();
             // Use low-level api, because this fn is low-level api.
             res._d.setTime(res._d.valueOf() + diff);
             hooks.updateOffset(res, false);
@@ -18516,10 +18931,10 @@ return jQuery;
         }
     }
 
-    function getDateOffset (m) {
+    function getDateOffset(m) {
         // On Firefox.24 Date#getTimezoneOffset returns a floating point.
         // https://github.com/moment/moment/pull/1871
-        return -Math.round(m._d.getTimezoneOffset() / 15) * 15;
+        return -Math.round(m._d.getTimezoneOffset());
     }
 
     // HOOKS
@@ -18540,7 +18955,7 @@ return jQuery;
     // a second time. In case it wants us to change the offset again
     // _changeInProgress == true case, then we have to adjust, because
     // there is no such time in the given timezone.
-    function getSetOffset (input, keepLocalTime, keepMinutes) {
+    function getSetOffset(input, keepLocalTime, keepMinutes) {
         var offset = this._offset || 0,
             localAdjust;
         if (!this.isValid()) {
@@ -18565,7 +18980,12 @@ return jQuery;
             }
             if (offset !== input) {
                 if (!keepLocalTime || this._changeInProgress) {
-                    addSubtract(this, createDuration(input - offset, 'm'), 1, false);
+                    addSubtract(
+                        this,
+                        createDuration(input - offset, 'm'),
+                        1,
+                        false
+                    );
                 } else if (!this._changeInProgress) {
                     this._changeInProgress = true;
                     hooks.updateOffset(this, true);
@@ -18578,7 +18998,7 @@ return jQuery;
         }
     }
 
-    function getSetZone (input, keepLocalTime) {
+    function getSetZone(input, keepLocalTime) {
         if (input != null) {
             if (typeof input !== 'string') {
                 input = -input;
@@ -18592,11 +19012,11 @@ return jQuery;
         }
     }
 
-    function setOffsetToUTC (keepLocalTime) {
+    function setOffsetToUTC(keepLocalTime) {
         return this.utcOffset(0, keepLocalTime);
     }
 
-    function setOffsetToLocal (keepLocalTime) {
+    function setOffsetToLocal(keepLocalTime) {
         if (this._isUTC) {
             this.utcOffset(0, keepLocalTime);
             this._isUTC = false;
@@ -18608,22 +19028,21 @@ return jQuery;
         return this;
     }
 
-    function setOffsetToParsedOffset () {
+    function setOffsetToParsedOffset() {
         if (this._tzm != null) {
             this.utcOffset(this._tzm, false, true);
         } else if (typeof this._i === 'string') {
             var tZone = offsetFromString(matchOffset, this._i);
             if (tZone != null) {
                 this.utcOffset(tZone);
-            }
-            else {
+            } else {
                 this.utcOffset(0, true);
             }
         }
         return this;
     }
 
-    function hasAlignedHourOffset (input) {
+    function hasAlignedHourOffset(input) {
         if (!this.isValid()) {
             return false;
         }
@@ -18632,27 +19051,28 @@ return jQuery;
         return (this.utcOffset() - input) % 60 === 0;
     }
 
-    function isDaylightSavingTime () {
+    function isDaylightSavingTime() {
         return (
             this.utcOffset() > this.clone().month(0).utcOffset() ||
             this.utcOffset() > this.clone().month(5).utcOffset()
         );
     }
 
-    function isDaylightSavingTimeShifted () {
+    function isDaylightSavingTimeShifted() {
         if (!isUndefined(this._isDSTShifted)) {
             return this._isDSTShifted;
         }
 
-        var c = {};
+        var c = {},
+            other;
 
         copyConfig(c, this);
         c = prepareConfig(c);
 
         if (c._a) {
-            var other = c._isUTC ? createUTC(c._a) : createLocal(c._a);
-            this._isDSTShifted = this.isValid() &&
-                compareArrays(c._a, other.toArray()) > 0;
+            other = c._isUTC ? createUTC(c._a) : createLocal(c._a);
+            this._isDSTShifted =
+                this.isValid() && compareArrays(c._a, other.toArray()) > 0;
         } else {
             this._isDSTShifted = false;
         }
@@ -18660,27 +19080,26 @@ return jQuery;
         return this._isDSTShifted;
     }
 
-    function isLocal () {
+    function isLocal() {
         return this.isValid() ? !this._isUTC : false;
     }
 
-    function isUtcOffset () {
+    function isUtcOffset() {
         return this.isValid() ? this._isUTC : false;
     }
 
-    function isUtc () {
+    function isUtc() {
         return this.isValid() ? this._isUTC && this._offset === 0 : false;
     }
 
     // ASP.NET json date format regex
-    var aspNetRegex = /^(\-|\+)?(?:(\d*)[. ])?(\d+)\:(\d+)(?:\:(\d+)(\.\d*)?)?$/;
+    var aspNetRegex = /^(-|\+)?(?:(\d*)[. ])?(\d+):(\d+)(?::(\d+)(\.\d*)?)?$/,
+        // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
+        // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
+        // and further modified to allow for strings containing both week and day
+        isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
 
-    // from http://docs.closure-library.googlecode.com/git/closure_goog_date_date.js.source.html
-    // somewhat more in line with 4.4.3.2 2004 spec, but allows decimal anywhere
-    // and further modified to allow for strings containing both week and day
-    var isoRegex = /^(-|\+)?P(?:([-+]?[0-9,.]*)Y)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)W)?(?:([-+]?[0-9,.]*)D)?(?:T(?:([-+]?[0-9,.]*)H)?(?:([-+]?[0-9,.]*)M)?(?:([-+]?[0-9,.]*)S)?)?$/;
-
-    function createDuration (input, key) {
+    function createDuration(input, key) {
         var duration = input,
             // matching against regexp is expensive, do it on demand
             match = null,
@@ -18690,42 +19109,49 @@ return jQuery;
 
         if (isDuration(input)) {
             duration = {
-                ms : input._milliseconds,
-                d  : input._days,
-                M  : input._months
+                ms: input._milliseconds,
+                d: input._days,
+                M: input._months,
             };
-        } else if (isNumber(input)) {
+        } else if (isNumber(input) || !isNaN(+input)) {
             duration = {};
             if (key) {
-                duration[key] = input;
+                duration[key] = +input;
             } else {
-                duration.milliseconds = input;
+                duration.milliseconds = +input;
             }
-        } else if (!!(match = aspNetRegex.exec(input))) {
-            sign = (match[1] === '-') ? -1 : 1;
+        } else if ((match = aspNetRegex.exec(input))) {
+            sign = match[1] === '-' ? -1 : 1;
             duration = {
-                y  : 0,
-                d  : toInt(match[DATE])                         * sign,
-                h  : toInt(match[HOUR])                         * sign,
-                m  : toInt(match[MINUTE])                       * sign,
-                s  : toInt(match[SECOND])                       * sign,
-                ms : toInt(absRound(match[MILLISECOND] * 1000)) * sign // the millisecond decimal point is included in the match
+                y: 0,
+                d: toInt(match[DATE]) * sign,
+                h: toInt(match[HOUR]) * sign,
+                m: toInt(match[MINUTE]) * sign,
+                s: toInt(match[SECOND]) * sign,
+                ms: toInt(absRound(match[MILLISECOND] * 1000)) * sign, // the millisecond decimal point is included in the match
             };
-        } else if (!!(match = isoRegex.exec(input))) {
-            sign = (match[1] === '-') ? -1 : 1;
+        } else if ((match = isoRegex.exec(input))) {
+            sign = match[1] === '-' ? -1 : 1;
             duration = {
-                y : parseIso(match[2], sign),
-                M : parseIso(match[3], sign),
-                w : parseIso(match[4], sign),
-                d : parseIso(match[5], sign),
-                h : parseIso(match[6], sign),
-                m : parseIso(match[7], sign),
-                s : parseIso(match[8], sign)
+                y: parseIso(match[2], sign),
+                M: parseIso(match[3], sign),
+                w: parseIso(match[4], sign),
+                d: parseIso(match[5], sign),
+                h: parseIso(match[6], sign),
+                m: parseIso(match[7], sign),
+                s: parseIso(match[8], sign),
             };
-        } else if (duration == null) {// checks for null or undefined
+        } else if (duration == null) {
+            // checks for null or undefined
             duration = {};
-        } else if (typeof duration === 'object' && ('from' in duration || 'to' in duration)) {
-            diffRes = momentsDifference(createLocal(duration.from), createLocal(duration.to));
+        } else if (
+            typeof duration === 'object' &&
+            ('from' in duration || 'to' in duration)
+        ) {
+            diffRes = momentsDifference(
+                createLocal(duration.from),
+                createLocal(duration.to)
+            );
 
             duration = {};
             duration.ms = diffRes.milliseconds;
@@ -18738,13 +19164,17 @@ return jQuery;
             ret._locale = input._locale;
         }
 
+        if (isDuration(input) && hasOwnProp(input, '_isValid')) {
+            ret._isValid = input._isValid;
+        }
+
         return ret;
     }
 
     createDuration.fn = Duration.prototype;
     createDuration.invalid = createInvalid$1;
 
-    function parseIso (inp, sign) {
+    function parseIso(inp, sign) {
         // We'd normally use ~~inp for this, but unfortunately it also
         // converts floats to ints.
         // inp may be undefined, so careful calling replace on it.
@@ -18756,13 +19186,13 @@ return jQuery;
     function positiveMomentsDifference(base, other) {
         var res = {};
 
-        res.months = other.month() - base.month() +
-            (other.year() - base.year()) * 12;
+        res.months =
+            other.month() - base.month() + (other.year() - base.year()) * 12;
         if (base.clone().add(res.months, 'M').isAfter(other)) {
             --res.months;
         }
 
-        res.milliseconds = +other - +(base.clone().add(res.months, 'M'));
+        res.milliseconds = +other - +base.clone().add(res.months, 'M');
 
         return res;
     }
@@ -18770,7 +19200,7 @@ return jQuery;
     function momentsDifference(base, other) {
         var res;
         if (!(base.isValid() && other.isValid())) {
-            return {milliseconds: 0, months: 0};
+            return { milliseconds: 0, months: 0 };
         }
 
         other = cloneWithOffset(other, base);
@@ -18791,19 +19221,27 @@ return jQuery;
             var dur, tmp;
             //invert the arguments, but complain about it
             if (period !== null && !isNaN(+period)) {
-                deprecateSimple(name, 'moment().' + name  + '(period, number) is deprecated. Please use moment().' + name + '(number, period). ' +
-                'See http://momentjs.com/guides/#/warnings/add-inverted-param/ for more info.');
-                tmp = val; val = period; period = tmp;
+                deprecateSimple(
+                    name,
+                    'moment().' +
+                        name +
+                        '(period, number) is deprecated. Please use moment().' +
+                        name +
+                        '(number, period). ' +
+                        'See http://momentjs.com/guides/#/warnings/add-inverted-param/ for more info.'
+                );
+                tmp = val;
+                val = period;
+                period = tmp;
             }
 
-            val = typeof val === 'string' ? +val : val;
             dur = createDuration(val, period);
             addSubtract(this, dur, direction);
             return this;
         };
     }
 
-    function addSubtract (mom, duration, isAdding, updateOffset) {
+    function addSubtract(mom, duration, isAdding, updateOffset) {
         var milliseconds = duration._milliseconds,
             days = absRound(duration._days),
             months = absRound(duration._months);
@@ -18829,36 +19267,150 @@ return jQuery;
         }
     }
 
-    var add      = createAdder(1, 'add');
-    var subtract = createAdder(-1, 'subtract');
+    var add = createAdder(1, 'add'),
+        subtract = createAdder(-1, 'subtract');
+
+    function isString(input) {
+        return typeof input === 'string' || input instanceof String;
+    }
+
+    // type MomentInput = Moment | Date | string | number | (number | string)[] | MomentInputObject | void; // null | undefined
+    function isMomentInput(input) {
+        return (
+            isMoment(input) ||
+            isDate(input) ||
+            isString(input) ||
+            isNumber(input) ||
+            isNumberOrStringArray(input) ||
+            isMomentInputObject(input) ||
+            input === null ||
+            input === undefined
+        );
+    }
+
+    function isMomentInputObject(input) {
+        var objectTest = isObject(input) && !isObjectEmpty(input),
+            propertyTest = false,
+            properties = [
+                'years',
+                'year',
+                'y',
+                'months',
+                'month',
+                'M',
+                'days',
+                'day',
+                'd',
+                'dates',
+                'date',
+                'D',
+                'hours',
+                'hour',
+                'h',
+                'minutes',
+                'minute',
+                'm',
+                'seconds',
+                'second',
+                's',
+                'milliseconds',
+                'millisecond',
+                'ms',
+            ],
+            i,
+            property;
+
+        for (i = 0; i < properties.length; i += 1) {
+            property = properties[i];
+            propertyTest = propertyTest || hasOwnProp(input, property);
+        }
+
+        return objectTest && propertyTest;
+    }
+
+    function isNumberOrStringArray(input) {
+        var arrayTest = isArray(input),
+            dataTypeTest = false;
+        if (arrayTest) {
+            dataTypeTest =
+                input.filter(function (item) {
+                    return !isNumber(item) && isString(input);
+                }).length === 0;
+        }
+        return arrayTest && dataTypeTest;
+    }
+
+    function isCalendarSpec(input) {
+        var objectTest = isObject(input) && !isObjectEmpty(input),
+            propertyTest = false,
+            properties = [
+                'sameDay',
+                'nextDay',
+                'lastDay',
+                'nextWeek',
+                'lastWeek',
+                'sameElse',
+            ],
+            i,
+            property;
+
+        for (i = 0; i < properties.length; i += 1) {
+            property = properties[i];
+            propertyTest = propertyTest || hasOwnProp(input, property);
+        }
+
+        return objectTest && propertyTest;
+    }
 
     function getCalendarFormat(myMoment, now) {
         var diff = myMoment.diff(now, 'days', true);
-        return diff < -6 ? 'sameElse' :
-                diff < -1 ? 'lastWeek' :
-                diff < 0 ? 'lastDay' :
-                diff < 1 ? 'sameDay' :
-                diff < 2 ? 'nextDay' :
-                diff < 7 ? 'nextWeek' : 'sameElse';
+        return diff < -6
+            ? 'sameElse'
+            : diff < -1
+            ? 'lastWeek'
+            : diff < 0
+            ? 'lastDay'
+            : diff < 1
+            ? 'sameDay'
+            : diff < 2
+            ? 'nextDay'
+            : diff < 7
+            ? 'nextWeek'
+            : 'sameElse';
     }
 
-    function calendar$1 (time, formats) {
+    function calendar$1(time, formats) {
+        // Support for single parameter, formats only overload to the calendar function
+        if (arguments.length === 1) {
+            if (isMomentInput(arguments[0])) {
+                time = arguments[0];
+                formats = undefined;
+            } else if (isCalendarSpec(arguments[0])) {
+                formats = arguments[0];
+                time = undefined;
+            }
+        }
         // We want to compare the start of today, vs this.
         // Getting start-of-today depends on whether we're local/utc/offset or not.
         var now = time || createLocal(),
             sod = cloneWithOffset(now, this).startOf('day'),
-            format = hooks.calendarFormat(this, sod) || 'sameElse';
+            format = hooks.calendarFormat(this, sod) || 'sameElse',
+            output =
+                formats &&
+                (isFunction(formats[format])
+                    ? formats[format].call(this, now)
+                    : formats[format]);
 
-        var output = formats && (isFunction(formats[format]) ? formats[format].call(this, now) : formats[format]);
-
-        return this.format(output || this.localeData().calendar(format, this, createLocal(now)));
+        return this.format(
+            output || this.localeData().calendar(format, this, createLocal(now))
+        );
     }
 
-    function clone () {
+    function clone() {
         return new Moment(this);
     }
 
-    function isAfter (input, units) {
+    function isAfter(input, units) {
         var localInput = isMoment(input) ? input : createLocal(input);
         if (!(this.isValid() && localInput.isValid())) {
             return false;
@@ -18871,7 +19423,7 @@ return jQuery;
         }
     }
 
-    function isBefore (input, units) {
+    function isBefore(input, units) {
         var localInput = isMoment(input) ? input : createLocal(input);
         if (!(this.isValid() && localInput.isValid())) {
             return false;
@@ -18884,18 +19436,24 @@ return jQuery;
         }
     }
 
-    function isBetween (from, to, units, inclusivity) {
+    function isBetween(from, to, units, inclusivity) {
         var localFrom = isMoment(from) ? from : createLocal(from),
             localTo = isMoment(to) ? to : createLocal(to);
         if (!(this.isValid() && localFrom.isValid() && localTo.isValid())) {
             return false;
         }
         inclusivity = inclusivity || '()';
-        return (inclusivity[0] === '(' ? this.isAfter(localFrom, units) : !this.isBefore(localFrom, units)) &&
-            (inclusivity[1] === ')' ? this.isBefore(localTo, units) : !this.isAfter(localTo, units));
+        return (
+            (inclusivity[0] === '('
+                ? this.isAfter(localFrom, units)
+                : !this.isBefore(localFrom, units)) &&
+            (inclusivity[1] === ')'
+                ? this.isBefore(localTo, units)
+                : !this.isAfter(localTo, units))
+        );
     }
 
-    function isSame (input, units) {
+    function isSame(input, units) {
         var localInput = isMoment(input) ? input : createLocal(input),
             inputMs;
         if (!(this.isValid() && localInput.isValid())) {
@@ -18906,22 +19464,23 @@ return jQuery;
             return this.valueOf() === localInput.valueOf();
         } else {
             inputMs = localInput.valueOf();
-            return this.clone().startOf(units).valueOf() <= inputMs && inputMs <= this.clone().endOf(units).valueOf();
+            return (
+                this.clone().startOf(units).valueOf() <= inputMs &&
+                inputMs <= this.clone().endOf(units).valueOf()
+            );
         }
     }
 
-    function isSameOrAfter (input, units) {
+    function isSameOrAfter(input, units) {
         return this.isSame(input, units) || this.isAfter(input, units);
     }
 
-    function isSameOrBefore (input, units) {
+    function isSameOrBefore(input, units) {
         return this.isSame(input, units) || this.isBefore(input, units);
     }
 
-    function diff (input, units, asFloat) {
-        var that,
-            zoneDelta,
-            output;
+    function diff(input, units, asFloat) {
+        var that, zoneDelta, output;
 
         if (!this.isValid()) {
             return NaN;
@@ -18938,26 +19497,49 @@ return jQuery;
         units = normalizeUnits(units);
 
         switch (units) {
-            case 'year': output = monthDiff(this, that) / 12; break;
-            case 'month': output = monthDiff(this, that); break;
-            case 'quarter': output = monthDiff(this, that) / 3; break;
-            case 'second': output = (this - that) / 1e3; break; // 1000
-            case 'minute': output = (this - that) / 6e4; break; // 1000 * 60
-            case 'hour': output = (this - that) / 36e5; break; // 1000 * 60 * 60
-            case 'day': output = (this - that - zoneDelta) / 864e5; break; // 1000 * 60 * 60 * 24, negate dst
-            case 'week': output = (this - that - zoneDelta) / 6048e5; break; // 1000 * 60 * 60 * 24 * 7, negate dst
-            default: output = this - that;
+            case 'year':
+                output = monthDiff(this, that) / 12;
+                break;
+            case 'month':
+                output = monthDiff(this, that);
+                break;
+            case 'quarter':
+                output = monthDiff(this, that) / 3;
+                break;
+            case 'second':
+                output = (this - that) / 1e3;
+                break; // 1000
+            case 'minute':
+                output = (this - that) / 6e4;
+                break; // 1000 * 60
+            case 'hour':
+                output = (this - that) / 36e5;
+                break; // 1000 * 60 * 60
+            case 'day':
+                output = (this - that - zoneDelta) / 864e5;
+                break; // 1000 * 60 * 60 * 24, negate dst
+            case 'week':
+                output = (this - that - zoneDelta) / 6048e5;
+                break; // 1000 * 60 * 60 * 24 * 7, negate dst
+            default:
+                output = this - that;
         }
 
         return asFloat ? output : absFloor(output);
     }
 
-    function monthDiff (a, b) {
+    function monthDiff(a, b) {
+        if (a.date() < b.date()) {
+            // end-of-month calculations work correct when the start month has more
+            // days than the end month.
+            return -monthDiff(b, a);
+        }
         // difference in months
-        var wholeMonthDiff = ((b.year() - a.year()) * 12) + (b.month() - a.month()),
+        var wholeMonthDiff = (b.year() - a.year()) * 12 + (b.month() - a.month()),
             // b is in (anchor - 1 month, anchor + 1 month)
             anchor = a.clone().add(wholeMonthDiff, 'months'),
-            anchor2, adjust;
+            anchor2,
+            adjust;
 
         if (b - anchor < 0) {
             anchor2 = a.clone().add(wholeMonthDiff - 1, 'months');
@@ -18976,7 +19558,7 @@ return jQuery;
     hooks.defaultFormat = 'YYYY-MM-DDTHH:mm:ssZ';
     hooks.defaultFormatUtc = 'YYYY-MM-DDTHH:mm:ss[Z]';
 
-    function toString () {
+    function toString() {
         return this.clone().locale('en').format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
     }
 
@@ -18984,20 +19566,30 @@ return jQuery;
         if (!this.isValid()) {
             return null;
         }
-        var utc = keepOffset !== true;
-        var m = utc ? this.clone().utc() : this;
+        var utc = keepOffset !== true,
+            m = utc ? this.clone().utc() : this;
         if (m.year() < 0 || m.year() > 9999) {
-            return formatMoment(m, utc ? 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]' : 'YYYYYY-MM-DD[T]HH:mm:ss.SSSZ');
+            return formatMoment(
+                m,
+                utc
+                    ? 'YYYYYY-MM-DD[T]HH:mm:ss.SSS[Z]'
+                    : 'YYYYYY-MM-DD[T]HH:mm:ss.SSSZ'
+            );
         }
         if (isFunction(Date.prototype.toISOString)) {
             // native implementation is ~50x faster, use it when we can
             if (utc) {
                 return this.toDate().toISOString();
             } else {
-                return new Date(this.valueOf() + this.utcOffset() * 60 * 1000).toISOString().replace('Z', formatMoment(m, 'Z'));
+                return new Date(this.valueOf() + this.utcOffset() * 60 * 1000)
+                    .toISOString()
+                    .replace('Z', formatMoment(m, 'Z'));
             }
         }
-        return formatMoment(m, utc ? 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]' : 'YYYY-MM-DD[T]HH:mm:ss.SSSZ');
+        return formatMoment(
+            m,
+            utc ? 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]' : 'YYYY-MM-DD[T]HH:mm:ss.SSSZ'
+        );
     }
 
     /**
@@ -19006,64 +19598,76 @@ return jQuery;
      *
      * @link https://nodejs.org/dist/latest/docs/api/util.html#util_custom_inspect_function_on_objects
      */
-    function inspect () {
+    function inspect() {
         if (!this.isValid()) {
             return 'moment.invalid(/* ' + this._i + ' */)';
         }
-        var func = 'moment';
-        var zone = '';
+        var func = 'moment',
+            zone = '',
+            prefix,
+            year,
+            datetime,
+            suffix;
         if (!this.isLocal()) {
             func = this.utcOffset() === 0 ? 'moment.utc' : 'moment.parseZone';
             zone = 'Z';
         }
-        var prefix = '[' + func + '("]';
-        var year = (0 <= this.year() && this.year() <= 9999) ? 'YYYY' : 'YYYYYY';
-        var datetime = '-MM-DD[T]HH:mm:ss.SSS';
-        var suffix = zone + '[")]';
+        prefix = '[' + func + '("]';
+        year = 0 <= this.year() && this.year() <= 9999 ? 'YYYY' : 'YYYYYY';
+        datetime = '-MM-DD[T]HH:mm:ss.SSS';
+        suffix = zone + '[")]';
 
         return this.format(prefix + year + datetime + suffix);
     }
 
-    function format (inputString) {
+    function format(inputString) {
         if (!inputString) {
-            inputString = this.isUtc() ? hooks.defaultFormatUtc : hooks.defaultFormat;
+            inputString = this.isUtc()
+                ? hooks.defaultFormatUtc
+                : hooks.defaultFormat;
         }
         var output = formatMoment(this, inputString);
         return this.localeData().postformat(output);
     }
 
-    function from (time, withoutSuffix) {
-        if (this.isValid() &&
-                ((isMoment(time) && time.isValid()) ||
-                 createLocal(time).isValid())) {
-            return createDuration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
+    function from(time, withoutSuffix) {
+        if (
+            this.isValid() &&
+            ((isMoment(time) && time.isValid()) || createLocal(time).isValid())
+        ) {
+            return createDuration({ to: this, from: time })
+                .locale(this.locale())
+                .humanize(!withoutSuffix);
         } else {
             return this.localeData().invalidDate();
         }
     }
 
-    function fromNow (withoutSuffix) {
+    function fromNow(withoutSuffix) {
         return this.from(createLocal(), withoutSuffix);
     }
 
-    function to (time, withoutSuffix) {
-        if (this.isValid() &&
-                ((isMoment(time) && time.isValid()) ||
-                 createLocal(time).isValid())) {
-            return createDuration({from: this, to: time}).locale(this.locale()).humanize(!withoutSuffix);
+    function to(time, withoutSuffix) {
+        if (
+            this.isValid() &&
+            ((isMoment(time) && time.isValid()) || createLocal(time).isValid())
+        ) {
+            return createDuration({ from: this, to: time })
+                .locale(this.locale())
+                .humanize(!withoutSuffix);
         } else {
             return this.localeData().invalidDate();
         }
     }
 
-    function toNow (withoutSuffix) {
+    function toNow(withoutSuffix) {
         return this.to(createLocal(), withoutSuffix);
     }
 
     // If passed a locale key, it will set the locale for this
     // instance.  Otherwise, it will return the locale configuration
     // variables for this instance.
-    function locale (key) {
+    function locale(key) {
         var newLocaleData;
 
         if (key === undefined) {
@@ -19088,18 +19692,18 @@ return jQuery;
         }
     );
 
-    function localeData () {
+    function localeData() {
         return this._locale;
     }
 
-    var MS_PER_SECOND = 1000;
-    var MS_PER_MINUTE = 60 * MS_PER_SECOND;
-    var MS_PER_HOUR = 60 * MS_PER_MINUTE;
-    var MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
+    var MS_PER_SECOND = 1000,
+        MS_PER_MINUTE = 60 * MS_PER_SECOND,
+        MS_PER_HOUR = 60 * MS_PER_MINUTE,
+        MS_PER_400_YEARS = (365 * 400 + 97) * 24 * MS_PER_HOUR;
 
     // actual modulo - handles negative numbers (for dates before 1970):
     function mod$1(dividend, divisor) {
-        return (dividend % divisor + divisor) % divisor;
+        return ((dividend % divisor) + divisor) % divisor;
     }
 
     function localStartOfDate(y, m, d) {
@@ -19122,30 +19726,42 @@ return jQuery;
         }
     }
 
-    function startOf (units) {
-        var time;
+    function startOf(units) {
+        var time, startOfDate;
         units = normalizeUnits(units);
         if (units === undefined || units === 'millisecond' || !this.isValid()) {
             return this;
         }
 
-        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+        startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
 
         switch (units) {
             case 'year':
                 time = startOfDate(this.year(), 0, 1);
                 break;
             case 'quarter':
-                time = startOfDate(this.year(), this.month() - this.month() % 3, 1);
+                time = startOfDate(
+                    this.year(),
+                    this.month() - (this.month() % 3),
+                    1
+                );
                 break;
             case 'month':
                 time = startOfDate(this.year(), this.month(), 1);
                 break;
             case 'week':
-                time = startOfDate(this.year(), this.month(), this.date() - this.weekday());
+                time = startOfDate(
+                    this.year(),
+                    this.month(),
+                    this.date() - this.weekday()
+                );
                 break;
             case 'isoWeek':
-                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1));
+                time = startOfDate(
+                    this.year(),
+                    this.month(),
+                    this.date() - (this.isoWeekday() - 1)
+                );
                 break;
             case 'day':
             case 'date':
@@ -19153,7 +19769,10 @@ return jQuery;
                 break;
             case 'hour':
                 time = this._d.valueOf();
-                time -= mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR);
+                time -= mod$1(
+                    time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE),
+                    MS_PER_HOUR
+                );
                 break;
             case 'minute':
                 time = this._d.valueOf();
@@ -19170,30 +19789,45 @@ return jQuery;
         return this;
     }
 
-    function endOf (units) {
-        var time;
+    function endOf(units) {
+        var time, startOfDate;
         units = normalizeUnits(units);
         if (units === undefined || units === 'millisecond' || !this.isValid()) {
             return this;
         }
 
-        var startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
+        startOfDate = this._isUTC ? utcStartOfDate : localStartOfDate;
 
         switch (units) {
             case 'year':
                 time = startOfDate(this.year() + 1, 0, 1) - 1;
                 break;
             case 'quarter':
-                time = startOfDate(this.year(), this.month() - this.month() % 3 + 3, 1) - 1;
+                time =
+                    startOfDate(
+                        this.year(),
+                        this.month() - (this.month() % 3) + 3,
+                        1
+                    ) - 1;
                 break;
             case 'month':
                 time = startOfDate(this.year(), this.month() + 1, 1) - 1;
                 break;
             case 'week':
-                time = startOfDate(this.year(), this.month(), this.date() - this.weekday() + 7) - 1;
+                time =
+                    startOfDate(
+                        this.year(),
+                        this.month(),
+                        this.date() - this.weekday() + 7
+                    ) - 1;
                 break;
             case 'isoWeek':
-                time = startOfDate(this.year(), this.month(), this.date() - (this.isoWeekday() - 1) + 7) - 1;
+                time =
+                    startOfDate(
+                        this.year(),
+                        this.month(),
+                        this.date() - (this.isoWeekday() - 1) + 7
+                    ) - 1;
                 break;
             case 'day':
             case 'date':
@@ -19201,7 +19835,13 @@ return jQuery;
                 break;
             case 'hour':
                 time = this._d.valueOf();
-                time += MS_PER_HOUR - mod$1(time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE), MS_PER_HOUR) - 1;
+                time +=
+                    MS_PER_HOUR -
+                    mod$1(
+                        time + (this._isUTC ? 0 : this.utcOffset() * MS_PER_MINUTE),
+                        MS_PER_HOUR
+                    ) -
+                    1;
                 break;
             case 'minute':
                 time = this._d.valueOf();
@@ -19218,24 +19858,32 @@ return jQuery;
         return this;
     }
 
-    function valueOf () {
-        return this._d.valueOf() - ((this._offset || 0) * 60000);
+    function valueOf() {
+        return this._d.valueOf() - (this._offset || 0) * 60000;
     }
 
-    function unix () {
+    function unix() {
         return Math.floor(this.valueOf() / 1000);
     }
 
-    function toDate () {
+    function toDate() {
         return new Date(this.valueOf());
     }
 
-    function toArray () {
+    function toArray() {
         var m = this;
-        return [m.year(), m.month(), m.date(), m.hour(), m.minute(), m.second(), m.millisecond()];
+        return [
+            m.year(),
+            m.month(),
+            m.date(),
+            m.hour(),
+            m.minute(),
+            m.second(),
+            m.millisecond(),
+        ];
     }
 
-    function toObject () {
+    function toObject() {
         var m = this;
         return {
             years: m.year(),
@@ -19244,24 +19892,24 @@ return jQuery;
             hours: m.hours(),
             minutes: m.minutes(),
             seconds: m.seconds(),
-            milliseconds: m.milliseconds()
+            milliseconds: m.milliseconds(),
         };
     }
 
-    function toJSON () {
+    function toJSON() {
         // new Date(NaN).toJSON() === null
         return this.isValid() ? this.toISOString() : null;
     }
 
-    function isValid$2 () {
+    function isValid$2() {
         return isValid(this);
     }
 
-    function parsingFlags () {
+    function parsingFlags() {
         return extend({}, getParsingFlags(this));
     }
 
-    function invalidAt () {
+    function invalidAt() {
         return getParsingFlags(this).overflow;
     }
 
@@ -19271,8 +19919,289 @@ return jQuery;
             format: this._f,
             locale: this._locale,
             isUTC: this._isUTC,
-            strict: this._strict
+            strict: this._strict,
         };
+    }
+
+    addFormatToken('N', 0, 0, 'eraAbbr');
+    addFormatToken('NN', 0, 0, 'eraAbbr');
+    addFormatToken('NNN', 0, 0, 'eraAbbr');
+    addFormatToken('NNNN', 0, 0, 'eraName');
+    addFormatToken('NNNNN', 0, 0, 'eraNarrow');
+
+    addFormatToken('y', ['y', 1], 'yo', 'eraYear');
+    addFormatToken('y', ['yy', 2], 0, 'eraYear');
+    addFormatToken('y', ['yyy', 3], 0, 'eraYear');
+    addFormatToken('y', ['yyyy', 4], 0, 'eraYear');
+
+    addRegexToken('N', matchEraAbbr);
+    addRegexToken('NN', matchEraAbbr);
+    addRegexToken('NNN', matchEraAbbr);
+    addRegexToken('NNNN', matchEraName);
+    addRegexToken('NNNNN', matchEraNarrow);
+
+    addParseToken(['N', 'NN', 'NNN', 'NNNN', 'NNNNN'], function (
+        input,
+        array,
+        config,
+        token
+    ) {
+        var era = config._locale.erasParse(input, token, config._strict);
+        if (era) {
+            getParsingFlags(config).era = era;
+        } else {
+            getParsingFlags(config).invalidEra = input;
+        }
+    });
+
+    addRegexToken('y', matchUnsigned);
+    addRegexToken('yy', matchUnsigned);
+    addRegexToken('yyy', matchUnsigned);
+    addRegexToken('yyyy', matchUnsigned);
+    addRegexToken('yo', matchEraYearOrdinal);
+
+    addParseToken(['y', 'yy', 'yyy', 'yyyy'], YEAR);
+    addParseToken(['yo'], function (input, array, config, token) {
+        var match;
+        if (config._locale._eraYearOrdinalRegex) {
+            match = input.match(config._locale._eraYearOrdinalRegex);
+        }
+
+        if (config._locale.eraYearOrdinalParse) {
+            array[YEAR] = config._locale.eraYearOrdinalParse(input, match);
+        } else {
+            array[YEAR] = parseInt(input, 10);
+        }
+    });
+
+    function localeEras(m, format) {
+        var i,
+            l,
+            date,
+            eras = this._eras || getLocale('en')._eras;
+        for (i = 0, l = eras.length; i < l; ++i) {
+            switch (typeof eras[i].since) {
+                case 'string':
+                    // truncate time
+                    date = hooks(eras[i].since).startOf('day');
+                    eras[i].since = date.valueOf();
+                    break;
+            }
+
+            switch (typeof eras[i].until) {
+                case 'undefined':
+                    eras[i].until = +Infinity;
+                    break;
+                case 'string':
+                    // truncate time
+                    date = hooks(eras[i].until).startOf('day').valueOf();
+                    eras[i].until = date.valueOf();
+                    break;
+            }
+        }
+        return eras;
+    }
+
+    function localeErasParse(eraName, format, strict) {
+        var i,
+            l,
+            eras = this.eras(),
+            name,
+            abbr,
+            narrow;
+        eraName = eraName.toUpperCase();
+
+        for (i = 0, l = eras.length; i < l; ++i) {
+            name = eras[i].name.toUpperCase();
+            abbr = eras[i].abbr.toUpperCase();
+            narrow = eras[i].narrow.toUpperCase();
+
+            if (strict) {
+                switch (format) {
+                    case 'N':
+                    case 'NN':
+                    case 'NNN':
+                        if (abbr === eraName) {
+                            return eras[i];
+                        }
+                        break;
+
+                    case 'NNNN':
+                        if (name === eraName) {
+                            return eras[i];
+                        }
+                        break;
+
+                    case 'NNNNN':
+                        if (narrow === eraName) {
+                            return eras[i];
+                        }
+                        break;
+                }
+            } else if ([name, abbr, narrow].indexOf(eraName) >= 0) {
+                return eras[i];
+            }
+        }
+    }
+
+    function localeErasConvertYear(era, year) {
+        var dir = era.since <= era.until ? +1 : -1;
+        if (year === undefined) {
+            return hooks(era.since).year();
+        } else {
+            return hooks(era.since).year() + (year - era.offset) * dir;
+        }
+    }
+
+    function getEraName() {
+        var i,
+            l,
+            val,
+            eras = this.localeData().eras();
+        for (i = 0, l = eras.length; i < l; ++i) {
+            // truncate time
+            val = this.startOf('day').valueOf();
+
+            if (eras[i].since <= val && val <= eras[i].until) {
+                return eras[i].name;
+            }
+            if (eras[i].until <= val && val <= eras[i].since) {
+                return eras[i].name;
+            }
+        }
+
+        return '';
+    }
+
+    function getEraNarrow() {
+        var i,
+            l,
+            val,
+            eras = this.localeData().eras();
+        for (i = 0, l = eras.length; i < l; ++i) {
+            // truncate time
+            val = this.startOf('day').valueOf();
+
+            if (eras[i].since <= val && val <= eras[i].until) {
+                return eras[i].narrow;
+            }
+            if (eras[i].until <= val && val <= eras[i].since) {
+                return eras[i].narrow;
+            }
+        }
+
+        return '';
+    }
+
+    function getEraAbbr() {
+        var i,
+            l,
+            val,
+            eras = this.localeData().eras();
+        for (i = 0, l = eras.length; i < l; ++i) {
+            // truncate time
+            val = this.startOf('day').valueOf();
+
+            if (eras[i].since <= val && val <= eras[i].until) {
+                return eras[i].abbr;
+            }
+            if (eras[i].until <= val && val <= eras[i].since) {
+                return eras[i].abbr;
+            }
+        }
+
+        return '';
+    }
+
+    function getEraYear() {
+        var i,
+            l,
+            dir,
+            val,
+            eras = this.localeData().eras();
+        for (i = 0, l = eras.length; i < l; ++i) {
+            dir = eras[i].since <= eras[i].until ? +1 : -1;
+
+            // truncate time
+            val = this.startOf('day').valueOf();
+
+            if (
+                (eras[i].since <= val && val <= eras[i].until) ||
+                (eras[i].until <= val && val <= eras[i].since)
+            ) {
+                return (
+                    (this.year() - hooks(eras[i].since).year()) * dir +
+                    eras[i].offset
+                );
+            }
+        }
+
+        return this.year();
+    }
+
+    function erasNameRegex(isStrict) {
+        if (!hasOwnProp(this, '_erasNameRegex')) {
+            computeErasParse.call(this);
+        }
+        return isStrict ? this._erasNameRegex : this._erasRegex;
+    }
+
+    function erasAbbrRegex(isStrict) {
+        if (!hasOwnProp(this, '_erasAbbrRegex')) {
+            computeErasParse.call(this);
+        }
+        return isStrict ? this._erasAbbrRegex : this._erasRegex;
+    }
+
+    function erasNarrowRegex(isStrict) {
+        if (!hasOwnProp(this, '_erasNarrowRegex')) {
+            computeErasParse.call(this);
+        }
+        return isStrict ? this._erasNarrowRegex : this._erasRegex;
+    }
+
+    function matchEraAbbr(isStrict, locale) {
+        return locale.erasAbbrRegex(isStrict);
+    }
+
+    function matchEraName(isStrict, locale) {
+        return locale.erasNameRegex(isStrict);
+    }
+
+    function matchEraNarrow(isStrict, locale) {
+        return locale.erasNarrowRegex(isStrict);
+    }
+
+    function matchEraYearOrdinal(isStrict, locale) {
+        return locale._eraYearOrdinalRegex || matchUnsigned;
+    }
+
+    function computeErasParse() {
+        var abbrPieces = [],
+            namePieces = [],
+            narrowPieces = [],
+            mixedPieces = [],
+            i,
+            l,
+            eras = this.eras();
+
+        for (i = 0, l = eras.length; i < l; ++i) {
+            namePieces.push(regexEscape(eras[i].name));
+            abbrPieces.push(regexEscape(eras[i].abbr));
+            narrowPieces.push(regexEscape(eras[i].narrow));
+
+            mixedPieces.push(regexEscape(eras[i].name));
+            mixedPieces.push(regexEscape(eras[i].abbr));
+            mixedPieces.push(regexEscape(eras[i].narrow));
+        }
+
+        this._erasRegex = new RegExp('^(' + mixedPieces.join('|') + ')', 'i');
+        this._erasNameRegex = new RegExp('^(' + namePieces.join('|') + ')', 'i');
+        this._erasAbbrRegex = new RegExp('^(' + abbrPieces.join('|') + ')', 'i');
+        this._erasNarrowRegex = new RegExp(
+            '^(' + narrowPieces.join('|') + ')',
+            'i'
+        );
     }
 
     // FORMATTING
@@ -19285,13 +20214,13 @@ return jQuery;
         return this.isoWeekYear() % 100;
     });
 
-    function addWeekYearFormatToken (token, getter) {
+    function addWeekYearFormatToken(token, getter) {
         addFormatToken(0, [token, token.length], 0, getter);
     }
 
-    addWeekYearFormatToken('gggg',     'weekYear');
-    addWeekYearFormatToken('ggggg',    'weekYear');
-    addWeekYearFormatToken('GGGG',  'isoWeekYear');
+    addWeekYearFormatToken('gggg', 'weekYear');
+    addWeekYearFormatToken('ggggg', 'weekYear');
+    addWeekYearFormatToken('GGGG', 'isoWeekYear');
     addWeekYearFormatToken('GGGGG', 'isoWeekYear');
 
     // ALIASES
@@ -19304,19 +20233,23 @@ return jQuery;
     addUnitPriority('weekYear', 1);
     addUnitPriority('isoWeekYear', 1);
 
-
     // PARSING
 
-    addRegexToken('G',      matchSigned);
-    addRegexToken('g',      matchSigned);
-    addRegexToken('GG',     match1to2, match2);
-    addRegexToken('gg',     match1to2, match2);
-    addRegexToken('GGGG',   match1to4, match4);
-    addRegexToken('gggg',   match1to4, match4);
-    addRegexToken('GGGGG',  match1to6, match6);
-    addRegexToken('ggggg',  match1to6, match6);
+    addRegexToken('G', matchSigned);
+    addRegexToken('g', matchSigned);
+    addRegexToken('GG', match1to2, match2);
+    addRegexToken('gg', match1to2, match2);
+    addRegexToken('GGGG', match1to4, match4);
+    addRegexToken('gggg', match1to4, match4);
+    addRegexToken('GGGGG', match1to6, match6);
+    addRegexToken('ggggg', match1to6, match6);
 
-    addWeekParseToken(['gggg', 'ggggg', 'GGGG', 'GGGGG'], function (input, week, config, token) {
+    addWeekParseToken(['gggg', 'ggggg', 'GGGG', 'GGGGG'], function (
+        input,
+        week,
+        config,
+        token
+    ) {
         week[token.substr(0, 2)] = toInt(input);
     });
 
@@ -19326,27 +20259,44 @@ return jQuery;
 
     // MOMENTS
 
-    function getSetWeekYear (input) {
-        return getSetWeekYearHelper.call(this,
-                input,
-                this.week(),
-                this.weekday(),
-                this.localeData()._week.dow,
-                this.localeData()._week.doy);
+    function getSetWeekYear(input) {
+        return getSetWeekYearHelper.call(
+            this,
+            input,
+            this.week(),
+            this.weekday(),
+            this.localeData()._week.dow,
+            this.localeData()._week.doy
+        );
     }
 
-    function getSetISOWeekYear (input) {
-        return getSetWeekYearHelper.call(this,
-                input, this.isoWeek(), this.isoWeekday(), 1, 4);
+    function getSetISOWeekYear(input) {
+        return getSetWeekYearHelper.call(
+            this,
+            input,
+            this.isoWeek(),
+            this.isoWeekday(),
+            1,
+            4
+        );
     }
 
-    function getISOWeeksInYear () {
+    function getISOWeeksInYear() {
         return weeksInYear(this.year(), 1, 4);
     }
 
-    function getWeeksInYear () {
+    function getISOWeeksInISOWeekYear() {
+        return weeksInYear(this.isoWeekYear(), 1, 4);
+    }
+
+    function getWeeksInYear() {
         var weekInfo = this.localeData()._week;
         return weeksInYear(this.year(), weekInfo.dow, weekInfo.doy);
+    }
+
+    function getWeeksInWeekYear() {
+        var weekInfo = this.localeData()._week;
+        return weeksInYear(this.weekYear(), weekInfo.dow, weekInfo.doy);
     }
 
     function getSetWeekYearHelper(input, week, weekday, dow, doy) {
@@ -19393,8 +20343,10 @@ return jQuery;
 
     // MOMENTS
 
-    function getSetQuarter (input) {
-        return input == null ? Math.ceil((this.month() + 1) / 3) : this.month((input - 1) * 3 + this.month() % 3);
+    function getSetQuarter(input) {
+        return input == null
+            ? Math.ceil((this.month() + 1) / 3)
+            : this.month((input - 1) * 3 + (this.month() % 3));
     }
 
     // FORMATTING
@@ -19410,13 +20362,13 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('D',  match1to2);
+    addRegexToken('D', match1to2);
     addRegexToken('DD', match1to2, match2);
     addRegexToken('Do', function (isStrict, locale) {
         // TODO: Remove "ordinalParse" fallback in next major release.
-        return isStrict ?
-          (locale._dayOfMonthOrdinalParse || locale._ordinalParse) :
-          locale._dayOfMonthOrdinalParseLenient;
+        return isStrict
+            ? locale._dayOfMonthOrdinalParse || locale._ordinalParse
+            : locale._dayOfMonthOrdinalParseLenient;
     });
 
     addParseToken(['D', 'DD'], DATE);
@@ -19441,7 +20393,7 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('DDD',  match1to3);
+    addRegexToken('DDD', match1to3);
     addRegexToken('DDDD', match3);
     addParseToken(['DDD', 'DDDD'], function (input, array, config) {
         config._dayOfYear = toInt(input);
@@ -19451,9 +20403,12 @@ return jQuery;
 
     // MOMENTS
 
-    function getSetDayOfYear (input) {
-        var dayOfYear = Math.round((this.clone().startOf('day') - this.clone().startOf('year')) / 864e5) + 1;
-        return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
+    function getSetDayOfYear(input) {
+        var dayOfYear =
+            Math.round(
+                (this.clone().startOf('day') - this.clone().startOf('year')) / 864e5
+            ) + 1;
+        return input == null ? dayOfYear : this.add(input - dayOfYear, 'd');
     }
 
     // FORMATTING
@@ -19470,7 +20425,7 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('m',  match1to2);
+    addRegexToken('m', match1to2);
     addRegexToken('mm', match1to2, match2);
     addParseToken(['m', 'mm'], MINUTE);
 
@@ -19492,7 +20447,7 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('s',  match1to2);
+    addRegexToken('s', match1to2);
     addRegexToken('ss', match1to2, match2);
     addParseToken(['s', 'ss'], SECOND);
 
@@ -19530,7 +20485,6 @@ return jQuery;
         return this.millisecond() * 1000000;
     });
 
-
     // ALIASES
 
     addUnitAlias('millisecond', 'ms');
@@ -19541,11 +20495,11 @@ return jQuery;
 
     // PARSING
 
-    addRegexToken('S',    match1to3, match1);
-    addRegexToken('SS',   match1to3, match2);
-    addRegexToken('SSS',  match1to3, match3);
+    addRegexToken('S', match1to3, match1);
+    addRegexToken('SS', match1to3, match2);
+    addRegexToken('SSS', match1to3, match3);
 
-    var token;
+    var token, getSetMillisecond;
     for (token = 'SSSS'; token.length <= 9; token += 'S') {
         addRegexToken(token, matchUnsigned);
     }
@@ -19557,155 +20511,186 @@ return jQuery;
     for (token = 'S'; token.length <= 9; token += 'S') {
         addParseToken(token, parseMs);
     }
-    // MOMENTS
 
-    var getSetMillisecond = makeGetSet('Milliseconds', false);
+    getSetMillisecond = makeGetSet('Milliseconds', false);
 
     // FORMATTING
 
-    addFormatToken('z',  0, 0, 'zoneAbbr');
+    addFormatToken('z', 0, 0, 'zoneAbbr');
     addFormatToken('zz', 0, 0, 'zoneName');
 
     // MOMENTS
 
-    function getZoneAbbr () {
+    function getZoneAbbr() {
         return this._isUTC ? 'UTC' : '';
     }
 
-    function getZoneName () {
+    function getZoneName() {
         return this._isUTC ? 'Coordinated Universal Time' : '';
     }
 
     var proto = Moment.prototype;
 
-    proto.add               = add;
-    proto.calendar          = calendar$1;
-    proto.clone             = clone;
-    proto.diff              = diff;
-    proto.endOf             = endOf;
-    proto.format            = format;
-    proto.from              = from;
-    proto.fromNow           = fromNow;
-    proto.to                = to;
-    proto.toNow             = toNow;
-    proto.get               = stringGet;
-    proto.invalidAt         = invalidAt;
-    proto.isAfter           = isAfter;
-    proto.isBefore          = isBefore;
-    proto.isBetween         = isBetween;
-    proto.isSame            = isSame;
-    proto.isSameOrAfter     = isSameOrAfter;
-    proto.isSameOrBefore    = isSameOrBefore;
-    proto.isValid           = isValid$2;
-    proto.lang              = lang;
-    proto.locale            = locale;
-    proto.localeData        = localeData;
-    proto.max               = prototypeMax;
-    proto.min               = prototypeMin;
-    proto.parsingFlags      = parsingFlags;
-    proto.set               = stringSet;
-    proto.startOf           = startOf;
-    proto.subtract          = subtract;
-    proto.toArray           = toArray;
-    proto.toObject          = toObject;
-    proto.toDate            = toDate;
-    proto.toISOString       = toISOString;
-    proto.inspect           = inspect;
-    proto.toJSON            = toJSON;
-    proto.toString          = toString;
-    proto.unix              = unix;
-    proto.valueOf           = valueOf;
-    proto.creationData      = creationData;
-    proto.year       = getSetYear;
+    proto.add = add;
+    proto.calendar = calendar$1;
+    proto.clone = clone;
+    proto.diff = diff;
+    proto.endOf = endOf;
+    proto.format = format;
+    proto.from = from;
+    proto.fromNow = fromNow;
+    proto.to = to;
+    proto.toNow = toNow;
+    proto.get = stringGet;
+    proto.invalidAt = invalidAt;
+    proto.isAfter = isAfter;
+    proto.isBefore = isBefore;
+    proto.isBetween = isBetween;
+    proto.isSame = isSame;
+    proto.isSameOrAfter = isSameOrAfter;
+    proto.isSameOrBefore = isSameOrBefore;
+    proto.isValid = isValid$2;
+    proto.lang = lang;
+    proto.locale = locale;
+    proto.localeData = localeData;
+    proto.max = prototypeMax;
+    proto.min = prototypeMin;
+    proto.parsingFlags = parsingFlags;
+    proto.set = stringSet;
+    proto.startOf = startOf;
+    proto.subtract = subtract;
+    proto.toArray = toArray;
+    proto.toObject = toObject;
+    proto.toDate = toDate;
+    proto.toISOString = toISOString;
+    proto.inspect = inspect;
+    if (typeof Symbol !== 'undefined' && Symbol.for != null) {
+        proto[Symbol.for('nodejs.util.inspect.custom')] = function () {
+            return 'Moment<' + this.format() + '>';
+        };
+    }
+    proto.toJSON = toJSON;
+    proto.toString = toString;
+    proto.unix = unix;
+    proto.valueOf = valueOf;
+    proto.creationData = creationData;
+    proto.eraName = getEraName;
+    proto.eraNarrow = getEraNarrow;
+    proto.eraAbbr = getEraAbbr;
+    proto.eraYear = getEraYear;
+    proto.year = getSetYear;
     proto.isLeapYear = getIsLeapYear;
-    proto.weekYear    = getSetWeekYear;
+    proto.weekYear = getSetWeekYear;
     proto.isoWeekYear = getSetISOWeekYear;
     proto.quarter = proto.quarters = getSetQuarter;
-    proto.month       = getSetMonth;
+    proto.month = getSetMonth;
     proto.daysInMonth = getDaysInMonth;
-    proto.week           = proto.weeks        = getSetWeek;
-    proto.isoWeek        = proto.isoWeeks     = getSetISOWeek;
-    proto.weeksInYear    = getWeeksInYear;
+    proto.week = proto.weeks = getSetWeek;
+    proto.isoWeek = proto.isoWeeks = getSetISOWeek;
+    proto.weeksInYear = getWeeksInYear;
+    proto.weeksInWeekYear = getWeeksInWeekYear;
     proto.isoWeeksInYear = getISOWeeksInYear;
-    proto.date       = getSetDayOfMonth;
-    proto.day        = proto.days             = getSetDayOfWeek;
-    proto.weekday    = getSetLocaleDayOfWeek;
+    proto.isoWeeksInISOWeekYear = getISOWeeksInISOWeekYear;
+    proto.date = getSetDayOfMonth;
+    proto.day = proto.days = getSetDayOfWeek;
+    proto.weekday = getSetLocaleDayOfWeek;
     proto.isoWeekday = getSetISODayOfWeek;
-    proto.dayOfYear  = getSetDayOfYear;
+    proto.dayOfYear = getSetDayOfYear;
     proto.hour = proto.hours = getSetHour;
     proto.minute = proto.minutes = getSetMinute;
     proto.second = proto.seconds = getSetSecond;
     proto.millisecond = proto.milliseconds = getSetMillisecond;
-    proto.utcOffset            = getSetOffset;
-    proto.utc                  = setOffsetToUTC;
-    proto.local                = setOffsetToLocal;
-    proto.parseZone            = setOffsetToParsedOffset;
+    proto.utcOffset = getSetOffset;
+    proto.utc = setOffsetToUTC;
+    proto.local = setOffsetToLocal;
+    proto.parseZone = setOffsetToParsedOffset;
     proto.hasAlignedHourOffset = hasAlignedHourOffset;
-    proto.isDST                = isDaylightSavingTime;
-    proto.isLocal              = isLocal;
-    proto.isUtcOffset          = isUtcOffset;
-    proto.isUtc                = isUtc;
-    proto.isUTC                = isUtc;
+    proto.isDST = isDaylightSavingTime;
+    proto.isLocal = isLocal;
+    proto.isUtcOffset = isUtcOffset;
+    proto.isUtc = isUtc;
+    proto.isUTC = isUtc;
     proto.zoneAbbr = getZoneAbbr;
     proto.zoneName = getZoneName;
-    proto.dates  = deprecate('dates accessor is deprecated. Use date instead.', getSetDayOfMonth);
-    proto.months = deprecate('months accessor is deprecated. Use month instead', getSetMonth);
-    proto.years  = deprecate('years accessor is deprecated. Use year instead', getSetYear);
-    proto.zone   = deprecate('moment().zone is deprecated, use moment().utcOffset instead. http://momentjs.com/guides/#/warnings/zone/', getSetZone);
-    proto.isDSTShifted = deprecate('isDSTShifted is deprecated. See http://momentjs.com/guides/#/warnings/dst-shifted/ for more information', isDaylightSavingTimeShifted);
+    proto.dates = deprecate(
+        'dates accessor is deprecated. Use date instead.',
+        getSetDayOfMonth
+    );
+    proto.months = deprecate(
+        'months accessor is deprecated. Use month instead',
+        getSetMonth
+    );
+    proto.years = deprecate(
+        'years accessor is deprecated. Use year instead',
+        getSetYear
+    );
+    proto.zone = deprecate(
+        'moment().zone is deprecated, use moment().utcOffset instead. http://momentjs.com/guides/#/warnings/zone/',
+        getSetZone
+    );
+    proto.isDSTShifted = deprecate(
+        'isDSTShifted is deprecated. See http://momentjs.com/guides/#/warnings/dst-shifted/ for more information',
+        isDaylightSavingTimeShifted
+    );
 
-    function createUnix (input) {
+    function createUnix(input) {
         return createLocal(input * 1000);
     }
 
-    function createInZone () {
+    function createInZone() {
         return createLocal.apply(null, arguments).parseZone();
     }
 
-    function preParsePostFormat (string) {
+    function preParsePostFormat(string) {
         return string;
     }
 
     var proto$1 = Locale.prototype;
 
-    proto$1.calendar        = calendar;
-    proto$1.longDateFormat  = longDateFormat;
-    proto$1.invalidDate     = invalidDate;
-    proto$1.ordinal         = ordinal;
-    proto$1.preparse        = preParsePostFormat;
-    proto$1.postformat      = preParsePostFormat;
-    proto$1.relativeTime    = relativeTime;
-    proto$1.pastFuture      = pastFuture;
-    proto$1.set             = set;
+    proto$1.calendar = calendar;
+    proto$1.longDateFormat = longDateFormat;
+    proto$1.invalidDate = invalidDate;
+    proto$1.ordinal = ordinal;
+    proto$1.preparse = preParsePostFormat;
+    proto$1.postformat = preParsePostFormat;
+    proto$1.relativeTime = relativeTime;
+    proto$1.pastFuture = pastFuture;
+    proto$1.set = set;
+    proto$1.eras = localeEras;
+    proto$1.erasParse = localeErasParse;
+    proto$1.erasConvertYear = localeErasConvertYear;
+    proto$1.erasAbbrRegex = erasAbbrRegex;
+    proto$1.erasNameRegex = erasNameRegex;
+    proto$1.erasNarrowRegex = erasNarrowRegex;
 
-    proto$1.months            =        localeMonths;
-    proto$1.monthsShort       =        localeMonthsShort;
-    proto$1.monthsParse       =        localeMonthsParse;
-    proto$1.monthsRegex       = monthsRegex;
-    proto$1.monthsShortRegex  = monthsShortRegex;
+    proto$1.months = localeMonths;
+    proto$1.monthsShort = localeMonthsShort;
+    proto$1.monthsParse = localeMonthsParse;
+    proto$1.monthsRegex = monthsRegex;
+    proto$1.monthsShortRegex = monthsShortRegex;
     proto$1.week = localeWeek;
     proto$1.firstDayOfYear = localeFirstDayOfYear;
     proto$1.firstDayOfWeek = localeFirstDayOfWeek;
 
-    proto$1.weekdays       =        localeWeekdays;
-    proto$1.weekdaysMin    =        localeWeekdaysMin;
-    proto$1.weekdaysShort  =        localeWeekdaysShort;
-    proto$1.weekdaysParse  =        localeWeekdaysParse;
+    proto$1.weekdays = localeWeekdays;
+    proto$1.weekdaysMin = localeWeekdaysMin;
+    proto$1.weekdaysShort = localeWeekdaysShort;
+    proto$1.weekdaysParse = localeWeekdaysParse;
 
-    proto$1.weekdaysRegex       =        weekdaysRegex;
-    proto$1.weekdaysShortRegex  =        weekdaysShortRegex;
-    proto$1.weekdaysMinRegex    =        weekdaysMinRegex;
+    proto$1.weekdaysRegex = weekdaysRegex;
+    proto$1.weekdaysShortRegex = weekdaysShortRegex;
+    proto$1.weekdaysMinRegex = weekdaysMinRegex;
 
     proto$1.isPM = localeIsPM;
     proto$1.meridiem = localeMeridiem;
 
-    function get$1 (format, index, field, setter) {
-        var locale = getLocale();
-        var utc = createUTC().set(setter, index);
+    function get$1(format, index, field, setter) {
+        var locale = getLocale(),
+            utc = createUTC().set(setter, index);
         return locale[field](utc, format);
     }
 
-    function listMonthsImpl (format, index, field) {
+    function listMonthsImpl(format, index, field) {
         if (isNumber(format)) {
             index = format;
             format = undefined;
@@ -19717,8 +20702,8 @@ return jQuery;
             return get$1(format, index, field, 'month');
         }
 
-        var i;
-        var out = [];
+        var i,
+            out = [];
         for (i = 0; i < 12; i++) {
             out[i] = get$1(format, i, field, 'month');
         }
@@ -19733,7 +20718,7 @@ return jQuery;
     // (true, 5)
     // (true, fmt, 5)
     // (true, fmt)
-    function listWeekdaysImpl (localeSorted, format, index, field) {
+    function listWeekdaysImpl(localeSorted, format, index, field) {
         if (typeof localeSorted === 'boolean') {
             if (isNumber(format)) {
                 index = format;
@@ -19755,97 +20740,127 @@ return jQuery;
         }
 
         var locale = getLocale(),
-            shift = localeSorted ? locale._week.dow : 0;
+            shift = localeSorted ? locale._week.dow : 0,
+            i,
+            out = [];
 
         if (index != null) {
             return get$1(format, (index + shift) % 7, field, 'day');
         }
 
-        var i;
-        var out = [];
         for (i = 0; i < 7; i++) {
             out[i] = get$1(format, (i + shift) % 7, field, 'day');
         }
         return out;
     }
 
-    function listMonths (format, index) {
+    function listMonths(format, index) {
         return listMonthsImpl(format, index, 'months');
     }
 
-    function listMonthsShort (format, index) {
+    function listMonthsShort(format, index) {
         return listMonthsImpl(format, index, 'monthsShort');
     }
 
-    function listWeekdays (localeSorted, format, index) {
+    function listWeekdays(localeSorted, format, index) {
         return listWeekdaysImpl(localeSorted, format, index, 'weekdays');
     }
 
-    function listWeekdaysShort (localeSorted, format, index) {
+    function listWeekdaysShort(localeSorted, format, index) {
         return listWeekdaysImpl(localeSorted, format, index, 'weekdaysShort');
     }
 
-    function listWeekdaysMin (localeSorted, format, index) {
+    function listWeekdaysMin(localeSorted, format, index) {
         return listWeekdaysImpl(localeSorted, format, index, 'weekdaysMin');
     }
 
     getSetGlobalLocale('en', {
+        eras: [
+            {
+                since: '0001-01-01',
+                until: +Infinity,
+                offset: 1,
+                name: 'Anno Domini',
+                narrow: 'AD',
+                abbr: 'AD',
+            },
+            {
+                since: '0000-12-31',
+                until: -Infinity,
+                offset: 1,
+                name: 'Before Christ',
+                narrow: 'BC',
+                abbr: 'BC',
+            },
+        ],
         dayOfMonthOrdinalParse: /\d{1,2}(th|st|nd|rd)/,
-        ordinal : function (number) {
+        ordinal: function (number) {
             var b = number % 10,
-                output = (toInt(number % 100 / 10) === 1) ? 'th' :
-                (b === 1) ? 'st' :
-                (b === 2) ? 'nd' :
-                (b === 3) ? 'rd' : 'th';
+                output =
+                    toInt((number % 100) / 10) === 1
+                        ? 'th'
+                        : b === 1
+                        ? 'st'
+                        : b === 2
+                        ? 'nd'
+                        : b === 3
+                        ? 'rd'
+                        : 'th';
             return number + output;
-        }
+        },
     });
 
     // Side effect imports
 
-    hooks.lang = deprecate('moment.lang is deprecated. Use moment.locale instead.', getSetGlobalLocale);
-    hooks.langData = deprecate('moment.langData is deprecated. Use moment.localeData instead.', getLocale);
+    hooks.lang = deprecate(
+        'moment.lang is deprecated. Use moment.locale instead.',
+        getSetGlobalLocale
+    );
+    hooks.langData = deprecate(
+        'moment.langData is deprecated. Use moment.localeData instead.',
+        getLocale
+    );
 
     var mathAbs = Math.abs;
 
-    function abs () {
-        var data           = this._data;
+    function abs() {
+        var data = this._data;
 
         this._milliseconds = mathAbs(this._milliseconds);
-        this._days         = mathAbs(this._days);
-        this._months       = mathAbs(this._months);
+        this._days = mathAbs(this._days);
+        this._months = mathAbs(this._months);
 
-        data.milliseconds  = mathAbs(data.milliseconds);
-        data.seconds       = mathAbs(data.seconds);
-        data.minutes       = mathAbs(data.minutes);
-        data.hours         = mathAbs(data.hours);
-        data.months        = mathAbs(data.months);
-        data.years         = mathAbs(data.years);
+        data.milliseconds = mathAbs(data.milliseconds);
+        data.seconds = mathAbs(data.seconds);
+        data.minutes = mathAbs(data.minutes);
+        data.hours = mathAbs(data.hours);
+        data.months = mathAbs(data.months);
+        data.years = mathAbs(data.years);
 
         return this;
     }
 
-    function addSubtract$1 (duration, input, value, direction) {
+    function addSubtract$1(duration, input, value, direction) {
         var other = createDuration(input, value);
 
         duration._milliseconds += direction * other._milliseconds;
-        duration._days         += direction * other._days;
-        duration._months       += direction * other._months;
+        duration._days += direction * other._days;
+        duration._months += direction * other._months;
 
         return duration._bubble();
     }
 
     // supports only 2.0-style add(1, 's') or add(duration)
-    function add$1 (input, value) {
+    function add$1(input, value) {
         return addSubtract$1(this, input, value, 1);
     }
 
     // supports only 2.0-style subtract(1, 's') or subtract(duration)
-    function subtract$1 (input, value) {
+    function subtract$1(input, value) {
         return addSubtract$1(this, input, value, -1);
     }
 
-    function absCeil (number) {
+    function absCeil(number) {
         if (number < 0) {
             return Math.floor(number);
         } else {
@@ -19853,17 +20868,25 @@ return jQuery;
         }
     }
 
-    function bubble () {
-        var milliseconds = this._milliseconds;
-        var days         = this._days;
-        var months       = this._months;
-        var data         = this._data;
-        var seconds, minutes, hours, years, monthsFromDays;
+    function bubble() {
+        var milliseconds = this._milliseconds,
+            days = this._days,
+            months = this._months,
+            data = this._data,
+            seconds,
+            minutes,
+            hours,
+            years,
+            monthsFromDays;
 
         // if we have a mix of positive and negative values, bubble down first
         // check: https://github.com/moment/moment/issues/2166
-        if (!((milliseconds >= 0 && days >= 0 && months >= 0) ||
-                (milliseconds <= 0 && days <= 0 && months <= 0))) {
+        if (
+            !(
+                (milliseconds >= 0 && days >= 0 && months >= 0) ||
+                (milliseconds <= 0 && days <= 0 && months <= 0)
+            )
+        ) {
             milliseconds += absCeil(monthsToDays(months) + days) * 864e5;
             days = 0;
             months = 0;
@@ -19873,14 +20896,14 @@ return jQuery;
         // examples of what that means.
         data.milliseconds = milliseconds % 1000;
 
-        seconds           = absFloor(milliseconds / 1000);
-        data.seconds      = seconds % 60;
+        seconds = absFloor(milliseconds / 1000);
+        data.seconds = seconds % 60;
 
-        minutes           = absFloor(seconds / 60);
-        data.minutes      = minutes % 60;
+        minutes = absFloor(seconds / 60);
+        data.minutes = minutes % 60;
 
-        hours             = absFloor(minutes / 60);
-        data.hours        = hours % 24;
+        hours = absFloor(minutes / 60);
+        data.hours = hours % 24;
 
         days += absFloor(hours / 24);
 
@@ -19893,31 +20916,31 @@ return jQuery;
         years = absFloor(months / 12);
         months %= 12;
 
-        data.days   = days;
+        data.days = days;
         data.months = months;
-        data.years  = years;
+        data.years = years;
 
         return this;
     }
 
-    function daysToMonths (days) {
+    function daysToMonths(days) {
         // 400 years have 146097 days (taking into account leap year rules)
         // 400 years have 12 months === 4800
-        return days * 4800 / 146097;
+        return (days * 4800) / 146097;
     }
 
-    function monthsToDays (months) {
+    function monthsToDays(months) {
         // the reverse of daysToMonths
-        return months * 146097 / 4800;
+        return (months * 146097) / 4800;
     }
 
-    function as (units) {
+    function as(units) {
         if (!this.isValid()) {
             return NaN;
         }
-        var days;
-        var months;
-        var milliseconds = this._milliseconds;
+        var days,
+            months,
+            milliseconds = this._milliseconds;
 
         units = normalizeUnits(units);
 
@@ -19925,28 +20948,38 @@ return jQuery;
             days = this._days + milliseconds / 864e5;
             months = this._months + daysToMonths(days);
             switch (units) {
-                case 'month':   return months;
-                case 'quarter': return months / 3;
-                case 'year':    return months / 12;
+                case 'month':
+                    return months;
+                case 'quarter':
+                    return months / 3;
+                case 'year':
+                    return months / 12;
             }
         } else {
             // handle milliseconds separately because of floating point math errors (issue #1867)
             days = this._days + Math.round(monthsToDays(this._months));
             switch (units) {
-                case 'week'   : return days / 7     + milliseconds / 6048e5;
-                case 'day'    : return days         + milliseconds / 864e5;
-                case 'hour'   : return days * 24    + milliseconds / 36e5;
-                case 'minute' : return days * 1440  + milliseconds / 6e4;
-                case 'second' : return days * 86400 + milliseconds / 1000;
+                case 'week':
+                    return days / 7 + milliseconds / 6048e5;
+                case 'day':
+                    return days + milliseconds / 864e5;
+                case 'hour':
+                    return days * 24 + milliseconds / 36e5;
+                case 'minute':
+                    return days * 1440 + milliseconds / 6e4;
+                case 'second':
+                    return days * 86400 + milliseconds / 1000;
                 // Math.floor prevents floating point math errors here
-                case 'millisecond': return Math.floor(days * 864e5) + milliseconds;
-                default: throw new Error('Unknown unit ' + units);
+                case 'millisecond':
+                    return Math.floor(days * 864e5) + milliseconds;
+                default:
+                    throw new Error('Unknown unit ' + units);
             }
         }
     }
 
     // TODO: Use this.as('ms')?
-    function valueOf$1 () {
+    function valueOf$1() {
         if (!this.isValid()) {
             return NaN;
         }
@@ -19958,27 +20991,27 @@ return jQuery;
         );
     }
 
-    function makeAs (alias) {
+    function makeAs(alias) {
         return function () {
             return this.as(alias);
         };
     }
 
-    var asMilliseconds = makeAs('ms');
-    var asSeconds      = makeAs('s');
-    var asMinutes      = makeAs('m');
-    var asHours        = makeAs('h');
-    var asDays         = makeAs('d');
-    var asWeeks        = makeAs('w');
-    var asMonths       = makeAs('M');
-    var asQuarters     = makeAs('Q');
-    var asYears        = makeAs('y');
+    var asMilliseconds = makeAs('ms'),
+        asSeconds = makeAs('s'),
+        asMinutes = makeAs('m'),
+        asHours = makeAs('h'),
+        asDays = makeAs('d'),
+        asWeeks = makeAs('w'),
+        asMonths = makeAs('M'),
+        asQuarters = makeAs('Q'),
+        asYears = makeAs('y');
 
-    function clone$1 () {
+    function clone$1() {
         return createDuration(this);
     }
 
-    function get$2 (units) {
+    function get$2(units) {
         units = normalizeUnits(units);
         return this.isValid() ? this[units + 's']() : NaN;
     }
@@ -19989,53 +21022,63 @@ return jQuery;
         };
     }
 
-    var milliseconds = makeGetter('milliseconds');
-    var seconds      = makeGetter('seconds');
-    var minutes      = makeGetter('minutes');
-    var hours        = makeGetter('hours');
-    var days         = makeGetter('days');
-    var months       = makeGetter('months');
-    var years        = makeGetter('years');
+    var milliseconds = makeGetter('milliseconds'),
+        seconds = makeGetter('seconds'),
+        minutes = makeGetter('minutes'),
+        hours = makeGetter('hours'),
+        days = makeGetter('days'),
+        months = makeGetter('months'),
+        years = makeGetter('years');
 
-    function weeks () {
+    function weeks() {
         return absFloor(this.days() / 7);
     }
 
-    var round = Math.round;
-    var thresholds = {
-        ss: 44,         // a few seconds to seconds
-        s : 45,         // seconds to minute
-        m : 45,         // minutes to hour
-        h : 22,         // hours to day
-        d : 26,         // days to month
-        M : 11          // months to year
-    };
+    var round = Math.round,
+        thresholds = {
+            ss: 44, // a few seconds to seconds
+            s: 45, // seconds to minute
+            m: 45, // minutes to hour
+            h: 22, // hours to day
+            d: 26, // days to month/week
+            w: null, // weeks to month
+            M: 11, // months to year
+        };
 
     // helper function for moment.fn.from, moment.fn.fromNow, and moment.duration.fn.humanize
     function substituteTimeAgo(string, number, withoutSuffix, isFuture, locale) {
         return locale.relativeTime(number || 1, !!withoutSuffix, string, isFuture);
     }
 
-    function relativeTime$1 (posNegDuration, withoutSuffix, locale) {
-        var duration = createDuration(posNegDuration).abs();
-        var seconds  = round(duration.as('s'));
-        var minutes  = round(duration.as('m'));
-        var hours    = round(duration.as('h'));
-        var days     = round(duration.as('d'));
-        var months   = round(duration.as('M'));
-        var years    = round(duration.as('y'));
+    function relativeTime$1(posNegDuration, withoutSuffix, thresholds, locale) {
+        var duration = createDuration(posNegDuration).abs(),
+            seconds = round(duration.as('s')),
+            minutes = round(duration.as('m')),
+            hours = round(duration.as('h')),
+            days = round(duration.as('d')),
+            months = round(duration.as('M')),
+            weeks = round(duration.as('w')),
+            years = round(duration.as('y')),
+            a =
+                (seconds <= thresholds.ss && ['s', seconds]) ||
+                (seconds < thresholds.s && ['ss', seconds]) ||
+                (minutes <= 1 && ['m']) ||
+                (minutes < thresholds.m && ['mm', minutes]) ||
+                (hours <= 1 && ['h']) ||
+                (hours < thresholds.h && ['hh', hours]) ||
+                (days <= 1 && ['d']) ||
+                (days < thresholds.d && ['dd', days]);
 
-        var a = seconds <= thresholds.ss && ['s', seconds]  ||
-                seconds < thresholds.s   && ['ss', seconds] ||
-                minutes <= 1             && ['m']           ||
-                minutes < thresholds.m   && ['mm', minutes] ||
-                hours   <= 1             && ['h']           ||
-                hours   < thresholds.h   && ['hh', hours]   ||
-                days    <= 1             && ['d']           ||
-                days    < thresholds.d   && ['dd', days]    ||
-                months  <= 1             && ['M']           ||
-                months  < thresholds.M   && ['MM', months]  ||
-                years   <= 1             && ['y']           || ['yy', years];
+        if (thresholds.w != null) {
+            a =
+                a ||
+                (weeks <= 1 && ['w']) ||
+                (weeks < thresholds.w && ['ww', weeks]);
+        }
+        a = a ||
+            (months <= 1 && ['M']) ||
+            (months < thresholds.M && ['MM', months]) ||
+            (years <= 1 && ['y']) || ['yy', years];
 
         a[2] = withoutSuffix;
         a[3] = +posNegDuration > 0;
@@ -20044,11 +21087,11 @@ return jQuery;
     }
 
     // This function allows you to set the rounding function for relative time strings
-    function getSetRelativeTimeRounding (roundingFunction) {
+    function getSetRelativeTimeRounding(roundingFunction) {
         if (roundingFunction === undefined) {
             return round;
         }
-        if (typeof(roundingFunction) === 'function') {
+        if (typeof roundingFunction === 'function') {
             round = roundingFunction;
             return true;
         }
@@ -20056,7 +21099,7 @@ return jQuery;
     }
 
     // This function allows you to set a threshold for relative time strings
-    function getSetRelativeTimeThreshold (threshold, limit) {
+    function getSetRelativeTimeThreshold(threshold, limit) {
         if (thresholds[threshold] === undefined) {
             return false;
         }
@@ -20070,13 +21113,32 @@ return jQuery;
         return true;
     }
 
-    function humanize (withSuffix) {
+    function humanize(argWithSuffix, argThresholds) {
         if (!this.isValid()) {
             return this.localeData().invalidDate();
         }
 
-        var locale = this.localeData();
-        var output = relativeTime$1(this, !withSuffix, locale);
+        var withSuffix = false,
+            th = thresholds,
+            locale,
+            output;
+
+        if (typeof argWithSuffix === 'object') {
+            argThresholds = argWithSuffix;
+            argWithSuffix = false;
+        }
+        if (typeof argWithSuffix === 'boolean') {
+            withSuffix = argWithSuffix;
+        }
+        if (typeof argThresholds === 'object') {
+            th = Object.assign({}, thresholds, argThresholds);
+            if (argThresholds.s != null && argThresholds.ss == null) {
+                th.ss = argThresholds.s - 1;
+            }
+        }
+
+        locale = this.localeData();
+        output = relativeTime$1(this, !withSuffix, th, locale);
 
         if (withSuffix) {
             output = locale.pastFuture(+this, output);
@@ -20088,7 +21150,7 @@ return jQuery;
     var abs$1 = Math.abs;
 
     function sign(x) {
-        return ((x > 0) - (x < 0)) || +x;
+        return (x > 0) - (x < 0) || +x;
     }
 
     function toISOString$1() {
@@ -20103,30 +21165,18 @@ return jQuery;
             return this.localeData().invalidDate();
         }
 
-        var seconds = abs$1(this._milliseconds) / 1000;
-        var days         = abs$1(this._days);
-        var months       = abs$1(this._months);
-        var minutes, hours, years;
-
-        // 3600 seconds -> 60 minutes -> 1 hour
-        minutes           = absFloor(seconds / 60);
-        hours             = absFloor(minutes / 60);
-        seconds %= 60;
-        minutes %= 60;
-
-        // 12 months -> 1 year
-        years  = absFloor(months / 12);
-        months %= 12;
-
-
-        // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
-        var Y = years;
-        var M = months;
-        var D = days;
-        var h = hours;
-        var m = minutes;
-        var s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
-        var total = this.asSeconds();
+        var seconds = abs$1(this._milliseconds) / 1000,
+            days = abs$1(this._days),
+            months = abs$1(this._months),
+            minutes,
+            hours,
+            years,
+            s,
+            total = this.asSeconds(),
+            totalSign,
+            ymSign,
+            daysSign,
+            hmsSign;
 
         if (!total) {
             // this is the same as C#'s (Noda) and python (isodate)...
@@ -20134,60 +21184,77 @@ return jQuery;
             return 'P0D';
         }
 
-        var totalSign = total < 0 ? '-' : '';
-        var ymSign = sign(this._months) !== sign(total) ? '-' : '';
-        var daysSign = sign(this._days) !== sign(total) ? '-' : '';
-        var hmsSign = sign(this._milliseconds) !== sign(total) ? '-' : '';
+        // 3600 seconds -> 60 minutes -> 1 hour
+        minutes = absFloor(seconds / 60);
+        hours = absFloor(minutes / 60);
+        seconds %= 60;
+        minutes %= 60;
 
-        return totalSign + 'P' +
-            (Y ? ymSign + Y + 'Y' : '') +
-            (M ? ymSign + M + 'M' : '') +
-            (D ? daysSign + D + 'D' : '') +
-            ((h || m || s) ? 'T' : '') +
-            (h ? hmsSign + h + 'H' : '') +
-            (m ? hmsSign + m + 'M' : '') +
-            (s ? hmsSign + s + 'S' : '');
+        // 12 months -> 1 year
+        years = absFloor(months / 12);
+        months %= 12;
+
+        // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
+        s = seconds ? seconds.toFixed(3).replace(/\.?0+$/, '') : '';
+
+        totalSign = total < 0 ? '-' : '';
+        ymSign = sign(this._months) !== sign(total) ? '-' : '';
+        daysSign = sign(this._days) !== sign(total) ? '-' : '';
+        hmsSign = sign(this._milliseconds) !== sign(total) ? '-' : '';
+
+        return (
+            totalSign +
+            'P' +
+            (years ? ymSign + years + 'Y' : '') +
+            (months ? ymSign + months + 'M' : '') +
+            (days ? daysSign + days + 'D' : '') +
+            (hours || minutes || seconds ? 'T' : '') +
+            (hours ? hmsSign + hours + 'H' : '') +
+            (minutes ? hmsSign + minutes + 'M' : '') +
+            (seconds ? hmsSign + s + 'S' : '')
+        );
     }
 
     var proto$2 = Duration.prototype;
 
-    proto$2.isValid        = isValid$1;
-    proto$2.abs            = abs;
-    proto$2.add            = add$1;
-    proto$2.subtract       = subtract$1;
-    proto$2.as             = as;
+    proto$2.isValid = isValid$1;
+    proto$2.abs = abs;
+    proto$2.add = add$1;
+    proto$2.subtract = subtract$1;
+    proto$2.as = as;
     proto$2.asMilliseconds = asMilliseconds;
-    proto$2.asSeconds      = asSeconds;
-    proto$2.asMinutes      = asMinutes;
-    proto$2.asHours        = asHours;
-    proto$2.asDays         = asDays;
-    proto$2.asWeeks        = asWeeks;
-    proto$2.asMonths       = asMonths;
-    proto$2.asQuarters     = asQuarters;
-    proto$2.asYears        = asYears;
-    proto$2.valueOf        = valueOf$1;
-    proto$2._bubble        = bubble;
-    proto$2.clone          = clone$1;
-    proto$2.get            = get$2;
-    proto$2.milliseconds   = milliseconds;
-    proto$2.seconds        = seconds;
-    proto$2.minutes        = minutes;
-    proto$2.hours          = hours;
-    proto$2.days           = days;
-    proto$2.weeks          = weeks;
-    proto$2.months         = months;
-    proto$2.years          = years;
-    proto$2.humanize       = humanize;
-    proto$2.toISOString    = toISOString$1;
-    proto$2.toString       = toISOString$1;
-    proto$2.toJSON         = toISOString$1;
-    proto$2.locale         = locale;
-    proto$2.localeData     = localeData;
+    proto$2.asSeconds = asSeconds;
+    proto$2.asMinutes = asMinutes;
+    proto$2.asHours = asHours;
+    proto$2.asDays = asDays;
+    proto$2.asWeeks = asWeeks;
+    proto$2.asMonths = asMonths;
+    proto$2.asQuarters = asQuarters;
+    proto$2.asYears = asYears;
+    proto$2.valueOf = valueOf$1;
+    proto$2._bubble = bubble;
+    proto$2.clone = clone$1;
+    proto$2.get = get$2;
+    proto$2.milliseconds = milliseconds;
+    proto$2.seconds = seconds;
+    proto$2.minutes = minutes;
+    proto$2.hours = hours;
+    proto$2.days = days;
+    proto$2.weeks = weeks;
+    proto$2.months = months;
+    proto$2.years = years;
+    proto$2.humanize = humanize;
+    proto$2.toISOString = toISOString$1;
+    proto$2.toString = toISOString$1;
+    proto$2.toJSON = toISOString$1;
+    proto$2.locale = locale;
+    proto$2.localeData = localeData;
 
-    proto$2.toIsoString = deprecate('toIsoString() is deprecated. Please use toISOString() instead (notice the capitals)', toISOString$1);
+    proto$2.toIsoString = deprecate(
+        'toIsoString() is deprecated. Please use toISOString() instead (notice the capitals)',
+        toISOString$1
+    );
     proto$2.lang = lang;
-
-    // Side effect imports
 
     // FORMATTING
 
@@ -20199,58 +21266,57 @@ return jQuery;
     addRegexToken('x', matchSigned);
     addRegexToken('X', matchTimestamp);
     addParseToken('X', function (input, array, config) {
-        config._d = new Date(parseFloat(input, 10) * 1000);
+        config._d = new Date(parseFloat(input) * 1000);
     });
     addParseToken('x', function (input, array, config) {
         config._d = new Date(toInt(input));
     });
 
-    // Side effect imports
+    //! moment.js
 
-
-    hooks.version = '2.24.0';
+    hooks.version = '2.27.0';
 
     setHookCallback(createLocal);
 
-    hooks.fn                    = proto;
-    hooks.min                   = min;
-    hooks.max                   = max;
-    hooks.now                   = now;
-    hooks.utc                   = createUTC;
-    hooks.unix                  = createUnix;
-    hooks.months                = listMonths;
-    hooks.isDate                = isDate;
-    hooks.locale                = getSetGlobalLocale;
-    hooks.invalid               = createInvalid;
-    hooks.duration              = createDuration;
-    hooks.isMoment              = isMoment;
-    hooks.weekdays              = listWeekdays;
-    hooks.parseZone             = createInZone;
-    hooks.localeData            = getLocale;
-    hooks.isDuration            = isDuration;
-    hooks.monthsShort           = listMonthsShort;
-    hooks.weekdaysMin           = listWeekdaysMin;
-    hooks.defineLocale          = defineLocale;
-    hooks.updateLocale          = updateLocale;
-    hooks.locales               = listLocales;
-    hooks.weekdaysShort         = listWeekdaysShort;
-    hooks.normalizeUnits        = normalizeUnits;
-    hooks.relativeTimeRounding  = getSetRelativeTimeRounding;
+    hooks.fn = proto;
+    hooks.min = min;
+    hooks.max = max;
+    hooks.now = now;
+    hooks.utc = createUTC;
+    hooks.unix = createUnix;
+    hooks.months = listMonths;
+    hooks.isDate = isDate;
+    hooks.locale = getSetGlobalLocale;
+    hooks.invalid = createInvalid;
+    hooks.duration = createDuration;
+    hooks.isMoment = isMoment;
+    hooks.weekdays = listWeekdays;
+    hooks.parseZone = createInZone;
+    hooks.localeData = getLocale;
+    hooks.isDuration = isDuration;
+    hooks.monthsShort = listMonthsShort;
+    hooks.weekdaysMin = listWeekdaysMin;
+    hooks.defineLocale = defineLocale;
+    hooks.updateLocale = updateLocale;
+    hooks.locales = listLocales;
+    hooks.weekdaysShort = listWeekdaysShort;
+    hooks.normalizeUnits = normalizeUnits;
+    hooks.relativeTimeRounding = getSetRelativeTimeRounding;
     hooks.relativeTimeThreshold = getSetRelativeTimeThreshold;
-    hooks.calendarFormat        = getCalendarFormat;
-    hooks.prototype             = proto;
+    hooks.calendarFormat = getCalendarFormat;
+    hooks.prototype = proto;
 
     // currently HTML5 input type only supports 24-hour formats
     hooks.HTML5_FMT = {
-        DATETIME_LOCAL: 'YYYY-MM-DDTHH:mm',             // <input type="datetime-local" />
-        DATETIME_LOCAL_SECONDS: 'YYYY-MM-DDTHH:mm:ss',  // <input type="datetime-local" step="1" />
-        DATETIME_LOCAL_MS: 'YYYY-MM-DDTHH:mm:ss.SSS',   // <input type="datetime-local" step="0.001" />
-        DATE: 'YYYY-MM-DD',                             // <input type="date" />
-        TIME: 'HH:mm',                                  // <input type="time" />
-        TIME_SECONDS: 'HH:mm:ss',                       // <input type="time" step="1" />
-        TIME_MS: 'HH:mm:ss.SSS',                        // <input type="time" step="0.001" />
-        WEEK: 'GGGG-[W]WW',                             // <input type="week" />
-        MONTH: 'YYYY-MM'                                // <input type="month" />
+        DATETIME_LOCAL: 'YYYY-MM-DDTHH:mm', // <input type="datetime-local" />
+        DATETIME_LOCAL_SECONDS: 'YYYY-MM-DDTHH:mm:ss', // <input type="datetime-local" step="1" />
+        DATETIME_LOCAL_MS: 'YYYY-MM-DDTHH:mm:ss.SSS', // <input type="datetime-local" step="0.001" />
+        DATE: 'YYYY-MM-DD', // <input type="date" />
+        TIME: 'HH:mm', // <input type="time" />
+        TIME_SECONDS: 'HH:mm:ss', // <input type="time" step="1" />
+        TIME_MS: 'HH:mm:ss.SSS', // <input type="time" step="0.001" />
+        WEEK: 'GGGG-[W]WW', // <input type="week" />
+        MONTH: 'YYYY-MM', // <input type="month" />
     };
 
     return hooks;
@@ -22654,223 +23720,1359 @@ return WaveSurfer;
 
 }));
 
+/* global btoa */
 (function (root) {
-// lazy require symbols table
-var _symbols, removelist;
-function symbols(code) {
-    if (_symbols) return _symbols[code];
-    _symbols = require('unicode/category/So');
-    removelist = ['sign','cross','of','symbol','staff','hand','black','white']
-        .map(function (word) {return new RegExp(word, 'gi')});
-    return _symbols[code];
-}
+  var base64
 
-function slug(string, opts) {
-    string = string.toString();
-    if ('string' === typeof opts)
-        opts = {replacement:opts};
-    opts = opts || {};
-    opts.mode = opts.mode || slug.defaults.mode;
-    var defaults = slug.defaults.modes[opts.mode];
-    var keys = ['replacement','multicharmap','charmap','remove','lower'];
-    for (var key, i = 0, l = keys.length; i < l; i++) { key = keys[i];
-        opts[key] = (key in opts) ? opts[key] : defaults[key];
+  // This function's sole purpose is to help us ignore lone surrogates so that
+  // malformed strings don't throw in the browser while being processed
+  // permissively in Node.js. If we didn't care about parity, we could get rid
+  // of it.
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charAt
+  function getWholeCharAndI (str, i) {
+    const code = str.charCodeAt(i)
+
+    // This is a coherence check. `code` should never be `NaN`.
+    /* istanbul ignore if */
+    if (Number.isNaN(code)) {
+      throw new RangeError('Index ' + i + ' out of range for string "' + str + '"; please open an issue at https://github.com/Trott/slug/issues/new')
     }
-    if ('undefined' === typeof opts.symbols)
-        opts.symbols = defaults.symbols;
-
-    var lengths = [];
-    for (var key in opts.multicharmap) {
-        if (!opts.multicharmap.hasOwnProperty(key))
-            continue;
-
-        var len = key.length;
-        if (lengths.indexOf(len) === -1)
-            lengths.push(len);
+    if (code < 0xD800 || code > 0xDFFF) {
+      return [str.charAt(i), i] // Non-surrogate character, keeping 'i' the same
     }
 
-    var code, unicode, result = "";
-    for (var char, i = 0, l = string.length; i < l; i++) { char = string[i];
-        if (!lengths.some(function (len) {
-            var str = string.substr(i, len);
-            if (opts.multicharmap[str]) {
-                i += len - 1;
-                char = opts.multicharmap[str];
-                return true;
-            } else return false;
-        })) {
-            if (opts.charmap[char]) {
-                char = opts.charmap[char];
-                code = char.charCodeAt(0);
-            } else {
-                code = string.charCodeAt(i);
-            }
-            if (opts.symbols && (unicode = symbols(code))) {
-                char = unicode.name.toLowerCase();
-                for(var j = 0, rl = removelist.length; j < rl; j++) {
-                    char = char.replace(removelist[j], '');
-                }
-                char = char.trim();
-            }
+    // High surrogate
+    if (code >= 0xD800 && code <= 0xDBFF) {
+      if (str.length <= (i + 1)) {
+        // High surrogate without following low surrogate
+        return [' ', i]
+      }
+      const next = str.charCodeAt(i + 1)
+      if (next < 0xDC00 || next > 0xDFFF) {
+        // High surrogate without following low surrogate
+        return [' ', i]
+      }
+      return [str.charAt(i) + str.charAt(i + 1), i + 1]
+    }
+
+    // Low surrogate (0xDC00 <= code && code <= 0xDFFF)
+    if (i === 0) {
+      // Low surrogate without preceding high surrogate
+      return [' ', i]
+    }
+
+    const prev = str.charCodeAt(i - 1)
+
+    /* istanbul ignore else */
+    if (prev < 0xD800 || prev > 0xDBFF) {
+      // Low surrogate without preceding high surrogate
+      return [' ', i]
+    }
+
+    /* istanbul ignore next */
+    throw new Error('String "' + str + '" reaches code believed to be unreachable; please open an issue at https://github.com/Trott/slug/issues/new')
+  }
+
+  if (typeof window === 'undefined') {
+    base64 = function (input) {
+      return Buffer.from(input).toString('base64')
+    }
+  } else {
+    base64 = function (input) {
+      return btoa(unescape(encodeURIComponent(input)))
+    }
+  }
+
+  function slug (string, opts) {
+    var result = slugify(string, opts)
+    // If output is an empty string, try slug for base64 of string.
+    if (result === '') {
+      // Get rid of lone surrogates.
+      let input = ''
+      for (let i = 0, chr; i < string.length; i++) {
+        [chr, i] = getWholeCharAndI(string, i)
+        input += chr
+      }
+      result = slugify(base64(input), opts)
+    }
+    return result
+  }
+
+  const locales = {
+    // http://www.eki.ee/wgrs/rom1_bg.pdf
+    bg: { Й: 'Y', й: 'y', X: 'H', x: 'h', Ц: 'Ts', ц: 'ts', Щ: 'Sht', щ: 'sht', Ъ: 'A', ъ: 'a', Ь: 'Y', ь: 'y' },
+    // Need a reference URL for Serbian.
+    sr: { đ: 'dj', Đ: 'DJ' }
+  }
+
+  function slugify (string, opts) {
+    if (typeof string !== 'string') {
+      throw new Error('slug() requires a string argument, received ' + typeof string)
+    }
+    if (typeof opts === 'string') { opts = { replacement: opts } }
+    opts = opts || {}
+    opts.mode = opts.mode || slug.defaults.mode
+    var defaults = slug.defaults.modes[opts.mode]
+    var keys = ['replacement', 'multicharmap', 'charmap', 'remove', 'lower']
+    for (let key, i = 0, l = keys.length; i < l; i++) {
+      key = keys[i]
+      opts[key] = (key in opts) ? opts[key] : defaults[key]
+    }
+    const localeMap = locales[opts.locale] || {}
+
+    var lengths = []
+    // "let" instead of "const" in next line is for IE11 compatibilty
+    for (let key in opts.multicharmap) { // eslint-disable-line prefer-const
+      if (!Object.prototype.hasOwnProperty.call(opts.multicharmap, key)) { continue }
+
+      var len = key.length
+      if (lengths.indexOf(len) === -1) { lengths.push(len) }
+    }
+
+    var result = ''
+    for (let char, i = 0, l = string.length; i < l; i++) {
+      char = string[i]
+      if (!lengths.some(function (len) {
+        var str = string.substr(i, len)
+        if (opts.multicharmap[str]) {
+          i += len - 1
+          char = opts.multicharmap[str]
+          return true
+        } else return false
+      })) {
+        if (localeMap[char]) {
+          char = localeMap[char]
+        } else if (opts.charmap[char]) {
+          char = opts.charmap[char]
         }
-        char = char.replace(/[^\w\s\-\.\_~]/g, ''); // allowed
-        if (opts.remove) char = char.replace(opts.remove, ''); // add flavour
-        result += char;
+      }
+      // next line preserves the replacement character in case it is included in allowedChars
+      char = char.replace(opts.replacement, ' ')
+      result += char
     }
-    result = result.trim();
-    result = result.replace(/[-\s]+/g, opts.replacement); // convert spaces
-    result = result.replace(opts.replacement+"$",''); // remove trailing separator
-    if (opts.lower)
-      result = result.toLowerCase();
-    return result;
-};
+    const allowedChars = opts.mode === 'rfc3986' ? /[^\w\s\-.~]/g : /[^A-Za-z0-9\s]/g
+    result = result.replace(allowedChars, '') // allowed
+    if (opts.remove) {
+      result = result.replace(opts.remove, '')
+    }
+    result = result.trim()
+    result = result.replace(/[-\s]+/g, opts.replacement) // convert spaces
+    result = result.replace(opts.replacement + '$', '') // remove trailing separator
+    if (opts.lower) {
+      result = result.toLowerCase()
+    }
+    return result
+  }
 
-slug.defaults = {
-    mode: 'pretty',
-};
+  slug.defaults = {
+    mode: 'pretty'
+  }
 
-slug.multicharmap = slug.defaults.multicharmap = {
-    '<3': 'love', '&&': 'and', '||': 'or', 'w/': 'with',
-};
+  const initialMulticharmap = {
+    '<3': 'love',
+    '&&': 'and',
+    '||': 'or',
+    'w/': 'with',
+    // multibyte devanagari characters (hindi, sanskrit, etc.)
+    फ़: 'Fi',
+    ग़: 'Ghi',
+    ख़: 'Khi',
+    क़: 'Qi',
+    ड़: 'ugDha',
+    ढ़: 'ugDhha',
+    य़: 'Yi',
+    ज़: 'Za'
+  }
+  slug.multicharmap = slug.defaults.multicharmap = Object.assign({}, initialMulticharmap)
 
-// https://code.djangoproject.com/browser/django/trunk/django/contrib/admin/media/js/urlify.js
-slug.charmap  = slug.defaults.charmap = {
+  // https://github.com/django/django/blob/master/django/contrib/admin/static/admin/js/urlify.js
+  const initialCharmap = {
     // latin
-    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE',
-    'Ç': 'C', 'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I',
-    'Î': 'I', 'Ï': 'I', 'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O',
-    'Õ': 'O', 'Ö': 'O', 'Ő': 'O', 'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U',
-    'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH', 'ß': 'ss', 'à':'a', 'á':'a',
-    'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c', 'è': 'e',
-    'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
-    'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
-    'ő': 'o', 'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u',
-    'ý': 'y', 'þ': 'th', 'ÿ': 'y', 'ẞ': 'SS',
+    À: 'A',
+    Á: 'A',
+    Â: 'A',
+    Ã: 'A',
+    Ä: 'A',
+    Å: 'A',
+    Æ: 'AE',
+    Ç: 'C',
+    È: 'E',
+    É: 'E',
+    Ê: 'E',
+    Ë: 'E',
+    Ì: 'I',
+    Í: 'I',
+    Î: 'I',
+    Ï: 'I',
+    Ð: 'D',
+    Ñ: 'N',
+    Ò: 'O',
+    Ó: 'O',
+    Ô: 'O',
+    Õ: 'O',
+    Ö: 'O',
+    Ő: 'O',
+    Ø: 'O',
+    Ù: 'U',
+    Ú: 'U',
+    Û: 'U',
+    Ü: 'U',
+    Ű: 'U',
+    Ý: 'Y',
+    Þ: 'TH',
+    ß: 'ss',
+    à: 'a',
+    á: 'a',
+    â: 'a',
+    ã: 'a',
+    ä: 'a',
+    å: 'a',
+    æ: 'ae',
+    ç: 'c',
+    è: 'e',
+    é: 'e',
+    ê: 'e',
+    ë: 'e',
+    ì: 'i',
+    í: 'i',
+    î: 'i',
+    ï: 'i',
+    ð: 'd',
+    ñ: 'n',
+    ò: 'o',
+    ó: 'o',
+    ô: 'o',
+    õ: 'o',
+    ö: 'o',
+    ő: 'o',
+    ø: 'o',
+    ù: 'u',
+    ú: 'u',
+    û: 'u',
+    ü: 'u',
+    ű: 'u',
+    ý: 'y',
+    þ: 'th',
+    ÿ: 'y',
+    ẞ: 'SS',
     // greek
-    'α':'a', 'β':'b', 'γ':'g', 'δ':'d', 'ε':'e', 'ζ':'z', 'η':'h', 'θ':'8',
-    'ι':'i', 'κ':'k', 'λ':'l', 'μ':'m', 'ν':'n', 'ξ':'3', 'ο':'o', 'π':'p',
-    'ρ':'r', 'σ':'s', 'τ':'t', 'υ':'y', 'φ':'f', 'χ':'x', 'ψ':'ps', 'ω':'w',
-    'ά':'a', 'έ':'e', 'ί':'i', 'ό':'o', 'ύ':'y', 'ή':'h', 'ώ':'w', 'ς':'s',
-    'ϊ':'i', 'ΰ':'y', 'ϋ':'y', 'ΐ':'i',
-    'Α':'A', 'Β':'B', 'Γ':'G', 'Δ':'D', 'Ε':'E', 'Ζ':'Z', 'Η':'H', 'Θ':'8',
-    'Ι':'I', 'Κ':'K', 'Λ':'L', 'Μ':'M', 'Ν':'N', 'Ξ':'3', 'Ο':'O', 'Π':'P',
-    'Ρ':'R', 'Σ':'S', 'Τ':'T', 'Υ':'Y', 'Φ':'F', 'Χ':'X', 'Ψ':'PS', 'Ω':'W',
-    'Ά':'A', 'Έ':'E', 'Ί':'I', 'Ό':'O', 'Ύ':'Y', 'Ή':'H', 'Ώ':'W', 'Ϊ':'I',
-    'Ϋ':'Y',
+    α: 'a',
+    β: 'b',
+    γ: 'g',
+    δ: 'd',
+    ε: 'e',
+    ζ: 'z',
+    η: 'h',
+    θ: '8',
+    ι: 'i',
+    κ: 'k',
+    λ: 'l',
+    μ: 'm',
+    ν: 'n',
+    ξ: '3',
+    ο: 'o',
+    π: 'p',
+    ρ: 'r',
+    σ: 's',
+    τ: 't',
+    υ: 'y',
+    φ: 'f',
+    χ: 'x',
+    ψ: 'ps',
+    ω: 'w',
+    ά: 'a',
+    έ: 'e',
+    ί: 'i',
+    ό: 'o',
+    ύ: 'y',
+    ή: 'h',
+    ώ: 'w',
+    ς: 's',
+    ϊ: 'i',
+    ΰ: 'y',
+    ϋ: 'y',
+    ΐ: 'i',
+    Α: 'A',
+    Β: 'B',
+    Γ: 'G',
+    Δ: 'D',
+    Ε: 'E',
+    Ζ: 'Z',
+    Η: 'H',
+    Θ: '8',
+    Ι: 'I',
+    Κ: 'K',
+    Λ: 'L',
+    Μ: 'M',
+    Ν: 'N',
+    Ξ: '3',
+    Ο: 'O',
+    Π: 'P',
+    Ρ: 'R',
+    Σ: 'S',
+    Τ: 'T',
+    Υ: 'Y',
+    Φ: 'F',
+    Χ: 'X',
+    Ψ: 'PS',
+    Ω: 'W',
+    Ά: 'A',
+    Έ: 'E',
+    Ί: 'I',
+    Ό: 'O',
+    Ύ: 'Y',
+    Ή: 'H',
+    Ώ: 'W',
+    Ϊ: 'I',
+    Ϋ: 'Y',
     // turkish
-    'ş':'s', 'Ş':'S', 'ı':'i', 'İ':'I',
-    'ğ':'g', 'Ğ':'G',
+    ş: 's',
+    Ş: 'S',
+    ı: 'i',
+    İ: 'I',
+    ğ: 'g',
+    Ğ: 'G',
     // russian
-    'а':'a', 'б':'b', 'в':'v', 'г':'g', 'д':'d', 'е':'e', 'ё':'yo', 'ж':'zh',
-    'з':'z', 'и':'i', 'й':'j', 'к':'k', 'л':'l', 'м':'m', 'н':'n', 'о':'o',
-    'п':'p', 'р':'r', 'с':'s', 'т':'t', 'у':'u', 'ф':'f', 'х':'h', 'ц':'c',
-    'ч':'ch', 'ш':'sh', 'щ':'sh', 'ъ':'u', 'ы':'y', 'ь':'', 'э':'e', 'ю':'yu',
-    'я':'ya',
-    'А':'A', 'Б':'B', 'В':'V', 'Г':'G', 'Д':'D', 'Е':'E', 'Ё':'Yo', 'Ж':'Zh',
-    'З':'Z', 'И':'I', 'Й':'J', 'К':'K', 'Л':'L', 'М':'M', 'Н':'N', 'О':'O',
-    'П':'P', 'Р':'R', 'С':'S', 'Т':'T', 'У':'U', 'Ф':'F', 'Х':'H', 'Ц':'C',
-    'Ч':'Ch', 'Ш':'Sh', 'Щ':'Sh', 'Ъ':'U', 'Ы':'Y', 'Ь':'', 'Э':'E', 'Ю':'Yu',
-    'Я':'Ya',
+    а: 'a',
+    б: 'b',
+    в: 'v',
+    г: 'g',
+    д: 'd',
+    е: 'e',
+    ё: 'yo',
+    ж: 'zh',
+    з: 'z',
+    и: 'i',
+    й: 'j',
+    к: 'k',
+    л: 'l',
+    м: 'm',
+    н: 'n',
+    о: 'o',
+    п: 'p',
+    р: 'r',
+    с: 's',
+    т: 't',
+    у: 'u',
+    ф: 'f',
+    х: 'h',
+    ц: 'c',
+    ч: 'ch',
+    ш: 'sh',
+    щ: 'sh',
+    ъ: 'u',
+    ы: 'y',
+    ь: '',
+    э: 'e',
+    ю: 'yu',
+    я: 'ya',
+    А: 'A',
+    Б: 'B',
+    В: 'V',
+    Г: 'G',
+    Д: 'D',
+    Е: 'E',
+    Ё: 'Yo',
+    Ж: 'Zh',
+    З: 'Z',
+    И: 'I',
+    Й: 'J',
+    К: 'K',
+    Л: 'L',
+    М: 'M',
+    Н: 'N',
+    О: 'O',
+    П: 'P',
+    Р: 'R',
+    С: 'S',
+    Т: 'T',
+    У: 'U',
+    Ф: 'F',
+    Х: 'H',
+    Ц: 'C',
+    Ч: 'Ch',
+    Ш: 'Sh',
+    Щ: 'Sh',
+    Ъ: 'U',
+    Ы: 'Y',
+    Ь: '',
+    Э: 'E',
+    Ю: 'Yu',
+    Я: 'Ya',
     // ukranian
-    'Є':'Ye', 'І':'I', 'Ї':'Yi', 'Ґ':'G', 'є':'ye', 'і':'i', 'ї':'yi', 'ґ':'g',
+    Є: 'Ye',
+    І: 'I',
+    Ї: 'Yi',
+    Ґ: 'G',
+    є: 'ye',
+    і: 'i',
+    ї: 'yi',
+    ґ: 'g',
     // czech
-    'č':'c', 'ď':'d', 'ě':'e', 'ň': 'n', 'ř':'r', 'š':'s', 'ť':'t', 'ů':'u',
-    'ž':'z', 'Č':'C', 'Ď':'D', 'Ě':'E', 'Ň': 'N', 'Ř':'R', 'Š':'S', 'Ť':'T',
-    'Ů':'U', 'Ž':'Z',
+    č: 'c',
+    ď: 'd',
+    ě: 'e',
+    ň: 'n',
+    ř: 'r',
+    š: 's',
+    ť: 't',
+    ů: 'u',
+    ž: 'z',
+    Č: 'C',
+    Ď: 'D',
+    Ě: 'E',
+    Ň: 'N',
+    Ř: 'R',
+    Š: 'S',
+    Ť: 'T',
+    Ů: 'U',
+    Ž: 'Z',
+    // slovak
+    ľ: 'l',
+    ĺ: 'l',
+    ŕ: 'r',
+    Ľ: 'L',
+    Ĺ: 'L',
+    Ŕ: 'R',
     // polish
-    'ą':'a', 'ć':'c', 'ę':'e', 'ł':'l', 'ń':'n', 'ś':'s', 'ź':'z',
-    'ż':'z', 'Ą':'A', 'Ć':'C', 'Ę':'E', 'Ł':'L', 'Ń':'N', 'Ś':'S',
-    'Ź':'Z', 'Ż':'Z',
+    ą: 'a',
+    ć: 'c',
+    ę: 'e',
+    ł: 'l',
+    ń: 'n',
+    ś: 's',
+    ź: 'z',
+    ż: 'z',
+    Ą: 'A',
+    Ć: 'C',
+    Ę: 'E',
+    Ł: 'L',
+    Ń: 'N',
+    Ś: 'S',
+    Ź: 'Z',
+    Ż: 'Z',
     // latvian
-    'ā':'a', 'ē':'e', 'ģ':'g', 'ī':'i', 'ķ':'k', 'ļ':'l', 'ņ':'n',
-    'ū':'u', 'Ā':'A', 'Ē':'E', 'Ģ':'G', 'Ī':'I',
-    'Ķ':'K', 'Ļ':'L', 'Ņ':'N', 'Ū':'U',
+    ā: 'a',
+    ē: 'e',
+    ģ: 'g',
+    ī: 'i',
+    ķ: 'k',
+    ļ: 'l',
+    ņ: 'n',
+    ū: 'u',
+    Ā: 'A',
+    Ē: 'E',
+    Ģ: 'G',
+    Ī: 'I',
+    Ķ: 'K',
+    Ļ: 'L',
+    Ņ: 'N',
+    Ū: 'U',
     // arabic
-    'أ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'g', 'ح': 'h', 'خ': 'kh', 'د': 'd',
-    'ذ': 'th', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't',
-    'ظ': 'th', 'ع': 'aa', 'غ': 'gh', 'ف': 'f', 'ق': 'k', 'ك': 'k', 'ل': 'l', 'م': 'm',
-    'ن': 'n', 'ه': 'h', 'و': 'o', 'ي': 'y',
+    أ: 'a',
+    ب: 'b',
+    ت: 't',
+    ث: 'th',
+    ج: 'g',
+    ح: 'h',
+    خ: 'kh',
+    د: 'd',
+    ذ: 'th',
+    ر: 'r',
+    ز: 'z',
+    س: 's',
+    ش: 'sh',
+    ص: 's',
+    ض: 'd',
+    ط: 't',
+    ظ: 'th',
+    ع: 'aa',
+    غ: 'gh',
+    ف: 'f',
+    ق: 'k',
+    ك: 'k',
+    ل: 'l',
+    م: 'm',
+    ن: 'n',
+    ه: 'h',
+    و: 'o',
+    ي: 'y',
+    // farsi
+    آ: 'a',
+    ا: 'a',
+    پ: 'p',
+    ژ: 'zh',
+    گ: 'g',
+    چ: 'ch',
+    ک: 'k',
+    ی: 'i',
     // lithuanian
-    'ė':'e', 'į':'i', 'ų':'u', 'Ė': 'E', 'Į': 'I', 'Ų':'U',
+    ė: 'e',
+    į: 'i',
+    ų: 'u',
+    Ė: 'E',
+    Į: 'I',
+    Ų: 'U',
     // romanian
-    'ț':'t', 'Ț':'T', 'ţ':'t', 'Ţ':'T', 'ș':'s', 'Ș':'S', 'ă':'a', 'Ă':'A',
+    ț: 't',
+    Ț: 'T',
+    ţ: 't',
+    Ţ: 'T',
+    ș: 's',
+    Ș: 'S',
+    ă: 'a',
+    Ă: 'A',
     // vietnamese
-    'Ạ': 'A', 'Ả': 'A', 'Ầ': 'A', 'Ấ': 'A', 'Ậ': 'A', 'Ẩ': 'A', 'Ẫ': 'A',
-    'Ằ': 'A', 'Ắ': 'A', 'Ặ': 'A', 'Ẳ': 'A', 'Ẵ': 'A', 'Ẹ': 'E', 'Ẻ': 'E',
-    'Ẽ': 'E', 'Ề': 'E', 'Ế': 'E', 'Ệ': 'E', 'Ể': 'E', 'Ễ': 'E', 'Ị': 'I',
-    'Ỉ': 'I', 'Ĩ': 'I', 'Ọ': 'O', 'Ỏ': 'O', 'Ồ': 'O', 'Ố': 'O', 'Ộ': 'O',
-    'Ổ': 'O', 'Ỗ': 'O', 'Ơ': 'O', 'Ờ': 'O', 'Ớ': 'O', 'Ợ': 'O', 'Ở': 'O',
-    'Ỡ': 'O', 'Ụ': 'U', 'Ủ': 'U', 'Ũ': 'U', 'Ư': 'U', 'Ừ': 'U', 'Ứ': 'U',
-    'Ự': 'U', 'Ử': 'U', 'Ữ': 'U', 'Ỳ': 'Y', 'Ỵ': 'Y', 'Ỷ': 'Y', 'Ỹ': 'Y',
-    'Đ': 'D', 'ạ': 'a', 'ả': 'a', 'ầ': 'a', 'ấ': 'a', 'ậ': 'a', 'ẩ': 'a',
-    'ẫ': 'a', 'ằ': 'a', 'ắ': 'a', 'ặ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ẹ': 'e',
-    'ẻ': 'e', 'ẽ': 'e', 'ề': 'e', 'ế': 'e', 'ệ': 'e', 'ể': 'e', 'ễ': 'e',
-    'ị': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ọ': 'o', 'ỏ': 'o', 'ồ': 'o', 'ố': 'o',
-    'ộ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ơ': 'o', 'ờ': 'o', 'ớ': 'o', 'ợ': 'o',
-    'ở': 'o', 'ỡ': 'o', 'ụ': 'u', 'ủ': 'u', 'ũ': 'u', 'ư': 'u', 'ừ': 'u',
-    'ứ': 'u', 'ự': 'u', 'ử': 'u', 'ữ': 'u', 'ỳ': 'y', 'ỵ': 'y', 'ỷ': 'y',
-    'ỹ': 'y', 'đ': 'd',
+    Ạ: 'A',
+    Ả: 'A',
+    Ầ: 'A',
+    Ấ: 'A',
+    Ậ: 'A',
+    Ẩ: 'A',
+    Ẫ: 'A',
+    Ằ: 'A',
+    Ắ: 'A',
+    Ặ: 'A',
+    Ẳ: 'A',
+    Ẵ: 'A',
+    Ẹ: 'E',
+    Ẻ: 'E',
+    Ẽ: 'E',
+    Ề: 'E',
+    Ế: 'E',
+    Ệ: 'E',
+    Ể: 'E',
+    Ễ: 'E',
+    Ị: 'I',
+    Ỉ: 'I',
+    Ĩ: 'I',
+    Ọ: 'O',
+    Ỏ: 'O',
+    Ồ: 'O',
+    Ố: 'O',
+    Ộ: 'O',
+    Ổ: 'O',
+    Ỗ: 'O',
+    Ơ: 'O',
+    Ờ: 'O',
+    Ớ: 'O',
+    Ợ: 'O',
+    Ở: 'O',
+    Ỡ: 'O',
+    Ụ: 'U',
+    Ủ: 'U',
+    Ũ: 'U',
+    Ư: 'U',
+    Ừ: 'U',
+    Ứ: 'U',
+    Ự: 'U',
+    Ử: 'U',
+    Ữ: 'U',
+    Ỳ: 'Y',
+    Ỵ: 'Y',
+    Ỷ: 'Y',
+    Ỹ: 'Y',
+    Đ: 'D',
+    ạ: 'a',
+    ả: 'a',
+    ầ: 'a',
+    ấ: 'a',
+    ậ: 'a',
+    ẩ: 'a',
+    ẫ: 'a',
+    ằ: 'a',
+    ắ: 'a',
+    ặ: 'a',
+    ẳ: 'a',
+    ẵ: 'a',
+    ẹ: 'e',
+    ẻ: 'e',
+    ẽ: 'e',
+    ề: 'e',
+    ế: 'e',
+    ệ: 'e',
+    ể: 'e',
+    ễ: 'e',
+    ị: 'i',
+    ỉ: 'i',
+    ĩ: 'i',
+    ọ: 'o',
+    ỏ: 'o',
+    ồ: 'o',
+    ố: 'o',
+    ộ: 'o',
+    ổ: 'o',
+    ỗ: 'o',
+    ơ: 'o',
+    ờ: 'o',
+    ớ: 'o',
+    ợ: 'o',
+    ở: 'o',
+    ỡ: 'o',
+    ụ: 'u',
+    ủ: 'u',
+    ũ: 'u',
+    ư: 'u',
+    ừ: 'u',
+    ứ: 'u',
+    ự: 'u',
+    ử: 'u',
+    ữ: 'u',
+    ỳ: 'y',
+    ỵ: 'y',
+    ỷ: 'y',
+    ỹ: 'y',
+    đ: 'd',
+    // kazakh
+    Ә: 'AE',
+    ә: 'ae',
+    Ғ: 'GH',
+    ғ: 'gh',
+    Қ: 'KH',
+    қ: 'kh',
+    Ң: 'NG',
+    ң: 'ng',
+    Ү: 'UE',
+    ү: 'ue',
+    Ұ: 'U',
+    ұ: 'u',
+    Һ: 'H',
+    һ: 'h',
+    Ө: 'OE',
+    ө: 'oe',
+    // serbian
+    ђ: 'dj',
+    ј: 'j',
+    љ: 'lj',
+    њ: 'nj',
+    ћ: 'c',
+    џ: 'dz',
+    Ђ: 'Dj',
+    Ј: 'j',
+    Љ: 'Lj',
+    Њ: 'Nj',
+    Ћ: 'C',
+    Џ: 'Dz',
+    ǌ: 'nj',
+    ǉ: 'lj',
+    ǋ: 'NJ',
+    ǈ: 'LJ',
+    // hindi
+    अ: 'a',
+    आ: 'aa',
+    ए: 'e',
+    ई: 'ii',
+    ऍ: 'ei',
+    ऎ: 'ae',
+    ऐ: 'ai',
+    इ: 'i',
+    ओ: 'o',
+    ऑ: 'oi',
+    ऒ: 'oii',
+    ऊ: 'uu',
+    औ: 'ou',
+    उ: 'u',
+    ब: 'B',
+    भ: 'Bha',
+    च: 'Ca',
+    छ: 'Chha',
+    ड: 'Da',
+    ढ: 'Dha',
+    फ: 'Fa',
+    ग: 'Ga',
+    घ: 'Gha',
+    ग़: 'Ghi',
+    ह: 'Ha',
+    ज: 'Ja',
+    झ: 'Jha',
+    क: 'Ka',
+    ख: 'Kha',
+    ख़: 'Khi',
+    ल: 'L',
+    ळ: 'Li',
+    ऌ: 'Li',
+    ऴ: 'Lii',
+    ॡ: 'Lii',
+    म: 'Ma',
+    न: 'Na',
+    ङ: 'Na',
+    ञ: 'Nia',
+    ण: 'Nae',
+    ऩ: 'Ni',
+    ॐ: 'oms',
+    प: 'Pa',
+    क़: 'Qi',
+    र: 'Ra',
+    ऋ: 'Ri',
+    ॠ: 'Ri',
+    ऱ: 'Ri',
+    स: 'Sa',
+    श: 'Sha',
+    ष: 'Shha',
+    ट: 'Ta',
+    त: 'Ta',
+    ठ: 'Tha',
+    द: 'Tha',
+    थ: 'Tha',
+    ध: 'Thha',
+    ड़: 'ugDha',
+    ढ़: 'ugDhha',
+    व: 'Va',
+    य: 'Ya',
+    य़: 'Yi',
+    ज़: 'Za',
+    // azerbaijani
+    ə: 'e',
+    Ə: 'E',
+    // georgian
+    ა: 'a',
+    ბ: 'b',
+    გ: 'g',
+    დ: 'd',
+    ე: 'e',
+    ვ: 'v',
+    ზ: 'z',
+    თ: 't',
+    ი: 'i',
+    კ: 'k',
+    ლ: 'l',
+    მ: 'm',
+    ნ: 'n',
+    ო: 'o',
+    პ: 'p',
+    ჟ: 'zh',
+    რ: 'r',
+    ს: 's',
+    ტ: 't',
+    უ: 'u',
+    ფ: 'p',
+    ქ: 'k',
+    ღ: 'gh',
+    ყ: 'q',
+    შ: 'sh',
+    ჩ: 'ch',
+    ც: 'ts',
+    ძ: 'dz',
+    წ: 'ts',
+    ჭ: 'ch',
+    ხ: 'kh',
+    ჯ: 'j',
+    ჰ: 'h',
     // currency
-    '€': 'euro', '₢': 'cruzeiro', '₣': 'french franc', '£': 'pound',
-    '₤': 'lira', '₥': 'mill', '₦': 'naira', '₧': 'peseta', '₨': 'rupee',
-    '₩': 'won', '₪': 'new shequel', '₫': 'dong', '₭': 'kip', '₮': 'tugrik',
-    '₯': 'drachma', '₰': 'penny', '₱': 'peso', '₲': 'guarani', '₳': 'austral',
-    '₴': 'hryvnia', '₵': 'cedi', '¢': 'cent', '¥': 'yen', '元': 'yuan',
-    '円': 'yen', '﷼': 'rial', '₠': 'ecu', '¤': 'currency', '฿': 'baht',
-    "$": 'dollar', '₹': 'indian rupee',
+    '€': 'euro',
+    '₢': 'cruzeiro',
+    '₣': 'french franc',
+    '£': 'pound',
+    '₤': 'lira',
+    '₥': 'mill',
+    '₦': 'naira',
+    '₧': 'peseta',
+    '₨': 'rupee',
+    '₩': 'won',
+    '₪': 'new shequel',
+    '₫': 'dong',
+    '₭': 'kip',
+    '₮': 'tugrik',
+    '₯': 'drachma',
+    '₰': 'penny',
+    '₱': 'peso',
+    '₲': 'guarani',
+    '₳': 'austral',
+    '₴': 'hryvnia',
+    '₵': 'cedi',
+    '¢': 'cent',
+    '¥': 'yen',
+    元: 'yuan',
+    円: 'yen',
+    '﷼': 'rial',
+    '₠': 'ecu',
+    '¤': 'currency',
+    '฿': 'baht',
+    $: 'dollar',
+    '₹': 'indian rupee',
+    '₽': 'russian ruble',
+    '₿': 'bitcoin',
+    '₸': 'kazakhstani tenge',
     // symbols
-    '©':'(c)', 'œ': 'oe', 'Œ': 'OE', '∑': 'sum', '®': '(r)', '†': '+',
-    '“': '"', '”': '"', '‘': "'", '’': "'", '∂': 'd', 'ƒ': 'f', '™': 'tm',
-    '℠': 'sm', '…': '...', '˚': 'o', 'º': 'o', 'ª': 'a', '•': '*',
-    '∆': 'delta', '∞': 'infinity', '♥': 'love', '&': 'and', '|': 'or',
-    '<': 'less', '>': 'greater',
-};
+    '©': 'c',
+    œ: 'oe',
+    Œ: 'OE',
+    '∑': 'sum',
+    '®': 'r',
+    '∂': 'd',
+    ƒ: 'f',
+    '™': 'tm',
+    '℠': 'sm',
+    '…': '...',
+    '˚': 'o',
+    º: 'o',
+    ª: 'a',
+    '∆': 'delta',
+    '∞': 'infinity',
+    '♥': 'love',
+    '&': 'and',
+    '|': 'or',
+    '<': 'less',
+    '>': 'greater'
+  }
+  slug.charmap = slug.defaults.charmap = Object.assign({}, initialCharmap)
 
-slug.defaults.modes = {
+  slug.reset = function () {
+    slug.defaults.modes.rfc3986.charmap = slug.defaults.modes.pretty.charmap = slug.charmap = slug.defaults.charmap = Object.assign({}, initialCharmap)
+    slug.defaults.modes.rfc3986.multiCharmap = slug.defaults.modes.pretty.multiCharmap = slug.multicharmap = slug.defaults.multicharmap = Object.assign({}, initialMulticharmap)
+  }
+
+  slug.extend = function (customMap) {
+    Object.assign(slug.charmap, customMap)
+  }
+
+  slug.defaults.modes = {
     rfc3986: {
-        replacement: '-',
-        symbols: true,
-        remove: null,
-        lower: true,
-        charmap: slug.defaults.charmap,
-        multicharmap: slug.defaults.multicharmap,
+      replacement: '-',
+      remove: null,
+      lower: true,
+      charmap: slug.defaults.charmap,
+      multicharmap: slug.defaults.multicharmap
     },
     pretty: {
-        replacement: '-',
-        symbols: true,
-        remove: /[.]/g,
-        lower: false,
-        charmap: slug.defaults.charmap,
-        multicharmap: slug.defaults.multicharmap,
-    },
-};
-
-// Be compatible with different module systems
-
-if (typeof define !== 'undefined' && define.amd) { // AMD
-    // dont load symbols table in the browser
-    for (var key in slug.defaults.modes) {
-        if (!slug.defaults.modes.hasOwnProperty(key))
-            continue;
-
-        slug.defaults.modes[key].symbols = false;
+      replacement: '-',
+      remove: null,
+      lower: true,
+      charmap: slug.defaults.charmap,
+      multicharmap: slug.defaults.multicharmap
     }
-    define('slug',[], function () {return slug});
-} else if (typeof module !== 'undefined' && module.exports) { // CommonJS
-    symbols(); // preload symbols table
-    module.exports = slug;
-} else { // Script tag
-    // dont load symbols table in the browser
-    for (var key in slug.defaults.modes) {
-        if (!slug.defaults.modes.hasOwnProperty(key))
-            continue;
+  }
 
-        slug.defaults.modes[key].symbols = false;
+  /* global define */
+  // Be compatible with different module systems
+
+  if (typeof define !== 'undefined' && define.amd) { // AMD
+    define('slug',[], function () { return slug })
+  } else if (typeof module !== 'undefined' && module.exports) { // CommonJS
+    module.exports = slug
+  } else { // Script tag
+    root.slug = slug
+  }
+}(this))
+;
+/**
+ * [js-sha256]{@link https://github.com/emn178/js-sha256}
+ *
+ * @version 0.9.0
+ * @author Chen, Yi-Cyuan [emn178@gmail.com]
+ * @copyright Chen, Yi-Cyuan 2014-2017
+ * @license MIT
+ */
+/*jslint bitwise: true */
+(function () {
+  'use strict';
+
+  var ERROR = 'input is invalid type';
+  var WINDOW = typeof window === 'object';
+  var root = WINDOW ? window : {};
+  if (root.JS_SHA256_NO_WINDOW) {
+    WINDOW = false;
+  }
+  var WEB_WORKER = !WINDOW && typeof self === 'object';
+  var NODE_JS = !root.JS_SHA256_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
+  if (NODE_JS) {
+    root = global;
+  } else if (WEB_WORKER) {
+    root = self;
+  }
+  var COMMON_JS = !root.JS_SHA256_NO_COMMON_JS && typeof module === 'object' && module.exports;
+  var AMD = typeof define === 'function' && define.amd;
+  var ARRAY_BUFFER = !root.JS_SHA256_NO_ARRAY_BUFFER && typeof ArrayBuffer !== 'undefined';
+  var HEX_CHARS = '0123456789abcdef'.split('');
+  var EXTRA = [-2147483648, 8388608, 32768, 128];
+  var SHIFT = [24, 16, 8, 0];
+  var K = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+  var OUTPUT_TYPES = ['hex', 'array', 'digest', 'arrayBuffer'];
+
+  var blocks = [];
+
+  if (root.JS_SHA256_NO_NODE_JS || !Array.isArray) {
+    Array.isArray = function (obj) {
+      return Object.prototype.toString.call(obj) === '[object Array]';
+    };
+  }
+
+  if (ARRAY_BUFFER && (root.JS_SHA256_NO_ARRAY_BUFFER_IS_VIEW || !ArrayBuffer.isView)) {
+    ArrayBuffer.isView = function (obj) {
+      return typeof obj === 'object' && obj.buffer && obj.buffer.constructor === ArrayBuffer;
+    };
+  }
+
+  var createOutputMethod = function (outputType, is224) {
+    return function (message) {
+      return new Sha256(is224, true).update(message)[outputType]();
+    };
+  };
+
+  var createMethod = function (is224) {
+    var method = createOutputMethod('hex', is224);
+    if (NODE_JS) {
+      method = nodeWrap(method, is224);
     }
-    root.slug = slug;
-}
+    method.create = function () {
+      return new Sha256(is224);
+    };
+    method.update = function (message) {
+      return method.create().update(message);
+    };
+    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
+      var type = OUTPUT_TYPES[i];
+      method[type] = createOutputMethod(type, is224);
+    }
+    return method;
+  };
 
-}(this));
+  var nodeWrap = function (method, is224) {
+    var crypto = eval("require('crypto')");
+    var Buffer = eval("require('buffer').Buffer");
+    var algorithm = is224 ? 'sha224' : 'sha256';
+    var nodeMethod = function (message) {
+      if (typeof message === 'string') {
+        return crypto.createHash(algorithm).update(message, 'utf8').digest('hex');
+      } else {
+        if (message === null || message === undefined) {
+          throw new Error(ERROR);
+        } else if (message.constructor === ArrayBuffer) {
+          message = new Uint8Array(message);
+        }
+      }
+      if (Array.isArray(message) || ArrayBuffer.isView(message) ||
+        message.constructor === Buffer) {
+        return crypto.createHash(algorithm).update(new Buffer(message)).digest('hex');
+      } else {
+        return method(message);
+      }
+    };
+    return nodeMethod;
+  };
+
+  var createHmacOutputMethod = function (outputType, is224) {
+    return function (key, message) {
+      return new HmacSha256(key, is224, true).update(message)[outputType]();
+    };
+  };
+
+  var createHmacMethod = function (is224) {
+    var method = createHmacOutputMethod('hex', is224);
+    method.create = function (key) {
+      return new HmacSha256(key, is224);
+    };
+    method.update = function (key, message) {
+      return method.create(key).update(message);
+    };
+    for (var i = 0; i < OUTPUT_TYPES.length; ++i) {
+      var type = OUTPUT_TYPES[i];
+      method[type] = createHmacOutputMethod(type, is224);
+    }
+    return method;
+  };
+
+  function Sha256(is224, sharedMemory) {
+    if (sharedMemory) {
+      blocks[0] = blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+      this.blocks = blocks;
+    } else {
+      this.blocks = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    }
+
+    if (is224) {
+      this.h0 = 0xc1059ed8;
+      this.h1 = 0x367cd507;
+      this.h2 = 0x3070dd17;
+      this.h3 = 0xf70e5939;
+      this.h4 = 0xffc00b31;
+      this.h5 = 0x68581511;
+      this.h6 = 0x64f98fa7;
+      this.h7 = 0xbefa4fa4;
+    } else { // 256
+      this.h0 = 0x6a09e667;
+      this.h1 = 0xbb67ae85;
+      this.h2 = 0x3c6ef372;
+      this.h3 = 0xa54ff53a;
+      this.h4 = 0x510e527f;
+      this.h5 = 0x9b05688c;
+      this.h6 = 0x1f83d9ab;
+      this.h7 = 0x5be0cd19;
+    }
+
+    this.block = this.start = this.bytes = this.hBytes = 0;
+    this.finalized = this.hashed = false;
+    this.first = true;
+    this.is224 = is224;
+  }
+
+  Sha256.prototype.update = function (message) {
+    if (this.finalized) {
+      return;
+    }
+    var notString, type = typeof message;
+    if (type !== 'string') {
+      if (type === 'object') {
+        if (message === null) {
+          throw new Error(ERROR);
+        } else if (ARRAY_BUFFER && message.constructor === ArrayBuffer) {
+          message = new Uint8Array(message);
+        } else if (!Array.isArray(message)) {
+          if (!ARRAY_BUFFER || !ArrayBuffer.isView(message)) {
+            throw new Error(ERROR);
+          }
+        }
+      } else {
+        throw new Error(ERROR);
+      }
+      notString = true;
+    }
+    var code, index = 0, i, length = message.length, blocks = this.blocks;
+
+    while (index < length) {
+      if (this.hashed) {
+        this.hashed = false;
+        blocks[0] = this.block;
+        blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+          blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+          blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+          blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+      }
+
+      if (notString) {
+        for (i = this.start; index < length && i < 64; ++index) {
+          blocks[i >> 2] |= message[index] << SHIFT[i++ & 3];
+        }
+      } else {
+        for (i = this.start; index < length && i < 64; ++index) {
+          code = message.charCodeAt(index);
+          if (code < 0x80) {
+            blocks[i >> 2] |= code << SHIFT[i++ & 3];
+          } else if (code < 0x800) {
+            blocks[i >> 2] |= (0xc0 | (code >> 6)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          } else if (code < 0xd800 || code >= 0xe000) {
+            blocks[i >> 2] |= (0xe0 | (code >> 12)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          } else {
+            code = 0x10000 + (((code & 0x3ff) << 10) | (message.charCodeAt(++index) & 0x3ff));
+            blocks[i >> 2] |= (0xf0 | (code >> 18)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 12) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | ((code >> 6) & 0x3f)) << SHIFT[i++ & 3];
+            blocks[i >> 2] |= (0x80 | (code & 0x3f)) << SHIFT[i++ & 3];
+          }
+        }
+      }
+
+      this.lastByteIndex = i;
+      this.bytes += i - this.start;
+      if (i >= 64) {
+        this.block = blocks[16];
+        this.start = i - 64;
+        this.hash();
+        this.hashed = true;
+      } else {
+        this.start = i;
+      }
+    }
+    if (this.bytes > 4294967295) {
+      this.hBytes += this.bytes / 4294967296 << 0;
+      this.bytes = this.bytes % 4294967296;
+    }
+    return this;
+  };
+
+  Sha256.prototype.finalize = function () {
+    if (this.finalized) {
+      return;
+    }
+    this.finalized = true;
+    var blocks = this.blocks, i = this.lastByteIndex;
+    blocks[16] = this.block;
+    blocks[i >> 2] |= EXTRA[i & 3];
+    this.block = blocks[16];
+    if (i >= 56) {
+      if (!this.hashed) {
+        this.hash();
+      }
+      blocks[0] = this.block;
+      blocks[16] = blocks[1] = blocks[2] = blocks[3] =
+        blocks[4] = blocks[5] = blocks[6] = blocks[7] =
+        blocks[8] = blocks[9] = blocks[10] = blocks[11] =
+        blocks[12] = blocks[13] = blocks[14] = blocks[15] = 0;
+    }
+    blocks[14] = this.hBytes << 3 | this.bytes >>> 29;
+    blocks[15] = this.bytes << 3;
+    this.hash();
+  };
+
+  Sha256.prototype.hash = function () {
+    var a = this.h0, b = this.h1, c = this.h2, d = this.h3, e = this.h4, f = this.h5, g = this.h6,
+      h = this.h7, blocks = this.blocks, j, s0, s1, maj, t1, t2, ch, ab, da, cd, bc;
+
+    for (j = 16; j < 64; ++j) {
+      // rightrotate
+      t1 = blocks[j - 15];
+      s0 = ((t1 >>> 7) | (t1 << 25)) ^ ((t1 >>> 18) | (t1 << 14)) ^ (t1 >>> 3);
+      t1 = blocks[j - 2];
+      s1 = ((t1 >>> 17) | (t1 << 15)) ^ ((t1 >>> 19) | (t1 << 13)) ^ (t1 >>> 10);
+      blocks[j] = blocks[j - 16] + s0 + blocks[j - 7] + s1 << 0;
+    }
+
+    bc = b & c;
+    for (j = 0; j < 64; j += 4) {
+      if (this.first) {
+        if (this.is224) {
+          ab = 300032;
+          t1 = blocks[0] - 1413257819;
+          h = t1 - 150054599 << 0;
+          d = t1 + 24177077 << 0;
+        } else {
+          ab = 704751109;
+          t1 = blocks[0] - 210244248;
+          h = t1 - 1521486534 << 0;
+          d = t1 + 143694565 << 0;
+        }
+        this.first = false;
+      } else {
+        s0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
+        s1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
+        ab = a & b;
+        maj = ab ^ (a & c) ^ bc;
+        ch = (e & f) ^ (~e & g);
+        t1 = h + s1 + ch + K[j] + blocks[j];
+        t2 = s0 + maj;
+        h = d + t1 << 0;
+        d = t1 + t2 << 0;
+      }
+      s0 = ((d >>> 2) | (d << 30)) ^ ((d >>> 13) | (d << 19)) ^ ((d >>> 22) | (d << 10));
+      s1 = ((h >>> 6) | (h << 26)) ^ ((h >>> 11) | (h << 21)) ^ ((h >>> 25) | (h << 7));
+      da = d & a;
+      maj = da ^ (d & b) ^ ab;
+      ch = (h & e) ^ (~h & f);
+      t1 = g + s1 + ch + K[j + 1] + blocks[j + 1];
+      t2 = s0 + maj;
+      g = c + t1 << 0;
+      c = t1 + t2 << 0;
+      s0 = ((c >>> 2) | (c << 30)) ^ ((c >>> 13) | (c << 19)) ^ ((c >>> 22) | (c << 10));
+      s1 = ((g >>> 6) | (g << 26)) ^ ((g >>> 11) | (g << 21)) ^ ((g >>> 25) | (g << 7));
+      cd = c & d;
+      maj = cd ^ (c & a) ^ da;
+      ch = (g & h) ^ (~g & e);
+      t1 = f + s1 + ch + K[j + 2] + blocks[j + 2];
+      t2 = s0 + maj;
+      f = b + t1 << 0;
+      b = t1 + t2 << 0;
+      s0 = ((b >>> 2) | (b << 30)) ^ ((b >>> 13) | (b << 19)) ^ ((b >>> 22) | (b << 10));
+      s1 = ((f >>> 6) | (f << 26)) ^ ((f >>> 11) | (f << 21)) ^ ((f >>> 25) | (f << 7));
+      bc = b & c;
+      maj = bc ^ (b & d) ^ cd;
+      ch = (f & g) ^ (~f & h);
+      t1 = e + s1 + ch + K[j + 3] + blocks[j + 3];
+      t2 = s0 + maj;
+      e = a + t1 << 0;
+      a = t1 + t2 << 0;
+    }
+
+    this.h0 = this.h0 + a << 0;
+    this.h1 = this.h1 + b << 0;
+    this.h2 = this.h2 + c << 0;
+    this.h3 = this.h3 + d << 0;
+    this.h4 = this.h4 + e << 0;
+    this.h5 = this.h5 + f << 0;
+    this.h6 = this.h6 + g << 0;
+    this.h7 = this.h7 + h << 0;
+  };
+
+  Sha256.prototype.hex = function () {
+    this.finalize();
+
+    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
+      h6 = this.h6, h7 = this.h7;
+
+    var hex = HEX_CHARS[(h0 >> 28) & 0x0F] + HEX_CHARS[(h0 >> 24) & 0x0F] +
+      HEX_CHARS[(h0 >> 20) & 0x0F] + HEX_CHARS[(h0 >> 16) & 0x0F] +
+      HEX_CHARS[(h0 >> 12) & 0x0F] + HEX_CHARS[(h0 >> 8) & 0x0F] +
+      HEX_CHARS[(h0 >> 4) & 0x0F] + HEX_CHARS[h0 & 0x0F] +
+      HEX_CHARS[(h1 >> 28) & 0x0F] + HEX_CHARS[(h1 >> 24) & 0x0F] +
+      HEX_CHARS[(h1 >> 20) & 0x0F] + HEX_CHARS[(h1 >> 16) & 0x0F] +
+      HEX_CHARS[(h1 >> 12) & 0x0F] + HEX_CHARS[(h1 >> 8) & 0x0F] +
+      HEX_CHARS[(h1 >> 4) & 0x0F] + HEX_CHARS[h1 & 0x0F] +
+      HEX_CHARS[(h2 >> 28) & 0x0F] + HEX_CHARS[(h2 >> 24) & 0x0F] +
+      HEX_CHARS[(h2 >> 20) & 0x0F] + HEX_CHARS[(h2 >> 16) & 0x0F] +
+      HEX_CHARS[(h2 >> 12) & 0x0F] + HEX_CHARS[(h2 >> 8) & 0x0F] +
+      HEX_CHARS[(h2 >> 4) & 0x0F] + HEX_CHARS[h2 & 0x0F] +
+      HEX_CHARS[(h3 >> 28) & 0x0F] + HEX_CHARS[(h3 >> 24) & 0x0F] +
+      HEX_CHARS[(h3 >> 20) & 0x0F] + HEX_CHARS[(h3 >> 16) & 0x0F] +
+      HEX_CHARS[(h3 >> 12) & 0x0F] + HEX_CHARS[(h3 >> 8) & 0x0F] +
+      HEX_CHARS[(h3 >> 4) & 0x0F] + HEX_CHARS[h3 & 0x0F] +
+      HEX_CHARS[(h4 >> 28) & 0x0F] + HEX_CHARS[(h4 >> 24) & 0x0F] +
+      HEX_CHARS[(h4 >> 20) & 0x0F] + HEX_CHARS[(h4 >> 16) & 0x0F] +
+      HEX_CHARS[(h4 >> 12) & 0x0F] + HEX_CHARS[(h4 >> 8) & 0x0F] +
+      HEX_CHARS[(h4 >> 4) & 0x0F] + HEX_CHARS[h4 & 0x0F] +
+      HEX_CHARS[(h5 >> 28) & 0x0F] + HEX_CHARS[(h5 >> 24) & 0x0F] +
+      HEX_CHARS[(h5 >> 20) & 0x0F] + HEX_CHARS[(h5 >> 16) & 0x0F] +
+      HEX_CHARS[(h5 >> 12) & 0x0F] + HEX_CHARS[(h5 >> 8) & 0x0F] +
+      HEX_CHARS[(h5 >> 4) & 0x0F] + HEX_CHARS[h5 & 0x0F] +
+      HEX_CHARS[(h6 >> 28) & 0x0F] + HEX_CHARS[(h6 >> 24) & 0x0F] +
+      HEX_CHARS[(h6 >> 20) & 0x0F] + HEX_CHARS[(h6 >> 16) & 0x0F] +
+      HEX_CHARS[(h6 >> 12) & 0x0F] + HEX_CHARS[(h6 >> 8) & 0x0F] +
+      HEX_CHARS[(h6 >> 4) & 0x0F] + HEX_CHARS[h6 & 0x0F];
+    if (!this.is224) {
+      hex += HEX_CHARS[(h7 >> 28) & 0x0F] + HEX_CHARS[(h7 >> 24) & 0x0F] +
+        HEX_CHARS[(h7 >> 20) & 0x0F] + HEX_CHARS[(h7 >> 16) & 0x0F] +
+        HEX_CHARS[(h7 >> 12) & 0x0F] + HEX_CHARS[(h7 >> 8) & 0x0F] +
+        HEX_CHARS[(h7 >> 4) & 0x0F] + HEX_CHARS[h7 & 0x0F];
+    }
+    return hex;
+  };
+
+  Sha256.prototype.toString = Sha256.prototype.hex;
+
+  Sha256.prototype.digest = function () {
+    this.finalize();
+
+    var h0 = this.h0, h1 = this.h1, h2 = this.h2, h3 = this.h3, h4 = this.h4, h5 = this.h5,
+      h6 = this.h6, h7 = this.h7;
+
+    var arr = [
+      (h0 >> 24) & 0xFF, (h0 >> 16) & 0xFF, (h0 >> 8) & 0xFF, h0 & 0xFF,
+      (h1 >> 24) & 0xFF, (h1 >> 16) & 0xFF, (h1 >> 8) & 0xFF, h1 & 0xFF,
+      (h2 >> 24) & 0xFF, (h2 >> 16) & 0xFF, (h2 >> 8) & 0xFF, h2 & 0xFF,
+      (h3 >> 24) & 0xFF, (h3 >> 16) & 0xFF, (h3 >> 8) & 0xFF, h3 & 0xFF,
+      (h4 >> 24) & 0xFF, (h4 >> 16) & 0xFF, (h4 >> 8) & 0xFF, h4 & 0xFF,
+      (h5 >> 24) & 0xFF, (h5 >> 16) & 0xFF, (h5 >> 8) & 0xFF, h5 & 0xFF,
+      (h6 >> 24) & 0xFF, (h6 >> 16) & 0xFF, (h6 >> 8) & 0xFF, h6 & 0xFF
+    ];
+    if (!this.is224) {
+      arr.push((h7 >> 24) & 0xFF, (h7 >> 16) & 0xFF, (h7 >> 8) & 0xFF, h7 & 0xFF);
+    }
+    return arr;
+  };
+
+  Sha256.prototype.array = Sha256.prototype.digest;
+
+  Sha256.prototype.arrayBuffer = function () {
+    this.finalize();
+
+    var buffer = new ArrayBuffer(this.is224 ? 28 : 32);
+    var dataView = new DataView(buffer);
+    dataView.setUint32(0, this.h0);
+    dataView.setUint32(4, this.h1);
+    dataView.setUint32(8, this.h2);
+    dataView.setUint32(12, this.h3);
+    dataView.setUint32(16, this.h4);
+    dataView.setUint32(20, this.h5);
+    dataView.setUint32(24, this.h6);
+    if (!this.is224) {
+      dataView.setUint32(28, this.h7);
+    }
+    return buffer;
+  };
+
+  function HmacSha256(key, is224, sharedMemory) {
+    var i, type = typeof key;
+    if (type === 'string') {
+      var bytes = [], length = key.length, index = 0, code;
+      for (i = 0; i < length; ++i) {
+        code = key.charCodeAt(i);
+        if (code < 0x80) {
+          bytes[index++] = code;
+        } else if (code < 0x800) {
+          bytes[index++] = (0xc0 | (code >> 6));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        } else if (code < 0xd800 || code >= 0xe000) {
+          bytes[index++] = (0xe0 | (code >> 12));
+          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        } else {
+          code = 0x10000 + (((code & 0x3ff) << 10) | (key.charCodeAt(++i) & 0x3ff));
+          bytes[index++] = (0xf0 | (code >> 18));
+          bytes[index++] = (0x80 | ((code >> 12) & 0x3f));
+          bytes[index++] = (0x80 | ((code >> 6) & 0x3f));
+          bytes[index++] = (0x80 | (code & 0x3f));
+        }
+      }
+      key = bytes;
+    } else {
+      if (type === 'object') {
+        if (key === null) {
+          throw new Error(ERROR);
+        } else if (ARRAY_BUFFER && key.constructor === ArrayBuffer) {
+          key = new Uint8Array(key);
+        } else if (!Array.isArray(key)) {
+          if (!ARRAY_BUFFER || !ArrayBuffer.isView(key)) {
+            throw new Error(ERROR);
+          }
+        }
+      } else {
+        throw new Error(ERROR);
+      }
+    }
+
+    if (key.length > 64) {
+      key = (new Sha256(is224, true)).update(key).array();
+    }
+
+    var oKeyPad = [], iKeyPad = [];
+    for (i = 0; i < 64; ++i) {
+      var b = key[i] || 0;
+      oKeyPad[i] = 0x5c ^ b;
+      iKeyPad[i] = 0x36 ^ b;
+    }
+
+    Sha256.call(this, is224, sharedMemory);
+
+    this.update(iKeyPad);
+    this.oKeyPad = oKeyPad;
+    this.inner = true;
+    this.sharedMemory = sharedMemory;
+  }
+  HmacSha256.prototype = new Sha256();
+
+  HmacSha256.prototype.finalize = function () {
+    Sha256.prototype.finalize.call(this);
+    if (this.inner) {
+      this.inner = false;
+      var innerHash = this.array();
+      Sha256.call(this, this.is224, this.sharedMemory);
+      this.update(this.oKeyPad);
+      this.update(innerHash);
+      Sha256.prototype.finalize.call(this);
+    }
+  };
+
+  var exports = createMethod();
+  exports.sha256 = exports;
+  exports.sha224 = createMethod(true);
+  exports.sha256.hmac = createHmacMethod();
+  exports.sha224.hmac = createHmacMethod(true);
+
+  if (COMMON_JS) {
+    module.exports = exports;
+  } else {
+    root.sha256 = exports.sha256;
+    root.sha224 = exports.sha224;
+    if (AMD) {
+      define('sha256',[],function () {
+        return exports;
+      });
+    }
+  }
+})();
 
 /*! Magnific Popup - v1.1.0 - 2016-02-20
 * http://dimsemenov.com/plugins/magnific-popup/
@@ -31614,37 +33816,37 @@ Strophe.RSM.prototype = {
 
       Strophe.addConnectionPlugin('caps', (function() {
         var addFeature, conn, createCapsNode, generateVerificationString, init, propertySort, removeFeature, sendPres;
-        conn = null;
+        this._connection = null;
         init = function(c) {
-          conn = c;
+          this._connection = c;
           Strophe.addNamespace('CAPS', "http://jabber.org/protocol/caps");
-          if (conn.disco === void 0) {
+          if (this._connection.disco === void 0) {
             throw new Error("disco plugin required!");
           }
           if (b64_sha1 === void 0) {
             throw new Error("SHA-1 library required!");
           }
-          conn.disco.addFeature(Strophe.NS.CAPS);
-          conn.disco.addFeature(Strophe.NS.DISCO_INFO);
+          this._connection.disco.addFeature(Strophe.NS.CAPS);
+          this._connection.disco.addFeature(Strophe.NS.DISCO_INFO);
         };
         addFeature = function(feature) {
-          return conn.disco.addFeature(feature);
+          return this._connection.disco.addFeature(feature);
         };
         removeFeature = function(feature) {
-          return conn.disco.removeFeature(feature);
+          return this._connection.disco.removeFeature(feature);
         };
         getPres = function () {
           return $pres().cnode(createCapsNode());
         };
         sendPres = function() {
-          return conn.send($pres().cnode(createCapsNode().tree()));
+          return this._connection.send($pres().cnode(createCapsNode().tree()));
         };
         createCapsNode = function(options) {
           options || (options = {});
           var node = options.node;
           if (!node) {
-            if (conn.disco._identities.length > 0) {
-              node = conn.disco._identities[0].name || "";
+            if (this._connection.disco._identities.length > 0) {
+              node = this._connection.disco._identities[0].name || "";
             } else {
               node = "strophejs";
             }
@@ -31653,7 +33855,7 @@ Strophe.RSM.prototype = {
             xmlns: Strophe.NS.CAPS,
             hash: "sha-1",
             node: node,
-            ver: generateVerificationString()
+            ver: generateVerificationString.call(this)
           });
         };
         propertySort = function(array, property) {
@@ -31668,13 +33870,13 @@ Strophe.RSM.prototype = {
         generateVerificationString = function() {
           var S, features, i, id, ids, k, key, ns, _i, _j, _k, _len, _len1, _len2, _ref, _ref1;
           ids = [];
-          _ref = conn.disco._identities;
+          _ref = this._connection.disco._identities;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             i = _ref[_i];
             ids.push(i);
           }
           features = [];
-          _ref1 = conn.disco._features;
+          _ref1 = this._connection.disco._features;
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             k = _ref1[_j];
             features.push(k);
@@ -32301,6 +34503,156 @@ Strophe.RSM.prototype = {
 }));
 
 (function (root, factory) {
+    define('omemo',["strophe","strophe.disco", "strophe.pubsub"], function (Strophe) {
+        factory(Strophe.Strophe, Strophe.$build, Strophe.$iq);
+    });
+}(this, function (Strophe, $build, $iq) {
+    Strophe.addConnectionPlugin('omemo', (function() {
+        if (typeof(libsignal) === "undefined")
+            throw new Error("Signal library required!");
+        let conn, init;
+        this._connection = null;
+        init = function(c) {
+            this._connection = c;
+            this.devices = {};
+            Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
+            Strophe.addNamespace('PUBSUB_NODE_CONFIG', "http://jabber.org/protocol/pubsub#node_config");
+            this._connection.disco.addFeature(Strophe.NS.OMEMO);
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + ':devices+notify');
+            this._connection.disco.addFeature(Strophe.NS.OMEMO + ':bundles+notify');
+        };
+
+        var parseUserDevices = function ($stanza) {
+            let devices = {};
+            $stanza.find(`devices[xmlns="${Strophe.NS.OMEMO}"] device`).each(function(idx, device) {
+                let $device = $(device),
+                    id = $device.attr('id'),
+                    label = $device.attr(('label'));
+                id && (devices[id] = {id, label});
+            }.bind(this));
+            return devices;
+        };
+
+        var getDevicesNode = function (jid, callback, errback) {
+            let attrs = {from: this._connection.jid, type: 'get'};
+            jid && (attrs.to = jid);
+            let iq = $iq(attrs)
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: Strophe.NS.OMEMO + ":devices"});
+            this._connection.sendIQ(iq, callback, function (err) {
+                ($(err).find('error').attr('code') == 404 && !jid) && createDeviceNode.call(this, callback);
+            }.bind(this));
+        };
+
+        var sendOptOut = function (attrs, callback) {
+            let msg = $msg({type: 'chat', to: attrs.to})
+                .c('content', {xmlns: Strophe.NS.SCE})
+                .c('payload')
+                .c('opt-out', {xmlns: Strophe.NS.OMEMO})
+                .c('reason').t(attrs.reason || 'Bad MAC');
+            this._connection.sendMsg(msg, callback);
+        };
+
+        var createDeviceNode = function (callback) {
+            createNode.call(this, Strophe.NS.OMEMO + ':devices', {'pubsub#access_model': 'open'}, callback);
+        };
+
+        var removeItemFromNode = function (node, iid, callback) {
+            let iq = $iq({from:this._connection.jid, type:'set'})
+                .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
+                .c('retract',{node:node})
+                .c('item', {id: iid});
+            this._connection.sendIQ(iq, callback);
+        };
+
+        var createBundleNode = function (callback) {
+            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, {'pubsub#access_model': 'open', 'pubsub#max_items': 10}, callback);
+        };
+
+        var createNode = function(node, options, callback) {
+            let iq = $iq({from:this._connection.jid, type:'set'})
+                .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
+                .c('create',{node:node});
+            if (options) {
+                iq.up().c('configure').form(Strophe.NS.PUBSUB_NODE_CONFIG, options);
+            }
+            this._connection.sendIQ(iq, callback);
+        };
+
+        var publishDevice = function (id, label, callback, errback) {
+            !this.devices && (this.devices = {});
+            if (id)
+                this.devices[id] = {id, label};
+            let stanza = $iq({from: this._connection.jid, type: 'set'})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('publish', {node: Strophe.NS.OMEMO + ':devices'})
+                .c('item', {id: 'current'})
+                .c('devices', {xmlns: Strophe.NS.OMEMO});
+            for (var i in this.devices) {
+                let device = this.devices[i];
+                if (!device.id)
+                    continue;
+                let attrs = {id: device.id};
+                device.label && (attrs.label = device.label);
+                stanza.c('device', attrs).up();
+            }
+            this._connection.sendIQ(stanza, callback, errback);
+        };
+
+        var configNode = function (callback) {
+            let iq = $iq({from: this._connection.jid, type: 'set'})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB + '#owner'})
+                .c('configure', {node: `${Strophe.NS.OMEMO}:bundles`})
+                .form(Strophe.NS.PUBSUB_NODE_CONFIG, {
+                    'pubsub#max_items': 32
+                });
+            this._connection.sendIQ(iq, callback, callback);
+        };
+
+        var publishBundle = function (attrs, callback, errback) {
+            let preKeys = attrs.pks,
+                spk = attrs.spk,
+                stanza = $iq({from: this._connection.jid, type: 'set'})
+                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                    .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
+                    .c('item', {id: attrs.device_id})
+                    .c('bundle', {xmlns: Strophe.NS.OMEMO})
+                    .c('spk', {id: spk.id}).t(spk.key).up()
+                    .c('spks').t(attrs.spks).up()
+                    .c('ik').t(attrs.ik).up()
+                    .c('prekeys');
+            for (var i in preKeys) {
+                let preKey = preKeys[i];
+                stanza.c('pk', {id: preKey.id}).t(preKey.key).up()
+            }
+            this._connection.sendIQ(stanza, callback, errback);
+        };
+
+        var getBundleInfo = function (attrs, callback, errback) {
+            let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
+                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
+            if (attrs.id)
+                iq.c('item', {id: attrs.id});
+            this._connection.sendIQ(iq, callback, errback);
+        };
+
+        return {
+            init: init,
+            parseUserDevices: parseUserDevices,
+            getDevicesNode: getDevicesNode,
+            configNode: configNode,
+            publishDevice: publishDevice,
+            createBundleNode: createBundleNode,
+            createDeviceNode: createDeviceNode,
+            publishBundle: publishBundle,
+            removeItemFromNode: removeItemFromNode,
+            getBundleInfo: getBundleInfo
+        };
+    })());
+}));
+(function (root, factory) {
     define('backbone.localsync',["backbone", "underscore"], function (Backbone, _) {
         return factory(Backbone, _);
     });
@@ -32326,7 +34678,7 @@ Strophe.RSM.prototype = {
         this.records = this.from_string(data, []);
     };
 
-    var IndexedDB = function (options) {
+    var IndexedDB = function (options, callback) {
         this.version = options.version || 1;
         this.name = options.name;
         var request = indexedDB.open(this.name, this.version);
@@ -32336,6 +34688,8 @@ Strophe.RSM.prototype = {
         }.bind(this);
         request.onsuccess = function() {
             this.db = request.result;
+            callback && callback();
+            options.model.trigger("database_opened");
         }.bind(this);
 
         this.createStore = function (db) {
@@ -32537,12 +34891,18 @@ Strophe.RSM.prototype = {
 
     Backbone.ModelWithDataBase = Backbone.Model.extend({
         initialize: function (attrs, options) {
-            this.database = new IndexedDB(options);
+            options = options || {};
+            this.database = new IndexedDB(_.extend(options, {model: this}));
             this._initialize && this._initialize(attrs, options);
+            this.on("quit", this.onQuit, this);
         },
 
-        clearDataBase: function () {
-            this.database.clear();
+        clearDataBase: function (name) {
+            this.database.clear_database(name);
+        },
+
+        onQuit: function () {
+            this.clearDataBase();
         }
     });
 
@@ -41096,6 +43456,7 @@ define('xabber-dependencies',[
     "moment",
     "wavesurfer",
     "slug",
+    "sha256",
     "magnific-popup",
     "strophe",
     "strophe.disco",
@@ -41103,18 +43464,20 @@ define('xabber-dependencies',[
     "strophe.rsm",
     "strophe.caps",
     "strophe.pubsub",
+    "omemo",
     "backbone.localsync",
     "sha1_hasher",
     "materialize",
     "qrcode",
     "perfectScrollbarJQuery"
-], function(Backbone, _, $, moment, WaveSurfer, slug, magnificPopup, Strophe) {
+], function(Backbone, _, $, moment, WaveSurfer, slug, sha256, magnificPopup, Strophe) {
     return _.extend({
         $: $,
         _: _,
         moment: moment,
         WaveSurfer: WaveSurfer,
         slug: slug,
+        sha256: sha256,
         magnificPopup: magnificPopup,
         Strophe: Strophe
     }, Strophe);
@@ -41144,6 +43507,8 @@ var constants = {
     KEY_BACKSPACE: 8,
     KEY_TAB: 9,
     KEY_ENTER: 13,
+    KEY_SHIFT: 16,
+    KEY_CTRL: 17,
     KEY_ESCAPE: 27,
     KEY_SPACE: 32,
     KEY_ARROW_LEFT: 37,
@@ -41173,6 +43538,13 @@ var constants = {
         9: 'REDIRECT',
         10:'CONNTIMEOUT'
     },
+
+    PREKEYS_COUNT: 100,
+    MIN_PREKEYS_COUNT: 80,
+
+    AES_KEY_LENGTH: 128,
+    AES_TAG_LENGTH: 128,
+    AES_EXTRACTABLE: true,
 
     BAD_CONN_STATUSES: [0, 2, 4, 6, 10],
 
@@ -41205,6 +43577,24 @@ var constants = {
 
     JINGLE_WAITING_TIME: 60,
 
+    TURN_SERVERS_LIST: [
+        {
+            url: 'turn:numb.viagenie.ca',
+            credential: 'muazkh',
+            username: 'webrtc@live.com'
+        },
+        {
+            urls: 'turn:192.158.29.39:3478?transport=udp',
+            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+            username: '28224511:1379330808'
+        },
+        {
+            urls: 'turn:192.158.29.39:3478?transport=tcp',
+            credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+            username: '28224511:1379330808'
+        }
+    ],
+
     JINGLE_MSG_PROPOSE: 0,
     JINGLE_MSG_REJECT: 1,
     JINGLE_MSG_ACCEPT: 2,
@@ -41229,7 +43619,7 @@ var constants = {
         "light-green", "amber", "deep-orange", "brown", "blue-grey"
     ],
 
-    MAX_AVATAR_FILE_SIZE: 20000000,
+    MAX_AVATAR_FILE_SIZE: 64000,
 
     AVATAR_PRIORITIES: {
         VCARD_AVATAR: 0,
@@ -41258,6 +43648,7 @@ var constants = {
         CHAT_MESSAGE:                   32,
         CHAT_BOTTOM:                    48,
         XABBER_VOICE_CALL_VIEW:         128,
+        OMEMO_ENABLE_SETTING:           182
     },
 
     SOUNDS: {
@@ -41443,7 +43834,8 @@ var constants = {
 
     GCM_SENDER_ID: '868637702480',
     GCM_API_KEY: 'AIzaSyC1JCBB3LLf_4DG_vRWMEEe0I4X5msEU-M',
-    MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive'
+    MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive',
+    STANZA_MAX_SIZE: Math.pow(2,16)
 };
 
 constants.JINGLE_MSG_STATE = {};
@@ -41894,6 +44286,12 @@ define('text',['module'], function (module) {
 define('text!templates/base/dialog.html',[],function () { return '<div class="modal dialog-modal">\n    <div class="modal-header">\n        <div class="panel-header black-text">{{header}}</div>\n    </div>\n    <div class="modal-content">\n        <div class="dialog-text">{{text}}</div>\n        <div class="dialog-options-wrap">\n        {[ for (var idx in dialog_options) { var option = dialog_options[idx]; ]}\n            <div class="dialog-option" data-name="{{option.name}}">\n                <input type="checkbox" class="filled-in" id="dialog_option_{{option.name}}" {[ if (option.checked) { ]}checked="checked"{[ } ]}/>\n                <label for="dialog_option_{{option.name}}">{{option.text}}</label>\n            </div>\n        {[ } ]}\n        </div>\n        <div class="container-for-img hidden"><img class="img-from-clipboard"></div>\n    </div>\n    <div class="modal-footer {{flag}}">\n        {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}\n        <button class="optional-button btn-flat btn-main btn-dark" data-option="{{button.value}}">{{button.name}}</button>\n        {[ } ]}\n        {[ if (ok_button) { ]}\n        <button class="ok-button btn-flat btn-main" data-option=true>{{ok_button.text}}</button>\n        {[ } ]}\n        {[ if (cancel_button) { ]}\n        <button class="cancel-button btn-flat btn-main btn-dark btn-cancel" data-option=false>{{cancel_button.text}}</button>\n        {[ } ]}\n    </div>\n</div>\n';});
 
 
+define('text!templates/base/fingerprints.html',[],function () { return '<div class="modal-header fingerprints-header">\n    <div class="header"></div>\n    <div class="additional-info"></div>\n</div>\n<div class="fingerprints-content">\n</div>\n<div class="fingerprints-bottom">\n    <div class="this-device-wrap">\n        <div class="this-device-header-wrap">\n            <div class="divider"></div>\n            <div class="this-device-header">this device</div>\n        </div>\n        <div class="this-device-content">\n        </div>\n    </div>\n    <div class="fingerprints-description-wrap">\n        <div class="fingerprints-description">You must carefully verify that this device fingerprints match the once visible to your chat partner. For maximum security, this should be done via another communication channel. Preferrably, in person.</div>\n        <div class="link-about-encryption"><a href="https://www.xabber.com/encryption/" target="_blank">Learn more about encryption and safe key exchange</a></div>\n    </div>\n</div>';});
+
+
+define('text!templates/base/fingerprint_item.html',[],function () { return '<div class="row">\n    <div title="Device ID: {{id}}&#10;Label: {[if (label) {]}{{label}}{[}else{]}none{[}]}&#10;Device ID is a unique identifier for your contact\'s device. You maintain separate encryption session with each device." class="device-wrap">\n        {[if (edit_setting) {]}\n        <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}\n        {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}\n        <div class="device-id one-line">{{id}}</div>\n        {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}\n        {[if (edit_setting) {]}<div class="set-label-label hidden">set label</div>{[}]}\n    </div>\n    <div class="fingerprint-wrap">\n    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>\n    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}\n    </div>\n    <div data-trust="{{trust}}" class="buttons">\n        {[if (trust !== null) {]}\n        <div class="dropdown-button" data-activates="select-status-{{id}}">\n            <div class="trust-item-wrap btn-main btn-flat">\n                <div data-value="{{trust}}">{{trust}}</div>\n            </div>\n        </div>\n        <div id="select-status-{{id}}" class="dropdown-content noselect">\n            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">Ignore</div>\n            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">Trust</div>\n            {[if (delete_button){]}\n            <div class="btn-main btn-flat btn-delete text-color-red-500">Delete</div>\n            {[}]}\n        </div>\n        {[}]}\n    </div>\n</div>';});
+
+
 define('text!templates/base/jingle_message_calling.html',[],function () { return '<i class="mdi mdi-phone btn-collapse"></i>\n<div class="call-header">\n    Xabber voice call\n    <div class="calling-status"/>\n</div>\n<div class="blur-background"></div>\n<div class="contact-info">\n    <div class="name one-line"/>\n    <div class="calling-status"/>\n</div>\n<div class="video-wrap">\n    <video autoplay loop class="blank-video hidden">\n        <source src="{{constants.BLANK_VIDEO.MP4}}">\n        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">\n        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">\n    </video>\n    <audio autoplay class="webrtc-remote-audio hidden"/>\n    <video autoplay muted class="webrtc-local-video collapsed hidden"/>\n    <div class="default-screen">\n        <div class="circle-avatar"/>\n        <div class="name one-line"/>\n    </div>\n</div>\n<div class="buttons-panel">\n    <div class="buttons-wrap">\n        <div class="btn-wrap" title="Collapse window"><svg class="btn-collapse mdi-24px" viewBox="0 0 24 24">\n            <path d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>\n        </svg></div>\n        <div class="btn-wrap" title="Fullscreen mode"><svg class="btn-full-screen mdi-24px" viewBox="0 0 24 24">\n            <path d="M11,21H3V13H5V17.59L17.59,5H13V3H21V11H19V6.41L6.41,19H11V21Z" />\n        </svg></div>\n        <i title="Mute" class="btn-volume mdi mdi-24px mdi-volume-high"/>\n        <i title="Mute microphone" class="btn-microphone mdi mdi-24px mdi-microphone"/>\n        <i title="Switch on/off video" class="btn-video mdi mdi-24px mdi-video"/>\n        <i title="Share screen" class="btn-share-screen mdi mdi-24px mdi-monitor"/>\n        <i title="Accept call" class="btn-accept mdi mdi-24px mdi-phone"/>\n        <i title="Decline call" class="btn-cancel mdi mdi-24px mdi-phone-hangup"/>\n    </div>\n</div>';});
 
 
@@ -41907,6 +44305,12 @@ define('text!templates/base/settings.html',[],function () { return '    <div cla
 
 
 define('text!templates/base/about.html',[],function () { return '    <div class="left-column noselect">\n        <div class="main-info-wrap xabber-info-wrap">\n            <div class="picture-wrap">\n                <img class="logo" src="images/xabber-logo-96.png"/>\n            </div>\n            <div class="name">Xabber for Web</div>\n            <div class="version"></div>\n        </div>\n    </div>\n\n    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>About</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content">\n                <div class="settings-block-wrap about">\n                    <div class="block-content">\n                        Xabber is an open source XMPP messenger for Android, iOS and Web platforms. It is build around open standards, interoperability, design and great user experience. Versions of Xabber for every platform are built to provide a continuous chat experience between them.\n                    </div>\n                    <div class="block-content">\n                        You will find more information on our official website <a href="https://www.xabber.com" target="_blank">https://www.xabber.com</a>\n                    </div>\n                    <div class="block-header">\n                        <span class="block-name">XMPP protocol</span>\n                    </div>\n                    <div class="block-content">\n                        Extensible Messaging and Presence Protocol (XMPP) is a communications protocol for message-oriented middleware based on XML (Extensible Markup Language). It enables the near-real-time exchange of structured yet extensible data between any two or more network entities. The protocol was originally named Jabber, and was developed by the Jabber open-source community in 1999 for near real-time instant messaging (IM),presence information, and contact list maintenance.\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">XMPP Extension Protocols</span>\n                    </div>\n                    <div class="block-content">\n                        XMPP is highly extensible, via extensions known as XEPs (XMPP Extension Protocol). Xabber supports a number of popular XEPs that are essential to providing great chat experience for our users.\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">Developers</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber for Android was originally developed by <a href="http://redsolution.com" target="_blank">Redsolution</a> — an international software and services company currently based in Estonia. Since then, a number of individuals joined Xabber as developers, testers and translators.\n                    </div>\n                    <div class="block-content">\n                        Our goal is to create a stable, reliable, interoperable and user friendly ecosystem for instant messaging that does not rely on proprietary services and data silos. We welcome anyone who believes in open standards and free information interchange to take part in moving Xabber forward.\n                    </div>\n                    <div class="block-content">\n                        Follow us on Twitter and Github.\n                    </div>\n                    <div class="block-content flex-content">\n                        <img class="logo" src="images/redsolution-logo.png"/>\n                        <a href="https://twitter.com/Xabber_XMPP" target="_blank"><div class="btn-social twitter-color">\n                            <i class="mdi mdi-28px mdi-twitter"></i>\n                        </div></a>\n                        <a href="https://github.com/redsolution/xabber-web" target="_blank"><img class="btn-social github-logo" src="images/ic_github.png"/></a>\n                    </div>\n\n\n                    <div class="block-header">\n                        <span class="block-name">Translators</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber is available in multiple languages thanks to many fine people from all over the world. We have created a special page on our website to acknowledge their efforts.\n                    </div>\n                    <div class="block-content">\n                        You may join their ranks and help us improve translation quality by contributing your translations to <a href="https://crowdin.com/project/xabber" target="_blank">Xabber project</a>\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">License</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber for Web source code is licensed under GNU AGPL v.3 license and is available on <a href="https://github.com/redsolution/xabber-web" target="_blank">GitHub</a>\n                    </div>\n                    <div class="block-content">\n                        Graphical images are licensed under Creative Commons Attribution Share-Alike (CC BY-SA) license.\n                    </div>\n                    <div class="block-content">\n                        Xabber & Redsolution logo are property of <a href="https://redsolution.com" target="_blank">Redsolution, OÜ</a>\n                    </div>\n                    <div class="block-content">\n                        View Xabber for Web <a href="https://github.com/redsolution/xabber-web/blob/master/LICENSE" target="_blank">license file</a> for more information.\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
+
+
+define('text!templates/base/omemo_enable.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="circle-avatar border-color-700">\n            <div class="avatar border-color-700"></div>\n        </div>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">Esc</span>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="msg-wrap"><p class="msg-text"></p></div>\n        <div class="panel-footer noselect">\n            <div class="buttons-wrap">\n                <button class="btn-cancel btn-dark btn-flat btn-main">Cancel</button>\n                <button class="btn-enable btn-flat btn-main">Enable</button>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+
+
+define('text!templates/base/omemo_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="encryption-icon">\n    <svg viewBox="0 0 24 24">\n        <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />\n    </svg>\n</div>\n<div class="recent-chat-info">\n    <p class="last-msg one-line">Enable encryption?</p>\n    <p class="account-jid one-line"></p>\n</div>\n';});
 
 
 define('text!templates/api_service/xabber_login.html',[],function () { return '<div class="login-panel">\n    <div class="login-panel-head noselect">\n        <img src="images/xabber-logo.png" class="client-logo">\n        <span class="client-name">Xabber</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n        </div>\n        <div class="login-form-header">Email Login</div>\n        <div class="input-field email-name">\n            <input id="username" type="text" name="username">\n            <label for="username">Email</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">Password</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">Forgot password?</a>\n            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>\n        </div>\n        <div class="social-auth-wrap"><div class="social-header">\n            <div class="divider"></div>\n            <div class="social-header-tip">New Account</div>\n        </div></div>\n        <div class="registration-footer">\n            <div class="registration-tip-wrap">\n                <span class="registration-tip">No XMPP account?</span>\n                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/?source=Xabber Web" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>\n            </div>\n        </div>\n        <div class="clearfix"></div>\n    </div>\n</div>\n';});
@@ -41942,10 +44346,10 @@ define('text!templates/accounts/change_password.html',[],function () { return '<
 define('text!templates/accounts/toolbar_item.html',[],function () { return '<div class="border"/>\n<div class="dropdown-button circle-avatar border-color ground-color-700 noselect"/>\n<div class="status"/>\n<i class="auth-failed mdi mdi-16px mdi-close"></i>\n<div class="account-actions-panel">\n    <div class="filter-chats">\n        <i class="mdi mdi-filter mdi-20px"></i>\n        <div class="text">Filter chats</div>\n    </div>\n</div>';});
 
 
-define('text!templates/accounts/settings_left.html',[],function () { return '    <div class="left-column ground-color-900 noselect">\n        <div class="main-info-wrap account-main-info-wrap">\n            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->\n            <div class="picture-wrap">\n                <div class="avatar-wrap">\n                    <div class="circle-avatar">\n                        <img/>\n                        <input type="file"/>\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        </div>\n                    </div>\n                    <div class="status"></div>\n                </div>\n            </div>\n            <div class="name-wrap">\n                <div class="name"></div>\n            </div>\n            <div class="status-wrap"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab" data-block-name="connection">\n                <i class="mdi mdi-24px mdi-settings"></i>\n                <div class="settings-block-name one-line">Connection settings</div>\n            </div>\n            <div class="settings-tab" data-block-name="tokens">\n                <i class="mdi mdi-24px mdi-key"></i>\n                <div class="settings-block-name one-line">Active sessions</div>\n            </div>\n            <div class="settings-tab" data-block-name="synchronization">\n                <i class="mdi mdi-24px mdi-sync"></i>\n                <div class="settings-block-name one-line">Synchronization</div>\n            </div>\n            <div class="settings-tab" data-block-name="color-scheme">\n                <i class="mdi mdi-24px mdi-palette"></i>\n                <div class="settings-block-name one-line">Color scheme</div>\n            </div>\n            <div class="settings-tab" data-block-name="xmpp-resources">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n                <div class="settings-block-name one-line">XMPP Resources</div>\n            </div>\n            <div class="settings-tab" data-block-name="vcard">\n                <i class="mdi mdi-24px mdi-account-card-details"></i>\n                <div class="settings-block-name one-line">vCard</div>\n            </div>\n            <div class="settings-tab" data-block-name="server-info">\n                <i class="mdi mdi-24px mdi-information"></i>\n                <div class="settings-block-name one-line">Server information</div>\n            </div>\n            <div class="settings-tab" data-block-name="blocklist-info">\n                <i class="mdi mdi-24px mdi-block-helper"></i>\n                <div class="settings-block-name one-line">Blocked contacts</div>\n            </div>\n            <div class="settings-tab" data-block-name="groups-info">\n                <i class="mdi mdi-24px mdi-account-multiple"></i>\n                <div class="settings-block-name one-line">Circles</div>\n            </div>\n        </div>\n        <div class="settings-tabs-bottom-wrap ground-color-900">\n            <div class="settings-tab delete-account">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">Quit account</div>\n            </div>\n        </div>\n    </div>\n';});
+define('text!templates/accounts/settings_left.html',[],function () { return '    <div class="left-column ground-color-900 noselect">\n        <div class="main-info-wrap account-main-info-wrap">\n            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->\n            <div class="picture-wrap">\n                <div class="avatar-wrap">\n                    <div class="circle-avatar">\n                        <img/>\n                        <input type="file"/>\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        </div>\n                    </div>\n                    <div class="status"></div>\n                </div>\n            </div>\n            <div class="name-wrap">\n                <div class="name"></div>\n            </div>\n            <div class="status-wrap"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab" data-block-name="connection">\n                <i class="mdi mdi-24px mdi-settings"></i>\n                <div class="settings-block-name one-line">Connection settings</div>\n            </div>\n            <div class="settings-tab" data-block-name="tokens">\n                <i class="mdi mdi-24px mdi-key"></i>\n                <div class="settings-block-name one-line">Active sessions</div>\n            </div>\n            <div class="settings-tab" data-block-name="synchronization">\n                <i class="mdi mdi-24px mdi-sync"></i>\n                <div class="settings-block-name one-line">Synchronization</div>\n            </div>\n            <div class="settings-tab" data-block-name="color-scheme">\n                <i class="mdi mdi-24px mdi-palette"></i>\n                <div class="settings-block-name one-line">Color scheme</div>\n            </div>\n            <div class="settings-tab" data-block-name="xmpp-resources">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n                <div class="settings-block-name one-line">XMPP Resources</div>\n            </div>\n            <div class="settings-tab" data-block-name="vcard">\n                <i class="mdi mdi-24px mdi-account-card-details"></i>\n                <div class="settings-block-name one-line">vCard</div>\n            </div>\n            <div class="settings-tab" data-block-name="omemo-info">\n                <i class="mdi mdi-24px mdi-fingerprint"></i>\n                <div class="settings-block-name one-line">OMEMO</div>\n            </div>\n            <div class="settings-tab" data-block-name="server-info">\n                <i class="mdi mdi-24px mdi-information"></i>\n                <div class="settings-block-name one-line">Server information</div>\n            </div>\n            <div class="settings-tab" data-block-name="blocklist-info">\n                <i class="mdi mdi-24px mdi-block-helper"></i>\n                <div class="settings-block-name one-line">Blocked contacts</div>\n            </div>\n            <div class="settings-tab" data-block-name="groups-info">\n                <i class="mdi mdi-24px mdi-account-multiple"></i>\n                <div class="settings-block-name one-line">Circles</div>\n            </div>\n        </div>\n        <div class="settings-tabs-bottom-wrap ground-color-900">\n            <div class="settings-tab delete-account">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">Quit account</div>\n            </div>\n        </div>\n    </div>\n';});
 
 
-define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span>Account settings</span>\n        <div class="field enabled-state switch normal">\n            <label class="field-value">\n                <input type="checkbox">\n                <span class="lever"></span>\n            </label>\n        </div>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div class="settings-block-wrap connection">\n                <div class="block-header">\n                    <span class="block-name">Connection settings</span>\n                </div>\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="buttons-wrap">\n                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>\n                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap tokens">\n                <div class="block-header">\n                    <span class="block-name">Active sessions</span>\n                </div>\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">Terminate all others sessions</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap synchronization">\n                <div class="block-header">\n                    <span class="block-name">Synchronization</span>\n                </div>\n                <div class="synchronization-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label sync-status"></div>\n                        </div>\n                    </div>\n                    <div class="xabber-account-features-wrap">\n                        <div class="sync-enable-wrap">\n                            <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>\n                            <label for="{{view.cid}}_sync_account">Enable synchronization</label>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap color-scheme">\n                <div class="block-header">\n                    <span class="block-name">Color scheme</span>\n                </div>\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="current-color-name text-color-700"></div>\n                        <div class="dropdown-button" data-activates="select-color-{{view.cid}}">\n                            <i class="mdi mdi-24px mdi-menu-down"></i>\n                        </div>\n                        <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">\n                            <li class="color-value" data-value="red">\n                                <div class="color-name text-color-red-700">red</div>\n                                <div class="color-pattern ground-color-red-700"></div>\n                            </li>\n                            <li class="color-value" data-value="pink">\n                                <div class="color-name text-color-pink-700">pink</div>\n                                <div class="color-pattern ground-color-pink-700"></div>\n                            </li>\n                            <li class="color-value" data-value="purple">\n                                <div class="color-name text-color-purple-700">purple</div>\n                                <div class="color-pattern ground-color-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-purple">\n                                <div class="color-name text-color-deep-purple-700">deep purple</div>\n                                <div class="color-pattern ground-color-deep-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="indigo">\n                                <div class="color-name text-color-indigo-700">indigo</div>\n                                <div class="color-pattern ground-color-indigo-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue">\n                                <div class="color-name text-color-blue-700">blue</div>\n                                <div class="color-pattern ground-color-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-blue">\n                                <div class="color-name text-color-light-blue-700">light blue</div>\n                                <div class="color-pattern ground-color-light-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="cyan">\n                                <div class="color-name text-color-cyan-700">cyan</div>\n                                <div class="color-pattern ground-color-cyan-700"></div>\n                            </li>\n                            <li class="color-value" data-value="teal">\n                                <div class="color-name text-color-teal-700">teal</div>\n                                <div class="color-pattern ground-color-teal-700"></div>\n                            </li>\n                            <li class="color-value" data-value="green">\n                                <div class="color-name text-color-green-700">green</div>\n                                <div class="color-pattern ground-color-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-green">\n                                <div class="color-name text-color-light-green-700">light green</div>\n                                <div class="color-pattern ground-color-light-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="lime">\n                                <div class="color-name text-color-lime-700">lime</div>\n                                <div class="color-pattern ground-color-lime-700"></div>\n                            </li>\n                            <li class="color-value" data-value="amber">\n                                <div class="color-name text-color-amber-700">amber</div>\n                                <div class="color-pattern ground-color-amber-700"></div>\n                            </li>\n                            <li class="color-value" data-value="orange">\n                                <div class="color-name text-color-orange-700">orange</div>\n                                <div class="color-pattern ground-color-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-orange">\n                                <div class="color-name text-color-deep-orange-700">deep orange</div>\n                                <div class="color-pattern ground-color-deep-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="brown">\n                                <div class="color-name text-color-brown-700">brown</div>\n                                <div class="color-pattern ground-color-brown-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue-grey">\n                                <div class="color-name text-color-blue-grey-700">blue grey</div>\n                                <div class="color-pattern ground-color-blue-grey-700"></div>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap xmpp-resources">\n                <div class="block-header">\n                    <span class="block-name">XMPP Resources</span>\n                </div>\n                <div class="resources-wrap">\n                    <div class="resource-wrap main-resource">\n                        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n                        <div class="info status-info">\n                            <div class="label">Status:</div>\n                            <div class="value status-message one-line"></div>\n                            <div class="status"></div>\n                        </div>\n                        <div class="info client-info">\n                            <div class="label">Client:</div>\n                            <div class="value client one-line"></div>\n                        </div>\n                        <div class="info resource-info">\n                            <div class="label">Resource:</div>\n                            <div class="value resource one-line"></div>\n                            <div class="device-indicator text-color-700">(this device)</div>\n                        </div>\n                        <div class="info priority-info">\n                            <div class="label">Priority:</div>\n                            <div class="value priority"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap vcard">\n            </div>\n\n            <div class="settings-block-wrap server-info">\n                <div class="block-header">\n                    <span class="block-name">Server capabilities</span>\n                </div>\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap blocklist-info">\n                <div class="block-header">\n                    <span class="block-name">Blocked contacts</span>\n                </div>\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">No blocked contacts yet</div>\n                        <div class="blocked-domains-wrap hidden">\n                            <div class="blocked-item domains-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Blocked domains</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-domains blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-invitations-wrap hidden">\n                            <div class="blocked-item invitations-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Group invitations</div>\n                                <div class="blocked-item-description">Blocking is used to mark group invitations as \'read\'</div>\n                            </div>\n                            <div class="blocked-invitations blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-contacts-wrap hidden">\n                            <div class="blocked-item contacts-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Blocked contacts</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-contacts blocked-list hidden"/>\n                        </div>\n                        <button class="btn-block btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Block</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap groups-info">\n                <div class="block-header">\n                    <span class="block-name">Circles</span>\n                </div>\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span>Account settings</span>\n        <div class="field enabled-state switch normal">\n            <label class="field-value">\n                <input type="checkbox">\n                <span class="lever"></span>\n            </label>\n        </div>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div class="settings-block-wrap connection">\n                <div class="block-header">\n                    <span class="block-name">Connection settings</span>\n                </div>\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="buttons-wrap">\n                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>\n                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap tokens">\n                <div class="block-header">\n                    <span class="block-name">Active sessions</span>\n                </div>\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">Terminate all others sessions</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap synchronization">\n                <div class="block-header">\n                    <span class="block-name">Synchronization</span>\n                </div>\n                <div class="synchronization-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label sync-status"></div>\n                        </div>\n                    </div>\n                    <div class="xabber-account-features-wrap">\n                        <div class="sync-enable-wrap">\n                            <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>\n                            <label for="{{view.cid}}_sync_account">Enable synchronization</label>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap color-scheme">\n                <div class="block-header">\n                    <span class="block-name">Color scheme</span>\n                </div>\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="current-color-name text-color-700"></div>\n                        <div class="dropdown-button" data-activates="select-color-{{view.cid}}">\n                            <i class="mdi mdi-24px mdi-menu-down"></i>\n                        </div>\n                        <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">\n                            <li class="color-value" data-value="red">\n                                <div class="color-name text-color-red-700">red</div>\n                                <div class="color-pattern ground-color-red-700"></div>\n                            </li>\n                            <li class="color-value" data-value="pink">\n                                <div class="color-name text-color-pink-700">pink</div>\n                                <div class="color-pattern ground-color-pink-700"></div>\n                            </li>\n                            <li class="color-value" data-value="purple">\n                                <div class="color-name text-color-purple-700">purple</div>\n                                <div class="color-pattern ground-color-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-purple">\n                                <div class="color-name text-color-deep-purple-700">deep purple</div>\n                                <div class="color-pattern ground-color-deep-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="indigo">\n                                <div class="color-name text-color-indigo-700">indigo</div>\n                                <div class="color-pattern ground-color-indigo-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue">\n                                <div class="color-name text-color-blue-700">blue</div>\n                                <div class="color-pattern ground-color-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-blue">\n                                <div class="color-name text-color-light-blue-700">light blue</div>\n                                <div class="color-pattern ground-color-light-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="cyan">\n                                <div class="color-name text-color-cyan-700">cyan</div>\n                                <div class="color-pattern ground-color-cyan-700"></div>\n                            </li>\n                            <li class="color-value" data-value="teal">\n                                <div class="color-name text-color-teal-700">teal</div>\n                                <div class="color-pattern ground-color-teal-700"></div>\n                            </li>\n                            <li class="color-value" data-value="green">\n                                <div class="color-name text-color-green-700">green</div>\n                                <div class="color-pattern ground-color-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-green">\n                                <div class="color-name text-color-light-green-700">light green</div>\n                                <div class="color-pattern ground-color-light-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="lime">\n                                <div class="color-name text-color-lime-700">lime</div>\n                                <div class="color-pattern ground-color-lime-700"></div>\n                            </li>\n                            <li class="color-value" data-value="amber">\n                                <div class="color-name text-color-amber-700">amber</div>\n                                <div class="color-pattern ground-color-amber-700"></div>\n                            </li>\n                            <li class="color-value" data-value="orange">\n                                <div class="color-name text-color-orange-700">orange</div>\n                                <div class="color-pattern ground-color-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-orange">\n                                <div class="color-name text-color-deep-orange-700">deep orange</div>\n                                <div class="color-pattern ground-color-deep-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="brown">\n                                <div class="color-name text-color-brown-700">brown</div>\n                                <div class="color-pattern ground-color-brown-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue-grey">\n                                <div class="color-name text-color-blue-grey-700">blue grey</div>\n                                <div class="color-pattern ground-color-blue-grey-700"></div>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap xmpp-resources">\n                <div class="block-header">\n                    <span class="block-name">XMPP Resources</span>\n                </div>\n                <div class="resources-wrap">\n                    <div class="resource-wrap main-resource">\n                        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n                        <div class="info status-info">\n                            <div class="label">Status:</div>\n                            <div class="value status-message one-line"></div>\n                            <div class="status"></div>\n                        </div>\n                        <div class="info client-info">\n                            <div class="label">Client:</div>\n                            <div class="value client one-line"></div>\n                        </div>\n                        <div class="info resource-info">\n                            <div class="label">Resource:</div>\n                            <div class="value resource one-line"></div>\n                            <div class="device-indicator text-color-700">(this device)</div>\n                        </div>\n                        <div class="info priority-info">\n                            <div class="label">Priority:</div>\n                            <div class="value priority"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap vcard">\n            </div>\n\n            <div class="settings-block-wrap omemo-info">\n                <div class="block-header">\n                    <span class="block-name">OMEMO settings</span>\n                </div>\n                <div class="omemo-settings-wrap">\n                    <div class="settings">\n                        <div class="setting-wrap omemo-enable">\n                            <span>OMEMO encryption</span>\n                            <div class="field setting-use-omemo switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap send-chat-states">\n                            <span>Send typing notifications</span>\n                            <div class="field setting-send-chat-states switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap manage-devices">\n                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Manage devices</button>\n                        </div>\n                        <div class="setting-wrap purge-keys">\n                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Purge keys</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap server-info">\n                <div class="block-header">\n                    <span class="block-name">Server capabilities</span>\n                </div>\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap blocklist-info">\n                <div class="block-header">\n                    <span class="block-name">Blocked contacts</span>\n                </div>\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">No blocked contacts yet</div>\n                        <div class="blocked-domains-wrap hidden">\n                            <div class="blocked-item domains-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Blocked domains</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-domains blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-invitations-wrap hidden">\n                            <div class="blocked-item invitations-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Group invitations</div>\n                                <div class="blocked-item-description">Blocking is used to mark group invitations as \'read\'</div>\n                            </div>\n                            <div class="blocked-invitations blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-contacts-wrap hidden">\n                            <div class="blocked-item contacts-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">Blocked contacts</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-contacts blocked-list hidden"/>\n                        </div>\n                        <button class="btn-block btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Block</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap groups-info">\n                <div class="block-header">\n                    <span class="block-name">Circles</span>\n                </div>\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/accounts/existing_groupchat_item.html',[],function () { return '<div class="existing-chat-wrap" data-name="{{name}}" data-jid="{{jid}}">\n    <div class="circle-avatar">\n        <img>\n    </div>\n    <div class="existing-chat-item">\n        <div class="name one-line">{{name}}</div>\n        <div class="jid one-line">{{jid}}</div>\n    </div>\n    <button class="btn-join-existing-chat btn-flat btn-dark btn-main">join</button>\n</div>';});
@@ -41966,10 +44370,10 @@ define('text!templates/accounts/token_item.html',[],function () { return '<div c
 define('text!templates/accounts/current_token_item.html',[],function () { return '<div class="token-wrap" data-token-uid="{{token_uid}}">\n    <div class="client one-line">{{client}}</div>\n    <div class="device one-line">{{device}}</div>\n    <div class="ip-address">{{ip}}</div>\n    <div class="last-auth text-color-700">Online</div>\n    <div class="token-indicator">this device</div>\n</div>';});
 
 
-define('text!templates/vcard/vcard.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <div class="btn-vcard-refresh">\n        <div class="button">\n            <i class="mdi mdi-20px mdi-refresh"></i>\n        </div>\n        <div class="preloader-wrapper preloader-20px active">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n<div class="vcard-wrap">\n    <div class="info-wrap jid-info-wrap hidden">\n        <div class="details-icon-wrap" title="Click to copy"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg></div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">Jabber ID</div>\n        </div>\n    </div>\n    <div class="info-wrap personal-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-account-card-details"></i>\n        <div class="info first-name">\n            <div class="value one-line"></div>\n            <div class="label">First name</div>\n        </div>\n        <div class="info middle-name">\n            <div class="value one-line"></div>\n            <div class="label">Middle name</div>\n        </div>\n        <div class="info last-name">\n            <div class="value one-line"></div>\n            <div class="label">Surname</div>\n        </div>\n        <div class="info fullname">\n            <div class="value one-line"></div>\n            <div class="label">Full name</div>\n        </div>\n    </div>\n    <div class="info-wrap nickname-info-wrap hidden">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info nickname">\n            <div class="value one-line"></div>\n            <div class="label">Nickname</div>\n        </div>\n    </div>\n    <div class="info-wrap birthday-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-cake-variant"></i>\n        <div class="info birthday">\n            <div class="value one-line"></div>\n            <div class="label">Birthday</div>\n        </div>\n    </div>\n    <div class="info-wrap job-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-briefcase"></i>\n        <div class="info org-name">\n            <div class="value one-line"></div>\n            <div class="label">Company</div>\n        </div>\n        <div class="info job-title">\n            <div class="value one-line"></div>\n            <div class="label">Job title</div>\n        </div>\n        <div class="info org-unit">\n            <div class="value one-line"></div>\n            <div class="label">Unit</div>\n        </div>\n        <div class="info role">\n            <div class="value one-line"></div>\n            <div class="label">Role</div>\n        </div>\n    </div>\n    <div class="info-wrap site-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-web"></i>\n        <div class="info url">\n            <div class="value one-line"></div>\n            <div class="label">Website</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">Description</div>\n        </div>\n    </div>\n    <div class="info-wrap phone-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-phone"></i>\n        <div class="info phone-work">\n            <div class="value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info phone-home">\n            <div class="value one-line"></div>\n            <div class="label">Home</div>\n        </div>\n        <div class="info phone-mobile">\n            <div class="value one-line"></div>\n            <div class="label">Mobile</div>\n        </div>\n        <div class="info phone-default">\n            <div class="value one-line"></div>\n            <div class="label">Phone</div>\n        </div>\n    </div>\n    <div class="info-wrap email-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-email"></i>\n        <div class="info email-work">\n            <div class="value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info email-home">\n            <div class="value one-line"></div>\n            <div class="label">Personal</div>\n        </div>\n        <div class="info email-default">\n            <div class="value one-line"></div>\n            <div class="label">Email</div>\n        </div>\n    </div>\n    <div class="info-wrap address-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-map-marker"></i>\n        <div class="info address-home">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Home</div>\n        </div>\n        <div class="info address-work">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info address-default">\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Address</div>\n        </div>\n    </div>\n    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300 hidden">Edit</button>\n</div>\n';});
+define('text!templates/vcard/vcard.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <div class="btn-vcard-refresh">\n        <div class="button">\n            <i class="mdi mdi-20px mdi-refresh"></i>\n        </div>\n        <div class="preloader-wrapper preloader-20px active">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n<div class="vcard-wrap">\n    <div class="info-wrap jid-info-wrap hidden">\n        <div class="details-icon-wrap" title="Click to copy"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg></div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">Jabber ID</div>\n        </div>\n    </div>\n    <div class="info-wrap personal-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-account-card-details"></i>\n        <div class="info first-name">\n            <div class="value one-line"></div>\n            <div class="label">First name</div>\n        </div>\n        <div class="info middle-name">\n            <div class="value one-line"></div>\n            <div class="label">Middle name</div>\n        </div>\n        <div class="info last-name">\n            <div class="value one-line"></div>\n            <div class="label">Surname</div>\n        </div>\n        <div class="info fullname">\n            <div class="value one-line"></div>\n            <div class="label">Full name</div>\n        </div>\n    </div>\n    <div class="info-wrap nickname-info-wrap hidden">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info nickname">\n            <div class="value one-line"></div>\n            <div class="label">Nickname</div>\n        </div>\n    </div>\n    <div class="info-wrap birthday-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-cake-variant"></i>\n        <div class="info birthday">\n            <div class="value one-line"></div>\n            <div class="label">Birthday</div>\n        </div>\n    </div>\n    <div class="info-wrap job-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-briefcase"></i>\n        <div class="info org-name">\n            <div class="value one-line"></div>\n            <div class="label">Company</div>\n        </div>\n        <div class="info job-title">\n            <div class="value one-line"></div>\n            <div class="label">Job title</div>\n        </div>\n        <div class="info org-unit">\n            <div class="value one-line"></div>\n            <div class="label">Unit</div>\n        </div>\n        <div class="info role">\n            <div class="value one-line"></div>\n            <div class="label">Role</div>\n        </div>\n    </div>\n    <div class="info-wrap site-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-web"></i>\n        <div class="info url">\n            <div class="value one-line"></div>\n            <div class="label">Website</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">Description</div>\n        </div>\n    </div>\n    <div class="info-wrap phone-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-phone"></i>\n        <div class="info phone-work">\n            <div class="value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info phone-home">\n            <div class="value one-line"></div>\n            <div class="label">Home</div>\n        </div>\n        <div class="info phone-mobile">\n            <div class="value one-line"></div>\n            <div class="label">Mobile</div>\n        </div>\n        <div class="info phone-default">\n            <div class="value one-line"></div>\n            <div class="label">Phone</div>\n        </div>\n    </div>\n    <div class="info-wrap email-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-email"></i>\n        <div class="info email-work">\n            <div class="value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info email-home">\n            <div class="value one-line"></div>\n            <div class="label">Personal</div>\n        </div>\n        <div class="info email-default">\n            <div class="value one-line"></div>\n            <div class="label">Email</div>\n        </div>\n    </div>\n    <div class="info-wrap address-info-wrap hidden">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-map-marker"></i>\n        <div class="info address-home">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Home</div>\n        </div>\n        <div class="info address-work">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Work</div>\n        </div>\n        <div class="info address-default">\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">Address</div>\n        </div>\n    </div>\n    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">Edit</button>\n</div>\n';});
 
 
-define('text!templates/vcard/vcard_edit.html',[],function () { return '    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>Edit vCard</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content details-panel">\n\n                <div class="settings-block-wrap vcard">\n                    <div class="vcard-edit-wrap">\n                        <div class="info-wrap personal-info-wrap">\n                            <i class="details-icon mdi mdi-24px mdi-account-card-details"></i>\n                            <div class="input-field first-name">\n                                <input id="{{view.cid}}-first-name" placeholder="First name" type="text" name="first_name">\n                            </div>\n                            <div class="input-field middle-name">\n                                <input id="{{view.cid}}-middle-name" placeholder="Middle name" type="text" name="middle_name">\n                            </div>\n                            <div class="input-field last-name">\n                                <input id="{{view.cid}}-last-name" placeholder="Surname" type="text" name="last_name">\n                            </div>\n                            <div class="input-field fullname">\n                                <input id="{{view.cid}}-fullname" placeholder="Full name" type="text" name="fullname">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap nickname-info-wrap">\n                            <div class="input-label">Nickname</div>\n                            <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n                            <div class="input-field nickname">\n                                <input id="{{view.cid}}-nickname" placeholder="Nickname" type="text" name="nickname">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap birthday-info-wrap">\n                            <div class="input-label">Birthday</div>\n                            <i class="details-icon mdi mdi-24px mdi-cake-variant"></i>\n                            <div class="input-field birthday">\n                                <input id="{{view.cid}}-birthday" placeholder="YYYYY-MM-DD" type="text" class="datepicker">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap job-info-wrap">\n                            <div class="input-label">Job</div>\n                            <i class="details-icon mdi mdi-24px mdi-briefcase"></i>\n                            <div class="input-field org-name">\n                                <input id="{{view.cid}}-org-name" placeholder="Company" type="text" name="org_name">\n                            </div>\n                            <div class="input-field job-title">\n                                <input id="{{view.cid}}-job-title" placeholder="Job title" type="text" name="job_title">\n                            </div>\n                            <div class="input-field org-unit">\n                                <input id="{{view.cid}}-org-unit" placeholder="Unit" type="text" name="org_unit">\n                            </div>\n                            <div class="input-field role">\n                                <input id="{{view.cid}}-role" placeholder="Role" type="text" name="role">\n                            </div>\n                        </div>\n                        <div class="info-wrap site-info-wrap">\n                            <div class="input-label">Website</div>\n                            <i class="details-icon mdi mdi-24px mdi-web"></i>\n                            <div class="input-field url">\n                                <input id="{{view.cid}}-url" placeholder="www.example.com" type="text" name="url">\n                            </div>\n                        </div>\n                        <div class="info-wrap description-info-wrap">\n                            <div class="input-label">Description</div>\n                            <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n                            <div class="input-field description">\n                                <textarea id="{{view.cid}}-description" placeholder="Some text field, 3-5 rows" type="text" cols="30" rows="10" class="text-field materialize-textarea" name="description"></textarea>\n                            </div>\n                        </div>\n\n                        <div class="info-wrap phone-info-wrap">\n                            <div class="input-label">Phone</div>\n                            <i class="details-icon mdi mdi-24px mdi-phone"></i>\n                            <div class="input-field phone-work">\n                                <input id="{{view.cid}}-phone-work" placeholder="Work" type="text" name="phone_work">\n                            </div>\n                            <div class="input-field phone-home">\n                                <input id="{{view.cid}}-phone-home" placeholder="Home" type="text" name="phone_home">\n                            </div>\n                            <div class="input-field phone-mobile">\n                                <input id="{{view.cid}}-phone-mobile" placeholder="Mobile" type="text" name="phone_mobile">\n                            </div>\n                        </div>\n                        <div class="info-wrap email-info-wrap">\n                            <div class="input-label">Email</div>\n                            <i class="details-icon mdi mdi-24px mdi-email"></i>\n                            <div class="input-field email-work">\n                                <input id="{{view.cid}}-email-work" placeholder="Work" type="text" name="email_work">\n                            </div>\n                            <div class="input-field email-home">\n                                <input id="{{view.cid}}-email-home" placeholder="Personal" type="text" name="email_home">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap address-info-wrap">\n                            <i class="details-icon mdi mdi-24px mdi-map-marker"></i>\n                            <div class="input-wrap address-wrap address-home-wrap">\n                                <div class="input-label">Home address</div>\n                                <div class="input-field pobox">\n                                    <input id="{{view.cid}}-po-home-box" placeholder="PO Box" type="text" name="po_home_box">\n                                </div>\n                                <div class="input-field extadd">\n                                    <input id="{{view.cid}}-addr-home-extadd" placeholder="Extended address" type="text" name="addr_home_extadd">\n                                </div>\n                                <div class="input-field street">\n                                    <input id="{{view.cid}}-addr-home-street" placeholder="Street" type="text" name="addr_home_street">\n                                </div>\n                                <div class="input-field locality">\n                                    <input id="{{view.cid}}-addr-home-locality" placeholder="Locality" type="text" name="addr_home_locality">\n                                </div>\n                                <div class="input-field region">\n                                    <input id="{{view.cid}}-addr-home-region" placeholder="Region" type="text" name="addr_home_region">\n                                </div>\n                                <div class="input-field pcode">\n                                    <input id="{{view.cid}}-addr-home-pcode" placeholder="Postal code" type="text" name="addr_home_pcode">\n                                </div>\n                                <div class="input-field country">\n                                    <input id="{{view.cid}}-addr-home-country" placeholder="Country name" type="text" name="addr_home_country">\n                                </div>\n                            </div>\n                            <div class="input-wrap address-wrap address-work-wrap">\n                                <div class="input-label">Work address</div>\n                                <div class="input-field pobox">\n                                    <input id="{{view.cid}}-po-work-box" placeholder="PO Box" type="text" name="po_work_box">\n                                </div>\n                                <div class="input-field extadd">\n                                    <input id="{{view.cid}}-addr-work-extadd" placeholder="Extended address" type="text" name="addr_work_extadd">\n                                </div>\n                                <div class="input-field street">\n                                    <input id="{{view.cid}}-addr-work-street" placeholder="Street" type="text" name="addr_work_street">\n                                </div>\n                                <div class="input-field locality">\n                                    <input id="{{view.cid}}-addr-work-locality" placeholder="Locality" type="text" name="addr_work_locality">\n                                </div>\n                                <div class="input-field region">\n                                    <input id="{{view.cid}}-addr-work-region" placeholder="Region" type="text" name="addr_work_region">\n                                </div>\n                                <div class="input-field pcode">\n                                    <input id="{{view.cid}}-addr-work-pcode" placeholder="Postal code" type="text" name="addr_work_pcode">\n                                </div>\n                                <div class="input-field country">\n                                    <input id="{{view.cid}}-addr-work-country" placeholder="Country name" type="text" name="addr_work_country">\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n\n            </div>\n        </div>\n        <div class="panel-footer noselect">\n            <div class="buttons-wrap">\n                <button class="btn-vcard-save btn-flat btn-main">Save</button>\n                <button class="btn-vcard-back btn-flat btn-main btn-dark">Cancel</button>\n            </div>\n        </div>\n    </div>\n';});
+define('text!templates/vcard/vcard_edit.html',[],function () { return '    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>Edit vCard</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content details-panel">\n\n                <div class="settings-block-wrap vcard">\n                    <div class="vcard-edit-wrap">\n                        <div class="info-wrap personal-info-wrap">\n                            <i class="details-icon mdi mdi-24px mdi-account-card-details"></i>\n                            <div class="input-field first-name">\n                                <input id="{{view.cid}}-first-name" placeholder="First name" type="text" name="first_name">\n                            </div>\n                            <div class="input-field middle-name">\n                                <input id="{{view.cid}}-middle-name" placeholder="Middle name" type="text" name="middle_name">\n                            </div>\n                            <div class="input-field last-name">\n                                <input id="{{view.cid}}-last-name" placeholder="Surname" type="text" name="last_name">\n                            </div>\n                            <div class="input-field fullname">\n                                <input id="{{view.cid}}-fullname" placeholder="Full name" type="text" name="fullname">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap nickname-info-wrap">\n                            <div class="input-label">Nickname</div>\n                            <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n                            <div class="input-field nickname">\n                                <input id="{{view.cid}}-nickname" placeholder="Nickname" type="text" name="nickname">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap birthday-info-wrap">\n                            <div class="input-label">Birthday</div>\n                            <i class="details-icon mdi mdi-24px mdi-cake-variant"></i>\n                            <div class="input-field birthday">\n                                <input id="{{view.cid}}-birthday" placeholder="YYYY-MM-DD" type="text" class="datepicker">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap job-info-wrap">\n                            <div class="input-label">Job</div>\n                            <i class="details-icon mdi mdi-24px mdi-briefcase"></i>\n                            <div class="input-field org-name">\n                                <input id="{{view.cid}}-org-name" placeholder="Company" type="text" name="org_name">\n                            </div>\n                            <div class="input-field job-title">\n                                <input id="{{view.cid}}-job-title" placeholder="Job title" type="text" name="job_title">\n                            </div>\n                            <div class="input-field org-unit">\n                                <input id="{{view.cid}}-org-unit" placeholder="Unit" type="text" name="org_unit">\n                            </div>\n                            <div class="input-field role">\n                                <input id="{{view.cid}}-role" placeholder="Role" type="text" name="role">\n                            </div>\n                        </div>\n                        <div class="info-wrap site-info-wrap">\n                            <div class="input-label">Website</div>\n                            <i class="details-icon mdi mdi-24px mdi-web"></i>\n                            <div class="input-field url">\n                                <input id="{{view.cid}}-url" placeholder="www.example.com" type="text" name="url">\n                            </div>\n                        </div>\n                        <div class="info-wrap description-info-wrap">\n                            <div class="input-label">Description</div>\n                            <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n                            <div class="input-field description">\n                                <textarea id="{{view.cid}}-description" placeholder="Some text field, 3-5 rows" type="text" cols="30" rows="10" class="text-field materialize-textarea" name="description"></textarea>\n                            </div>\n                        </div>\n\n                        <div class="info-wrap phone-info-wrap">\n                            <div class="input-label">Phone</div>\n                            <i class="details-icon mdi mdi-24px mdi-phone"></i>\n                            <div class="input-field phone-work">\n                                <input id="{{view.cid}}-phone-work" placeholder="Work" type="text" name="phone_work">\n                            </div>\n                            <div class="input-field phone-home">\n                                <input id="{{view.cid}}-phone-home" placeholder="Home" type="text" name="phone_home">\n                            </div>\n                            <div class="input-field phone-mobile">\n                                <input id="{{view.cid}}-phone-mobile" placeholder="Mobile" type="text" name="phone_mobile">\n                            </div>\n                        </div>\n                        <div class="info-wrap email-info-wrap">\n                            <div class="input-label">Email</div>\n                            <i class="details-icon mdi mdi-24px mdi-email"></i>\n                            <div class="input-field email-work">\n                                <input id="{{view.cid}}-email-work" placeholder="Work" type="text" name="email_work">\n                            </div>\n                            <div class="input-field email-home">\n                                <input id="{{view.cid}}-email-home" placeholder="Personal" type="text" name="email_home">\n                            </div>\n                        </div>\n\n                        <div class="info-wrap address-info-wrap">\n                            <i class="details-icon mdi mdi-24px mdi-map-marker"></i>\n                            <div class="input-wrap address-wrap address-home-wrap">\n                                <div class="input-label">Home address</div>\n                                <div class="input-field pobox">\n                                    <input id="{{view.cid}}-po-home-box" placeholder="PO Box" type="text" name="po_home_box">\n                                </div>\n                                <div class="input-field extadd">\n                                    <input id="{{view.cid}}-addr-home-extadd" placeholder="Extended address" type="text" name="addr_home_extadd">\n                                </div>\n                                <div class="input-field street">\n                                    <input id="{{view.cid}}-addr-home-street" placeholder="Street" type="text" name="addr_home_street">\n                                </div>\n                                <div class="input-field locality">\n                                    <input id="{{view.cid}}-addr-home-locality" placeholder="Locality" type="text" name="addr_home_locality">\n                                </div>\n                                <div class="input-field region">\n                                    <input id="{{view.cid}}-addr-home-region" placeholder="Region" type="text" name="addr_home_region">\n                                </div>\n                                <div class="input-field pcode">\n                                    <input id="{{view.cid}}-addr-home-pcode" placeholder="Postal code" type="text" name="addr_home_pcode">\n                                </div>\n                                <div class="input-field country">\n                                    <input id="{{view.cid}}-addr-home-country" placeholder="Country name" type="text" name="addr_home_country">\n                                </div>\n                            </div>\n                            <div class="input-wrap address-wrap address-work-wrap">\n                                <div class="input-label">Work address</div>\n                                <div class="input-field pobox">\n                                    <input id="{{view.cid}}-po-work-box" placeholder="PO Box" type="text" name="po_work_box">\n                                </div>\n                                <div class="input-field extadd">\n                                    <input id="{{view.cid}}-addr-work-extadd" placeholder="Extended address" type="text" name="addr_work_extadd">\n                                </div>\n                                <div class="input-field street">\n                                    <input id="{{view.cid}}-addr-work-street" placeholder="Street" type="text" name="addr_work_street">\n                                </div>\n                                <div class="input-field locality">\n                                    <input id="{{view.cid}}-addr-work-locality" placeholder="Locality" type="text" name="addr_work_locality">\n                                </div>\n                                <div class="input-field region">\n                                    <input id="{{view.cid}}-addr-work-region" placeholder="Region" type="text" name="addr_work_region">\n                                </div>\n                                <div class="input-field pcode">\n                                    <input id="{{view.cid}}-addr-work-pcode" placeholder="Postal code" type="text" name="addr_work_pcode">\n                                </div>\n                                <div class="input-field country">\n                                    <input id="{{view.cid}}-addr-work-country" placeholder="Country name" type="text" name="addr_work_country">\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n\n            </div>\n        </div>\n        <div class="panel-footer noselect">\n            <div class="buttons-wrap">\n                <button class="btn-vcard-save btn-flat btn-main">Save</button>\n                <button class="btn-vcard-back btn-flat btn-main btn-dark">Cancel</button>\n            </div>\n        </div>\n    </div>\n';});
 
 
 define('text!templates/searching/searching_wide.html',[],function () { return '<div class="searching-panel">\n    <div class="search-form">\n        <div class="account-indicator ground-color-500"></div>\n        <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search by domain">\n        <i class="close-search-icon mdi mdi-20px mdi-close"></i>\n    </div>\n    <div class="searching-properties-field">\n        <div class="dropdown-button" data-visible="false">\n            <i class="mdi mdi-24px mdi-chevron-down arrow"></i>\n        </div>\n    </div>\n    <ul id="select-searching-properties" class="selectable-text">\n        <div class="account-property">\n            <p class="property-name">Account</p>\n            <div class="account-field">\n                <div class="multiple-acc">\n                    <div class="account-dropdown-wrap">\n                        <div class="dropdown-button" data-activates="select-account-for-searching">\n                            <div class="account-item-wrap">\n                            </div>\n                            <div class="caret">\n                                <i class="mdi mdi-20px mdi-menu-down"></i>\n                            </div>\n                        </div>\n                        <div id="select-account-for-searching" class="dropdown-content">\n                        </div>\n                    </div>\n                </div>\n                <div class="single-acc">\n                    <div class="dropdown-button">\n                        <div class="account-item-wrap">\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="title-property">\n            <p class="property-name">Title</p>\n            <div class="input-field">\n                <input id="searching_property_title" type="text" name="title">\n            </div>\n        </div>\n        <div class="sorting-property">\n            <p class="property-name">Sort by</p>\n            <div class="input-field">\n                <input id="searching_property_sort_by" type="text" name="title">\n            </div>\n        </div>\n        <button class="btn-search btn btn-main-filled ground-color-700">Search</button>\n    </ul>\n</div>\n<div class="searching-result-wrap">\n    <div class="chats-list-wrap">\n        <div class="result-string"></div>\n        <div class="preloader-wrapper preloader-17px active">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div></div>\n        <div class="chats-list"></div></div>\n    <div class="searching-more"></div>\n</div>';});
@@ -41981,7 +44385,7 @@ define('text!templates/searching/searching_account_item.html',[],function () { r
 define('text!templates/searching/existing_groupchat_item.html',[],function () { return '<div class="existing-chat-wrap" data-name="{{name}}" data-jid="{{jid}}">\n    <div class="account-indicator ground-color-{{color}}-500"></div>\n    <div class="circle-avatar">\n        <img>\n    </div>\n    <div class="existing-chat-item">\n        <div class="name one-line">{{name}}</div>\n        <div class="jid one-line">{{jid}}</div>\n    </div>\n</div>';});
 
 
-define('text!templates/searching/existing_groupchat_details_view.html',[],function () { return '<div class="block-header">\n    <span class="block-name">Chat properties</span>\n</div>\n<div class="chat-properties-wrap selectable-text">\n    <div class="info-wrap jid-info-wrap">\n        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        <div class="info jabber-id">\n            <div class="value one-line">{{jid}}</div>\n            <div class="label">Jabber ID</div>\n        </div>\n    </div>\n    <div class="info-wrap name-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info name">\n            <div class="value one-line">{{name}}</div>\n            <div class="label">Name</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value one-line">{{description}}</div>\n            <div class="label">Description</div>\n        </div>\n    </div>\n    <div class="info-wrap anonymous-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-comment-question-outline"></i>\n        <div class="info anonymous">\n            <div class="value one-line">{{anonymous}}</div>\n            <div class="label">Anonymous</div>\n        </div>\n    </div>\n    <div class="info-wrap model-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-lock-open-outline"></i>\n        <div class="info model">\n            <div class="value one-line">{{membership}}</div>\n            <div class="label">Membership</div>\n        </div>\n    </div>\n</div>\n<button class="btn-join-chat btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Join</button>\n';});
+define('text!templates/searching/existing_groupchat_details_view.html',[],function () { return '<div class="block-header">\n    <span class="block-name">Chat properties</span>\n</div>\n<div class="chat-properties-wrap selectable-text">\n    <div class="info-wrap jid-info-wrap">\n        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        <div class="info jabber-id">\n            <div class="value one-line">{{jid}}</div>\n            <div class="label">Jabber ID</div>\n        </div>\n    </div>\n    <div class="info-wrap name-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info name">\n            <div class="value one-line">{{name}}</div>\n            <div class="label">Name</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value one-line">{{description}}</div>\n            <div class="label">Description</div>\n        </div>\n    </div>\n    <div class="info-wrap anonymous-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-comment-question-outline"></i>\n        <div class="info anonymous">\n            <div class="value one-line">{{privacy}}</div>\n            <div class="label">Anonymous</div>\n        </div>\n    </div>\n    <div class="info-wrap model-info-wrap">\n        <i class="details-icon mdi mdi-24px mdi-lock-open-outline"></i>\n        <div class="info model">\n            <div class="value one-line">{{membership}}</div>\n            <div class="label">Membership</div>\n        </div>\n    </div>\n</div>\n<button class="btn-join-chat btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Join</button>\n';});
 
 
 define('text!templates/contacts/roster_right.html',[],function () { return '<div class="contacts-panel noselect">\n    <div class="collapsed-wrap">\n        <i class="collapsed-contacts-icon mdi mdi-24px mdi-account-multiple"></i>\n        <div class="all-contacts-counter"></div>\n    </div>\n    <div class="expanded-wrap">\n        <div class="roster-head panel-head">\n            <div class="contacts-header">Contacts</div>\n            <div class="roster-button btn-pin"></div>\n        </div>\n\n        <div class="contact-list-wrap">\n            <div class="contact-list">\n            </div>\n        </div>\n    </div>\n</div>\n';});
@@ -42005,13 +44409,13 @@ define('text!templates/contacts/group_left.html',[],function () { return '<div c
 define('text!templates/contacts/add_contact.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Add new contact</span>\n    </div>\n    <div class="modal-content">\n        <div class="row account-field">\n            <div class="field-header">Account</div>\n            <div class="multiple-acc">\n                <div class="account-dropdown-wrap">\n                    <div class="dropdown-button" data-activates="select-account-for-add-contact">\n                        <div class="account-item-wrap">\n                        </div>\n                        <div class="caret">\n                            <i class="mdi mdi-20px mdi-menu-down"></i>\n                        </div>\n                    </div>\n                    <div id="select-account-for-add-contact" class="dropdown-content noselect">\n                    </div>\n                </div>\n            </div>\n            <div class="single-acc">\n                <div class="dropdown-button">\n                    <div class="account-item-wrap">\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="row name-field">\n            <div class="input-field">\n                <input id="new_contact_username" type="text" name="username">\n                <label for="new_contact_username">Contact JID</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="new_contact_name" type="text" name="contact_name" required>\n                <label for="new_contact_name">Contact name</label>\n            </div>\n            <span class="add-contact-feedback red-text"></span>\n        </div>\n        <div class="row groups-field">\n            <div class="field-header">Circles</div>\n            <div class="groups checkbox-list">\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">Add</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
 
 
-define('text!templates/contacts/contact_right_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <p class="name one-line"></p>\n    <p class="jid one-line hidden"></p>\n    <p class="status-message one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"><svg class="mdi mdi-18px" viewBox="0 0 18 18"/></div>\n';});
+define('text!templates/contacts/contact_right_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <p class="name one-line"></p>\n    <p class="jid one-line hidden"></p>\n    <p class="status-message one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>\n';});
 
 
-define('text!templates/contacts/contact_left_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <div class="name-wrap">\n        <p class="name one-line"></p>\n        <i class="mdi muted-icon mdi-14px mdi-bell-off"/>\n    </div>\n    <p class="jid one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"><svg class="mdi mdi-18px" viewBox="0 0 18 18"/></div>';});
+define('text!templates/contacts/contact_left_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <div class="name-wrap">\n        <p class="name one-line"></p>\n        <i class="mdi muted-icon mdi-14px mdi-bell-off"/>\n    </div>\n    <p class="jid one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>';});
 
 
-define('text!templates/contacts/contact_blocked_item.html',[],function () { return '<div class="circle-avatar noselect">\n    <img>\n</div>\n<div class="text-info-wrap">\n    <p class="jid one-line"></p>\n    <p class="btn-unblock text-color-700 hover-text-color-900 one-line">Unblock</p>\n</div>\n\n';});
+define('text!templates/contacts/contact_blocked_item.html',[],function () { return '<div data-jid="{{jid}}" class="blocked-contact">\n    <div class="text-info-wrap">\n        <p class="jid one-line">{{jid}}</p>\n        <p class="btn-unblock text-color-700 hover-text-color-900 one-line">Unblock</p>\n    </div>\n</div>';});
 
 
 define('text!templates/contacts/contact_details.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar"/>\n            <div class="status hide-offline"></div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n            <div class="status-message one-line"></div>\n        </div>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">Esc</span>\n        </div>\n        <div class="btn-more  dropdown-button" data-activates="{{view.cid}}-buttons-wrap">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">\n            <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>\n            <li class="btn-auth-request"><span class="one-line">Request authorization</span></li>\n            <li class="btn-add"><span class="one-line">Add contact</span></li>\n            <li class="btn-delete"><span class="one-line">Delete contact</span></li>\n        </ul>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-chat-wrap">\n                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n                <div class="btn-name">Chat</div>\n            </div>\n            <div class="button-wrap btn-voice-call-wrap">\n                <i class="mdi mdi-24px mdi-phone btn-voice-call"></i>\n                <div class="btn-name">Voice Call</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <i class="mdi mdi-24px mdi-bell btn-mute"></i>\n                <div class="btn-name">Notifications</div>\n            </div>\n            <div class="button-wrap btn-block-wrap">\n                <i class="mdi mdi-24px mdi-block-helper btn-block"></i>\n                <div class="btn-name">Block</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content private-chat">\n        <div class="left-column">\n            <div class="block-wrap subscription-block-wrap">\n                <div class="block-header">\n                    <span class="block-name">Subscription information</span>\n                </div>\n                <div class="subscription-info-wrap">\n                    <div class="incoming-subscription-wrap">\n                        <div class="input-field checkbox-field incoming-subscription-wrap">\n                            <input type="checkbox" class="filled-in" id="incoming-subscription"/>\n                            <label for="incoming-subscription"></label>\n                        </div>\n                    </div>\n                    <div class="outcoming-subscription-wrap">\n                        <div class="input-field checkbox-field incoming-subscription-wrap">\n                            <input type="checkbox" class="filled-in" id="outcoming-subscription"/>\n                            <label for="outcoming-subscription"></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div class="block-wrap vcard">\n            </div>\n        </div>\n        <div class="right-column">\n            <div class="block-wrap resources-block-wrap hidden">\n                <div class="block-header">\n                    <span class="block-name">Connected devices</span>\n                </div>\n                <div class="resources-wrap">\n                </div>\n            </div>\n            <div class="block-wrap groups-block-wrap"></div>\n        </div>\n    </div>\n</div>';});
@@ -42041,19 +44445,19 @@ define('text!templates/contacts/preloader.html',[],function () { return '<div cl
 define('text!templates/contacts/group_chats/group_chat_properties.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <span class="btn-edit-settings">edit</span>\n</div>\n<div class="group-chat-properties vcard">\n    <div class="info-wrap jid-info-wrap">\n        <div title="Click to copy" class="details-icon-wrap">\n            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        </div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">Jabber ID</div>\n        </div>\n    </div>\n    <div class="info-wrap name-info-wrap">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info name">\n            <div class="value one-line"></div>\n            <div class="label">Name</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">Description</div>\n        </div>\n    </div>\n    <div class="info-wrap searchable-info-wrap">\n        <svg class="details-icon toolbar-icon mdi mdi-24px" viewBox="0 0 24 24">\n            <path title="Click to copy" d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z"></path>\n        </svg>\n        <div class="info searchable">\n            <div class="value one-line"></div>\n            <div class="label">Indexed</div>\n        </div>\n    </div>\n    <div class="info-wrap model-info-wrap">\n        <i title="Click to copy" class="details-icon mdi mdi-24px mdi-lock"></i>\n        <div class="info model">\n            <div class="value one-line"></div>\n            <div class="label">Membership</div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/group_chat_details.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar">\n                <input title="Change avatar" type="file"/>\n                <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                    <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                </svg>\n                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                </div>\n            </div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n            <div class="status-message one-line"></div>\n        </div>\n        <div class="btn-more dropdown-button" data-activates="{{view.cid}}-buttons-wrap">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">\n            <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>\n            <li class="btn-edit-settings"><span class="one-line">Settings</span></li>\n            <li class="btn-default-restrictions"><span class="one-line">Default restrictions</span></li>\n            <li class="btn-delete-group"><span class="one-line">Delete group</span></li>\n        </ul>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">Esc</span>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-chat-wrap">\n                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n                <div class="btn-name">Chat</div>\n            </div>\n            <div class="button-wrap btn-invite-wrap">\n                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>\n                <div class="btn-name">Invite</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <i class="mdi mdi-24px mdi-bell btn-mute"></i>\n                <div class="btn-name">Notifications</div>\n            </div>\n            <div class="button-wrap btn-leave-wrap">\n                <div class="btn-leave"><svg viewBox="0 0 24 24">\n                    <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />\n                </svg>\n                </div>\n                <div class="btn-name">Leave</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="head-block">\n            <div class="left-column">\n                <div class="block-wrap group-chat-properties-wrap"></div>\n            </div>\n            <div class="right-column">\n                <div class="block-wrap status-block-wrap"></div>\n                <div class="block-wrap groups-block-wrap"></div>\n            </div>\n        </div>\n        <div class="bottom-block">\n            <ul class="tabs">\n                <li data-value="participants" class="list-variant tab"><a class="text-color-700">Participants</a></li>\n                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">Invitations</a></li>\n                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">Blocked</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>\n';});
+define('text!templates/contacts/group_chats/group_chat_details.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar">\n                <input title="Change avatar" type="file"/>\n                <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                    <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                </svg>\n                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                </div>\n            </div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n            <div class="status-message one-line"></div>\n        </div>\n        <div class="btn-more dropdown-button" data-activates="{{view.cid}}-buttons-wrap">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">\n            <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>\n            <li class="btn-edit-settings"><span class="one-line">Settings</span></li>\n            <li class="btn-default-restrictions"><span class="one-line">Default restrictions</span></li>\n            <li class="btn-delete-group"><span class="one-line">Delete group</span></li>\n        </ul>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">Esc</span>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-chat-wrap">\n                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n                <div class="btn-name">Chat</div>\n            </div>\n            <div class="button-wrap btn-invite-wrap">\n                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>\n                <div class="btn-name">Invite</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <i class="mdi mdi-24px mdi-bell btn-mute"></i>\n                <div class="btn-name">Notifications</div>\n            </div>\n            <div class="button-wrap btn-leave-wrap">\n                <div class="btn-leave"><svg viewBox="0 0 24 24">\n                    <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />\n                </svg>\n                </div>\n                <div class="btn-name">Leave</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="head-block">\n            <div class="left-column">\n                <div class="block-wrap group-chat-properties-wrap"></div>\n            </div>\n            <div class="right-column">\n                <div class="block-wrap status-block-wrap"></div>\n                <div class="block-wrap groups-block-wrap"></div>\n            </div>\n        </div>\n        <div class="bottom-block">\n            <ul class="tabs">\n                <li data-value="participants" class="list-variant tab"><a class="text-color-700">Members</a></li>\n                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">Invitations</a></li>\n                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">Blocked</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/contacts/group_chats/invitation.html',[],function () { return '    <div class="panel-content-wrap noselect">\n        <div class="main-info">\n            <div class="circle-avatar"><img></div>\n            <div class="text-info">\n                <div class="name-wrap one-line"></div>\n                <div class="jid one-line"></div>\n            </div>\n        </div>\n\n        <div class="panel-content">\n            <div class="invite-msg"><p class="invite-msg-text"></p></div>\n            <div class="panel-footer noselect">\n                <div class="buttons-wrap">\n                    <button class="btn-accept btn-flat btn-main">Accept</button>\n                    <button class="btn-join btn-flat btn-main hidden">Join</button>\n                    <button class="btn-decline btn-flat btn-main">Decline</button>\n                    <button class="btn-decline-all btn-flat btn-main">Decline all</button>\n                    <button class="btn-block btn-flat btn-main">Block</button>\n                    <button class="btn-chat btn-flat btn-main hidden">Chat</button>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
+define('text!templates/contacts/group_chats/invitation.html',[],function () { return '    <div class="panel-content-wrap noselect">\n        <div class="main-info">\n            <div class="circle-avatar"><img></div>\n            <div class="text-info">\n                <div class="name-wrap one-line"></div>\n                <div class="jid one-line"></div>\n            </div>\n        </div>\n\n        <div class="panel-content">\n            <div class="msg-wrap"><p class="msg-text"></p></div>\n            <div class="panel-footer noselect">\n                <div class="buttons-wrap">\n                    <button class="btn-accept btn-flat btn-main">Accept</button>\n                    <button class="btn-join btn-flat btn-main hidden">Join</button>\n                    <button class="btn-decline btn-flat btn-main">Decline</button>\n                    <button class="btn-decline-all btn-flat btn-main">Decline all</button>\n                    <button class="btn-block btn-flat btn-main">Block</button>\n                    <button class="btn-chat btn-flat btn-main hidden">Chat</button>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
 
 
-define('text!templates/contacts/group_chats/group_chat_properties_edit.html',[],function () { return '<div class="modal-header"><div class="panel-header black-text">{{anonymous}} Group settings</div></div>\n<div class="modal-content group-chat-properties-wrap selectable-text">\n    <div class="property-wrap jid-info-wrap">\n        <div class="property-header">XMPP ID</div>\n        <div class="jabber-id">\n            <div class="value one-line">{{jid}}</div>\n        </div>\n        <p id="anonymous-public" class="property-description hidden">Public group. Participants can see real XMPP IDs of other participants</p>\n        <p id="anonymous-incognito" class="property-description hidden">Incognito group. Participants can not see real XMPP IDs of other participants</p>\n    </div>\n    {[fields.forEach(function (field) { if (field.type === \'hidden\' || field.type === \'jid-multi\') return;]}\n    <div class="property-wrap {{field.var}}-field">\n        <div class="property-header">{{field.label}}</div>\n        {[if (field.type === \'text-single\') {]}\n        <div class="input-field input-group-chat-name">\n            <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder="Input Chat Name" class="text-field">\n        </div>\n        {[} else if (field.type === \'text-multi\') {]}\n        <textarea placeholder="Input {{field.var}}" id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea">{{field.values[0]}}</textarea>\n        {[} else if (field.type === \'list-single\') { field.options.forEach(function (option) {]}\n        <div class="property-radio">\n            <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{field.var}}" type="radio" class="with-gap" required="">\n            <label class="{{option.value}}-label" for="{{option.value}}">{{option.label}}</label>\n        </div>\n        {[});}]}\n        {[if (field.var === \'index\'){]}\n        <p class="property-description">Locally indexed chats can be discovered by searching host server. Globally indexed chats can be discovered by searching global index</p>\n        {[} else if (field.var === \'membership\') {]}\n        <p class="property-description">Member-only chats can be joined only by invitation</p>\n        {[}]}\n    </div>\n    {[})]}\n</div>\n<div class="modal-footer">\n    <div class="buttons-wrap">\n        <button class="btn-save btn-flat btn-main non-active">Save</button>\n        <button class="btn-cancel btn-flat btn-dark btn-main">Cancel</button>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/group_chat_properties_edit.html',[],function () { return '<div class="modal-header"><div class="panel-header black-text">{{anonymous}} Group settings</div></div>\n<div class="modal-content group-chat-properties-wrap selectable-text">\n    <div class="property-wrap jid-info-wrap">\n        <div class="property-header">XMPP ID</div>\n        <div class="jabber-id">\n            <div class="value one-line">{{jid}}</div>\n        </div>\n        <p id="anonymous-public" class="property-description hidden">Public group. Members can see real XMPP IDs of other participants</p>\n        <p id="anonymous-incognito" class="property-description hidden">Incognito group. Members can not see real XMPP IDs of other participants</p>\n    </div>\n    {[fields.forEach(function (field) { if (field.type === \'hidden\' || field.type === \'jid-multi\') return;]}\n    <div class="property-wrap {{field.var}}-field">\n        {[if (!(field.type == \'fixed\' && field.values[0] === "")) {]}\n        <div class="property-header">{{field.label}}</div>\n        {[}]}\n        {[if (field.type === \'text-single\') {]}\n        <div class="input-field input-group-chat-name">\n            <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder="Input Chat Name" class="text-field">\n        </div>\n        {[} else if (field.type === \'text-multi\') {]}\n        <textarea placeholder="Input {{field.var}}" id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea">{{field.values[0]}}</textarea>\n        {[} else if (field.type === \'list-single\') { field.options.forEach(function (option) {]}\n        <div class="property-radio">\n            <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{field.var}}" type="radio" class="with-gap" required="">\n            <label class="{{option.value}}-label" for="{{option.value}}">{{option.label}}</label>\n        </div>\n        {[});} else  if (field.type === \'fixed\' && field.values[0] !== "") {]}\n        <div class="fixed-field{[if (field.var === \'description\'){]} description{[}]}">\n            <div class="value">{{field.values[0]}}</div>\n        </div>\n        {[}]}\n        {[if (field.var === \'index\'){]}\n        <p class="property-description">Locally indexed chats can be discovered by searching host server. Globally indexed chats can be discovered by searching global index</p>\n        {[} else if (field.var === \'membership\') {]}\n        <p class="property-description">Member-only chats can be joined only by invitation</p>\n        {[}]}\n    </div>\n    {[})]}\n</div>\n<div class="modal-footer">\n    <div class="buttons-wrap">\n        {[if (!all_fixed){]}\n        <button class="btn-save btn-flat btn-main non-active">Save</button>\n        {[}]}\n        <button class="btn-cancel btn-flat btn-dark btn-main">Cancel</button>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/default_restrictions.html',[],function () { return '<div class="modal-header"><div class="panel-header black-text">Default restrictions</div></div>\n<div class="modal-content">\n    <div class="default-restrictions-list-wrap"></div>\n    <p class="default-restrictions-info">These restrictions will be automatically applied to all new group participants</p>\n</div>\n<div class="modal-footer">\n    <div class="buttons-wrap">\n        <button class="btn-default-restrictions-save btn-flat btn-main non-active">Save</button>\n        <button class="btn-default-restrictions-cancel btn-flat btn-main btn-dark">Cancel</button>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/default_restrictions.html',[],function () { return '<div class="modal-header"><div class="panel-header black-text">Default restrictions</div></div>\n<div class="modal-content">\n    <div class="default-restrictions-list-wrap"></div>\n    <p class="default-restrictions-info">These restrictions will be automatically applied to all new group members</p>\n</div>\n<div class="modal-footer">\n    <div class="buttons-wrap">\n        <button class="btn-default-restrictions-save btn-flat btn-main non-active">Save</button>\n        <button class="btn-default-restrictions-cancel btn-flat btn-main btn-dark">Cancel</button>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/group_member_item.html',[],function () { return '<tr class="participant-wrap" data-id="{{id}}" data-jid="{{jid}}">\n    <td class="list-item group-chat-participant">\n        <div class="member-item">\n            <div class="circle-avatar"/>\n            <div class="participant-info">\n            <div class="top-line"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div class="badge one-line">{{badge}}</div>{[}]}</div>\n            {[if (jid) {]}<p class="jid one-line">{{jid}}</p>{[} else {]}<p class="id one-line">{{id}}</p>{[}]}\n            </div>\n        </div>\n    </td>\n    <td class="last-seen">{[if (!present) {]}<span class="online-status text-color-green-700">Online</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}</td>\n    <td class="role">{[if (role !== \'member\') {]}{{role}}{[}]}</td>\n    <td>\n        {[if (is_me) {]}\n        <span style="font-size:12px" class="text-color-500">this is you</span>\n        {[} else {]}\n        <div class="buttons-wrap">\n            <div title="Kick" class="btn-kick">\n                <i class="mdi mdi-24px mdi-account-remove"></i>\n            </div>\n            <div title="Block" class="btn-block">\n                <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                    <path fill="#9e9e9e" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />\n                </svg>\n            </div>\n        </div>\n        {[}]}\n    </td>\n</tr>';});
+define('text!templates/contacts/group_chats/group_member_item.html',[],function () { return '<tr class="participant-wrap" data-id="{{id}}" data-jid="{{jid}}">\n    <td class="list-item group-chat-participant">\n        <div class="member-item">\n            <div class="circle-avatar"/>\n            <div class="participant-info">\n            <div class="top-line"><div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>{[if (badge) {]}<div class="badge one-line">{{badge}}</div>{[}]}</div>\n            {[if (jid) {]}<p class="jid one-line">{{jid}}</p>{[}]}\n            </div>\n        </div>\n    </td>\n    <td class="last-seen">{[if (!present) {]}<span class="online-status text-color-green-700">Online</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}</td>\n    <td class="role">{[if (role !== \'member\') {]}{{role}}{[}]}</td>\n    <td>\n        {[if (is_me) {]}\n        <span style="font-size:12px" class="text-color-500">this is you</span>\n        {[} else {]}\n        <div class="buttons-wrap">\n            <div title="Kick" class="btn-kick">\n                <i class="mdi mdi-24px mdi-account-remove"></i>\n            </div>\n            <div title="Block" class="btn-block">\n                <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                    <path fill="#9e9e9e" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,13.85 4.63,15.55 5.68,16.91L16.91,5.68C15.55,4.63 13.85,4 12,4M12,20A8,8 0 0,0 20,12C20,10.15 19.37,8.45 18.32,7.09L7.09,18.32C8.45,19.37 10.15,20 12,20Z" />\n                </svg>\n            </div>\n        </div>\n        {[}]}\n    </td>\n</tr>';});
 
 
 define('text!templates/contacts/group_chats/invited_member_item.html',[],function () { return '<div class="list-item {{status}}-user" data-jid="{{jid}}">\n    <div class="member-item">\n        <div class="circle-avatar"/>\n        <p title="{{jid}}" class="one-line">{{jid}}</p>\n        {[if (status == \'invitations\') {]}\n        <div title="Revoke invitation" class="revoke-invitation">\n            {[}else{]}\n            <div title="Unblock user" class="unblock-user">\n                {[}]}\n                <i class="mdi mdi-20px mdi-close"></i>\n            </div>\n    </div>\n</div>';});
@@ -42071,25 +44475,25 @@ define('text!templates/contacts/group_chats/right_expire_variants.html',[],funct
 define('text!templates/contacts/group_chats/pinned_message.html',[],function () { return '<svg class="pin" viewBox="0 0 24 24">\n    <path fill="#757575" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z" />\n</svg>\n<div class="msg-wrap">\n    <div class="chat-msg-author-wrap">\n        <div class="chat-msg-author text-color-700 one-line">{{author}}</div>{[if (fwd_author){]}<svg class="fwd-chevron" viewBox="0 0 24 24"><path fill="#9E9E9E" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg><div class="chat-msg-author text-color-700 one-line">{{fwd_author}}</div>{[}]}\n        <div class="msg-time">{{time}}</div>\n    </div>\n    <div class="chat-msg-content chat-text-content one-line">\n        {{message}}\n    </div>\n</div>\n<svg title="Unpin" class="close" viewBox="0 0 24 24">\n    <path class="close" fill="#9E9E9E" d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />\n</svg>';});
 
 
-define('text!templates/contacts/group_chats/participant_details_item.html',[],function () { return '<div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">\n    <div class="btn-more dropdown-button" data-activates="{{id}}-buttons-wrap">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">\n        <li class="btn-block-participant"><span class="one-line">Block</span></li>\n    </ul>\n        <div class="circle-avatar">\n            <input title="Change avatar" type="file">\n            <img>\n            <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n            </svg>\n            <div class="preloader-wrap"><div class="preloader-wrapper preloader-16px visible">\n                <div class="spinner-layer">\n                    <div class="circle-clipper left">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="gap-patch">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="circle-clipper right">\n                        <div class="circle"></div>\n                    </div>\n                </div>\n            </div>\n            </div>\n        </div>\n        <div class="participant-info">\n            <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>\n            <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>\n            <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>\n            {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[} else {]}<p title="{{id}}" class="id selectable-text one-line">{{id}}</p>{[}]}\n        </div>\n    <div class="buttons-wrap">\n        {[if (incognito_chat) {]}\n        <div class="button-wrap non-active btn-chat-wrap">\n            <i class="mdi mdi-24px mdi-incognito btn-chat"></i>\n            <div class="btn-name">Private chat</div>\n        </div>\n        {[} else {]}\n        <div class="button-wrap non-active btn-chat-wrap">\n            <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n            <div class="btn-name">Direct chat</div>\n        </div>\n        {[}]}\n        <div class="button-wrap btn-participant-messages-wrap">\n            <i class="mdi mdi-24px mdi-view-list btn-participant-messages"></i>\n            <div class="btn-name">Messages</div>\n        </div>\n        <div class="button-wrap btn-set-badge-wrap">\n            <svg class="btn-set-badge" viewBox="0 0 24 24">\n                <path d="M17,3H14V6H10V3H7A2,2 0 0,0 5,5V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V5A2,2 0 0,0 17,3M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M16,16H8V15C8,13.67 10.67,13 12,13C13.33,13 16,13.67 16,15V16M13,5H11V1H13V5M16,19H8V18H16V19M12,21H8V20H12V21Z" />\n            </svg>\n            <div class="btn-name">Set badge</div>\n        </div>\n        <div class="button-wrap btn-kick-participant-wrap">\n            <i class="mdi mdi-24px mdi-account-remove btn-kick-participant"></i>\n            <div class="btn-name">Kick</div>\n        </div>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/participant_details_item.html',[],function () { return '<div class="participant-details-item {[if (subscription === null) {]}unsubscribed{[}]}" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">\n    {[if (subscription !== null) {]}\n    <div class="btn-more dropdown-button" data-activates="{{id}}-buttons-wrap">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">\n        <li class="btn-block-participant"><span class="one-line">Block</span></li>\n    </ul>\n    {[}]}\n    <div class="circle-avatar">\n        {[if (subscription !== null) {]}\n        <input title="Change avatar" type="file">\n            <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n            </svg>\n            <div class="preloader-wrap"><div class="preloader-wrapper preloader-16px visible">\n                <div class="spinner-layer">\n                    <div class="circle-clipper left">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="gap-patch">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="circle-clipper right">\n                        <div class="circle"></div>\n                    </div>\n                </div>\n            </div>\n            </div>\n        {[}]}\n    </div>\n        <div class="participant-info">\n            {[if (subscription !== null) {]}<div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>{[}]}\n            <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>\n            <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>\n            {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[}]}\n            {[ if (is_myself) {]}\n            <div class="my-flag one-line text-color-red-700">this is you</div>\n            {[}]}\n            {[if (subscription === null) {]}<p class="role selectable-text one-line">{[if (blocked) {]}Blocked{[}else{]}Not a member{[}]}</p>{[}]}\n        </div>\n    <div class="buttons-wrap">\n        {[if (incognito_chat) {]}\n        <div class="button-wrap non-active btn-chat-wrap">\n            <i class="mdi mdi-24px mdi-incognito btn-chat"></i>\n            <div class="btn-name">Private chat</div>\n        </div>\n        {[} else {]}\n        <div class="button-wrap non-active btn-chat-wrap">\n            <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n            <div class="btn-name">Direct chat</div>\n        </div>\n        {[}]}\n        <div class="button-wrap btn-participant-messages-wrap">\n            <i class="mdi mdi-24px mdi-view-list btn-participant-messages"></i>\n            <div class="btn-name">Messages</div>\n        </div>\n        <div class="button-wrap btn-set-badge-wrap">\n            <svg class="btn-set-badge" viewBox="0 0 24 24">\n                <path d="M17,3H14V6H10V3H7A2,2 0 0,0 5,5V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V5A2,2 0 0,0 17,3M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M16,16H8V15C8,13.67 10.67,13 12,13C13.33,13 16,13.67 16,15V16M13,5H11V1H13V5M16,19H8V18H16V19M12,21H8V20H12V21Z" />\n            </svg>\n            <div class="btn-name">Set badge</div>\n        </div>\n        <div class="button-wrap btn-kick-participant-wrap">\n            <i class="mdi mdi-24px mdi-account-remove btn-kick-participant"></i>\n            <div class="btn-name">Kick</div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/participant_placeholder.html',[],function () { return '<div class="default-screen-wrap">\n    <div class="default-image-wrap"><img src="images/astronaut@2x.png" class="image-select-participant"></div>\n    <p class="text-select-participant">Select chat participant</p>\n</div>';});
+define('text!templates/contacts/group_chats/participant_placeholder.html',[],function () { return '<div class="default-screen-wrap">\n    <div class="default-image-wrap"><img src="images/astronaut@2x.png" class="image-select-participant"></div>\n    <p class="text-select-participant">Select chat member</p>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/participants.html',[],function () { return '<table class="members-list-wrap">\n    <thead>\n    <tr>\n        <th>\n            <div class="participants-search-form search-form">\n                <svg class="search-icon" viewBox="0 0 24 24">\n                    <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M10,4A4,4 0 0,1 14,8C14,8.91 13.69,9.75 13.18,10.43C12.32,10.75 11.55,11.26 10.91,11.9L10,12A4,4 0 0,1 6,8A4,4 0 0,1 10,4M2,20V18C2,15.88 5.31,14.14 9.5,14C9.18,14.78 9,15.62 9,16.5C9,17.79 9.38,19 10,20H2Z" />\n                </svg>\n                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search participant">\n                <i class="close-search-icon mdi mdi-20px mdi-close"></i>\n            </div>\n        </th>\n        <th>Last seen</th>\n        <th>Role</th>\n        <th></th>\n    </tr>\n    </thead>\n    <tbody></tbody>\n</table>\n<div class="preloader-wrapper preloader-17px active">\n    <div class="spinner-layer">\n        <div class="circle-clipper left">\n            <div class="circle"></div>\n        </div>\n        <div class="gap-patch">\n            <div class="circle"></div>\n        </div>\n        <div class="circle-clipper right">\n            <div class="circle"></div>\n        </div>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/participants.html',[],function () { return '<table class="members-list-wrap">\n    <thead>\n    <tr>\n        <th>\n            <div class="participants-search-form search-form">\n                <svg class="search-icon" viewBox="0 0 24 24">\n                    <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M10,4A4,4 0 0,1 14,8C14,8.91 13.69,9.75 13.18,10.43C12.32,10.75 11.55,11.26 10.91,11.9L10,12A4,4 0 0,1 6,8A4,4 0 0,1 10,4M2,20V18C2,15.88 5.31,14.14 9.5,14C9.18,14.78 9,15.62 9,16.5C9,17.79 9.38,19 10,20H2Z" />\n                </svg>\n                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search member">\n                <i class="close-search-icon mdi mdi-20px mdi-close"></i>\n            </div>\n        </th>\n        <th>Last seen</th>\n        <th>Role</th>\n        <th></th>\n    </tr>\n    </thead>\n    <tbody></tbody>\n</table>\n<div class="preloader-wrapper preloader-17px active">\n    <div class="spinner-layer">\n        <div class="circle-clipper left">\n            <div class="circle"></div>\n        </div>\n        <div class="gap-patch">\n            <div class="circle"></div>\n        </div>\n        <div class="circle-clipper right">\n            <div class="circle"></div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/badge_edit_view.html',[],function () { return '\n    <div class="modal-content">\n        <div class="rich-textarea badge-text" tabindex="1" contenteditable></div>\n        <div class="error"></div>\n    </div>\n    <div class="panel-footer noselect">\n        <div class="buttons-wrap">\n            <div class="insert-emoticon">\n                <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n            </div>\n            <div class="emoticons-panel-wrap">\n                <div class="emoticons-panel"></div>\n                <div class="emoji-menu"></div>\n            </div>\n            <button class="btn-save btn-flat btn-main">Save</button>\n            <button class="btn-cancel btn-flat btn-main btn-dark">Cancel</button>\n        </div>\n    </div>';});
+define('text!templates/contacts/group_chats/badge_edit_view.html',[],function () { return '\n    <div class="modal-content">\n        <div class="textarea-header">Badge</div>\n        <div class="rich-textarea badge-text" tabindex="1" contenteditable></div>\n        <div class="error"></div>\n    </div>\n    <div class="panel-footer noselect">\n        <div class="buttons-wrap">\n            <div class="insert-emoticon">\n                <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n            </div>\n            <div class="emoticons-panel-wrap">\n                <div class="emoticons-panel"></div>\n                <div class="emoji-menu"></div>\n            </div>\n            <button class="btn-save btn-flat btn-main">Save</button>\n            <button class="btn-cancel btn-flat btn-main btn-dark">Cancel</button>\n        </div>\n    </div>';});
 
 
-define('text!templates/contacts/group_chats/private_participant_details.html',[],function () { return '<div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">\n    <div class="circle-avatar">\n        {[ if (is_myself) {]}\n        <input title="Change avatar" type="file">\n        {[}]}\n        <img>\n        {[ if (is_myself) {]}\n        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n        </svg>\n        <div class="preloader-wrap"><div class="preloader-wrapper preloader-16px visible">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n        </div>\n        {[}]}\n    </div>\n    <div class="participant-info">\n        {[ if (is_myself) {]}\n        <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>\n        {[}]}\n        <div title="{{nickname}}" class="{{is_myself && \'is-myself\'}} nickname one-line">{{nickname}}</div>\n        <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/private_participant_details.html',[],function () { return '<div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">\n    <div class="circle-avatar">\n        {[ if (is_myself) {]}\n        <input title="Change avatar" type="file">\n        {[}]}\n        <img>\n        {[ if (is_myself) {]}\n        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n        </svg>\n        <div class="preloader-wrap"><div class="preloader-wrapper preloader-16px visible">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n        </div>\n        {[}]}\n    </div>\n    <div class="participant-info">\n        {[ if (is_myself) {]}\n        <div id="edit-nickname" class="rich-textarea" tabindex="1" contenteditable></div>\n        {[}]}\n        <div title="{{nickname}}" class="{{is_myself && \'is-myself\'}} nickname one-line">{{nickname}}</div>\n        <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>\n        {[ if (is_myself) {]}\n        <div class="my-flag one-line text-color-red-700">this is you</div>\n        {[}]}\n    </div>\n</div>';});
 
 
 define('text!templates/contacts/group_chats/set_status.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Set status</span>\n    </div>\n    <ul class="status-values noselect">\n        <div class="loading-status">\n            <div class="preloader-wrapper preloader-17px active">\n                <div class="spinner-layer">\n                    <div class="circle-clipper left">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="gap-patch">\n                        <div class="circle"></div>\n                    </div>\n                    <div class="circle-clipper right">\n                        <div class="circle"></div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </ul>\n</div>\n';});
 
 
-define('text!templates/contacts/group_chats/status_item.html',[],function () { return '<li data-value="{{option.value}}">\n    <span class="status-value one-line">{{option.label}}</span>\n    <span class="status-bulb" data-status="{{option.value}}"></span>\n</li>';});
+define('text!templates/contacts/group_chats/status_item.html',[],function () { return '<li data-value="{{status.value}}">\n    <span class="status-value one-line">{{status.label}}</span>\n    <span class="status-bulb" data-status="{{status.show}}"></span>\n</li>';});
 
 
 define('text!templates/contacts/group_chats/group_status.html',[],function () { return '<div class="block-header">\n    <span class="block-name">Status</span>\n</div>\n<div class="group-chat-status">\n    <div class="status-wrap">\n        <div class="status status-bulb"></div>\n        <div class="status-message"></div>\n    </div>\n    <div class="btn-edit-status">edit</div>\n</div>';});
@@ -42101,16 +44505,16 @@ define('text!templates/chats/chats_panel.html',[],function () { return '<div cla
 define('text!templates/chats/add_chat_account_item.html',[],function () { return '<div class="account-item-wrap" data-jid="{{jid}}">\n    <div class="name one-line">{{jid}}</div>\n</div>\n';});
 
 
-define('text!templates/chats/chat_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="circle-avatar"></div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"><svg class="mdi mdi-18px" viewBox="0 0 18 18"/></div>\n<div class="recent-chat-info">\n    <div class="chat-title-wrap">\n        <p class="chat-title one-line"></p>\n        <i class="mdi muted-icon mdi-14px mdi-bell-off"></i>\n        <p class="last-msg-date"></p>\n    </div>\n    <p class="last-msg one-line"></p>\n    <i class="msg-delivering-state mdi mdi-12px hidden"></i>\n    <span class="msg-counter hidden"></span>\n</div>\n';});
+define('text!templates/chats/chat_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="circle-avatar"></div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>\n<div class="recent-chat-info">\n    <div class="chat-title-wrap">\n        <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>\n        <p class="chat-title one-line"></p>\n        <i class="mdi muted-icon mdi-14px mdi-bell-off"></i>\n        <p class="last-msg-date"></p>\n    </div>\n    <p class="last-msg one-line"></p>\n    <i class="msg-delivering-state mdi mdi-12px hidden"></i>\n    <span class="msg-counter hidden"></span>\n</div>\n';});
 
 
-define('text!templates/chats/chat_head.html',[],function () { return '    <div class="circle-avatar"/>\n    <div class="contact-status hide-offline"/>\n    <div class="chat-icon hidden"><svg class="mdi mdi-18px" viewBox="0 0 18 18"/></div>\n    <div class="contact-info">\n        <p class="contact-name one-line"></p>\n        <p class="contact-status-message one-line"></p>\n    </div>\n    <div class="chat-tools-wrap">\n        <div class="chat-tool btn-jingle-message">\n            <i class="mdi mdi-phone mdi-24px"></i>\n        </div>\n        <div class="chat-tool btn-set-status">\n            <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                <g stroke="none" stroke-width="1" fill="none">\n                    <rect x="0" y="0" width="24" height="24"/>\n                    <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>\n                </g>\n            </svg>\n        </div>\n        <div class="chat-tool btn-search-messages">\n            <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n        </div>\n        <div class="chat-tool btn-archive-chat">\n            <i class="mdi mdi-24px mdi-package-down"></i>\n        </div>\n        <div class="chat-tool btn-notifications">\n            <i class="mdi muted-icon mdi-22px mdi-bell"></i>\n        </div>\n        <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n            <li class="btn-contact-details">\n                <span class="one-line">Contact info</span>\n            </li>\n            <li class="btn-call-attention">\n                <span class="one-line">Call attention</span>\n            </li>\n            <li class="btn-export-history">\n                <span class="one-line">Export history</span>\n            </li>\n            <li class="btn-clear-history">\n                <span class="one-line">Clear history</span>\n            </li>\n            <li class="btn-invite-users">\n                <span class="one-line">Invite users</span>\n            </li>\n            <li class="btn-delete-chat">\n                <span class="one-line">Delete chat</span>\n            </li>\n            <li class="btn-delete-contact">\n                <span class="one-line">Delete contact</span>\n            </li>\n            <li class="btn-block-contact">\n                <span class="one-line">Block contact</span>\n            </li>\n            <li class="btn-unblock-contact">\n                <span class="one-line">Unblock contact</span>\n            </li>\n        </ul>\n    </div>\n';});
+define('text!templates/chats/chat_head.html',[],function () { return '    <div class="circle-avatar"/>\n    <div class="contact-status hide-offline"/>\n    <div class="chat-icon hidden"></div>\n    <div class="contact-info">\n        <div class="contact-name-wrap one-line">\n            <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>\n            <p class="contact-name one-line"></p>\n        </div>\n        <p class="contact-status-message one-line"></p>\n    </div>\n    <div class="chat-tools-wrap">\n        <div class="chat-tool btn-show-fingerprints">\n            <i class="mdi mdi-lock mdi-24px"></i>\n        </div>\n        <div class="chat-tool btn-jingle-message">\n            <i class="mdi mdi-phone mdi-24px"></i>\n        </div>\n        <div class="chat-tool btn-set-status">\n            <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                <g stroke="none" stroke-width="1" fill="none">\n                    <rect x="0" y="0" width="24" height="24"/>\n                    <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>\n                </g>\n            </svg>\n        </div>\n        <div class="chat-tool btn-search-messages">\n            <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n        </div>\n        <div class="chat-tool btn-archive-chat">\n            <i class="mdi mdi-24px mdi-package-down"></i>\n        </div>\n        <div class="chat-tool btn-notifications">\n            <i class="mdi muted-icon mdi-22px mdi-bell"></i>\n        </div>\n        <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n            <li class="btn-contact-details">\n                <span class="one-line">Contact info</span>\n            </li>\n            <li class="btn-call-attention">\n                <span class="one-line">Call attention</span>\n            </li>\n            <!--<li class="btn-export-history">\n                <span class="one-line">Export history</span>\n            </li>-->\n            <li class="btn-clear-history">\n                <span class="one-line">Clear history</span>\n            </li>\n            <li class="btn-start-encryption">\n                <span class="one-line">Start encrypted chat</span>\n            </li>\n            <li class="btn-open-encrypted-chat">\n                <span class="one-line">Open encrypted chat</span>\n            </li>\n            <li class="btn-open-regular-chat">\n                <span class="one-line">Open regular chat</span>\n            </li>\n            <li class="btn-invite-users">\n                <span class="one-line">Invite users</span>\n            </li>\n            <li class="btn-delete-chat">\n                <span class="one-line">Delete chat</span>\n            </li>\n            <li class="btn-delete-contact">\n                <span class="one-line">Delete contact</span>\n            </li>\n            <li class="btn-block-contact">\n                <span class="one-line">Block contact</span>\n            </li>\n            <li class="btn-unblock-contact">\n                <span class="one-line">Unblock contact</span>\n            </li>\n        </ul>\n    </div>\n';});
 
 
-define('text!templates/chats/chat_content.html',[],function () { return '<div class="search-form-header">\n    <div class="messages-search-form search-form">\n        <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search messages" autofocus>\n    </div>\n    <div class="text-color-700 btn-cancel-searching">cancel</div>\n</div>\n<div class="pinned-message"></div>\n<div class="elements-in-top">\n    <div class="subscription-buttons-wrap hidden"/>\n    <div class="chat-day-indicator fixed-day-indicator-wrap hidden"><div class="fixed-day-indicator"></div></div>\n</div>\n<div class="load-history-feedback hidden"></div>\n<div class="participant-messages-header hidden"><div class="messages-by-header">Messages by <div class="participant-nickname text-color-700"></div></div><div class="text-color-700 btn-cancel-selection">cancel</div><div class="btn-retract-messages">delete all</div></div>\n<div class="chat-content">\n</div>\n<i class="mdi mdi-36px back-to-bottom mdi-chevron-down"></i>\n<div class="chat-notification hidden one-line"></div>';});
+define('text!templates/chats/chat_content.html',[],function () { return '<div class="search-form-header">\n    <div class="messages-search-form search-form">\n        <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search messages" autofocus>\n    </div>\n    <div class="text-color-700 btn-cancel-searching">cancel</div>\n</div>\n<div class="pinned-message"></div>\n<div class="elements-in-top">\n    <div class="subscription-buttons-wrap hidden"/>\n    <div class="chat-day-indicator fixed-day-indicator-wrap hidden"><div class="fixed-day-indicator"></div></div>\n</div>\n<div class="load-history-feedback hidden"></div>\n<div class="participant-messages-header hidden"><div class="messages-by-header">Messages by <div class="participant-nickname text-color-700"></div></div><div class="text-color-700 btn-cancel-selection">cancel</div><div class="btn-retract-messages">delete all</div></div>\n<div class="chat-content">\n</div>\n<div class="chat-notification hidden one-line"></div>\n<i class="mdi mdi-36px back-to-bottom mdi-chevron-down"></i>\n';});
 
 
-define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix">\n            <img>\n        </div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">Release outside this form to cancel</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title="Send file" multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-jid text-color-700"></div><div class="account-role ground-color-700"></div><div class="account-badge"></div><div class="account-nickname text-color-700"></div>\n            </div>\n        </div>\n        <div class="send-area">\n            <button class="btn-save btn-flat btn-main text-color-700 hidden">Save</button>\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">blocked</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">R</span>eply</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">F</span>orward</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">C</span>opy</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">D</span>elete</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">E</span>dit</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">P</span>in</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">Cancel</div>\n        </div>\n    </div>\n';});
+define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix">\n            <img>\n        </div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">Release outside this form to cancel</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title="Send file" multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-info-wrap">\n                    <div class="account-jid text-color-700"></div>\n                    <div class="account-nickname text-color-700"></div>\n                    <div class="account-badge"></div>\n                    <div class="account-role ground-color-700"></div>\n                </div>\n            </div>\n        </div>\n        <div class="send-area">\n            <button class="btn-save btn-flat btn-main text-color-700 hidden">Save</button>\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">blocked</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">R</span>eply</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">F</span>orward</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">C</span>opy</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">D</span>elete</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">E</span>dit</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">P</span>in</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">Cancel</div>\n        </div>\n    </div>\n';});
 
 
 define('text!templates/chats/subscription_buttons.html',[],function () { return '<div class="subscription-buttons">\n    <div class="subscription-info"></div>\n    <div class="button text-color-500 btn-add">Add contact</div>\n    <div class="button btn-block">Block</div>\n    <div class="button text-color-500 btn-allow">Allow</div>\n    <div class="button text-color-500 btn-subscribe">Subscribe</div>\n    <i class="mdi-close btn-decline mdi mdi-24px"/>\n</div>';});
@@ -42122,7 +44526,7 @@ define('text!templates/chats/forward_panel.html',[],function () { return '<div c
 define('text!templates/chats/chat_placeholder.html',[],function () { return '<div class="text">Please select a chat to start messaging</div>\n';});
 
 
-define('text!templates/chats/message_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="circle-avatar"></div>\n<div class="chat-icon hidden"><svg class="mdi mdi-18px" viewBox="0 0 18 18"/></div>\n<div class="recent-chat-info">\n    <div class="chat-title-wrap">\n        <p class="chat-title one-line"></p>\n        <p class="last-msg-date"></p>\n    </div>\n    <p class="last-msg one-line"></p>\n</div>\n';});
+define('text!templates/chats/message_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="circle-avatar"></div>\n<div class="chat-icon hidden"></div>\n<div class="recent-chat-info">\n    <div class="chat-title-wrap">\n        <p class="chat-title one-line"></p>\n        <p class="last-msg-date"></p>\n    </div>\n    <p class="last-msg one-line"></p>\n</div>\n';});
 
 
 define('text!templates/chats/messages/main.html',[],function () { return '<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <div class="edited-info one-line hidden"></div>\n        {[ if (is_sender) { ]}\n            <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n            <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>\n        {[ } ]}\n        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n    </div>\n</div>\n';});
@@ -42134,7 +44538,7 @@ define('text!templates/chats/messages/forwarded.html',[],function () { return '<
 define('text!templates/chats/messages/system.html',[],function () { return '<div class="chat-message system"  data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="msg-wrap">\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/chats/messages/file_upload.html',[],function () { return '<div class="chat-message file-upload noselect" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-from="{{from_jid}}" data-uniqueid="{{unique_id}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"><!--<img>--></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="chat-msg-content chat-file-content">\n            <div class="chat-file-info">\n                <div class="filename text-color-700 one-line">{{files[0].name}}</div>\n                <div class="filesize grey-text one-line"></div>\n                <div class="status-area">\n                    <div class="status one-line text-color-700" style="display: none"></div>\n                    <div class="repeat-upload text-color-700" style="display: none;">Resend</div>\n                </div>\n                <div class="progress-area">\n                    <div class="progress ground-color-100">\n                        <div class="determinate ground-color-700" style="width: 0%"></div>\n                    </div>\n                    <div class="cancel-upload text-color-700">Cancel</div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>\n        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n    </div>\n</div>';});
+define('text!templates/chats/messages/file_upload.html',[],function () { return '<div class="chat-message {[if (encrypted) {]}encrypted{[}]} file-upload noselect" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-from="{{from_jid}}" data-uniqueid="{{unique_id}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="chat-msg-content chat-file-content">\n            <div class="chat-file-info">\n                <div class="filename text-color-700 one-line">{{files[0].name}}</div>\n                <div class="filesize grey-text one-line"></div>\n                <div class="status-area">\n                    <div class="status one-line text-color-700" style="display: none"></div>\n                    <div class="repeat-upload text-color-700" style="display: none;">Resend</div>\n                </div>\n                <div class="progress-area">\n                    <div class="progress ground-color-100">\n                        <div class="determinate ground-color-700" style="width: 0%"></div>\n                    </div>\n                    <div class="cancel-upload text-color-700">Cancel</div>\n                </div>\n            </div>\n        </div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <i class="msg-delivering-state mdi mdi-14px" data-state="pending" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>\n        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n    </div>\n</div>';});
 
 
 define('text!templates/chats/messages/file.html',[],function () { return '<div class="one-file-wrap link-file">\n    <i class="mdi {{mdi_icon}}"></i>\n    <div class="file-container">\n        <div class="file-info one-line">\n            <span class="file-name">{{name}}</span>{[ if (is_audio && duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span>\n        </div>\n        <a href="{{sources[0]}}" class="file-link-download">Download</a>\n    </div>\n</div>';});
@@ -42152,19 +44556,19 @@ define('text!templates/chats/messages/auth_request.html',[],function () { return
 define('text!templates/chats/messages/group_request.html',[],function () { return '<div class="chat-message system auth-request" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"><img></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n        </div>\n        <div class="chat-msg-content chat-text-content">{{message}}<div><span class="accept-request-group">Accept</span><span class="decline-request-group">Decline</span><span class="block-request-group">Block</span></div></div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/chats/messages/template-for-2.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-2"><img src="{{images[0].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div>\n<div class="img-content-template template-for-2"><img src="{{images[1].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div></div>\n\n';});
+define('text!templates/chats/messages/template-for-2.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-2"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div>\n<div class="img-content-template template-for-2"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div></div>';});
 
 
-define('text!templates/chats/messages/template-for-3.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-3 main"><img src="{{images[0].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div>\n<div class="template-for-3 minor-images"><div class="img-content-template template-for-3 minor"><img src="{{images[1].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-3 minor"><img src="{{images[2].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div></div></div>';});
+define('text!templates/chats/messages/template-for-3.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-3 main"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div>\n<div class="template-for-3 minor-images"><div class="img-content-template template-for-3 minor"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-3 minor"><img src="{{images[2].sources[0]}}" title="{{images[2].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div></div></div>';});
 
 
-define('text!templates/chats/messages/template-for-4.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-4 main"><img src="{{images[0].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="template-for-4 minor-images">\n<div class="img-content-template template-for-4 minor"><img src="{{images[1].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-4 minor"><img src="{{images[2].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div>\n<div class="img-content-template template-for-4 minor"><img src="{{images[3].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div></div></div>';});
+define('text!templates/chats/messages/template-for-4.html',[],function () { return '<div class="image-collection zoom-gallery"><div class="img-content-template template-for-4 main"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="template-for-4 minor-images">\n<div class="img-content-template template-for-4 minor"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-4 minor"><img src="{{images[2].sources[0]}}" title="{{images[2].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div>\n<div class="img-content-template template-for-4 minor"><img src="{{images[3].sources[0]}}" title="{{images[3].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div></div></div>';});
 
 
-define('text!templates/chats/messages/template-for-5.html',[],function () { return '<div class="image-collection zoom-gallery template-for-5"><div class="img-content-wrap template-for-5 main"><div class="img-content-template template-for-5"><img src="{{images[0].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="img-content-template template-for-5"><img src="{{images[1].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div></div>\n<div class="img-content-wrap template-for-5 minor-images"><div class="img-content-template template-for-5"><img src="{{images[2].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div>\n<div class="img-content-template template-for-5"><img src="{{images[3].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div>\n<div class="img-content-template template-for-5"><img src="{{images[4].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[4].sources[0]}}"></div></div></div>';});
+define('text!templates/chats/messages/template-for-5.html',[],function () { return '<div class="image-collection zoom-gallery template-for-5"><div class="img-content-wrap template-for-5 main"><div class="img-content-template template-for-5"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="img-content-template template-for-5"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div></div>\n<div class="img-content-wrap template-for-5 minor-images"><div class="img-content-template template-for-5"><img src="{{images[2].sources[0]}}" title="{{images[2].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div>\n<div class="img-content-template template-for-5"><img src="{{images[3].sources[0]}}" title="{{images[3].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div>\n<div class="img-content-template template-for-5"><img src="{{images[4].sources[0]}}" title="{{images[4].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[4].sources[0]}}"></div></div></div>';});
 
 
-define('text!templates/chats/messages/template-for-6.html',[],function () { return '<div class="image-collection zoom-gallery template-for-6"><div class="img-content-wrap template-for-6 main-row"><div class="img-content-template template-for-6 main"><img src="{{images[0].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="template-for-6 minor-1"><div class="img-content-template template-for-6"><img src="{{images[1].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[2].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div></div></div>\n<div class="template-for-6 minor-2"><div class="img-content-template template-for-6"><img src="{{images[3].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[4].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[4].sources[0]}}"></div>\n<div class="img-content-template template-for-6 last-image"><img src="{{images[5].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[5].sources[0]}}">\n{[ if (images.length > 6) { ]}<span class="image-counter"></span>{[ for (var i=6; i < images.length; i++) {]} <div class="img-content-template hidden"><img src="{{images[i].sources[0]}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[i].sources[0]}}"></div> {[}} ]}</div></div></div>\n';});
+define('text!templates/chats/messages/template-for-6.html',[],function () { return '<div class="image-collection zoom-gallery template-for-6"><div class="img-content-wrap template-for-6 main-row"><div class="img-content-template template-for-6 main"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="template-for-6 minor-1"><div class="img-content-template template-for-6"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[2].sources[0]}}" title="{{images[2].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div></div></div>\n<div class="template-for-6 minor-2"><div class="img-content-template template-for-6"><img src="{{images[3].sources[0]}}" title="{{images[3].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[4].sources[0]}}" title="{{images[4].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[4].sources[0]}}"></div>\n<div class="img-content-template template-for-6 last-image"><img src="{{images[5].sources[0]}}" title="{{images[5].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[5].sources[0]}}">\n{[ if (images.length > 6) { ]}<span class="image-counter"></span>{[ for (var i=6; i < images.length; i++) {]} <div class="img-content-template hidden"><img src="{{images[i].sources[0]}}" title="{{images[i].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[i].sources[0]}}"></div> {[}} ]}</div></div></div>\n';});
 
 
 define('text!templates/chats/archive_placeholder.html',[],function () { return '<div class="text">Archive chats are not implemented yet</div>';});
@@ -42180,6 +44584,12 @@ define('text!templates/chats/group_chats/invitation_panel_view.html',[],function
 
 
 define('text!templates/chats/group_chats/mention_item.html',[],function () { return '<div class="list-item mention-item" data-jid="{{jid}}" data-id="{{id}}" data-nickname="{{nickname}}">\n    <div class="circle-avatar"><img></div>\n    <div class="participant-info">\n        <span class="one-line nickname">{{nickname}}</span>\n        <span class="one-line jid">{{jid}}</span>\n    </div>\n</div>';});
+
+
+define('text!templates/chats/encryption_warning.html',[],function () { return '<div class="warning-wrap">\n    <p class="warning-message">{{message}}</p>\n    <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-{{color}}-100 hover-ground-color-{{color}}-300">Manage devices</button>\n</div>';});
+
+
+define('text!templates/chats/content_encryption_warning.html',[],function () { return '<div>\n    <i class="mdi mdi-36px mdi-alert-circle"></i>\n</div>\n<div class="warning-message">{{message}}</div>\n<button class="btn-manage-devices btn-flat btn-main btn-dark hover-ground-color-amber-300">Manage devices</button>';});
 
 
 define('text!templates/mentions/mentions_panel.html',[],function () { return '<div class="mentions-panel noselect">\n    <div class="chats-search-form search-form panel-head">\n        <div class="account-indicator"></div>\n        <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search">\n        <i class="close-search-icon mdi mdi-20px mdi-close"></i>\n    </div>\n    <div class="mentions-list-wrap left-panel-list-wrap">\n        <div class="mentions-list item-list">\n        </div>\n        <div class="searched-lists-wrap">\n            <div class="chats-list-wrap hidden">\n                <div class="account-indicator"></div>\n                <div class="chats-title">Chats</div>\n                <div class="chats-list roster-left-container"></div>\n            </div>\n            <div class="contacts-list-wrap hidden">\n                <div class="account-indicator"></div>\n                <div class="contacts-title">Contacts</div>\n                <div class="contacts-list roster-left-container"></div>\n            </div>\n            <div class="messages-list-wrap hidden">\n                <div class="account-indicator"></div>\n                <div class="messages-title">Messages</div>\n                <div class="messages-list roster-left-container"></div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
@@ -42203,34 +44613,37 @@ define('text!templates/svg/ic-at.html',[],function () { return '<path fill="#9E9
 define('text!templates/svg/ic-searching.html',[],function () { return '<path fill="#9E9E9E" d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z" />';});
 
 
-define('text!templates/svg/ic-invitation-chat.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="7"/>\n    <path d="M5.8,6 L12.2,6 C12.64,6 13,6.33981818 13,6.76363636 L13,11.2363636 C13,11.6581084 12.6418278,12 12.2,12 L5.8,12 C5.3581722,12 5,11.6581084 5,11.2363636 L5,6.76363636 C5,6.33981818 5.356,6 5.8,6 Z M5.57142857,6.81818182 L5.57142857,7.90909091 L9,10.0909091 L12.4285714,7.90909091 L12.4285714,6.81818182 L9,9 L5.57142857,6.81818182 Z" id="Icon-Shape" fill="#FFFFFF" fill-rule="nonzero"/>\n</g>';});
+define('text!templates/svg/blocked.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/blocked</title>\n    <g id="badge/icon/blocked" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M8,1 C11.8659932,1 15,4.13400675 15,8 C15,11.8659932 11.8659932,15 8,15 C4.13400675,15 1,11.8659932 1,8 C1,4.13400675 4.13400675,1 8,1 Z M12.3574649,4.64359326 L4.64359326,12.3574649 C5.57228864,13.073866 6.73637986,13.5 8,13.5 C11.0375661,13.5 13.5,11.0375661 13.5,8 C13.5,6.73637986 13.073866,5.57228864 12.3574649,4.64359326 Z M8,2.5 C4.96243388,2.5 2.5,4.96243388 2.5,8 C2.5,9.26408031 2.92644441,10.4285592 3.64331784,11.3574212 L11.3574212,3.64331784 C10.4285592,2.92644441 9.26408031,2.5 8,2.5 Z" id="blocked" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-group-contact.html',[],function () { return '<defs>\n    <path d="M11.500501,9 C12.3287776,9 12.995,8.328 12.995,7.5 C12.995,6.672 12.3287776,6 11.500501,6 C10.6722244,6 10,6.672 10,7.5 C10,8.328 10.6722244,9 11.500501,9 Z M7.5,8 C8.33,8 8.995,7.33 8.995,6.5 C8.995,5.67 8.33,5 7.5,5 C6.67,5 6,5.67 6,6.5 C6,7.33 6.67,8 7.5,8 Z M11.5,10 C10.6681818,10 9,10.46 9,11.375 L9,11.9989178 L14,11.9989178 L14,11.375 C14,10.46 12.3318182,10 11.5,10 Z M7.50474946,8.99186821 C5.77490105,8.99186821 4,9.585 4,10.75 L4,12 L8,12 L8,11 C8,10.2484187 8.73828683,9.72461975 9.70884076,9.35916117 C9.08932051,9.04219075 7.85693708,8.99186821 7.50474946,8.99186821 Z" id="path-1"/>\n</defs>\n<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="8"/>\n    <g>\n        <circle fill="transparent" cx="9" cy="9" r="7"/>\n        <mask id="mask-2" fill="white">\n            <use xlink:href="#path-1"/>\n        </mask>\n        <use id="Shape" fill="#FFFFFF" xlink:href="#path-1"/>\n    </g>\n</g>\n';});
+define('text!templates/svg/bot.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/bot</title>\n    <g id="badge/icon/bot" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M8.5,2.9 C8.83137085,2.9 9.1,3.16862915 9.1,3.5 C9.1,3.6775201 9.02290618,3.83703397 8.9003726,3.94688754 L8.899,4.999 L11,5 C11.5522847,5 12,5.44771525 12,6 L12,7 C12.2761424,7 12.5,7.22385763 12.5,7.5 L12.5,8.5 C12.5,8.77614237 12.2761424,9 12,9 L12,11 C12,11.5522847 11.5522847,12 11,12 L5,12 C4.44771525,12 4,11.5522847 4,11 L4,9 C3.72385763,9 3.5,8.77614237 3.5,8.5 L3.5,7.5 C3.5,7.22385763 3.72385763,7 4,7 L4,6 C4,5.44771525 4.44771525,5 5,5 L8.1,4.999 L8.0996274,3.94688754 C7.99996676,3.85753997 7.93036502,3.73534156 7.90785299,3.59732312 L7.9,3.5 C7.9,3.16862915 8.16862915,2.9 8.5,2.9 Z M9.5,10 L6.5,10 C6.22385763,10 6,10.2238576 6,10.5 C6,10.7761424 6.22385763,11 6.5,11 L6.5,11 L9.5,11 C9.77614237,11 10,10.7761424 10,10.5 C10,10.2238576 9.77614237,10 9.5,10 L9.5,10 Z M6.5,6 C6.22385763,6 6,6.22385763 6,6.5 L6,6.5 L6,7 L5.5,7 C5.22385763,7 5,7.22385763 5,7.5 C5,7.77614237 5.22385763,8 5.5,8 L5.5,8 L6,8 L6,8.5 C6,8.77614237 6.22385763,9 6.5,9 C6.77614237,9 7,8.77614237 7,8.5 L7,8.5 L7,8 L7.5,8 C7.77614237,8 8,7.77614237 8,7.5 C8,7.22385763 7.77614237,7 7.5,7 L7.5,7 L7,7 L7,6.5 C7,6.22385763 6.77614237,6 6.5,6 Z M9.5,7 C9.22385763,7 9,7.22385763 9,7.5 C9,7.77614237 9.22385763,8 9.5,8 C9.77614237,8 10,7.77614237 10,7.5 C10,7.22385763 9.77614237,7 9.5,7 Z" id="bot" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-group-chat.html',[],function () { return '<defs>\n    <path d="M11.500501,9 C12.3287776,9 12.995,8.328 12.995,7.5 C12.995,6.672 12.3287776,6 11.500501,6 C10.6722244,6 10,6.672 10,7.5 C10,8.328 10.6722244,9 11.500501,9 Z M7.5,8 C8.33,8 8.995,7.33 8.995,6.5 C8.995,5.67 8.33,5 7.5,5 C6.67,5 6,5.67 6,6.5 C6,7.33 6.67,8 7.5,8 Z M11.5,10 C10.6681818,10 9,10.46 9,11.375 L9,11.9989178 L14,11.9989178 L14,11.375 C14,10.46 12.3318182,10 11.5,10 Z M7.50474946,8.99186821 C5.77490105,8.99186821 4,9.585 4,10.75 L4,12 L8,12 L8,11 C8,10.2484187 8.73828683,9.72461975 9.70884076,9.35916117 C9.08932051,9.04219075 7.85693708,8.99186821 7.50474946,8.99186821 Z" id="path-1"/>\n</defs>\n<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="7"/>\n    <mask fill="white">\n        <use xlink:href="#path-1"/>\n    </mask>\n    <use fill="#FFFFFF" xlink:href="#path-1"/>\n</g>';});
+define('text!templates/svg/bot-variant.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/bot-variant</title>\n    <g id="badge/icon/bot-variant" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M8,3.5 C9.8685634,3.5 11.3951264,4.9642776 11.4948211,6.8079648 L11.5,7 L11.5,9.5 C11.5,11.1568542 9.93299662,12.5 8,12.5 C6.13365843,12.5 4.60850439,11.2478879 4.50554054,9.67023745 L4.5,9.5 L4.5,7 L4.50517886,6.8079648 C4.60487355,4.9642776 6.1314366,3.5 8,3.5 Z M3.5,6 C3.77614237,6 4,6.22385763 4,6.5 L4,9.5 C4,9.77614237 3.77614237,10 3.5,10 C3.22385763,10 3,9.77614237 3,9.5 L3,6.5 C3,6.22385763 3.22385763,6 3.5,6 Z M12.5,6 C12.7761424,6 13,6.22385763 13,6.5 L13,9.5 C13,9.77614237 12.7761424,10 12.5,10 C12.2238576,10 12,9.77614237 12,9.5 L12,6.5 C12,6.22385763 12.2238576,6 12.5,6 Z M8,5 C6.99835629,5 6.16869161,5.73632971 6.0227694,6.69722565 L6.00548574,6.85073766 L6,7 L6,8 L6.00662994,8.12302332 C6.0900659,8.89390548 6.95065898,9.5 8,9.5 C9.04934102,9.5 9.9099341,8.89390548 9.99337006,8.12302332 L10,8 L10,7 L9.99451426,6.85073766 C9.91816512,5.81587779 9.0543618,5 8,5 Z" id="Bot" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-blocked.html',[],function () { return '<path fill="#d32f2f" d="M 9 2 C 12.866 2 16 5.134 16 9 C 16 12.866 12.866 16 9 16 C 5.134 16 2 12.866 2 9 C 2 5.134 5.134 2 9 2 Z M 13.357 5.644 L 5.644 13.357 C 6.572 14.074 7.736 14.5 9 14.5 C 12.038 14.5 14.5 12.038 14.5 9 C 14.5 7.736 14.074 6.572 13.357 5.644 Z M 9 3.5 C 5.962 3.5 3.5 5.962 3.5 9 C 3.5 10.264 3.926 11.429 4.643 12.357 L 12.357 4.643 C 11.429 3.926 10.264 3.5 9 3.5 Z" stroke="#00000000" stroke-width="1" fill-rule="evenodd"/>\n';});
+define('text!templates/svg/group-incognito.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/group-incognito</title>\n    <g id="badge/icon/group-incognito" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M10,8.00704958 C10.9597902,8.00704958 12.8474987,8.64533875 12.9912872,9.91524601 L13,10.0706662 L13,11.0070496 L10.7492023,11.0070496 L10.75,9.875 C10.75,9.10242267 10.3751421,8.46914598 9.75414509,8.01828756 L9.88054216,8.01011295 L10,8.00704958 Z M7,8 C8.71428571,8 10,8.75 10,9.875 L10,11 L4,11 L4,9.875 C4,8.75 5.28571429,8 7,8 Z M7,8.75 C5.68529006,8.75 4.83790401,9.22876096 4.75645218,9.78636102 L4.75,9.875 L4.75,10.25 L9.25,10.25 L9.25,9.875 C9.25,9.31020891 8.46834945,8.80320839 7.20365867,8.75392032 L7,8.75 Z M10.5,4 C11.3284271,4 12,4.67157288 12,5.5 C12,6.32842712 11.3284271,7 10.5,7 C10.0309641,7 9.61220865,6.78472342 9.33715065,6.44758714 C9.59948544,6.02690214 9.75,5.53102835 9.75,5 C9.75,4.7455993 9.71545544,4.49926692 9.65080116,4.2654377 C9.89064982,4.09777196 10.183907,4 10.5,4 Z M7,3 C8.1045695,3 9,3.8954305 9,5 C9,6.1045695 8.1045695,7 7,7 C5.8954305,7 5,6.1045695 5,5 C5,3.8954305 5.8954305,3 7,3 Z M7,3.75 C6.30964406,3.75 5.75,4.30964406 5.75,5 C5.75,5.69035594 6.30964406,6.25 7,6.25 C7.69035594,6.25 8.25,5.69035594 8.25,5 C8.25,4.30964406 7.69035594,3.75 7,3.75 Z" id="incognito" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-incognito-contact.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" fill-rule="nonzero" cx="9" cy="9" r="8"/>\n    <g>\n        <circle fill="#4a8e3d" fill-rule="nonzero" cx="9" cy="9" r="7"/>\n        <g transform="translate(1.000000, 1.000000)" id="Icon16/Incognito">\n            <rect x="0" y="0" width="16" height="16"/>\n            <path d="M10,8.00704958 C10.9597902,8.00704958 12.8474987,8.64533875 12.9912872,9.91524601 L13,10.0706662 L13,11.0070496 L10.7492023,11.0070496 L10.75,9.875 C10.75,9.10242267 10.3751421,8.46914598 9.75414509,8.01828756 L9.88054216,8.01011295 L10,8.00704958 Z M7,8 C8.71428571,8 10,8.75 10,9.875 L10,11 L4,11 L4,9.875 C4,8.75 5.28571429,8 7,8 Z M7,8.75 C5.68529006,8.75 4.83790401,9.22876096 4.75645218,9.78636102 L4.75,9.875 L4.75,10.25 L9.25,10.25 L9.25,9.875 C9.25,9.31020891 8.46834945,8.80320839 7.20365867,8.75392032 L7,8.75 Z M10.5,4 C11.3284271,4 12,4.67157288 12,5.5 C12,6.32842712 11.3284271,7 10.5,7 C10.0309641,7 9.61220865,6.78472342 9.33715065,6.44758714 C9.59948544,6.02690214 9.75,5.53102835 9.75,5 C9.75,4.7455993 9.71545544,4.49926692 9.65080116,4.2654377 C9.89064982,4.09777196 10.183907,4 10.5,4 Z M7,3 C8.1045695,3 9,3.8954305 9,5 C9,6.1045695 8.1045695,7 7,7 C5.8954305,7 5,6.1045695 5,5 C5,3.8954305 5.8954305,3 7,3 Z M7,3.75 C6.30964406,3.75 5.75,4.30964406 5.75,5 C5.75,5.69035594 6.30964406,6.25 7,6.25 C7.69035594,6.25 8.25,5.69035594 8.25,5 C8.25,4.30964406 7.69035594,3.75 7,3.75 Z" id="incognito" fill="#FFFFFF" fill-rule="nonzero"/>\n        </g>\n    </g>\n</g>';});
+define('text!templates/svg/group-invite.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/group-invite</title>\n    <g id="badge/icon/group-invite" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M4.8,5 L11.2,5 C11.64,5 12,5.33981818 12,5.76363636 L12,10.2363636 C12,10.6581084 11.6418278,11 11.2,11 L4.8,11 C4.3581722,11 4,10.6581084 4,10.2363636 L4,5.76363636 C4,5.33981818 4.356,5 4.8,5 Z M4.57142857,5.81818182 L4.57142857,6.90909091 L8,9.09090909 L11.4285714,6.90909091 L11.4285714,5.81818182 L8,8 L4.57142857,5.81818182 Z" id="invitation" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-incognito-chat.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" fill-rule="nonzero" cx="9" cy="9" r="7"/>\n    <g transform="translate(1.000000, 1.000000)">\n        <rect x="0" y="0" width="16" height="16"/>\n        <path d="M10,8.00704958 C10.9597902,8.00704958 12.8474987,8.64533875 12.9912872,9.91524601 L13,10.0706662 L13,11.0070496 L10.7492023,11.0070496 L10.75,9.875 C10.75,9.10242267 10.3751421,8.46914598 9.75414509,8.01828756 L9.88054216,8.01011295 L10,8.00704958 Z M7,8 C8.71428571,8 10,8.75 10,9.875 L10,11 L4,11 L4,9.875 C4,8.75 5.28571429,8 7,8 Z M7,8.75 C5.68529006,8.75 4.83790401,9.22876096 4.75645218,9.78636102 L4.75,9.875 L4.75,10.25 L9.25,10.25 L9.25,9.875 C9.25,9.31020891 8.46834945,8.80320839 7.20365867,8.75392032 L7,8.75 Z M10.5,4 C11.3284271,4 12,4.67157288 12,5.5 C12,6.32842712 11.3284271,7 10.5,7 C10.0309641,7 9.61220865,6.78472342 9.33715065,6.44758714 C9.59948544,6.02690214 9.75,5.53102835 9.75,5 C9.75,4.7455993 9.71545544,4.49926692 9.65080116,4.2654377 C9.89064982,4.09777196 10.183907,4 10.5,4 Z M7,3 C8.1045695,3 9,3.8954305 9,5 C9,6.1045695 8.1045695,7 7,7 C5.8954305,7 5,6.1045695 5,5 C5,3.8954305 5.8954305,3 7,3 Z M7,3.75 C6.30964406,3.75 5.75,4.30964406 5.75,5 C5.75,5.69035594 6.30964406,6.25 7,6.25 C7.69035594,6.25 8.25,5.69035594 8.25,5 C8.25,4.30964406 7.69035594,3.75 7,3.75 Z" id="incognito" fill="#FFFFFF" fill-rule="nonzero"/>\n    </g>\n</g>';});
+define('text!templates/svg/group-public.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/group-public</title>\n    <g id="badge/icon/group-public" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M10.500501,8 C11.3287776,8 11.995,7.328 11.995,6.5 C11.995,5.672 11.3287776,5 10.500501,5 C9.67222445,5 9,5.672 9,6.5 C9,7.328 9.67222445,8 10.500501,8 Z M6.5,7 C7.33,7 7.995,6.33 7.995,5.5 C7.995,4.67 7.33,4 6.5,4 C5.67,4 5,4.67 5,5.5 C5,6.33 5.67,7 6.5,7 Z M10.5,9 C9.66818182,9 8,9.46 8,10.375 L8,10.9989178 L13,10.9989178 L13,10.375 C13,9.46 11.3318182,9 10.5,9 Z M6.50474946,7.99186821 C4.77490105,7.99186821 3,8.585 3,9.75 L3,11 L7,11 L7,10 C7,9.24841871 7.73828683,8.72461975 8.70884076,8.35916117 C8.08932051,8.04219075 6.85693708,7.99186821 6.50474946,7.99186821 Z" id="xabber:group-public" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-bot-contact.html',[],function () { return '<g id="Badge/Bot/Circle16" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="8"/>\n    <g>\n        <circle fill="transparent" cx="9" cy="9" r="7"/>\n        <path d="M9,4 C11.1421954,4 12.8910789,5.68396847 12.9951047,7.80035966 L13,8 L13,11 C13,12.6568542 11.209139,14 9,14 C6.86449897,14 5.11985549,12.7449049 5.0059187,11.1646016 L5,11 L5,8 L5.00489531,7.80035966 C5.10892112,5.68396847 6.85780461,4 9,4 Z M3.75,7 C4.16421356,7 4.5,7.33578644 4.5,7.75 L4.5,10.25 C4.5,10.6642136 4.16421356,11 3.75,11 C3.33578644,11 3,10.6642136 3,10.25 L3,7.75 C3,7.33578644 3.33578644,7 3.75,7 Z M14.25,7 C14.6642136,7 15,7.33578644 15,7.75 L15,10.25 C15,10.6642136 14.6642136,11 14.25,11 C13.8357864,11 13.5,10.6642136 13.5,10.25 L13.5,7.75 C13.5,7.33578644 13.8357864,7 14.25,7 Z M9,5.5 C7.72974508,5.5 6.68075921,6.44736547 6.52105111,7.67408771 L6.50531768,7.83562431 L6.5,8 L6.5,9 C6.5,9.82842712 7.61928813,10.5 9,10.5 C10.3179522,10.5 11.3977064,9.88809166 11.4931428,9.11194676 L11.5,9 L11.5,8 L11.4946823,7.83562431 C11.4100387,6.53153594 10.3254834,5.5 9,5.5 Z" id="Bot" fill="#FFFFFF"/>\n    </g>\n</g>\n';});
+define('text!templates/svg/group-private.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/group-private</title>\n    <g id="badge/icon/group-private" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M10.45296,9.00001406 C11.2484973,9.00015914 11.9605655,9.50273575 12.2400509,10.2613541 C12.5195363,11.0199725 12.3078467,11.8755937 11.7087696,12.4087226 C11.1096925,12.9418515 10.2488201,13.0407214 9.5482222,12.6568582 C8.84762429,12.272995 8.45417618,11.4868729 8.56077817,10.683913 C8.38677817,10.6450242 8.19859635,10.6155798 7.99841453,10.6144687 C7.79823271,10.6139132 7.61005089,10.6450242 7.43605089,10.683913 C7.54265288,11.4868729 7.14920477,12.272995 6.44860686,12.6568582 C5.74800895,13.0407214 4.88713659,12.9418515 4.28805949,12.4087226 C3.68898239,11.8755937 3.4772928,11.0199725 3.75677818,10.2613541 C4.03626356,9.50273575 4.74833179,9.00015914 5.54386908,9.00001406 C6.32349136,8.99699984 7.02602967,9.47872777 7.31659635,10.2155808 C7.49059635,10.1616921 7.69841453,10.1111366 7.99841453,10.1111366 C8.22964016,10.109582 8.45968538,10.1448214 8.68023271,10.2155808 C8.97079939,9.47872777 9.6733377,8.99699984 10.45296,9.00001406 Z M5.54386908,9.55558244 C4.79075351,9.55558244 4.18023271,10.1774076 4.18023271,10.9444679 C4.18023271,11.7115282 4.79075351,12.3333534 5.54386908,12.3333534 C6.29698464,12.3333534 6.90750544,11.7115282 6.90750544,10.9444679 C6.90750544,10.1774076 6.29698464,9.55558244 5.54386908,9.55558244 Z M10.45296,9.55558244 C9.69984442,9.55558244 9.08932362,10.1774076 9.08932362,10.9444679 C9.08932362,11.7115282 9.69984442,12.3333534 10.45296,12.3333534 C11.2060756,12.3333534 11.8165963,11.7115282 11.8165963,10.9444679 C11.8165963,10.1774076 11.2060756,9.55558244 10.45296,9.55558244 Z M8,7 C8.29622378,7 8.61657343,7.01098373 8.94081475,7.02872667 L9.33047735,7.05299226 C10.5621226,7.13839497 11.7330909,7.297 11.7330909,7.297 C12.2062901,7.40997808 12.6727414,7.54549536 13.1305455,7.703 C13.6858182,7.877 14,8 14,8 L14,8 L2,8 C2,8 2.31418182,7.877 2.86945455,7.703 C3.32163107,7.54577794 3.78243762,7.41026088 4.25,7.297 C4.39345455,7.268 6.512,7 8,7 Z M8,3 C9.46836364,3.001 10.5058182,3.6095 10.5058182,3.6095 L10.5058182,3.6095 L11.2727273,6 L4.72727273,6 L5.49418182,3.6095 C5.49418182,3.6095 6.53163636,3.0015 8,3 Z" id="private" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-bot-chat.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="7"/>\n    <path d="M9,4 C11.1421954,4 12.8910789,5.68396847 12.9951047,7.80035966 L13,8 L13,11 C13,12.6568542 11.209139,14 9,14 C6.86449897,14 5.11985549,12.7449049 5.0059187,11.1646016 L5,11 L5,8 L5.00489531,7.80035966 C5.10892112,5.68396847 6.85780461,4 9,4 Z M3.75,7 C4.16421356,7 4.5,7.33578644 4.5,7.75 L4.5,10.25 C4.5,10.6642136 4.16421356,11 3.75,11 C3.33578644,11 3,10.6642136 3,10.25 L3,7.75 C3,7.33578644 3.33578644,7 3.75,7 Z M14.25,7 C14.6642136,7 15,7.33578644 15,7.75 L15,10.25 C15,10.6642136 14.6642136,11 14.25,11 C13.8357864,11 13.5,10.6642136 13.5,10.25 L13.5,7.75 C13.5,7.33578644 13.8357864,7 14.25,7 Z M9,5.5 C7.72974508,5.5 6.68075921,6.44736547 6.52105111,7.67408771 L6.50531768,7.83562431 L6.5,8 L6.5,9 C6.5,9.82842712 7.61928813,10.5 9,10.5 C10.3179522,10.5 11.3977064,9.88809166 11.4931428,9.11194676 L11.5,9 L11.5,8 L11.4946823,7.83562431 C11.4100387,6.53153594 10.3254834,5.5 9,5.5 Z" id="Bot" fill="#FFFFFF" fill-rule="nonzero"/>\n</g>';});
+define('text!templates/svg/channel.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/channel</title>\n    <g id="badge/icon/channel" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M6.5,12.5 C6.5,12.7761424 6.27614237,13 6,13 L5,13 C4.72385763,13 4.5,12.7761424 4.5,12.5 L4.5,9.997 L4.02563513,9.99796942 C3.49695533,9.99796942 3.06170233,9.63379568 3.00601829,9.10979782 L3,8.99514074 L3,7 C3,6.44278422 3.50172034,6 4.02563513,6 L4.02563513,6 L8,6 L11,4 L11,12 L8,9.99796942 L6.5,9.997 L6.5,12.5 Z M12,6 C12.7835446,6.37375602 13.2808221,7.14951331 13.2820439,8 C13.2882682,8.85255761 12.7887168,9.63186239 12,10 L12,6 Z" id="Horn" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-private-contact.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="8"/>\n    <g>\n        <circle fill="#000000" cx="9" cy="9" r="7"/>\n        <g transform="translate(1.000000, 1.000000)">\n            <rect x="0" y="0" width="16" height="16"/>\n            <path d="M10.45296,9.00001406 C11.2484973,9.00015914 11.9605655,9.50273575 12.2400509,10.2613541 C12.5195363,11.0199725 12.3078467,11.8755937 11.7087696,12.4087226 C11.1096925,12.9418515 10.2488201,13.0407214 9.5482222,12.6568582 C8.84762429,12.272995 8.45417618,11.4868729 8.56077817,10.683913 C8.38677817,10.6450242 8.19859635,10.6155798 7.99841453,10.6144687 C7.79823271,10.6139132 7.61005089,10.6450242 7.43605089,10.683913 C7.54265288,11.4868729 7.14920477,12.272995 6.44860686,12.6568582 C5.74800895,13.0407214 4.88713659,12.9418515 4.28805949,12.4087226 C3.68898239,11.8755937 3.4772928,11.0199725 3.75677818,10.2613541 C4.03626356,9.50273575 4.74833179,9.00015914 5.54386908,9.00001406 C6.32349136,8.99699984 7.02602967,9.47872777 7.31659635,10.2155808 C7.49059635,10.1616921 7.69841453,10.1111366 7.99841453,10.1111366 C8.22964016,10.109582 8.45968538,10.1448214 8.68023271,10.2155808 C8.97079939,9.47872777 9.6733377,8.99699984 10.45296,9.00001406 Z M5.54386908,9.55558244 C4.79075351,9.55558244 4.18023271,10.1774076 4.18023271,10.9444679 C4.18023271,11.7115282 4.79075351,12.3333534 5.54386908,12.3333534 C6.29698464,12.3333534 6.90750544,11.7115282 6.90750544,10.9444679 C6.90750544,10.1774076 6.29698464,9.55558244 5.54386908,9.55558244 Z M10.45296,9.55558244 C9.69984442,9.55558244 9.08932362,10.1774076 9.08932362,10.9444679 C9.08932362,11.7115282 9.69984442,12.3333534 10.45296,12.3333534 C11.2060756,12.3333534 11.8165963,11.7115282 11.8165963,10.9444679 C11.8165963,10.1774076 11.2060756,9.55558244 10.45296,9.55558244 Z M8,7 C9.54036364,7 11.7330909,7.297 11.7330909,7.297 C12.2062901,7.40997808 12.6727414,7.54549536 13.1305455,7.703 C13.6858182,7.877 14,8 14,8 L14,8 L2,8 C2,8 2.31418182,7.877 2.86945455,7.703 C3.32163107,7.54577794 3.78243762,7.41026088 4.25,7.297 C4.39345455,7.268 6.512,7 8,7 Z M8,3 C9.46836364,3.001 10.5058182,3.6095 10.5058182,3.6095 L10.5058182,3.6095 L11.2727273,6 L4.72727273,6 L5.49418182,3.6095 C5.49418182,3.6095 6.53163636,3.0015 8,3 Z" id="Private" fill="#FFFFFF" fill-rule="nonzero"/>\n        </g>\n    </g>\n</g>';});
+define('text!templates/svg/rss.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/rss</title>\n    <g id="badge/icon/rss" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M4.75,10 C5.44035594,10 6,10.5596441 6,11.25 C6,11.9403559 5.44035594,12.5 4.75,12.5 C4.05964406,12.5 3.5,11.9403559 3.5,11.25 C3.5,10.5596441 4.05964406,10 4.75,10 Z M5.11116669,7.54639605 C6.82660407,7.80940186 8.1830606,9.16218778 8.45158391,10.8758014 L7.23152342,11.1795044 C7.08441894,9.91212418 6.07561709,8.9075227 4.80628203,8.7668642 L5.11116669,7.54639605 Z M5.72009926,5.11432766 C8.32885675,5.60976503 10.3855062,7.6642481 10.8841422,10.2718714 L9.66858256,10.5739265 C9.28406621,8.41337145 7.57799724,6.7100586 5.41602734,6.32963962 L5.72009926,5.11432766 Z M6.32787101,2.68573625 C9.83044069,3.40831848 12.5892971,6.16611302 13.3134345,9.66811414 L12.0989255,9.96960741 C11.4871421,6.91510726 9.07973668,4.50930363 6.02438684,3.89987406 L6.32787101,2.68573625 Z" id="Channel-variant" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
-define('text!templates/svg/ic-private-chat.html',[],function () { return '<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <circle fill="#4a8e3d" cx="9" cy="9" r="7"/>\n    <g transform="translate(1.000000, 1.000000)">\n        <rect x="0" y="0" width="16" height="16"/>\n        <path d="M10.45296,9.00001406 C11.2484973,9.00015914 11.9605655,9.50273575 12.2400509,10.2613541 C12.5195363,11.0199725 12.3078467,11.8755937 11.7087696,12.4087226 C11.1096925,12.9418515 10.2488201,13.0407214 9.5482222,12.6568582 C8.84762429,12.272995 8.45417618,11.4868729 8.56077817,10.683913 C8.38677817,10.6450242 8.19859635,10.6155798 7.99841453,10.6144687 C7.79823271,10.6139132 7.61005089,10.6450242 7.43605089,10.683913 C7.54265288,11.4868729 7.14920477,12.272995 6.44860686,12.6568582 C5.74800895,13.0407214 4.88713659,12.9418515 4.28805949,12.4087226 C3.68898239,11.8755937 3.4772928,11.0199725 3.75677818,10.2613541 C4.03626356,9.50273575 4.74833179,9.00015914 5.54386908,9.00001406 C6.32349136,8.99699984 7.02602967,9.47872777 7.31659635,10.2155808 C7.49059635,10.1616921 7.69841453,10.1111366 7.99841453,10.1111366 C8.22964016,10.109582 8.45968538,10.1448214 8.68023271,10.2155808 C8.97079939,9.47872777 9.6733377,8.99699984 10.45296,9.00001406 Z M5.54386908,9.55558244 C4.79075351,9.55558244 4.18023271,10.1774076 4.18023271,10.9444679 C4.18023271,11.7115282 4.79075351,12.3333534 5.54386908,12.3333534 C6.29698464,12.3333534 6.90750544,11.7115282 6.90750544,10.9444679 C6.90750544,10.1774076 6.29698464,9.55558244 5.54386908,9.55558244 Z M10.45296,9.55558244 C9.69984442,9.55558244 9.08932362,10.1774076 9.08932362,10.9444679 C9.08932362,11.7115282 9.69984442,12.3333534 10.45296,12.3333534 C11.2060756,12.3333534 11.8165963,11.7115282 11.8165963,10.9444679 C11.8165963,10.1774076 11.2060756,9.55558244 10.45296,9.55558244 Z M8,7 C9.54036364,7 11.7330909,7.297 11.7330909,7.297 C12.2062901,7.40997808 12.6727414,7.54549536 13.1305455,7.703 C13.6858182,7.877 14,8 14,8 L14,8 L2,8 C2,8 2.31418182,7.877 2.86945455,7.703 C3.32163107,7.54577794 3.78243762,7.41026088 4.25,7.297 C4.39345455,7.268 6.512,7 8,7 Z M8,3 C9.46836364,3.001 10.5058182,3.6095 10.5058182,3.6095 L10.5058182,3.6095 L11.2727273,6 L4.72727273,6 L5.49418182,3.6095 C5.49418182,3.6095 6.53163636,3.0015 8,3 Z" id="Private" fill="#FFFFFF" fill-rule="nonzero"/>\n    </g>\n</g>';});
+define('text!templates/svg/rss-variant.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/rss-variant</title>\n    <g id="badge/icon/rss-variant" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M5,10 C5.55228475,10 6,10.4477153 6,11 C6,11.5412844 5.55045872,12 5,12 C4.4587156,12 4,11.5412844 4,11 C4,10.4477153 4.44771525,10 5,10 M4,4 C8.418278,4 12,7.581722 12,12 L10.5449871,12 C10.5449871,8.38530341 7.61469659,5.45501285 4,5.45501285 L4,4 M4,7 C6.76142375,7 9,9.23857625 9,12 L7.57070707,12 C7.57070707,11.0529896 7.19450866,10.1447663 6.52487118,9.47512882 C5.85523371,8.80549134 4.9470104,8.42929293 4,8.42929293 L4,7 Z" id="rss-variant" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/server.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>badge/icon/server</title>\n    <g id="badge/icon/server" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="Bounds" x="0" y="0" width="16" height="16"></rect>\n        <path d="M10.1428571,13 L5.85714286,13 C5.38571429,13 5,12.625 5,12.1666667 L5,3.83333333 C5,3.375 5.38571429,3 5.85714286,3 L10.1428571,3 C10.6142857,3 11,3.375 11,3.83333333 L11,12.1666667 C11,12.625 10.6142857,13 10.1428571,13 Z M10,5 L6,5 L6,6 L10,6 L10,5 Z M10,7 L6,7 L6,8 L10,8 L10,7 Z M10,11 L9,11 L9,12 L10,12 L10,11 Z" id="Server" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
 define('text!templates/svg/volume-off-variant.html',[],function () { return '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n    <g id="Mobile-Portrait" transform="translate(-41.000000, -4.000000)">\n        <g id="volume-off-variant" transform="translate(34.000000, 0.000000)">\n            <rect id="Bounds" x="0" y="0" width="24" height="24"></rect>\n            <polygon id="Path-2" points="7 9 7 15 11 15 16 20 16 16.5 8.5 9"></polygon>\n            <polygon id="Path-3" points="7 6 18.5 17.5 19.5 16.5 16 13 16 4 11.5 8.5 8 5"></polygon>\n        </g>\n    </g>\n</g>\n';});
@@ -42249,11 +44662,15 @@ define("xabber-templates", [
     "jquery",
 
     "text!templates/base/dialog.html",
+    "text!templates/base/fingerprints.html",
+    "text!templates/base/fingerprint_item.html",
     "text!templates/base/jingle_message_calling.html",
     "text!templates/base/input_widget.html",
     "text!templates/base/toolbar.html",
     "text!templates/base/settings.html",
     "text!templates/base/about.html",
+    "text!templates/base/omemo_enable.html",
+    "text!templates/base/omemo_item.html",
 
     "text!templates/api_service/xabber_login.html",
     "text!templates/api_service/xabber_login_by_email.html",
@@ -42352,6 +44769,8 @@ define("xabber-templates", [
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
     "text!templates/chats/group_chats/mention_item.html",
+    "text!templates/chats/encryption_warning.html",
+    "text!templates/chats/content_encryption_warning.html",
 
     "text!templates/mentions/mentions_panel.html",
     "text!templates/mentions/mentions_placeholder.html",
@@ -42361,16 +44780,17 @@ define("xabber-templates", [
     "text!templates/svg/xmpp.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
-    "text!templates/svg/ic-invitation-chat.html",
-    "text!templates/svg/ic-group-contact.html",
-    "text!templates/svg/ic-group-chat.html",
-    "text!templates/svg/ic-blocked.html",
-    "text!templates/svg/ic-incognito-contact.html",
-    "text!templates/svg/ic-incognito-chat.html",
-    "text!templates/svg/ic-bot-contact.html",
-    "text!templates/svg/ic-bot-chat.html",
-    "text!templates/svg/ic-private-contact.html",
-    "text!templates/svg/ic-private-chat.html",
+    "text!templates/svg/blocked.html",
+    "text!templates/svg/bot.html",
+    "text!templates/svg/bot-variant.html",
+    "text!templates/svg/group-incognito.html",
+    "text!templates/svg/group-invite.html",
+    "text!templates/svg/group-public.html",
+    "text!templates/svg/group-private.html",
+    "text!templates/svg/channel.html",
+    "text!templates/svg/rss.html",
+    "text!templates/svg/rss-variant.html",
+    "text!templates/svg/server.html",
     "text!templates/svg/volume-off-variant.html",
     "text!templates/svg/message-group.html",
     "text!templates/svg/xabber-offline.html",
@@ -42425,11 +44845,15 @@ define("xabber-templates", [
 
 
     addTemplate('base.dialog');
+    addTemplate('base.fingerprints');
+    addTemplate('base.fingerprint_item');
     addTemplate('base.jingle_message_calling');
     addTemplate('base.input_widget');
     addTemplate('base.toolbar');
     addTemplate('base.settings');
     addTemplate('base.about');
+    addTemplate('base.omemo_enable');
+    addTemplate('base.omemo_item');
 
     addTemplate('api_service.xabber_login');
     addTemplate('api_service.xabber_login_by_email');
@@ -42527,6 +44951,9 @@ define("xabber-templates", [
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
     addTemplate('chats.group_chats.mention_item');
+    addTemplate('chats.encryption_warning');
+    addTemplate('chats.content_encryption_warning');
+
 
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');
@@ -42536,16 +44963,17 @@ define("xabber-templates", [
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
-    addSvgTemplate('svg.ic-invitation-chat');
-    addSvgTemplate('svg.ic-group-contact');
-    addSvgTemplate('svg.ic-group-chat');
-    addSvgTemplate('svg.ic-blocked');
-    addSvgTemplate('svg.ic-incognito-contact');
-    addSvgTemplate('svg.ic-incognito-chat');
-    addSvgTemplate('svg.ic-bot-contact');
-    addSvgTemplate('svg.ic-bot-chat');
-    addSvgTemplate('svg.ic-private-contact');
-    addSvgTemplate('svg.ic-private-chat');
+    addSvgTemplate('svg.blocked');
+    addSvgTemplate('svg.bot');
+    addSvgTemplate('svg.bot-variant');
+    addSvgTemplate('svg.group-incognito');
+    addSvgTemplate('svg.group-invite');
+    addSvgTemplate('svg.group-public');
+    addSvgTemplate('svg.group-private');
+    addSvgTemplate('svg.channel');
+    addSvgTemplate('svg.rss');
+    addSvgTemplate('svg.rss-variant');
+    addSvgTemplate('svg.server');
     addSvgTemplate('svg.volume-off-variant');
     addSvgTemplate('svg.message-group');
     addSvgTemplate('svg.xabber-offline');
@@ -42895,7 +45323,9 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
             } else {
                 this.throw();
             }
-            document.addEventListener("keyup", this.clickHandler.bind(this));
+            setTimeout(() => {
+                document.addEventListener("keyup", this.clickHandler.bind(this));
+            }, 500);
             return this.closed.promise();
         },
 
@@ -43236,8 +45666,18 @@ define('xabber-utils',[
 
     var getHyperLink = function (url) {
         var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
-                escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
-        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+decodeURI(url)+"</a>";
+            escaped_url = "";
+        try {
+            escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        }
+        catch (e) {
+            escaped_url = url;
+        }
+        try {
+            url = decodeURI(url);
+        }
+        catch (e) {}
+        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
     };
 
     $.fn.hyperlinkify = function (options) {
@@ -43247,6 +45687,7 @@ define('xabber-utils',[
             var $obj = $(obj),
                 html_concat = "",
                 url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g;
+                // url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)((\w+)([\w#!:.?+=&%@!\-\/])(\w+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/\w+)|(\S+)|\/|\/([\w#!:.?+=&%@!\-\/]))?)/g;
             $obj[0].childNodes.forEach(function (node) {
                 let $node = $(node),
                     x = node.outerHTML;
@@ -43455,7 +45896,7 @@ define('xabber-utils',[
                 return ("0:0" + duration);
             if (duration < 60)
                 return ("0:" + duration);
-            if (duration > 60)
+            if (duration >= 60)
                 return (Math.trunc(duration/60) + ":" + ((duration%60 < 10) ? ("0" + (duration%60)) : duration%60));
         },
 
@@ -43680,6 +46121,146 @@ define('xabber-utils',[
             }
         },
 
+        fromBase64toArrayBuffer: function (b64_string) {
+            return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0)).buffer;
+        },
+
+        ArrayBuffertoBase64: function (arrayBuffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+        },
+
+        AES: {
+            ALGO_NAME: 'AES-GCM',
+
+            decoder: new window.TextDecoder('utf-8'),
+            encoder: new window.TextEncoder('utf-8'),
+
+            decrypt: async function (exportedAESKey, iv, data) {
+                let key = await window.crypto.subtle.importKey('raw', exportedAESKey, utils.AES.ALGO_NAME, false, ['decrypt']);
+
+                let decryptedBuffer = await window.crypto.subtle.decrypt({
+                    name: utils.AES.ALGO_NAME,
+                    iv,
+                    tagLength: constants.AES_TAG_LENGTH
+                }, key, data);
+
+                return utils.AES.decoder.decode(decryptedBuffer);
+            },
+
+            encrypt: async function (plaintext) {
+                let iv = window.crypto.getRandomValues(new Uint8Array(12)),
+                    key = await utils.AES.generateAESKey(),
+                    encrypted = await utils.AES.generateAESencryptedMessage(iv, key, plaintext);
+
+                let ciphertext = encrypted.ciphertext,
+                    authenticationTag = encrypted.authenticationTag,
+                    keydata = await window.crypto.subtle.exportKey('raw', key);
+
+                return {
+                    keydata: utils.AES.arrayBufferConcat(keydata, authenticationTag),
+                    iv,
+                    payload: ciphertext
+                }
+            },
+
+            generateAESencryptedMessage: async function (iv, key, plaintext) {
+                let encryptOptions = {
+                    name: utils.AES.ALGO_NAME,
+                    iv,
+                    tagLength: constants.AES_TAG_LENGTH
+                };
+                let encodedPlaintext = utils.AES.encoder.encode(plaintext),
+                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext),
+                    ciphertextLength = encrypted.byteLength - ((128 + 7) >> 3),
+                    ciphertext = encrypted.slice(0, ciphertextLength),
+                    authenticationTag = encrypted.slice(ciphertextLength);
+
+                return {
+                    ciphertext,
+                    authenticationTag
+                };
+            },
+
+            arrayBufferConcat: function () {
+                let length = 0,
+                    buffer = null;
+
+                for (var i in arguments) {
+                    buffer = arguments[i];
+                    length += buffer.byteLength;
+                }
+
+                let joined = new Uint8Array(length),
+                    offset = 0;
+
+                for (var i in arguments) {
+                    buffer = arguments[i];
+                    joined.set(new Uint8Array(buffer), offset);
+                    offset += buffer.byteLength;
+                }
+
+                return joined.buffer
+            },
+
+            generateAESKey: async function () {
+                let algo = {
+                    name: utils.AES.ALGO_NAME,
+                    length: constants.AES_KEY_LENGTH,
+                };
+                let keyUsage = ['encrypt', 'decrypt'],
+                    key = await window.crypto.subtle.generateKey(algo, constants.AES_EXTRACTABLE, keyUsage);
+
+                return key;
+            }
+        },
+
+        getBrowser: function () {
+            // Get the user-agent string
+            let userAgentString =
+                navigator.userAgent;
+
+            // Detect Chrome
+            let chromeAgent =
+                userAgentString.indexOf("Chrome") > -1;
+
+            // Detect Internet Explorer
+            let IExplorerAgent =
+                userAgentString.indexOf("MSIE") > -1 ||
+                userAgentString.indexOf("Windows NT:") > -1;
+
+            // Detect Firefox
+            let firefoxAgent =
+                userAgentString.indexOf("Firefox") > -1;
+
+            // Detect Safari
+            let safariAgent =
+                userAgentString.indexOf("Safari") > -1;
+
+            // Discard Safari since it also matches Chrome
+            if ((chromeAgent) && (safariAgent))
+                safariAgent = false;
+
+            // Detect Opera
+            let operaAgent =
+                userAgentString.indexOf("OP") > -1;
+
+            // Discard Chrome since it also matches Opera
+            if ((chromeAgent) && (operaAgent))
+                chromeAgent = false;
+
+            if (safariAgent)
+                return 'Safari';
+            if (chromeAgent)
+                return 'Chrome';
+            if (IExplorerAgent)
+                return 'IE';
+            if (operaAgent)
+                return 'Opera';
+            if (firefoxAgent)
+                return 'Firefox';
+            return 'Unknown browser';
+        },
+
         emoji: emoji,
         images: images,
         modals: modals,
@@ -43690,7 +46271,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.1.0","version_description":"Improved group chats, client synchronization. Changed client rendering logic. Fixed configuration parameters and added new ones"}'
+'{"version_number":"2.1.0 (75)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -43838,8 +46419,8 @@ define('xabber-environment',[
                 'Update Xabber Web',
                 'New version '+version_number+' is available. '
                 +'<div class="new-version-description">'+version_description+'</div>'
-                +' Reload page to fetch this changes?',
-                {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
+                +'Reload page to fetch this changes?',
+                {ok_button: {text: 'reload'}, cancel_button: {text: 'not now'}}
             ).done(function (result) {
                 if (result) {
                     window.location.reload(true);
@@ -43877,7 +46458,6 @@ define('xabber-environment',[
         configure: function (config) {
             _.extend(constants, _.pick(config, [
                 'CONNECTION_URL',
-                'XMPP_SERVER_GROUPCHATS',
                 'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'DEBUG',
@@ -43898,6 +46478,13 @@ define('xabber-environment',[
             if (constants.DEBUG) {
                 window.xabber = this;
                 _.extend(window, env);
+            }
+
+            if (config.TURN_SERVERS_LIST) {
+                if (_.isArray(config.TURN_SERVERS_LIST))
+                    _.extend(constants, {TURN_SERVERS_LIST: config.TURN_SERVERS_LIST});
+                else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
+                    _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
             }
 
             if (utils.isMobile.any()) {
@@ -44657,7 +47244,7 @@ define("xabber-views", [],function () {
                                   this.$('.contacts-list').append(item_list);
                               item_list.click(function () {
                                   this.$('.list-item.active').removeClass('active');
-                                  let chat = account.chats.get(contact.hash_id);
+                                  let chat = account.chats.getChat(contact);
                                   chat && xabber.chats_view.openChat(chat.item_view, {clear_search: false, screen: xabber.body.screen.get('name')});
                                   item_list.addClass('active');
                               }.bind(this));
@@ -44878,8 +47465,8 @@ define("xabber-views", [],function () {
         },
 
         setScreen: function (name, attrs, options) {
-            $('body').switchClass('login', name === 'login');
-            $('body').switchClass('on-login', name !== 'login');
+            $('body').switchClass('xabber-login', name === 'login');
+            $('body').switchClass('on-xabber-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
@@ -45053,6 +47640,8 @@ define("xabber-views", [],function () {
         },
 
         showAbout: function () {
+            if (!xabber.about_view)
+                xabber.about_view = xabber.wide_panel.addChild('about', xabber.AboutView, {model: xabber});
             xabber.body.setScreen('about');
         },
 
@@ -45129,6 +47718,7 @@ define("xabber-views", [],function () {
             this.model.on('change:volume_on', this.updateButtons, this);
             this.model.on('change:video', this.updateButtons, this);
             this.model.on('change:video_live', this.updateButtons, this);
+            this.model.on('change:video_screen', this.updateButtons, this);
             this.model.on('change:video_in', this.updateCollapsedWindow, this);
             this.model.on('change:audio', this.updateButtons, this);
         },
@@ -45215,11 +47805,11 @@ define("xabber-views", [],function () {
             this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
             this.$('.btn-share-screen').switchClass('active', this.model.get('video_screen'));
             this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
-            this.$('.btn-video').switchClass('mdi-video', this.model.get('video_live'))
+            this.$('.btn-video').switchClass('mdi-video active', this.model.get('video_live'))
                 .switchClass('mdi-video-off', !this.model.get('video_live'));
-            this.$('.btn-volume').switchClass('mdi-volume-high', this.model.get('volume_on'))
+            this.$('.btn-volume').switchClass('mdi-volume-high active', this.model.get('volume_on'))
                 .switchClass('mdi-volume-off', !this.model.get('volume_on'));
-            this.$('.btn-microphone').switchClass('mdi-microphone', this.model.get('audio'))
+            this.$('.btn-microphone').switchClass('active mdi-microphone', this.model.get('audio'))
                 .switchClass('mdi-microphone-off', !this.model.get('audio'));
         },
 
@@ -45287,7 +47877,7 @@ define("xabber-views", [],function () {
             $overlay.toggle();
             this.$el.toggleClass('collapsed');
             if (this.$el.hasClass('collapsed'))
-                (this.model.get('video') || this.model.get('video_in')) && this.$el.addClass('collapsed-video');
+                this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
             else
                 this.$el.css('right', "");
             this.windowResized();
@@ -45305,7 +47895,7 @@ define("xabber-views", [],function () {
         },
 
         onDestroy: function () {
-            this.updateStatusText("Disconnected");
+            this.updateStatusText(this.model.get('status') == 'busy' ? "Line busy" : "Disconnected");
             setTimeout(function () {
                 this.close();
                 this.$el.detach();
@@ -45739,8 +48329,6 @@ define("xabber-views", [],function () {
             'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
         this.settings_view = this.wide_panel.addChild(
             'settings', this.SettingsView, {model: this._settings});
-        this.about_view = this.wide_panel.addChild(
-            'about', this.AboutView, {model: this});
     }, xabber);
 
     return xabber;
@@ -46156,6 +48744,8 @@ define("xabber-api-service", [],function () {
             var sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
+                if (!xabber.sync_settings_view)
+                    xabber.sync_settings_view = new xabber.SyncSettingsView({model: this});
                 this.trigger('open_sync_window', data);
             } else {
                 this.fetch_from_server(data);
@@ -46240,9 +48830,11 @@ define("xabber-api-service", [],function () {
             if (!username) {
                 return this.errorFeedback({username: 'Please input username!'});
             }
+            username = username.trim();
             if (!password)  {
                 return this.errorFeedback({password: 'Please input password!'});
             }
+            password = password.trim();
             this.authFeedback({password: 'Authentication...'});
             this.model.login(username, password);
         },
@@ -47008,7 +49600,6 @@ define("xabber-api-service", [],function () {
 
         this.xabber_login_panel = xabber.login_page.addChild(
             'xabber_login', this.XabberLoginPanel, {model: this.api_account});
-        this.sync_settings_view = new this.SyncSettingsView({model: this.api_account});
 
         this.settings_view.addChild('api-account', this.APIAccountView,
             {model: this.api_account});
@@ -47074,8 +49665,9 @@ define("xabber-strophe", [],function () {
             return utf16to8(auth_str);
         };
 
-        Strophe.ConnectionManager = function (CONNECTION_URL) {
-            this.connection = new Strophe.Connection(CONNECTION_URL);
+        Strophe.ConnectionManager = function (CONNECTION_URL, options) {
+            options = options || {};
+            this.connection = new Strophe.Connection(CONNECTION_URL, options);
         };
 
         Strophe.ConnectionManager.prototype = {
@@ -47110,7 +49702,7 @@ define("xabber-strophe", [],function () {
         _.extend(Strophe.Connection.prototype, {
             _sasl_auth1_cb: function (elem) {
                 this.features = elem;
-                var i, child;
+                let i, child;
                 for (i = 0; i < elem.childNodes.length; i++) {
                     child = elem.childNodes[i];
                     if (child.nodeName === 'bind') {
@@ -47121,7 +49713,7 @@ define("xabber-strophe", [],function () {
                         this.do_session = true;
                     }
 
-                    if ((child.nodeName === 'x-token') && (child.namespaceURI === Strophe.NS.AUTH_TOKENS)) {
+                    if ((child.nodeName === 'x-token') && child.namespaceURI === Strophe.NS.AUTH_TOKENS && this.options['x-token']) {
                         this.x_token_auth = true;
                     }
 
@@ -47177,7 +49769,7 @@ define("xabber-strophe", [],function () {
                     id: uniq_id
                 }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('device').t('PC, ' + navigator.platform);
+                    .c('device').t(`PC, ${window.navigator.platform}, ${env.utils.getBrowser()}`);
 
                 handler = function (stanza) {
                     var iqtype = stanza.getAttribute('type');
@@ -47227,6 +49819,7 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
         Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
+        Strophe.addNamespace('SCE', 'urn:xmpp:sce:0');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');
         Strophe.addNamespace('JINGLE_SECURITY_STUB', 'urn:xmpp:jingle:security:stub:0');
@@ -47237,10 +49830,11 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('CHATSTATES', 'http://jabber.org/protocol/chatstates');
         Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extended-chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
-        Strophe.addNamespace('AUTH_TOKENS', 'http://xabber.com/protocol/auth-tokens');
-        Strophe.addNamespace('SYNCHRONIZATION', 'http://xabber.com/protocol/synchronization');
-        Strophe.addNamespace('DELIVERY', 'http://xabber.com/protocol/delivery');
-        Strophe.addNamespace('MAM', 'urn:xmpp:mam:1');
+        Strophe.addNamespace('AUTH_TOKENS', 'https://xabber.com/protocol/auth-tokens');
+        Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
+        Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
+        Strophe.addNamespace('ARCHIVE', 'https://xabber.com/protocol/archive');
+        Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
         Strophe.addNamespace('RSM', 'http://jabber.org/protocol/rsm');
         Strophe.addNamespace('DATAFORM', 'jabber:x:data');
         Strophe.addNamespace('CHAT_MARKERS', 'urn:xmpp:chat-markers:0');
@@ -47251,17 +49845,17 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('PRIVATE_STORAGE', 'jabber:iq:private');
         Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
         Strophe.addNamespace('LAST', 'jabber:iq:last');
-        Strophe.addNamespace('GROUP_CHAT', 'http://xabber.com/protocol/groupchat');
-        Strophe.addNamespace('WEBCHAT', 'http://xabber.com/protocol/webchat');
-        Strophe.addNamespace('INDEX', 'http://xabber.com/protocol/index');
+        Strophe.addNamespace('GROUP_CHAT', 'https://xabber.com/protocol/groups');
+        Strophe.addNamespace('WEBCHAT', 'https://xabber.com/protocol/webchat');
+        Strophe.addNamespace('INDEX', 'https://xabber.com/protocol/index');
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
-        Strophe.addNamespace('REWRITE', 'http://xabber.com/protocol/rewrite');
-        Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/reference');
+        Strophe.addNamespace('REWRITE', 'https://xabber.com/protocol/rewrite');
+        Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/references');
         Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
-        Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-message');
-        Strophe.addNamespace('OTB', 'https://xabber.com/protocol/otb');
+        Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-messages');
+        Strophe.addNamespace('FILES', 'https://xabber.com/protocol/files');
         return xabber;
     };
 });
@@ -47280,7 +49874,7 @@ define("xabber-vcard", [],function () {
         utils = env.utils;
 
     var xmlToObject = function ($vcard) {
-        var vcard = {
+        let vcard = {
             nickname: $vcard.find('NICKNAME').text().trim(),
             fullname: $vcard.find('FN').text().trim(),
             first_name: $vcard.find('N GIVEN').text().trim(),
@@ -47299,21 +49893,34 @@ define("xabber-vcard", [],function () {
             email: {}
         };
 
-        var $org = $vcard.find('ORG');
+        if ($vcard.find('X-PRIVACY').length || $vcard.find('X-MEMBERSHIP').length || $vcard.find('X-INDEX').length) {
+            vcard.group_info = {
+                jid: vcard.jabber_id,
+                description: vcard.description,
+                name: vcard.nickname,
+                anonymous: $vcard.find('X-PRIVACY').text().trim(),
+                searchable: $vcard.find('X-INDEX').text().trim(),
+                model: $vcard.find('X-MEMBERSHIP').text().trim(),
+                status_msg: $vcard.find('X-STATUS').text().trim(),
+                members_num: $vcard.find('X-MEMBERS').text().trim()
+            };
+        }
+
+        let $org = $vcard.find('ORG');
         if ($org.length) {
             vcard.org.name = $org.find('ORGNAME').text().trim();
             vcard.org.unit = $org.find('ORGUNIT').text().trim();
         }
 
-        var $photo = $vcard.find('PHOTO');
+        let $photo = $vcard.find('PHOTO');
         if ($photo.length) {
             vcard.photo.image = $photo.find('BINVAL').text().trim();
             vcard.photo.type = $photo.find('TYPE').text().trim();
         }
 
         $vcard.find('TEL').each(function () {
-            var $this = $(this);
-            var number = $this.find('NUMBER').text().trim();
+            let $this = $(this),
+                number = $this.find('NUMBER').text().trim();
             if (!number) {
                 return;
             }
@@ -47591,14 +50198,19 @@ define("xabber-vcard", [],function () {
         },
 
         _initialize: function () {
-            this.$('.datepicker').pickadate({
+            var $input = this.$('.datepicker').pickadate({
                 selectMonths: true,
                 selectYears: 100,
+                autoOk: false,
                 // min = 100 years ago
                 min: new Date(moment.now() - 3153600000000),
                 max: new Date(moment.now() - 86400000),
                 format: 'dd.mm.yyyy',
+                allowKeyboardControl: false,
                 today: '',
+                onClose: function(){
+                    $(document.activeElement).blur();
+                },
                 klass: {
                     weekday_display: 'picker__weekday-display ground-color-700',
                     date_display: 'picker__date-display ground-color-500',
@@ -47609,6 +50221,9 @@ define("xabber-vcard", [],function () {
                     buttonClear: 'btn-flat btn-main btn-dark',
                     buttonClose: 'btn-flat btn-main text-color-700'
                 }
+            });
+            $input.on('mousedown', function cancelEvent(evt) {
+                evt.preventDefault();
             });
             this.data.on("change:saving", this.updateSaveButton, this);
         },
@@ -47763,7 +50378,6 @@ define("xabber-accounts", [],function () {
             utils = env.utils,
             $ = env.$,
             $iq = env.$iq,
-            $msg = env.$msg,
             $pres = env.$pres,
             Strophe = env.Strophe,
             _ = env._,
@@ -47785,6 +50399,7 @@ define("xabber-accounts", [],function () {
                 },
 
                 initialize: function (_attrs, options) {
+                    this.retraction_version = null;
                     options || (options = {});
                     if (_attrs.is_new && !options.auth_view) {
                         this.is_invalid = true;
@@ -47825,7 +50440,7 @@ define("xabber-accounts", [],function () {
                     this.xabber_auth = {};
                     this.session.on("change:connected", this.onChangedConnected, this);
                     this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
-                    this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                    this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
                     this.connection = this.conn_manager.connection;
                     this.get('x_token') && (this.connection.x_token = this.get('x_token'));
                     this.on("destroy", this.onDestroy, this);
@@ -47835,8 +50450,6 @@ define("xabber-accounts", [],function () {
                     this.dfd_presence = new $.Deferred();
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
-                    this.settings_left = new xabber.AccountSettingsLeftView({model: this});
-                    this.settings_right = new xabber.AccountSettingsRightView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
                     this.updateColorScheme();
                     this.settings.on("change:color", this.updateColorScheme, this);
@@ -47855,7 +50468,7 @@ define("xabber-accounts", [],function () {
                     this.once("start", this.start, this);
                     xabber.api_account.on("settings_result", function (result) {
                         if (result && this.settings.get('token')) {
-                            this.save({auth_type: 'token', password: ''});
+                            this.save({auth_type: 'token'/*, password: ''*/});
                         }
                         this.trigger('start');
                     }, this);
@@ -47894,6 +50507,34 @@ define("xabber-accounts", [],function () {
                     return res;
                 },
 
+                sendMsgFast: function (stanza, callback) {
+                    var res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    if (res) {
+                        this.fast_connection.send(stanza);
+                        callback && callback();
+                        return res;
+                    } else {
+                        return this.sendMsg(stanza, callback);
+                    }
+                },
+
+                sendIQFast: function () {
+                    let res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    if (res) {
+                        this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
+                        return res;
+                    } else
+                        return this.sendIQ.apply(this, arguments);
+                },
+
+                sendFast: function (stanza, callback, errback) {
+                    if ($(stanza.nodeTree).first().is('message')) {
+                        this.sendMsgFast(stanza, callback);
+                    } else {
+                        this.sendIQFast(stanza, callback, errback);
+                    }
+                },
+
                 pubAvatar: function (image, callback, errback) {
                     if (!image) {
                         this.removeAvatar(callback, errback);
@@ -47911,8 +50552,8 @@ define("xabber-accounts", [],function () {
                             .c('item', {id: avatar_hash})
                             .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                             .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                    this.sendIQ(iq_pub_data, function () {
-                            this.sendIQ(iq_pub_metadata, function () {
+                    this.sendIQinBackground(iq_pub_data, function () {
+                            this.sendIQinBackground(iq_pub_metadata, function () {
                                     callback && callback(avatar_hash);
                                 }.bind(this),
                                 function (data_error) {
@@ -47930,7 +50571,7 @@ define("xabber-accounts", [],function () {
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('item')
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA});
-                    this.sendIQ(iq_pub_metadata, function () {
+                    this.sendIQinBackground(iq_pub_metadata, function () {
                             callback && callback();
                         }.bind(this),
                         function () {
@@ -47943,7 +50584,7 @@ define("xabber-accounts", [],function () {
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
                         .c('item', {id: avatar});
-                    this.sendIQ(iq_request_avatar, function (iq) {
+                    this.sendIQinBackground(iq_request_avatar, function (iq) {
                         var pubsub_avatar = $(iq).find('data').text();
                         if (pubsub_avatar == "")
                             errback && errback("Node is empty");
@@ -47953,13 +50594,22 @@ define("xabber-accounts", [],function () {
                 },
 
                 sendIQ: function () {
-                    var res = this.connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
                         this.connection.sendIQ.apply(this.connection, arguments);
                     } else {
                         this._pending_stanzas.push({stanza: arguments});
                     }
                     return res;
+                },
+
+                sendIQinBackground: function () {
+                    let res = this.background_connection && this.background_connection.authenticated && this.background_connection.connected && this.get('status') !== 'offline';
+                    if (res) {
+                        this.background_connection.sendIQ.apply(this.background_connection, arguments);
+                        return res;
+                    } else
+                        return this.sendIQ.apply(this, arguments);
                 },
 
                 parseDataForm: function ($dataform, options) {
@@ -48039,9 +50689,37 @@ define("xabber-accounts", [],function () {
                     $.ajax(request);
                 },
 
+                createBackgroundConnection: function (auth_type) {
+                    let jid = this.get('jid'),
+                        password = this.getPassword();
+                    if (!password)
+                        return;
+                    auth_type = auth_type || 'password';
+                    if (!this.background_conn_manager) {
+                        this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                        this.background_connection = this.background_conn_manager.connection;
+                    } else
+                        this.background_connection.disconnect();
+                    this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
+                },
+
+                createFastConnection: function (auth_type) {
+                    let jid = this.get('jid'),
+                        password = this.getPassword();
+                    if (!password)
+                        return;
+                    auth_type = auth_type || 'password';
+                    if (!this.fast_conn_manager) {
+                        this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                        this.fast_connection = this.fast_conn_manager.connection;
+                    } else
+                        this.fast_connection.disconnect();
+                    this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
+                },
+
                 connect: function (options) {
                     options = options || {};
-                    var jid = this.get('jid'),
+                    let jid = this.get('jid'),
                         auth_type = this.get('auth_type'),
                         password;
                     jid += '/xabber-web-' + xabber.get('client_id');
@@ -48062,6 +50740,8 @@ define("xabber-accounts", [],function () {
                         this.password_view.show(attrs);
                         return;
                     }
+                    this.createBackgroundConnection();
+                    this.createFastConnection();
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -48089,6 +50769,8 @@ define("xabber-accounts", [],function () {
                     setTimeout(function () {
                         this.connFeedback('Connecting...');
                         this.restoreStatus();
+                        this.createBackgroundConnection();
+                        this.createFastConnection();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                     }.bind(this), timeout);
                 },
@@ -48109,7 +50791,7 @@ define("xabber-accounts", [],function () {
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
                         if (this.connection.x_token) {
-                            this.save({auth_type: 'x-token', x_token: this.connection.x_token, password: null});
+                            this.save({auth_type: 'x-token', x_token: this.connection.x_token/*, password: null*/});
                             this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
@@ -48268,7 +50950,7 @@ define("xabber-accounts", [],function () {
                             tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                         }.bind(this));
                         this.x_tokens_list = tokens_list;
-                        this.settings_right.updateXTokens();
+                        this.settings_right && this.settings_right.updateXTokens();
                     }.bind(this));
                 },
 
@@ -48315,6 +50997,28 @@ define("xabber-accounts", [],function () {
                     }.bind(this));
                 },
 
+                onBackgroundConnected: function (status) {
+                    if (status === Strophe.Status.CONNECTED) {
+                        _.each(this._after_background_connected_plugins, function (plugin) {
+                            plugin.call(this);
+                        }.bind(this));
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.background_conn_manager = undefined;
+                        this.background_connection = undefined;
+                    }
+                },
+
+                onFastConnected: function (status) {
+                    if (status === Strophe.Status.CONNECTED) {
+                        _.each(this._after_fast_connected_plugins, function (plugin) {
+                            plugin.call(this);
+                        }.bind(this));
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.fast_conn_manager = undefined;
+                        this.fast_connection = undefined;
+                    }
+                },
+
                 onReconnected: function () {
                     this.connFeedback('Connected');
                     this.afterConnected();
@@ -48333,10 +51037,12 @@ define("xabber-accounts", [],function () {
                     }.bind(this), 5000);*/
                 },
 
-                activateXabberRewrite: function () {
-                    var retractions_query = $iq({from: this.get('jid'), type: 'set', to: this.get('jid')})
-                        .c('activate', { xmlns: Strophe.NS.XABBER_REWRITE});
-                    this.sendIQ(retractions_query);
+                getAllMessageRetractions: function (encrypted, callback) {
+                    let query_options = {xmlns: Strophe.NS.REWRITE, version: (encrypted && this.omemo) ? this.omemo.getRetractVersion() : this.retraction_version};
+                    encrypted && (query_options.type = 'encrypted');
+                    let retractions_query = $iq({type: 'get'})
+                        .c('query', query_options);
+                    this.sendIQ(retractions_query, callback);
                 },
 
                 sendPendingStanzas: function () {
@@ -48361,6 +51067,8 @@ define("xabber-accounts", [],function () {
 
                 _after_connected_plugins: [],
                 _after_reconnected_plugins: [],
+                _after_background_connected_plugins: [],
+                _after_fast_connected_plugins: [],
 
                 onDisconnected: function () {
                     this.disconnected_timestamp = this.last_stanza_timestamp;
@@ -48396,7 +51104,7 @@ define("xabber-accounts", [],function () {
                 getVCard: function (callback) {
                     var jid = this.get('jid'),
                         is_callback = _.isFunction(callback);
-                    this.connection.vcard.get(jid,
+                    ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
                         function (vcard) {
                             var attrs = {
                                 vcard: vcard,
@@ -48501,17 +51209,32 @@ define("xabber-accounts", [],function () {
                 },
 
                 showSettings: function (right, block_name) {
+                    let has_settings_right = !_.isUndefined(this.settings_right);
+                    if (!this.settings_left)
+                        this.settings_left = new xabber.AccountSettingsLeftView({model: this});
+                    if (!has_settings_right)
+                        this.settings_right = new xabber.AccountSettingsRightView({model: this});
+                    this.updateColorScheme();
                     xabber.body.setScreen('account_settings', {
                         account: this, right: right, block_name: block_name
                     });
                     this.trigger('open_settings');
+                    if (!has_settings_right) {
+                        this.trigger('render_settings');
+                        this.settings_right.addChild('blocklist', xabber.BlockListView, {
+                            account: this,
+                            el: this.settings_right.$('.blocklist-info')[0]
+                        });
+                    }
                 },
 
                 updateColorScheme: function () {
                     let color = this.settings.get('color');
-                    this.settings_left.$el.attr('data-color', color);
-                    this.settings_right.$el.attr('data-color', color);
-                    this.settings_right.$('.account-color .current-color-name').text(color);
+                    this.settings_left && this.settings_left.$el.attr('data-color', color);
+                    if (this.settings_right) {
+                        this.settings_right.$el.attr('data-color', color);
+                        this.settings_right.$('.account-color .current-color-name').text(color);
+                    }
                     this.vcard_edit.$el.attr('data-color', color);
                 },
 
@@ -48602,7 +51325,7 @@ define("xabber-accounts", [],function () {
                         }.bind(this), null, 'presence', null);
                 },
 
-            onSyncedIQ: function (iq) {
+                onSyncedIQ: function (iq) {
                     let $synced_iq = $(iq),
                         $conversation = $synced_iq.find('conversation'),
                         chat_jid = $conversation.attr('jid'),
@@ -48610,11 +51333,14 @@ define("xabber-accounts", [],function () {
                     if (is_deleted) {
                         let contact = this.contacts.mergeContact(chat_jid),
                             chat = this.chats.getChat(contact);
+                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
+                        chat.set('const_unread', 0);
+                        xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
                     }
-			return true;
-            },
+                    return true;
+                },
 
                 onGetIQ: function (iq) {
                     let $incoming_iq = $(iq),
@@ -48724,6 +51450,14 @@ define("xabber-accounts", [],function () {
                 addConnPlugin: function (func, conn, reconn) {
                     conn && this.prototype._after_connected_plugins.push(func);
                     reconn && this.prototype._after_reconnected_plugins.push(func);
+                },
+
+                addBackgroundConnPlugin: function (func, conn, reconn) {
+                    conn && this.prototype._after_background_connected_plugins.push(func);
+                },
+
+                addFastConnPlugin: function (func, conn, reconn) {
+                    conn && this.prototype._after_fast_connected_plugins.push(func);
                 }
             });
 
@@ -49035,10 +51769,17 @@ define("xabber-accounts", [],function () {
 
         xabber.ResourcesView = xabber.BasicView.extend({
             _initialize: function () {
+                this.renderByInit();
                 this.model.on("add", this.onResourceAdded, this);
                 this.model.on("remove", this.onResourceRemoved, this);
                 this.model.on("reset", this.onReset, this);
                 this.model.on("change:priority", this.onPriorityChanged, this);
+            },
+
+            renderByInit: function () {
+                this.model.each((resource) => {
+                    this.onResourceAdded(resource);
+                });
             },
 
             onResourceAdded: function (resource) {
@@ -49190,7 +51931,6 @@ define("xabber-accounts", [],function () {
             },
 
             changeAvatar: function (ev) {
-                this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 var field = ev.target;
                 if (!field.files.length) {
                     return;
@@ -49204,6 +51944,7 @@ define("xabber-accounts", [],function () {
                     utils.dialogs.error('Wrong image');
                     return;
                 }
+                this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done(function (image, hash, size) {
                     if (image) {
                         this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type},
@@ -49225,6 +51966,8 @@ define("xabber-accounts", [],function () {
             },
 
             openChangeStatus: function (ev) {
+                if (!xabber.change_status_view)
+                    xabber.change_status_view = new xabber.ChangeStatusView();
                 xabber.change_status_view.open(this.model);
             },
 
@@ -49265,13 +52008,17 @@ define("xabber-accounts", [],function () {
 
             events: {
                 "change .enabled-state input": "setEnabled",
+                "change .setting-send-chat-states input": "setTypingNotification",
+                "change .setting-use-omemo input": "setEnabledOmemo",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "change .sync-account": "changeSyncSetting",
                 "click .btn-delete-settings": "deleteSettings",
                 "click .color-values .color-value": "changeColor",
                 "click .token-wrap .btn-revoke-token": "revokeXToken",
-                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens"
+                "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
+                "click .omemo-info .btn-manage-devices": "openDevicesWindow",
+                "click .omemo-info .btn-purge-keys": "purgeKeys"
             },
 
             _initialize: function () {
@@ -49284,7 +52031,7 @@ define("xabber-accounts", [],function () {
                 this.updateView();
                 this.showConnectionStatus();
                 this.updateSynchronizationBlock();
-                // this.model.getAllXTokens();
+
                 this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
                 this.model.settings.on("change:to_sync", this.updateSyncOption, this);
@@ -49292,12 +52039,16 @@ define("xabber-accounts", [],function () {
                 this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
                 xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
                 this.model.on("change:enabled", this.updateEnabled, this);
+                this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
+                this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
             },
 
             render: function (options) {
+                this.updateEnabledOmemo();
+                this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
                 this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
@@ -49433,8 +52184,36 @@ define("xabber-accounts", [],function () {
             },
 
             updateEnabled: function () {
-                var enabled = this.model.get('enabled');
+                let enabled = this.model.get('enabled');
                 this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
+            },
+
+            updateEnabledOmemo: function () {
+                let enabled = this.model.settings.get('omemo'), has_keys = false;
+                if (this.model.omemo) {
+                    has_keys = Object.keys(this.model.omemo.get('prekeys')).length;
+                } else {
+                    let omemo = new xabber.Omemo({id: 'omemo'}, {
+                        account: this.model,
+                        storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                        fetch: 'before'
+                    });
+                    has_keys = Object.keys(omemo.get('prekeys')).length;
+                    omemo.destroy();
+                }
+                if (_.isUndefined(enabled)) {
+                    enabled = false;
+                }
+                if (enabled && this.model.omemo_enable_view)
+                    this.model.omemo_enable_view.close();
+                this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
+                this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+                this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', !has_keys);
+            },
+
+            updateEncryptedChatstates: function () {
+                let enabled = this.model.settings.get('encrypted_chatstates');
+                this.$('.setting-send-chat-states input[type=checkbox]').prop('checked', enabled);
             },
 
             updateReconnectButton: function () {
@@ -49442,9 +52221,77 @@ define("xabber-accounts", [],function () {
             },
 
             setEnabled: function (ev) {
-                var enabled = this.$('.enabled-state input').prop('checked');
+                let enabled = this.$('.enabled-state input').prop('checked');
                 this.model.save('enabled', enabled);
                 enabled ? this.model.activate() : this.model.deactivate();
+            },
+
+            setEnabledOmemo: function () {
+                let enabled = this.$('.setting-use-omemo input').prop('checked');
+                this.model.settings.save('omemo', enabled);
+                this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+                if (enabled)
+                    this.initOmemo();
+                else
+                    this.destroyOmemo();
+            },
+
+            setTypingNotification: function () {
+                let enabled = this.$('.setting-send-chat-states input').prop('checked');
+                this.model.settings.save('encrypted_chatstates', enabled);
+            },
+
+            initOmemo: function () {
+                this.model.omemo = new xabber.Omemo({id: 'omemo'}, {
+                    account: this.model,
+                    storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                    fetch: 'before'
+                });
+                setTimeout(function () {
+                    this.model.omemo.onConnected();
+                }.bind(this), 2000);
+            },
+
+            destroyOmemo: function () {
+                this.model.omemo = undefined;
+            },
+
+            openDevicesWindow: function () {
+                if (this.model.omemo) {
+                    if (!this.omemo_devices)
+                        this.omemo_devices = new xabber.Fingerprints({model: this.model.omemo});
+                    this.omemo_devices.open();
+                }
+                else
+                    utils.dialogs.error('OMEMO encryption is disabled');
+            },
+
+            purgeKeys: function () {
+                utils.dialogs.ask("Purge encryption keys", `This will unpublish all encryption keys and remove them from your server and this device. All decrypted will be permanently deleted, you will not be able to recover them in the future. To resume encrypted messaging you will have to perform fingerprint verification procedures again, with each of your contacts.\n\nUse this measure only as a last resort.`,
+                    null, { ok_button_text: 'purge keys'}).done(function (result) {
+                    if (result) {
+                        if (this.model.omemo) {
+                            let device_id = this.model.omemo.get('device_id');
+                            this.model.omemo.save('prekeys', {});
+                            this.model.omemo.bundle && (this.model.omemo.bundle.preKeys = []);
+                            if (this.model.omemo.own_devices[device_id]) {
+                                this.model.omemo.own_devices[device_id].preKeys = [];
+                                this.model.omemo.own_devices[device_id].set({ik: null, fingerprint: null});
+                            }
+                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
+                        } else {
+                            let omemo = new xabber.Omemo({id: 'omemo'}, {
+                                account: this.model,
+                                storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                                fetch: 'before'
+                            });
+                            omemo.save('prekeys', {});
+                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
+                            omemo.destroy();
+                        }
+                        this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', true);
+                    }
+                }.bind(this));
             },
 
             showConnectionStatus: function () {
@@ -49535,6 +52382,7 @@ define("xabber-accounts", [],function () {
                 this.updateSyncState();
                 this.showConnectionStatus();
                 this.model.on("change:enabled", this.updateEnabled, this);
+                this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.settings.on("change:color", this.updateColorScheme, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
@@ -49836,11 +52684,12 @@ define("xabber-accounts", [],function () {
                 }
                 this.data.set('authentication', true);
                 this.authFeedback({});
-                var jid = this.model.get('jid'),
+                let jid = this.model.get('jid'),
                     password = this.$password_input.val();
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
+                password = password.trim();
                 this.authFeedback({password: 'Authentication with password...'});
                 if (this.model.connection.connected) {
                     this.model.once('deactivate', function () {
@@ -49945,20 +52794,22 @@ define("xabber-accounts", [],function () {
                 }
                 this.data.set('authentication', true);
                 this.authFeedback({});
-                var jid = this.$jid_input.val(),
+                let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (!jid) {
                     return this.errorFeedback({jid: 'Please input username!'});
                 }
+                jid = jid.trim();
                 if (!password)  {
                     return this.errorFeedback({password: 'Please input password!'});
                 }
-                var at_idx = jid.indexOf('@');
+                password = password.trim();
+                let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
                     return this.errorFeedback({jid: 'Wrong username format!'});
                 }
                 jid = Strophe.getBareJidFromJid(jid).toLowerCase();
-                var account = xabber.accounts.get(jid);
+                let account = xabber.accounts.get(jid);
                 if (account) {
                     this.errorFeedback({jid: 'This account already added to Xabber web'});
                 } else {
@@ -50047,7 +52898,7 @@ define("xabber-accounts", [],function () {
             },
 
             updateButtons: function () {
-                                var authentication = this.data.get('authentication');
+                let authentication = this.data.get('authentication');
                 this.$('.btn-log-in').switchClass('disabled', authentication);
                 this.$('.btn-cancel').showIf(authentication);
             },
@@ -50133,9 +52984,9 @@ define("xabber-accounts", [],function () {
                 {model: this.accounts, el: this.settings_view.$('.xmpp-accounts')[0]});
 
 
-            this.add_account_view = new this.AddAccountView();
-            this.change_status_view = new this.ChangeStatusView();
             this.on("add_account", function () {
+                if (!this.add_account_view)
+                    this.add_account_view = new this.AddAccountView();
                 this.add_account_view.show();
             }, this);
 
@@ -50203,6 +53054,7 @@ define("xabber-discovery", [],function () {
 
         initialize: function (models, options) {
             this.account = options.account;
+            this.account.on('render_settings', this.render, this);
             this.connection = this.account.connection;
             this.connection.disco.addIdentity(
                 'client',
@@ -50216,11 +53068,10 @@ define("xabber-discovery", [],function () {
             this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
             this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
             this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
-            this.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
+            this.connection.disco.addFeature(Strophe.NS.ATTENTION, 'XEP-0244: Attention');
             this.addFeature(Strophe.NS.CARBONS, 'XEP-0280: Message carbons');
             this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
-            // this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA);
             this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         },
@@ -50231,7 +53082,12 @@ define("xabber-discovery", [],function () {
                 verbose_name: verbose_name
             });
             this.connection.disco.addFeature(namespace);
-            var view = new xabber.FeatureView({model: feature});
+        },
+
+        render: function () {
+            this.models.forEach((feature) => {
+                let view = new xabber.FeatureView({model: feature});
+            });
         }
     });
 
@@ -50256,13 +53112,16 @@ define("xabber-discovery", [],function () {
         onItems: function (stanza) {
             let groupchat_servers_list = [];
             $(stanza).find('query item').each(function (idx, item) {
-                if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
-                    let server_name = $(item).attr('jid');
-                    groupchat_servers_list.push(server_name);
+                let jid = $(item).attr('jid'),
+                    name = $(item).attr('name'),
+                    node = $(item).attr('node');
+                if (node === Strophe.NS.GROUP_CHAT) {
+                    groupchat_servers_list.push(jid);
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
+                this.connection.disco.addItem(jid, name, node, () => {});
                 this.connection.disco.info(
-                    $(item).attr('jid'),
+                    jid,
                     null,
                     this.onInfo.bind(this));
             }.bind(this));
@@ -50383,7 +53242,7 @@ define("xabber-discovery", [],function () {
 
         this.connection.deleteTimedHandler(this._ping_handler);
         this._ping_handler = this.connection.addTimedHandler(30000, function () {
-            var downtime = moment.now() - this.last_stanza_timestamp;
+            let downtime = moment.now() - this.last_stanza_timestamp;
             if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
                 if (this.connection.connected)
                     this.connection.disconnect();
@@ -50398,6 +53257,72 @@ define("xabber-discovery", [],function () {
         }.bind(this));
 
         this.server_features.request();
+    }, true, true);
+
+    xabber.Account.addBackgroundConnPlugin(function () {
+        this.last_background_stanza_timestamp = moment.now();
+
+        this.background_connection.deleteHandler(this._last_background_stanza_handler);
+        this._last_background_stanza_handler = this.background_connection.addHandler(function () {
+            this.last_background_stanza_timestamp = moment.now();
+            return true;
+        }.bind(this));
+
+        this.background_connection.deleteHandler(this._background_pong_handler);
+        this._background_pong_handler = this.background_connection.ping.addPingHandler(function (ping) {
+            this.last_background_stanza_timestamp = moment.now();
+            this.background_connection.ping.pong(ping);
+            return true;
+        }.bind(this));
+
+        this.background_connection.deleteTimedHandler(this._background_ping_handler);
+        this._background_ping_handler = this.background_connection.addTimedHandler(30000, function () {
+            let downtime = moment.now() - this.last_background_stanza_timestamp;
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                if (this.background_connection.connected)
+                    this.background_connection.disconnect();
+                else
+                    this.background_connection.connect('password', this.background_connection.jid, this.background_connection.pass);
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
+                this.background_connection.ping.ping(this.background_connection.jid);
+            }
+            return true;
+        }.bind(this));
+    }, true, true);
+
+    xabber.Account.addFastConnPlugin(function () {
+        this.last_fast_stanza_timestamp = moment.now();
+
+        this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
+        this._last_fast_stanza_handler = this.fast_connection.addHandler(function () {
+            this.last_fast_stanza_timestamp = moment.now();
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteHandler(this._fast_pong_handler);
+        this._fast_pong_handler = this.fast_connection.ping.addPingHandler(function (ping) {
+            this.last_fast_stanza_timestamp = moment.now();
+            this.fast_connection.ping.pong(ping);
+            return true;
+        }.bind(this));
+
+        this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
+        this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, function () {
+            let downtime = moment.now() - this.last_fast_stanza_timestamp;
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+                if (this.fast_connection.connected)
+                    this.fast_connection.disconnect();
+                else
+                    this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
+                return false;
+            }
+            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
+                this.fast_connection.ping.ping(this.fast_connection.jid);
+            }
+            return true;
+        }.bind(this));
     }, true, true);
 
     xabber.Account.addConnPlugin(function () {
@@ -50443,27 +53368,39 @@ define("xabber-contacts", [],function () {
             initialize: function (_attrs, options) {
                 this.on("change:group_chat", this.onChangedGroupchat, this);
                 this.account = options.account;
-                var attrs = _.clone(_attrs);
-                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {is_server: true, bot: true});
-                attrs.name = attrs.roster_name || attrs.jid;
+                if (_attrs.avatar) {
+                    _attrs.image = _attrs.avatar;
+                    delete _attrs.avatar;
+                }
+                let attrs = _.clone(_attrs);
+                if (attrs.resource) {
+                    attrs.full_jid = attrs.jid + '/' + attrs.resource;
+                } /*else if (attrs.group_chat) {
+                    attrs.full_jid = attrs.jid + '/Group';
+                }*/
+                (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, status: 'online'});
+                attrs.name = attrs.roster_name || attrs.name || attrs.jid;
                 if (!attrs.image) {
                     attrs.photo_hash = "";
                     attrs.image = Images.getDefaultAvatar(attrs.name);
                 }
+                if (this.account.blocklist.isBlocked(attrs.jid))
+                    attrs.blocked = true;
                 this.cached_image = Images.getCachedImage(attrs.image);
                 attrs.vcard = utils.vcard.getBlank(attrs.jid);
                 this.set(attrs);
+                this.onChangedGroupchat();
                 this.domain = Strophe.getDomainFromJid(this.get('jid'));
-                this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
+                !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
                 this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
                 this.resources = new xabber.ContactResources(null, {contact: this});
-                this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
-                this.on("change:photo_hash", this.getContactInfo, this);
+                this.on("update_avatar", this.updateAvatar, this);
+                this.on("change:full_jid", this.updateCachedInfo, this);
                 this.on("change:roster_name", this.updateName, this);
                 !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
                 this.account.dfd_presence.done(function () {
-                    if (!this.get('blocked'))
-                        this.getContactInfo();
+                    if (!this.get('blocked') && !this.get('vcard_updated'))
+                        this.getVCard();
                 }.bind(this));
             },
 
@@ -50491,9 +53428,9 @@ define("xabber-contacts", [],function () {
                 } else if (this.get('group_info')) {
                     status_text = this.get('group_info').members_num;
                     if (this.get('group_info').members_num > 1)
-                        status_text += ' participants';
+                        status_text += ' members';
                     else
-                        status_text += ' participant';
+                        status_text += ' member';
                     if (this.get('group_info').online_members_num > 0)
                         status_text += ', ' + this.get('group_info').online_members_num + ' online';
                 } else
@@ -50503,45 +53440,43 @@ define("xabber-contacts", [],function () {
 
             getIcon: function () {
                 if (this.get('blocked'))
-                    return 'ic-blocked';
+                    return 'blocked';
                 if (this.get('invitation'))
-                    return 'ic-invitation-chat';
+                    return 'group-invite';
                 if (this.get('group_chat')) {
                     if (this.get('private_chat'))
-                        return 'ic-private-chat';
+                        return 'group-private';
                     if (this.get('incognito_chat'))
-                        return 'ic-incognito-chat';
-                    return 'ic-group-chat';
+                        return 'group-incognito';
+                    return 'group-public';
                 }
+                if (this.get('server'))
+                    return 'server';
                 if (this.get('bot'))
-                    return 'ic-bot-chat';
+                    return 'bot';
                 return;
             },
 
-            getContactInfo: function () {
-                xabber.cached_contacts_info.getContactInfo(this.get('jid'), function (contact_info) {
-                    if (!_.isNull(contact_info)) {
-                        if ((contact_info.hash === this.get('photo_hash')) || contact_info.hash && !this.get('photo_hash') && !_.isNull(this.get('photo_hash'))) {
-                            this.cached_image = Images.getCachedImage(contact_info.avatar);
-                            contact_info.avatar_priority && this.set('avatar_priority', contact_info.avatar_priority);
-                            this.set('photo_hash', contact_info.hash);
-                            this.set('image', contact_info.avatar);
-                        }
-                        if (!this.get('roster_name') && contact_info.name)
-                            this.set('name', contact_info.name);
+            updateAvatar: function () {
+                this.account.cached_roster.getFromRoster(this.get('jid'), (cached_info) => {
+                    if (cached_info && this.get('photo_hash') === cached_info.photo_hash)
                         return;
-                    }
-                    if (!this.get('group_chat'))
-                        this.getVCard();
-                }.bind(this));
+                    this.getVCard();
+                });
             },
 
             getVCard: function (callback) {
-                var jid = this.get('jid'),
+                let jid = this.get('jid'),
                     is_callback = _.isFunction(callback);
-                this.account.connection.vcard.get(jid,
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid,
                     function (vcard) {
-                        var attrs = {
+                        if (vcard.group_info) {
+                            let group_info = this.get('group_info') || {};
+                            group_info = _.extend(group_info, vcard.group_info);
+                            this.set({group_info});
+                            delete vcard.group_info;
+                        }
+                        let attrs = {
                             vcard: vcard,
                             vcard_updated: moment.now(),
                             name: this.get('roster_name')
@@ -50562,13 +53497,9 @@ define("xabber-contacts", [],function () {
                             this.cached_image = Images.getCachedImage(attrs.image);
                         }
                         this.set(attrs);
-                        let cached_info = {
-                            jid: this.get('jid'),
-                            name: this.get('name')
-                        };
-                        if (this.get('photo_hash') || vcard.photo.image)
-                            _.extend(cached_info, {hash: (this.get('photo_hash') || this.account.getAvatarHash(vcard.photo.image)), avatar_priority: this.get('avatar_priority'), avatar: this.get('image')});
-                        xabber.cached_contacts_info.putContactInfo(cached_info);
+                        if (this.get('in_roster')) {
+                            this.updateCachedInfo();
+                        }
                         is_callback && callback(vcard);
                     }.bind(this),
                     function () {
@@ -50577,11 +53508,42 @@ define("xabber-contacts", [],function () {
                 );
             },
 
+            updateCachedInfo: function () {
+                let roster_info = {
+                    jid: this.get('jid'),
+                    in_roster: this.get('in_roster'),
+                    groups: this.get('groups'),
+                    subscription: this.get('subscription'),
+                    roster_name: this.get('roster_name'),
+                    subscription_request_out: this.get('subscription_request_out'),
+                    subscription_request_in: this.get('subscription_request_in'),
+                    name: this.get('name'),
+                    vcard_updated: this.get('vcard_updated')
+                }, full_jid = this.get('full_jid');
+                if (this.get('photo_hash') || this.get('image'))
+                    _.extend(roster_info, {
+                        photo_hash: (this.get('photo_hash') || this.account.getAvatarHash(this.get('image'))),
+                        avatar_priority: this.get('avatar_priority'),
+                        avatar: this.get('image')
+                    });
+                if (full_jid)
+                    roster_info.resource = Strophe.getResourceFromJid(full_jid);
+                this.account.cached_roster.putInRoster(roster_info);
+            },
+
             onChangedGroupchat: function () {
                 if (this.get('group_chat')) {
                     this.updateCounters();
                     this.participants = new xabber.Participants(null, {contact: this});
                 }
+            },
+
+            getBlockedParticipants: function (callback, errback) {
+                let iq = $iq({
+                    type: 'get',
+                    to: this.get('full_jid') || this.get('jid')})
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
+                this.account.sendFast(iq, callback, errback);
             },
 
             updateCounters: function () {
@@ -50607,8 +53569,8 @@ define("xabber-contacts", [],function () {
             membersRequest: function (options, callback) {
                 options = options || {};
                 let participant_id = options.id,
-                    version = options.version || 0;
-                var iq = $iq({from: this.account.get('jid'), to: this.get('jid'), type: 'get'});
+                    version = options.version || 0,
+                    iq = $iq({from: this.account.get('jid'), to: this.get('full_jid') || this.get('jid'), type: 'get'});
                 if (participant_id != undefined) {
                     if (!participant_id) {
                         if (options.properties)
@@ -50624,7 +53586,7 @@ define("xabber-contacts", [],function () {
                 }
                 else
                     iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
-                this.account.sendIQ(iq, function (response) {
+                this.account.sendFast(iq, function (response) {
                     callback && callback(response);
                 });
             },
@@ -50650,7 +53612,7 @@ define("xabber-contacts", [],function () {
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
-                this.account.sendIQ(iq_request_avatar, function (iq) {
+                this.account.sendIQinBackground(iq_request_avatar, function (iq) {
                     var pubsub_avatar = $(iq).find('data').text();
                     if (pubsub_avatar == "")
                         errback && errback("Node is empty");
@@ -50672,8 +53634,8 @@ define("xabber-contacts", [],function () {
                         .c('item', {id: avatar_hash})
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                this.account.sendIQ(iq_pub_data, function () {
-                        this.account.sendIQ(iq_pub_metadata, function () {
+                this.account.sendIQinBackground(iq_pub_data, function () {
+                        this.account.sendIQinBackground(iq_pub_metadata, function () {
                                 callback && callback(avatar_hash);
                             }.bind(this),
                             function (data_error) {
@@ -50693,7 +53655,7 @@ define("xabber-contacts", [],function () {
             },
 
             pres: function (type) {
-                var pres = $pres({to: this.get('jid'), type: type});
+                let pres = $pres({to: this.get('jid'), from: this.account.jid, type: type});
                 this.account.sendPres(pres);
                 return this;
             },
@@ -50717,7 +53679,7 @@ define("xabber-contacts", [],function () {
                 var iq = $iq({type: 'set'})
                     .c('query', {xmlns: Strophe.NS.ROSTER})
                     .c('item', {jid: this.get('jid'), subscription: "remove"});
-                this.account.cached_roster.removeFromCachedRoster(this.get('jid'));
+                this.account.cached_roster.removeFromRoster(this.get('jid'));
                 this.account.sendIQ(iq, callback, errback);
                 this.set('known', false);
                 return this;
@@ -50752,10 +53714,81 @@ define("xabber-contacts", [],function () {
                 this.pres('unsubscribed');
             },
 
+            deleteWithDialog: function () {
+                let is_group = this.get('group_chat'),
+                    header = is_group ? "Delete group" : "Delete contact",
+                    msg_text = is_group ? `Do you really want to delete group ${this.get('name').bold()}?` : `Do you really want to delete ${this.get('name').bold()} from contacts?`,
+                    optional_buttons = is_group ? null : [{ name: 'delete_history', checked: false, text: 'Delete chat history'}];
+                utils.dialogs.ask(header, msg_text, optional_buttons, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        if (is_group) {
+                            let domain = this.domain,
+                                localpart = Strophe.getNodeFromJid(this.get('jid')),
+                                iq = $iq({to: domain, type: 'set'})
+                                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'}).t(localpart);
+                            this.account.sendIQ(iq, function () {
+                                this.declineSubscription();
+                                this.removeFromRoster();
+                                let chat = this.account.chats.getChat(this);
+                                chat.trigger("close_chat");
+                                xabber.body.setScreen('all-chats', {right: undefined});
+                            }.bind(this));
+                        } else {
+                            this.removeFromRoster();
+                            if (result.delete_history) {
+                                let chat = this.account.chats.getChat(this);
+                                chat.retractAllMessages(false);
+                                chat.deleteFromSynchronization();
+                                xabber.body.setScreen('all-chats', {right: undefined});
+                            }
+                            xabber.trigger("clear_search");
+                        }
+                    }
+                }.bind(this));
+            },
+
+            blockWithDialog: function () {
+                let is_group = this.get('group_chat'),
+                    header = is_group ? "Block group" : "Block contact",
+                    buttons = { ok_button_text: 'block'},
+                    msg_text = `Do you really want to block ${this.get('name').bold()}?`;
+                if (!is_group) {
+                    buttons.optional_button = 'block & delete';
+                    msg_text += `?\nYou will be unable to exchange messages and presence updates with ${this.get('jid').bold()}`;
+                }
+                utils.dialogs.ask(header, msg_text, null, buttons).done(function (result) {
+                    if (result) {
+                       if (!is_group) {
+                            let chat = this.account.chats.getChat(this);
+                            if (result === 'block & delete') {
+                                this.removeFromRoster();
+                                chat.retractAllMessages(false);
+                                chat.deleteFromSynchronization();
+                                chat.set('active', false);
+                            }
+                        }
+                        this.blockRequest();
+                        xabber.trigger("clear_search");
+                        if (!is_group)
+                            xabber.body.setScreen('all-chats', {right: undefined});
+                    }
+                }.bind(this));
+            },
+
+            unblockWithDialog: function () {
+                utils.dialogs.ask("Unblock contact", `Do you really want to unblock ${this.get('name')}?`, null, { ok_button_text: 'unblock'}).done(function (result) {
+                    if (result) {
+                        this.unblock();
+                        xabber.trigger("clear_search");
+                    }
+                }.bind(this));
+            },
+
             block: function (callback, errback) {
                 var iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
+                this.set('blocked', true);
                 this.set('known', false);
             },
 
@@ -50763,6 +53796,7 @@ define("xabber-contacts", [],function () {
                 var iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
+                this.set('blocked', false);
             },
 
             sendPresent: function () {
@@ -50781,8 +53815,30 @@ define("xabber-contacts", [],function () {
                 var $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find('x[xmlns="'+Strophe.NS.VCARD_UPDATE+'"]');
-                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
+                if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
                     this.set('photo_hash', $vcard_update.find('photo').text());
+                    this.trigger('update_avatar');
+                }
+                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                    this.set('full_jid', $presence.attr('from'));
+                    if (!this.get('group_chat')) {
+                        this.set('group_chat', true);
+                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
+                    }
+                    if (this.details_view && !this.details_view.child('participants')) {
+                        this.details_view = new xabber.GroupChatDetailsView({model: this});
+                    }
+                    let group_chat_info = this.parseGroupInfo($(presence)),
+                        prev_group_info = this.get('group_info') || {};
+                    if (this.details_view && this.details_view.isVisible() && group_chat_info.online_members_num != prev_group_info.online_members_num)
+                        this.trigger('update_participants');
+                    _.extend(prev_group_info, group_chat_info);
+                    this.set('group_info', prev_group_info);
+                    if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
+                        this.set('name', prev_group_info.name);
+                    this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members, ' + prev_group_info.online_members_num + ' online')});
+                }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
                     if (this.get('in_roster') || this.get('subscription_preapproved')) {
@@ -50791,6 +53847,9 @@ define("xabber-contacts", [],function () {
                         this.trigger('presence', this, 'subscribe');
                     }
                 } else if (type === 'subscribed') {
+                    if (this.get('group_chat') && (this.get('subscription_request_out') || this.get('subscription') === 'to')) {
+
+                    }
                     if (this.get('subscription') === 'to') {
                         // this.pres('subscribed');
                     }
@@ -50808,6 +53867,7 @@ define("xabber-contacts", [],function () {
                         }.bind(this));
                     }
                 } else if (type === 'unsubscribed') {
+                    this.set('subscription_request_out', false);
                     // this.trigger('presence', this, 'unsubscribed');
                 } else {
                     var jid = presence.getAttribute('from'),
@@ -50837,70 +53897,53 @@ define("xabber-contacts", [],function () {
                         }
                     }
                 }
-                let $group_chat_info = $(presence).find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]');
-                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
-                    if (!this.get('group_chat')) {
-                        this.set('group_chat', true);
-                        this.account.chat_settings.updateGroupChatsList(this.get('jid'), this.get('group_chat'));
-                    }
-                    if (!this.details_view.child('participants')) {
-                        this.details_view = new xabber.GroupChatDetailsView({model: this});
-                    }
-                    let group_chat_info = this.parseGroupInfo($(presence));
-                    this.set('group_info', group_chat_info);
-                    if (!this.get('roster_name') && (group_chat_info.name !== this.get('name')))
-                        this.set('name', group_chat_info.name);
-                    this.set({status: group_chat_info.status, status_updated: moment.now(), status_message: (group_chat_info.members_num + ' participants, ' + group_chat_info.online_members_num + ' online')});
-                }
             },
 
             parseGroupInfo: function ($presence) {
-                var $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
+                let jid = this.get('jid'),
+                    $group_chat = $presence.find('x[xmlns="'+Strophe.NS.GROUP_CHAT +'"]'),
                     name = $group_chat.find('name').text(),
-                    model = $group_chat.find('membership').text(),
-                    status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'inactive' : 'active'),
+                    $model = $group_chat.find('membership'),
+                    status = $presence.children('show').text() || (($presence.attr('type') === 'unavailable') ? 'unavailable' : 'online'),
                     status_msg = $presence.children('status').text(),
-                    anonymous = $group_chat.find('privacy').text(),
-                    searchable = $group_chat.find('index').text(),
-                    description = $group_chat.find('description').text(),
+                    privacy = $group_chat.find('privacy').text(),
+                    $index = $group_chat.find('index'),
+                    $description = $group_chat.find('description'),
                     pinned_message = Number($group_chat.find('pinned-message').text()),
+                    prev_pinned_message = this.get('pinned_message') ? this.get('pinned_message').get('stanza_id') : 0,
                     private_chat = $group_chat.find('parent-chat').text() || false,
                     members_num = parseInt($group_chat.find('members').text()),
-                    online_members_num = parseInt($group_chat.find('present').text()),
-                    info = {
-                        jid: this.get('jid'),
-                        name: name,
-                        anonymous: anonymous,
-                        searchable: searchable,
-                        model: model,
-                        status: status,
-                        status_msg: status_msg || status,
-                        description: description,
-                        members_num: members_num,
-                        online_members_num: online_members_num
-                    };
+                    $online_members_num = $group_chat.find('present'),
+                    info = {jid, name, status_msg, privacy, status, members_num};
+                $index.length && (info.searchable = $index.text());
+                $model.length && (info.model = $model.text());
+                $description.length && (info.description = $description.text());
+                $online_members_num.length && (info.online_members_num = parseInt($online_members_num.text()));
                 private_chat && this.set('private_chat', private_chat);
-                anonymous === 'incognito' && this.set('incognito_chat', true);
-                var chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
-                if (chat)
-                    pinned_msg_elem = chat.item_view.content.$pinned_message;
-                if (pinned_msg_elem) {
-                    if (pinned_message) {
-                        this.getMessageByStanzaId(pinned_message, function ($message) {
-                            this.parsePinnedMessage($message, pinned_msg_elem);
-                        }.bind(this));
-                    }
-                    else {
-                        this.set('pinned_message', undefined);
-                        this.parsePinnedMessage(undefined, pinned_msg_elem);
+                privacy === 'incognito' && this.set('incognito_chat', true);
+                let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
+                if ($group_chat.find('pinned-message').length) {
+                    if (prev_pinned_message != pinned_message) {
+                        if (chat)
+                            pinned_msg_elem = chat.item_view.content.$pinned_message;
+                        if (pinned_msg_elem) {
+                            if (pinned_message) {
+                                this.getMessageByStanzaId(pinned_message, function ($message) {
+                                    this.parsePinnedMessage($message, pinned_msg_elem);
+                                }.bind(this));
+                            }
+                            else {
+                                this.set('pinned_message', undefined);
+                                this.parsePinnedMessage(undefined, pinned_msg_elem);
+                            }
+                        }
                     }
                 }
-
                 return info;
             },
 
             getAllRights: function (callback) {
-                let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') })
+                let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('full_jid') || this.get('jid') })
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights' });
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
                     var all_permissions = $(iq_all_rights).find('permission'),
@@ -50912,7 +53955,7 @@ define("xabber-contacts", [],function () {
 
             getMessageByStanzaId: function (stanza_id, callback) {
                 var queryid = uuid(),
-                    iq = $iq({type: 'set', to: this.get('jid')})
+                    iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
                         .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                         .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                         .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
@@ -51041,6 +54084,8 @@ define("xabber-contacts", [],function () {
             },
 
             showDetails: function (screen) {
+                if (!this.details_view)
+                    this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
                 screen || (screen = 'contacts');
                 xabber.body.setScreen(screen, {right: 'contact_details', contact: this});
             }
@@ -51067,12 +54112,13 @@ define("xabber-contacts", [],function () {
             },
 
             getStatuses: function () {
-                let iq_get_properties = $iq({to: this.contact.get('jid'), type: 'get'})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-                this.account.sendIQ(iq_get_properties, function (properties) {
+                let iq_get_properties = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'get'})
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'});
+                this.account.sendFast(iq_get_properties, function (properties) {
                     this.data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                    let options = this.data_form.fields.find(field => field.var == 'status').options || [];
-                    if (!options.length) {
+                    let status_field = this.data_form.fields.find(field => field.var == 'status'),
+                        options = (this.data_form.fields.find(field => field.var == 'status') || []).options || [];
+                    if (!options.length || status_field.type == 'fixed') {
                         this.closeModal();
                         utils.dialogs.error("You have no permission to set group chat's status");
                         return;
@@ -51084,10 +54130,16 @@ define("xabber-contacts", [],function () {
             renderStatuses: function (options) {
                 this.$('.status-values').html("");
                 options.forEach(function (option) {
-                    let $status_item = $(templates.group_chats.status_item({option: option}));
+                    let status = option,
+                        status_field = this.data_form.fields.find(f => f.var == status.value);
+                    if (status_field)
+                        status.show = status_field.values[0];
+                    else
+                        status.show = status.value;
+                    let $status_item = $(templates.group_chats.status_item({status}));
                     this.$('.status-values').append($status_item);
                 }.bind(this));
-                this.highlightStatus(this.contact.get('group_info').status);
+                this.highlightStatus(this.contact.get('status'));
             },
 
             changeStatus: function (ev) {
@@ -51111,14 +54163,14 @@ define("xabber-contacts", [],function () {
             setStatus: function (status) {
                 if (!this.data_form || this.contact.get('group_info').status === status)
                     return;
-                let iq_set_status = $iq({to: this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT}),
+                let iq_set_status = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#status'}),
                     status_field = this.data_form.fields.find(field => field.var === 'status'),
                     idx = this.data_form.fields.indexOf(status_field);
                 status_field.values = [status];
                 this.data_form.fields[idx] = status_field;
                 iq_set_status = this.account.addDataFormToStanza(iq_set_status, this.data_form);
-                this.account.sendIQ(iq_set_status);
+                this.account.sendFast(iq_set_status);
             },
 
             onHide: function () {
@@ -51158,6 +54210,7 @@ define("xabber-contacts", [],function () {
                 this.model.on("change:private_chat", this.updateIcon, this);
                 this.model.on("change:incognito_chat", this.updateIcon, this);
                 this.model.on("change:bot", this.updateIcon, this);
+                this.model.on("change:blocked", this.onBlocked, this);
                 this.model.on("change:status_message", this.updateStatusMsg, this);
                 this.model.on("change:last_seen", this.lastSeenUpdated, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
@@ -51188,6 +54241,11 @@ define("xabber-contacts", [],function () {
                 }
             },
 
+            onBlocked: function () {
+                this.updateIcon();
+                this.$el.switchClass('blocked', this.model.get('blocked'));
+            },
+
             selectView: function () {
                 if (this.model.get('group_chat')) {
                     this.$('.private-chat').addClass('hidden');
@@ -51216,24 +54274,11 @@ define("xabber-contacts", [],function () {
             },
 
             updateIcon: function () {
-                let ic_name;
+                let ic_name = this.model.getIcon();
                 this.$('.chat-icon').addClass('hidden');
-                if (this.model.get('blocked')) {
-                    ic_name = 'ic-blocked';
-                } else {
-                    if (this.model.get('invitation')) {
-                        return;
-                    } else if (this.model.get('group_chat')) {
-                        if (this.model.get('private_chat'))
-                            ic_name = 'ic-private-contact';
-                        else if (this.model.get('incognito_chat'))
-                            ic_name = 'ic-incognito-contact';
-                        else
-                            ic_name = 'ic-group-contact';
-                    } else if (this.model.get('bot'))
-                        ic_name = 'ic-bot-contact';
-                }
-                ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+                if (this.model.get('invitation'))
+                    return;
+                ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name == 'server' || ic_name == 'blocked').html(env.templates.svg[ic_name]());
             },
 
             updateStatusMsg: function() {
@@ -51280,6 +54325,7 @@ define("xabber-contacts", [],function () {
                 this.updateDisplayStatus();
                 this.updateBlockedState();
                 this.updateMutedState();
+                this.updateGroupChat();
                 this.model.on("change:display", this.updateDisplayStatus, this);
                 this.model.on("change:blocked", this.updateBlockedState, this);
                 this.model.on("change:muted", this.updateMutedState, this);
@@ -51487,7 +54533,7 @@ define("xabber-contacts", [],function () {
             updateButtons: function () {
                 var in_roster = this.model.get('in_roster'),
                     is_blocked = this.model.get('blocked'),
-                    is_server = this.model.get('is_server'),
+                    is_server = this.model.get('server'),
                     subscription = this.model.get('subscription');
                 this.$('.btn-add').hideIf(in_roster);
                 this.$('.btn-delete').showIf(in_roster);
@@ -51535,7 +54581,7 @@ define("xabber-contacts", [],function () {
                     $label_incoming.text('Preemptively grant subscription request').prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text('Ask for presence updates').prev('input').prop('checked', false);
                 }
-                if (in_request) {
+                if (in_request && subscription !== 'both') {
                     $label_incoming.text('Send presence updates').prev('input').prop('checked', false);
                 }
                 if (out_request) {
@@ -51566,7 +54612,9 @@ define("xabber-contacts", [],function () {
             openChat: function (ev) {
                 if (ev && ($(ev.target).closest('.button-wrap').hasClass('non-active') || $(ev.target).closest('.button-wrap').length && this.model.get('blocked')))
                     return;
-                this.model.trigger("open_chat", this.model);
+                let options = {};
+                (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.get('jid') === this.model.get('jid') && xabber.chats_view.active_chat.model.get('encrypted')) && (options.encrypted = true);
+                this.model.trigger("open_chat", this.model, options);
             },
 
             voiceCall: function (ev) {
@@ -51586,6 +54634,18 @@ define("xabber-contacts", [],function () {
                 chat.item_view.content.initJingleMessage();
             },
 
+            deleteContact: function () {
+                this.model.deleteWithDialog();
+            },
+
+            blockContact: function () {
+                this.model.blockWithDialog();
+            },
+
+            unblockContact: function () {
+                this.model.unblockWithDialog();
+            },
+
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
@@ -51596,58 +54656,6 @@ define("xabber-contacts", [],function () {
 
             addContact: function () {
                 xabber.add_contact_view.show({account: this.account, jid: this.model.get('jid')});
-            },
-
-            deleteContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Delete contact", "Do you really want to delete contact "+ contact.get('name').bold() +
-                    " from account " + this.account.get('jid').bold() + "?",
-                    [{ name: 'delete_history', checked: false, text: 'Delete chat history'}],
-                    { ok_button_text: 'delete'}).done(function (result) {
-                        if (result) {
-                            contact.removeFromRoster();
-                            if (result.delete_history) {
-                                let chat = this.account.chats.getChat(contact);
-                                chat.retractAllMessages(false);
-                                chat.deleteFromSynchronization();
-                                xabber.body.setScreen('all-chats', {right: undefined});
-                            }
-                            xabber.trigger("clear_search");
-                        }
-                    }.bind(this));
-            },
-
-            blockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask_extended("Block contact", "Do you really want to block " + contact.get('name').bold() +
-                    " from account " + this.account.get('jid').bold() +
-                    "?\nYou will be unable to exchange messages and presence updates with " + contact.get('jid').bold(), null,
-                    { ok_button_text: 'block', optional_button: 'block & delete'}).done(function (result) {
-                    if (result) {
-                        let chat = this.account.chats.getChat(contact);
-                        if (result === 'block & delete') {
-                            contact.removeFromRoster();
-                            chat.retractAllMessages(false);
-                            chat.deleteFromSynchronization();
-                        }
-                        contact.blockRequest();
-                        xabber.trigger("clear_search");
-                        xabber.body.setScreen('all-chats', {right: undefined});
-                        chat.set('active', false);
-                    }
-                }.bind(this));
-            },
-
-            unblockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Unblock contact", "Do you really want to unblock "+
-                    " from account " + this.account.get('jid').bold() + "?", null,
-                    { ok_button_text: 'unblock'}).done(function (result) {
-                    if (result) {
-                        contact.unblock();
-                        xabber.trigger("clear_search");
-                    }
-                });
             },
 
             requestAuthorization: function () {
@@ -51669,7 +54677,7 @@ define("xabber-contacts", [],function () {
                 "click .btn-qr-code": "showQRCode",
                 "click .btn-leave": "leaveGroupChat",
                 "click .btn-invite": "inviteUser",
-                "click .btn-delete-group": "deleteGroupChat",
+                "click .btn-delete-group": "deleteGroup",
                 "click .btn-edit-settings": "editProperties",
                 "click .btn-default-restrictions": "editDefaultRestrictions",
                 "click .btn-chat": "openChat",
@@ -51739,11 +54747,14 @@ define("xabber-contacts", [],function () {
             },
 
             updateButtons: function () {
-                let has_permission = this.model.my_rights && this.model.my_rights.fields.find(permission => (permission.var == 'owner' || permission.var == 'administrator') && permission.values),
+                let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'owner' && permission.values),
+                    change_group = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'change-group' && permission.values),
                     is_blocked = this.model.get('blocked');
-                this.$('.btn-settings-wrap').switchClass('non-active', !has_permission);
-                this.$('.btn-default-restrictions-wrap').switchClass('non-active', !has_permission);
-                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat'));
+                this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
+                this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
+                this.$('.btn-leave-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
+                this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat') || this.model.get('subscription') != 'both');
+                this.$('.btn-default-restrictions-wrap').switchClass('non-active', !is_owner);
                 this.$('.btn-block').hideIf(is_blocked);
                 this.$('.btn-unblock').showIf(is_blocked);
             },
@@ -51769,27 +54780,6 @@ define("xabber-contacts", [],function () {
                 this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
             },
 
-            deleteGroupChat: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Delete groupchat", "Do you want to delete groupchat "+
-                    contact.get('name')+"?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        let jid = contact.get('jid'),
-                            domain = Strophe.getDomainFromJid(jid),
-                            localpart = Strophe.getNodeFromJid(jid),
-                            iq = $iq({to: domain, type: 'set'})
-                                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#delete'}).t(localpart);
-                        this.account.sendIQ(iq, function () {
-                            contact.declineSubscription();
-                            contact.removeFromRoster();
-                            let chat = this.account.chats.getChat(contact);
-                            chat.trigger("close_chat");
-                            xabber.body.setScreen('all-chats', {right: undefined});
-                        }.bind(this));
-                    }
-                }.bind(this));
-            },
-
             showQRCode: function () {
                 let qrcode = new VanillaQR({
                     url: 'xmpp:' + this.model.get('jid'),
@@ -51804,12 +54794,14 @@ define("xabber-contacts", [],function () {
 
             editProperties: function (ev) {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
-                        let iq_get_properties = $iq({to: this.model.get('jid'), type: 'get'})
+                        let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-                        this.account.sendIQ(iq_get_properties, function (properties) {
+                        this.account.sendIQ(iq_get_properties, (properties) => {
                             let data_form = this.account.parseDataForm($(properties).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                             this.group_chat_properties_edit.open(data_form);
-                        }.bind(this));
+                        }, () => {
+                            utils.callback_popup_message("You have no permission to edit group properties", 3000);
+                        });
                 }
             },
 
@@ -51819,6 +54811,8 @@ define("xabber-contacts", [],function () {
             },
 
             leaveGroupChat: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    return;
                 var contact = this.model;
                 utils.dialogs.ask("Leave groupchat", "Do you want to leave groupchat "+
                     contact.get('name')+"?", null, { ok_button_text: 'leave'}).done(function (result) {
@@ -51838,8 +54832,11 @@ define("xabber-contacts", [],function () {
             },
 
             inviteUser: function (ev) {
-                if (!$(ev.target).closest('.button-wrap').hasClass('non-active'))
+                if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
+                    if (!xabber.invite_panel)
+                        xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
                     xabber.invite_panel.open(this.account, this.model);
+                }
             },
 
             changeList: function (ev) {
@@ -51874,38 +54871,24 @@ define("xabber-contacts", [],function () {
                     return;
             },
 
-            deleteContact: function (ev) {
-                var contact = this.model;
-                utils.dialogs.ask("Delete contact", "Do you want to delete "+
-                    contact.get('name')+" from contacts?", null, { ok_button_text: 'delete'}).done(function (result) {
-                    if (result) {
-                        contact.removeFromRoster();
-                        contact.trigger('archive_chat');
-                        xabber.trigger("clear_search");
-                    }
-                });
+            getInvitations: function (callback, errback) {
+                let iq = $iq({
+                    type: 'get',
+                    to: this.model.get('full_jid') || this.model.get('jid')})
+                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
+                this.account.sendFast(iq, callback, errback);
+            },
+
+            deleteGroup: function () {
+                this.model.deleteWithDialog();
             },
 
             blockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Block group chat", "Do you want to block "+
-                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
-                    if (result) {
-                        contact.blockRequest();
-                        xabber.trigger("clear_search");
-                    }
-                });
+                this.model.blockWithDialog();
             },
 
             unblockContact: function () {
-                var contact = this.model;
-                utils.dialogs.ask("Unblock contact", "Do you want to unblock "+
-                    contact.get('name')+"?", null, { ok_button_text: 'unblock'}).done(function (result) {
-                    if (result) {
-                        contact.unblock();
-                        xabber.trigger("clear_search");
-                    }
-                });
+                this.model.unblockWithDialog();
             },
 
             updateStatus: function () {
@@ -51926,15 +54909,16 @@ define("xabber-contacts", [],function () {
                 if (!field.files.length) {
                     return;
                 }
-                $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 var file = field.files[0];
                 field.value = '';
                 if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
                     utils.dialogs.error('File is too large');
+                    return;
                 } else if (!file.type.startsWith('image')) {
                     utils.dialogs.error('Wrong image');
+                    return;
                 }
-
+                $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done(function (image) {
                     if (image) {
                         file.base64 = image;
@@ -51969,15 +54953,15 @@ define("xabber-contacts", [],function () {
             _initialize: function () {
                 this.$el.html(this.template());
                 this.render();
+                this.model.on("change:status", this.render, this);
                 this.model.on("change:group_info", this.render, this);
             },
 
             render: function () {
-                let group_info;
-                this.model.get('group_info') && (group_info = this.model.get('group_info'));
+                let group_info = this.model.get('group_info');
                 if (!group_info)
                     return;
-                this.$('.status').attr('data-status', group_info.status);
+                this.$('.status').attr('data-status', group_info.status || this.model.get('status'));
                 this.$('.status-message').text(group_info.status_msg);
             },
 
@@ -51998,17 +54982,19 @@ define("xabber-contacts", [],function () {
                 this.$el.html(this.template());
                 this.contact = this.model;
                 this.account = this.model.account;
-                this.model.on("change:name", this.updateName, this);
                 this.model.on("change:group_info", this.update, this);
+                this.model.on("change:vcard_updated", this.update, this);
             },
 
             render: function () {
+                if (!this.model.get('vcard_updated'))
+                    this.model.vcard && this.model.vcard.refresh();
                 this.update();
             },
 
             update: function () {
                 let info = this.model.get('group_info') || {};
-                this.$('.block-name').text(this.contact.get('group_info').anonymous + " group");
+                this.$('.block-name').text((info.privacy ? info.privacy : (this.model.get('incognito_group') ? 'incognito' : 'public')) + " group");
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
@@ -52061,7 +55047,8 @@ define("xabber-contacts", [],function () {
 
             open: function (data_form) {
                 this.data_form = data_form;
-                this.$el.html(templates.group_chats.group_chat_properties_edit({fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').anonymous), jid: this.model.get('jid')}));
+                let all_fixed = this.data_form.fields.filter(f => f.type == 'fixed' || f.type == 'hidden').length == this.data_form.fields.length;
+                this.$el.html(templates.group_chats.group_chat_properties_edit({all_fixed: all_fixed, fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').privacy), jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: function () {
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
@@ -52078,7 +55065,9 @@ define("xabber-contacts", [],function () {
             close: function () {
                 this.$el.closeModal({
                     complete: function () {
-                        this.hide.bind(this);
+                        this.$el.detach();
+                        this.$('.modal-content').css('height', '100%');
+                        this.data.set('visible', false);
                     }.bind(this)
                 });
             },
@@ -52092,7 +55081,7 @@ define("xabber-contacts", [],function () {
                     return;
 
                 let has_changes = false,
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 this.data_form.fields.forEach(function (field) {
                     if (field.type === 'hidden' || field.type === 'fixed')
@@ -52174,29 +55163,23 @@ define("xabber-contacts", [],function () {
 
             _render: function () {
                 this.$el.html($(templates.preloader()));
-                this.getInvitations();
+                this.updateInvitations();
             },
 
-            getInvitations: function () {
-                let iq = $iq({
-                    from: this.account.get('jid'),
-                    type: 'get',
-                    to: this.contact.get('jid')})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'});
-
-                this.account.sendIQ(iq, function (response) {
-                    if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active')) {
-                        this.$el.html("");
-                        $(response).find('query').find('user').each(function (idx, item) {
-                            let user = {jid: $(item).attr('jid'), status: this.status},
-                                $item_view = $(templates.group_chats.invited_member_item(user)),
-                                avatar = Images.getDefaultAvatar(user.jid);
-                            this.$el.append($item_view);
-                            $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
-                        }.bind(this));
-                        if (!$(response).find('query').find('user').length)
-                            this.$el.html(this.$error.text('No pending invitations'));
-                    }
+            updateInvitations: function () {
+                this.parent.getInvitations(function (response) {
+                        if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active')) {
+                            this.$el.html("");
+                            $(response).find('query').find('user').each(function (idx, item) {
+                                let user = {jid: $(item).attr('jid'), status: this.status},
+                                    $item_view = $(templates.group_chats.invited_member_item(user)),
+                                    avatar = Images.getDefaultAvatar(user.jid);
+                                this.$el.append($item_view);
+                                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                            }.bind(this));
+                            if (!$(response).find('query').find('user').length)
+                                this.$el.html(this.$error.text('No pending invitations'));
+                        }
                     }.bind(this),
                     function(err) {
                         if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active'))
@@ -52207,7 +55190,7 @@ define("xabber-contacts", [],function () {
             revokeInvitation: function (ev) {
                 let $member_item = $(ev.target).closest('.invitations-user'),
                     member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
+                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                         .c('jid').t(member_jid);
                 this.account.sendIQ(iq, function () {
@@ -52232,28 +55215,23 @@ define("xabber-contacts", [],function () {
 
             _render: function () {
                 this.$el.html($(templates.preloader()));
-                this.getBlockedParticipants();
+                this.updateBlockedParticipants();
             },
 
-            getBlockedParticipants: function () {
-                let iq = $iq({
-                    from: this.account.get('jid'),
-                    type: 'get',
-                    to: this.contact.get('jid')})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#block'});
-                this.account.sendIQ(iq, function (response) {
-                    if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active')) {
+            updateBlockedParticipants: function () {
+                this.contact.getBlockedParticipants(function (response) {
+                        if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active')) {
                             this.$el.html("");
-                       $(response).find('query').find('user').each(function (idx, item) {
-                            let user = {jid: $(item).attr('jid'), status: this.status},
-                                $item_view = $(templates.group_chats.invited_member_item(user)),
-                                avatar = Images.getDefaultAvatar(user.jid);
-                            this.$el.append($item_view);
-                            $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
-                        }.bind(this));
-                        if (!$(response).find('query').find('user').length)
-                            this.$el.html(this.$error.text('Block list is empty'));
-                    }
+                            $(response).find('query').find('user').each(function (idx, item) {
+                                let user = {jid: $(item).attr('jid'), status: this.status},
+                                    $item_view = $(templates.group_chats.invited_member_item(user)),
+                                    avatar = Images.getDefaultAvatar(user.jid);
+                                this.$el.append($item_view);
+                                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                            }.bind(this));
+                            if (!$(response).find('query').find('user').length)
+                                this.$el.html(this.$error.text('Block list is empty'));
+                        }
                     }.bind(this),
                     function(err) {
                         if (this.$el.prev().find('.list-variant[data-value="' + this.status +'"] a').hasClass('active'))
@@ -52264,10 +55242,10 @@ define("xabber-contacts", [],function () {
             unblockUser: function (ev) {
                 var $member_item = $(ev.target).closest('.blocked-user'),
                     member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid') })
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('unblock', {xmlns: Strophe.NS.GROUP_CHAT + '#block' })
                         .c('jid').t(member_jid);
-                this.account.sendIQ(iq, function () {
+                this.account.sendFast(iq, function () {
                     $member_item.remove();
                     !this.$el.children().length && this.$el.html(this.$error.text('Block list is empty'));
                 }.bind(this));
@@ -52298,7 +55276,7 @@ define("xabber-contacts", [],function () {
 
             _render: function () {
                 this.$el.html(this.template()).addClass('request-waiting');
-                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this});
+                this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.model});
                 this.updateParticipants();
                 this.$('.members-list-wrap').perfectScrollbar({theme: 'item-list'});
                 if (!this.model.all_rights)
@@ -52333,40 +55311,38 @@ define("xabber-contacts", [],function () {
 
             blockParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Block participant", "Do you want to block "+
+                utils.dialogs.ask("Block member", "Do you want to block "+
                     $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
-                        let iq = $iq({type: 'set', to: this.model.get('jid')})
-                                .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
-                                .c('id').t($target.attr('data-id'));
-                        this.account.sendIQ(iq, function () {
-                                $target.remove();
-                                this.parent.updateScrollBar();
-                            }.bind(this),
-                            function (error) {
-                                if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to block participants");
-                            });
+                        let participant = this.participants.get($target.attr('data-id'));
+                        if (participant)
+                            participant.block(function () {
+                                    $target.remove();
+                                    this.parent.updateScrollBar();
+                                }.bind(this),
+                                function (error) {
+                                    if ($(error).find('not-allowed').length)
+                                        utils.dialogs.error("You have no permission to block members");
+                                });
                     }
                 }.bind(this));
             },
 
             kickParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Kick participant", "Do you want to kick "+
+                utils.dialogs.ask("Kick member", "Do you want to kick "+
                     $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'kick'}).done(function (result) {
                     if (result) {
-                        let iq = $iq({type: 'set', to: this.model.get('jid')})
-                            .c('kick', {xmlns: Strophe.NS.GROUP_CHAT})
-                            .c('id').t($target.attr('data-id'));
-                        this.account.sendIQ(iq, function () {
-                                $target.remove();
-                                this.parent.updateScrollBar();
-                            }.bind(this),
-                            function (error) {
-                                if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to kick participants");
-                            });
+                        let participant = this.participants.get($target.attr('data-id'));
+                        if (participant)
+                            participant.kick(function () {
+                                    $target.remove();
+                                    this.parent.updateScrollBar();
+                                }.bind(this),
+                                function (error) {
+                                    if ($(error).find('not-allowed').length)
+                                        utils.dialogs.error("You have no permission to kick members");
+                                });
                     }
                 }.bind(this));
             },
@@ -52494,7 +55470,7 @@ define("xabber-contacts", [],function () {
                 "click .btn-cancel-changes": "close",
                 "change .clickable-field input": "changeRights",
                 "click .btn-save-user-rights": "saveRights",
-                "click .nickname": "editNickname",
+                "click .participant-details-item:not(.unsubscribed) .nickname": "editNickname",
                 "change .circle-avatar input": "changeAvatar",
                 "click .btn-block-participant": "block",
                 "click .btn-kick-participant": "kick",
@@ -52507,13 +55483,14 @@ define("xabber-contacts", [],function () {
             },
 
             _initialize: function () {
+                this.contact = this.model;
                 this.account = this.model.account;
-                this.contact = this.model.model;
             },
 
             open: function (participant, data_form) {
                 if (!participant) return;
                 this.participant = participant;
+                this.participant.on("change:badge", this.onBadgeUpdated, this);
                 this.data_form = data_form;
                 this.render();
                 this.$el.openModal({
@@ -52556,9 +55533,11 @@ define("xabber-contacts", [],function () {
                 this.new_avatar = "";
                 let attrs = _.clone(this.participant.attributes);
                 attrs.nickname = _.escape(attrs.nickname);
+                attrs.blocked = attrs.blocked;
+                attrs.subscription = attrs.subscription === null ? null : 'both';
                 attrs.badge = _.escape(attrs.badge);
                 attrs.is_myself = attrs.jid === this.account.get('jid');
-                attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').anonymous === 'incognito') ? true : false;
+                attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').privacy === 'incognito') ? true : false;
                 let $member_info_view;
                 if (this.contact.get('private_chat')) {
                     this.$el.addClass('edit-rights-private');
@@ -52567,6 +55546,7 @@ define("xabber-contacts", [],function () {
                 else
                     $member_info_view = $(templates.group_chats.participant_details_item(attrs));
                 this.$('.header').html($member_info_view);
+                this.$('.buttons-wrap .button-wrap:not(.btn-chat-wrap):not(.btn-participant-messages-wrap)').switchClass('non-active', attrs.subscription === null);
                 this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
                 this.updateMemberAvatar(this.participant);
                 this.participant_messages = [];
@@ -52633,8 +55613,10 @@ define("xabber-contacts", [],function () {
                 field.value = '';
                 if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
                     utils.dialogs.error('File is too large');
+                    return;
                 } else if (!file.type.startsWith('image')) {
                     utils.dialogs.error('Wrong image');
+                    return;
                 }
 
                 utils.images.getAvatarFromFile(file).done(function (image) {
@@ -52664,6 +55646,11 @@ define("xabber-contacts", [],function () {
                 if (!$input_item.prop('checked')) {
                     $input_item.click();
                 }
+            },
+
+            onBadgeUpdated: function (participant) {
+                let badge = _.escape(participant.get('badge'));
+                this.updateBadge(badge);
             },
 
             updateBadge: function (badge) {
@@ -52699,7 +55686,9 @@ define("xabber-contacts", [],function () {
                 this.$('.participant-info #edit-nickname').text(this.$('.participant-info .nickname').text()).show().placeCaretAtEnd();
             },
 
-            editBadge: function () {
+            editBadge: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    return;
                 this.edit_badge_panel = new xabber.EditBadgeView({model: this});
             },
 
@@ -52723,7 +55712,7 @@ define("xabber-contacts", [],function () {
                 utils.dialogs.ask("User messages retraction", "Do you want to delete all messages of " + (this.participant.get('nickname') || this.participant.get('jid') || this.participant.get('id')) + " in this groupchat?", null, { ok_button_text: 'delete'}).done(function (result) {
                     if (result) {
                         if (this.participant.get('id')) {
-                            let group_chat = this.account.chats.getChat(this.model.model);
+                            let group_chat = this.account.chats.getChat(this.contact);
                             group_chat.retractMessagesByUser(this.participant.get('id'));
                         }
                     }
@@ -52731,34 +55720,36 @@ define("xabber-contacts", [],function () {
             },
 
             block: function () {
-                utils.dialogs.ask("Block participant", "Do you want to block "+
+                utils.dialogs.ask("Block member", "Do you want to block "+
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
                         this.participant.block(function () {
                                 this.close();
-                                this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to block participants");
+                                    utils.dialogs.error("You have no permission to block members");
                             });
                     }
                 }.bind(this));
             },
 
-            kick: function () {
-                utils.dialogs.ask("Kick participant", "Do you want to kick "+
+            kick: function (ev) {
+                if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                    return;
+                utils.dialogs.ask("Kick member", "Do you want to kick "+
                     this.participant.get('nickname') + "?", null, { ok_button_text: 'kick'}).done(function (result) {
                     if (result) {
                         this.participant.kick(function () {
                                 this.close();
-                                this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');
+                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
+                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
-                                    utils.dialogs.error("You have no permission to kick participants");
+                                    utils.dialogs.error("You have no permission to kick members");
                             });
                     }
                 }.bind(this));
@@ -52766,7 +55757,7 @@ define("xabber-contacts", [],function () {
 
             setActualRights: function () {
                 this.$('.rights-wrap').html("");
-                this.data_form.fields.forEach(function (field) {
+                this.data_form.fields && this.data_form.fields.forEach(function (field) {
                     field = _.clone(field);
                     if (field.type  === 'list-single' || field.type  === 'fixed' && (!field.values || field.values[0] == 0)) {
                         !field.values && (field.values = []);
@@ -52806,11 +55797,11 @@ define("xabber-contacts", [],function () {
                 let participant_jid = this.participant.get('jid'),
                     participant_in_roster = this.account.contacts.get(participant_jid);
                 if (!participant_jid || this.contact.get('incognito_chat')) {
-                    let iq = $iq({from: this.account.get('jid'), to: this.account.domain/*Strophe.getDomainFromJid(this.contact.get('jid'))*/, type: 'set'})
-                        .c('create', { xmlns: Strophe.NS.GROUP_CHAT})
+                    let iq = $iq({to: this.contact.domain, type: 'set'})
+                        .c('query', { xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
                     this.account.sendIQ(iq, function (iq_response) {
-                        let group_jid = $(iq_response).find('created jid').text(),
+                        let group_jid = $(iq_response).find('query localpart').text() + '@' + this.contact.domain,
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
                         contact.pres('subscribed');
@@ -52892,7 +55883,7 @@ define("xabber-contacts", [],function () {
                     changed_avatar = this.new_avatar,
                     rights_changed = false,
                     has_changes = false,
-                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                         .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
                 this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
@@ -52928,7 +55919,7 @@ define("xabber-contacts", [],function () {
                     this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
                         this.$('.buttons-wrap button').removeClass('non-active');
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
+                        // this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
                         this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
                         this.close();
                     }.bind(this), function (error) {
@@ -52948,11 +55939,11 @@ define("xabber-contacts", [],function () {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.close();
                             if ($(error).find('not-allowed').length) {
-                                utils.dialogs.error("You have no permission to change participant's info");
+                                utils.dialogs.error("You have no permission to change member's info");
                             }
                         }.bind(this));
                 if (rights_changed) {
-                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('jid')})
+                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
                     this.account.sendIQ(iq_rights_changes, function () {
@@ -52961,7 +55952,7 @@ define("xabber-contacts", [],function () {
                         function (error) {
                             this.close();
                             if ($(error).find('not-allowed').length)
-                                utils.dialogs.error("You have no permission to change participant's info");
+                                utils.dialogs.error("You have no permission to change member's info");
                         }.bind(this));
                 }
                 $btn.blur();
@@ -52981,6 +55972,7 @@ define("xabber-contacts", [],function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model.contact;
+                this.$el.attr('data-color', this.account.settings.get('color'));
                 this.participant = this.model.participant;
                 this.$el.openModal({
                     ready: function () {
@@ -53064,7 +56056,7 @@ define("xabber-contacts", [],function () {
                 }
                 else {
                     if (new_badge != this.participant.get('badge')) {
-                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                             .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
@@ -53140,9 +56132,9 @@ define("xabber-contacts", [],function () {
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
                 this.$('button').blur();
-                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('jid') })
+                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
-                this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
+                this.account.sendFast(iq_get_rights, function(iq_all_rights) {
                     this.showDefaultRestrictions(iq_all_rights);
                     let dropdown_settings = {
                         inDuration: 100,
@@ -53254,7 +56246,7 @@ define("xabber-contacts", [],function () {
                 if (this.$('.btn-default-restrictions-save').hasClass('non-active'))
                     return;
                 this.$('button').blur();
-                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('jid'), type: 'set'})
+                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'}),
                     has_new_default_restrictions = false,
                     data_form = _.clone(this.default_restrictions);
@@ -53319,6 +56311,8 @@ define("xabber-contacts", [],function () {
             },
 
             getBase64Avatar: function () {
+                if (!this.get('id'))
+                    return;
                 if (this.get('avatar')) {
                     let cached_info = this.account.chat_settings.getAvatarInfoById(this.get('id'));
                     if (cached_info) {
@@ -53340,7 +56334,7 @@ define("xabber-contacts", [],function () {
             kick: function (callback, errback) {
                 let id = this.get('id'),
                     jid = this.get('jid'),
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('kick', {xmlns: Strophe.NS.GROUP_CHAT});
                 if (jid)
                     iq.c('jid').t(jid);
@@ -53355,7 +56349,7 @@ define("xabber-contacts", [],function () {
 
             block: function (callback, errback) {
                 let id = this.get('id'),
-                    iq = $iq({type: 'set', to: this.contact.get('jid')})
+                    iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
                         .c('id').t(id);
                 this.account.sendIQ(iq, function () {
@@ -53553,9 +56547,9 @@ define("xabber-contacts", [],function () {
 
             events: {
                 "click .btn-chat": "openChat",
-                "click .btn-accept": "joinGroupChat",
-                "click .btn-join": "joinGroupChat",
-                "click .btn-decline": "declineContact",
+                "click .btn-accept": "join",
+                "click .btn-join": "join",
+                "click .btn-decline": "reject",
                 "click .btn-decline-all": "declineAll",
                 "click .btn-block": "blockContact",
                 "click .btn-escape": "closeInvitationView"
@@ -53563,7 +56557,7 @@ define("xabber-contacts", [],function () {
 
             _initialize: function (options) {
                 this.account = this.model.account;
-                this.$('.invite-msg-text').text('You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat participants');
+                this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : 'You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat members');
                 this.message = options.message;
                 this.model.on("change", this.update, this);
             },
@@ -53588,9 +56582,8 @@ define("xabber-contacts", [],function () {
             closeChat: function () {
                 let chat = this.account.chats.getChat(this.model);
                 chat.set({'opened': false, 'display': false, 'active': false});
-                chat.deleteFromSynchronization(function () {
-                    xabber.body.setScreen('all-chats', { right: undefined });
-                }.bind(this));
+                xabber.body.setScreen('all-chats', { right: undefined });
+                chat.item_view.content.readMessages();
             },
 
             updateAvatar: function () {
@@ -53618,6 +56611,8 @@ define("xabber-contacts", [],function () {
             },
 
             blockInvitation: function () {
+                if (this.account.connection && this.account.connection.do_synchronization)
+                    return;
                 let contact_jid = this.model.get('jid'),
                     iq_get_blocking = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING}),
                     iq_unblocking = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING}),
@@ -53641,25 +56636,28 @@ define("xabber-contacts", [],function () {
                 }.bind(this));
             },
 
-            joinGroupChat: function () {
-                var contact = this.model;
+            join: function () {
+                let contact = this.model;
                 contact.acceptRequest();
                 contact.pushInRoster(null, function () {
                     contact.askRequest();
                     this.blockInvitation();
                     contact.getMyInfo();
                     contact.sendPresent();
+                    this.openChat();
                 }.bind(this));
                 contact.trigger('remove_invite', contact);
-                this.openChat();
             },
 
-            declineContact: function () {
-                var contact = this.model;
-                contact.declineRequest();
-                this.blockInvitation();
-                contact.trigger('remove_invite', contact);
+            reject: function () {
+                let contact = this.model;
                 this.closeChat();
+                let iq = $iq({to: contact.get('full_jid') || contact.get('jid'), type: 'set'})
+                    .c('decline', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`});
+                this.account.sendFast(iq, () => {}, () => {
+                    contact.declineRequest();
+                    this.blockInvitation();
+                });
             },
 
             declineAll: function () {
@@ -54156,8 +57154,8 @@ define("xabber-contacts", [],function () {
 
             initialize: function (models, options) {
                 this.account = options.account;
-                this.on("add", this.onGroupAdded, this);
                 this.on("change:id", this.sort, this);
+                this.account.on('render_settings', this.render, this);
             },
 
             comparator: function (a, b) {
@@ -54173,6 +57171,13 @@ define("xabber-contacts", [],function () {
 
             onGroupAdded: function (group) {
                 group.acc_view = new xabber.AccountGroupView({model: group});
+            },
+
+            render: function () {
+                this.on("add", this.onGroupAdded, this);
+                this.models.forEach((group) => {
+                    group.acc_view = new xabber.AccountGroupView({model: group});
+                });
             }
         });
 
@@ -54199,13 +57204,30 @@ define("xabber-contacts", [],function () {
                 if (typeof attrs !== "object") {
                     attrs = {jid: attrs};
                 }
-                var contact = this.get(attrs.jid);
+                let contact = this.get(attrs.jid);
                 if (contact) {
+                    if (attrs.avatar) {
+                        attrs.image = attrs.avatar;
+                        delete attrs.avatar;
+                        contact.cached_image = Images.getCachedImage(attrs.image);
+                    }
                     contact.set(attrs);
                 } else {
                     contact = this.create(attrs, {account: this.account});
                 }
                 return contact;
+            },
+
+            blockContact: function (jid, callback, errback) {
+                let iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                    .c('item', {jid: jid});
+                this.account.sendIQ(iq, callback, errback);
+            },
+
+            unblockContact: function (jid, callback, errback) {
+                let iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
+                    .c('item', {jid: jid});
+                this.account.sendIQ(iq, callback, errback);
             },
 
             removeAllContacts: function () {
@@ -54215,33 +57237,34 @@ define("xabber-contacts", [],function () {
             },
 
             handlePresence: function (presence, jid) {
-                var contact = this.mergeContact(jid);
+                let contact = this.mergeContact(jid);
                 contact.handlePresence(presence);
             }
         });
 
-        xabber.BlockList = xabber.ContactsBase.extend({
+        xabber.BlockList = Backbone.Model.extend({
             initialize: function (models, options) {
                 this.account = options.account;
+                this.list = {};
                 this.contacts = this.account.contacts;
+                this.contacts.on("add_to_blocklist", this.onContactAdded, this);
                 this.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
             },
 
-            update: function (contact, event) {
-                var contains = contact.get('blocked');
-                if (contains) {
-                    if (!this.get(contact)) {
-                        this.add(contact);
-                        contact.trigger("add_to_blocklist", contact);
-                    }
-                } else if (this.get(contact)) {
-                    this.remove(contact);
-                    contact.trigger("remove_from_blocklist", contact);
-                }
+            length: function () {
+                return Object.keys(this.list).length;
             },
 
-            onContactRemoved: function (contact) {
-                contact.getVCard();
+            isBlocked: function (jid) {
+                return this.list.hasOwnProperty(jid);
+            },
+
+            onContactRemoved: function (jid) {
+                delete this.list[jid];
+            },
+
+            onContactAdded: function (attrs) {
+                this.list[attrs.jid] = attrs;
             },
 
             registerHandler: function () {
@@ -54258,17 +57281,24 @@ define("xabber-contacts", [],function () {
             },
 
             onBlockingIQ: function (iq) {
-                var $elem = $(iq).find('[xmlns="' + Strophe.NS.BLOCKING + '"]'),
+                let $elem = $(iq).find('[xmlns="' + Strophe.NS.BLOCKING + '"]'),
                     tag = $elem[0].tagName.toLowerCase(),
                     blocked = tag.startsWith('block');
                 $elem.find('item').each(function (idx, item) {
-                    var jid = item.getAttribute('jid'),
+                    let jid = item.getAttribute('jid'),
                         resource = Strophe.getResourceFromJid(jid),
                         domain = Strophe.getDomainFromJid(jid),
-                        attrs = {jid: jid, blocked: blocked};
+                        attrs = {jid},
+                        contact = this.contacts.get(jid);
                     resource && (attrs.resource = true);
                     (domain === jid) && (attrs.domain = true);
-                    this.account.contacts.mergeContact(attrs);
+                    if (blocked)
+                        this.contacts.trigger("add_to_blocklist", attrs);
+                    else {
+                        this.contacts.trigger("remove_from_blocklist", jid);
+                        contact && contact.trigger("remove_from_blocklist", contact);
+                    }
+                    contact && contact.set('blocked', blocked);
                 }.bind(this));
                 return true;
             }
@@ -54302,7 +57332,6 @@ define("xabber-contacts", [],function () {
 
             onContactAdded: function (contact) {
                 if (!contact.get('in_roster')) {
-                    this.addContactToGroup(contact, constants.NON_ROSTER_GROUP_ID);
                     return;
                 }
                 var groups = contact.get('groups');
@@ -54326,8 +57355,6 @@ define("xabber-contacts", [],function () {
                             groups.push(constants.GENERAL_GROUP_ID);
                         }
                     } else if (contact.get('known')) {
-                        groups = [constants.NON_ROSTER_GROUP_ID];
-                    } else {
                         groups = [];
                     }
                     // TODO: optimize
@@ -54386,19 +57413,31 @@ define("xabber-contacts", [],function () {
                 }
                 delete(options.stamp);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
-                this.account.sendIQ(iq, function (response) {
+                this.account.sendFast(iq, function (response) {
                     this.onSyncIQ(response, request_attrs.stamp);
                 }.bind(this));
             },
 
             onSyncIQ: function (iq, request_with_stamp) {
-                this.account.last_msg_timestamp = Math.round($(iq).children('synchronization').attr('stamp')/1000);
-                let last_chat_msg_id = $(iq).find('set last');
+                let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp'));
+                this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
+                this.account.set('last_sync', sync_timestamp);
+                let last_chat_msg_id = $(iq).find('set last'),
+                    encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
+                    retract_version = $(iq).find('query conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
                     xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
                     return;
+                }
+                if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
+                    this.account.getAllMessageRetractions(true);
+                if (request_with_stamp) {
+                    if (this.account.retraction_version < retract_version)
+                        this.account.getAllMessageRetractions();
+                } else {
+                    this.account.retraction_version = retract_version;
                 }
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
@@ -54406,23 +57445,37 @@ define("xabber-contacts", [],function () {
                     if (jid === this.account.get('jid'))
                         return;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
-                        contact = this.contacts.mergeContact(jid),
-                        is_group_chat = $item.attr('type') === 'groupchat' ? true : false,
-                        chat = this.account.chats.getChat(contact),
+                        type = $item.attr('type'),
+                        is_private =  type === 'private',
+                        is_incognito =  type === 'incognito',
+                        is_group_chat =  type === 'group' || is_private || is_incognito,
+                        encrypted = type === 'encrypted',
+                        contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
+                        chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
-                        current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),//$sync_metadata.children('call'),
+                        current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
+                        $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         $unread_messages = $sync_metadata.children('unread'),
+                        chat_timestamp = Math.trunc(Number($item.attr('stamp'))/1000),
+                        last_read_msg = $unread_messages.attr('after'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = parseInt($unread_messages.attr('count')),
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
-                    contact.set('group_chat', is_group_chat);
                     if ($sync_metadata.children('deleted').length) {
+                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                    } else if (encrypted && this.account.omemo) {
+                        chat.set('timestamp', chat_timestamp);
+                        chat.set('opened', true);
+                        chat.item_view.updateEncryptedChat();
+                    }
+                    if ($group_metadata.length) {
+                        contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
                     }
                     if (current_call.length) {
                         let $jingle_message = current_call.children('message'),
@@ -54430,25 +57483,20 @@ define("xabber-contacts", [],function () {
                             session_id = $jingle_message.children('propose').attr('id');
                         chat.initIncomingCall(full_jid, session_id);
                     }
-                    if (!message.length) {
-                        chat.set('timestamp', Math.trunc(Number($item.attr('stamp')))/1000);
-                        chat.item_view.updateEmptyChat();
-                    }
-                    if (request_with_stamp) {
-                        let unread_messages = _.clone(chat.messages_unread.models);
-                        chat.trigger('get_missed_history', request_with_stamp/1000);
-                        chat.set('unread', 0);
-                        chat.set('const_unread', 0);
-                        _.each(unread_messages, function (unread_msg) {
-                            unread_msg.set('is_unread', false);
-                        }.bind(this));
-                        if (chat.message_retraction_version != msg_retraction_version)
-                            chat.trigger("get_retractions_list");
-                    } else {
-                        chat.message_retraction_version = msg_retraction_version;
-                    }
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);
+                    chat.set('last_read_msg', last_read_msg);
+                    if (!message.length) {
+                        chat.set('timestamp', chat_timestamp);
+                        chat.item_view.updateEmptyChat();
+                    }
+                    if (is_group_chat) {
+                        if (request_with_stamp) {
+                            if (chat.retraction_version < msg_retraction_version)
+                                chat.trigger("get_retractions_list");
+                        } else
+                            chat.retraction_version = msg_retraction_version;
+                    }
                     unread_msgs_count && (options.is_unread = true);
                     options.delay = message.children('time');
                     unread_msgs_count && unread_msgs_count--;
@@ -54465,22 +57513,25 @@ define("xabber-contacts", [],function () {
                 return true;
             },
 
+            getRoster: function () {
+                let request_ver = this.roster_version;
+                this.account.cached_roster.getAllFromRoster(function (roster_items) {
+                    $(roster_items).each(function (idx, roster_item) {
+                        this.contacts.mergeContact(roster_item);
+                    }.bind(this));
+                    if (!roster_items.length && request_ver != 0) {
+                        this.roster_version = 0;
+                    }
+                    this.getFromServer();
+                }.bind(this));
+            },
+
             getFromServer: function () {
-                let request_ver = this.roster_version,
-                    iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: request_ver});
+                let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
                 this.account.sendIQ(iq, function (iq) {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
-                    if (!$(iq).children('query').find('item').length)
-                        this.account.cached_roster.getAllFromRoster(function (roster_items) {
-                            $(roster_items).each(function (idx, roster_item) {
-                                this.contacts.mergeContact(roster_item);
-                            }.bind(this));
-                            if (!roster_items.length && request_ver != 0) {
-                                this.roster_version = 0;
-                                this.getFromServer();
-                            }
-                        }.bind(this));
+                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: 20});
                     this.account.dfd_presence.resolve();
                 }.bind(this));
             },
@@ -54504,11 +57555,11 @@ define("xabber-contacts", [],function () {
             },
 
             onRosterItem: function (item) {
-                var jid = item.getAttribute('jid');
+                let jid = item.getAttribute('jid');
                 if (jid === this.account.get('jid'))
                     return;
-                var contact = this.contacts.mergeContact(jid);
-                var subscription = item.getAttribute("subscription"),
+                let contact = this.contacts.mergeContact(jid),
+                    subscription = item.getAttribute("subscription"),
                     ask = item.getAttribute("ask");
                 if (contact.get('invitation') && (subscription === 'both' || subscription === 'to')) {
                     contact.set('invitation', false);
@@ -54523,15 +57574,15 @@ define("xabber-contacts", [],function () {
                         subscription: undefined,
                         subscription_request_out: false
                     });
-                    this.account.cached_roster.removeFromCachedRoster(jid);
+                    this.account.cached_roster.removeFromRoster(jid);
                     return;
                 }
-                var groups = [];
+                let groups = [];
                 $(item).find('group').each(function () {
                     var group = $(this).text();
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
-                var attrs = {
+                let attrs = {
                     subscription: subscription,
                     in_roster: true,
                     roster_name: item.getAttribute("name"),
@@ -54547,9 +57598,9 @@ define("xabber-contacts", [],function () {
                     attrs.subscription_request_out = false;
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
-                this.account.cached_roster.putInRoster(_.extend(_.clone(attrs), {jid: jid}));
                 attrs.roster_name && (attrs.name = attrs.roster_name);
                 contact.set(attrs);
+                contact.updateCachedInfo();
             }
         });
 
@@ -54640,6 +57691,8 @@ define("xabber-contacts", [],function () {
             },
 
             openChangeStatus: function (ev) {
+                if (!xabber.change_status_view)
+                    xabber.change_status_view = new xabber.ChangeStatusView();
                 xabber.change_status_view.open(this.account);
             }
         });
@@ -54706,70 +57759,19 @@ define("xabber-contacts", [],function () {
             }
         });
 
-        xabber.BlockedItemView = xabber.BasicView.extend({
-            className: 'blocked-contact',
-            template: templates.contact_blocked_item,
-            avatar_size: constants.AVATAR_SIZES.CONTACT_BLOCKED_ITEM,
-
-            events: {
-                "click .btn-unblock": "unblockContact",
-                "click": "showDetails"
-            },
-
-            _initialize: function (options) {
-                if (this.model.get('resource')) {
-                    this.parent.$('.blocked-invitations-wrap').removeClass('hidden');
-                    this.$el.appendTo(this.parent.$('.blocked-invitations'));
-                }
-                else if (this.model.get('domain')) {
-                    this.parent.$('.blocked-domains-wrap').removeClass('hidden');
-                    let $desc = this.parent.$('.blocked-domains-wrap .blocked-item-description');
-                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.model.get('jid'));
-                    this.parent.$('.blocked-item-description').text();
-                    this.$el.appendTo(this.parent.$('.blocked-domains'));
-                }
-                else {
-                    this.parent.$('.blocked-contacts-wrap').removeClass('hidden');
-                    let $desc = this.parent.$('.blocked-contacts-wrap .blocked-item-description');
-                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + this.model.get('jid'));
-                    this.$el.appendTo(this.parent.$('.blocked-contacts'));
-                }
-                this.$el.attr({'data-jid': this.model.get('jid')});
-                this.$('.jid').text(this.model.get('jid'));
-                this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
-                this.on("remove", this.onRemoved, this);
-            },
-
-            unblockContact: function (ev) {
-                ev.stopPropagation();
-                this.model.unblock();
-            },
-
-            showDetails: function (ev) {
-                if (!$(ev.target).closest('.blocked-invitations-wrap').length)
-                    this.model.showDetails();
-            },
-
-            onRemoved: function () {
-                let blocked_list = this.$el.closest('.blocked-list'),
-                    jid = this.model.get('jid'),
-                    reg = new RegExp(('\\,\\s' + jid + '|' + jid + '\\,\\s' + '|' + jid)),
-                    blocked_contacts_desc = this.$el.closest('.blocked-contacts-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description'),
-                    blocked_domains_desc = this.$el.closest('.blocked-domains-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description');
-                this.$el.closest('.blocked-invitations-wrap').showIf(blocked_list.children().length > 1);
-                blocked_contacts_desc.text(blocked_contacts_desc.text().replace(reg, ""));
-                blocked_domains_desc.text(blocked_domains_desc.text().replace(reg, ""));
-            }
-        });
-
         xabber.BlockListView = xabber.BasicView.extend({
+            avatar_size: constants.AVATAR_SIZES.CONTACT_BLOCKED_ITEM,
             events: {
                 "click .blocked-item": "toggleItems",
-                "click .btn-block": "openBlockWindow"
+                "click .btn-block": "openBlockWindow",
+                "click .btn-unblock": "unblockContact"
             },
 
             _initialize: function (options) {
                 this.account = options.account;
+                for (let jid in this.account.blocklist.list) {
+                    this.onContactAdded(this.account.blocklist.list[jid], false);
+                };
                 this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
                 this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
             },
@@ -54783,25 +57785,60 @@ define("xabber-contacts", [],function () {
                 this.parent.updateScrollBar();
             },
 
-            onContactAdded: function (contact) {
-                if (!contact.get('group_chat')) {
-                    this.addChild(contact.get('jid'), xabber.BlockedItemView, {model: contact});
-                    this.$('.placeholder').addClass('hidden');
-                    this.parent.updateScrollBar();
+            unblockContact: function (ev) {
+                let jid = $(ev.target).closest('.blocked-contact').attr('data-jid'),
+                    contact = this.account.contacts.get(jid);
+                ev.stopPropagation();
+                if (contact)
+                    contact.unblock();
+                else {
+                    this.account.contacts.unblockContact(jid);
                 }
             },
 
-            onContactRemoved: function (contact) {
-                this.removeChild(contact.get('jid'));
-                this.$('.placeholder').hideIf(this.account.blocklist.length);
+            onContactAdded: function (attrs) {
+                let tmp = templates.contact_blocked_item({jid: attrs.jid});
+                if (attrs.resource) {
+                    this.$('.blocked-invitations-wrap').removeClass('hidden').find('.blocked-invitations').append(tmp);
+                }
+                else if (attrs.domain) {
+                    let $domain_wrap = this.$('.blocked-domains-wrap').removeClass('hidden'),
+                        $desc = $domain_wrap.find('.blocked-item-description');
+                    $domain_wrap.find('.blocked-domains').append(tmp);
+                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
+                }
+                else {
+                    this.$('.blocked-contacts-wrap').removeClass('hidden').find('.blocked-contacts').append(tmp);
+                    let $desc = this.$('.blocked-contacts-wrap .blocked-item-description');
+                    $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
+                }
+                this.$('.placeholder').addClass('hidden');
+                this.isVisible() && this.parent.updateScrollBar();
+            },
+
+            onContactRemoved: function (jid) {
+                let $elem = this.$(`.blocked-contact[data-jid="${jid}"]`);
+                let blocked_list = $elem.closest('.blocked-list'),
+                    reg = new RegExp(('\\,\\s' + jid + '|' + jid + '\\,\\s' + '|' + jid)),
+                    blocked_contacts_desc = $elem.closest('.blocked-contacts-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description'),
+                    blocked_domains_desc = $elem.closest('.blocked-domains-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description');
+                $elem.closest('.blocked-invitations-wrap').showIf(blocked_list.children().length > 1);
+                blocked_contacts_desc.text(blocked_contacts_desc.text().replace(reg, ""));
+                blocked_domains_desc.text(blocked_domains_desc.text().replace(reg, ""));
+                $elem.detach();
+                this.$('.placeholder').hideIf(this.account.blocklist.length());
                 this.parent.updateScrollBar();
             },
 
             openBlockWindow: function () {
                 utils.dialogs.ask_enter_value("Block", "Block a specific xmpp address", {input_placeholder_value: 'name@example.com'}, { ok_button_text: 'block'}).done(function (result) {
                     if (result) {
-                        let contact = this.account.contacts.mergeContact(result);
-                        contact.block();
+                        let contact = this.account.contacts.get(result);
+                        if (contact)
+                            contact.block();
+                        else {
+                            this.account.contacts.blockContact(result);
+                        }
                     }
                 }.bind(this));
             }
@@ -55040,7 +58077,7 @@ define("xabber-contacts", [],function () {
 
             _initialize: function (options) {
                 this.$('.group-name').text(this.model.get('name'));
-                var index = this.model.collection.indexOf(this.model),
+                let index = this.model.collection.indexOf(this.model),
                     $parent_el = this.model.account.settings_right.$('.groups');
                 if (index === 0) {
                     $parent_el.prepend(this.$el);
@@ -55244,9 +58281,10 @@ define("xabber-contacts", [],function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
-                    contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, function () {
+                        contact.pres('subscribed');
                         contact.pres('subscribe');
+                        contact.trigger('presence', contact, 'subscribe_from');
                         contact.trigger("open_chat", contact);
                     }.bind(this), function () {
                         contact.destroy();
@@ -55296,24 +58334,6 @@ define("xabber-contacts", [],function () {
             }
         });
 
-        xabber.CachedContactsInfo = Backbone.ModelWithDataBase.extend({
-            defaults: {
-                contacts: []
-            },
-
-            putContactInfo: function (value, callback) {
-                this.database.put('contacts', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            },
-
-            getContactInfo: function (value, callback) {
-                this.database.get('contacts', value, function (response_value) {
-                    callback && callback(response_value);
-                });
-            }
-        });
-
         xabber.CachedRoster = Backbone.ModelWithDataBase.extend({
             putInRoster: function (value, callback) {
                 this.database.put('roster_items', value, function (response_value) {
@@ -55321,7 +58341,7 @@ define("xabber-contacts", [],function () {
                 });
             },
 
-            getItemFromRoster: function (value, callback) {
+            getFromRoster: function (value, callback) {
                 this.database.get('roster_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
@@ -55333,7 +58353,7 @@ define("xabber-contacts", [],function () {
                 });
             },
 
-            removeFromCachedRoster: function (value, callback) {
+            removeFromRoster: function (value, callback) {
                 this.database.remove('roster_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
@@ -55363,10 +58383,7 @@ define("xabber-contacts", [],function () {
             this.groups = new xabber.Groups(null, {account: this});
             this.contacts = new xabber.Contacts(null, {account: this});
             this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this}));
-            this.contacts.addCollection(this.blocklist = new xabber.BlockList(null, {account: this}));
-
-            this.settings_right.addChild('blocklist', xabber.BlockListView,
-                {account: this, el: this.settings_right.$('.blocklist-info')[0]});
+            this.blocklist = new xabber.BlockList(null, {account: this});
 
             this._added_pres_handlers.push(this.contacts.handlePresence.bind(this.contacts));
 
@@ -55382,7 +58399,7 @@ define("xabber-contacts", [],function () {
                     !this.roster.last_chat_msg_id && (options.max = max_count);
                     this.roster.syncFromServer(options);
                 }
-                this.roster.getFromServer();
+                this.roster.getRoster();
                 this.blocklist.getFromServer();
             }, this);
         });
@@ -55400,11 +58417,6 @@ define("xabber-contacts", [],function () {
             this.settings.roster = this._roster_settings.attributes;
             this.roster_settings_view = xabber.settings_view.addChild(
                 'roster_settings', this.RosterSettingsView, {model: this._roster_settings});
-            this.cached_contacts_info = new xabber.CachedContactsInfo(null, {
-                name:'cached-contacts-list',
-                objStoreName: 'contacts',
-                primKey: 'jid'
-            });
             this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
                 {model: this.accounts});
             this.roster_view = this.body.addChild('roster', this.RosterRightView,
@@ -55579,27 +58591,28 @@ define("xabber-chats", [],function () {
             $delay.length && (attrs.time = $delay.attr('stamp'));
             body && (attrs.message = body);
 
-            let contact = this.account.contacts.mergeContact(Strophe.getBareJidFromJid(from_jid)),
+            let contact = this.account.contacts.mergeContact({jid: Strophe.getBareJidFromJid(from_jid), group_chat: true}),
                 chat = this.account.chats.getChat(contact);
-            contact.set('group_chat', true);
             contact.set('in_roster', false);
             contact.getVCard();
             if ($group_info.length) {
                 let name = $group_info.find('name').text(),
                     model = $group_info.find('membership').text(),
-                    anonymous = $group_info.find('privacy').text(),
+                    privacy = $group_info.find('privacy').text(),
                     searchable = $group_info.find('index').text(),
                     parent_chat = $group_info.find('parent-chat').text(),
                     description = $group_info.find('description').text();
                 name && (group_info_attributes.name = name);
                 model && (group_info_attributes.model = name);
-                anonymous && (group_info_attributes.anonymous = anonymous);
+                privacy && (group_info_attributes.privacy = privacy);
                 searchable && (group_info_attributes.searchable = searchable);
                 description && (group_info_attributes.description = description);
                 parent_chat.length && (is_private_invitation = true);
                 is_private_invitation && contact.set('private_chat', true);
-                anonymous === 'incognito' && contact.set('incognito_chat', true);
-                contact.set('group_info', group_info_attributes);
+                privacy === 'incognito' && contact.set('incognito_chat', true);
+                let prev_group_info = contact.get('group_info') || {};
+                _.extend(prev_group_info, group_info_attributes);
+                contact.set('group_info', prev_group_info);
             }
 
             let invite_msg = chat.messages.createSystemMessage(_.extend(attrs, {
@@ -55628,6 +58641,12 @@ define("xabber-chats", [],function () {
                 message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
+                let by_jid = $message.children('replace').attr('by'),
+                    converstion = $message.children('replace').attr('conversation');
+                if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: converstion}));
+                    return;
+                }
                 $message = $message.children('replace').children('message');
                 body = $message.children('body').text();
                 let sid = $message.children('stanza-id').first().attr('id');
@@ -55659,6 +58678,8 @@ define("xabber-chats", [],function () {
                 },
                 mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [];
 
+            options.encrypted && _.extend(attrs, {encrypted: true});
+            options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
 
             $message.children('reference[xmlns="' + Strophe.NS.REFERENCE + '"]').each(function (idx, reference) {
                 let $reference = $(reference),
@@ -55686,7 +58707,7 @@ define("xabber-chats", [],function () {
                         markup.length && markups.push({start: begin, end: end, markup: markup});
                     }
                 } else if (type === 'mutable') {
-                    let $file_sharing = $reference.find('file-sharing[xmlns="' + Strophe.NS.OTB + '"]').first();
+                    let $file_sharing = $reference.find('file-sharing[xmlns="' + Strophe.NS.FILES + '"]').first();
                     if ($reference.children('forwarded').length)
                         mutable_content.push({ start: begin, end: end, type: 'forward'});
                     else if ($file_sharing.length) {
@@ -55706,6 +58727,14 @@ define("xabber-chats", [],function () {
                             voice: type === 'voice',
                             sources: sources
                         };
+                        if (sources[0].indexOf('aesgcm') == 0) {
+                            let uri = sources[0].replace(/^aesgcm/, 'https'),
+                                iv_and_key = uri.slice(uri.length - 44 - 16),
+                                iv = utils.fromBase64toArrayBuffer(iv_and_key.slice(0, 16)),
+                                key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
+                            uri = uri.slice(0, uri.length - 44 - 16 - 1);
+                            _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                        }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
                             images.push(file_attrs);
                         else
@@ -55757,14 +58786,14 @@ define("xabber-chats", [],function () {
                 attrs.participants_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
             }
 
-            if ($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
-                $message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"] field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
+            if ($message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]').length &&
+                $message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]').find('field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
                 let addresses = [];
                 $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address').each(function (idx, address) {
                     let $address = $(address);
                     addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
                 }.bind(this));
-                attrs.data_form = _.extend(this.account.parseDataForm($message.find('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
+                attrs.data_form = _.extend(this.account.parseDataForm($message.children('x[xmlns="' + Strophe.NS.DATAFORM + '"]')), {addresses: addresses});
             }
 
             body && (body = utils.slice_pretty_body(body, mutable_content));
@@ -55798,7 +58827,7 @@ define("xabber-chats", [],function () {
             if (options.context_message)
                 return this.account.context_messages.create(attrs);
 
-            if (options.echo_msg || options.replaced && message) {
+            if ((options.echo_msg || options.replaced) && message) {
                 message.set(attrs);
                 if (options.replaced)
                     return;
@@ -55814,8 +58843,30 @@ define("xabber-chats", [],function () {
             }
 
             message = this.create(attrs);
+
+            (options.encrypted && options.is_unread) && message.set('is_unread', true);
+
             return message;
         },
+
+          decryptFile: async function (uri, iv, key) {
+              return new Promise((resolve, reject) => {
+                  fetch(uri).then((r) => {
+                      r.blob().then((blob) => {
+                          let filereader = new FileReader();
+                          filereader.onloadend = function () {
+                              let arrayBuffer = filereader.result;
+                              utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
+                                  resolve(enc_file);
+                              });
+                          }.bind(this);
+                          filereader.readAsArrayBuffer(blob);
+                      });
+                  }).catch(() => {
+                      resolve(null)
+                  });
+              });
+          },
 
         getFilename: function (url_media) {
             let idx = url_media.lastIndexOf("/");
@@ -55862,13 +58913,8 @@ define("xabber-chats", [],function () {
                   iceServers: [
                       {
                           urls: "stun:stun.l.google.com:19302"
-                      },
-                      {
-                          urls: 'turn:192.158.29.39:3478?transport=udp',
-                          credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                          username: '28224511:1379330808'
                       }
-                  ],
+                  ].concat(constants.TURN_SERVERS_LIST),
                   sdpSemantics: 'unified-plan'
               });
               this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
@@ -56179,15 +59225,17 @@ define("xabber-chats", [],function () {
               this.audio_notifiation = xabber.playAudio('connecting', true);
           },
 
-          reject: function () {
+          reject: function (reason) {
               if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
                   return;
               let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
                   let end = moment.now(),
-                      duration = Math.round((end - this.get('jingle_start'))/1000);
-                  $reject_msg.c('call', {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration}).up();
+                      duration = Math.round((end - this.get('jingle_start'))/1000),
+                      call_attrs = {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration};
+                  reason && (call_attrs.reason = reason);
+                  $reject_msg.c('call', call_attrs).up();
               }
               $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -56297,18 +59345,20 @@ define("xabber-chats", [],function () {
             last_delivered_id: 0,
             unread: 0,
             timestamp: 0,
-            const_unread: 0
+            const_unread: 0,
+            encrypted: false
         },
 
         initialize: function (attrs, options) {
             this.contact = options.contact;
             this.account = this.contact.account;
-            var jid = this.contact.get('jid');
+            let jid = this.contact.get('jid');
             this.set({
-                id: this.contact.hash_id,
+                id: attrs && attrs.id || this.contact.hash_id,
                 jid: jid
             });
-            this.message_retraction_version = 0;
+            (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
+            this.retraction_version = 0;
             this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
             this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
             this.messages = new xabber.Messages(null, {account: this.account});
@@ -56316,6 +59366,27 @@ define("xabber-chats", [],function () {
             this.item_view = new xabber.ChatItemView({model: this});
             this.contact.on("destroy", this.onContactDestroyed, this);
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
+            this.on("change:timestamp", this.onChangedTimestamp, this);
+        },
+
+        onChangedTimestamp: function () {
+            if (this.get('timestamp') != this.get('cached_timestamp'))
+                this.cacheChat();
+        },
+
+        cacheChat: function () {
+            let jid = this.get('jid'),
+                last_message = this.last_message ? _.clone(this.last_message).get('xml') : null;
+            if (_.isUndefined(last_message))
+                return;
+            let attrs = {
+                jid: this.get('encrypted') ? `${jid}:encrypted` : jid,
+                timestamp: this.get('timestamp'),
+                last_displayed_id: this.get('last_displayed_id'),
+                last_delivered_id: this.get('last_delivered_id'),
+                last_message: last_message ? last_message.outerHTML : null
+            };
+            this.account.cached_chats.putChat(attrs);
         },
 
         recountUnread: function () {
@@ -56378,10 +59449,13 @@ define("xabber-chats", [],function () {
         },
 
         setStanzaId: function (unique_id, stanza_id) {
-            let message = this.messages.get(unique_id);
+            let message = this.messages.get(unique_id),
+                origin_id = message.get('origin_id');
             message.set('stanza_id', stanza_id);
             if (!message.get('origin_id'))
                 this.item_view.content.$('.chat-message[data-uniqueid="' + stanza_id + '"]').data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id);
+            if (this.get('encrypted'))
+                this.account.omemo && this.account.omemo.updateMessage({stanza_id, origin_id}, this.contact);
         },
 
         getCallingAvailability: function (to, session_id, callback) {
@@ -56398,7 +59472,8 @@ define("xabber-chats", [],function () {
                 type: 'chat',
                 to: msg_to
             })
-                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id}).up()
+                .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id})
+                    .c('call', {reason: options.reason}).up().up()
                 .c('store', {xmlns: Strophe.NS.HINTS}).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
@@ -56425,8 +59500,10 @@ define("xabber-chats", [],function () {
         },
 
         getAllMessageRetractions: function () {
-            var retractions_query = $iq({from: this.account.connection.jid, type: 'set', to: this.contact.get('jid')})
-                .c('activate', { xmlns: Strophe.NS.REWRITE, version: this.message_retraction_version});
+            if (!this.contact.get('group_chat'))
+                return;
+            let retractions_query = $iq({type: 'get', to: this.contact.get('jid')})
+                .c('query', {xmlns: Strophe.NS.REWRITE, version: this.retraction_version});
             this.account.sendIQ(retractions_query);
         },
 
@@ -56443,7 +59520,7 @@ define("xabber-chats", [],function () {
             if ($jingle_msg_propose.length) {
                 if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
                     if (xabber.current_voip_call)
-                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id')});
+                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id'), reason: 'busy'});
                     return;
                 }
                 if (options.is_archived || options.synced_msg)
@@ -56453,7 +59530,7 @@ define("xabber-chats", [],function () {
                         iq_to = $message.attr('from');
                     this.getCallingAvailability(iq_to, session_id, function () {
                         if (xabber.current_voip_call) {
-                            this.sendReject({session_id: session_id});
+                            this.sendReject({session_id: session_id, reason: 'busy'});
                             this.messages.createSystemMessage({
                                 from_jid: this.account.get('jid'),
                                 message: 'Cancelled call'
@@ -56490,7 +59567,10 @@ define("xabber-chats", [],function () {
                 if ($jingle_msg_reject.children('call').length) {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
-                    msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
+                    if (duration && initiator)
+                        msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
+                    else
+                        msg_text = 'Cancelled call';
                 }
                 else
                     msg_text = 'Cancelled call';
@@ -56509,7 +59589,7 @@ define("xabber-chats", [],function () {
                     setTimeout(function () {
                         xabber.stopAudio(busy_audio);
                     }.bind(this), 1500);
-                    this.endCall('disconnected');
+                    this.endCall($jingle_msg_reject.children('call').attr('reason') == 'busy' ? 'busy' : 'disconnected');
                 }
                 return message;
             }
@@ -56571,34 +59651,39 @@ define("xabber-chats", [],function () {
                 if (contact)
                     if (contact.get('subscription') == 'both')
                         return;
-                var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
-                this.account.sendIQ(iq,
-                    function (iq) {
-                        var items = $(iq).find('item'),
-                            current_timestamp = Number(moment($message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now())),
-                            last_blocking_timestamp,
-                            has_blocking = false;
-                        if (items.length > 0) {
-                            items.each(function (idx, item) {
-                                let $item = $(item),
-                                    item_jid = $item.attr('jid'), blocking_timestamp = "";
-                                if (item_jid.indexOf(group_jid) > -1) {
-                                    has_blocking = true;
-                                    blocking_timestamp = item_jid.substr(item_jid.lastIndexOf("/") + 1, item_jid.length - group_jid.length);
-                                    if (!blocking_timestamp) {
-                                        last_blocking_timestamp = "";
-                                        return false;
-                                    } else if (!last_blocking_timestamp || last_blocking_timestamp < blocking_timestamp)
-                                        last_blocking_timestamp = blocking_timestamp;
-                                }
-                            }.bind(this));
-                        }
-                        if (_.isUndefined(last_blocking_timestamp) || last_blocking_timestamp && last_blocking_timestamp < current_timestamp)
-                            return this.messages.createInvitationFromStanza($message, options);
-                    }.bind(this),
-                    function () {
+                if (this.account.connection && this.account.connection.do_synchronization) {
+                    if (options.synced_msg || !options.synced_msg && !options.is_archived)
                         return this.messages.createInvitationFromStanza($message, options);
-                    }.bind(this));
+                } else {
+                    var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
+                    this.account.sendIQ(iq,
+                        function (iq) {
+                            var items = $(iq).find('item'),
+                                current_timestamp = Number(moment($message.find('delay').attr('stamp') || $message.find('time').attr('stamp') || (options.delay) && Number(moment(options.delay.attr('stamp'))) || moment.now())),
+                                last_blocking_timestamp,
+                                has_blocking = false;
+                            if (items.length > 0) {
+                                items.each(function (idx, item) {
+                                    let $item = $(item),
+                                        item_jid = $item.attr('jid'), blocking_timestamp = "";
+                                    if (item_jid.indexOf(group_jid) > -1) {
+                                        has_blocking = true;
+                                        blocking_timestamp = item_jid.substr(item_jid.lastIndexOf("/") + 1, item_jid.length - group_jid.length);
+                                        if (!blocking_timestamp) {
+                                            last_blocking_timestamp = "";
+                                            return false;
+                                        } else if (!last_blocking_timestamp || last_blocking_timestamp < blocking_timestamp)
+                                            last_blocking_timestamp = blocking_timestamp;
+                                    }
+                                }.bind(this));
+                            }
+                            if (_.isUndefined(last_blocking_timestamp) || last_blocking_timestamp && last_blocking_timestamp < current_timestamp)
+                                return this.messages.createInvitationFromStanza($message, options);
+                        }.bind(this),
+                        function () {
+                            return this.messages.createInvitationFromStanza($message, options);
+                        }.bind(this));
+                }
             }
             else
                 return this.messages.createFromStanza($message, options);
@@ -56670,9 +59755,14 @@ define("xabber-chats", [],function () {
                 return;
             var marked_msg_id = $displayed.attr('id') || $received.attr('id'),
                 marked_stanza_id = $displayed.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id') || $received.find('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
-                msg = this.account.messages.find(m => m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id || m.get('msgid') === marked_msg_id);
-            if (!msg)
+                msg = this.account.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
+            if (!msg) {
+                let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
+                    enc_msg = enc_chat && enc_chat.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
+                if (enc_msg)
+                    enc_chat.receiveMarker($message, tag, carbon_copied);
                 return;
+            }
             if (msg.isSenderMe()) {
                 if ($received.length) {
                     let msg_state = msg.get('state');
@@ -56695,20 +59785,35 @@ define("xabber-chats", [],function () {
         setMessagesDelivered: function (timestamp) {
             !timestamp && (timestamp = moment.now());
             let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED));
+            if (!undelivered_messages.length) {
+                let chat =  this.account.chats.get(this.id + ':encrypted');
+                chat && (undelivered_messages = chat.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DELIVERED)));
+            }
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DELIVERED));
         },
 
         setMessagesDisplayed: function (timestamp) {
             !timestamp && (timestamp = moment.now());
             let undelivered_messages = this.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED));
+            if (!undelivered_messages.length) {
+                let chat =  this.account.chats.get(this.id + ':encrypted');
+                chat && (undelivered_messages = chat.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED)));
+            }
             undelivered_messages.forEach(message => message.set('state', constants.MSG_DISPLAYED));
         },
 
         receiveCarbonsMarker: function ($marker) {
             let stanza_id = $marker.children('stanza-id[by="' + this.account.get('jid') + '"]').attr('id'),
                 msg_id = $marker.attr('id'),
-                msg = this.messages.find(m => m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id || m.get('msgid') === msg_id), msg_idx;
+                msg = this.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id), msg_idx;
             msg && (msg_idx = this.messages.indexOf(msg));
+            if (!msg) {
+                let enc_chat =  this.account.chats.get(this.id + ':encrypted'),
+                    enc_msg = enc_chat && enc_chat.messages.find(m => stanza_id && (m.get('stanza_id') === stanza_id || m.get('contact_stanza_id') === stanza_id) || m.get('msgid') === msg_id);
+                if (enc_msg)
+                    enc_chat.receiveCarbonsMarker($marker);
+                return;
+            }
             if (msg_idx > -1) {
                 this.set('const_unread', 0);
                 for (var i = msg_idx; i >= 0; i--) {
@@ -56783,7 +59888,7 @@ define("xabber-chats", [],function () {
                 let stanza_id = item.get('stanza_id'),
                     contact_stanza_id = item.get('contact_stanza_id');
                 if (stanza_id || contact_stanza_id) {
-                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? this.contact.get('jid') : this.account.get('jid')})
+                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
                         .c('retract-message', {id: (this.contact.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
@@ -56801,7 +59906,7 @@ define("xabber-chats", [],function () {
         },
 
         retractMessagesByUser: function (user_id) {
-            var iq_retraction = $iq({type: 'set', to: this.contact.get('jid')})
+            var iq_retraction = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('retract-user', {id: user_id, xmlns: Strophe.NS.REWRITE, symmetric: true});
             this.account.sendIQ(iq_retraction, function (success) {
                     var user_msgs = this.messages.filter(msg => msg.get('user_info') && (msg.get('user_info').id == user_id));
@@ -56817,9 +59922,10 @@ define("xabber-chats", [],function () {
 
         retractAllMessages: function (symmetric, callback, errback) {
             let is_group_chat = this.contact.get('group_chat'),
-                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? this.contact.get('jid') : this.account.get('jid')}),
+                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
+            this.get('encryped') && (retract_attrs.type = 'encrypted');
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
                     var all_messages = this.messages.models;
@@ -56845,9 +59951,11 @@ define("xabber-chats", [],function () {
         },
 
         deleteFromSynchronization: function (callback, errback) {
+            let conversation_options = {jid: this.get('jid')};
+            this.get('encrypted') && (conversation_options.encrypted = true);
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
-                .c('conversation', {jid: this.get('jid')});
+                .c('conversation', conversation_options);
             this.account.sendIQ(iq, function (success) {
                 callback && callback(success);
             }.bind(this), function (error) {
@@ -56877,9 +59985,12 @@ define("xabber-chats", [],function () {
             this.updateMutedState();
             this.updateArchivedState();
             this.updateColorScheme();
+            this.updateGroupChats();
             this.updateIcon();
+            this.updateEncrypted();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
+            this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("change:const_unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
@@ -56896,6 +60007,7 @@ define("xabber-chats", [],function () {
             this.contact.on("change:group_chat", this.updateGroupChats, this);
             this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
             this.contact.on("remove_invite", this.removeInvite, this);
+            this.contact.on("update_trusted", this.updateEncryptedColor, this);
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -56934,10 +60046,18 @@ define("xabber-chats", [],function () {
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
+        updateEncrypted: function () {
+            this.$el.switchClass('encrypted', this.model.get('encrypted'));
+        },
+
+        updateEncryptedColor: function (encrypted) {
+            this.$el.attr('data-trust', encrypted);
+        },
+
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
@@ -56989,16 +60109,24 @@ define("xabber-chats", [],function () {
         },
 
         updateEmptyChat: function () {
+            let msg_time = this.model.get('timestamp'),
+                is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg'));
+            this.$('.last-msg').html((is_empty ? 'Message retracted' : 'No messages').italics());
+            this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
+                .attr('title', utils.pretty_datetime(msg_time));
+        },
+
+        updateEncryptedChat: function () {
             let msg_time = this.model.get('timestamp');
-            this.$('.last-msg').html('No messages'.italics());
-            this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
+            this.$('.last-msg').html('Decrypting messages'.italics());
+            this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
                 .attr('title', utils.pretty_datetime(msg_time));
         },
 
         updateLastMessage: function (msg) {
             msg || (msg = this.model.last_message);
             if (!msg) {
-                !this.model.messages.length && this.$('.last-msg').html('No messages'.italics());
+                !this.model.messages.length && this.updateEmptyChat();
                 return;
             }
             let msg_time = msg.get('time'),
@@ -57030,7 +60158,12 @@ define("xabber-chats", [],function () {
             else {
                 if (msg.get('type') == 'system') {
                     msg_from = "";
-                    msg.get('invite') && (msg_text = 'Invitation to group chat');
+                    if (msg.get('invite')) {
+                        if (this.contact.get('incognito_chat'))
+                            msg_text = 'Invitation to incognito group';
+                        else
+                            msg_text = 'Invitation to public group';
+                    }
                     msg.get('private_invite') && (msg_text = 'Invitation to private chat');
                     if (this.contact.get('group_chat'))
                         msg_text = $('<i/>').text(msg_text);
@@ -57083,6 +60216,8 @@ define("xabber-chats", [],function () {
         },
 
         removeInvite: function (options) {
+            if (!this.account.server_features.get(Strophe.NS.REWRITE))
+                return;
             options || (options = {});
             let msgs = _.clone(this.model.messages.models);
             this.model.set({'last_archive_id': undefined, 'first_archive_id': undefined});
@@ -57121,7 +60256,7 @@ define("xabber-chats", [],function () {
               this.model = options.model;
               this.contact = options.contact;
               this.account = this.contact.account;
-              this.chat = this.account.chats.get(this.contact.hash_id);
+              this.chat = this.account.chats.getChat(this.contact);
               let color = this.account.settings.get('color');
               this.$el.attr('data-color', color);
               this.$search_form = this.$('.search-form-header');
@@ -57131,7 +60266,7 @@ define("xabber-chats", [],function () {
               this.last_msg_id = 0;
               this._scrolltop = this.getScrollTop();
               this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
-              this.chat_content = options.chat_content || this.account.chats.get(this.contact.hash_id).item_view.content;
+              this.chat_content = options.chat_content || this.chat.item_view.content;
               let wheel_ev = this.defineMouseWheelEvent();
               this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
               this.$('.back-to-bottom').click(this.backToBottom.bind(this));
@@ -57543,8 +60678,11 @@ define("xabber-chats", [],function () {
           },
 
           render: function () {
-              if (this.contact.get('group_chat'))
+              this.$el.closest('.chat-content-wrap').children('.chat-content').removeClass('with-before');
+              if (this.contact.get('group_chat')) {
+                  this.$el.addClass('hidden');
                   return;
+              }
               let subscription = this.contact.get('subscription'),
                   in_request = this.contact.get('subscription_request_in'),
                   out_request = this.contact.get('subscription_request_out');
@@ -57565,16 +60703,22 @@ define("xabber-chats", [],function () {
                   return;
               }
               this.$el.removeClass('hidden');
+              this.$el.closest('.chat-content-wrap').children('.chat-content').addClass('with-before');
+          },
+
+          hideElement: function () {
+              this.$el.addClass('hidden');
+              this.$el.closest('.chat-content-wrap').children('.chat-content').removeClass('with-before');
           },
 
           declineSubscription: function () {
               this.contact.declineSubscribe();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           allowSubscription: function () {
               this.contact.acceptRequest();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           addContact: function () {
@@ -57584,7 +60728,7 @@ define("xabber-chats", [],function () {
                   }.bind(this));
               else
                   this.sendAndAskSubscription();
-              this.$el.addClass('hidden');
+              this.hideElement();
           },
 
           sendAndAskSubscription: function () {
@@ -57594,7 +60738,7 @@ define("xabber-chats", [],function () {
 
           blockContact: function () {
               this.contact.blockRequest();
-              this.$el.addClass('hidden');
+              this.hideElement();
           }
 
       });
@@ -57616,7 +60760,8 @@ define("xabber-chats", [],function () {
             "keyup .messages-search-form": "keyupSearch",
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
-            "click .btn-retry-send-message": "retrySendMessage"
+            "click .btn-retry-send-message": "retrySendMessage",
+            "click .encryption-warning": "openDevicesWindow"
         },
 
         _initialize: function (options) {
@@ -57646,6 +60791,7 @@ define("xabber-chats", [],function () {
             this.model.messages.on("change:state", this.onChangedMessageState, this);
             this.model.messages.on("change:is_unread", this.onChangedReadState, this);
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
+            this.model.messages.on("change:trusted", this.onTrustedChanged, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
             this.contact.on("change:blocked", this.updateBlockedState, this);
             this.contact.on("change:group_chat", this.updateGroupChat, this);
@@ -57656,8 +60802,23 @@ define("xabber-chats", [],function () {
             this.account.dfd_presence.done(function () {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             }.bind(this));
+            this.updateGroupChat();
             return this;
         },
+
+          render: function () {
+              this.cancelSearch();
+              this.scrollToBottom();
+              this.onScroll();
+              this.updateContactStatus();
+              this.updatePinnedMessage();
+              this.subscription_buttons.render();
+          },
+
+          openDevicesWindow: function () {
+              let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+              peer.fingerprints.open();
+          },
 
         defineMouseWheelEvent: function () {
             if (!_.isUndefined(window.onwheel)) {
@@ -57676,19 +60837,17 @@ define("xabber-chats", [],function () {
             if (_.has(changed, 'image')) this.updateMyAvatar();
         },
 
+          onTrustedChanged: function (message) {
+              let trusted = message.get('trusted'),
+                  $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]');
+              (trusted === null) && (trusted = 'none');
+              $message.attr('data-trust', trusted);
+          },
+
         updateGroupChat: function () {
             this._loading_history = false;
             this.model.set('history_loaded', false);
             // this.loadLastHistory();
-        },
-
-        render: function () {
-            this.cancelSearch();
-            this.scrollToBottom();
-            this.onScroll();
-            this.updateContactStatus();
-            this.updatePinnedMessage();
-            this.subscription_buttons.render();
         },
 
         cancelSearch: function () {
@@ -57718,9 +60877,10 @@ define("xabber-chats", [],function () {
         },
 
         onChangedActiveStatus: function () {
-            this.sendChatState(this.model.get('active') ? 'active' : 'inactive');
+            let active = this.model.get('active');
+            this.sendChatState(active ? 'active' : 'inactive');
             if (this.contact.get('group_chat')) {
-                if (this.model.get('active'))
+                if (active)
                     this.contact.sendPresent();
                 else
                     this.contact.sendNotPresent();
@@ -57906,17 +61066,24 @@ define("xabber-chats", [],function () {
 
         MAMRequest: function (options, callback, errback) {
             var account = this.account,
+                is_fast = options.fast && account.fast_connection && account.fast_connection.connected,
+                conn = is_fast ? account.fast_connection : account.connection,
                 contact = this.contact,
                 messages = [], queryid = uuid(),
                 is_groupchat = contact.get('group_chat'), success = true, iq;
+            delete options.fast;
             if (is_groupchat)
-                iq = $iq({type: 'set', to: contact.get('jid')});
+                iq = $iq({type: 'set', to: contact.get('full_jid') || contact.get('jid')});
             else
                 iq = $iq({type: 'set'});
             iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                     .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                     .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                     .c('value').t(Strophe.NS.MAM).up().up();
+            if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
+                    .c('value').t(this.model.get('encrypted')).up().up();
+            }
             if (!is_groupchat)
                 iq.c('field', {'var': 'with'})
                     .c('value').t(this.model.get('jid')).up().up();
@@ -57929,7 +61096,7 @@ define("xabber-chats", [],function () {
             var deferred = new $.Deferred();
             account.chats.onStartedMAMRequest(deferred);
             deferred.done(function () {
-                var handler = account.connection.addHandler(function (message) {
+                var handler = conn.addHandler(function (message) {
                     if (is_groupchat == contact.get('group_chat')) {
                         var $msg = $(message);
                         if ($msg.find('result').attr('queryid') === queryid) {
@@ -57942,9 +61109,8 @@ define("xabber-chats", [],function () {
                     }
                     return true;
                 }, Strophe.NS.MAM);
-                account.sendIQ(iq,
-                    function (res) {
-                        account.connection.deleteHandler(handler);
+                var callb = function (res) {
+                        conn.deleteHandler(handler);
                         account.chats.onCompletedMAMRequest(deferred);
                         var $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
                         if ($fin.length && $fin.attr('queryid') === queryid) {
@@ -57953,14 +61119,17 @@ define("xabber-chats", [],function () {
                             callback && callback(success, messages, rsm);
                         }
                     },
-                    function (err) {
-                        account.connection.deleteHandler(handler);
+                    errb = function (err) {
+                        conn.deleteHandler(handler);
                         xabber.error("MAM error");
                         xabber.error(err);
                         account.chats.onCompletedMAMRequest(deferred);
                         errback && errback(err);
-                    }
-                );
+                    };
+                if (is_fast)
+                    account.sendFast(iq, callb, errb);
+                else
+                    account.sendIQ(iq, callb, errb);
             });
         },
 
@@ -57989,7 +61158,7 @@ define("xabber-chats", [],function () {
                                 this.contact.getMyInfo();
                         }
                         else {
-                            if (!this.contact.get('last_seen') && !this.contact.get('is_server'))
+                            if (!this.contact.get('last_seen') && !this.contact.get('server'))
                                 this.contact.getLastSeen();
                         }
                         if ((messages.length < query.max) && success) {
@@ -58051,8 +61220,9 @@ define("xabber-chats", [],function () {
                 return;
             }
             this.getMessageArchive({
-                max: xabber.settings.mam_messages_limit,
-                before: this.model.get('first_archive_id') || '' },
+                    fast: true,
+                    max: xabber.settings.mam_messages_limit,
+                    before: this.model.get('first_archive_id') || '' },
                 {previous_history: true
                 });
         },
@@ -58099,7 +61269,7 @@ define("xabber-chats", [],function () {
         },
 
         unpinMessage: function () {
-            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            var iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('pinned-message');
             this.account.sendIQ(iq, function () {}, function (error) {
@@ -58120,7 +61290,13 @@ define("xabber-chats", [],function () {
             if ($chat_state.length) {
                 if (!is_sender) {
                     let $subtype = $chat_state.children('subtype');
-                    this.showChatState($chat_state[0].tagName.toLowerCase(), $subtype.attr('type'), $subtype.attr('mime-type'));
+                    if ($subtype.attr('type') == 'encrypted') {
+                        var view = xabber.chats_view.child(`${this.contact.hash_id}:encrypted`);
+                        if (view && view.content) {
+                            view.content.showChatState($chat_state[0].tagName.toLowerCase());
+                        }
+                    } else
+                        this.showChatState($chat_state[0].tagName.toLowerCase(), $subtype.attr('type'), $subtype.attr('mime-type'));
                 }
             }
         },
@@ -58157,6 +61333,7 @@ define("xabber-chats", [],function () {
                 }
             } else if (state === 'paused') {
                 this.showChatState();
+                return;
             } else {
                 this.bottom.showChatNotification('');
                 this.chat_item.updateLastMessage();
@@ -58199,8 +61376,9 @@ define("xabber-chats", [],function () {
 
         onMessage: function (message) {
             this.updateMentions(message);
-            let scrolled_from_bottom = this.getScrollBottom();
             this.account.messages.add(message);
+            let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                scrolled_from_bottom = this.getScrollBottom();
             if (!_.isUndefined(message.get('is_accepted'))) {
                 this.model.set('is_accepted', false);
             }
@@ -58213,18 +61391,19 @@ define("xabber-chats", [],function () {
                     this.contact.trigger('update_participants');
             }
 
-            let is_scrolled_to_bottom = this.isScrolledToBottom(),
-                $message = this.addMessage(message);
+            let $message = this.addMessage(message);
 
             if (message.get('type') === 'file_upload') {
                 this.startUploadFile(message, $message);
             }
 
-            if (is_scrolled_to_bottom || message.get('submitted_here')) {
-                this.scrollToBottom();
-            } else {
-                this.updateScrollBar();
-                this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+            if (this.isVisible()) {
+                if (is_scrolled_to_bottom || message.get('submitted_here')) {
+                    this.scrollToBottom();
+                } else {
+                    this.updateScrollBar();
+                    this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+                }
             }
 
             if (!(message.get('synced_from_server') || message.get('is_archived'))) {
@@ -58310,6 +61489,62 @@ define("xabber-chats", [],function () {
             }
         },
 
+
+          decryptImages: function (message) {
+            let scrolled_from_bottom = this.getScrollBottom(),
+                unique_id = message.get('unique_id');
+              if (this.model.get('encrypted') || message.get('encrypted')) {
+                  let images = message.get('images') || [];
+                  if (images.length) {
+                      images.forEach((img) => {
+                          let source = img.sources[0];
+                          if (!img.iv && !img.key)
+                              return;
+                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                              if (result === null)
+                                  return;
+                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              if ($msg.length) {
+                                  $msg[0].src = result;
+                                  $msg[0].onload = function () {
+                                      if (!scrolled_from_bottom)
+                                          this.scrollToBottom();
+                                      else
+                                          this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                                  }.bind(this);
+                                  $msg.attr('data-mfp-src', result);
+                              }
+                          });
+                      });
+                  }
+                  let fwd_msgs = message.get('forwarded_message') || [];
+                  fwd_msgs.forEach((fwd_msg) => {
+                      let fwd_images = fwd_msg.get('images') || [],
+                          fwd_unique_id = fwd_msg.get('unique_id');
+                      fwd_images.forEach((img) => {
+                          let source = img.sources[0];
+                          if (!img.iv && !img.key)
+                              return;
+                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                              if (result === null)
+                                  return;
+                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
+                              if ($msg.length) {
+                                  $msg[0].src = result;
+                                  $msg[0].onload = function () {
+                                      if (!scrolled_from_bottom)
+                                          this.scrollToBottom();
+                                      else
+                                          this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                                  }.bind(this);
+                                  $msg.attr('data-mfp-src', result);
+                              }
+                          });
+                      });
+                  });
+              }
+          },
+
         addMessage: function (message) {
             if (message.get('auth_request')) {
                 // return;
@@ -58345,13 +61580,17 @@ define("xabber-chats", [],function () {
         },
 
         initMagnificPopup: function ($elem) {
+            var self = this;
             $elem.magnificPopup({
                 type: 'image',
                 closeOnContentClick: true,
                 fixedContentPos: true,
                 mainClass: 'mfp-no-margins mfp-with-zoom',
                 image: {
-                    verticalFit: true
+                    verticalFit: true,
+                    titleSrc: function(item) {
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>' + ' ' + item.el.attr('title');
+                    }
                 },
                 zoom: {
                     enabled: true,
@@ -58371,7 +61610,7 @@ define("xabber-chats", [],function () {
                 image: {
                     verticalFit: true,
                     titleSrc: function(item) {
-                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>';
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + self.model.messages.getFilename(item.el.attr('src')) + '</a>' + ' ' + item.el.attr('title');
                     }
                 },
                 gallery: {
@@ -58467,6 +61706,7 @@ define("xabber-chats", [],function () {
             }
             $message.prev('.chat-day-indicator').remove();
             $message.remove();
+            this.bottom.manageSelectedMessages();
             if (!this._clearing_history) {
                 this.updateScrollBar();
             }
@@ -58609,6 +61849,7 @@ define("xabber-chats", [],function () {
                 badge: badge,
                 from_id: from_id
             });
+            attrs.encrypted = attrs.encrypted || this.model.get('encrypted');
             if (attrs.type === 'file_upload') {
                 return $(templates.messages.file_upload(attrs));
             }
@@ -58625,7 +61866,8 @@ define("xabber-chats", [],function () {
             }
 
             var classes = [
-                attrs.forwarded_message && 'forwarding'
+                attrs.forwarded_message && 'forwarding',
+                (attrs.encrypted || this.model.get('encrypted')) && 'encrypted'
             ];
 
             let markup_body = utils.markupBodyMessage(message);
@@ -58635,6 +61877,9 @@ define("xabber-chats", [],function () {
                 message: markup_body,
                 classlist: classes.join(' ')
             })));
+
+            if (attrs.hasOwnProperty('is_trusted'))
+                $message.attr('data-trust', attrs.is_trusted);
 
             if (is_image) {
                 if (images.length > 1) {
@@ -58753,6 +61998,10 @@ define("xabber-chats", [],function () {
                             }.bind(this));
                         }
                     }
+                    if (fwd_msg.get('data_form')) {
+                        let data_form = utils.render_data_form(fwd_msg.get('data_form'));
+                        $f_message.find('.chat-msg-content').append(data_form);
+                    }
                     $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
@@ -58760,12 +62009,15 @@ define("xabber-chats", [],function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
+            if (attrs.encrypted || this.model.get('encrypted')) {
+                this.decryptImages(message);
+            }
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
 
         getDateIndicator: function (date) {
             var day_date = moment(date).startOf('day');
-            return $('<div class="chat-day-indicator one-line noselect" data-time="'+
+            return $('<div class="chat-day-indicator one-line noselect"' + (this.model.get('encrypted') ? (' data-trust="' + (this.bottom.$el.attr('data-trust') || this.bottom.$el.attr('data-contact-trust')) + '"') : "") + ' data-time="'+
                 day_date.format('x')+'">'+utils.pretty_date(day_date)+'</div>');
         },
 
@@ -58975,7 +62227,7 @@ define("xabber-chats", [],function () {
                 unique_id = message.get('unique_id'),
                 msg_id = message.get('msgid'),
                 stanza = $msg({
-                    from: this.account.jid,
+                    // from: this.account.jid,
                     to: this.model.get('jid'),
                     type: 'chat',
                     id: msg_id
@@ -59065,7 +62317,7 @@ define("xabber-chats", [],function () {
                         end: end_idx
                     });
                     file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
-                    stanza.c('file-sharing', {xmlns: Strophe.NS.OTB}).c('file');
+                    stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();
@@ -59075,7 +62327,9 @@ define("xabber-chats", [],function () {
                     file.description && stanza.c('desc').t(file.description).up();
                     stanza.up().c('sources');
                     file.sources.forEach(function (u) {
-                        stanza.c('uri').t(u).up()
+                        if (file.iv && file.key)
+                            u = u.replace(/^(https|http)/, 'aesgcm') + '#' + utils.ArrayBuffertoBase64(file.iv) + utils.ArrayBuffertoBase64(file.key);
+                        stanza.c('uri').t(u).up();
                     }.bind(this));
                     stanza.up().up().up();
                     file.voice && stanza.up();
@@ -59085,49 +62339,69 @@ define("xabber-chats", [],function () {
                 message.set({type: 'main'});
             }
 
+
             mutable_content.length && message.set({mutable_content: mutable_content});
 
-            this.account._pending_messages.push({chat_hash_id: this.contact.hash_id, unique_id: unique_id});
+            this.account._pending_messages.push({chat_hash_id: this.model.id, unique_id: unique_id});
 
             message.set('original_message', body);
             body && stanza.c('body').t(body).up();
             stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
+            message.set({xml: $(stanza.tree()).clone()[0]});
             if (message.get('state') === constants.MSG_ERROR) {
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
                 message.set('state', constants.MSG_PENDING);
             }
-            message.set({xml: stanza.tree()});
-            let msg_sending_timestamp = moment.now();
-            this.account.sendMsg(stanza, function () {
-                if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
-                    setTimeout(function () {
-                        if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
-                            message.set('state', constants.MSG_SENT);
-                        } else {
-                            this.account.connection.ping.ping(this.account.get('jid'), function () {
-                                (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
-                            }.bind(this));
-                            setTimeout(function () {
-                                if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
-                                    message.set('state', constants.MSG_ERROR);
-                            }.bind(this), 5000);
-                        }
-                    }.bind(this), 1000);
-                }
-                else {
-                    let _pending_time = 5, _interval = setInterval(function () {
-                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
-                            message.set('state', constants.MSG_ERROR);
-                            clearInterval(_interval);
-                        }
-                        else if (message.get('state') !== constants.MSG_PENDING)
-                            clearInterval(_interval);
-                        _pending_time += 10;
-                    }.bind(this), 10000);
-                }
-            }.bind(this));
+            if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
+                utils.dialogs.error('Too big xml-stanza');
+                this.removeMessage(message);
+                return;
+            }
+            if (message.get('encrypted') && this.account.omemo) {
+                this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
+                    if (msg) {
+                        stanza = msg.message;
+                        message.set('trusted', msg.is_trusted);
+                    }
+                    let msg_sending_timestamp = moment.now();
+                    this.account.sendFast(stanza, this.msgCallback.bind(this, msg_sending_timestamp, message));
+                });
+                return;
+            } else {
+                let msg_sending_timestamp = moment.now();
+                this.account.sendFast(stanza, this.msgCallback.bind(this, msg_sending_timestamp, message));
+            }
         },
+
+          msgCallback: function (msg_sending_timestamp, message) {
+              if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
+                  setTimeout(function () {
+                      if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                          message.set('state', constants.MSG_SENT);
+                      } else {
+                          this.account.connection.ping.ping(this.account.get('jid'), function () {
+                              (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
+                          }.bind(this));
+                          setTimeout(function () {
+                              if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                                  message.set('state', constants.MSG_ERROR);
+                          }.bind(this), 5000);
+                      }
+                  }.bind(this), 1000);
+              }
+              else {
+                  let _pending_time = 5, _interval = setInterval(function () {
+                      if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                          message.set('state', constants.MSG_ERROR);
+                          clearInterval(_interval);
+                      }
+                      else if (message.get('state') !== constants.MSG_PENDING)
+                          clearInterval(_interval);
+                      _pending_time += 10;
+                  }.bind(this), 10000);
+              }
+          },
 
         isImageType: function(type) {
             if (type.indexOf('image') != -1)
@@ -59170,6 +62444,7 @@ define("xabber-chats", [],function () {
                 mentions: options.mentions,
                 blockquotes: options.blockquotes,
                 markups: options.markup_references,
+                encrypted: this.model.get('encrypted'),
                 submitted_here: true,
                 forwarded_message: null
             };
@@ -59223,6 +62498,7 @@ define("xabber-chats", [],function () {
                     from_jid: this.account.get('jid'),
                     type: 'file_upload',
                     files: data,
+                    encrypted: this.model.get('encrypted'),
                     upload_service: http_upload_service.get('from'),
                     message: 'Uploading file',
                     submitted_here: true
@@ -59238,31 +62514,75 @@ define("xabber-chats", [],function () {
                                 image.height = data.height;
                                 image.width = data.width;
                             }
-                            new_files.push(image);
+                            if (data.encrypted_file)
+                                new_files.push(data.encrypted_file);
+                            else
+                                new_files.push(image);
                             file_counter++;
                             if (file_counter === files.length)
                                 deferred_all.resolve(new_files);
                         }.bind(this));
                     }.bind(this));
                     reader.onload = function (e) {
-                        if (file.type === 'image/svg+xml') {
-                            deferred.resolve();
+                        if (this.model.get('encrypted')) {
+                            this.encryptFile(e.target.result).then(function (encrypted) {
+                                let iv = encrypted.iv,
+                                    key = encrypted.keydata,
+                                    new_file = new File([encrypted.payload], file.name, {type: file.type});
+                                new_file.iv = iv;
+                                new_file.key = key;
+                                if (new_file.type === 'image/svg+xml') {
+                                    deferred.resolve({encrypted_file: new_file, iv: iv, key: key});
+                                } else {
+                                    var image_prev = new Image();
+                                    image_prev.onload = function () {
+                                        var height = this.height,
+                                            width = this.width;
+                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, iv: iv, key: key});
+                                    };
+                                    image_prev.src = e.target.result;
+                                }
+                            }.bind(this));
                         } else {
-                            var image_prev = new Image();
-                            image_prev.onload = function () {
-                                var height = this.height,
-                                    width = this.width;
-                                deferred.resolve({height: height, width: width});
-                            };
-                            image_prev.src = e.target.result;
+                            if (file.type === 'image/svg+xml') {
+                                deferred.resolve();
+                            } else {
+                                var image_prev = new Image();
+                                image_prev.onload = function () {
+                                    var height = this.height,
+                                        width = this.width;
+                                    deferred.resolve({height: height, width: width});
+                                };
+                                image_prev.src = e.target.result;
+                            }
                         }
-                    };
+                    }.bind(this);
                 }
                 else {
-                    new_files.push(file);
-                    file_counter++;
-                    if (file_counter === files.length)
-                        deferred_all.resolve(new_files);
+                    if (this.model.get('encrypted')) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            this.encryptFile(e.target.result).then(function (encrypted) {
+                                let iv = encrypted.iv,
+                                    key = encrypted.keydata,
+                                    encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                file.voice && (encrypted_file.voice = true);
+                                file.duration && (encrypted_file.duration = file.duration);
+                                encrypted_file.iv = iv;
+                                encrypted_file.key = key;
+                                new_files.push(encrypted_file);
+                                file_counter++;
+                                if (file_counter === files.length)
+                                    deferred_all.resolve(new_files);
+                            }.bind(this));
+                        }.bind(this);
+                        reader.readAsDataURL(file);
+                    } else {
+                        new_files.push(file);
+                        file_counter++;
+                        if (file_counter === files.length)
+                            deferred_all.resolve(new_files);
+                    }
                 }
             }.bind(this));
         },
@@ -59275,11 +62595,14 @@ define("xabber-chats", [],function () {
             $message.find('.progress').show();
             var files_count = 0;
             $(message.get('files')).each(function(idx, file) {
+                let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
+                enc_file.iv && (delete enc_file.iv);
+                enc_file.key && (delete enc_file.key);
                 var iq = $iq({type: 'get', to: message.get('upload_service')})
                         .c('request', {xmlns: Strophe.NS.HTTP_UPLOAD})
-                        .c('filename').t(file.name).up()
-                        .c('size').t(file.size).up()
-                        .c('content-type').t(file.type).up(),
+                        .c('filename').t(enc_file.name).up()
+                        .c('size').t(enc_file.size).up()
+                        .c('content-type').t(enc_file.type).up(),
                     deferred = new $.Deferred(), self = this;
                 this.account.sendIQ(iq,
                     function (result) {
@@ -59335,23 +62658,30 @@ define("xabber-chats", [],function () {
                         xhr.abort();
                     } else {
                         xhr.open("PUT", data.put_url, true);
-                        xhr.send(file);
+                        xhr.send(enc_file);
                     }
                 }.bind(this));
             }.bind(this));
         },
+
+          encryptFile: async function (file) {
+            return await utils.AES.encrypt(file);
+          },
 
         onFileUploaded: function (message, $message) {
             var files = message.get('files'),
                 self = this, is_audio = false,
                 images = [], files_ = [], body_message = "";
             $(files).each(function(idx, file_) {
-                var file_new_format = {
+                let file_new_format = {
                     name: file_.name,
                     type: file_.type,
                     size: file_.size,
+                    description: file_.description || '',
                     sources: [file_.url]
                 };
+                file_.iv && (file_new_format.iv = file_.iv);
+                file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
                 if (this.isImageType(file_.type)) {
@@ -59420,6 +62750,9 @@ define("xabber-chats", [],function () {
             this.initPopup($message);
             message.set('images', images);
             message.set('files', files_);
+            if ((message.get('encrypted') || this.model.get('encrypted')) && message.get('images').length) {
+                this.decryptImages(message);
+            }
             this.sendMessage(message);
             this.scrollToBottom();
         },
@@ -59452,7 +62785,7 @@ define("xabber-chats", [],function () {
                 imgContent.width = image.width;
             imgContent.src = image.sources[0];
             $(imgContent).addClass('uploaded-img popup-img');
-            $(imgContent).attr('data-mfp-src', image.sources[0]);
+            $(imgContent).attr({'data-mfp-src': image.sources[0], title: (image.description || '')});
             if (imgContent.height && imgContent.width) {
                 if (imgContent.width > maxWidth) {
                     imgContent.height = imgContent.height * (maxWidth/imgContent.width);
@@ -59489,6 +62822,12 @@ define("xabber-chats", [],function () {
             clearTimeout(this._chatstate_send_timeout);
             this.chat_state = false;
             let stanza = $msg({to: this.model.get('jid'), type: 'chat'}).c(state, {xmlns: Strophe.NS.CHATSTATES});
+            if (this.model.get('encrypted')) {
+                if (this.account.settings.get('encrypted_chatstates'))
+                    type = 'encrypted';
+                else
+                    return;
+            }
             type && stanza.c('subtype', {xmlns: Strophe.NS.EXTENDED_CHATSTATES, type: type});
             (state === 'composing') && (this.chat_state = true);
             this.account.sendMsg(stanza);
@@ -59638,15 +62977,26 @@ define("xabber-chats", [],function () {
             utils.copyTextToClipboard(files_links, 'Link copied to clipboard', 'ERROR: Link not copied to clipboard');
         },
 
-        showParticipantProperties: function (participant_id) {
-            let participant = this.contact.participants.get(participant_id);
-            if (!participant)
+        showParticipantProperties: function (participant_id, options) {
+            options = options || {};
+            let participant = this.contact.participants.get(participant_id),
+                participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
+            if (!participant) {
+                this.contact.getBlockedParticipants(function (response) {
+                    _.extend(options, {present: null, subscription: null});
+                    if ($(response).find(`query user:has(${participant_id})`).length)
+                        options.blocked = true;
+                    else
+                        options.blocked = false;
+                    participant = new xabber.Participant(options, {contact: this.contact});
+                    participant_properties_panel.open(participant, {});
+                }.bind(this));
                 return;
+            }
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
-            this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
             this.contact.membersRequest({id: participant_id}, function (response) {
                 let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
-                this.contact.participants.participant_properties_panel.open(participant, data_form);
+                participant_properties_panel.open(participant, data_form);
             }.bind(this));
         },
 
@@ -59654,7 +63004,23 @@ define("xabber-chats", [],function () {
             let $elem = $(ev.target);
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
-                xabber.openWindow($elem.attr('href'));
+                if ($elem.closest('.chat-message').hasClass('encrypted')) {
+                    let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                        uri = $elem.attr('href'),
+                        file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                    if (file && file.iv && file.key) {
+                        this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                            if (result === null)
+                                return;
+                            let download = document.createElement("a");
+                            download.href = result;
+                            download.download = file.name;
+                            download.click();
+                        });
+                        return;
+                    }
+                } else
+                    xabber.openWindow($elem.attr('href'));
             }
             if ($elem.hasClass('msg-delivering-state')) {
                 return;
@@ -59712,8 +63078,11 @@ define("xabber-chats", [],function () {
                 if ($elem.hasClass('circle-avatar')) {
                     let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
                     if (this.contact.get('group_chat')) {
-                        let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id');
-                        member_id && this.showParticipantProperties(member_id);
+                        let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id'),
+                            unique_id = (is_forwarded) ? $fwd_message.attr('data-uniqueid') : $msg.attr('data-uniqueid'),
+                            msg = this.model.messages.get(unique_id),
+                            user_info = msg && msg.get('user_info');
+                        member_id && this.showParticipantProperties(member_id, user_info);
                         return;
                     }
                     else if (from_jid === this.account.get('jid')) {
@@ -59753,9 +63122,24 @@ define("xabber-chats", [],function () {
                     let $audio_elem = $elem.closest('.link-file'),
                         f_url = $audio_elem.find('.file-link-download').attr('href');
                     $audio_elem.find('.mdi-play').removeClass('no-uploaded');
-                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
-                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
-                    this.prev_audio_message = $audio_elem[0];
+                    if ($elem.closest('.chat-message').hasClass('encrypted')) {
+                        let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                            uri = $elem.attr('href'),
+                            file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                        if (file && file.iv && file.key) {
+                            this.model.messages.decryptFile(f_url, file.iv, file.key).then((result) => {
+                                if (result === null)
+                                    return;
+                                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
+                                this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                                this.prev_audio_message = $audio_elem[0];
+                            });
+                        }
+                    } else {
+                        $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+                        this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                        this.prev_audio_message = $audio_elem[0];
+                    }
                     return;
                 }
 
@@ -59805,6 +63189,23 @@ define("xabber-chats", [],function () {
                 }
 
                 let processClick = function () {
+                    let $prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').last() : $msg.prevAll('.chat-message.selected').first();
+                    !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.nextAll('.chat-message.selected').last() : $msg.nextAll('.chat-message.selected').first());
+                    !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').first() : $msg.prevAll('.chat-message.selected').last());
+                    if ((xabber.shiftctrl_pressed || xabber.shift_pressed) && $prev_selected.length) {
+                        let $all_msgs = [], is_selected = $msg.hasClass('selected');
+                        if ($prev_selected.attr('data-time') < $msg.attr('data-time'))
+                            $all_msgs = $prev_selected.nextUntil($msg, '.chat-message:not(.system)');
+                        else
+                            $all_msgs = $msg.nextUntil($prev_selected, '.chat-message:not(.system)');
+                        xabber.shift_pressed && this.$('.chat-message').removeClass('selected');
+                        $prev_selected.switchClass('selected', !is_selected);
+                        $all_msgs.switchClass('selected', !is_selected);
+                        $msg.switchClass('selected', !is_selected);
+                        ev.preventDefault();
+                        this.bottom.manageSelectedMessages();
+                        return false;
+                    }
                     if (!no_select_message) {
                         $msg.switchClass('selected', !$msg.hasClass('selected'));
                         this.bottom.manageSelectedMessages();
@@ -60035,17 +63436,22 @@ define("xabber-chats", [],function () {
             this.account = options.account;
             this.mam_requests = 0;
             this.deferred_mam_requests = [];
-            this.account.contacts.on("add_to_roster", this.getChat, this);
             this.account.contacts.on("open_chat", this.openChat, this);
             this.account.contacts.on("open_mention", this.openMention, this);
             this.account.contacts.on("presence", this.onPresence, this);
             this.account.contacts.on("roster_push", this.onRosterPush, this);
         },
 
-        getChat: function (contact) {
-            var chat = this.get(contact.hash_id);
+        getChat: function (contact, identifier) {
+            var attrs = null,
+                id = identifier && `${contact.hash_id}:${identifier}`,
+                chat = id ? this.get(id) : this.get(contact.hash_id);
+            if (id)
+                attrs = {id};
+            if (identifier === 'encrypted')
+                attrs.type = identifier;
             if (!chat) {
-                chat = xabber.chats.create(null, {contact: contact});
+                chat = xabber.chats.create(attrs, {contact: contact});
                 this.add(chat);
                 contact.set('known', true);
             }
@@ -60055,7 +63461,7 @@ define("xabber-chats", [],function () {
         openChat: function (contact, options) {
             options = options || {};
             _.isUndefined(options.clear_search) && (options.clear_search = true);
-            var chat = this.getChat(contact);
+            var chat = this.getChat(contact, options.encrypted && 'encrypted');
             chat.trigger('open', {clear_search: options.clear_search});
         },
 
@@ -60068,6 +63474,14 @@ define("xabber-chats", [],function () {
         registerMessageHandler: function () {
             this.account.connection.deleteHandler(this._msg_handler);
             this._msg_handler = this.account.connection.addHandler(function (message) {
+                this.receiveMessage(message);
+                return true;
+            }.bind(this), null, 'message');
+        },
+
+        registerFastMessageHandler: function () {
+            this.account.fast_connection.deleteHandler(this._fast_msg_handler);
+            this._fast_msg_handler = this.account.fast_connection.addHandler(function (message) {
                 this.receiveMessage(message);
                 return true;
             }.bind(this), null, 'message');
@@ -60105,71 +63519,75 @@ define("xabber-chats", [],function () {
         receivePubsubMessage: function ($message) {
             var photo_id =  $message.find('info').attr('id'),
                 from_jid = Strophe.getBareJidFromJid($message.attr('from')),
-                node = $message.find('items').attr('node'),
-                member_id = this.parsePubSubNode(node),
-                contact = this.account.contacts.get(from_jid);
-            if (contact) {
-                if (member_id) {
-                    if (contact.my_info) {
-                        if ((member_id == contact.my_info.get('id')) && (photo_id == contact.my_info.get('avatar'))) {
-                            contact.trigger('update_my_info');
-                            return;
+                node = $message.find('items').attr('node');
+            if (node.indexOf(Strophe.NS.OMEMO) > -1)
+                return;
+            if (node.indexOf(Strophe.NS.PUBSUB_AVATAR_METADATA) > -1) {
+                let member_id = this.parsePubSubNode(node),
+                    contact = this.account.contacts.get(from_jid);
+                if (contact) {
+                    if (member_id) {
+                        if (contact.my_info) {
+                            if ((member_id == contact.my_info.get('id')) && (photo_id == contact.my_info.get('avatar'))) {
+                                contact.trigger('update_my_info');
+                                return;
+                            }
+                        }
+                        if (photo_id && (this.account.chat_settings.getHashAvatar(member_id) != photo_id)) {
+                            let member_node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + member_id;
+                            contact.getAvatar(photo_id, member_node, function (new_avatar) {
+                                this.account.chat_settings.updateCachedAvatars(member_id, photo_id, new_avatar);
+                                if (contact.my_info) {
+                                    if (member_id == contact.my_info.id) {
+                                        contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar});
+                                        contact.trigger('update_my_info');
+                                    }
+                                }
+                                let participant = contact.participants && contact.participants.get(member_id);
+                                if (participant) {
+                                    participant.set({avatar: photo_id, b64_avatar: new_avatar});
+                                    this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
+                                }
+                            }.bind(this));
                         }
                     }
-                    if (photo_id && (this.account.chat_settings.getHashAvatar(member_id) != photo_id)) {
-                        let member_node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + member_id;
-                        contact.getAvatar(photo_id, member_node, function (new_avatar) {
-                            this.account.chat_settings.updateCachedAvatars(member_id, photo_id, new_avatar);
-                            if (contact.my_info) {
-                                if (member_id == contact.my_info.id) {
-                                    contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar});
-                                    contact.trigger('update_my_info');
-                                }
-                            }
-                            let participant = contact.participants && contact.participants.get(member_id);
-                            if (participant) {
-                                participant.set({avatar: photo_id, b64_avatar: new_avatar});
-                                this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
-                            }
+                    else if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.PUBSUB_AVATAR) {
+                        if (!photo_id) {
+                            let image = Images.getDefaultAvatar(contact.get('name'));
+                            contact.cached_image = Images.getCachedImage(image);
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            contact.set('photo_hash', null);
+                            contact.set('image', image);
+                            contact.updateCachedInfo();
+                            return;
+                        }
+                        if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
+                            return;
+                        contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
+                            contact.cached_image = Images.getCachedImage(data_avatar);
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            contact.set('photo_hash', photo_id);
+                            contact.set('image', data_avatar);
+                            contact.updateCachedInfo();
                         }.bind(this));
                     }
                 }
-                else if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.PUBSUB_AVATAR) {
+                else if (from_jid === this.account.get('jid')) {
                     if (!photo_id) {
-                        let image = Images.getDefaultAvatar(contact.get('name'));
-                        contact.cached_image = Images.getCachedImage(image);
-                        xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: "", avatar: image, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
-                        contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
-                        contact.set('photo_hash', null);
-                        contact.set('image', image);
+                        let image = Images.getDefaultAvatar(this.account.get('name'));
+                        this.account.cached_image = Images.getCachedImage(image);
+                        let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: image};
+                        this.account.set(avatar_attrs);
+                        this.account.save(avatar_attrs);
                         return;
                     }
-                    if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
-                        return;
-                    contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
-                        contact.cached_image = Images.getCachedImage(data_avatar);
-                        xabber.cached_contacts_info.putContactInfo({jid: contact.get('jid'), hash: photo_id, avatar: data_avatar, name: contact.get('name'), avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
-                        contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
-                        contact.set('photo_hash', photo_id);
-                        contact.set('image', data_avatar);
+                    this.account.getAvatar(photo_id, function (data_avatar) {
+                        this.account.cached_image = Images.getCachedImage(data_avatar);
+                        let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
+                        this.account.set(avatar_attrs);
+                        this.account.save(avatar_attrs);
                     }.bind(this));
                 }
-            }
-            else if (from_jid === this.account.get('jid')) {
-                if (!photo_id) {
-                    let image = Images.getDefaultAvatar(this.account.get('name'));
-                    this.account.cached_image = Images.getCachedImage(image);
-                    let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: image};
-                    this.account.set(avatar_attrs);
-                    this.account.save(avatar_attrs);
-                    return;
-                }
-                this.account.getAvatar(photo_id, function (data_avatar) {
-                    this.account.cached_image = Images.getCachedImage(data_avatar);
-                    let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
-                    this.account.set(avatar_attrs);
-                    this.account.save(avatar_attrs);
-                }.bind(this));
             }
         },
 
@@ -60196,7 +63614,7 @@ define("xabber-chats", [],function () {
             var $message = $(message),
                 msg_from = Strophe.getBareJidFromJid($message.attr('from')),
                 $stanza_received = $message.find('received[xmlns="' + Strophe.NS.DELIVERY + '"]'),
-                $echo_msg = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"][type="echo"]').children('message');
+                $echo_msg = $message.children('x[xmlns="' + Strophe.NS.DELIVERY + '"]').children('message');
             if ($stanza_received.length) {
                 let stanza_id = $stanza_received.children('stanza-id').attr('id'),
                     origin_msg_id = $stanza_received.children('origin-id').first().attr('id');
@@ -60208,7 +63626,8 @@ define("xabber-chats", [],function () {
                     msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                     let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
                     if (pending_message) {
-                        this.account.chats.get(pending_message.chat_hash_id).setStanzaId(pending_message.unique_id, stanza_id);
+                        let chat = this.account.chats.get(pending_message.chat_hash_id);
+                        chat && chat.setStanzaId(pending_message.unique_id, stanza_id);
                         this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
                     }
                 }
@@ -60232,7 +63651,7 @@ define("xabber-chats", [],function () {
                         (token_idx > -1) && this.account.x_tokens_list.splice(token_idx, 1);
                     }
                 }.bind(this));
-                this.account.settings_right.updateXTokens();
+                this.account.settings_right && this.account.settings_right.updateXTokens();
                 return;
             }
 
@@ -60245,7 +63664,6 @@ define("xabber-chats", [],function () {
             contact && (chat = this.account.chats.getChat(contact));
 
             if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
-                // return this.attention();
                 if (!chat)
                     return;
                 return chat.messages.createSystemMessage({from_jid: msg_from, message: 'Attention was requested', attention: true});
@@ -60275,19 +63693,25 @@ define("xabber-chats", [],function () {
                 }
             }
             if ($message.find('retract-message').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+                let is_encrypted = $message.find('retract-message').attr('type') == 'encrypted';
+                !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
                 if (!chat)
                     return;
                 let $retracted_msg = $message.find('retract-message'),
                     retracted_msg_id = $retracted_msg.attr('id'),
+                    retract_version = $retracted_msg.attr('version'),
                     msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
                 if (msg_item) {
                     msg_item.set('is_unread', false);
                     chat.item_view.content.removeMessage(msg_item);
                     chat.item_view.updateLastMessage(chat.last_message);
                 }
-                if ($retracted_msg.attr('version') > chat.message_retraction_version)
-                    chat.message_retraction_version = $retracted_msg.attr('version');
+                if (retract_version > this.account.retraction_version) {
+                    if (chat.get('encrypted') && this.account.omemo)
+                        this.account.omemo.cacheRetractVersion(retract_version);
+                    else
+                        this.account.retraction_version = retract_version;
+                }
             }
             if ($message.find('retract-user').length) {
                 var $retracted_user_msgs = $message.find('retract-user'),
@@ -60301,7 +63725,7 @@ define("xabber-chats", [],function () {
                 chat.item_view.updateLastMessage(chat.last_message);
             }
             if ($message.find('retract-all').length) {
-                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+                !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('type') == 'encrypted' && 'encrypted'));
                 if (!chat)
                     return;
                 var all_messages = chat.messages.models;
@@ -60363,15 +63787,19 @@ define("xabber-chats", [],function () {
                 to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
                 from_jid = $message.attr('from') || options.from_jid;
 
+            if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
+                if (this.account.omemo)
+                    this.account.omemo.receiveChatMessage(message, options);
+                return;
+            }
+
             if ($message.find('invite').length) {
                 if (options.forwarded)
                     return;
             }
 
             if (!from_jid) {
-                xabber.warn('Message without "from" attribute');
-                xabber.warn(message);
-                return;
+                from_jid = this.account.get('jid');
             }
             let from_bare_jid = Strophe.getBareJidFromJid(from_jid),
                 is_sender = from_bare_jid === this.account.get('jid');
@@ -60413,6 +63841,8 @@ define("xabber-chats", [],function () {
                     if ($forwarded.length)
                         $message = $forwarded.children('message');
                     if ($carbons.find('request[xmlns="' + Strophe.NS.DELIVERY + '"][to="' + to_bare_jid + '"]').length)
+                        return;
+                    if (this.account.fast_connection && ($message.attr('from') === this.account.fast_connection.jid))
                         return;
                     return this.receiveChatMessage($message[0], _.extend(options, {
                         carbon_copied: true
@@ -60458,7 +63888,7 @@ define("xabber-chats", [],function () {
             }
 
             var contact = this.account.contacts.mergeContact(contact_jid),
-                chat = this.account.chats.getChat(contact),
+                chat = this.account.chats.getChat(contact, (options.encrypted || options.not_encrypted) && 'encrypted'),
                 stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
 
             if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
@@ -60474,6 +63904,9 @@ define("xabber-chats", [],function () {
                 if (!contact.get('in_roster'))
                     contact.pushInRoster();
             }
+
+            if (chat.contact.get('group_chat') && options.carbon_copied && !$message.children('[xmlns="'+Strophe.NS.CHAT_MARKERS+'"]').length)
+                return;
 
             return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
         },
@@ -60660,14 +64093,14 @@ define("xabber-chats", [],function () {
             var my_jid = this.account.resources.connection.jid,
                 name = this.$('input[name=chat_name]').val(),
                 chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
-                anonymous = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
+                privacy = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 searchable = this.$('.global-field .property-value').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
                 model = this.$('.membership-field .property-value').attr('data-value'),
                 iq = $iq({from: my_jid, type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                     .c('name').t(name).up()
-                    .c('privacy').t(anonymous).up()
+                    .c('privacy').t(privacy).up()
                     .c('index').t(searchable).up()
                     .c('description').t(description).up()
                     .c('membership').t(model).up();
@@ -60686,9 +64119,11 @@ define("xabber-chats", [],function () {
                         xabber.chats_view.updateScreenAllChats();
                         contact.sendPresent();
                         contact.trigger("open_chat", contact);
-                        let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
-                            .c('item', {jid: group_jid + '/' + moment.now()});
-                        this.account.sendIQ(iq_set_blocking);
+                        if (!(this.account.connection && this.account.connection.do_synchronization)) {
+                            let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                                .c('item', {jid: group_jid + '/' + moment.now()});
+                            this.account.sendIQ(iq_set_blocking);
+                        }
                     }.bind(this));
                 }.bind(this),
                 function () {
@@ -60916,7 +64351,7 @@ define("xabber-chats", [],function () {
                     selection.addClass('active');
                 }
                 if (selection.hasClass('roster-contact')) {
-                    view = xabber.accounts.get(selection.data('account')).chats.get(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')).hash_id);
+                    view = xabber.accounts.get(selection.data('account')).chats.getChat(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')));
                     view && (view = view.item_view);
                     view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                     selection.addClass('active');
@@ -60962,7 +64397,7 @@ define("xabber-chats", [],function () {
                     chat_item: view,
                     blocked: view.contact.get('blocked')
                 });
-                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
             }
@@ -60980,7 +64415,7 @@ define("xabber-chats", [],function () {
                 group_chats = chats.filter(chat => chat.contact.get('group_chat') && chat.get('timestamp') && !chat.contact.get('archived'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
                 this.onUpdatedScreen();
-            } 
+            }
             group_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
@@ -61008,6 +64443,7 @@ define("xabber-chats", [],function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && chat.get('timestamp') && !chat.contact.get('archived'));
+            this.$(`.omemo-item:not([data-id="${account.get('jid')}"])`).addClass('hidden');
             account_chats.forEach(function (chat) {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
@@ -61066,7 +64502,9 @@ define("xabber-chats", [],function () {
               this.updateColorScheme();
               this.updateGroupChats();
               this.updateIcon();
+              this.updateStatus();
               this.account.settings.on("change:color", this.updateColorScheme, this);
+              this.contact.on("change:status", this.updateStatus, this);
               this.contact.on("change:name", this.updateName, this);
           },
 
@@ -61077,6 +64515,14 @@ define("xabber-chats", [],function () {
           updateAvatar: function () {
               var image = this.contact.cached_image;
               this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+          },
+
+          updateStatus: function () {
+              let status = this.contact.get('status'),
+                  status_message = this.contact.getStatusMessage();
+              this.$('.contact-status').attr('data-status', status);
+              this.$('.chat-icon').attr('data-status', status);
+              this.contact.get('blocked') ? this.$('.contact-status-message').text('Contact blocked') : this.$('.contact-status-message').text(status_message);
           },
 
           updateGroupChats: function () {
@@ -61093,7 +64539,7 @@ define("xabber-chats", [],function () {
           updateIcon: function () {
               this.$('.chat-icon').addClass('hidden');
               let ic_name = this.contact.getIcon();
-              ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+              ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
           },
 
           updateColorScheme: function () {
@@ -61248,7 +64694,7 @@ define("xabber-chats", [],function () {
         onEnterPressed: function (selection) {
             let chat_item;
             if (selection.hasClass('roster-contact'))
-                chat_item = xabber.chats_view.child(this.account.contacts.get(selection.data('jid')).hash_id);
+                chat_item = this.account.chats.getChat(this.account.contacts.get(selection.data('jid'))).item_view;
             if (selection.hasClass('chat-item'))
                 chat_item = xabber.chats_view.child(selection.data('id'));
             chat_item && this.forwardTo(chat_item);
@@ -61350,11 +64796,11 @@ define("xabber-chats", [],function () {
 
         sendInvite: function (contact_jid) {
             let is_member_only = this.contact.get('group_info').model === 'member-only',
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                 .c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite'})
                 .c('jid').t(contact_jid).up()
                 .c('send').t(is_member_only).up()
-                .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat participants'));
+                .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + contact_jid + ' username shall be visible to group chat members'));
             this.account.sendIQ(iq,
                 function () {
                     !is_member_only && this.sendInviteMessage(contact_jid);
@@ -61384,9 +64830,9 @@ define("xabber-chats", [],function () {
                     type: 'chat',
                     id: uuid()
                 }).c('invite', {xmlns: Strophe.NS.GROUP_CHAT + '#invite', jid: this.contact.get('jid')})
-                    .c('reason').t((this.contact.get('group_info').anonymous === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other participants') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat participants')).up().up()
+                    .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? ( 'You are invited to incognito group chat. If you join it, you won\'t see real XMPP IDs of other members') : ('You are invited to group chat. If you accept, ' + jid_to + ' username shall be visible to group chat members')).up().up()
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
-                    .c('privacy').t(this.contact.get('group_info').anonymous).up().up()
+                    .c('privacy').t(this.contact.get('group_info').privacy).up().up()
                     .c('body').t(body).up();
             this.account.sendMsg(stanza);
         },
@@ -61502,6 +64948,10 @@ define("xabber-chats", [],function () {
             "click .btn-block-contact": "blockContact",
             "click .btn-unblock-contact": "unblockContact",
             "click .btn-export-history": "exportHistory",
+            "click .btn-show-fingerprints": "showFingerprints",
+            "click .btn-start-encryption": "startEncryptedChat",
+            "click .btn-open-encrypted-chat": "openEncryptedChat",
+            "click .btn-open-regular-chat": "openRegularChat",
             "click .btn-archive-chat": "archiveChat",
             "click .btn-call-attention": "callAttention",
             "click .btn-search-messages": "renderSearchPanel",
@@ -61516,9 +64966,11 @@ define("xabber-chats", [],function () {
             this.account = this.model.account;
             this.updateName();
             this.updateStatus();
+            this.updateEncrypted();
             this.updateAvatar();
             this.updateNotifications();
             this.updateArchiveButton();
+            this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("close_chat", this.closeChat, this);
             this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
@@ -61529,6 +64981,7 @@ define("xabber-chats", [],function () {
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
             this.contact.on("change:in_roster", this.updateMenu, this);
+            this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
         },
 
@@ -61545,6 +64998,14 @@ define("xabber-chats", [],function () {
             this.updateStatusMsg();
             this.updateGroupChatHead();
             return this;
+        },
+
+        updateEncrypted: function () {
+            this.$el.switchClass('encrypted', this.model.get('encrypted'));
+        },
+
+        updateEncryptedColor: function (encrypted) {
+            this.$el.attr('data-trust', encrypted);
         },
 
         updateName: function () {
@@ -61572,7 +65033,7 @@ define("xabber-chats", [],function () {
             let changed = this.contact.changed;
             if (_.has(changed, 'subscription_request_in') || _.has(changed, 'subscription_request_out') || _.has(changed, 'subscription') || _.has(changed, 'status_message'))
                 this.updateStatusMsg();
-            if (_.has(changed, 'private_chat') || _.has(changed, 'incognito_chat'))
+            if (_.has(changed, 'private_chat') || _.has(changed, 'incognito_chat') || _.has(changed, 'invitation'))
                 this.updateIcon();
         },
 
@@ -61584,12 +65045,16 @@ define("xabber-chats", [],function () {
 
         updateMenu: function () {
             var is_group_chat = this.contact.get('group_chat');
-            this.$('.btn-invite-users').showIf(is_group_chat);
-            this.$('.btn-call-attention').hideIf(is_group_chat);
+            this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') == 'both');
+            this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
+            this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+            this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
+            this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
             this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
-            this.$('.btn-delete-contact').showIf(this.contact.get('in_roster'));
+            this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
         },
 
         renderSearchPanel: function () {
@@ -61676,6 +65141,7 @@ define("xabber-chats", [],function () {
 
         getActiveScreen: function () {
             var active_screen = xabber.toolbar_view.$('.active');
+            this.$('.omemo-item').removeClass('hidden');
             if (active_screen.hasClass('archive-chats')) {
                 xabber.toolbar_view.showArchive();
                 return;
@@ -61717,10 +65183,12 @@ define("xabber-chats", [],function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').children('svg').html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         inviteUsers: function () {
+            if (!xabber.invite_panel)
+                xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
             xabber.invite_panel.open(this.account, this.contact);
         },
 
@@ -61774,19 +65242,43 @@ define("xabber-chats", [],function () {
         },
 
         deleteContact: function () {
-            this.contact.details_view.deleteContact();
+            this.contact.deleteWithDialog();
         },
 
         blockContact: function () {
-            this.contact.details_view.blockContact();
+            this.contact.blockWithDialog();
         },
 
         unblockContact: function () {
-            this.contact.details_view.unblockContact();
+            this.contact.unblockWithDialog();
         },
 
         exportHistory: function () {
             utils.callback_popup_message('History export is not implemented yet', 2000);
+        },
+
+        showFingerprints: function () {
+            if (!this.account.omemo)
+                return;
+            let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+            peer.fingerprints.open();
+        },
+
+        startEncryptedChat: function () {
+            this.account.chats.openChat(this.contact, {encrypted: true});
+            let chat = this.account.chats.get(this.contact.hash_id + ':encrypted');
+            chat.set('timestamp', moment.now());
+            chat.item_view.updateLastMessage();
+        },
+
+        openEncryptedChat: function () {
+            this.model.set('opened', true);
+            this.account.chats.openChat(this.contact, {encrypted: true});
+        },
+
+        openRegularChat: function () {
+            this.model.set('opened', true);
+            this.account.chats.openChat(this.contact);
         }
     });
 
@@ -61817,10 +65309,13 @@ define("xabber-chats", [],function () {
             "click .delete-message": "deleteMessages",
             "click .close-message-panel": "resetSelectedMessages",
             "click .mention-item": "inputMention",
-            "click .format-text": "updateMarkupPanel"
+            "click .format-text": "updateMarkupPanel",
+            "click .btn-manage-devices": "openDevicesWindow"
         },
 
         _initialize: function (options) {
+            this.view = options.content;
+            this.model = this.view.model;
             let rich_textarea_wrap = this.$('.rich-textarea-wrap');
             let bindings = {
                 enter: {
@@ -61912,13 +65407,11 @@ define("xabber-chats", [],function () {
                     ]
                 },
                 formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
-                placeholder: 'Write a message...',
+                placeholder: (this.model.get('encrypted')) ? 'Write an encrypted message...' : 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
-            this.view = options.content;
-            this.model = this.view.model;
             this.contact = this.view.contact;
             this.account = this.view.account;
             this.fwd_messages = [];
@@ -61927,6 +65420,7 @@ define("xabber-chats", [],function () {
             this.updateAvatar();
             this.quill.on("text-change", this.onChangedText, this);
             this.account.on("change:image", this.updateAvatar, this);
+            this.account.on('trusting_updated', this.updateEncrypted, this);
             this.contact.on("change:blocked", this.onBlockedUpdate, this);
             this.contact.on("reply_selected_messages", this.replyMessages, this);
             this.contact.on("forward_selected_messages", this.forwardMessages, this);
@@ -61936,6 +65430,7 @@ define("xabber-chats", [],function () {
             this.contact.on("pin_selected_message", this.pinMessage, this);
             this.contact.on('update_my_info', this.updateInfoInBottom, this);
             this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
+            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
@@ -62045,6 +65540,7 @@ define("xabber-chats", [],function () {
             this.$('.blocked-msg').showIf(options.blocked);
             this.$el.switchClass('chat-bottom-blocked-wrap', options.blocked);
             this.updateAvatar();
+            this.updateEncrypted();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
             this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
             this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
@@ -62059,9 +65555,88 @@ define("xabber-chats", [],function () {
                 this.$('.account-role').hide();
             }
             this.focusOnInput();
-            xabber.chat_body.updateHeight();
             this.manageSelectedMessages();
+            xabber.chat_body.updateHeight();
             return this;
+        },
+
+        updateEncrypted: function () {
+            this.$el.children('.preloader-wrapper').detach();
+            this.$el.children('.omemo-disabled').detach();
+            this.view.$el.removeClass('encrypted');
+            this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('encryption-warning').html("");
+            this.$el.attr('data-trust', null);
+            this.$el.attr('data-contact-trust', null);
+            this.$el.find('.warning-wrap').detach();
+            if (!this.model.get('encrypted'))
+                return;
+            if (this.account.omemo) {
+                this.$el.addClass('loading');
+                this.$el.prepend(env.templates.contacts.preloader());
+                this.account.omemo.checkOwnFingerprints().then((is_trusted) => {
+                    if (is_trusted == 'none' || is_trusted == 'error') {
+                        let is_scrolled_bottom = this.view.isScrolledToBottom();
+                        this.$el.attr('data-trust', is_trusted);
+                        this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_trusted);
+                        this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_trusted);
+                        this.view.$el.attr('data-trust', is_trusted);
+                        this.$el.removeClass('loading');
+                        this.$el.children('.preloader-wrapper').detach();
+                        if (is_trusted == 'none')
+                            this.$el.prepend(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for your account. If it wasn\'t you, it looks like you might have a problem.'}));
+                        else
+                            this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your device you previously trusted have changed. This <i>should not</i> be happening, ever. You are likely being hacked, or your software is severely malfunctioning.'}));
+                        xabber.chat_body.updateHeight();
+                        is_scrolled_bottom && this.view.scrollToBottom();
+                        this.account.omemo.checkContactFingerprints(this.contact);
+                        this.focusOnInput();
+                    } else {
+                        this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
+                            let is_scrolled_bottom = this.view.isScrolledToBottom();
+                            this.$el.removeClass('loading');
+                            this.$el.children('.preloader-wrapper').detach();
+                            if (is_contact_trusted === 'nil') {
+                                this.$el.prepend($('<div class="warning-wrap no-fingerprints">No fingerprints yet</div>'));
+                                this.$el.attr('data-contact-trust', is_contact_trusted);
+                                return;
+                            }
+                            if (is_contact_trusted === 'error') {
+                                this.$el.attr('data-contact-trust', is_contact_trusted);
+                                this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your partner\'s device that you previously trusted have changed. This <i>should not</i> be happening, ever. He is likely being hacked, or his software is severely malfunctioning.'}));
+                            } else {
+                                if (is_contact_trusted === 'none') {
+                                    this.view.$el.addClass('encrypted');
+                                    this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.content_encryption_warning({message: 'Your chat partner has unverified devices with published encryption keys. Please, review the list of devices and perform verification of digital fingerprints. It is <u>very</u> important.'}));
+                                }
+                                this.$el.attr('data-contact-trust', is_contact_trusted);
+                            }
+                            this.view.$el.attr('data-trust', is_contact_trusted);
+                            this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
+                            this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
+                            xabber.chat_body.updateHeight();
+                            is_scrolled_bottom && this.view.scrollToBottom();
+                            this.focusOnInput();
+                        });
+                    }
+                });
+            } else {
+                this.$el.addClass('loading');
+                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text('OMEMO disabled'));
+            }
+        },
+
+        openDevicesWindow: function () {
+            if (this.account.omemo) {
+                if (this.$el.attr('data-trust') !== undefined) {
+                    if (!this.omemo_devices)
+                        this.omemo_devices = new xabber.Fingerprints({model: this.account.omemo});
+                    this.omemo_devices.open();
+                } else if (this.$el.attr('data-contact-trust') !== undefined) {
+                    let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+                    peer.fingerprints.open();
+                }
+            } else
+                utils.dialogs.error('OMEMO encryption is disabled');
         },
 
         onBlockedUpdate: function () {
@@ -62183,6 +65758,10 @@ define("xabber-chats", [],function () {
                 this.$('.last-emoticons').show();
             }
         },
+
+        changeEncryption: function () {
+            this.model.set('encrypted', !this.model.get('encrypted'));
+        },
         
         getParticipantsList: function () {
             let list = [];
@@ -62270,12 +65849,12 @@ define("xabber-chats", [],function () {
 
         showAccountSettings: function () {
             if (this.contact.get('group_chat')) {
-                this.contact.participants.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact.details_view.participants});
+                let participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
                 if (this.contact.my_info && this.contact.my_rights) {
-                    this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                    participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                 } else
                     this.contact.getMyInfo(function () {
-                        this.contact.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                        participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                     }.bind(this));
             } else {
                 this.account.showSettings();
@@ -62316,7 +65895,6 @@ define("xabber-chats", [],function () {
                         else
                             this.displaySend();
                         $rich_textarea.flushRichTextarea();
-                        this.view.sendChatState('active');
                     }
                 }
                 if (ev.keyCode === constants.KEY_SPACE) {
@@ -62349,7 +65927,7 @@ define("xabber-chats", [],function () {
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentionsList(mention_text);
                             } else {
-                                this.contact.details_view.participants.participantsRequest(function () {
+                                this.contact.membersRequest({version: 0}, function () {
                                     this.updateMentionsList(mention_text);
                                 }.bind(this));
                             }
@@ -62608,78 +66186,108 @@ define("xabber-chats", [],function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                text = $rich_textarea.getTextFromRichTextarea().trim();
+                text = $rich_textarea.getTextFromRichTextarea();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
                 var emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
-            this.quill.getContents().forEach(function (content) {
-                if (content.attributes) {
-                    let content_attrs = [],
-                        start_idx = content_concat.length,
-                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
-                    for (let attr in content.attributes)
-                        (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
-                    if (content_attrs.indexOf('mention') > -1) {
-                        let mention_idx = content_attrs.indexOf('mention'),
-                            is_gc = this.contact.get('group_chat'),
-                            target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
-                        content_attrs.splice(mention_idx, mention_idx + 1);
-                        target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
-                        mentions.push({
+            if (text.length >= constants.STANZA_MAX_SIZE) {
+                utils.dialogs.error('Too big xml-stanza');
+                $rich_textarea.flushRichTextarea();
+                return;
+            }
+            if (text.length) {
+                this.quill.getContents().forEach(function (content) {
+                    if (content.attributes) {
+                        let content_attrs = [],
+                            start_idx = content_concat.length,
+                            end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
+                        for (let attr in content.attributes)
+                            (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
+                        if (content_attrs.indexOf('mention') > -1) {
+                            let mention_idx = content_attrs.indexOf('mention'),
+                                is_gc = this.contact.get('group_chat'),
+                                target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
+                            content_attrs.splice(mention_idx, mention_idx + 1);
+                            target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
+                            mentions.push({
+                                start: start_idx,
+                                end: end_idx,
+                                target: target,
+                                is_gc: is_gc
+                            });
+                        }
+                        if (content.attributes.blockquote) {
+                            if (content_concat.length) {
+                                Array.from(content.insert).forEach(function (ins) {
+                                    let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
+                                        quote_end_idx = content_concat.length;
+                                    blockquotes.push({
+                                        marker: constants.QUOTE_MARKER,
+                                        start: quote_start_idx,
+                                        end: quote_end_idx + constants.QUOTE_MARKER.length
+                                    });
+                                    text = Array.from(_.escape(text));
+
+                                    if (quote_start_idx === quote_end_idx) {
+                                        text[quote_start_idx - 1] += constants.QUOTE_MARKER;
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER;
+                                    }
+                                    else {
+                                        text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
+                                    }
+                                    (quote_end_idx > text.length) && (quote_end_idx = text.length);
+                                    text[quote_end_idx - 1] += '\n';
+
+                                    text = _.unescape(text.join(""));
+                                    content_concat = Array.from(content_concat.join(""));
+
+                                    markup_references.forEach(function (markup_ref) {
+                                        if (markup_ref.start >= quote_start_idx) {
+                                            markup_ref.start += constants.QUOTE_MARKER.length;
+                                            markup_ref.end += constants.QUOTE_MARKER.length;
+                                        }
+                                    }.bind(this));
+
+                                    content_concat = content_concat.concat(Array.from(_.escape(ins)));
+                                }.bind(this))
+                            }
+                        }
+                        content_attrs.length && markup_references.push({
                             start: start_idx,
                             end: end_idx,
-                            target: target,
-                            is_gc: is_gc
+                            markup: content_attrs
                         });
                     }
-                    if (content.attributes.blockquote) {
-                        if (content_concat.length) {
-                            Array.from(content.insert).forEach(function (ins) {
-                                let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
-                                    quote_end_idx = content_concat.length;
-                                blockquotes.push({
-                                    marker: constants.QUOTE_MARKER,
-                                    start: quote_start_idx,
-                                    end: quote_end_idx + constants.QUOTE_MARKER.length
-                                });
-                                text = Array.from(_.escape(text));
-
-                                if (quote_start_idx === quote_end_idx) {
-                                    text[quote_start_idx - 1] += constants.QUOTE_MARKER;
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER;
-                                }
-                                else {
-                                    text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
-                                }
-                                (quote_end_idx > text.length) && (quote_end_idx = text.length);
-                                text[quote_end_idx - 1] += '\n';
-
-                                text = _.unescape(text.join(""));
-                                content_concat = Array.from(content_concat.join(""));
-
-                                markup_references.forEach(function (markup_ref) {
-                                    if (markup_ref.start >= quote_start_idx) {
-                                        markup_ref.start += constants.QUOTE_MARKER.length;
-                                        markup_ref.end += constants.QUOTE_MARKER.length;
-                                    }
-                                }.bind(this));
-
-                                content_concat = content_concat.concat(Array.from(_.escape(ins)));
-                            }.bind(this))
-                        }
+                    if (content.insert && content.insert.emoji) {
+                        content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
                     }
-                    content_attrs.length && markup_references.push({start: start_idx, end: end_idx, markup: content_attrs});
-                }
-                if (content.insert && content.insert.emoji) {
-                    content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
-                }
-                else if (content.attributes && content.attributes.blockquote) {}
-                else
-                    content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
-            }.bind(this));
+                    else if (content.attributes && content.attributes.blockquote) {
+                    }
+                    else
+                        content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
+                }.bind(this));
+            }
+            let start_length = text.length;
+            text = text.trimStart();
+            if (start_length > text.length) {
+                let delta = start_length - text.length;
+                mentions.forEach((mention) => {
+                    mention.start -= delta;
+                    mention.end -= delta;
+                });
+                markup_references.forEach((markup_reference) => {
+                    markup_reference.start -= delta;
+                    markup_reference.end -= delta;
+                });
+                blockquotes.forEach((blockquote) => {
+                    blockquote.start -= delta;
+                    blockquote.end -= delta;
+                });
+            }
+            text = text.trimEnd();
             $rich_textarea.flushRichTextarea();
             this.quill.focus();
             this.displayMicrophone();
@@ -62691,7 +66299,6 @@ define("xabber-chats", [],function () {
                 this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
-            this.view.sendChatState('active');
             xabber.chats_view.clearSearch();
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
@@ -62836,23 +66443,25 @@ define("xabber-chats", [],function () {
                 $message_actions.find('.pin-message-wrap').showIf(this.contact.get('group_chat')).switchClass('non-active', ((length !== 1) && this.contact.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.contact.get('blocked'));
                 $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.contact.get('blocked'));
-                this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
+                !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {
-                this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
+                !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
                 this.focusOnInput();
             }
         },
 
         pinMessage: function () {
+            if (!this.model.get('active'))
+                return;
             if (this.$('.pin-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
                 pinned_msg = this.messages_arr.get($msg.data('uniqueid')),
-                msg_text = pinned_msg.get('stanza_id');
+                msg_id = pinned_msg.get('stanza_id');
             this.resetSelectedMessages();
-            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('jid')})
+            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
-                .c('pinned-message').t(msg_text);
+                .c('pinned-message').t(msg_id);
             this.account.sendIQ(iq, function () {},
                 function (error) {
                     if ($(error).find('not-allowed').length)
@@ -62861,6 +66470,8 @@ define("xabber-chats", [],function () {
         },
 
         copyMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
@@ -62881,14 +66492,13 @@ define("xabber-chats", [],function () {
                 markups = text_markups.markup_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')})
-                .c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id})
-                .c('message');
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+                $message = $build('message').attrs({xmlns: undefined});
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
                     gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end);
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
-                    .c('forwarded', {xmlns: 'urn:xmpp:forward:0'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: (groupchat_ref ? (fwd.start - gc_length) : fwd.start), end: (groupchat_ref ? (fwd.end - gc_length) : fwd.end), type: 'mutable'})
+                    .c('forwarded', {xmlns: Strophe.NS.FORWARD})
                     .c('delay', {
                         xmlns: 'urn:xmpp:delay',
                         stamp: fwd_msg.get('time')
@@ -62896,27 +66506,39 @@ define("xabber-chats", [],function () {
                 forwarded_body += original_body.slice(fwd.start, fwd.end);
             }.bind(this));
             markups.forEach(function (markup) {
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + forwarded_body.length, end: markup.end + forwarded_body.length, type: 'decoration'});
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: markup.start + forwarded_body.length, end: markup.end + forwarded_body.length, type: 'decoration'});
                 for (let idx in markup.markup)
-                    iq.c(markup.markup[idx], {xmlns: Strophe.NS.MARKUP}).up();
-                iq.up();
+                    $message.c(markup.markup[idx], {xmlns: Strophe.NS.MARKUP}).up();
+                $message.up();
             }.bind(this));
             blockquotes.forEach(function (blockquote) {
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + forwarded_body.length, end: blockquote.end + forwarded_body.length, type: 'decoration'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + forwarded_body.length, end: blockquote.end + forwarded_body.length, type: 'decoration'})
                     .c('quote', {xmlns: Strophe.NS.MARKUP}).up().up();
             }.bind(this));
             mentions.forEach(function (mention) {
                 let mention_attrs = {xmlns: Strophe.NS.MARKUP};
                 mention.is_gc && (mention_attrs = Strophe.NS.GROUP_CHAT);
-                iq.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + forwarded_body.length, end: mention.end + forwarded_body.length, type: 'decoration'})
+                $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + forwarded_body.length, end: mention.end + forwarded_body.length, type: 'decoration'})
                     .c('mention', mention_attrs).t(mention.target).up().up();
             }.bind(this));
-            iq.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
+            $message.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
             this.unsetForwardedMessages();
-            this.account.sendIQ(iq);
+            if (this.model.get('encrypted')) {
+                let decrypted_msg = $message.tree().innerHTML;
+                this.account.omemo.encrypt(this.contact, $message).then((msg) => {
+                    iq.cnode(msg.message.tree());
+                    this.account.omemo.cached_messages.putMessage(this.contact, stanza_id, decrypted_msg);
+                    this.account.sendIQ(iq);
+                });
+            } else {
+                iq.cnode($message.tree());
+                this.account.sendIQ(iq);
+            }
         },
 
         showEditPanel: function () {
+            if (!this.model.get('active'))
+                return;
             if (this.$('.edit-message-wrap').hasClass('non-active'))
                 return;
             let $msg = this.content_view.$('.chat-message.selected').first(),
@@ -62927,6 +66549,8 @@ define("xabber-chats", [],function () {
         },
 
         deleteMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [],
                 my_msgs = 0,
@@ -62937,7 +66561,7 @@ define("xabber-chats", [],function () {
                 msg.isSenderMe() && my_msgs++;
             }.bind(this));
             if (this.account.server_features.get(Strophe.NS.REWRITE) || this.contact.get('group_chat')) {
-                (!this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
+                (!this.contact.get('group_chat') && my_msgs == $msgs.length && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
                     name: 'symmetric_deletion',
                     checked: false,
                     text: 'Delete for all'
@@ -62954,12 +66578,13 @@ define("xabber-chats", [],function () {
                 }.bind(this));
             }
             else {
-                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Message" + (msgs.length > 1) ? "s" : "" +" will be deleted only locally.").fontcolor('#E53935'),
+                utils.dialogs.ask("Delete messages", "Are you sure you want to <b>delete " + msgs.length + " message" + ((msgs.length > 1) ? "s" : "") + "</b>?" + ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Message" + ((msgs.length > 1) ? "s" : "") +" will be deleted only locally.").fontcolor('#E53935'),
                     dialog_options, {ok_button_text: 'delete locally'}).done(function (res) {
                     if (!res) {
                         this._clearing_history = false;
                         return;
                     }
+                    this.resetSelectedMessages();
                     msgs.forEach(function (item) { this.view.removeMessage(item); }.bind(this))
                 }.bind(this));
             }
@@ -62994,6 +66619,8 @@ define("xabber-chats", [],function () {
         },
 
         replyMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
@@ -63005,6 +66632,8 @@ define("xabber-chats", [],function () {
         },
 
         forwardMessages: function () {
+            if (!this.model.get('active'))
+                return;
             let $msgs = this.content_view.$('.chat-message.selected'),
                 msgs = [];
             $msgs.each(function (idx, item) {
@@ -63012,11 +66641,13 @@ define("xabber-chats", [],function () {
                 msg && msgs.push(msg);
             }.bind(this));
             this.resetSelectedMessages();
+            if (!xabber.forward_panel)
+                xabber.forward_panel = new xabber.ForwardPanelView({ model: xabber.opened_chats });
             xabber.forward_panel.open(msgs, this.account);
         },
 
         showChatNotification: function (message, is_colored) {
-            if (!this.view.$('.chat-notification').hasClass('msgs-counter')) {
+            if (!this.view.$('.chat-notification').hasClass('msgs-counter') && !this.view.$('.chat-notification').hasClass('encryption-warning')) {
                 this.view.$('.chat-notification').switchClass('hidden', !message).text(message)
                     .switchClass('text-color-300', is_colored);
             }
@@ -63148,6 +66779,36 @@ define("xabber-chats", [],function () {
         }
     });
 
+    xabber.CachedChats = Backbone.ModelWithDataBase.extend({
+        putChat: function (value, callback) {
+            this.database.put('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        getChat: function (value, callback) {
+            this.database.get('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        getAllChats: function (callback) {
+            this.database.get_all('chats_items', null, function (response_value) {
+                callback && callback(response_value || []);
+            });
+        },
+
+        removeChat: function (value, callback) {
+            this.database.remove('chats_items', value, function (response_value) {
+                callback && callback(response_value);
+            });
+        },
+
+        clearDataBase: function () {
+            this.database.clear_database('roster_items');
+        }
+    });
+
     xabber.Account.addInitPlugin(function () {
         this.chat_settings = new xabber.ChatSettings({id: 'chat-settings'}, {
             account: this,
@@ -63162,6 +66823,34 @@ define("xabber-chats", [],function () {
     });
 
     xabber.Account.addConnPlugin(function () {
+        this.cached_chats = new xabber.CachedChats(null, {
+            name:'cached-chats-list-' + this.get('jid'),
+            objStoreName: 'chats_items',
+            primKey: 'jid'
+        });
+
+        this.cached_chats.on("database_opened", () => {
+            /*this.cached_chats.getAllChats((chats) => {
+                chats.forEach((chat) => {
+                    let is_encrypted = chat.jid.indexOf(':encrypted') == chat.jid.length - ':encrypted'.length,
+                        jid = is_encrypted ? (chat.jid.slice(0, chat.jid.length - ':encrypted'.length)) : chat.jid,
+                        contact = this.contacts.mergeContact(jid);
+                    if (this.chats.get(contact.hash_id))
+                        return;
+                    let created_chat = this.chats.getChat(contact, is_encrypted && 'encrypted'),
+                        last_message = chat.last_message;
+                    if (typeof(last_message) !== 'string')
+                        return;
+                    created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
+                    if (last_message) {
+                        this.chats.receiveMessage(Strophe.xmlHtmlNode(last_message).documentElement);
+                    } else {
+                        created_chat.item_view.updateEmptyChat();
+                    }
+                });
+            });*/
+        });
+
         let timestamp = this.last_msg_timestamp || this.disconnected_timestamp;
         this.chats.registerMessageHandler();
         this.chats.each(function (chat) {
@@ -63176,17 +66865,37 @@ define("xabber-chats", [],function () {
 
         this.connection.deleteTimedHandler(this._get_msg_handler);
         this._get_msg_handler = this.connection.addTimedHandler(60000, function () {
-            if (this.connection && !this.connection.handlers.find(h => !h.ns && h.name === 'message')) {
+            if (this.connection && !this.connection.handlers.find(h => !h.ns && !h.options.encrypted && h.name === 'message')) {
                 let last_msg_timestamp = this.last_msg_timestamp;
                 this.chats.registerMessageHandler();
                 this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000});
             }
             return true;
         }.bind(this));
+        if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_view) {
+            this.omemo_enable_view = new xabber.OMEMOEnableView({account: this});
+        }
+    }, true, true);
+
+    xabber.Account.addFastConnPlugin(function () {
+        this.chats.registerFastMessageHandler();
     }, true, true);
 
     xabber.once("start", function () {
-
+        ["keydown"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return !((e.ctrlKey || e.metaKey) && e.keyCode == constants.KEY_SHIFT || e.shiftKey && e.keyCode == constants.KEY_CTRL || e.keyCode == constants.KEY_SHIFT);
+                }
+            });
+        });
+        ["keyup"].forEach((event) => {
+            window.addEventListener(event, (e) => {
+                document.onselectstart = function() {
+                    return true;
+                }
+            });
+        });
         this.chats = new this.Chats;
         this.chats.addCollection(this.opened_chats = new this.OpenedChats);
         this.chats.addCollection(this.closed_chats = new this.ClosedChats);
@@ -63202,13 +66911,10 @@ define("xabber-chats", [],function () {
                 this.ChatBottomContainer);
         this.chat_placeholder = this.right_panel.addChild('chat_placeholder',
                 this.ChatPlaceholderView);
-        this.forward_panel = new this.ForwardPanelView({ model: this.opened_chats });
-
-        this.invite_panel = new this.InvitationPanelView({ model: this.opened_chats });
-
-        this.add_group_chat_view = new this.AddGroupChatView();
 
         this.on("add_group_chat", function (attrs) {
+            if (!this.add_group_chat_view)
+                this.add_group_chat_view = new this.AddGroupChatView();
             this.add_group_chat_view.show(attrs);
         }, this);
 
@@ -63444,9 +67150,9 @@ define("xabber-searching", [],function () {
                 this.account.sendIQ(request_iq, function (iq_response) {
                     var $iq_response = $(iq_response),
                         description = $iq_response.find('field[var="description"] value').text(),
-                        anonymous = $iq_response.find('field[var="anonymous"] value').text(),
+                        privacy = $iq_response.find('field[var="anonymous"] value').text(),
                         membership = $iq_response.find('field[var="model"] value').text(),
-                        chat_properties = {jid: jid, name: name, anonymous: anonymous, description: description, membership: membership};
+                        chat_properties = {jid: jid, name: name, privacy: privacy, description: description, membership: membership};
                     this.more_info_view = this.addChild('groupchat_properties', xabber.MoreInfoView,
                         {model: this, chat_properties: chat_properties, el: this.$('.searching-more')[0]})
                 }.bind(this));
@@ -63474,7 +67180,13 @@ define("xabber-searching", [],function () {
             joinChat: function () {
                 let contact = this.account.contacts.mergeContact(this.chat_properties.jid);
                 contact.set('group_chat', true);
-                contact.invitation.joinGroupChat();
+                contact.acceptRequest();
+                contact.pushInRoster(null, function () {
+                    contact.askRequest();
+                    contact.getMyInfo();
+                    contact.sendPresent();
+                }.bind(this));
+                contact.trigger("open_chat", contact);
             }
         });
 
@@ -63998,6 +67710,14 @@ define("xabber-ui", [],function () {
 
     xabber.once("start", function () {
         $(window).on("keydown", function (ev) {
+            if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL) {
+                this.shift_pressed = null;
+                this.shiftctrl_pressed = true;
+                ev.preventDefault();
+            } else if (ev.keyCode == constants.KEY_SHIFT) {
+                this.shift_pressed = true;
+                ev.preventDefault();
+            }
             let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
                 if (xabber.body.$el.siblings('#modals').children().length)
@@ -64036,6 +67756,14 @@ define("xabber-ui", [],function () {
                 }
             }
             }.bind(this));
+        $(window).on("keyup", function (ev) {
+            if (!(ev.shiftKey && ev.ctrlKey))
+                this.shiftctrl_pressed = null;
+            if (ev.shiftKey && !ev.ctrlKey)
+                this.shift_pressed = true;
+            if (!ev.shiftKey)
+                this.shift_pressed = null;
+        }.bind(this));
 
         this.updateLayout = function (options) {
             options || (options = {});
@@ -64163,6 +67891,7 @@ define("xabber-ui", [],function () {
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
+            path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_participant_messages = new this.ViewPath('contact.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
@@ -64213,6 +67942,9 @@ define("xabber-ui", [],function () {
                     chat_bottom: path_chat_bottom
                 };
             }
+            /*if (options.right === 'enable_encryption') {
+                return { details: path_enable_view };
+            }*/
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };
             }
@@ -64227,6 +67959,9 @@ define("xabber-ui", [],function () {
                     chat_body: path_chat_body,
                     chat_bottom: path_chat_bottom
                 };
+            }
+            if (options.right === 'enable_encryption' || options.omemo_item) {
+                return { details: path_enable_view };
             }
         };
 
@@ -64248,6 +67983,1940 @@ define("xabber-ui", [],function () {
   };
 });
 
+define("xabber-omemo", [],function () {
+    return function (xabber) {
+        var env = xabber.env,
+            constants = env.constants,
+            utils = env.utils,
+            $ = env.$,
+            templates = env.templates.base,
+            Strophe = env.Strophe,
+            _ = env._,
+            KeyHelper = libsignal.KeyHelper,
+            SignalProtocolAddress = libsignal.SignalProtocolAddress,
+            SessionBuilder = libsignal.SessionBuilder,
+            SessionCipher = libsignal.SessionCipher;
+
+        xabber.Peer = Backbone.Model.extend({
+            idAttribute: 'jid',
+
+            initialize: function (attrs, options) {
+                attrs = attrs || {};
+                this.account = options.account;
+                this.devices = {};
+                this.store = this.account.omemo.store;
+                this.fingerprints = new xabber.Fingerprints({model: this});
+                this.updateDevices(attrs.devices);
+                this.set({
+                    jid: attrs.jid
+                });
+            },
+
+            updateDevices: function (devices) {
+                if (!devices)
+                    return;
+                for (let d in this.devices) {
+                    if (!devices[d]) {
+                        this.account.omemo.removeSession('session' + this.devices[d].address.toString());
+                        delete this.devices[d];
+                    }
+                }
+                for (let d in devices) {
+                    let device = this.getDevice(d),
+                        label = devices[d].label;
+                    label && device.set('label', label);
+                }
+            },
+
+            getDevicesNode: async function () {
+                if (!this._pending_devices) {
+                    this._pending_devices = true;
+                    this._dfd_devices = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), function (cb) {
+                            this.updateDevices((this.account.background_connection || this.account.connection).omemo.parseUserDevices($(cb)));
+                            this._pending_devices = false;
+                            this._dfd_devices.resolve();
+                            resolve();
+                        }.bind(this), function () {
+                            this._pending_devices = false;
+                            this._dfd_devices.resolve();
+                            resolve();
+                        });
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_devices.done(() => {
+                            resolve();
+                        });
+                    });
+                }
+            },
+
+            encrypt: async function (message) {
+                let enc_promises = [],
+                    aes = await utils.AES.encrypt(message),
+                    is_trusted = true;
+
+                if (!_.keys(this.devices).length)
+                    await this.getDevicesNode();
+                for (let device in this.devices) {
+                    enc_promises.push(this.devices[device].encrypt(aes.keydata));
+                }
+
+                for (let device in this.account.omemo.own_devices) {
+                    enc_promises.push(this.account.omemo.own_devices[device].encrypt(aes.keydata));
+                }
+
+                let keys = await Promise.all(enc_promises);
+
+                keys = keys.filter(key => key !== null);
+
+                for (let device_id in this.devices) {
+                    let device = this.devices[device_id];
+                    if (device.get('ik') === null)
+                        continue;
+                    if (device.get('trusted') === null)
+                        is_trusted = 'error';
+                    if (is_trusted && device.get('trusted') === undefined)
+                        is_trusted = 'none';
+                }
+
+                return {
+                    keys: keys,
+                    iv: aes.iv,
+                    payload: aes.payload,
+                    is_trusted: is_trusted
+                };
+            },
+
+            decrypt: async function (deviceId, ciphertext, preKey) {
+                let device = this.getDevice(deviceId);
+
+                return device.decrypt(ciphertext, preKey);
+            },
+
+            getDevice: function (id) {
+                if (!this.devices[id]) {
+                    this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.store});
+                }
+
+                return this.devices[id];
+            }
+        });
+
+        xabber.Peers = Backbone.Collection.extend({
+            model: xabber.Peer,
+
+            initialize: function (models, options) {
+                this.collections = [];
+                this.on("add", _.bind(this.updateInCollections, this, 'add'));
+                this.on("change", _.bind(this.updateInCollections, this, 'change'));
+            },
+
+            addCollection: function (collection) {
+                this.collections.push(collection);
+            },
+
+            updateInCollections: function (event, contact) {
+                _.each(this.collections, function (collection) {
+                    collection.update(contact, event);
+                });
+            }
+        });
+
+        xabber.Fingerprints = xabber.BasicView.extend({
+            className: 'modal main-modal fingerprints-wrap',
+            template: templates.fingerprints,
+            ps_selector: '.fingerprints-content',
+            ps_settings: {theme: 'item-list'},
+
+            events: {
+                'click .btn-trust': "trustDevice",
+                'click .btn-ignore': "ignoreDevice",
+                'click .btn-delete': "deleteDevice",
+                "click .set-label + div": "editLabel",
+                'click .btn-cancel': "close"
+            },
+
+            _initialize: function () {
+                if (this.model.own_devices) {
+                    this.account = this.model.account;
+                    this.omemo = this.model;
+                    this.jid = this.account.get('jid');
+                    this.is_own_devices = true;
+                } else {
+                    this.account = this.model.account;
+                    this.omemo = this.account.omemo;
+                    this.jid = this.model.get('jid');
+                }
+            },
+
+            open: function () {
+                let name = "";
+                if (this.is_own_devices)
+                    name = this.account.get('name');
+                else {
+                    let contact = this.account.contacts.get(this.jid);
+                    name = contact ? contact.get('name') : this.jid;
+                }
+                this.$('.header').text(`${name} fingerprints`);
+                this.data.set('visible', true);
+                this.show();
+                this.$('div.fingerprints-content').html(env.templates.contacts.preloader());
+                if (this.is_own_devices)
+                    this.renderOwnDevices();
+                else
+                    this.renderDevices();
+            },
+
+            renderDevices: function () {
+                this.model.getDevicesNode().then(() => {
+                    let devices_count = _.keys(this.model.devices).length;
+                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
+                    this.updateFingerprints(this.model.devices);
+                });
+                this.updateOwnFingerprint();
+            },
+
+            renderOwnDevices: function () {
+                let devices_count = _.keys(this.model.own_devices).length;
+                this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
+                this.updateFingerprints(this.model.own_devices);
+                this.updateOwnFingerprint();
+            },
+
+            render: function () {
+                this.$el.openModal({
+                    complete: function () {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }.bind(this)
+                });
+            },
+
+            editLabel: function () {
+                this.$('.set-label').removeClass('hidden');
+                this.$('.set-label').focus();
+                let saveLabel = function (ev) {
+                    let label = ev.target.value.trim();
+                    this.saveLabel(label);
+                }.bind(this);
+                this.$('.set-label')[0].onblur = saveLabel;
+                this.$('input.set-label')[0].onkeydown = function (ev) {
+                    if (ev.keyCode == constants.KEY_ENTER)
+                        saveLabel(ev);
+                }.bind(this);
+            },
+
+            saveLabel: function (label) {
+                this.$('.set-label').addClass('hidden');
+                if (label == this.account.settings.get('device_label_text'))
+                    return;
+                this.account.settings.save('device_label_text', label);
+                (this.account.background_connection || this.account.connection).omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                    this.updateOwnFingerprint();
+                }.bind(this));
+            },
+
+            updateFingerprints: async function (devices) {
+                let counter = 0,
+                    devices_count = _.keys(devices).length,
+                    dfd = new $.Deferred(),
+                    $container = this.$('div.fingerprints-content');
+                dfd.done((f_count) => {
+                    if (!f_count)
+                        $container.html($('<div class="empty-table">No fingerprints yet</div>'));
+                    else
+                        this.$('.dropdown-button').dropdown({
+                            inDuration: 100,
+                            outDuration: 100,
+                            constrainWidth: false,
+                            hover: false,
+                            container: this.$('.fingerprints-content')[0],
+                            alignment: 'left'
+                        });
+                    $container.find('.preloader-wrapper').detach();
+                });
+                for (var device_id in devices) {
+                    if (device_id == this.omemo.get('device_id')) {
+                        counter++;
+                        if (devices_count == counter)
+                            dfd.resolve($container.find('div.row').length);
+                        continue;
+                    }
+                    let device = devices[device_id];
+                    if (device.get('ik')) {
+                        let options = {},
+                            f = device.generateFingerprint(),
+                            fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
+                            is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                        is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
+                        $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
+                        counter++;
+                        if (devices_count == counter)
+                            dfd.resolve($container.find('div.row').length);
+                    }
+                    else {
+                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
+                            let $iq = $(iq),
+                                $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                                ik = $bundle.find(`ik`).text();
+                            if (ik) {
+                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                let options = {},
+                                    f = device.generateFingerprint(),
+                                    fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
+                                    is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                                is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
+                                $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
+                            }
+                            counter++;
+                            if (devices_count == counter)
+                                dfd.resolve($container.find('div.row').length);
+                        }.bind(this), function () {
+                            counter++;
+                            if (devices_count == counter)
+                                dfd.resolve($container.find('div.row').length);
+                        }.bind(this));
+                    }
+                }
+            },
+
+            updateOwnFingerprint: async function () {
+                this.$('.this-device-content').html("");
+                let omemo = this.account.omemo;
+                if (omemo) {
+                    let device = omemo.own_devices[omemo.get('device_id')];
+                    if (device) {
+                        if (device.get('fingerprint')) {
+                            this.$('.this-device-content').append(this.addRow(device.id, device.get('label'), null, device.get('fingerprint')));
+                        } else if (device.get('ik')) {
+                            device.set('fingerprint', device.generateFingerprint());
+                            this.$('.this-device-content').append(this.addRow(device.id, device.get('label'), null, device.get('fingerprint')));
+                        } else {
+                            device.getBundle().then(({pk, spk, ik}) => {
+                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                let fingerprint = device.generateFingerprint();
+                                if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
+                                    device.set('fingerprint', fingerprint);
+                            });
+                        }
+                    } else {
+                        omemo.store.getIdentityKeyPair().then((ik) => {
+                            let pubKey = ik.pubKey;
+                            if (pubKey.byteLength == 33)
+                                pubKey.slice(1);
+                            let fingerprint = Array.from(new Uint8Array(ik)).map(b => b.toString(16).padStart(2, "0")).join("");
+                            this.$('.this-device-content').append(this.addRow(omemo.get('device_id'), this.account.settings.get('device_label_text'), null, fingerprint));
+                        });
+                    }
+
+                }
+            },
+
+            close: function () {
+                var deferred = new $.Deferred();
+                this.$el.closeModal({ complete: function () {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                        deferred.resolve();
+                    }.bind(this)});
+                return deferred.promise();
+            },
+
+            trustDevice: function (ev) {
+                let $target = $(ev.target).closest('div.row'),
+                    fingerprint = $target.find('.fingerprint').text().replace(/ /g, ""),
+                    is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
+                    device_id = Number($target.find('div.device-id').text());
+                $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
+                this.omemo.updateFingerprints(this.jid, device_id, fingerprint, true);
+                let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
+                if (device && is_trusted != 'trusted') {
+                    if (is_trusted === 'error')
+                        $target.find('.old-fingerprint').detach();
+                    device.set('trusted', true);
+                    device.is_session_initiated = false;
+                    device.preKeys = null;
+                    this.account.trigger('trusting_updated');
+                }
+            },
+
+            ignoreDevice: function (ev) {
+                let $target = $(ev.target).closest('div.row'),
+                    fingerprint = $target.find('.fingerprint').text().replace(/ /g, ""),
+                    is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
+                    device_id = Number($target.find('div.device-id').text());
+                $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
+                this.omemo.updateFingerprints(this.jid, device_id, fingerprint, false);
+                let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
+                if (device && is_trusted != 'ignore') {
+                    if (is_trusted === 'error')
+                        $target.find('.old-fingerprint').detach();
+                    device.set('trusted', false);
+                    device.is_session_initiated = false;
+                    device.preKeys = null;
+                    this.account.trigger('trusting_updated');
+                }
+            },
+
+            addRow: function (id, label, trust, fingerprint, options) {
+                options = options || {};
+                let delete_button = this.is_own_devices ? true : false,
+                    edit_setting = id == this.omemo.get('device_id'),
+                    old_fingerprint = options.old_fingerprint;
+                fingerprint = fingerprint.match(/.{1,8}/g).join(" ");
+                old_fingerprint && (old_fingerprint = old_fingerprint.match(/.{1,8}/g).join(" "));
+                let $row = templates.fingerprint_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint});
+                return $row;
+            },
+
+            deleteDevice: function (ev) {
+                let $target = $(ev.target).closest('div.row'),
+                    device_id = Number($target.find('div.device-id').text());
+                utils.dialogs.ask("Delete device", `Do you really want to delete device ${device_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
+                    if (result) {
+                        $target.detach();
+                        delete this.model.own_devices[device_id];
+                        let conn = this.account.connection;
+                        if (conn && conn.omemo) {
+                            delete conn.omemo.devices[device_id];
+                            conn.omemo.publishDevice(null, null, function () {
+                                $target.detach();
+                            }.bind(this));
+                            conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
+                        }
+                    }
+                }.bind(this));
+            },
+        });
+
+        xabber.Bundle = Backbone.Model.extend({
+            initialize: async function (attrs, options) {
+                this.preKeys = [];
+                this.model = options.model;
+                this.store = options.store;
+                if (this.model.get('identityKey'))
+                    this.getIdentity();
+                else
+                    await this.generateIdentity();
+               await this.getPreKeys();
+               if (this.model.get('resend_bundle')) {
+                   this.model.publishBundle();
+                   this.set('resend_bundle', false);
+               }
+            },
+
+            generateIdentity: function () {
+                return Promise.all([
+                    KeyHelper.generateIdentityKeyPair(),
+                    KeyHelper.generateRegistrationId(),
+                ]).then((result) => {
+                    let identityKey = result[0],
+                        registrationId = result[1];
+                    this.store.put('identityKey', identityKey);
+                    this.store.put('registrationId', registrationId);
+                    this.cacheIdentity(identityKey, registrationId);
+                });
+            },
+
+            getIdentity: function () {
+                let identityKey = JSON.parse(this.model.get('identityKey')),
+                    registrationId = this.model.get('registrationId'),
+                    pubKey = utils.fromBase64toArrayBuffer(identityKey.pubKey),
+                    privKey = utils.fromBase64toArrayBuffer(identityKey.privKey);
+                this.store.put('identityKey', {pubKey: pubKey, privKey: privKey});
+                this.store.put('registrationId', registrationId);
+            },
+
+            cacheIdentity: function (identityKey, registrationId) {
+                let pubKey = utils.ArrayBuffertoBase64(identityKey.pubKey),
+                    privKey = utils.ArrayBuffertoBase64(identityKey.privKey);
+                this.model.save('identityKey', JSON.stringify({pubKey: pubKey, privKey: privKey}));
+                this.model.save('registrationId', registrationId);
+            },
+
+            generatePreKeys: async function () {
+                let preKeysPromises = [];
+                for (let i = 1; i <= constants.PREKEYS_COUNT; i++) {
+                    preKeysPromises.push(this.generatePreKey(i));
+                }
+
+                preKeysPromises.push(this.generateSignedPreKey(1));
+
+                return await Promise.all(preKeysPromises);
+            },
+
+            getSignedPreKey: async function () {
+                let spk = this.model.get('signedPreKey');
+                if (spk) {
+                    let pubKey = utils.fromBase64toArrayBuffer(spk.keyPair.pubKey),
+                        privKey = utils.fromBase64toArrayBuffer(spk.keyPair.privKey),
+                        signature = utils.fromBase64toArrayBuffer(spk.signature),
+                        keyPair = {pubKey, privKey},
+                        keyId = spk.keyId;
+                    return {keyPair, keyId, signature};
+                }
+                else {
+                    return await this.generateSignedPreKey(this.preKeys[0].keyId || 1);
+                }
+            },
+
+            getPreKeys: async function () {
+                let prekeys = this.model.prekeys.getAll();
+                if (Object.keys(prekeys).length >= constants.MIN_PREKEYS_COUNT) {
+                    for (let p in prekeys) {
+                        let pk = prekeys[p],
+                            id = pk.id,
+                            prekey = JSON.parse(pk.key),
+                            priv_pk = utils.fromBase64toArrayBuffer(prekey.privKey),
+                            pub_pk = utils.fromBase64toArrayBuffer(prekey.pubKey),
+                            key_pair = {pubKey: pub_pk, privKey: priv_pk};
+                        this.preKeys.push({keyId: id, keyPair: key_pair});
+                        this.store.storePreKey(id, key_pair);
+                    }
+                    this.getUsedPreKeys();
+                    let spk = await this.getSignedPreKey();
+                    this.preKeys.push(spk);
+                    this.store.storeSignedPreKey(spk.keyId, spk.keyPair);
+                }
+                else {
+                    this.generatePreKeys().then((prekeys) => {
+                        this.preKeys = prekeys;
+                        this.getUsedPreKeys();
+                    });
+                }
+            },
+
+            getUsedPreKeys: function () {
+                let prekeys = this.model.own_used_prekeys.getAll();
+                if (Object.keys(prekeys).length) {
+                    for (let p in prekeys) {
+                        let pk = prekeys[p],
+                            id = pk.id,
+                            prekey = JSON.parse(pk.key),
+                            privKey = utils.fromBase64toArrayBuffer(prekey.privKey),
+                            pubKey = utils.fromBase64toArrayBuffer(prekey.pubKey);
+                        this.store.storePreKey(id, {pubKey, privKey});
+                    }
+                }
+            },
+
+            generatePreKey: async function (id) {
+                let preKey = await KeyHelper.generatePreKey(id);
+                this.store.storePreKey(id, preKey.keyPair);
+
+                return preKey;
+            },
+
+            generateSignedPreKey: async function (id) {
+                let identity = await this.store.getIdentityKeyPair();
+                let signedPreKey = await KeyHelper.generateSignedPreKey(identity, id);
+
+                this.store.storeSignedPreKey(id, signedPreKey.keyPair);
+                this.cacheSignedPreKey(signedPreKey);
+
+                return signedPreKey;
+            },
+
+            cacheSignedPreKey: function (spk) {
+                let pubKey = utils.ArrayBuffertoBase64(spk.keyPair.pubKey),
+                    privKey = utils.ArrayBuffertoBase64(spk.keyPair.privKey),
+                    signature = utils.ArrayBuffertoBase64(spk.signature),
+                    keyPair = {pubKey, privKey},
+                    keyId = spk.keyId,
+                    converted_spk = {keyPair, keyId, signature};
+                this.model.save('signedPreKey', converted_spk);
+            }
+
+        });
+        
+        xabber.Prekeys = Backbone.Model.extend({
+            initialize: function (options) {
+                this.name = options.name;
+                this.model = options.model;
+            },
+
+            get: function (id) {
+                let prekeys = _.clone(this.model.get(this.name));
+                return prekeys[id];
+            },
+
+            put: function (prekey) {
+                if (!prekey.id)
+                    return;
+                let prekeys = _.clone(this.model.get(this.name));
+                prekeys[prekey.id] = prekey;
+                this.model.save(this.name, prekeys);
+            },
+
+            getAll: function () {
+                let prekeys = _.clone(this.model.get(this.name));
+                return prekeys;
+            },
+
+            remove: function (id) {
+                if (!id)
+                    return;
+                let prekeys = _.clone(this.model.get(this.name));
+                delete prekeys[id];
+                this.model.save(this.name, prekeys);
+            }
+        });
+
+        xabber.Device = Backbone.Model.extend({
+            initialize: function (attrs, options) {
+                this.account = options.account;
+                this.id = attrs.id;
+                this.jid = attrs.jid;
+                this.store = options.store;
+                this.preKeys = null;
+                this.address = new SignalProtocolAddress(attrs.jid, attrs.id);
+            },
+
+            generateFingerprint: function () {
+                let identityKey = this.get('ik');
+                if (!identityKey)
+                    return;
+                if (identityKey.byteLength == 33)
+                    identityKey = identityKey.slice(1);
+                return Array.from(new Uint8Array(identityKey)).map(b => b.toString(16).padStart(2, "0")).join("");
+            },
+
+            closeSession: function (reason) {
+                (this.account.background_connection || this.account.connection).omemo.sendOptOut({
+                    to: this.jid,
+                    reason: reason
+                }, function () {
+
+                }.bind(this));
+            },
+
+            getBundle: async function () {
+                if (!this._pending_bundle) {
+                    this._pending_bundle = true;
+                    this._dfd_bundle = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
+                            let $iq = $(iq),
+                                $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                                $spk = $bundle.find('spk'),
+                                spk = {id: $spk.attr('id'), key: $spk.text(), signature: $bundle.find('spks').text()},
+                                ik = $bundle.find(`ik`).text();
+                            this.preKeys = [];
+                            if (!ik)
+                                this.set('ik', null);
+                            $bundle.find('prekeys pk').each((i, pk) => {
+                                let $pk = $(pk);
+                                this.preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                            });
+                            this._pending_bundle = false;
+                            let pk = this.getRandomPreKey();
+                            if (!pk) {
+                                this._dfd_bundle.reject();
+                                reject();
+                            }
+                            else {
+                                this._dfd_bundle.resolve({pk, spk, ik});
+                                resolve({pk, spk, ik});
+                            }
+                        }.bind(this), function () {
+                            this.set('ik', null);
+                            this.preKeys = [];
+                            this._dfd_bundle.reject();
+                            this._pending_bundle = false;
+                            reject();
+                        }.bind(this));
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_bundle.done(({pk, spk, ik}) => {
+                            resolve({pk, spk, ik});
+                        });
+                        this._dfd_bundle.fail(() => {
+                            reject();
+                        });
+                    });
+                }
+            },
+
+            getRandomPreKey: function () {
+                let min = 0,
+                    max = this.preKeys.length - 1,
+                    i = Math.floor(min + Math.random() * (max + 1 - min));
+                return this.preKeys[i];
+            },
+
+            decrypt: async function (cipherText, preKey) {
+                try {
+                    let sessionCipher = new SessionCipher(this.store, this.address), plainText;
+
+                    if (preKey)
+                        plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
+                    else {
+                        if (!this.store.hasSession(this.address.toString())) {
+                            let session = this.getCachedSession();
+                            if (session)
+                                await this.store.storeSession(this.address.toString(), session);
+                        }
+                        plainText = await sessionCipher.decryptWhisperMessage(cipherText, 'binary');
+                    }
+
+                    return plainText;
+                }
+                catch (e) {
+                    return null;
+                }
+            },
+
+            getPreKey: function () {
+                let pk = this.account.omemo.used_prekeys.get(String(this.id));
+                return pk;
+            },
+
+            getCachedSession: function () {
+                return this.account.omemo.getSession('session' + this.address.toString());
+            },
+
+            encrypt: async function (plainText) {
+                try {
+                    if (this.get('trusted') === false && (this.id != this.account.omemo.get('device_id')))
+                        return null;
+                    if (!this.store.hasSession(this.address.toString()) || !this.is_session_initiated) { // this.preKeys ??
+                        if (this.preKeys && !this.preKeys.length)
+                            return null;
+                        this.is_session_initiated = true;
+                        let s = await this.initSession();
+                        if (!s)
+                            return null;
+                    }
+
+                    let session = this.getSession(),
+                        ciphertext = await session.encrypt(plainText);
+
+                    return {
+                        preKey: ciphertext.type === 3,
+                        ciphertext: ciphertext,
+                        deviceId: this.address.getDeviceId()
+                    };
+                } catch (e) {
+                    console.log('Error:', e);
+                    console.warn('Could not encrypt data for device with id ' + this.address.getDeviceId());
+
+                    return null;
+                }
+            },
+
+            initSession: async function () {
+                let {pk, spk, ik} = await this.getBundle(),
+                    cached_pk = this.getPreKey(),
+                    id = this.id;
+                if (cached_pk) {
+                    if (!spk || spk && JSON.stringify(spk) == JSON.stringify(cached_pk.spk) && JSON.stringify(ik) == JSON.stringify(cached_pk.ik))
+                        pk = cached_pk.pk;
+                    else
+                        this.account.omemo.used_prekeys.put({id, pk, spk, ik});
+                }
+                else
+                    this.account.omemo.used_prekeys.put({id, pk, spk, ik});
+                this.set({'pk': utils.fromBase64toArrayBuffer(pk.key), 'ik': utils.fromBase64toArrayBuffer(ik)});
+                this.fingerprint = this.generateFingerprint();
+                let trusted = this.account.omemo.isTrusted(this.jid, id, this.fingerprint);
+                this.set('trusted', trusted);
+                if ((this.id != this.account.omemo.get('device_id')) && trusted === false)
+                    return false;
+                this.processPreKey({
+                    registrationId: Number(id),
+                    identityKey: utils.fromBase64toArrayBuffer(ik),
+                    signedPreKey: {
+                        keyId: Number(spk.id),
+                        publicKey: utils.fromBase64toArrayBuffer(spk.key),
+                        signature: utils.fromBase64toArrayBuffer(spk.signature)
+                    },
+                    preKey: {
+                        keyId: Number(pk.id),
+                        publicKey: utils.fromBase64toArrayBuffer(pk.key)
+                    }
+                });
+                return true;
+            },
+
+            processPreKey: function (preKeyBundle) {
+                this.session = new SessionBuilder(this.store, this.address);
+                return this.session.processPreKey(preKeyBundle);
+            },
+
+            removeSession: function () {
+                this.store.removeSession(this.address.toString());
+                this.sessionCipher = null;
+            },
+
+            getSession: function () {
+                if (!this.sessionCipher) {
+                    this.sessionCipher = new SessionCipher(this.store, this.address);
+                }
+                return this.sessionCipher;
+            }
+        });
+
+        xabber.Omemo = Backbone.ModelWithStorage.extend({
+            defaults: {
+                sessions: {},
+                fingerprints: {},
+                prekeys: {},
+                retract_version: null,
+                used_prekeys: {},
+                own_used_prekeys: {},
+                device_id: ""
+            },
+
+            _initialize: function (attrs, options) {
+                this.on("change:device_id", this.onDeviceIdUpdated, this);
+                this.own_devices = {};
+                this.account = options.account;
+                this.peers = new xabber.Peers();
+                if (!this.get('device_id'))
+                    this.set('device_id', this.generateDeviceId());
+                this.store = new xabber.SignalProtocolStore();
+                this.account.on('device_published', this.publishBundle, this);
+                this.account.on("devices_updated", this.onOwnDevicesUpdated, this);
+                this.store.on('prekey_removed', this.removePreKey, this);
+                this.store.on('session_stored', this.cacheSession, this);
+            },
+
+            storeSessions: function () {
+                let sessions = this.get('sessions');
+                for (let session_id in sessions) {
+                    let session = sessions[session_id];
+                    session && this.store.put(session_id, session);
+                }
+            },
+
+            onConnected: function () {
+                this.prekeys = new xabber.Prekeys({name: 'prekeys', model: this});
+                this.used_prekeys = new xabber.Prekeys({name: 'used_prekeys', model: this});
+                this.own_used_prekeys = new xabber.Prekeys({name: 'own_used_prekeys', model: this});
+                this.cached_messages = new xabber.DecryptedMessages({id: 'decrypted-messages'}, {
+                    account: this.account,
+                    storage_name: xabber.getStorageName() + '-decrypted-messages-' + this.account.get('jid'),
+                    fetch: 'before'
+                });
+                this.bundle = new xabber.Bundle(null, {store: this.store, model: this});
+                this.connection = this.account.connection;
+                this.registerMessageHandler();
+                this.addDevice();
+            },
+
+            getMyDevices: async function () {
+                if (!this._pending_own_devices) {
+                    this._pending_own_devices = true;
+                    this._dfd_own_devices = new $.Deferred();
+                    return new Promise((resolve, reject) => {
+                        let conn = this.account.connection;
+                        if (conn) {
+                            if (conn.omemo) {
+                                conn.omemo.getDevicesNode(null, function (cb) {
+                                    conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
+                                    this._pending_own_devices = false;
+                                    this._dfd_own_devices.resolve();
+                                    resolve();
+                                }.bind(this), function () {
+                                    this._pending_own_devices = false;
+                                    this._dfd_own_devices.resolve();
+                                    resolve();
+                                });
+                            } else
+                                this._pending_own_devices = false;
+                        } else
+                            this._pending_own_devices = false;
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        this._dfd_own_devices.done(() => {
+                            resolve();
+                        });
+                    });
+                }
+            },
+
+            updateFingerprints: function (contact, device_id, fingerprint, trusted) {
+                let fingerprints = _.clone(this.get('fingerprints'));
+                if (!fingerprints[contact])
+                    fingerprints[contact] = {};
+                let contact_fingerprints = fingerprints[contact];
+                if (_.isArray(contact_fingerprints))
+                    contact_fingerprints = {};
+                contact_fingerprints[device_id] = {fingerprint, trusted};
+                fingerprints[contact] = contact_fingerprints;
+                this.save('fingerprints', fingerprints);
+            },
+
+            isTrusted: function (jid, device_id, fingerprint) {
+                let fingerprints = _.clone(this.get('fingerprints'));
+                if (!fingerprints[jid])
+                    return;
+                if (!fingerprints[jid][device_id])
+                    return;
+                let fing = fingerprints[jid][device_id];
+                if (fing) {
+                    if (fing.fingerprint == fingerprint) {
+                        if (fing.trusted === undefined)
+                            return;
+                        else
+                            return fing.trusted;
+                    }
+                    else
+                        return null;
+                }
+            },
+
+            cacheRetractVersion: function (version) {
+                this.save('retract_version', version);
+            },
+
+            getRetractVersion: function () {
+                return this.get('retract_version');
+            },
+
+            addDevice: function () {
+                let device_id = this.get('device_id');
+                if (this.connection) {
+                    let omemo = (this.account.background_connection || this.account.connection).omemo;
+                    if (omemo.devices.length) {
+                        let device = omemo.devices[device_id];
+                        if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                            let label = this.account.settings.get('device_label_text');
+                            omemo.publishDevice(device_id, label, function () {
+                                this.account.trigger('device_published');
+                            }.bind(this));
+                        }
+                        else
+                            this.account.trigger('device_published');
+                    }
+                    else
+                        omemo.getDevicesNode(null, function (cb) {
+                            omemo.devices = omemo.parseUserDevices($(cb));
+                            let device = omemo.devices[device_id];
+                            if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                                let label = this.account.settings.get('device_label_text');
+                                omemo.publishDevice(device_id, label, function () {
+                                    this.account.trigger('device_published');
+                                }.bind(this));
+                            }
+                            else
+                                this.account.trigger('device_published');
+                        }.bind(this));
+                }
+            },
+
+            onDeviceIdUpdated: function () {
+                this.save('device_id', this.get('device_id'));
+            },
+
+            generateDeviceId: function () {
+                let min = 1,
+                    max = Math.pow(2, 31) - 1,
+                    rand = min + Math.random() * (max + 1 - min);
+                return Math.floor(rand);
+            },
+
+            updateMessage: function (attrs, contact) {
+                if (!this.cached_messages)
+                    return;
+                this.cached_messages.updateMessage(attrs, contact);
+            },
+
+            registerMessageHandler: function () {
+                this.account.connection.deleteHandler(this._msg_handler);
+                this._msg_handler = this.account.connection.addHandler(function (message) {
+                    this.receiveMessage(message);
+                    return true;
+                }.bind(this), null, 'message', null, null, null, {'encrypted': true});
+            },
+
+            encrypt: function (contact, message) {
+                let peer = this.getPeer(contact.get('jid')),
+                    $msg = $(message.tree()),
+                    origin_id = $msg.children('origin-id').attr('id'),
+                    plaintext = Strophe.serialize($msg.children('body')[0]) || "";
+
+                $msg.children('reference').each(function (i, ref) {
+                    plaintext += Strophe.serialize(ref);
+                }.bind(this));
+
+                origin_id && this.cached_messages.putMessage(contact, origin_id, plaintext);
+
+                return peer.encrypt(plaintext).then((encryptedMessage) => {
+
+                    let encryptedElement = $build('encrypted', {xmlns: Strophe.NS.OMEMO})
+                        .c('header', {
+                            sid: this.get('device_id'),
+                            label: this.account.settings.get('device_label_text')
+                        }),
+                        myKeys = $build('keys', {jid: this.account.get('jid')});
+
+                    encryptedElement.c('keys', { jid: contact.get('jid')});
+
+                    for (let key of encryptedMessage.keys) {
+                        let attrs = {
+                            rid: key.deviceId,
+                            kex: undefined
+                        };
+                        if (key.preKey) {
+                            attrs.kex = true;
+                        }
+
+                        if (peer.devices[key.deviceId])
+                            encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                        else
+                            myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+
+                    }
+                    encryptedElement.up().cnode(myKeys.tree());
+
+                    encryptedElement.up().c('iv', utils.ArrayBuffertoBase64(encryptedMessage.iv)).up().up()
+                        .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
+
+                    $(message.tree()).find('body').remove();
+                    $(message.tree()).children('reference').remove();
+
+                    message.cnode(encryptedElement.tree());
+                    message.up().c('store', {
+                        xmlns: 'urn:xmpp:hints'
+                    }).up()
+                        .c('body').t('This message is encrypted using OMEMO end-to-end encryption.').up();
+
+                    return {message: message, is_trusted: encryptedMessage.is_trusted};
+                }).catch((msg) => {
+                });
+            },
+
+            hasChanges: function (o1, o2) {
+                let obj1 = _.clone(o1), obj2 = _.clone(o2);
+                for (let d in obj1) {
+                    delete obj2[d];
+                }
+                for (let d in obj2) {
+                    delete obj1[d];
+                }
+                return Object.keys(obj1).length || Object.keys(obj2).length;
+            },
+
+            receiveHeadlineMessage: function (message) {
+                var $message = $(message),
+                    from_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                    node = $message.find('items').attr('node');
+                if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
+                    if (node == `${Strophe.NS.OMEMO}:devices`) {
+                        let devices = (this.account.background_connection || this.account.connection).omemo.parseUserDevices($message);
+                        if (from_jid === this.account.get('jid')) {
+                            let has_devices = this.own_devices && Object.keys(this.own_devices).length,
+                                has_changes = this.hasChanges(this.own_devices, devices);
+                            (this.account.background_connection || this.account.connection).omemo.devices = devices;
+                            let device_id = this.get('device_id'),
+                                device = (this.account.background_connection || this.account.connection).omemo.devices[device_id];
+                            /*if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                                let label = this.account.settings.get('device_label_text');
+                                (this.account.background_connection || this.account.connection).omemo.publishDevice(device_id, label, () => {
+                                    this.account.trigger('device_published');
+                                });
+                            }*/
+                            if (has_changes) {
+                                this.account.trigger("devices_updated");
+                            }
+                            if (has_devices && has_changes) {
+                                this.account.trigger('trusting_updated');
+                            }
+                        }
+                        else {
+                            let peer = this.getPeer(from_jid),
+                                has_devices = peer.devices && Object.keys(peer.devices).length,
+                                has_changes = this.hasChanges(peer.devices, devices);
+                            peer.updateDevices(devices);
+                            if (has_devices && has_changes) {
+                                this.account.trigger('trusting_updated');
+                            }
+                        }
+                        return;
+                    }
+                    if (node == `${Strophe.NS.OMEMO}:bundles`) {
+                        let $item = $message.find('items item').first(),
+                            device_id = $item.attr('id'),
+                            $bundle = $item.children(`bundle[xmlns="${Strophe.NS.OMEMO}"]`), device;
+                        if (from_jid === this.account.get('jid')) {
+                            if ((this.account.background_connection || this.account.connection).omemo.devices && (this.account.background_connection || this.account.connection).omemo.devices[device_id]) {
+                                if (!this.own_devices[device_id])
+                                    this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
+                                device = this.own_devices[device_id];
+                            }
+                        } else {
+                            let peer = this.peers.get(from_jid);
+                            if (peer) {
+                                device = peer.devices[device_id];
+                            }
+                        }
+                        if (device) {
+                            let ik = $bundle.find(`ik`).text(),
+                                device_ik = device.get(`ik`), preKeys = [];
+                            if (!ik) {
+                                device.set('ik', null);
+                                return;
+                            }
+                            $bundle.find('prekeys pk').each((i, pk) => {
+                                let $pk = $(pk);
+                                preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                            });
+                            device.preKeys = preKeys;
+                            device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                            device.set('fingerprint', device.generateFingerprint());
+                            device_ik && (device_ik = utils.ArrayBuffertoBase64(device_ik));
+                            if (!_.isUndefined(device_ik) && device_ik != ik)
+                                this.account.trigger('trusting_updated');
+                        }
+                    }
+                }
+            },
+
+            receiveChatMessage: function (message, options) {
+                options = options || {};
+                let $message = $(message);
+                if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
+                    if ($message.find('result[xmlns="' + Strophe.NS.MAM + '"]').length)
+                        _.extend(options, {
+                            is_mam: true,
+                            is_archived: true
+                        });
+                    if ($message.find('[xmlns="' + Strophe.NS.CARBONS + '"]').length)
+                        options.carbon_copied = true;
+
+                    let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
+                        jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || options.from_jid,
+                        contact = this.account.contacts.get(options.conversation ? options.conversation : jid),
+                        stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
+                        cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
+
+                    if (cached_msg) {
+                        if (!options.replaced) {
+                            options.encrypted = true;
+                            this.getTrusted($message).then((is_trusted) => {
+                                options.is_trusted = is_trusted;
+                                $message.find('body').remove();
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                                this.account.chats.receiveChatMessage($message[0], options);
+                            });
+                            return;
+                        }
+                        else if (options.replaced && $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid') == this.get('device_id')) {
+                            options.encrypted = true;
+                            $message.find('body').remove();
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                            let chat = this.account.chats.getChat(contact, 'encrypted');
+                            chat && chat.messages.createFromStanza($message, options);
+                            let msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id);
+                            if (msg_item) {
+                                msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                chat && chat.item_view.updateLastMessage(chat.last_message);
+                            }
+                            return;
+                        }
+                    }
+
+                    if (options.replaced) {
+                        this.decrypt(message.children('replace').children('message'), options).then((decrypted_msg) => {
+                            if (decrypted_msg) {
+                                options.encrypted = true;
+                                stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                                $message.find('body').remove();
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                                let chat = this.account.chats.getChat(contact, 'encrypted');
+                                chat && chat.messages.createFromStanza($message, options);
+                                let msg_item = chat.messages.find(msg => msg.get('stanza_id') == stanza_id || msg.get('contact_stanza_id') == stanza_id);
+                                if (msg_item) {
+                                    msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                    chat && chat.item_view.updateLastMessage(chat.last_message);
+                                }
+                            }
+                        });
+                    } else {
+                        this.getTrusted($message).then((is_trusted) => {
+                            options.is_trusted = is_trusted;
+                            return this.decrypt(message);
+                        }).then((decrypted_msg) => {
+                            if (decrypted_msg) {
+                                options.encrypted = true;
+                                stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                                $message.find('body').remove();
+                            }
+                            else {
+                                if (decrypted_msg === null) {
+                                    this.account.chats.getChat(contact, 'encrypted').item_view.updateLastMessage();
+                                    return;
+                                }
+                                options.not_encrypted = true;
+                                delete options.is_trusted;
+                            }
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                            this.account.chats.receiveChatMessage($message[0], options);
+                        }).catch(() => {
+                            if (options.synced_msg && !options.decryption_retry) {
+                                this.receiveChatMessage($message[0], _.extend(options, {decryption_retry: true}));
+                                return;
+                            }
+                            options.not_encrypted = true;
+                            delete options.is_trusted;
+                            $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
+                            this.account.chats.receiveChatMessage($message[0], options);
+                        });
+                    }
+                }
+            },
+
+            checkOwnFingerprints: async function () {
+                return new Promise((resolve, reject) => {
+                    let is_trusted = true,
+                        dfd = new $.Deferred(), counter = 0;
+                    dfd.done((t) => {
+                        let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
+                        resolve(trust);
+                    });
+                    if (Object.keys(this.own_devices).length) {
+                        counter = Object.keys(this.own_devices).length;
+                        for (let device_id in this.own_devices) {
+                            let device = this.own_devices[device_id];
+                            if (device_id == this.get('device_id')) {
+                                counter--;
+                                !counter && dfd.resolve(is_trusted);
+                                continue;
+                            }
+                            if (device.get('fingerprint')) {
+                                let trusted = this.isTrusted(this.account.get('jid'), device.id, device.get('fingerprint'));
+                                if (trusted === undefined && is_trusted !== null)
+                                    is_trusted = undefined;
+                                if (trusted === null)
+                                    is_trusted = null;
+                                counter--;
+                                !counter && dfd.resolve(is_trusted);
+                            } else if (device.get('ik')) {
+                                device.set('fingerprint', device.generateFingerprint());
+                                let trusted = this.isTrusted(this.account.get('jid'), device.id, device.get('fingerprint'));
+                                if (trusted === undefined && is_trusted !== null)
+                                    is_trusted = undefined;
+                                if (trusted === null)
+                                    is_trusted = null;
+                                counter--;
+                                !counter && dfd.resolve(is_trusted);
+                            } else {
+                                if (device.get('ik') === null) {
+                                    counter--;
+                                    !counter && dfd.resolve(is_trusted);
+                                    continue;
+                                }
+                                device.getBundle().then(({pk, spk, ik}) => {
+                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                    device.set('fingerprint', device.generateFingerprint());
+                                    let trusted = this.isTrusted(this.account.get('jid'), device.id, device.get('fingerprint'));
+                                    if (trusted === undefined && is_trusted !== null)
+                                        is_trusted = undefined;
+                                    if (trusted === null)
+                                        is_trusted = null;
+                                    counter--;
+                                    !counter && dfd.resolve(is_trusted);
+                                }).catch(() => {
+                                    counter--;
+                                    !counter && dfd.resolve(is_trusted);
+                                });
+                            }
+                        }
+                    }
+                    else {
+                        this.getMyDevices().then(() => {
+                            this.onOwnDevicesUpdated().then(() => {
+                                counter = Object.keys(this.own_devices).length;
+                                for (let device_id in this.own_devices) {
+                                    if (device_id == this.get('device_id')) {
+                                        counter--;
+                                        !counter && dfd.resolve(is_trusted);
+                                        continue;
+                                    }
+                                    let device = this.own_devices[device_id];
+                                    if (device.get('fingerprint')) {
+                                        let trusted = this.isTrusted(this.account.get('jid'), device.id, device.get('fingerprint'));
+                                        if (trusted === undefined && is_trusted !== null)
+                                            is_trusted = undefined;
+                                        if (trusted === null)
+                                            is_trusted = null;
+                                        counter--;
+                                        !counter && dfd.resolve(is_trusted);
+                                    } else {
+                                        counter--;
+                                        !counter && dfd.resolve(is_trusted);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+            },
+
+            checkContactFingerprints: function (contact) {
+                return new Promise((resolve, reject) => {
+                    let is_trusted = true,
+                        peer = this.getPeer(contact.get('jid')),
+                        dfd = new $.Deferred(), counter = 0;
+                    dfd.done((t) => {
+                        let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
+                        contact.trigger('update_trusted', trust);
+                        resolve(trust);
+                    });
+                    if (Object.keys(peer.devices).length) {
+                        counter = Object.keys(peer.devices).length;
+                        for (let device_id in peer.devices) {
+                            let device = peer.devices[device_id];
+                            if (device.get('fingerprint')) {
+                                let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                if (trusted === undefined && is_trusted !== null)
+                                    is_trusted = undefined;
+                                if (trusted === null)
+                                    is_trusted = null;
+                                counter--;
+                                !counter && dfd.resolve(is_trusted);
+                            } else if (device.get('ik')) {
+                                device.set('fingerprint', device.generateFingerprint());
+                                let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                if (trusted === undefined && is_trusted !== null)
+                                    is_trusted = undefined;
+                                if (trusted === null)
+                                    is_trusted = null;
+                                counter--;
+                                !counter && dfd.resolve(is_trusted);
+                            } else {
+                                if (device.get('ik') === null) {
+                                    counter--;
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
+                                    continue;
+                                }
+                                device.getBundle().then(({pk, spk, ik}) => {
+                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                    device.set('fingerprint', device.generateFingerprint());
+                                    let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                    if (trusted === undefined && is_trusted !== null)
+                                        is_trusted = undefined;
+                                    if (trusted === null)
+                                        is_trusted = null;
+                                    counter--;
+                                    !counter && dfd.resolve(is_trusted);
+                                }).catch(() => {
+                                    counter--;
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
+                                });
+                            }
+                        }
+                    } else {
+                        peer.getDevicesNode().then(() => {
+                            counter = Object.keys(peer.devices).length;
+                            for (let device_id in peer.devices) {
+                                let device = peer.devices[device_id];
+                                device.getBundle().then(({pk, spk, ik}) => {
+                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                    device.set('fingerprint', device.generateFingerprint());
+                                    let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                    if (trusted === undefined && is_trusted !== null)
+                                        is_trusted = undefined;
+                                    if (trusted === null) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        else
+                                            is_trusted = null;
+                                    }
+                                    counter--;
+                                    !counter && dfd.resolve(is_trusted);
+                                }).catch(() => {
+                                    counter--;
+                                    if (!counter) {
+                                        if (Object.keys(peer.devices).length === 1)
+                                            is_trusted = 'nil';
+                                        dfd.resolve(is_trusted);
+                                    }
+                                });
+                            }
+                        });
+
+                    }
+                });
+            },
+
+            getTrusted: async function ($message) {
+                let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
+                    from_jid = Strophe.getBareJidFromJid($msg.attr('from')),
+                    to_jid = Strophe.getBareJidFromJid($msg.attr('to')),
+                    contact = this.account.contacts.mergeContact(from_jid === this.account.get('jid') ? to_jid : from_jid);
+
+                let own_trusted = await this.checkOwnFingerprints(),
+                    contact_trusted = await this.checkContactFingerprints(contact);
+                if (own_trusted === 'error' || (own_trusted === 'none' && contact_trusted !== 'error')) {
+                    return own_trusted;
+                } else if (contact_trusted === 'error' || contact_trusted === 'none') {
+                    return contact_trusted;
+                } else {
+                    let device_id = $message.find('encrypted header').attr('sid'),
+                        peer = this.getPeer(contact.get('jid')),
+                        device = peer.devices[device_id];
+                    if (device) {
+                        if (device.get('fingerprint')) {
+                            let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                            if (trusted === false) {
+                                return 'untrusted';
+                            }
+                        }
+                    }
+                    return true;
+                }
+            },
+
+            receiveMessage: function (message) {
+                let $message = $(message),
+                    type = $message.attr('type');
+                if (type === 'headline') {
+                    return this.receiveHeadlineMessage(message);
+                }
+            },
+
+            parseEncrypted: function ($encrypted) {
+                let $payload = $encrypted.children(`payload`),
+                    $header = $encrypted.children('header'),
+                    iv = utils.fromBase64toArrayBuffer($header.find('iv').text()),
+                    payload = utils.fromBase64toArrayBuffer($payload.text()),
+                    sid = Number($header.attr('sid'));
+
+                let keys = $header.find(`key`).get().map(function(keyElement) {
+                    return {
+                        preKey: $(keyElement).attr('kex') === 'true',
+                        ciphertext: utils.fromBase64toArrayBuffer($(keyElement).text()),
+                        deviceId: parseInt($(keyElement).attr('rid'))
+                    };
+                });
+
+                return {sid, keys, iv, payload};
+            },
+
+            getPeer: function (jid) {
+                if (!this.peers.get(jid))
+                    this.peers.create({jid}, {account:this.account});
+                return this.peers.get(jid);
+            },
+
+            decrypt: async function (message, options) {
+                let $message = $(message),
+                    from_jid = Strophe.getBareJidFromJid($message.attr('from')) || options.from_jid,
+                    $encrypted;
+
+                if ($message.find('result[xmlns="'+Strophe.NS.MAM+'"]').length) {
+                    let $m = $message.find('message').first();
+                    from_jid = Strophe.getBareJidFromJid($m.attr('from'));
+                    $encrypted = $message.children(`result`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+                }
+                else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length)
+                    $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+                else
+                    $encrypted = $message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+
+                let encryptedData = this.parseEncrypted($encrypted),
+                    deviceId = this.get('device_id'),
+                    ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
+                    ownPreKey = ownPreKeysArr[0];
+                if (!ownPreKey)
+                    return null;
+                let peer = this.getPeer(from_jid),
+                    exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey);
+                if (!exportedKey)
+                    return;
+                let exportedAESKey = exportedKey.slice(0, 16),
+                    authenticationTag = exportedKey.slice(16),
+                    iv = encryptedData.iv,
+                    ciphertextAndAuthenticationTag = utils.AES.arrayBufferConcat(encryptedData.payload, authenticationTag);
+
+                return utils.AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);
+            },
+
+            toBase64: function (arrayBuffer) {
+                return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            },
+
+            publish: function (spk, ik, pks) {
+                if (!this.account.connection)
+                    return;
+                let conn_omemo = (this.account.background_connection || this.account.connection).omemo,
+                    prekeys = [];
+                pks.forEach(function (pk) {
+                    let id = pk.keyId,
+                        pubKey = utils.ArrayBuffertoBase64(pk.keyPair.pubKey),
+                        privKey = utils.ArrayBuffertoBase64(pk.keyPair.privKey),
+                        key = JSON.stringify({pubKey, privKey});
+                    if (!pk.signature) {
+                        prekeys.push({id: id, key: pubKey});
+                        this.prekeys.put({id, key});
+                    }
+                }.bind(this));
+                conn_omemo.configNode(() => {
+                    conn_omemo.publishBundle({
+                        spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},
+                        spks: utils.ArrayBuffertoBase64(spk.signature),
+                        ik:  utils.ArrayBuffertoBase64(ik),
+                        pks: prekeys,
+                        device_id: this.get('device_id')
+                    });
+                });
+            },
+
+            removePreKey: async function (id) {
+                if (!this.account)
+                    return;
+                let bundle = this.bundle,
+                    removed_pk = this.bundle.preKeys.find(p => p.keyId === id && !p.signature);
+                if (!removed_pk)
+                    return;
+                let pubKey = utils.ArrayBuffertoBase64(removed_pk.keyPair.pubKey),
+                    privKey = utils.ArrayBuffertoBase64(removed_pk.keyPair.privKey),
+                    key = JSON.stringify({pubKey, privKey}),
+                    idx = this.bundle.preKeys.indexOf(removed_pk);
+                bundle.preKeys.splice(idx, 1);
+                this.own_used_prekeys.put({id, key});
+                this.prekeys.remove(id);
+                if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
+                    let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
+                        last_id = _.sortBy(xabber.accounts.connected[0].omemo.bundle.preKeys, 'keyId').last().keyId;
+                    for (var i = ++last_id; last_id + missing_keys; i++)
+                        await this.bundle.generatePreKey(i);
+                    this.account.omemo.publishBundle();
+                }
+                else
+                    this.account.omemo.publishBundle();
+            },
+
+            cacheSession: function (attrs) {
+                let id = attrs.id,
+                    session = attrs.rec,
+                    sessions = _.clone(this.get('sessions'));
+                _.isArray(sessions) && (sessions = {});
+                sessions[id] = session;
+                this.save('sessions', sessions);
+            },
+
+            removeSession: function (id) {
+                let sessions = _.clone(this.get('sessions'));
+                _.isArray(sessions) && (sessions = {});
+                delete sessions[id];
+                this.save('sessions', sessions);
+            },
+
+            getSession: function (id) {
+                let sessions = _.clone(this.get('sessions'));
+                return sessions[id];
+            },
+
+            publishBundle: async function () {
+                let spk = this.bundle.preKeys.find(pk => pk.signature),
+                    ik = await this.store.getIdentityKeyPair(),
+                    pks = this.bundle.preKeys;
+                if (!spk || !ik) {
+                    this.set('resend_bundle', true);
+                    return;
+                }
+                (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
+                        this.publish(spk, ik.pubKey, pks);
+                    }.bind(this),
+                    function (err) {
+                        if (($(err).find('error').attr('code') == 404))
+                            (this.account.background_connection || this.account.connection).omemo.createBundleNode(function () {
+                                this.publish(spk, ik.pubKey, pks);
+                            }.bind(this));
+                    }.bind(this));
+            },
+
+            onOwnDevicesUpdated: async function () {
+                return new Promise((resolve, reject) => {
+                    let conn = this.account.connection;
+                    if (conn && conn.omemo && conn.omemo.devices) {
+                        for (let d in this.own_devices) {
+                            if (!conn.omemo.devices[d]) {
+                                this.account.omemo.removeSession('session' + this.own_devices[d].address.toString());
+                                delete this.own_devices[d];
+                            }
+                        }
+                        let counter = Object.keys(conn.omemo.devices).length;
+                        for (let device_id in conn.omemo.devices) {
+                            if (!this.own_devices[device_id])
+                                this.own_devices[device_id] = new xabber.Device({
+                                    jid: this.account.get('jid'),
+                                    id: device_id
+                                }, {account: this.account, store: this.store});
+                            let device = this.own_devices[device_id],
+                                label = conn.omemo.devices[device_id].label;
+                            if (!device.get('ik')) {
+                                if (device.get('ik') === null) {
+                                    counter--;
+                                    !counter && resolve();
+                                    continue;
+                                }
+                                device.getBundle().then(({pk, spk, ik}) => {
+                                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                    let fingerprint = device.generateFingerprint();
+                                    if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
+                                        device.set('fingerprint', fingerprint);
+                                    counter--;
+                                    !counter && resolve();
+                                }).catch(() => {
+                                    counter--;
+                                    !counter && resolve();
+                                });
+                            } else if (!device.get('fingerprint')) {
+                                device.set('fingerprint', device.generateFingerprint());
+                                counter--;
+                                !counter && resolve();
+                            } else {
+                                counter--;
+                                !counter && resolve();
+                            }
+                            label && device.set('label', label);
+                        }
+                    }
+                });
+            }
+        });
+
+        xabber.DecryptedMessages = Backbone.ModelWithStorage.extend({
+            defaults: {
+                messages: {}
+            },
+
+            getMessage: function (contact, stanza_id) {
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                return contact_messages[stanza_id];
+            },
+
+            putMessage: function (contact, stanza_id, message) {
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                contact_messages[stanza_id] = message;
+                messages[contact.get('jid')] = contact_messages;
+                this.save('messages', messages);
+            },
+
+            removeMessage: function (attrs, contact) {
+                let origin_id = attrs.origin_id;
+                let messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {};
+                delete contact_messages[origin_id];
+                messages[contact.get('jid')] = contact_messages;
+                this.save('messages', messages);
+            },
+
+            updateMessage: function (attrs, contact) {
+                let stanza_id = attrs.stanza_id,
+                    origin_id = attrs.origin_id,
+                    messages = _.clone(this.get('messages')),
+                    contact_messages = messages[contact.get('jid')] || {},
+                    message = contact_messages[origin_id];
+                if (origin_id)
+                    this.removeMessage({origin_id}, contact);
+                if (stanza_id)
+                    this.putMessage(contact, stanza_id, message);
+            }
+        });
+
+        xabber.SignalProtocolStore = Backbone.Model.extend({
+            initialize: function () {
+                this.Direction = {
+                    SENDING: 1,
+                    RECEIVING: 2
+                };
+                this.store = {};
+            },
+
+            getIdentityKeyPair: function () {
+                return Promise.resolve(this.get('identityKey'));
+            },
+
+            getLocalRegistrationId: function () {
+                return Promise.resolve(this.get('registrationId'));
+            },
+
+            put: function (key, value) {
+                if (key === undefined || value === undefined || key === null || value === null)
+                    throw new Error("Tried to store undefined/null");
+                this.store[key] = value;
+            },
+
+            get: function (key, defaultValue) {
+                if (key === null || key === undefined)
+                    throw new Error("Tried to get value for undefined/null key");
+                if (key in this.store) {
+                    return this.store[key];
+                } else {
+                    return defaultValue;
+                }
+            },
+
+            remove: function (key) {
+                if (key === null || key === undefined)
+                    throw new Error("Tried to remove value for undefined/null key");
+                delete this.store[key];
+            },
+
+            isTrustedIdentity: function (identifier, identityKey, direction) {
+                if (identifier === null || identifier === undefined) {
+                    throw new Error("tried to check identity key for undefined/null key");
+                }
+                if (!(identityKey instanceof ArrayBuffer)) {
+                    throw new Error("Expected identityKey to be an ArrayBuffer");
+                }
+                var trusted = this.get('identityKey' + identifier);
+                if (trusted === undefined) {
+                    return Promise.resolve(true);
+                }
+                return Promise.resolve(util.toString(identityKey) === util.toString(trusted));
+            },
+
+            loadIdentityKey: function (identifier) {
+                if (identifier === null || identifier === undefined)
+                    throw new Error("Tried to get identity key for undefined/null key");
+                return Promise.resolve(this.get('identityKey' + identifier));
+            },
+
+            saveIdentity: function (identifier, identityKey) {
+                if (identifier === null || identifier === undefined)
+                    throw new Error("Tried to put identity key for undefined/null key");
+
+                var address = new SignalProtocolAddress.fromString(identifier);
+
+                var existing = this.get('identityKey' + address.getName());
+                this.put('identityKey' + address.getName(), identityKey);
+
+                if (existing && libsignal.toString(identityKey) !== libsignal.toString(existing)) {
+                    return Promise.resolve(true);
+                } else {
+                    return Promise.resolve(false);
+                }
+
+            },
+
+            /* Returns a prekeypair object or undefined */
+            loadPreKey: function (keyId) {
+                var res = this.get('25519KeypreKey' + keyId);
+                if (res !== undefined) {
+                    res = {pubKey: res.pubKey, privKey: res.privKey};
+                }
+                return Promise.resolve(res);
+            },
+
+            storePreKey: function (keyId, keyPair) {
+                return Promise.resolve(this.put('25519KeypreKey' + keyId, keyPair));
+            },
+
+            removePreKey: function (keyId) {
+                this.trigger('prekey_removed', keyId);
+                // return Promise.resolve(this.remove('25519KeypreKey' + keyId));
+            },
+
+            /* Returns a signed keypair object or undefined */
+            loadSignedPreKey: function (keyId) {
+                var res = this.get('25519KeysignedKey' + keyId);
+                if (res !== undefined) {
+                    res = {pubKey: res.pubKey, privKey: res.privKey};
+                }
+                return Promise.resolve(res);
+            },
+
+            storeSignedPreKey: function (keyId, keyPair) {
+                return Promise.resolve(this.put('25519KeysignedKey' + keyId, keyPair));
+            },
+
+            removeSignedPreKey: function (keyId) {
+                return Promise.resolve(this.remove('25519KeysignedKey' + keyId));
+            },
+
+            loadSession: function (identifier) {
+                return Promise.resolve(this.get('session' + identifier));
+            },
+
+            hasSession: function (identifier) {
+                return !!this.get('session' + identifier)
+            },
+
+            storeSession: function (identifier, record) {
+                this.trigger('session_stored', {id: 'session' + identifier, rec: record});
+                return Promise.resolve(this.put('session' + identifier, record));
+            },
+
+            removeSession: function (identifier) {
+                return Promise.resolve(this.remove('session' + identifier));
+            },
+
+            getAllSessions: function (identifier) {
+                let sessions = [];
+                for (var id in this.store) {
+                    if (id.startsWith('session' + identifier)) {
+                        sessions.push({id: id, session: this.store[id]});
+                    }
+                }
+                return Promise.resolve(sessions);
+            },
+
+            removeAllSessions: function (identifier) {
+                for (var id in this.store) {
+                    if (id.startsWith('session' + identifier)) {
+                        delete this.store[id];
+                    }
+                }
+                return Promise.resolve();
+            }
+        });
+
+        xabber.OMEMOItemView = xabber.BasicView.extend({
+            className: 'omemo-item list-item',
+            template: templates.omemo_item,
+
+            events: {
+                'click': 'openByClick'
+            },
+
+            _initialize: function (options) {
+                this.model = options.model;
+                this.account = this.model.account;
+                this.$el.attr('data-id', this.account.id);
+                this.updateColorScheme();
+                this.$('.account-jid').text(this.account.get('jid'));
+                xabber.chats_view.addChild(this.account.id, this);
+                xabber.chats_view.$('.chat-list-wrap').prepend(this.$el);
+                this.account.settings.on("change:color", this.updateColorScheme, this);
+            },
+
+            openByClick: function () {
+                if (xabber.chats_view.active_chat) {
+                    xabber.chats_view.active_chat.model.set('active', false);
+                    xabber.chats_view.active_chat = null;
+                }
+                this.$el.addClass('active');
+                xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'enable_encryption', chat_item: null, omemo_item: this});
+            },
+
+            updateColorScheme: function () {
+                var color = this.account.settings.get('color');
+                this.$el.attr('data-color', color);
+            },
+
+            close: function () {
+                xabber.chats_view.removeChild(this.account.id);
+            }
+        });
+
+        xabber.OMEMOEnableView = xabber.BasicView.extend({
+            className: 'details-panel omemo-enable-view',
+            template: templates.omemo_enable,
+            avatar_size: constants.AVATAR_SIZES.OMEMO_ENABLE_SETTING,
+
+            events: {
+                'click .btn-enable': 'enableOmemo',
+                'click .btn-cancel': 'disableOmemo',
+                'click .btn-escape': 'close'
+            },
+
+            _initialize: function (options) {
+                this.account = options.account;
+                this.updateColorScheme();
+                this.$('.msg-text').html(`<p class="msg-header">Enable end-to-end encryption for account ${this.account.get('jid')}?</p>This will allow you and your contacts exchange private messages using encrypted chats. Remember to always verify the identity of your chat partners by verifying digital fingerprints of their devices.`);
+                this.addChatItem();
+                this.updateAvatar();
+                xabber.on("update_screen", this.onUpdatedScreen, this);
+                this.account.on("change:image", this.updateAvatar, this);
+                this.account.session.on("change:connected", this.updateConnected, this);
+                this.account.settings.on("change:color", this.updateColorScheme, this);
+            },
+
+            updateAvatar: function () {
+                this.$('.circle-avatar .avatar').setAvatar(this.account.cached_image, this.avatar_size);
+            },
+
+            addChatItem: function () {
+                this.chat_item = new xabber.OMEMOItemView({model: this});
+            },
+
+            updateColorScheme: function () {
+                var color = this.account.settings.get('color');
+                this.$el.attr('data-color', color);
+            },
+
+            onUpdatedScreen: function () {
+                if (this.isVisible())
+                    this.chat_item.$el.addClass('active');
+            },
+
+            onChangedVisibility: function () {
+                if (!this.isVisible())
+                    this.chat_item.$el.removeClass('active');
+            },
+
+            updateConnected: function () {
+                if (!this.account.isConnected())
+                    this.close();
+            },
+
+            enableOmemo: function () {
+                this.account.settings.save('omemo', true);
+                this.close();
+                this.account.omemo = new xabber.Omemo({id: 'omemo'}, {
+                    account: this.account,
+                    storage_name: xabber.getStorageName() + '-omemo-settings-' + this.account.get('jid'),
+                    fetch: 'before'
+                });
+                setTimeout(function () {
+                    this.account.omemo.onConnected();
+                }.bind(this), 2000);
+            },
+
+            disableOmemo: function () {
+                this.account.settings.save('omemo', false);
+                this.close();
+            },
+
+            close: function () {
+                this.chat_item.close();
+                this.trigger('remove') && this.remove();
+                this.account.omemo_enable_view = undefined;
+            }
+        });
+
+        xabber.Account.addInitPlugin(function () {
+            if (!this.settings.get('omemo'))
+                return;
+            this.omemo = new xabber.Omemo({id: 'omemo'}, {
+                account: this,
+                storage_name: xabber.getStorageName() + '-omemo-settings-' + this.get('jid'),
+                fetch: 'before'
+            });
+        });
+
+        xabber.Account.addConnPlugin(function () {
+            if (!this.settings.get('omemo'))
+                return;
+            this.omemo.onConnected();
+        }, true, true);
+
+        return xabber;
+    };
+});
 define("xabber", [
     "xabber-core",
     "xabber-views",
@@ -64260,10 +69929,11 @@ define("xabber", [
     "xabber-chats",
     "xabber-searching",
     "xabber-mentions",
-    "xabber-ui"
+    "xabber-ui",
+    "xabber-omemo"
 ], function (xabber, views, api_service, strophe, vcard,
-             accounts, discovery, contacts, chats, searching, mentions, ui) {
+             accounts, discovery, contacts, chats, searching, mentions, ui, omemo) {
     return xabber.extendWith(views, api_service, strophe, vcard,
-                             accounts, discovery, contacts, chats, searching, mentions, ui);
+                             accounts, discovery, contacts, chats, searching, mentions, ui, omemo);
 });
 
