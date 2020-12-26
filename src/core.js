@@ -85,8 +85,9 @@
         },
 
         onQuit: function () {
-            var full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
-            for (var key in window.localStorage) {
+            window.indexedDB.databases().then((a)=>{a.forEach((db)=>{window.indexedDB.deleteDatabase(db.name)});});
+            let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            for (let key in window.localStorage) {
                 if (key.startsWith(full_storage_name)) {
                     window.localStorage.removeItem(key);
                 }

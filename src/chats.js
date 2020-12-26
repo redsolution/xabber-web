@@ -1580,7 +1580,7 @@ define("xabber-chats", function () {
         },
 
         updateStatus: function () {
-            var status = this.contact.get('status');
+            let status = this.contact.get('status');
             this.$('.status').attr('data-status', status);
             this.$('.chat-icon').attr('data-status', status);
         },
@@ -1621,7 +1621,7 @@ define("xabber-chats", function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {

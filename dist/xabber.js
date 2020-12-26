@@ -46271,7 +46271,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.1.0 (75)","version_description":""}'
+'{"version_number":"2.1.0 (77)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46376,8 +46376,9 @@ define('xabber-environment',[
         },
 
         onQuit: function () {
-            var full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
-            for (var key in window.localStorage) {
+            window.indexedDB.databases().then((a)=>{a.forEach((db)=>{window.indexedDB.deleteDatabase(db.name)});});
+            let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            for (let key in window.localStorage) {
                 if (key.startsWith(full_storage_name)) {
                     window.localStorage.removeItem(key);
                 }
@@ -60016,7 +60017,7 @@ define("xabber-chats", [],function () {
         },
 
         updateStatus: function () {
-            var status = this.contact.get('status');
+            let status = this.contact.get('status');
             this.$('.status').attr('data-status', status);
             this.$('.chat-icon').attr('data-status', status);
         },
@@ -60057,7 +60058,7 @@ define("xabber-chats", [],function () {
         updateIcon: function () {
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
+            ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
