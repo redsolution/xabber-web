@@ -2067,6 +2067,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .roster-contact [data-status=offline] svg,
 [data-status=offline],
+[data-status=inactive],
 [data-status=unavailable] {
     background-color: #9E9E9E;
 }
@@ -2100,7 +2101,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .roster-contact [data-status=resolved] svg,
 [data-status=resolved],
-[data-status=inactive],
 [data-status=dnd] {
     background-color: #D32F2F;
 }
