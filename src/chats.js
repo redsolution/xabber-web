@@ -6539,6 +6539,7 @@ define("xabber-chats", function () {
             this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
+            this.contact.on("change:status", this.updateStatus, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onChangedBlocked, this);

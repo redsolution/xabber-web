@@ -85,7 +85,17 @@
         },
 
         onQuit: function () {
-            window.indexedDB.databases().then((a)=>{a.forEach((db)=>{window.indexedDB.deleteDatabase(db.name)});});
+            if (window.indexedDB.databases) {
+                window.indexedDB.databases().then((a) => {
+                    a.forEach((db) => {
+                        window.indexedDB.deleteDatabase(db.name)
+                    });
+                });
+            } else {
+                this.accounts.forEach((acc) => {
+                    indexedDB.deleteDatabase(acc.cached_roster.database.name);
+                });
+            }
             let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
             for (let key in window.localStorage) {
                 if (key.startsWith(full_storage_name)) {

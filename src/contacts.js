@@ -5057,7 +5057,7 @@ define("xabber-contacts", function () {
                 if (this.connection && this.connection.do_synchronization) {
                     let options = {},
                         max_count = Math.trunc(xabber.chats_view.$el[0].clientHeight/56) > 20 ? Math.trunc(xabber.chats_view.$el[0].clientHeight/56) : 20;
-                    !this.roster.last_chat_msg_id && (options.max = max_count);
+                    !this.roster.last_chat_msg_id && (options.max = ++max_count);
                     this.roster.syncFromServer(options);
                 }
                 this.roster.getRoster();
