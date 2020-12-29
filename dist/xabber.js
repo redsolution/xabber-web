@@ -43584,6 +43584,11 @@ var constants = {
             username: 'webrtc@live.com'
         },
         {
+            urls:"turn:turn.editcompany.org:5439",
+            username: "test",
+            credential: "1111"
+        },
+        {
             urls: 'turn:192.158.29.39:3478?transport=udp',
             credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
             username: '28224511:1379330808'
@@ -46271,7 +46276,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.1.0 (77)","version_description":""}'
+'{"version_number":"2.1.0 (78)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46376,7 +46381,17 @@ define('xabber-environment',[
         },
 
         onQuit: function () {
-            window.indexedDB.databases().then((a)=>{a.forEach((db)=>{window.indexedDB.deleteDatabase(db.name)});});
+            if (window.indexedDB.databases) {
+                window.indexedDB.databases().then((a) => {
+                    a.forEach((db) => {
+                        window.indexedDB.deleteDatabase(db.name)
+                    });
+                });
+            } else {
+                this.accounts.forEach((acc) => {
+                    indexedDB.deleteDatabase(acc.cached_roster.database.name);
+                });
+            }
             let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
             for (let key in window.localStorage) {
                 if (key.startsWith(full_storage_name)) {
@@ -58397,7 +58412,7 @@ define("xabber-contacts", [],function () {
                 if (this.connection && this.connection.do_synchronization) {
                     let options = {},
                         max_count = Math.trunc(xabber.chats_view.$el[0].clientHeight/56) > 20 ? Math.trunc(xabber.chats_view.$el[0].clientHeight/56) : 20;
-                    !this.roster.last_chat_msg_id && (options.max = max_count);
+                    !this.roster.last_chat_msg_id && (options.max = ++max_count);
                     this.roster.syncFromServer(options);
                 }
                 this.roster.getRoster();
@@ -64976,6 +64991,7 @@ define("xabber-chats", [],function () {
             this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
+            this.contact.on("change:status", this.updateStatus, this);
             this.contact.on("change:status_updated", this.updateStatus, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onChangedBlocked, this);
