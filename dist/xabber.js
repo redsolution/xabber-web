@@ -46276,7 +46276,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.1.0 (78)","version_description":""}'
+'{"version_number":"2.2.0","version_description":"Implemented OMEMO. Optimized client rendering. Improved group chats, client synchronization. Added new ones configurations"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
