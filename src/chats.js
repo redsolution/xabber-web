@@ -901,7 +901,24 @@ define("xabber-chats", function () {
           }
       });
 
-    xabber.Chat = Backbone.Model.extend({
+      xabber.ChatBase = Backbone.Model.extend({
+          initialize: function (attrs, options) {
+              this.account = options.account;
+              let jid = attrs.jid;
+              this.set({
+                  id: attrs && attrs.id || this.contact.hash_id,
+                  jid: jid
+              });
+              (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
+              this.retraction_version = 0;
+              this.messages = new xabber.Messages(null, {account: this.account});
+              this.item_view = new xabber.ChatItemView({model: this});
+              this.on("get_retractions_list", this.getAllMessageRetractions, this);
+              this._initialize && this._initialize();
+          }
+      });
+
+      xabber.Chat = Backbone.Model.extend({
         defaults: {
             opened: true,
             active: false,
@@ -917,20 +934,22 @@ define("xabber-chats", function () {
 
         initialize: function (attrs, options) {
             this.contact = options.contact;
-            this.account = this.contact.account;
-            let jid = this.contact.get('jid');
+            this.account = this.contact ? this.contact.account : options.account;
+            let jid = this.contact ? this.contact.get('jid') : attrs.jid;
             this.set({
                 id: attrs && attrs.id || this.contact.hash_id,
                 jid: jid
             });
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
             this.retraction_version = 0;
-            this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
-            this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
+            if (this.contact) {
+                this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
+                this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
+                this.contact.on("destroy", this.onContactDestroyed, this);
+            }
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
-            this.contact.on("destroy", this.onContactDestroyed, this);
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
             this.on("change:timestamp", this.onChangedTimestamp, this);
         },
@@ -5008,8 +5027,19 @@ define("xabber-chats", function () {
             this.account.contacts.on("roster_push", this.onRosterPush, this);
         },
 
+        getSavedChat: function () {
+          let jid = this.account.get('jid'),
+              attrs = {jid: jid, saved: true, id: `${jid}:saved`},
+              chat = this.get(attrs.id);
+            if (!chat) {
+                chat = xabber.chats.create(attrs, {account: this.account});
+                this.add(chat);
+            }
+            return chat;
+        },
+
         getChat: function (contact, identifier) {
-            var attrs = null,
+            let attrs = null,
                 id = identifier && `${contact.hash_id}:${identifier}`,
                 chat = id ? this.get(id) : this.get(contact.hash_id);
             if (id)
@@ -6059,7 +6089,7 @@ define("xabber-chats", function () {
 
           _initialize: function () {
               this.contact = this.model.contact;
-              this.account = this.contact.account;
+              this.account = this.contact ? this.contact.account : this.model.account;
               this.$el.attr('data-id', this.model.id + '-' + this.cid);
               this.$el.attr('data-contact-jid', this.contact.get('jid'));
               this.updateName();
