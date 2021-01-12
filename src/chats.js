@@ -8228,7 +8228,7 @@ define("xabber-chats", function () {
 
         // TODO: refactor CSS and remove this
         updateHeight: function () {
-            var bottom_height = xabber.chat_bottom.$el.height();
+            let bottom_height = xabber.chat_bottom.$el.height() + parseInt(xabber.chat_bottom.$el.css('bottom'));
             if (bottom_height) {
                 this.$el.css({bottom: bottom_height});
                 if (this.view) {
@@ -8236,6 +8236,34 @@ define("xabber-chats", function () {
                     this.view.scrolled_to_bottom && this.view.scrollToBottom();
                 }
             }
+        }
+    });
+
+    xabber.NotificationsPlaceholder = xabber.BasicView.extend({
+        className: 'notifications-placeholder',
+        events: {
+            "click .btn-request-notifications": "requestNotifications",
+            "click .mdi-close": "close"
+        },
+
+        _initialize: function (options) {
+            this.$el.html('Xabber for Web needs your permission to <span class="btn-request-notifications">enable desktop notifications</span>');
+            this.$el.append($('<i/>').addClass('mdi mdi-22px mdi-close'));
+        },
+
+        requestNotifications: function () {
+            window.Notification.requestPermission((permission) => {
+                xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
+                this.close();
+            });
+        },
+
+        close: function () {
+            xabber._cache.save('ignore_notifications_warning', true);
+            this.remove();
+            xabber.notifications_placeholder = undefined;
+            xabber.right_panel.$el.removeClass('notifications-request');
+            xabber.chat_body &&  xabber.chat_body.updateHeight();
         }
     });
 

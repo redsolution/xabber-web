@@ -790,6 +790,7 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
+            xabber.notifications_placeholder && xabber.right_panel.$el.addClass('notifications-request');
             $('body').switchClass('xabber-login', name === 'login');
             $('body').switchClass('on-xabber-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
@@ -880,6 +881,7 @@ define("xabber-views", function () {
         },
 
         onUpdatedScreen: function (name) {
+            xabber.notifications_placeholder && xabber.right_panel.$el.append(xabber.notifications_placeholder.$el);
             if ((name === 'account_settings') || ((name === 'all-chats') &&
                 (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
@@ -1291,7 +1293,11 @@ define("xabber-views", function () {
         },
 
         setNotifications: function (ev) {
-            var value = !this.model.get('notifications');
+            let value = this.model.get('notifications');
+            if (value === null) {
+                utils.callback_popup_message("Browser doesn't support notifications", 1500);
+            } else
+                value = !value;
             this.model.save('notifications', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);

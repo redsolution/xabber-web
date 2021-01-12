@@ -246,19 +246,9 @@
                 self._cache.save('notifications', granted);
                 if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
                     self.setUpPushNotifications().done(function (res) {
-                        if (res !== true) {
-                            utils.dialogs.error('Could not enable push notifications! '+res);
-                        }
                         self.check_config.resolve(true);
                     });
                 } else {
-                    if (granted && !self.cache.ignore_push_warning) {
-                        utils.dialogs.warning('Push notifications are not supported',
-                            [{name: 'ignore', text: 'Don\'t show this message again'}]
-                        ).done(function (res) {
-                            res && res.ignore && self._cache.save('ignore_push_warning', true);
-                        });
-                    }
                     self._cache.save('endpoint_key', undefined);
                     self.check_config.resolve(true);
                 }
@@ -301,33 +291,16 @@
         },
 
         requestNotifications: function () {
-            var result = new $.Deferred(),
+            let result = new $.Deferred(),
                 self = this;
             if (!window.Notification) {
-                if (!self.cache.ignore_notifications_warning) {
-                    utils.dialogs.warning(
-                        'Notifications are not supported.',
-                        [{name: 'ignore', text: 'Don\'t show this message again'}]
-                    ).done(function (res) {
-                        res && res.ignore && self._cache.save('ignore_notifications_warning', true);
-                    });
-                }
-                result.resolve(false);
+                result.resolve(null);
             } else if (window.Notification.permission === 'granted') {
                 result.resolve(true);
             } else {
-                window.Notification.requestPermission(function (permission) {
-                    if (permission !== 'granted' && !self.cache.ignore_push_warning) {
-                        utils.dialogs.warning(
-                            'You should allow popup notifications for this site if you want '+
-                            'to receive popups on new messages and some important push notifications.',
-                            [{name: 'ignore', text: 'Don\'t show this message again'}]
-                        ).done(function (res) {
-                            res && res.ignore && self._cache.save('ignore_push_warning', true);
-                        });
-                    }
-                    result.resolve(permission === 'granted');
-                });
+                if (!self.cache.ignore_notifications_warning)
+                    this.notifications_placeholder = new xabber.NotificationsPlaceholder();
+                result.resolve(undefined);
             }
             return result.promise();
         },
