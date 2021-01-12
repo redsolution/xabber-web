@@ -797,7 +797,9 @@ define("xabber-chats", function () {
               if (this.get('jingle_start')) {
                   let end = moment.now(),
                       duration = Math.round((end - this.get('jingle_start'))/1000),
-                      call_attrs = {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration};
+                      call_attrs = {initiator: this.get('call_initiator')};
+                  if (this.call_timer)
+                      _.extend(call_attrs, {start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration});
                   reason && (call_attrs.reason = reason);
                   $reject_msg.c('call', call_attrs).up();
               }

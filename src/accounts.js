@@ -1532,7 +1532,7 @@ define("xabber-accounts", function () {
             },
 
             updateBlocks: function () {
-                var connected = this.model.isConnected();
+                let connected = this.model.isConnected();
                 this.$('.main-info-wrap').switchClass('disconnected', !connected);
                 this.$('.settings-tab[data-block-name="xmpp-resources"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
