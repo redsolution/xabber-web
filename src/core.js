@@ -32,6 +32,7 @@
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
             this.cacheFavicons();
+            this.extendFunction();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -82,6 +83,19 @@
                 }
             }.bind(this);
             rawFile.send();
+        },
+
+        extendFunction: function () {
+            if (!String.prototype.trimStart) {
+                String.prototype.trimStart = function () {
+                    return this.replace(/^\s+/, '');
+                }
+            }
+            if (!String.prototype.trimEnd) {
+                String.prototype.trimEnd = function () {
+                    return Array.from(Array.from(this).reverse().join("").trimStart(/\s$/, '')).reverse().join("");
+                }
+            }
         },
 
         onQuit: function () {
