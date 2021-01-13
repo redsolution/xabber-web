@@ -924,6 +924,7 @@ define("xabber-chats", function () {
                 jid: jid
             });
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
+            (attrs && attrs.type === 'saved') && this.set('saved', true);
             this.retraction_version = 0;
             if (this.contact) {
                 this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
@@ -959,7 +960,7 @@ define("xabber-chats", function () {
 
         recountUnread: function () {
             this.set('unread', this.messages_unread.length);
-            if (this.contact.get('archived') && this.contact.get('muted')) {
+            if (this.contact && this.contact.get('archived') && this.contact.get('muted')) {
             }
             else {
                 xabber.toolbar_view.recountAllMessageCounter();
@@ -1563,27 +1564,35 @@ define("xabber-chats", function () {
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
             this.model.messages.on("destroy", this.onMessageRemoved, this);
-            this.contact.on("change:name", this.updateName, this);
-            this.contact.on("change:status", this.updateStatus, this);
-            this.contact.on("change:private_chat", this.updateIcon, this);
-            this.contact.on("change:invitation", this.updateIcon, this);
-            this.contact.on("change:incognito_chat", this.updateIcon, this);
-            this.contact.on("change:image", this.updateAvatar, this);
-            this.contact.on("change:blocked", this.onBlocked, this);
-            this.contact.on("change:muted", this.updateMutedState, this);
-            this.contact.on("change:archived", this.updateArchivedState, this);
-            this.contact.on("change:group_chat", this.updateGroupChats, this);
-            this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
-            this.contact.on("remove_invite", this.removeInvite, this);
-            this.contact.on("update_trusted", this.updateEncryptedColor, this);
+            if (this.contact) {
+                this.contact.on("change:name", this.updateName, this);
+                this.contact.on("change:status", this.updateStatus, this);
+                this.contact.on("change:private_chat", this.updateIcon, this);
+                this.contact.on("change:invitation", this.updateIcon, this);
+                this.contact.on("change:incognito_chat", this.updateIcon, this);
+                this.contact.on("change:image", this.updateAvatar, this);
+                this.contact.on("change:blocked", this.onBlocked, this);
+                this.contact.on("change:muted", this.updateMutedState, this);
+                this.contact.on("change:archived", this.updateArchivedState, this);
+                this.contact.on("change:group_chat", this.updateGroupChats, this);
+                this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
+                this.contact.on("remove_invite", this.removeInvite, this);
+                this.contact.on("update_trusted", this.updateEncryptedColor, this);
+            }
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
         updateName: function () {
+            if (this.model.get('saved')) {
+                this.$('.chat-title').text('Saved messages');
+                return;
+            }
             this.$('.chat-title').text(this.contact.get('name'));
         },
 
         updateStatus: function () {
+            if (this.model.get('saved'))
+                return;
             let status = this.contact.get('status');
             this.$('.status').attr('data-status', status);
             this.$('.chat-icon').attr('data-status', status);
@@ -1610,7 +1619,9 @@ define("xabber-chats", function () {
         },
 
         updateAvatar: function () {
-            var image = this.contact.cached_image;
+            if (this.model.get('saved'))
+                return;
+            let image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
@@ -1623,18 +1634,24 @@ define("xabber-chats", function () {
         },
 
         updateIcon: function () {
+            if (!this.contact)
+                return;
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
             ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
+            if (!this.contact)
+                return;
             let is_muted = this.contact.get('muted');
             this.$('.msg-counter').switchClass('muted-chat-counter', is_muted);
             this.$('.muted-icon').showIf(is_muted);
         },
 
         updateArchivedState: function () {
+            if (!this.contact)
+                return;
             let archived = this.contact.get('archived');
             if (archived || (!archived && xabber.toolbar_view.$('.active').hasClass('archive-chats')))
                 this.$el.detach();
@@ -1643,6 +1660,8 @@ define("xabber-chats", function () {
         },
 
         updateGroupChats: function () {
+            if (!this.contact)
+                return;
             var is_group_chat = this.contact.get('group_chat');
             this.$('.status').hideIf(is_group_chat);
             this.$('.chat-icon').showIf(is_group_chat);
@@ -2341,9 +2360,8 @@ define("xabber-chats", function () {
             this.account = this.chat_item.account;
             this.model = this.chat_item.model;
             this.contact = this.model.contact;
-            this.head = new xabber.ChatHeadView({content: this});
+            this.head = this.model.get('saved') ? new xabber.SavedChatHeadView({content: this}) : new xabber.ChatHeadView({content: this});
             this.bottom = new xabber.ChatBottomView({content: this});
-            this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
             this.$history_feedback = this.$('.load-history-feedback');
             this.$pinned_message = this.$('.pinned-message');
             this.$search_form = this.$('.search-form-header');
@@ -2362,11 +2380,14 @@ define("xabber-chats", function () {
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
             this.model.messages.on("change:trusted", this.onTrustedChanged, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
-            this.contact.on("change:blocked", this.updateBlockedState, this);
-            this.contact.on("change:group_chat", this.updateGroupChat, this);
-            this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
-            this.account.contacts.on("change:name", this.updateName, this);
-            this.account.contacts.on("change:image", this.updateAvatar, this);
+            if (this.contact) {
+                this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
+                this.contact.on("change:blocked", this.updateBlockedState, this);
+                this.contact.on("change:group_chat", this.updateGroupChat, this);
+                this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
+                this.account.contacts.on("change:name", this.updateName, this);
+                this.account.contacts.on("change:image", this.updateAvatar, this);
+            }
             this.account.on("change", this.updateMyInfo, this);
             this.account.dfd_presence.done(function () {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
@@ -6516,7 +6537,47 @@ define("xabber-chats", function () {
 
     });
 
-    xabber.ChatHeadView = xabber.BasicView.extend({
+      xabber.SavedChatHeadView = xabber.BasicView.extend({
+          className: 'chat-head-wrap',
+          template: templates.saved_chat_head,
+          events: {
+              "click .contact-name": "showSettings",
+              "click .circle-avatar": "showSettings",
+              "click .btn-clear-history": "clearHistory",
+              // "click .btn-delete-chat": "deleteChat",
+              "click .btn-archive-chat": "archiveChat",
+              "click .btn-search-messages": "renderSearchPanel"
+          },
+
+          _initialize: function (options) {
+              this.content = options.content;
+              this.contact = this.content.contact;
+              this.model = this.content.model;
+              this.account = this.model.account;
+              this.model.on("close_chat", this.closeChat, this);
+          },
+
+          closeChat: function () {
+              this.model.set({'opened': false, 'display': false, 'active': false});
+              xabber.chats_view.clearSearch();
+          },
+
+          showSettings: function () {
+              this.account.showSettings();
+          },
+
+          clearHistory: function () {
+              this.content.clearHistory();
+              xabber.chats_view.clearSearch();
+          },
+
+          renderSearchPanel: function () {
+
+          }
+
+      });
+
+      xabber.ChatHeadView = xabber.BasicView.extend({
         className: 'chat-head-wrap',
         template: templates.chat_head,
         avatar_size: constants.AVATAR_SIZES.CHAT_HEAD,
@@ -7007,16 +7068,18 @@ define("xabber-chats", function () {
             this.quill.on("text-change", this.onChangedText, this);
             this.account.on("change:image", this.updateAvatar, this);
             this.account.on('trusting_updated', this.updateEncrypted, this);
-            this.contact.on("change:blocked", this.onBlockedUpdate, this);
-            this.contact.on("reply_selected_messages", this.replyMessages, this);
-            this.contact.on("forward_selected_messages", this.forwardMessages, this);
-            this.contact.on("copy_selected_messages", this.copyMessages, this);
-            this.contact.on("delete_selected_messages", this.deleteMessages, this);
-            this.contact.on("edit_selected_message", this.showEditPanel, this);
-            this.contact.on("pin_selected_message", this.pinMessage, this);
-            this.contact.on('update_my_info', this.updateInfoInBottom, this);
-            this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
-            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
+            if (this.contact) {
+                this.contact.on("change:blocked", this.onBlockedUpdate, this);
+                this.contact.on("reply_selected_messages", this.replyMessages, this);
+                this.contact.on("forward_selected_messages", this.forwardMessages, this);
+                this.contact.on("copy_selected_messages", this.copyMessages, this);
+                this.contact.on("delete_selected_messages", this.deleteMessages, this);
+                this.contact.on("edit_selected_message", this.showEditPanel, this);
+                this.contact.on("pin_selected_message", this.pinMessage, this);
+                this.contact.on('update_my_info', this.updateInfoInBottom, this);
+                this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
+            }
+            this.content_view = (this.view.data.get('visible') ? this.view : (this.contact && this.contact.messages_view)) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
@@ -7128,7 +7191,7 @@ define("xabber-chats", function () {
             this.updateAvatar();
             this.updateEncrypted();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
-            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
+            this.content_view = (this.view.data.get('visible') ? this.view : (this.contact && this.contact.messages_view)) || this.view;
             this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
             this.renderLastEmoticons();
             this.$('.attach-file').showIf(http_upload);
@@ -7272,7 +7335,9 @@ define("xabber-chats", function () {
 
         updateAvatar: function () {
             let image;
-            if (this.contact.get('group_chat')) {
+            if (this.model.get('saved'))
+                return;
+            if (this.contact && this.contact.get('group_chat')) {
                 if (this.contact.my_info)
                     if (this.contact.my_info.get('b64_avatar'))
                         image = this.contact.my_info.get('b64_avatar');
@@ -7899,7 +7964,6 @@ define("xabber-chats", function () {
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
                     xabber.chats_view.openChat(this.model.item_view, {clear_search: true, screen: xabber.body.screen.get('name')});
-                    // this.contact.messages_view.openChat();
         },
 
         setEditedMessage: function (message) {

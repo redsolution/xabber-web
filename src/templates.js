@@ -85,6 +85,7 @@ define("xabber-templates", [
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
+    "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_bottom.html",
     "text!templates/chats/subscription_buttons.html",
@@ -267,6 +268,7 @@ define("xabber-templates", [
     addTemplate('chats.add_chat_account_item');
     addTemplate('chats.chat_item');
     addTemplate('chats.chat_head');
+    addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_bottom');
     addTemplate('chats.subscription_buttons');
