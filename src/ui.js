@@ -16,7 +16,7 @@ define("xabber-ui", function () {
             }
             let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
-                if (xabber.body.$el.siblings('#modals').children().length)
+                if (xabber.body.$el.siblings('#modals').children('.open').length)
                     return;
                 if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);

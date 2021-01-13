@@ -4816,7 +4816,7 @@ define("xabber-contacts", function () {
                             alignment: 'left'
                         });
                     }.bind(this),
-                    complete: this.hide.bind(this)
+                    complete: this.close.bind(this)
                 });
                 return this;
             },

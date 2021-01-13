@@ -901,23 +901,6 @@ define("xabber-chats", function () {
           }
       });
 
-      xabber.ChatBase = Backbone.Model.extend({
-          initialize: function (attrs, options) {
-              this.account = options.account;
-              let jid = attrs.jid;
-              this.set({
-                  id: attrs && attrs.id || this.contact.hash_id,
-                  jid: jid
-              });
-              (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
-              this.retraction_version = 0;
-              this.messages = new xabber.Messages(null, {account: this.account});
-              this.item_view = new xabber.ChatItemView({model: this});
-              this.on("get_retractions_list", this.getAllMessageRetractions, this);
-              this._initialize && this._initialize();
-          }
-      });
-
       xabber.Chat = Backbone.Model.extend({
         defaults: {
             opened: true,
@@ -1798,6 +1781,7 @@ define("xabber-chats", function () {
         open: function (options) {
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
+            xabber.message_sent && this.content.bottom.updatePlaceholder();
         },
 
         removeInvite: function (options) {
@@ -3960,6 +3944,7 @@ define("xabber-chats", function () {
         },
 
           msgCallback: function (msg_sending_timestamp, message) {
+              xabber.message_sent = true;
               if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                   setTimeout(function () {
                       if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -5029,7 +5014,7 @@ define("xabber-chats", function () {
 
         getSavedChat: function () {
           let jid = this.account.get('jid'),
-              attrs = {jid: jid, saved: true, id: `${jid}:saved`},
+              attrs = {jid: jid, type: 'saved', id: `${jid}:saved`},
               chat = this.get(attrs.id);
             if (!chat) {
                 chat = xabber.chats.create(attrs, {account: this.account});
@@ -5584,7 +5569,7 @@ define("xabber-chats", function () {
                     this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 }.bind(this),
-                complete: this.hide.bind(this)
+                complete: this.close.bind(this)
             });
 
         },
@@ -5661,7 +5646,11 @@ define("xabber-chats", function () {
         },
 
         close: function () {
-            this.$el.closeModal({ complete: this.hide.bind(this) });
+            this.$el.closeModal({ complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
         },
 
         updateGroupJid: function () {
@@ -7354,6 +7343,16 @@ define("xabber-chats", function () {
                 this.$('.ql-toolbar.ql-snow').hide();
                 this.$('.last-emoticons').show();
             }
+        },
+
+        updatePlaceholder: function () {
+            let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                placeholder = constants.ONELINERS[rand_idx];
+            if (!placeholder) {
+                this.updatePlaceholder();
+                return;
+            }
+            this.quill.root.setAttribute('data-placeholder', placeholder);
         },
 
         changeEncryption: function () {
