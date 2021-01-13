@@ -461,14 +461,19 @@ define("xabber-contacts", function () {
             },
 
             sendPresent: function () {
-                var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
+                let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#present'});
                 this.account.sendPres(pres);
+                this._sending_present_interval = setInterval(() => {
+                    this.account.sendPres(pres);
+                }, constants.PRESENT_INTERVAL);
             },
 
             sendNotPresent: function () {
                 var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#not-present'});
+                clearInterval(this._sending_present_interval);
+                this._sending_present_interval = null;
                 this.account.sendPres(pres);
             },
 
