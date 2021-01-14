@@ -5605,9 +5605,9 @@ define("xabber-chats", function () {
             this.$('.incognito-field .public-item-wrap').showIf(options.public);
             this.$('.incognito-field .incognito-item-wrap').showIf(options.incognito);
             if (options.public)
-                this.$('.panel-header').text('Create Group');
+                this.$('.modal-header span').text('Create Group');
             if (options.incognito)
-                this.$('.panel-header').text('Create Incognito Group');
+                this.$('.modal-header span').text('Create Incognito Group');
             this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
             this.$('#new_chat_domain').val("");
             this.$('input[name=chat_name]').val("");

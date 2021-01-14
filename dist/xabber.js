@@ -44513,7 +44513,7 @@ define('text!templates/api_service/sync_settings_account_item.html',[],function 
 define('text!templates/accounts/xmpp_login.html',[],function () { return '    <div class="login-panel-head noselect">\n        <img src="images/xabber-logo.png" class="client-logo">\n        <span class="client-name">Xabber</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="input-field">\n            <input id="jid" type="text" name="jid">\n            <label for="jid">XMPP ID</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">Password</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{REGISTER_XMPP_ACCOUNT}}" target="_blank" class="btn-flat btn-main btn-forgot-password">Register an XMPP account</a>{[}]}\n            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>\n        </div>\n        <div class="clearfix"></div>\n        {[if (constants.USE_SOCIAL_AUTH){]}\n        <div class="social-auth-wrap">\n            <div class="social-header">\n                <div class="divider"></div>\n                <div class="social-header-tip">Social Login</div>\n            </div>\n            <div class="social-buttons">\n                <div class="btn-social google-color" data-provider="google">\n                    <i class="mdi mdi-28px mdi-google-plus"></i>\n                </div>\n                <div class="btn-social facebook-color" data-provider="facebook">\n                    <i class="mdi mdi-28px mdi-facebook"></i>\n                </div>\n                <div class="btn-social twitter-color" data-provider="twitter">\n                    <i class="mdi mdi-28px mdi-twitter"></i>\n                </div>\n                <div class="btn-social xabber-color" data-provider="email">\n                    <i class="mdi mdi-28px mdi-at"></i>\n                </div>\n            </div>\n        </div>\n        {[}]}\n    </div>';});
 
 
-define('text!templates/accounts/add_account.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Add new account</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid">\n                <label for="jid">Username</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">Password</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n        <div class="sync-option">\n            <input type="checkbox" class="filled-in" id="{{view.cid}}_sync_acc"/>\n            <label for="{{view.cid}}_sync_acc">Synchronize with Xabber account</label>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">Add</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
+define('text!templates/accounts/add_account.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Add Account</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid">\n                <label for="jid">Username</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">Password</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n        <div class="sync-option">\n            <input type="checkbox" class="filled-in" id="{{view.cid}}_sync_acc"/>\n            <label for="{{view.cid}}_sync_acc">Synchronize with Xabber account</label>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">Add</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
 
 
 define('text!templates/accounts/change_password.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Set password</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid" readonly>\n                <label for="jid">Username</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">Password</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-change">Set</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
@@ -44582,7 +44582,7 @@ define('text!templates/contacts/group_right.html',[],function () { return '<div 
 define('text!templates/contacts/group_left.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="group-head">\n    <i class="arrow mdi mdi-20px"></i>\n    <div class="group-title">\n        <span class="group-name one-line"></span>\n        <span class="member-counter one-line"></span>\n    </div>\n    <i class="group-icon mdi mdi-20px hidden"></i>\n</div>\n';});
 
 
-define('text!templates/contacts/add_contact.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Add new contact</span>\n    </div>\n    <div class="modal-content">\n        <div class="row account-field">\n            <div class="field-header">Account</div>\n            <div class="multiple-acc">\n                <div class="account-dropdown-wrap">\n                    <div class="dropdown-button" data-activates="select-account-for-add-contact">\n                        <div class="account-item-wrap">\n                        </div>\n                        <div class="caret">\n                            <i class="mdi mdi-20px mdi-menu-down"></i>\n                        </div>\n                    </div>\n                    <div id="select-account-for-add-contact" class="dropdown-content noselect">\n                    </div>\n                </div>\n            </div>\n            <div class="single-acc">\n                <div class="dropdown-button">\n                    <div class="account-item-wrap">\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="row name-field">\n            <div class="input-field">\n                <input id="new_contact_username" type="text" name="username">\n                <label for="new_contact_username">Contact JID</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="new_contact_name" type="text" name="contact_name" required>\n                <label for="new_contact_name">Contact name</label>\n            </div>\n            <span class="add-contact-feedback red-text"></span>\n        </div>\n        <div class="row groups-field">\n            <div class="field-header">Circles</div>\n            <div class="groups checkbox-list">\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">Add</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
+define('text!templates/contacts/add_contact.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>Add Contact</span>\n    </div>\n    <div class="modal-content">\n        <div class="row account-field">\n            <div class="field-header">Account</div>\n            <div class="multiple-acc">\n                <div class="account-dropdown-wrap">\n                    <div class="dropdown-button" data-activates="select-account-for-add-contact">\n                        <div class="account-item-wrap">\n                        </div>\n                        <div class="caret">\n                            <i class="mdi mdi-20px mdi-menu-down"></i>\n                        </div>\n                    </div>\n                    <div id="select-account-for-add-contact" class="dropdown-content noselect">\n                    </div>\n                </div>\n            </div>\n            <div class="single-acc">\n                <div class="dropdown-button">\n                    <div class="account-item-wrap">\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="row name-field">\n            <div class="input-field">\n                <input id="new_contact_username" type="text" name="username">\n                <label for="new_contact_username">Contact JID</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="new_contact_name" type="text" name="contact_name" required>\n                <label for="new_contact_name">Contact name</label>\n            </div>\n            <span class="add-contact-feedback red-text"></span>\n        </div>\n        <div class="row groups-field">\n            <div class="field-header">Circles</div>\n            <div class="groups checkbox-list">\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">Add</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n    </div>\n</div>\n';});
 
 
 define('text!templates/contacts/contact_right_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <p class="name one-line"></p>\n    <p class="jid one-line hidden"></p>\n    <p class="status-message one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>\n';});
@@ -44756,7 +44756,7 @@ define('text!templates/chats/archive_placeholder.html',[],function () { return '
 define('text!templates/chats/group_chats/pinned_message_panel.html',[],function () { return '<div class="modal-content full-pinned-message">\n</div>\n';});
 
 
-define('text!templates/chats/group_chats/add_group_chat.html',[],function () { return '<div class="modal-header">\n    <div class="panel-header black-text">Create group</div>\n</div>\n<div class="modal-content">\n    <div class="row account-field">\n        <i class="field-icon mdi mdi-24px mdi-account-circle"></i>\n        <div class="multiple-acc">\n            <div class="account-dropdown-wrap">\n                <div class="dropdown-button" data-activates="select-account-for-creating-groupchat">\n                    <div class="account-item-wrap">\n                    </div>\n                    <div class="caret">\n                        <i class="mdi mdi-20px mdi-menu-down"></i>\n                    </div>\n                </div>\n                <div id="select-account-for-creating-groupchat" class="dropdown-content noselect">\n                </div>\n            </div>\n        </div>\n        <div class="single-acc">\n            <div class="dropdown-button">\n                <div class="account-item-wrap">\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="row name-field">\n        <i class="field-icon mdi mdi-24px mdi-pencil"></i>\n        <div class="input-field input-group-chat-name">\n            <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group name" required>\n        </div>\n    </div>\n    <div class="row jid-field">\n        <svg class="field-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        <div class="property-field xmpp-server-dropdown-wrap">\n            <div class="select-xmpp-server">\n                <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                <div class="input-field input-group-chat-domain hidden">\n                    <input id="new_chat_domain" type="text" placeholder="domain" name="chat_domain">\n                </div>\n                <div data-activates="select-xmpp-server" class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-xmpp-server" class="dropdown-content noselect">\n                <div class="property-variant set-custom-domain">custom server...</div>\n            </div>\n        </div>\n        <div class="input-field input-group-chat-jid">\n            <input id="new_chat_jid" type="text" placeholder="jid" name="chat_jid">\n        </div>\n    </div>\n    <div class="row incognito-field">\n        <i class="field-icon mdi mdi-24px mdi-incognito"></i>\n        <div class="property-field incognito-dropdown-wrap">\n           <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>\n           <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">Incognito</div></div>\n        </div>\n    </div>\n    <div class="row global-field">\n        <svg class="field-icon toolbar-icon mdi mdi-24px" viewBox="0 0 24 24">\n            <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z"></path>\n        </svg>\n        <div class="property-field global-dropdown-wrap">\n            <div class="dropdown-button" data-activates="select-global">\n                <div class="global-item-wrap property-wrap"><div data-value="none" class="property-value">Not indexed</div></div>\n                <div class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-global" class="dropdown-content noselect">\n                <div data-value="none" class="property-variant default-value">Not indexed</div>\n                <div data-value="local" class="property-variant">Local index</div>\n                <div data-value="global" class="property-variant">Global index</div>\n            </div>\n        </div>\n    </div>\n    <div class="row membership-field">\n        <i class="field-icon mdi mdi-24px mdi-lock"></i>\n        <div class="property-field membership-dropdown-wrap">\n            <div class="dropdown-button" data-activates="select-membership">\n                <div class="membership-item-wrap property-wrap"><div data-value="open" class="property-value">Open membership</div></div>\n                <div class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-membership" class="dropdown-content noselect">\n                <div data-value="open" class="property-variant default-value">Open membership</div>\n                <div data-value="member-only" class="property-variant">Member-only</div>\n            </div>\n        </div>\n    </div>\n    <div class="row description-field">\n        <i class="field-icon mdi mdi-24px mdi-sort-variant"></i>\n        <div class="input-field input-message">\n            <div class="rich-textarea-wrap notranslate">\n                <div class="rich-textarea" tabindex="2" contenteditable=""></div>\n                <div class="placeholder">Write a description...</div>\n            </div>\n        </div>\n    </div>\n</div>\n</div>\n<div class="modal-footer">\n    <span class="errors"></span>\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">Create</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n</div>';});
+define('text!templates/chats/group_chats/add_group_chat.html',[],function () { return '<div class="modal-header">\n    <span>Create Group</span>\n</div>\n<div class="modal-content">\n    <div class="row account-field">\n        <i class="field-icon mdi mdi-24px mdi-account-circle"></i>\n        <div class="multiple-acc">\n            <div class="account-dropdown-wrap">\n                <div class="dropdown-button" data-activates="select-account-for-creating-groupchat">\n                    <div class="account-item-wrap">\n                    </div>\n                    <div class="caret">\n                        <i class="mdi mdi-20px mdi-menu-down"></i>\n                    </div>\n                </div>\n                <div id="select-account-for-creating-groupchat" class="dropdown-content noselect">\n                </div>\n            </div>\n        </div>\n        <div class="single-acc">\n            <div class="dropdown-button">\n                <div class="account-item-wrap">\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="row name-field">\n        <i class="field-icon mdi mdi-24px mdi-pencil"></i>\n        <div class="input-field input-group-chat-name">\n            <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group name" required>\n        </div>\n    </div>\n    <div class="row jid-field">\n        <svg class="field-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        <div class="property-field xmpp-server-dropdown-wrap">\n            <div class="select-xmpp-server">\n                <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                <div class="input-field input-group-chat-domain hidden">\n                    <input id="new_chat_domain" type="text" placeholder="domain" name="chat_domain">\n                </div>\n                <div data-activates="select-xmpp-server" class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-xmpp-server" class="dropdown-content noselect">\n                <div class="property-variant set-custom-domain">custom server...</div>\n            </div>\n        </div>\n        <div class="input-field input-group-chat-jid">\n            <input id="new_chat_jid" type="text" placeholder="jid" name="chat_jid">\n        </div>\n    </div>\n    <div class="row incognito-field">\n        <i class="field-icon mdi mdi-24px mdi-incognito"></i>\n        <div class="property-field incognito-dropdown-wrap">\n           <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>\n           <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">Incognito</div></div>\n        </div>\n    </div>\n    <div class="row global-field">\n        <svg class="field-icon toolbar-icon mdi mdi-24px" viewBox="0 0 24 24">\n            <path d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z"></path>\n        </svg>\n        <div class="property-field global-dropdown-wrap">\n            <div class="dropdown-button" data-activates="select-global">\n                <div class="global-item-wrap property-wrap"><div data-value="none" class="property-value">Not indexed</div></div>\n                <div class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-global" class="dropdown-content noselect">\n                <div data-value="none" class="property-variant default-value">Not indexed</div>\n                <div data-value="local" class="property-variant">Local index</div>\n                <div data-value="global" class="property-variant">Global index</div>\n            </div>\n        </div>\n    </div>\n    <div class="row membership-field">\n        <i class="field-icon mdi mdi-24px mdi-lock"></i>\n        <div class="property-field membership-dropdown-wrap">\n            <div class="dropdown-button" data-activates="select-membership">\n                <div class="membership-item-wrap property-wrap"><div data-value="open" class="property-value">Open membership</div></div>\n                <div class="caret">\n                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                </div>\n            </div>\n            <div id="select-membership" class="dropdown-content noselect">\n                <div data-value="open" class="property-variant default-value">Open membership</div>\n                <div data-value="member-only" class="property-variant">Member-only</div>\n            </div>\n        </div>\n    </div>\n    <div class="row description-field">\n        <i class="field-icon mdi mdi-24px mdi-sort-variant"></i>\n        <div class="input-field input-message">\n            <div class="rich-textarea-wrap notranslate">\n                <div class="rich-textarea" tabindex="2" contenteditable=""></div>\n                <div class="placeholder">Write a description...</div>\n            </div>\n        </div>\n    </div>\n</div>\n</div>\n<div class="modal-footer">\n    <span class="errors"></span>\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">Create</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n</div>';});
 
 
 define('text!templates/chats/group_chats/invitation_panel_view.html',[],function () { return '    <div class="modal-header noselect">\n        <div class="panel-header">\n            <span class="header">Invite users</span>\n        </div>\n    </div>\n    <div class="modal-content noselect">\n        <div class="chats-search-form search-form">\n            <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n            <input type="text" class="search-input simple-input-field" placeholder="Search">\n            <i class="close-search-icon mdi mdi-20px mdi-close"></i>\n        </div>\n        <div class="contacts-list-wrap">\n        </div>\n        <div class="error hidden">No matches</div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add"><span class="counter hidden"></span>Invite</button>\n        <button class="btn-flat btn-dark btn-main btn-cancel">Cancel</button>\n        <span class="errors"></span>\n    </div>';});
@@ -46452,7 +46452,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (2)","version_description":""}'
+'{"version_number":"2.2.0 (3)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -47699,16 +47699,16 @@ define("xabber-views", [],function () {
         },
 
         _initialize: function () {
-            var $menu_overlay = $('<div class="lean-overlay toolbar-menu"></div>');
-
             this.$('.add-something').on("change_state", function (ev, state) {
                 $(this).switchClass('active', state).find('.mdi')
                         .switchClass('mdi-close', state)
                         .switchClass('mdi-plus', !state);
                 if (state) {
-                    $menu_overlay.appendTo('body');
+                    this.setAttribute('data-title',  this.getAttribute('title'));
+                    this.setAttribute('title', "");
                 } else {
-                    $menu_overlay.detach();
+                    this.setAttribute('title', this.getAttribute('data-title'));
+                    this.removeAttribute('data-title');
                 }
             });
 
@@ -59552,6 +59552,7 @@ define("xabber-chats", [],function () {
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
             (attrs && attrs.type === 'saved') && this.set('saved', true);
             this.retraction_version = 0;
+            this.get('saved') && this.set('timestamp', moment.now());
             if (this.contact) {
                 this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
                 this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
@@ -60205,6 +60206,9 @@ define("xabber-chats", [],function () {
                 this.contact.on("remove_invite", this.removeInvite, this);
                 this.contact.on("update_trusted", this.updateEncryptedColor, this);
             }
+            this.$el.switchClass('saved-chat', this.model.get('saved'));
+            this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
+            this.model.get('saved') && this.$el.find('.circle-avatar').append($('<i/>').addClass('mdi mdi-36px mdi-bookmark-outline'));
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -60426,7 +60430,8 @@ define("xabber-chats", [],function () {
         open: function (options) {
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
-            this.content.bottom.updatePlaceholder(this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...');
+            this.content.bottom.click_counter = 0;
+            this.content.bottom.setDefaultPlaceholder();
         },
 
         removeInvite: function (options) {
@@ -62591,7 +62596,8 @@ define("xabber-chats", [],function () {
         },
 
           msgCallback: function (msg_sending_timestamp, message) {
-              this.bottom.setOneLiner();
+              this.bottom.click_counter = 0;
+              this.bottom.setDefaultPlaceholder();
               if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                   setTimeout(function () {
                       if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -64168,7 +64174,7 @@ define("xabber-chats", [],function () {
     });
 
     xabber.AddGroupChatView = xabber.SearchView.extend({
-        className: 'modal dialog-modal main-modal add-group-chat-modal add-contact-modal',
+        className: 'modal main-modal add-group-chat-modal add-contact-modal',
         template: templates.group_chats.add_group_chat,
         avatar_size: constants.AVATAR_SIZES.ACCOUNT_ITEM,
         ps_selector: '.rich-textarea',
@@ -64225,9 +64231,9 @@ define("xabber-chats", [],function () {
             this.$('.incognito-field .public-item-wrap').showIf(options.public);
             this.$('.incognito-field .incognito-item-wrap').showIf(options.incognito);
             if (options.public)
-                this.$('.panel-header').text('Create public group');
+                this.$('.modal-header span').text('Create Group');
             if (options.incognito)
-                this.$('.panel-header').text('Create incognito group');
+                this.$('.modal-header span').text('Create Incognito Group');
             this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
             this.$('#new_chat_domain').val("");
             this.$('input[name=chat_name]').val("");
@@ -64565,11 +64571,11 @@ define("xabber-chats", [],function () {
                 return;
             if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
                 return;
-            active_toolbar.hasClass('group-chats') && view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => chat.contact.get('group_chat') && !chat.contact.get('archived')));
-            active_toolbar.hasClass('chats') && !view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => !chat.contact.get('group_chat') && !chat.contact.get('archived')));
-            active_toolbar.hasClass('all-chats') && !view.contact.get('archived') && this.replaceChatItem(item, this.model.filter(chat => !chat.contact.get('archived')));
-            active_toolbar.hasClass('archive-chats') && view.contact.get('archived') && this.replaceChatItem(item, this.model.filter(chat => chat.contact.get('archived')));
-            active_toolbar.hasClass('account-item') && (view.account.get('jid') === active_toolbar.attr('data-jid')) && this.replaceChatItem(item, this.model.filter(chat => chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.contact.get('archived')));
+            active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && !chat.contact.get('archived')));
+            active_toolbar.hasClass('chats') && (view.model.get('saved') || !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && !chat.contact.get('archived')));
+            active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.contact.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.contact.get('archived')));
+            active_toolbar.hasClass('archive-chats') && (view.model.get('saved') || view.contact.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.contact.get('archived')));
+            active_toolbar.hasClass('account-item') && (view.model.get('saved') || (view.account.get('jid') === active_toolbar.attr('data-jid'))) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.contact.get('archived')));
         },
 
         onEnterPressed: function (selection) {
@@ -64604,7 +64610,7 @@ define("xabber-chats", [],function () {
             view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
             options.clear_search && this.clearSearch();
-            if (!view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
+            if (view.contact && !view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
                 view.model.set('display', true);
                 view.model.set('active', true);
                 xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
@@ -64629,7 +64635,7 @@ define("xabber-chats", [],function () {
                     chat_item: view,
                     blocked: view.contact.get('blocked')
                 });
-                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                if (view.contact && !view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
             }
@@ -65589,6 +65595,7 @@ define("xabber-chats", [],function () {
         _initialize: function (options) {
             this.view = options.content;
             this.model = this.view.model;
+            this.click_counter = 0;
             let rich_textarea_wrap = this.$('.rich-textarea-wrap');
             let bindings = {
                 enter: {
@@ -65925,6 +65932,14 @@ define("xabber-chats", [],function () {
 
         onClickBottom: function (ev) {
             (this.$el.hasClass('chat-bottom-blocked-wrap') && !$(ev.target).closest('.message-actions-panel').length) && this.contact.showDetails(xabber.body.screen.get('name'));
+            if ($(ev.target).closest('.ql-editor.rich-textarea').length) {
+                if (!this.quill.getText().trim().length) {
+                    if (++this.click_counter === 3) {
+                        this.click_counter = 0;
+                        this.setOneLiner();
+                    }
+                }
+            }
         },
 
         updateInfoInBottom: function () {
@@ -66037,15 +66052,18 @@ define("xabber-chats", [],function () {
         },
 
         setOneLiner: function () {
-            if (Math.random() <= 1/30) {
-                let rand_idx = _.random(0, constants.ONELINERS.length - 1),
-                    placeholder = constants.ONELINERS[rand_idx];
-                if (!placeholder) {
-                    this.updatePlaceholder();
-                    return;
-                }
-                this.updatePlaceholder(placeholder);
+            let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                placeholder = constants.ONELINERS[rand_idx];
+            if (!placeholder) {
+                this.setOneLiner();
+                return;
             }
+            this.updatePlaceholder(placeholder);
+        },
+
+        setDefaultPlaceholder: function () {
+            let placeholder = this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...';
+            this.updatePlaceholder(placeholder);
         },
 
         updatePlaceholder: function (placeholder) {
@@ -66157,6 +66175,10 @@ define("xabber-chats", [],function () {
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
+            if (text) {
+                this.click_counter = 0;
+                this.setDefaultPlaceholder();
+            }
             if (ev.keyCode === constants.KEY_ARROW_UP) {
                 if (!text) {
                     let $msg = this.view.$('.chat-message[data-from="' + this.account.get('jid') + '"]').last();
@@ -66599,6 +66621,8 @@ define("xabber-chats", [],function () {
         },
 
         setEditedMessage: function (message) {
+            this.click_counter = 0;
+            this.setDefaultPlaceholder();
             let msg_text = message.get('message') || "";
             this.$('.fwd-messages-preview').showIf(this.edit_message);
             this.$('.fwd-messages-preview .msg-author').text('Edit message');
