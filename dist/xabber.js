@@ -43570,6 +43570,7 @@ var constants = {
         unavailable:    7
     },
 
+    PRESENT_INTERVAL: 30000,
     CHATSTATE_INTERVAL_COMPOSING_AUDIO: 5000,
     CHATSTATE_TIMEOUT_PAUSED:   15000,
     CHATSTATE_TIMEOUT_STOPPED:  5000,
@@ -43840,7 +43841,177 @@ var constants = {
     GCM_SENDER_ID: '868637702480',
     GCM_API_KEY: 'AIzaSyC1JCBB3LLf_4DG_vRWMEEe0I4X5msEU-M',
     MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive',
-    STANZA_MAX_SIZE: Math.pow(2,16)
+    STANZA_MAX_SIZE: Math.pow(2,16),
+
+    ONELINERS: [
+        "Ready to rock?",
+        "Groovy!",
+        "Be the change!",
+        "Believe in yourself!",
+        "Change is good!",
+        "Carpe Diem!",
+        "Focus and win!",
+        "Spice must flow!",
+        "Knowledge is power!",
+        "Live your potential!",
+        "Make it happen!",
+        "Never give up!",
+        "Success is yours!",
+        "Yes you can!",
+        "Happy trails!",
+        "Stay vigilant!",
+        "Keep it simple!",
+        "Happiness is Choice!",
+        "Friends are treasures!",
+        "Citius, Altius, Fortius!",
+        "Aim high!",
+        "Be yourself!",
+        "Dream big!",
+        "There be dragons!",
+        "Hello gorgeous!",
+        "Infinite possibilities!",
+        "Pretty awesome!",
+        "Rise above!",
+        "Woo hoo!",
+        "Now or never!",
+        "No strings attached!",
+        "Time heals everything!",
+        "Words can hurt!",
+        "Try new things!",
+        "Less is more!",
+        "Trust your gut!",
+        "You are beautiful!",
+        "Straight into success!",
+        "Get this done!",
+        "Why not now?",
+        "Got a dream?",
+        "Keep going!",
+        "They live! 😎",
+        "Break the routine!",
+        "Hello there!",
+        "Passion never fails!",
+        "More coffee please!",
+        "Expect great things!",
+        "Flex that smile)",
+        "Remember to live!",
+        "See the world!",
+        "A fresh start!",
+        "Real is rare!",
+        "Dare to fail!",
+        "Here & now!",
+        "Just be happy!",
+        "With ❤️",
+        "Follow that dream!",
+        "This is fine.",
+        "It's ok, I still love you 💖",
+        "Use your imagination!",
+        "Because you can!",
+        "Make it count!",
+        "Oh what a day!",
+        "Embrace the love!",
+        "Attitude is everything!",
+        "Float like a butterfly!",
+        "Sting like a bee!",
+        "Normal is boring!",
+        "Life is good!",
+        "Here's looking at you, kid!",
+        "We'll always have Paris!",
+        "Play it, Sam!",
+        "You can't take the sky from me!",
+        "TANSTAAFL",
+        "Free as in freedom!",
+        "Alwaуs have the high ground!",
+        "Zed's dead, baby.",
+        "It's an offer you can't refuse!",
+        "Radiate positive vibes!",
+        "Time is Now!",
+        "Inconceivable!",
+        "En Taro Adun, Executor!",
+        "My life for Auir!",
+        "I do this for Aiur!",
+        "Kirov reporting!",
+        "You're the one who knocks!",
+        "It shall be done!",
+        "This should be good!",
+        "Go ahead, Commander!",
+        "Sounds fun!",
+        "Additional supply depots required!",
+        "Not enough minerals!",
+        "All crews reporting!",
+        "Fasten your seatbelts!",
+        "Transmit orders!",
+        "Reporting for duty!",
+        "Transmit coordinates!",
+        "It'd be a pleasure!",
+        "What is thy bidding, my master?",
+        "We are the Borg!",
+        "Prepare to be assimilated!",
+        "It's only a flesh wound!",
+        "Everything Changed When the Fire Nation Attacked!",
+        "I used to be a user like you!",
+        "The Boulder feels conflicted!",
+        "Everything is connected!",
+        "Follow the White Rabbit!",
+        "Red or Blue pill?",
+        "Wake up, Neo!",
+        "Stannis is one true king!",
+        "The sleeper must awaken!",
+        "Fear is the mind-killer!",
+        "Shaken, not stirred!",
+        "We aim to please!",
+        "Enjoy it while it lasts!",
+        "Let off some steam!",
+        "See you at the party!",
+        "Game over, man! Game over!",
+        "Frankly, my dear, I don't give a damn!",
+        "Go ahead, make my day!",
+        "May the Force be with you!",
+        "You talkin' to me?",
+        "Rosebud.",
+        "E.T. phone home!",
+        "Can you handle the truth?",
+        "Tomorrow is another day!",
+        "I'll be back!",
+        "It's alive! It's alive!",
+        "Well, nobody's perfect!",
+        "Houston, we've had a problem!",
+        "We've had a main B bus undervolt!",
+        "You had me at 'hello!",
+        "Here's Johnny!",
+        "Soylent Green is people!",
+        "Open the pod bay doors, HAL!",
+        "I'm sorry, Dave, I'm afraid I can't do that!",
+        "Who's on first?",
+        "Nobody puts Baby in a corner!",
+        "Do not talk about Fight Club!",
+        "Why so serious?",
+        "To infinity and beyond!",
+        "Leave the gun. Take the cannoli!",
+        "These go to eleven!",
+        "It's dangerous to go alone. Take this!",
+        "Cake is a lie!",
+        "Our Princess is in another castle!",
+        "Do a barrel roll!",
+        "War. War never changes.",
+        "Does this unit have a soul?",
+        "Dany kind of forgot about the Iron Fleet!",
+        "This is major Tom to ground control!",
+        "We're gonna need a bigger boat!",
+        "My precious!",
+        "This is SPARTA!!!",
+        "I’ll have what she’s having!",
+        "We all go a little mad sometimes!",
+        "Are you not entertained?",
+        "Live Long and Prosper 🖖",
+        "Avengers, Assemble!",
+        "Wanna know how I got these scars?",
+        "The night is darkest before the dawn",
+        "How about another joke, Murray?",
+        "I, for one, like Roman numerals",
+        "We'll bang, OK?",
+        "Throw it out the airlock",
+        "I don't need luck. I have ammo."
+    ]
 };
 
 constants.JINGLE_MSG_STATE = {};
@@ -44303,7 +44474,7 @@ define('text!templates/base/jingle_message_calling.html',[],function () { return
 define('text!templates/base/input_widget.html',[],function () { return '<div class="input-widget-wrap {{field_name}}-wrap">\n    <div class="{{field_name}} field-text one-line"></div>\n    <div class="btn-rename">\n        <span>rename</span>\n    </div>\n    <div class="{{field_name}}-input-wrap">\n        <input class="{{field_name}}-input field-input hidden" type="{{field_type}}" placeholder="{{placeholder}}">\n    </div>\n</div>\n';});
 
 
-define('text!templates/base/toolbar.html',[],function () { return '<div class="toolbar-item all-chats active" title="All chats">\n    <div class="border"></div>\n    <img class="logo" src="images/xabber-logo.png">\n    <span class="all-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item chats" title="Chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>\n    <span class="msg-indicator"></span>\n</div>\n\n<div class="toolbar-item group-chats" title="Group chats">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" data-svgname="message-group"></svg>\n    <span class="group-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item mentions" title="Mentions">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-at"></svg>\n    <span class="mentions-indicator"></span>\n</div>\n\n<div class="toolbar-item archive-chats" title="Archive chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>\n    <span class="archive-msg-indicator hidden"></span>\n</div>\n\n<div class="toolbar-item contacts" title="Contacts">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>\n</div>\n\n<div class="toolbar-item search" title="Search">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-searching"></svg>\n</div>\n\n<div class="add-something-wrap">\n    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add group, contact or account">\n        <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>\n    </div>\n\n    <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">\n        <div class="add-variant public-groupchat">\n            <i class="mdi mdi-20px mdi-account-multiple-plus"></i>\n            <span class="text">Create public group</span>\n        </div>\n        <div class="add-variant incognito-groupchat">\n            <svg class="mdi mdi-20px" viewBox="0 0 24 24">\n                <path d="M13 11A3 3 0 1 0 10 8A3 3 0 0 0 13 11M13 7A1 1 0 1 1 12 8A1 1 0 0 1 13 7M17.11 10.86A5 5 0 0 0 17.11 5.14A2.91 2.91 0 0 1 18 5A3 3 0 0 1 18 11A2.91 2.91 0 0 1 17.11 10.86M13 13C7 13 7 17 7 17V19H19V17S19 13 13 13M9 17C9 16.71 9.32 15 13 15C16.5 15 16.94 16.56 17 17M24 17V19H21V17A5.6 5.6 0 0 0 19.2 13.06C24 13.55 24 17 24 17M8 12H5V15H3V12H0V10H3V7H5V10H8Z" />\n            </svg>\n            <span class="text">Create incognito group</span>\n        </div>\n        <div class="add-variant contact">\n            <i class="mdi mdi-20px mdi-account-plus"></i>\n            <span class="text">Add contact</span>\n        </div>\n        <div class="add-variant account">\n            <i class="mdi mdi-20px mdi-account-circle"></i>\n            <span class="text">Add account</span>\n        </div>\n    </div>\n</div>\n\n<div class="divider noselect"></div>\n\n<div class="accounts-wrap">\n    <div class="accounts">\n    </div>\n</div>\n\n<div class="toolbar-bottom">\n    <div class="toolbar-item about" title="About">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-information"></i>\n    </div>\n    <div class="toolbar-item settings" title="Settings">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>\n    </div>\n</div>\n';});
+define('text!templates/base/toolbar.html',[],function () { return '<div class="toolbar-item all-chats active" title="All chats">\n    <div class="border"></div>\n    <img class="logo" src="images/xabber-logo.png">\n    <span class="all-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item chats" title="Chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>\n    <span class="msg-indicator"></span>\n</div>\n\n<div class="toolbar-item group-chats" title="Group chats">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" data-svgname="message-group"></svg>\n    <span class="group-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item mentions" title="Mentions">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-at"></svg>\n    <span class="mentions-indicator"></span>\n</div>\n\n<div class="toolbar-item archive-chats" title="Archive chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>\n    <span class="archive-msg-indicator hidden"></span>\n</div>\n\n<div class="toolbar-item contacts" title="Contacts">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>\n</div>\n\n<div class="toolbar-item search" title="Search">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-searching"></svg>\n</div>\n\n<div class="add-something-wrap">\n    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add group, contact or account">\n        <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>\n    </div>\n\n    <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">\n        <div class="add-variant contact">\n            <i class="mdi mdi-20px mdi-account-plus"></i>\n            <span class="text">Add Contact</span>\n        </div>\n        <div class="add-variant public-groupchat">\n            <i class="mdi mdi-20px mdi-account-multiple-plus"></i>\n            <span class="text">Create Group</span>\n        </div>\n        <div class="add-variant incognito-groupchat">\n            <svg class="mdi mdi-20px" viewBox="0 0 24 24">\n                <path d="M13 11A3 3 0 1 0 10 8A3 3 0 0 0 13 11M13 7A1 1 0 1 1 12 8A1 1 0 0 1 13 7M17.11 10.86A5 5 0 0 0 17.11 5.14A2.91 2.91 0 0 1 18 5A3 3 0 0 1 18 11A2.91 2.91 0 0 1 17.11 10.86M13 13C7 13 7 17 7 17V19H19V17S19 13 13 13M9 17C9 16.71 9.32 15 13 15C16.5 15 16.94 16.56 17 17M24 17V19H21V17A5.6 5.6 0 0 0 19.2 13.06C24 13.55 24 17 24 17M8 12H5V15H3V12H0V10H3V7H5V10H8Z" />\n            </svg>\n            <span class="text">Create Incognito Group</span>\n        </div>\n        <div class="add-variant account">\n            <i class="mdi mdi-20px mdi-account-circle"></i>\n            <span class="text">Add Account</span>\n        </div>\n    </div>\n</div>\n\n<div class="divider noselect"></div>\n\n<div class="accounts-wrap">\n    <div class="accounts">\n    </div>\n</div>\n\n<div class="toolbar-bottom">\n    <div class="toolbar-item about" title="About">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-information"></i>\n    </div>\n    <div class="toolbar-item settings" title="Settings">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>\n    </div>\n</div>\n';});
 
 
 define('text!templates/base/settings.html',[],function () { return '    <div class="left-column noselect">\n        <div class="main-info-wrap xabber-info-wrap">\n            <div class="picture-wrap">\n                <img class="logo" src="images/xabber-logo-96.png"/>\n            </div>\n            <div class="name">Xabber for Web</div>\n            <div class="version"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">\n                <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>\n                <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>\n                <div class="settings-block-name one-line">Xabber Account</div>\n            </div>\n            <div class="settings-tab" data-block-name="xmpp-accounts">\n                <i class="mdi mdi-24px mdi-settings"/>\n                <div class="settings-block-name one-line">XMPP Accounts</div>\n            </div>\n            <div class="settings-tab" data-block-name="keyboard">\n                <i class="mdi mdi-24px mdi-keyboard"></i>\n                <div class="settings-block-name one-line">Keyboard</div>\n            </div>\n            <div class="settings-tab" data-block-name="contact-list">\n                <i class="mdi mdi-24px mdi-account-multiple"></i>\n                <div class="settings-block-name one-line">Contact list</div>\n            </div>\n            <div class="settings-tab" data-block-name="notifications">\n                <i class="mdi mdi-24px mdi-bell"></i>\n                <div class="settings-block-name one-line">Notifications</div>\n            </div>\n            <div class="settings-tab" data-block-name="sounds">\n                <i class="mdi mdi-24px mdi-volume-high"></i>\n                <div class="settings-block-name one-line">Sounds</div>\n            </div>\n            {[if (PERSONAL_AREA_URL) {]}\n            <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">\n                <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>\n                <div class="settings-block-name one-line">{{PERSONAL_AREA_URL.label}}</div>\n            </div>\n            </a>\n            {[}]}\n        </div>\n        <div class="settings-tabs-bottom-wrap">\n            <div class="settings-tab delete-all-accounts">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">Quit Xabber Web</div>\n            </div>\n        </div>\n    </div>\n\n    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>Settings</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content">\n                <div class="settings-block-wrap xabber-account">\n                    <div class="block-header">\n                        <span class="block-name">Xabber account</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap xmpp-accounts">\n                    <div class="block-header">\n                        <span class="block-name">XMPP accounts</span>\n                    </div>\n                    <div class="setting xmpp-account-list">\n                        <div class="accounts-head-wrap">\n                            <div class="accounts-head xmppid-head">XMPP ID</div>\n                            <div class="accounts-head sync-head">Sync</div>\n                            <div class="accounts-head enabled-head">Enabled</div>\n                        </div>\n                        <span class="no-accounts-tip">No accounts</span>\n                        <div class="move-account-to-bottom droppable"></div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap keyboard">\n                    <div class="block-header">\n                        <span class="block-name">Keyboard</span>\n                    </div>\n\n                    <div class="setting hotkeys radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />\n                                    <label for="{{view.cid}}-enter">Send message on Enter</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />\n                                    <label for="{{view.cid}}-ctrlenter">Send message on Ctrl+Enter</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap contact-list">\n                    <div class="block-header">\n                        <span class="block-name">Contact list</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap notifications">\n                    <div class="block-header">\n                        <span class="block-name">Notifications</span>\n                    </div>\n\n                    <div class="setting notifications field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Desktop notifications</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="notifications">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting message-preview field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Message preview</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="message-preview">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting call-attention field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Call attention</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="call-attention">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap sounds">\n                    <div class="block-header">\n                        <span class="block-name">Sounds</span>\n                    </div>\n                    <div class="setting sound radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="sound" value="" type="radio" id="{{view.cid}}-sound-no" />\n                                    <label for="{{view.cid}}-sound-no">No sound</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_up" type="radio" id="{{view.cid}}-sound-beep-up" />\n                                    <label for="{{view.cid}}-sound-beep-up">Beep Up</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="tiny_noize" type="radio" id="{{view.cid}}-sound-tiny-noize" />\n                                    <label for="{{view.cid}}-sound-tiny-noize">Tiny Noize</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="retro_game" type="radio" id="{{view.cid}}-sound-retro-game" />\n                                    <label for="{{view.cid}}-sound-retro-game">Retro Game</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pixel_beep" type="radio" id="{{view.cid}}-sound-pixel-beep" />\n                                    <label for="{{view.cid}}-sound-pixel-beep">Pixel Beep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_positive" type="radio" id="{{view.cid}}-sound-beep-positive" />\n                                    <label for="{{view.cid}}-sound-beep-positive">Beep Positive</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="good_chime" type="radio" id="{{view.cid}}-sound-good-chime" />\n                                    <label for="{{view.cid}}-sound-good-chime">Good Chime</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="cellular_click" type="radio" id="{{view.cid}}-sound-cellular-click" />\n                                    <label for="{{view.cid}}-sound-cellular-click">Cellular Click</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="bleep" type="radio" id="{{view.cid}}-sound-bleep" />\n                                    <label for="{{view.cid}}-sound-bleep">Bleep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="mono_u" type="radio" id="{{view.cid}}-sound-mono-u" />\n                                    <label for="{{view.cid}}-sound-mono-u">Mono U</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="plop" type="radio" id="{{view.cid}}-sound-plop" />\n                                    <label for="{{view.cid}}-sound-plop">Plop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="ether" type="radio" id="{{view.cid}}-sound-ether" />\n                                    <label for="{{view.cid}}-sound-ether">Ether</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pop" type="radio" id="{{view.cid}}-sound-pop" />\n                                    <label for="{{view.cid}}-sound-pop">Pop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="computer_chime" type="radio" id="{{view.cid}}-sound-computer-chime" />\n                                    <label for="{{view.cid}}-sound-computer-chime">Computer Chime</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n            </div>\n        </div>\n    </div>\n';});
@@ -44514,6 +44685,9 @@ define('text!templates/chats/chat_item.html',[],function () { return '<div class
 
 
 define('text!templates/chats/chat_head.html',[],function () { return '    <div class="circle-avatar"/>\n    <div class="contact-status hide-offline"/>\n    <div class="chat-icon hidden"></div>\n    <div class="contact-info">\n        <div class="contact-name-wrap one-line">\n            <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>\n            <p class="contact-name one-line"></p>\n        </div>\n        <p class="contact-status-message one-line"></p>\n    </div>\n    <div class="chat-tools-wrap">\n        <div class="chat-tool btn-show-fingerprints">\n            <i class="mdi mdi-lock mdi-24px"></i>\n        </div>\n        <div class="chat-tool btn-jingle-message">\n            <i class="mdi mdi-phone mdi-24px"></i>\n        </div>\n        <div class="chat-tool btn-set-status">\n            <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                <g stroke="none" stroke-width="1" fill="none">\n                    <rect x="0" y="0" width="24" height="24"/>\n                    <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>\n                </g>\n            </svg>\n        </div>\n        <div class="chat-tool btn-search-messages">\n            <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n        </div>\n        <div class="chat-tool btn-archive-chat">\n            <i class="mdi mdi-24px mdi-package-down"></i>\n        </div>\n        <div class="chat-tool btn-notifications">\n            <i class="mdi muted-icon mdi-22px mdi-bell"></i>\n        </div>\n        <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n            <li class="btn-contact-details">\n                <span class="one-line">Contact info</span>\n            </li>\n            <li class="btn-call-attention">\n                <span class="one-line">Call attention</span>\n            </li>\n            <!--<li class="btn-export-history">\n                <span class="one-line">Export history</span>\n            </li>-->\n            <li class="btn-clear-history">\n                <span class="one-line">Clear history</span>\n            </li>\n            <li class="btn-start-encryption">\n                <span class="one-line">Start encrypted chat</span>\n            </li>\n            <li class="btn-open-encrypted-chat">\n                <span class="one-line">Open encrypted chat</span>\n            </li>\n            <li class="btn-open-regular-chat">\n                <span class="one-line">Open regular chat</span>\n            </li>\n            <li class="btn-invite-users">\n                <span class="one-line">Invite users</span>\n            </li>\n            <li class="btn-delete-chat">\n                <span class="one-line">Delete chat</span>\n            </li>\n            <li class="btn-delete-contact">\n                <span class="one-line">Delete contact</span>\n            </li>\n            <li class="btn-block-contact">\n                <span class="one-line">Block contact</span>\n            </li>\n            <li class="btn-unblock-contact">\n                <span class="one-line">Unblock contact</span>\n            </li>\n        </ul>\n    </div>\n';});
+
+
+define('text!templates/chats/saved_chat_head.html',[],function () { return '<div class="circle-avatar"/>\n<div class="contact-info">\n    <p class="contact-name one-line"></p>\n</div>\n<div class="chat-tools-wrap">\n    <div class="chat-tool btn-search-messages">\n        <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n    </div>\n    <div class="chat-tool btn-archive-chat">\n        <i class="mdi mdi-24px mdi-package-down"></i>\n    </div>\n    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n        <li class="btn-clear-history">\n            <span class="one-line">Clear history</span>\n        </li>\n        </li>\n    </ul>\n</div>\n';});
 
 
 define('text!templates/chats/chat_content.html',[],function () { return '<div class="search-form-header">\n    <div class="messages-search-form search-form">\n        <i class="search-icon mdi mdi-20px mdi-magnify"></i>\n        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search messages" autofocus>\n    </div>\n    <div class="text-color-700 btn-cancel-searching">cancel</div>\n</div>\n<div class="pinned-message"></div>\n<div class="elements-in-top">\n    <div class="subscription-buttons-wrap hidden"/>\n    <div class="chat-day-indicator fixed-day-indicator-wrap hidden"><div class="fixed-day-indicator"></div></div>\n</div>\n<div class="load-history-feedback hidden"></div>\n<div class="participant-messages-header hidden"><div class="messages-by-header">Messages by <div class="participant-nickname text-color-700"></div></div><div class="text-color-700 btn-cancel-selection">cancel</div><div class="btn-retract-messages">delete all</div></div>\n<div class="chat-content">\n</div>\n<div class="chat-notification hidden one-line"></div>\n<i class="mdi mdi-36px back-to-bottom mdi-chevron-down"></i>\n';});
@@ -44749,6 +44923,7 @@ define("xabber-templates", [
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
+    "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_bottom.html",
     "text!templates/chats/subscription_buttons.html",
@@ -44931,6 +45106,7 @@ define("xabber-templates", [
     addTemplate('chats.add_chat_account_item');
     addTemplate('chats.chat_item');
     addTemplate('chats.chat_head');
+    addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_bottom');
     addTemplate('chats.subscription_buttons');
@@ -46276,7 +46452,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0","version_description":"Implemented OMEMO. Optimized client rendering. Improved group chats, client synchronization. Added new ones configurations"}'
+'{"version_number":"2.2.0 (2)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46328,6 +46504,7 @@ define('xabber-environment',[
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
             this.cacheFavicons();
+            this.extendFunction();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -46378,6 +46555,19 @@ define('xabber-environment',[
                 }
             }.bind(this);
             rawFile.send();
+        },
+
+        extendFunction: function () {
+            if (!String.prototype.trimStart) {
+                String.prototype.trimStart = function () {
+                    return this.replace(/^\s+/, '');
+                }
+            }
+            if (!String.prototype.trimEnd) {
+                String.prototype.trimEnd = function () {
+                    return Array.from(Array.from(this).reverse().join("").trimStart(/\s$/, '')).reverse().join("");
+                }
+            }
         },
 
         onQuit: function () {
@@ -46542,19 +46732,9 @@ define('xabber-environment',[
                 self._cache.save('notifications', granted);
                 if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
                     self.setUpPushNotifications().done(function (res) {
-                        if (res !== true) {
-                            utils.dialogs.error('Could not enable push notifications! '+res);
-                        }
                         self.check_config.resolve(true);
                     });
                 } else {
-                    if (granted && !self.cache.ignore_push_warning) {
-                        utils.dialogs.warning('Push notifications are not supported',
-                            [{name: 'ignore', text: 'Don\'t show this message again'}]
-                        ).done(function (res) {
-                            res && res.ignore && self._cache.save('ignore_push_warning', true);
-                        });
-                    }
                     self._cache.save('endpoint_key', undefined);
                     self.check_config.resolve(true);
                 }
@@ -46597,33 +46777,16 @@ define('xabber-environment',[
         },
 
         requestNotifications: function () {
-            var result = new $.Deferred(),
+            let result = new $.Deferred(),
                 self = this;
             if (!window.Notification) {
-                if (!self.cache.ignore_notifications_warning) {
-                    utils.dialogs.warning(
-                        'Notifications are not supported.',
-                        [{name: 'ignore', text: 'Don\'t show this message again'}]
-                    ).done(function (res) {
-                        res && res.ignore && self._cache.save('ignore_notifications_warning', true);
-                    });
-                }
-                result.resolve(false);
+                result.resolve(null);
             } else if (window.Notification.permission === 'granted') {
                 result.resolve(true);
             } else {
-                window.Notification.requestPermission(function (permission) {
-                    if (permission !== 'granted' && !self.cache.ignore_push_warning) {
-                        utils.dialogs.warning(
-                            'You should allow popup notifications for this site if you want '+
-                            'to receive popups on new messages and some important push notifications.',
-                            [{name: 'ignore', text: 'Don\'t show this message again'}]
-                        ).done(function (res) {
-                            res && res.ignore && self._cache.save('ignore_push_warning', true);
-                        });
-                    }
-                    result.resolve(permission === 'granted');
-                });
+                if (!self.cache.ignore_notifications_warning)
+                    this.notifications_placeholder = new xabber.NotificationsPlaceholder();
+                result.resolve(undefined);
             }
             return result.promise();
         },
@@ -47481,6 +47644,7 @@ define("xabber-views", [],function () {
         },
 
         setScreen: function (name, attrs, options) {
+            xabber.notifications_placeholder && xabber.right_panel.$el.addClass('notifications-request');
             $('body').switchClass('xabber-login', name === 'login');
             $('body').switchClass('on-xabber-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
@@ -47571,6 +47735,7 @@ define("xabber-views", [],function () {
         },
 
         onUpdatedScreen: function (name) {
+            xabber.notifications_placeholder && xabber.right_panel.$el.append(xabber.notifications_placeholder.$el);
             if ((name === 'account_settings') || ((name === 'all-chats') &&
                 (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
@@ -47982,7 +48147,11 @@ define("xabber-views", [],function () {
         },
 
         setNotifications: function (ev) {
-            var value = !this.model.get('notifications');
+            let value = this.model.get('notifications');
+            if (value === null) {
+                utils.callback_popup_message("Browser doesn't support notifications", 1500);
+            } else
+                value = !value;
             this.model.save('notifications', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);
@@ -51920,7 +52089,7 @@ define("xabber-accounts", [],function () {
             },
 
             updateBlocks: function () {
-                var connected = this.model.isConnected();
+                let connected = this.model.isConnected();
                 this.$('.main-info-wrap').switchClass('disconnected', !connected);
                 this.$('.settings-tab[data-block-name="xmpp-resources"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
@@ -53816,14 +53985,19 @@ define("xabber-contacts", [],function () {
             },
 
             sendPresent: function () {
-                var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
+                let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#present'});
                 this.account.sendPres(pres);
+                this._sending_present_interval = setInterval(() => {
+                    this.account.sendPres(pres);
+                }, constants.PRESENT_INTERVAL);
             },
 
             sendNotPresent: function () {
                 var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#not-present'});
+                clearInterval(this._sending_present_interval);
+                this._sending_present_interval = null;
                 this.account.sendPres(pres);
             },
 
@@ -58166,7 +58340,7 @@ define("xabber-contacts", [],function () {
                             alignment: 'left'
                         });
                     }.bind(this),
-                    complete: this.hide.bind(this)
+                    complete: this.close.bind(this)
                 });
                 return this;
             },
@@ -59249,7 +59423,9 @@ define("xabber-chats", [],function () {
               if (this.get('jingle_start')) {
                   let end = moment.now(),
                       duration = Math.round((end - this.get('jingle_start'))/1000),
-                      call_attrs = {initiator: this.get('call_initiator'), start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration};
+                      call_attrs = {initiator: this.get('call_initiator')};
+                  if (this.call_timer)
+                      _.extend(call_attrs, {start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration});
                   reason && (call_attrs.reason = reason);
                   $reject_msg.c('call', call_attrs).up();
               }
@@ -59351,7 +59527,7 @@ define("xabber-chats", [],function () {
           }
       });
 
-    xabber.Chat = Backbone.Model.extend({
+      xabber.Chat = Backbone.Model.extend({
         defaults: {
             opened: true,
             active: false,
@@ -59367,20 +59543,23 @@ define("xabber-chats", [],function () {
 
         initialize: function (attrs, options) {
             this.contact = options.contact;
-            this.account = this.contact.account;
-            let jid = this.contact.get('jid');
+            this.account = this.contact ? this.contact.account : options.account;
+            let jid = this.contact ? this.contact.get('jid') : attrs.jid;
             this.set({
                 id: attrs && attrs.id || this.contact.hash_id,
                 jid: jid
             });
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
+            (attrs && attrs.type === 'saved') && this.set('saved', true);
             this.retraction_version = 0;
-            this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
-            this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
+            if (this.contact) {
+                this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
+                this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
+                this.contact.on("destroy", this.onContactDestroyed, this);
+            }
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
-            this.contact.on("destroy", this.onContactDestroyed, this);
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
             this.on("change:timestamp", this.onChangedTimestamp, this);
         },
@@ -59407,7 +59586,7 @@ define("xabber-chats", [],function () {
 
         recountUnread: function () {
             this.set('unread', this.messages_unread.length);
-            if (this.contact.get('archived') && this.contact.get('muted')) {
+            if (this.contact && this.contact.get('archived') && this.contact.get('muted')) {
             }
             else {
                 xabber.toolbar_view.recountAllMessageCounter();
@@ -60011,27 +60190,35 @@ define("xabber-chats", [],function () {
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
             this.model.messages.on("destroy", this.onMessageRemoved, this);
-            this.contact.on("change:name", this.updateName, this);
-            this.contact.on("change:status", this.updateStatus, this);
-            this.contact.on("change:private_chat", this.updateIcon, this);
-            this.contact.on("change:invitation", this.updateIcon, this);
-            this.contact.on("change:incognito_chat", this.updateIcon, this);
-            this.contact.on("change:image", this.updateAvatar, this);
-            this.contact.on("change:blocked", this.onBlocked, this);
-            this.contact.on("change:muted", this.updateMutedState, this);
-            this.contact.on("change:archived", this.updateArchivedState, this);
-            this.contact.on("change:group_chat", this.updateGroupChats, this);
-            this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
-            this.contact.on("remove_invite", this.removeInvite, this);
-            this.contact.on("update_trusted", this.updateEncryptedColor, this);
+            if (this.contact) {
+                this.contact.on("change:name", this.updateName, this);
+                this.contact.on("change:status", this.updateStatus, this);
+                this.contact.on("change:private_chat", this.updateIcon, this);
+                this.contact.on("change:invitation", this.updateIcon, this);
+                this.contact.on("change:incognito_chat", this.updateIcon, this);
+                this.contact.on("change:image", this.updateAvatar, this);
+                this.contact.on("change:blocked", this.onBlocked, this);
+                this.contact.on("change:muted", this.updateMutedState, this);
+                this.contact.on("change:archived", this.updateArchivedState, this);
+                this.contact.on("change:group_chat", this.updateGroupChats, this);
+                this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
+                this.contact.on("remove_invite", this.removeInvite, this);
+                this.contact.on("update_trusted", this.updateEncryptedColor, this);
+            }
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
         updateName: function () {
+            if (this.model.get('saved')) {
+                this.$('.chat-title').text('Saved messages');
+                return;
+            }
             this.$('.chat-title').text(this.contact.get('name'));
         },
 
         updateStatus: function () {
+            if (this.model.get('saved'))
+                return;
             let status = this.contact.get('status');
             this.$('.status').attr('data-status', status);
             this.$('.chat-icon').attr('data-status', status);
@@ -60058,7 +60245,9 @@ define("xabber-chats", [],function () {
         },
 
         updateAvatar: function () {
-            var image = this.contact.cached_image;
+            if (this.model.get('saved'))
+                return;
+            let image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
         },
 
@@ -60071,18 +60260,24 @@ define("xabber-chats", [],function () {
         },
 
         updateIcon: function () {
+            if (!this.contact)
+                return;
             this.$('.chat-icon').addClass('hidden');
             let ic_name = this.contact.getIcon();
             ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
         },
 
         updateMutedState: function () {
+            if (!this.contact)
+                return;
             let is_muted = this.contact.get('muted');
             this.$('.msg-counter').switchClass('muted-chat-counter', is_muted);
             this.$('.muted-icon').showIf(is_muted);
         },
 
         updateArchivedState: function () {
+            if (!this.contact)
+                return;
             let archived = this.contact.get('archived');
             if (archived || (!archived && xabber.toolbar_view.$('.active').hasClass('archive-chats')))
                 this.$el.detach();
@@ -60091,6 +60286,8 @@ define("xabber-chats", [],function () {
         },
 
         updateGroupChats: function () {
+            if (!this.contact)
+                return;
             var is_group_chat = this.contact.get('group_chat');
             this.$('.status').hideIf(is_group_chat);
             this.$('.chat-icon').showIf(is_group_chat);
@@ -60229,6 +60426,7 @@ define("xabber-chats", [],function () {
         open: function (options) {
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
+            this.content.bottom.updatePlaceholder(this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...');
         },
 
         removeInvite: function (options) {
@@ -60788,9 +60986,8 @@ define("xabber-chats", [],function () {
             this.account = this.chat_item.account;
             this.model = this.chat_item.model;
             this.contact = this.model.contact;
-            this.head = new xabber.ChatHeadView({content: this});
+            this.head = this.model.get('saved') ? new xabber.SavedChatHeadView({content: this}) : new xabber.ChatHeadView({content: this});
             this.bottom = new xabber.ChatBottomView({content: this});
-            this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
             this.$history_feedback = this.$('.load-history-feedback');
             this.$pinned_message = this.$('.pinned-message');
             this.$search_form = this.$('.search-form-header');
@@ -60809,11 +61006,14 @@ define("xabber-chats", [],function () {
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
             this.model.messages.on("change:trusted", this.onTrustedChanged, this);
             this.model.messages.on("change:last_replace_time", this.updateMessage, this);
-            this.contact.on("change:blocked", this.updateBlockedState, this);
-            this.contact.on("change:group_chat", this.updateGroupChat, this);
-            this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
-            this.account.contacts.on("change:name", this.updateName, this);
-            this.account.contacts.on("change:image", this.updateAvatar, this);
+            if (this.contact) {
+                this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
+                this.contact.on("change:blocked", this.updateBlockedState, this);
+                this.contact.on("change:group_chat", this.updateGroupChat, this);
+                this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
+                this.account.contacts.on("change:name", this.updateName, this);
+                this.account.contacts.on("change:image", this.updateAvatar, this);
+            }
             this.account.on("change", this.updateMyInfo, this);
             this.account.dfd_presence.done(function () {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
@@ -62391,6 +62591,7 @@ define("xabber-chats", [],function () {
         },
 
           msgCallback: function (msg_sending_timestamp, message) {
+              this.bottom.setOneLiner();
               if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                   setTimeout(function () {
                       if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -63458,8 +63659,19 @@ define("xabber-chats", [],function () {
             this.account.contacts.on("roster_push", this.onRosterPush, this);
         },
 
+        getSavedChat: function () {
+          let jid = this.account.get('jid'),
+              attrs = {jid: jid, type: 'saved', id: `${jid}:saved`},
+              chat = this.get(attrs.id);
+            if (!chat) {
+                chat = xabber.chats.create(attrs, {account: this.account});
+                this.add(chat);
+            }
+            return chat;
+        },
+
         getChat: function (contact, identifier) {
-            var attrs = null,
+            let attrs = null,
                 id = identifier && `${contact.hash_id}:${identifier}`,
                 chat = id ? this.get(id) : this.get(contact.hash_id);
             if (id)
@@ -64004,7 +64216,7 @@ define("xabber-chats", [],function () {
                     this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 }.bind(this),
-                complete: this.hide.bind(this)
+                complete: this.close.bind(this)
             });
 
         },
@@ -64081,7 +64293,11 @@ define("xabber-chats", [],function () {
         },
 
         close: function () {
-            this.$el.closeModal({ complete: this.hide.bind(this) });
+            this.$el.closeModal({ complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
         },
 
         updateGroupJid: function () {
@@ -64509,7 +64725,7 @@ define("xabber-chats", [],function () {
 
           _initialize: function () {
               this.contact = this.model.contact;
-              this.account = this.contact.account;
+              this.account = this.contact ? this.contact.account : this.model.account;
               this.$el.attr('data-id', this.model.id + '-' + this.cid);
               this.$el.attr('data-contact-jid', this.contact.get('jid'));
               this.updateName();
@@ -64947,7 +65163,47 @@ define("xabber-chats", [],function () {
 
     });
 
-    xabber.ChatHeadView = xabber.BasicView.extend({
+      xabber.SavedChatHeadView = xabber.BasicView.extend({
+          className: 'chat-head-wrap',
+          template: templates.saved_chat_head,
+          events: {
+              "click .contact-name": "showSettings",
+              "click .circle-avatar": "showSettings",
+              "click .btn-clear-history": "clearHistory",
+              // "click .btn-delete-chat": "deleteChat",
+              "click .btn-archive-chat": "archiveChat",
+              "click .btn-search-messages": "renderSearchPanel"
+          },
+
+          _initialize: function (options) {
+              this.content = options.content;
+              this.contact = this.content.contact;
+              this.model = this.content.model;
+              this.account = this.model.account;
+              this.model.on("close_chat", this.closeChat, this);
+          },
+
+          closeChat: function () {
+              this.model.set({'opened': false, 'display': false, 'active': false});
+              xabber.chats_view.clearSearch();
+          },
+
+          showSettings: function () {
+              this.account.showSettings();
+          },
+
+          clearHistory: function () {
+              this.content.clearHistory();
+              xabber.chats_view.clearSearch();
+          },
+
+          renderSearchPanel: function () {
+
+          }
+
+      });
+
+      xabber.ChatHeadView = xabber.BasicView.extend({
         className: 'chat-head-wrap',
         template: templates.chat_head,
         avatar_size: constants.AVATAR_SIZES.CHAT_HEAD,
@@ -65424,7 +65680,7 @@ define("xabber-chats", [],function () {
                     ]
                 },
                 formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
-                placeholder: (this.model.get('encrypted')) ? 'Write an encrypted message...' : 'Write a message...',
+                placeholder: this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
             });
@@ -65438,16 +65694,18 @@ define("xabber-chats", [],function () {
             this.quill.on("text-change", this.onChangedText, this);
             this.account.on("change:image", this.updateAvatar, this);
             this.account.on('trusting_updated', this.updateEncrypted, this);
-            this.contact.on("change:blocked", this.onBlockedUpdate, this);
-            this.contact.on("reply_selected_messages", this.replyMessages, this);
-            this.contact.on("forward_selected_messages", this.forwardMessages, this);
-            this.contact.on("copy_selected_messages", this.copyMessages, this);
-            this.contact.on("delete_selected_messages", this.deleteMessages, this);
-            this.contact.on("edit_selected_message", this.showEditPanel, this);
-            this.contact.on("pin_selected_message", this.pinMessage, this);
-            this.contact.on('update_my_info', this.updateInfoInBottom, this);
-            this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
-            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
+            if (this.contact) {
+                this.contact.on("change:blocked", this.onBlockedUpdate, this);
+                this.contact.on("reply_selected_messages", this.replyMessages, this);
+                this.contact.on("forward_selected_messages", this.forwardMessages, this);
+                this.contact.on("copy_selected_messages", this.copyMessages, this);
+                this.contact.on("delete_selected_messages", this.deleteMessages, this);
+                this.contact.on("edit_selected_message", this.showEditPanel, this);
+                this.contact.on("pin_selected_message", this.pinMessage, this);
+                this.contact.on('update_my_info', this.updateInfoInBottom, this);
+                this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
+            }
+            this.content_view = (this.view.data.get('visible') ? this.view : (this.contact && this.contact.messages_view)) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
                 $rich_textarea_wrap = $rich_textarea.parent('.rich-textarea-wrap'),
@@ -65559,7 +65817,7 @@ define("xabber-chats", [],function () {
             this.updateAvatar();
             this.updateEncrypted();
             var http_upload = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
-            this.content_view = (this.view.data.get('visible') ? this.view : this.contact.messages_view) || this.view;
+            this.content_view = (this.view.data.get('visible') ? this.view : (this.contact && this.contact.messages_view)) || this.view;
             this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
             this.renderLastEmoticons();
             this.$('.attach-file').showIf(http_upload);
@@ -65703,7 +65961,9 @@ define("xabber-chats", [],function () {
 
         updateAvatar: function () {
             let image;
-            if (this.contact.get('group_chat')) {
+            if (this.model.get('saved'))
+                return;
+            if (this.contact && this.contact.get('group_chat')) {
                 if (this.contact.my_info)
                     if (this.contact.my_info.get('b64_avatar'))
                         image = this.contact.my_info.get('b64_avatar');
@@ -65774,6 +66034,22 @@ define("xabber-chats", [],function () {
                 this.$('.ql-toolbar.ql-snow').hide();
                 this.$('.last-emoticons').show();
             }
+        },
+
+        setOneLiner: function () {
+            if (Math.random() <= 1/30) {
+                let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                    placeholder = constants.ONELINERS[rand_idx];
+                if (!placeholder) {
+                    this.updatePlaceholder();
+                    return;
+                }
+                this.updatePlaceholder(placeholder);
+            }
+        },
+
+        updatePlaceholder: function (placeholder) {
+            this.quill.root.setAttribute('data-placeholder', placeholder);
         },
 
         changeEncryption: function () {
@@ -66320,7 +66596,6 @@ define("xabber-chats", [],function () {
             if (this.contact.messages_view)
                 if (this.contact.messages_view.data.get('visible'))
                     xabber.chats_view.openChat(this.model.item_view, {clear_search: true, screen: xabber.body.screen.get('name')});
-                    // this.contact.messages_view.openChat();
         },
 
         setEditedMessage: function (message) {
@@ -66680,7 +66955,7 @@ define("xabber-chats", [],function () {
 
         // TODO: refactor CSS and remove this
         updateHeight: function () {
-            var bottom_height = xabber.chat_bottom.$el.height();
+            let bottom_height = xabber.chat_bottom.$el.height() + parseInt(xabber.chat_bottom.$el.css('bottom'));
             if (bottom_height) {
                 this.$el.css({bottom: bottom_height});
                 if (this.view) {
@@ -66688,6 +66963,34 @@ define("xabber-chats", [],function () {
                     this.view.scrolled_to_bottom && this.view.scrollToBottom();
                 }
             }
+        }
+    });
+
+    xabber.NotificationsPlaceholder = xabber.BasicView.extend({
+        className: 'notifications-placeholder',
+        events: {
+            "click .btn-request-notifications": "requestNotifications",
+            "click .mdi-close": "close"
+        },
+
+        _initialize: function (options) {
+            this.$el.html('Xabber for Web needs your permission to <span class="btn-request-notifications">enable desktop notifications</span>');
+            this.$el.append($('<i/>').addClass('mdi mdi-22px mdi-close'));
+        },
+
+        requestNotifications: function () {
+            window.Notification.requestPermission((permission) => {
+                xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
+                this.close();
+            });
+        },
+
+        close: function () {
+            xabber._cache.save('ignore_notifications_warning', true);
+            this.remove();
+            xabber.notifications_placeholder = undefined;
+            xabber.right_panel.$el.removeClass('notifications-request');
+            xabber.chat_body &&  xabber.chat_body.updateHeight();
         }
     });
 
@@ -67737,7 +68040,7 @@ define("xabber-ui", [],function () {
             }
             let attrs = xabber.body.screen.attributes;
             if (ev.keyCode === constants.KEY_ESCAPE) {
-                if (xabber.body.$el.siblings('#modals').children().length)
+                if (xabber.body.$el.siblings('#modals').children('.open').length)
                     return;
                 if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
                     attrs.contact.trigger('open_chat', attrs.contact);

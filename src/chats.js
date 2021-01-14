@@ -1800,7 +1800,7 @@ define("xabber-chats", function () {
         open: function (options) {
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
-            xabber.message_sent && this.content.bottom.updatePlaceholder();
+            this.content.bottom.updatePlaceholder(this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...');
         },
 
         removeInvite: function (options) {
@@ -3965,7 +3965,7 @@ define("xabber-chats", function () {
         },
 
           msgCallback: function (msg_sending_timestamp, message) {
-              xabber.message_sent = true;
+              this.bottom.setOneLiner();
               if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                   setTimeout(function () {
                       if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -7054,7 +7054,7 @@ define("xabber-chats", function () {
                     ]
                 },
                 formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
-                placeholder: (this.model.get('encrypted')) ? 'Write an encrypted message...' : 'Write a message...',
+                placeholder: this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...',
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
             });
@@ -7410,13 +7410,19 @@ define("xabber-chats", function () {
             }
         },
 
-        updatePlaceholder: function () {
-            let rand_idx = _.random(0, constants.ONELINERS.length - 1),
-                placeholder = constants.ONELINERS[rand_idx];
-            if (!placeholder) {
-                this.updatePlaceholder();
-                return;
+        setOneLiner: function () {
+            if (Math.random() <= 1/30) {
+                let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                    placeholder = constants.ONELINERS[rand_idx];
+                if (!placeholder) {
+                    this.updatePlaceholder();
+                    return;
+                }
+                this.updatePlaceholder(placeholder);
             }
+        },
+
+        updatePlaceholder: function (placeholder) {
             this.quill.root.setAttribute('data-placeholder', placeholder);
         },
 
