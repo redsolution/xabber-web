@@ -4923,13 +4923,13 @@ define("xabber-contacts", function () {
                     name = this.$('input[name=contact_name]').removeClass('invalid').val(),
                     groups = this.group_data.get('selected'),
                     contact, error_text,
-                    regexp = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                    regexp_full_jid = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))|(([0-9]{1,3}\.){3}[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 jid = Strophe.getBareJidFromJid(jid);
                 if (!jid) {
                     error_text = 'Input username!';
                 } else if (jid === this.account.get('jid')) {
                     error_text = 'Can not add yourself to contacts!';
-                } else if (!regexp.test(jid)) {
+                } else if (!regexp_full_jid.test(jid)) {
                     error_text = 'Invalid jid';
                 }
                 else {
