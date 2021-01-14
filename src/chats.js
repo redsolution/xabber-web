@@ -926,6 +926,7 @@ define("xabber-chats", function () {
             (attrs && attrs.type === 'encrypted') && this.set('encrypted', true);
             (attrs && attrs.type === 'saved') && this.set('saved', true);
             this.retraction_version = 0;
+            this.get('saved') && this.set('timestamp', moment.now());
             if (this.contact) {
                 this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
                 this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
@@ -1579,6 +1580,9 @@ define("xabber-chats", function () {
                 this.contact.on("remove_invite", this.removeInvite, this);
                 this.contact.on("update_trusted", this.updateEncryptedColor, this);
             }
+            this.$el.switchClass('saved-chat', this.model.get('saved'));
+            this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
+            this.model.get('saved') && this.$el.find('.circle-avatar').append($('<i/>').addClass('mdi mdi-36px mdi-bookmark-outline'));
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -1800,7 +1804,8 @@ define("xabber-chats", function () {
         open: function (options) {
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
-            this.content.bottom.updatePlaceholder(this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...');
+            this.content.bottom.click_counter = 0;
+            this.content.bottom.setDefaultPlaceholder();
         },
 
         removeInvite: function (options) {
@@ -3965,7 +3970,8 @@ define("xabber-chats", function () {
         },
 
           msgCallback: function (msg_sending_timestamp, message) {
-              this.bottom.setOneLiner();
+              this.bottom.click_counter = 0;
+              this.bottom.setDefaultPlaceholder();
               if (!this.contact.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
                   setTimeout(function () {
                       if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
@@ -5542,7 +5548,7 @@ define("xabber-chats", function () {
     });
 
     xabber.AddGroupChatView = xabber.SearchView.extend({
-        className: 'modal dialog-modal main-modal add-group-chat-modal add-contact-modal',
+        className: 'modal main-modal add-group-chat-modal add-contact-modal',
         template: templates.group_chats.add_group_chat,
         avatar_size: constants.AVATAR_SIZES.ACCOUNT_ITEM,
         ps_selector: '.rich-textarea',
@@ -5599,9 +5605,9 @@ define("xabber-chats", function () {
             this.$('.incognito-field .public-item-wrap').showIf(options.public);
             this.$('.incognito-field .incognito-item-wrap').showIf(options.incognito);
             if (options.public)
-                this.$('.panel-header').text('Create public group');
+                this.$('.panel-header').text('Create Group');
             if (options.incognito)
-                this.$('.panel-header').text('Create incognito group');
+                this.$('.panel-header').text('Create Incognito Group');
             this.$('input[name=chat_jid]').removeClass('fixed-jid').val("");
             this.$('#new_chat_domain').val("");
             this.$('input[name=chat_name]').val("");
@@ -5939,11 +5945,11 @@ define("xabber-chats", function () {
                 return;
             if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
                 return;
-            active_toolbar.hasClass('group-chats') && view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => chat.contact.get('group_chat') && !chat.contact.get('archived')));
-            active_toolbar.hasClass('chats') && !view.contact.get('group_chat') && this.replaceChatItem(item, this.model.filter(chat => !chat.contact.get('group_chat') && !chat.contact.get('archived')));
-            active_toolbar.hasClass('all-chats') && !view.contact.get('archived') && this.replaceChatItem(item, this.model.filter(chat => !chat.contact.get('archived')));
-            active_toolbar.hasClass('archive-chats') && view.contact.get('archived') && this.replaceChatItem(item, this.model.filter(chat => chat.contact.get('archived')));
-            active_toolbar.hasClass('account-item') && (view.account.get('jid') === active_toolbar.attr('data-jid')) && this.replaceChatItem(item, this.model.filter(chat => chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.contact.get('archived')));
+            active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && !chat.contact.get('archived')));
+            active_toolbar.hasClass('chats') && (view.model.get('saved') || !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && !chat.contact.get('archived')));
+            active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.contact.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.contact.get('archived')));
+            active_toolbar.hasClass('archive-chats') && (view.model.get('saved') || view.contact.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.contact.get('archived')));
+            active_toolbar.hasClass('account-item') && (view.model.get('saved') || (view.account.get('jid') === active_toolbar.attr('data-jid'))) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.contact.get('archived')));
         },
 
         onEnterPressed: function (selection) {
@@ -5978,7 +5984,7 @@ define("xabber-chats", function () {
             view.updateActiveStatus();
             let scrolled_top = xabber.chats_view.getScrollTop();
             options.clear_search && this.clearSearch();
-            if (!view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
+            if (view.contact && !view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
                 view.model.set('display', true);
                 view.model.set('active', true);
                 xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
@@ -6003,7 +6009,7 @@ define("xabber-chats", function () {
                     chat_item: view,
                     blocked: view.contact.get('blocked')
                 });
-                if (!view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
+                if (view.contact && !view.contact.get('vcard_updated') || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour')))) {
                     view.contact.getVCard();
                 }
             }
@@ -6963,6 +6969,7 @@ define("xabber-chats", function () {
         _initialize: function (options) {
             this.view = options.content;
             this.model = this.view.model;
+            this.click_counter = 0;
             let rich_textarea_wrap = this.$('.rich-textarea-wrap');
             let bindings = {
                 enter: {
@@ -7299,6 +7306,14 @@ define("xabber-chats", function () {
 
         onClickBottom: function (ev) {
             (this.$el.hasClass('chat-bottom-blocked-wrap') && !$(ev.target).closest('.message-actions-panel').length) && this.contact.showDetails(xabber.body.screen.get('name'));
+            if ($(ev.target).closest('.ql-editor.rich-textarea').length) {
+                if (!this.quill.getText().trim().length) {
+                    if (++this.click_counter === 3) {
+                        this.click_counter = 0;
+                        this.setOneLiner();
+                    }
+                }
+            }
         },
 
         updateInfoInBottom: function () {
@@ -7411,15 +7426,18 @@ define("xabber-chats", function () {
         },
 
         setOneLiner: function () {
-            if (Math.random() <= 1/30) {
-                let rand_idx = _.random(0, constants.ONELINERS.length - 1),
-                    placeholder = constants.ONELINERS[rand_idx];
-                if (!placeholder) {
-                    this.updatePlaceholder();
-                    return;
-                }
-                this.updatePlaceholder(placeholder);
+            let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                placeholder = constants.ONELINERS[rand_idx];
+            if (!placeholder) {
+                this.setOneLiner();
+                return;
             }
+            this.updatePlaceholder(placeholder);
+        },
+
+        setDefaultPlaceholder: function () {
+            let placeholder = this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...';
+            this.updatePlaceholder(placeholder);
         },
 
         updatePlaceholder: function (placeholder) {
@@ -7531,6 +7549,10 @@ define("xabber-chats", function () {
         keyUp: function (ev) {
             let $rich_textarea = $(ev.target).closest('.rich-textarea'),
                 text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
+            if (text) {
+                this.click_counter = 0;
+                this.setDefaultPlaceholder();
+            }
             if (ev.keyCode === constants.KEY_ARROW_UP) {
                 if (!text) {
                     let $msg = this.view.$('.chat-message[data-from="' + this.account.get('jid') + '"]').last();
@@ -7973,6 +7995,8 @@ define("xabber-chats", function () {
         },
 
         setEditedMessage: function (message) {
+            this.click_counter = 0;
+            this.setDefaultPlaceholder();
             let msg_text = message.get('message') || "";
             this.$('.fwd-messages-preview').showIf(this.edit_message);
             this.$('.fwd-messages-preview .msg-author').text('Edit message');

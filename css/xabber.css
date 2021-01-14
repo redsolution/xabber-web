@@ -1085,7 +1085,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     margin: 3px 0;
     display: inline-flex;
     padding: 8px 16px 8px 42px;
-    background-color: #000000;
+    background-color: rgba(0, 0, 0, 0.85);
     border-radius: 18px;
     overflow: hidden;
     cursor: pointer;
@@ -1185,7 +1185,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     padding-left: 10px;
     color: #C0C0C0;
     text-align: center;
-    min-width: 134px;
+    min-width: 148px;
     -moz-transition: opacity .4s;
     -webkit-transition: opacity .4s;
     -ms-transition: opacity .4s;
@@ -1198,7 +1198,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border-radius: 18px;
     display: flex;
     justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.85);
 }
 
 .toolbar .account-actions-panel .text {
@@ -2815,11 +2815,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 480px !important;
 }
 
-.add-group-chat-modal .modal-header {
-    font-weight: 500;
-    padding: 21px 24px 7px 24px;
-}
-
 .add-group-chat-modal .modal-footer .errors {
     line-height: 36px;
 }
@@ -3701,11 +3696,28 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     top: 8px;
     width: 40px;
     height: 40px;
-    background-color: #E0E0E0 !important;
+    background-color: #E0E0E0;
     background-image: url(../images/loading.png);
     background-size: 50%;
 }
 
+.chat-item.saved-chat .status,
+.chat-item.saved-chat .chat-icon,
+.chat-item.saved-chat .last-msg-date,
+.chat-item.saved-chat .muted-icon {
+    display: none !important;
+}
+
+.chat-item.saved-chat .circle-avatar {
+    background-image: none;
+}
+
+.chat-item.saved-chat .circle-avatar i {
+    color: #FFF;
+    left: 2px;
+    top: 2px;
+    position: absolute;
+}
 
 .message-item p,
 .mention-item p,
@@ -8081,11 +8093,6 @@ input[type='range'].voice-message-volume:focus {
 
 .dialog-modal .modal-header {
     padding: 18px 24px;
-}
-
-.dialog-modal .panel-header {
-    font-size: 16px;
-    font-weight: bold;
 }
 
 .dialog-modal .img-from-clipboard {

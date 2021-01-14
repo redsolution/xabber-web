@@ -845,16 +845,16 @@ define("xabber-views", function () {
         },
 
         _initialize: function () {
-            var $menu_overlay = $('<div class="lean-overlay toolbar-menu"></div>');
-
             this.$('.add-something').on("change_state", function (ev, state) {
                 $(this).switchClass('active', state).find('.mdi')
                         .switchClass('mdi-close', state)
                         .switchClass('mdi-plus', !state);
                 if (state) {
-                    $menu_overlay.appendTo('body');
+                    this.setAttribute('data-title',  this.getAttribute('title'));
+                    this.setAttribute('title', "");
                 } else {
-                    $menu_overlay.detach();
+                    this.setAttribute('title', this.getAttribute('data-title'));
+                    this.removeAttribute('data-title');
                 }
             });
 
