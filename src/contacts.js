@@ -36,9 +36,9 @@ define("xabber-contacts", function () {
                 let attrs = _.clone(_attrs);
                 if (attrs.resource) {
                     attrs.full_jid = attrs.jid + '/' + attrs.resource;
-                } /*else if (attrs.group_chat) {
+                } else if (attrs.group_chat) {
                     attrs.full_jid = attrs.jid + '/Group';
-                }*/
+                }
                 (this.account && this.account.domain === attrs.jid) && _.extend(attrs, {server: true, status: 'online'});
                 attrs.name = attrs.roster_name || attrs.name || attrs.jid;
                 if (!attrs.image) {
@@ -227,7 +227,7 @@ define("xabber-contacts", function () {
                 }
             },
 
-            membersRequest: function (options, callback) {
+            membersRequest: function (options, callback, errback) {
                 options = options || {};
                 let participant_id = options.id,
                     version = options.version || 0,
@@ -249,6 +249,8 @@ define("xabber-contacts", function () {
                     iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
                 this.account.sendFast(iq, function (response) {
                     callback && callback(response);
+                }, function (error) {
+                    errback && errback(error);
                 });
             },
 
@@ -464,16 +466,15 @@ define("xabber-contacts", function () {
                 let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#present'});
                 this.account.sendPres(pres);
+                clearInterval(this._sending_present_interval);
                 this._sending_present_interval = setInterval(() => {
                     this.account.sendPres(pres);
                 }, constants.PRESENT_INTERVAL);
             },
 
             sendNotPresent: function () {
-                var pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
+                let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#not-present'});
-                clearInterval(this._sending_present_interval);
-                this._sending_present_interval = null;
                 this.account.sendPres(pres);
             },
 
@@ -790,7 +791,11 @@ define("xabber-contacts", function () {
                         return;
                     }
                     this.renderStatuses(options);
-                }.bind(this));
+                }.bind(this), function () {
+                    this.closeModal();
+                    utils.dialogs.error("Service unavailable");
+                    return;
+                });
             },
 
             renderStatuses: function (options) {
@@ -1972,7 +1977,9 @@ define("xabber-contacts", function () {
                         this.renderMemberItem(participant);
                     }.bind(this));
                     this.$el.removeClass('request-waiting');
-                }.bind(this));
+                }.bind(this), function () {
+                    this.$el.removeClass('request-waiting');
+                });
             },
 
             blockParticipant: function (ev) {
@@ -2013,7 +2020,7 @@ define("xabber-contacts", function () {
                 }.bind(this));
             },
 
-            participantsRequest: function (callback) {
+            participantsRequest: function (callback, errback) {
                 this.model.membersRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
@@ -2030,7 +2037,9 @@ define("xabber-contacts", function () {
                             this.participants.createFromStanza($item);
                     }.bind(this));
                     callback && callback(version);
-                }.bind(this));
+                }.bind(this), function (error) {
+                    errback && errback(error);
+                });
             },
 
             renderMemberItem: function (participant) {
