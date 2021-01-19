@@ -795,7 +795,7 @@ define("xabber-contacts", function () {
                     this.closeModal();
                     utils.dialogs.error("Service unavailable");
                     return;
-                });
+                }.bind(this));
             },
 
             renderStatuses: function (options) {
@@ -1979,7 +1979,7 @@ define("xabber-contacts", function () {
                     this.$el.removeClass('request-waiting');
                 }.bind(this), function () {
                     this.$el.removeClass('request-waiting');
-                });
+                }.bind(this));
             },
 
             blockParticipant: function (ev) {
