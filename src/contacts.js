@@ -476,6 +476,7 @@ define("xabber-contacts", function () {
                 let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
                     .c('x', {xmlns: Strophe.NS.GROUP_CHAT + '#not-present'});
                 this.account.sendPres(pres);
+                clearInterval(this._sending_present_interval);
             },
 
             handlePresence: function (presence) {
@@ -2272,8 +2273,9 @@ define("xabber-contacts", function () {
             },
 
             getMessages: function (options, callback) {
-                this.contact.messages_view = new xabber.ParticipantMessagesView({contact: this.contact, model: this.participant.attributes });
-                this.contact.messages_view.messagesRequest(options, function () {
+                let chat = this.account.chats.getChat(this.contact);
+                chat.messages_view = new xabber.ParticipantMessagesView({ model: this.participant.attributes });
+                chat.messages_view.messagesRequest(options, function () {
                     this.close();
                     xabber.body.setScreen('all-chats', {right: 'participant_messages', contact: this.contact});
                 }.bind(this));
@@ -4116,17 +4118,17 @@ define("xabber-contacts", function () {
                 }
                 $(iq).find('conversation').each(function (idx, item) {
                     let $item = $(item),
-                        jid = $item.attr('jid');
+                        jid = $item.attr('jid'), saved = false;
                     if (jid === this.account.get('jid'))
-                        return;
+                        saved = true;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
                         is_private =  type === 'private',
                         is_incognito =  type === 'incognito',
                         is_group_chat =  type === 'group' || is_private || is_incognito,
                         encrypted = type === 'encrypted',
-                        contact = this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
-                        chat = this.account.chats.getChat(contact, encrypted && 'encrypted'),
+                        contact = !saved && this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
+                        chat = saved ? this.account.chats.getSavedChat() : this.account.chats.getChat(contact, encrypted && 'encrypted'),
                         message = $sync_metadata.children('last-message').children('message'),
                         current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
@@ -4139,7 +4141,7 @@ define("xabber-contacts", function () {
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     if ($sync_metadata.children('deleted').length) {
-                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();

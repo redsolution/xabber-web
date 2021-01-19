@@ -925,6 +925,7 @@ define("xabber-accounts", function () {
                 onDestroy: function () {
                     this.connection.connect_callback = null;
                     this.settings.destroy();
+                    this.trigger('remove_saved_chat');
                 },
 
                 registerIQHandler: function () {

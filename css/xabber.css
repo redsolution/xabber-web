@@ -3704,6 +3704,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-item.saved-chat .status,
 .chat-item.saved-chat .chat-icon,
 .chat-item.saved-chat .last-msg-date,
+.chat-item.saved-chat .msg-delivering-state,
 .chat-item.saved-chat .muted-icon {
     display: none !important;
 }
@@ -4113,6 +4114,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     left: initial !important;
     right: 0 !important;
     min-width: 200px !important;
+}
+
+.saved-chat .chat-head-menu {
+    min-width: 204px !important;
 }
 
 .xabber-account-menu {

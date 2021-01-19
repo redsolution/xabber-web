@@ -524,7 +524,7 @@ define("xabber-views", function () {
               query_chats.comparator = 'timestamp';
               query_chats.sort('timestamp').forEach(function (chat) {
                   let jid = chat.get('jid').toLowerCase(),
-                      name = chat.contact.get('roster_name') || chat.contact.get('name');
+                      name = chat.contact ? (chat.contact.get('roster_name') || chat.contact.get('name')) : chat.get('name');
                   name && (name = name.toLowerCase());
                   if (chat.get('timestamp')) {
                       if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
@@ -976,7 +976,7 @@ define("xabber-views", function () {
             var count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
             xabber.accounts.each(function(account) {
                 account.chats.each(function (chat) {
-                    if (!chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
+                    if (chat.contact && !chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
@@ -1549,7 +1549,7 @@ define("xabber-views", function () {
             let count_msg = 0;
             xabber.accounts.each(function(account) {
                 account.chats.each(function (chat) {
-                    if (!chat.contact.get('muted'))
+                    if (chat.contact && !chat.contact.get('muted'))
                         count_msg += chat.get('unread') + chat.get('const_unread');
                 }.bind(this));
             }.bind(this));
