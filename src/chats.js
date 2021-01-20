@@ -1476,7 +1476,7 @@ define("xabber-chats", function () {
                     contact_stanza_id = item.get('contact_stanza_id');
                 if (stanza_id || contact_stanza_id) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
-                        .c('retract-message', {id: (this.contact.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
+                        .c('retract-message', {id: (this.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQ(iq_retraction, function (success) {
                             this.item_view.content.removeMessage(item);
                             msgs_responses++;
@@ -1508,10 +1508,10 @@ define("xabber-chats", function () {
         },
 
         retractAllMessages: function (symmetric, callback, errback) {
-            let is_group_chat = this.contact.get('group_chat'),
+            let is_group_chat = this.get('group_chat'),
                 iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
-            !is_group_chat && (retract_attrs.conversation = this.contact.get('jid'));
+            !is_group_chat && (retract_attrs.conversation = this.get('jid'));
             this.get('encryped') && (retract_attrs.type = 'encrypted');
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
@@ -1599,7 +1599,7 @@ define("xabber-chats", function () {
             }
             this.$el.switchClass('saved-chat', this.model.get('saved'));
             this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
-            this.model.get('saved') && this.$el.find('.circle-avatar').append($('<i/>').addClass('mdi mdi-36px mdi-bookmark-outline'));
+            this.model.get('saved') && this.$el.find('.circle-avatar').append($('<i/>').addClass('mdi mdi-24px mdi-bookmark-outline'));
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -3040,7 +3040,10 @@ define("xabber-chats", function () {
                         this.head.archiveChat();
                         this.contact.set('archived', false);
                     }
-                this.model.get('saved') && message.set('muted', true);
+                if (this.model.get('saved')) {
+                    message.set('muted', true);
+                    message.set('state', constants.MSG_DISPLAYED);
+                }
             }
 
             if (message.get('attention')) {
@@ -3482,7 +3485,7 @@ define("xabber-chats", function () {
 
             var classes = [
                 attrs.forwarded_message && 'forwarding',
-                (attrs.encrypted || this.model.get('encrypted')) && 'encrypted'
+                (attrs.encrypted || this.model.get('encrypted')) ? 'encrypted' : ""
             ];
 
             let markup_body = utils.markupBodyMessage(message);
@@ -3725,7 +3728,7 @@ define("xabber-chats", function () {
                 if (!image)
                     image = this.account.cached_image;
             } else if (contact) {
-                image = contact.cached_image || (this.contact.get('group_chat') ? Images.getDefaultAvatar($fwd_message.find('.msg-wrap .fwd-msg-author').text()) : Images.getDefaultAvatar(contact));
+                image = contact.cached_image || (this.model.get('group_chat') ? Images.getDefaultAvatar($fwd_message.find('.msg-wrap .fwd-msg-author').text()) : Images.getDefaultAvatar(contact));
             }
             $avatar.setAvatar(image, this.avatar_size);
             $avatar.removeClass('hidden');
@@ -3735,8 +3738,8 @@ define("xabber-chats", function () {
                         $avatar.setAvatar(this.account.chat_settings.getB64Avatar($fwd_message.data('from-id')), this.avatar_size);
                     }
                     else {
-                        var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $fwd_message.data('from-id');
-                        this.contact.getAvatar($fwd_message.data('avatar'), node, function (data_avatar) {
+                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $fwd_message.data('from-id');
+                        this.contact && this.contact.getAvatar($fwd_message.data('avatar'), node, function (data_avatar) {
                             $avatar.setAvatar(data_avatar, this.avatar_size);
                             this.account.chat_settings.updateCachedAvatars($fwd_message.data('from-id'), $fwd_message.data('avatar'), data_avatar);
                         }.bind(this));
@@ -6637,6 +6640,7 @@ define("xabber-chats", function () {
                           }.bind(this));
                       }
                       this.closeChat();
+                      this.model.set('timestamp', 0);
                   }
               }.bind(this));
           },

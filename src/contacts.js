@@ -580,13 +580,13 @@ define("xabber-contacts", function () {
                     pinned_message = Number($group_chat.find('pinned-message').text()),
                     prev_pinned_message = this.get('pinned_message') ? this.get('pinned_message').get('stanza_id') : 0,
                     private_chat = $group_chat.find('parent-chat').text() || false,
-                    members_num = parseInt($group_chat.find('members').text()),
+                    members_num = Number($group_chat.find('members').text()),
                     $online_members_num = $group_chat.find('present'),
                     info = {jid, name, status_msg, privacy, status, members_num};
                 $index.length && (info.searchable = $index.text());
                 $model.length && (info.model = $model.text());
                 $description.length && (info.description = $description.text());
-                $online_members_num.length && (info.online_members_num = parseInt($online_members_num.text()));
+                $online_members_num.length && (info.online_members_num = Number($online_members_num.text()));
                 private_chat && this.set('private_chat', private_chat);
                 privacy === 'incognito' && this.set('incognito_chat', true);
                 let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
@@ -4137,10 +4137,10 @@ define("xabber-contacts", function () {
                         last_read_msg = $unread_messages.attr('after'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
-                        unread_msgs_count = parseInt($unread_messages.attr('count')),
+                        unread_msgs_count = Number($unread_messages.attr('count')),
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
-                    if ($sync_metadata.children('deleted').length) {
+                    if ($item.children('deleted').length) {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);

@@ -355,7 +355,7 @@ define("xabber-accounts", function () {
                     if (auth_type === 'token') {
                         password = this.settings.get('token');
                     } else if (auth_type === 'x-token') {
-                        if (this.get('x_token') && (parseInt(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
+                        if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
                             password = this.get('x_token').token;
                         else
                             password = undefined;
@@ -572,8 +572,8 @@ define("xabber-accounts", function () {
                                 client = $token.find('client').text(),
                                 device = $token.find('device').text(),
                                 token_uid = $token.find('token-uid').text(),
-                                expire = parseInt($token.find('expire').text())*1000,
-                                last_auth = parseInt($token.find('last-auth').text())*1000,
+                                expire = Number($token.find('expire').text())*1000,
+                                last_auth = Number($token.find('last-auth').text())*1000,
                                 ip_address = $token.find('ip').text();
                             tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                         }.bind(this));
@@ -960,8 +960,9 @@ define("xabber-accounts", function () {
                         chat_jid = $conversation.attr('jid'),
                         is_deleted = $conversation.children('deleted').length;
                     if (is_deleted) {
-                        let contact = this.contacts.mergeContact(chat_jid),
-                            chat = this.chats.getChat(contact);
+                        let saved = chat_jid === this.get('jid'),
+                            contact = !saved && this.contacts.mergeContact(chat_jid),
+                            chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact);
                         contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);

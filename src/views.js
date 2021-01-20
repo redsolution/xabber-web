@@ -520,13 +520,18 @@ define("xabber-views", function () {
               this.query_text = query;
               this.$('.contacts-list').html("");
               this.$('.chats-list').html("");
+              xabber.accounts.connected.forEach((acc) => {
+                  let saved_chat = acc.chats.getSavedChat();
+                  saved_chat.set('opened', true);
+                  saved_chat.item_view.updateLastMessage();
+              });
               let query_chats = _.clone(xabber.chats);
               query_chats.comparator = 'timestamp';
               query_chats.sort('timestamp').forEach(function (chat) {
                   let jid = chat.get('jid').toLowerCase(),
                       name = chat.contact ? (chat.contact.get('roster_name') || chat.contact.get('name')) : chat.get('name');
                   name && (name = name.toLowerCase());
-                  if (chat.get('timestamp')) {
+                  if (chat.get('timestamp') || chat.get('saved')) {
                       if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
                           let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
                               chat_item = xabber.chats_view.child(chat.get('id'));

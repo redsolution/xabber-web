@@ -3715,8 +3715,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .chat-item.saved-chat .circle-avatar i {
     color: #FFF;
-    left: 2px;
-    top: 2px;
+    left: 8px;
+    top: 8px;
     position: absolute;
 }
 
@@ -4016,8 +4016,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .saved-chat.chat-head-wrap .circle-avatar i {
     color: #FFF;
-    left: 2px;
-    top: 2px;
+    left: 8px;
+    top: 8px;
     position: absolute;
 }
 
