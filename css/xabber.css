@@ -4021,6 +4021,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: absolute;
 }
 
+.saved-chat.chat-head-wrap .one-liner {
+    height: 14px;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 300;
+    color: #616161;
+    margin-top: 1px;
+}
+
 .chat-head-wrap .contact-name-wrap {
     display: flex;
     align-items: center;
@@ -4114,10 +4123,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     left: initial !important;
     right: 0 !important;
     min-width: 200px !important;
-}
-
-.saved-chat .chat-head-menu {
-    min-width: 204px !important;
 }
 
 .xabber-account-menu {

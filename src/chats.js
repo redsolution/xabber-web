@@ -1004,7 +1004,7 @@ define("xabber-chats", function () {
             this.messages_view.messagesRequest({}, function () {
                 xabber.body.setScreen('all-chats', {
                     right: 'searched_messages',
-                    contact: this.contact
+                    model: this
                 });
             }.bind(this));
         },
@@ -1282,14 +1282,14 @@ define("xabber-chats", function () {
                 message = messages.get(unique_id);
             if (message) {
                 let stanza_id = message.get('stanza_id');
-                this.contact.messages_view = new xabber.MessageContextView({
+                this.messages_view = new xabber.MessageContextView({
                     contact: this.contact,
                     mention_context: options.mention,
                     model: this,
                     stanza_id_context: stanza_id
                 });
                 this.account.context_messages.add(message);
-                this.contact.messages_view.messagesRequest({after: stanza_id}, function () {
+                this.messages_view.messagesRequest({after: stanza_id}, function () {
                     if (options.mention)
                         xabber.body.setScreen('mentions', {
                             right: 'message_context',
@@ -2181,7 +2181,7 @@ define("xabber-chats", function () {
           },
 
           __initialize: function (options) {
-              this.participant = options.model;
+              this.participant = options.participant;
               this.member_jid = this.participant.jid;
               this.member_id = this.participant.id;
               this.member_nickname = this.participant.nickname;
@@ -4614,7 +4614,7 @@ define("xabber-chats", function () {
                 return;
             }
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
-            this.contact.membersRequest({id: participant_id}, function (response) {
+            this.contact.participantsRequest({id: participant_id}, function (response) {
                 let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                 participant_properties_panel.open(participant, data_form);
             }.bind(this));
@@ -4697,7 +4697,7 @@ define("xabber-chats", function () {
 
                 if ($elem.hasClass('circle-avatar')) {
                     let from_jid = is_forwarded ? $fwd_message.data('from') : $msg.data('from');
-                    if (this.contact.get('group_chat')) {
+                    if (this.model.get('group_chat')) {
                         let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id'),
                             unique_id = (is_forwarded) ? $fwd_message.attr('data-uniqueid') : $msg.attr('data-uniqueid'),
                             msg = this.model.messages.get(unique_id),
@@ -4708,7 +4708,7 @@ define("xabber-chats", function () {
                     else if (from_jid === this.account.get('jid')) {
                         this.account.showSettings();
                     } else if (from_jid === this.model.get('jid')) {
-                        this.contact.showDetails('all-chats');
+                        this.contact && this.contact.showDetails('all-chats');
                     } else {
                         let contact = this.account.contacts.mergeContact(from_jid);
                         contact.showDetails();
@@ -6598,6 +6598,11 @@ define("xabber-chats", function () {
               this.content = options.content;
               this.contact = this.content.contact;
               this.model = this.content.model;
+              clearInterval(this._update_oneliner_interval);
+              this.updateOneLiner();
+              this._update_oneliner_interval = setInterval(() => {
+                  this.updateOneLiner();
+              }, 1000*60*2);
               this.account = this.model.account;
               this.model.on("close_chat", this.closeChat, this);
           },
@@ -6613,6 +6618,16 @@ define("xabber-chats", function () {
               return this;
           },
 
+          updateOneLiner: function () {
+              let rand_idx = _.random(0, constants.ONELINERS.length - 1),
+                  one_liner = constants.ONELINERS[rand_idx];
+              if (!one_liner) {
+                  this.updateOneLiner();
+                  return;
+              }
+              this.$('.one-liner').text(one_liner);
+          },
+
           closeChat: function () {
               this.model.set({'opened': false, 'display': false, 'active': false});
               xabber.chats_view.clearSearch();
@@ -6624,7 +6639,7 @@ define("xabber-chats", function () {
 
           deleteChat: function () {
               let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
-              utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
+              utils.dialogs.ask("Delete all saved messages", "Are you sure you want to <b>delete all saved messages</b>? This operation can not be undone." +
                   (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                   if (result) {
                       if (this.account.connection && this.account.connection.do_synchronization) {
@@ -7688,7 +7703,7 @@ define("xabber-chats", function () {
                             if (this.contact.participants.length && this.contact.participants.version > 0) {
                                 this.updateMentionsList(mention_text);
                             } else {
-                                this.contact.membersRequest({version: 0}, function () {
+                                this.contact.participants.participantsRequest({version: 0}, function () {
                                     this.updateMentionsList(mention_text);
                                 }.bind(this));
                             }

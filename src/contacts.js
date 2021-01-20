@@ -227,41 +227,14 @@ define("xabber-contacts", function () {
                 }
             },
 
-            membersRequest: function (options, callback, errback) {
-                options = options || {};
-                let participant_id = options.id,
-                    version = options.version || 0,
-                    iq = $iq({from: this.account.get('jid'), to: this.get('full_jid') || this.get('jid'), type: 'get'});
-                if (participant_id != undefined) {
-                    if (!participant_id) {
-                        if (options.properties)
-                            iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
-                        else
-                            iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
-                    }
-                    else
-                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {
-                            xmlns: Strophe.NS.GROUP_CHAT,
-                            id: participant_id
-                        });
-                }
-                else
-                    iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
-                this.account.sendFast(iq, function (response) {
-                    callback && callback(response);
-                }, function (error) {
-                    errback && errback(error);
-                });
-            },
-
             getMyInfo: function (callback) {
-                this.membersRequest({id: '', properties: true}, function (response) {
+                this.participants.participantsRequest({id: '', properties: true}, function (response) {
                     let $item = $($(response).find('query user')),
                         cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
                     $item.length && this.participants && this.participants.createFromStanza($item);
                     cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
                     this.trigger('update_my_info');
-                    this.membersRequest({id: ''}, function (response) {
+                    this.participants.participantsRequest({id: ''}, function (response) {
                         let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                         this.my_rights = data_form;
                         this.trigger('permissions_changed');
@@ -729,21 +702,30 @@ define("xabber-contacts", function () {
             },
 
             searchByParticipants: function (query, callback) {
-                let participants_list = [];
-                this.participants.forEach(function (participant) {
-                    let jid = participant.get('jid');
-                    // if (jid !== this.account.get('jid')) {
-                        if (query) {
-                            query = query.toLowerCase();
-                            let nickname = participant.get('nickname'),
-                                id = participant.get('id');
-                            if (jid && jid.toLowerCase().indexOf(query) > -1 || /*id && id.toLowerCase().indexOf(query) > -1 ||*/ nickname && nickname.toLowerCase().indexOf(query) > -1)
-                                participants_list.push(participant);
-                        } else
-                            participants_list.push(participant);
-                    // }
-                }.bind(this));
-                callback && callback(participants_list);
+                if (!this.participants.version) {
+                    this.participants.participantsRequest({}, (response) => {
+                        let $response = $(response),
+                            version = $response.find('query').attr('version');
+                        (this.participants.version === 0) && this.participants.resetParticipants();
+                        this.participants.version = version;
+                        $response.find('query user').each(function (idx, item) {
+                            let $item = $(item),
+                                subscription = $item.find('subscription').text(),
+                                id = $item.find('id').text();
+                            if (subscription === 'none') {
+                                this.participants.get(id) && this.participants.get(id).destroy();
+                                this.account.groupchat_settings.removeParticipantFromList(this.get('jid'), id);
+                            }
+                            else
+                                this.participants.createFromStanza($item);
+                        }.bind(this));
+                        let participants_list = this.participants.search(query);
+                        callback && callback(participants_list);
+                    });
+                } else {
+                    let participants_list = this.participants.search(query);
+                    callback && callback(participants_list);
+                }
             },
 
             updateName: function () {
@@ -2022,7 +2004,7 @@ define("xabber-contacts", function () {
             },
 
             participantsRequest: function (callback, errback) {
-                this.model.membersRequest({version: this.participants.version }, function (response) {
+                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
                     (this.participants.version === 0) && this.participants.resetParticipants();
@@ -2098,7 +2080,7 @@ define("xabber-contacts", function () {
                     participant_id = participant_item.attr('data-id'),
                     participant = this.model.participants.get(participant_id);
                 (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
-                this.model.membersRequest({id: participant_id}, function (response) {
+                this.model.participants.participantsRequest({id: participant_id}, function (response) {
                     let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
                     this.participant_properties_panel.open(participant, data_form);
                 }.bind(this));
@@ -2274,10 +2256,10 @@ define("xabber-contacts", function () {
 
             getMessages: function (options, callback) {
                 let chat = this.account.chats.getChat(this.contact);
-                chat.messages_view = new xabber.ParticipantMessagesView({ model: this.participant.attributes });
+                chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
                 chat.messages_view.messagesRequest(options, function () {
                     this.close();
-                    xabber.body.setScreen('all-chats', {right: 'participant_messages', contact: this.contact});
+                    xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
                 }.bind(this));
             },
 
@@ -3093,6 +3075,41 @@ define("xabber-contacts", function () {
                     });
                 }.bind(this));
                 return pretty_rights;
+            },
+
+            participantsRequest: function (options, callback, errback) {
+                options = options || {};
+                let participant_id = options.id,
+                    version = options.version || 0,
+                    iq = $iq({to: this.contact.get('full_jid'), type: 'get'});
+                if (participant_id != undefined) {
+                    if (options.properties)
+                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                    else
+                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
+                }
+                else
+                    iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
+                this.account.sendFast(iq, function (response) {
+                    callback && callback(response);
+                }, function (error) {
+                    errback && errback(error);
+                });
+            },
+
+            search: function (query) {
+                let list = [];
+                this.models.forEach(function (participant) {
+                    let jid = participant.get('jid');
+                    if (query) {
+                        query = query.toLowerCase();
+                        let nickname = participant.get('nickname');
+                        if (jid && jid.toLowerCase().indexOf(query) > -1 || nickname && nickname.toLowerCase().indexOf(query) > -1)
+                            list.push(participant);
+                    } else
+                        list.push(participant);
+                }.bind(this));
+                return list;
             },
 
             createFromStanza: function ($item) {

@@ -189,7 +189,7 @@ define("xabber-ui", function () {
             path_group_invitation = new this.ViewPath('contact.invitation'),
             path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
-            path_participant_messages = new this.ViewPath('contact.messages_view'),
+            path_participant_messages = new this.ViewPath('model.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
         this.body.addScreen('contacts', {
