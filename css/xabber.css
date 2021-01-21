@@ -470,9 +470,9 @@ input[type=text].simple-input-field:hover {
     padding: 16px 24px;
 }
 
-.main-modal .modal-header span {
-    height: 24px;
-    font-size: 20px;
+.modal .modal-header {
+    font-size: 16px;
+    font-weight: 500;
     line-height: 24px;
     color: #212121;
 }
@@ -483,7 +483,6 @@ input[type=text].simple-input-field:hover {
     max-height: 500px;
     padding: 0 24px;
 }
-
 
 .main-modal .input-field {
     margin-top: 10px;
@@ -789,6 +788,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     margin: 0 auto;
 }
 
+.main-wrap.notifications-request {
+    padding-bottom: 48px;
+}
+
 .panel-wrap {
     height: 100%;
     float: left;
@@ -844,10 +847,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-color: #FFFFFF;
 }
 
-.notifications-request .chat-bottom-container {
-    bottom: 32px;
-}
-
 .chat-bottom-blocked-wrap {
     height: 104px;
     width: 100%;
@@ -871,8 +870,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .notifications-placeholder {
     bottom: 0;
     position: absolute;
-    height: 32px;
-    line-height: 32px;
+    height: 48px;
+    line-height: 48px;
     background-color: #FBC02D;
     width: 100%;
     padding: 0 0 0 24px;
@@ -886,7 +885,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .notifications-placeholder .mdi-close {
     position: absolute;
-    top: 5px;
+    top: 13px;
     color: #212121;
     right: 12px;
     cursor: pointer;
@@ -7541,11 +7540,6 @@ input[type='range'].voice-message-volume:focus {
     position: relative;
     width: 100%;
     height: 100%;
-}
-
-.notifications-request .contact-details-panel .panel-content-wrap,
-.notifications-request .groupchat-details-panel .panel-content-wrap {
-    height: calc(100% - 32px);
 }
 
 .details-panel .main-info {

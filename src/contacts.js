@@ -703,22 +703,7 @@ define("xabber-contacts", function () {
 
             searchByParticipants: function (query, callback) {
                 if (!this.participants.version) {
-                    this.participants.participantsRequest({}, (response) => {
-                        let $response = $(response),
-                            version = $response.find('query').attr('version');
-                        (this.participants.version === 0) && this.participants.resetParticipants();
-                        this.participants.version = version;
-                        $response.find('query user').each(function (idx, item) {
-                            let $item = $(item),
-                                subscription = $item.find('subscription').text(),
-                                id = $item.find('id').text();
-                            if (subscription === 'none') {
-                                this.participants.get(id) && this.participants.get(id).destroy();
-                                this.account.groupchat_settings.removeParticipantFromList(this.get('jid'), id);
-                            }
-                            else
-                                this.participants.createFromStanza($item);
-                        }.bind(this));
+                    this.participants.participantsRequest({}, () => {
                         let participants_list = this.participants.search(query);
                         callback && callback(participants_list);
                     });
@@ -2007,18 +1992,6 @@ define("xabber-contacts", function () {
                 this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
-                    (this.participants.version === 0) && this.participants.resetParticipants();
-                    $response.find('query user').each(function (idx, item) {
-                        let $item = $(item),
-                            subscription = $item.find('subscription').text(),
-                            id = $item.find('id').text();
-                        if (subscription === 'none') {
-                            this.participants.get(id) && this.participants.get(id).destroy();
-                            this.account.groupchat_settings.removeParticipantFromList(this.model.get('jid'), id);
-                        }
-                        else
-                            this.participants.createFromStanza($item);
-                    }.bind(this));
                     callback && callback(version);
                 }.bind(this), function (error) {
                     errback && errback(error);
@@ -3084,15 +3057,32 @@ define("xabber-contacts", function () {
                     iq = $iq({to: this.contact.get('full_jid'), type: 'get'});
                 if (participant_id != undefined) {
                     if (options.properties)
-                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', id: participant_id});
+                        iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, id: participant_id});
                     else
-                        iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
+                        iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights`}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
                 }
                 else
-                    iq.c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#members', version: version});
-                this.account.sendFast(iq, function (response) {
+                    iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, version: version});
+                this.account.sendFast(iq, (response) => {
+                    let $response = $(response),
+                        version = $response.find('query').attr('version');
+                    if (version) {
+                        (this.version === 0) && this.resetParticipants();
+                        this.version = Number(version);
+                    }
+                    $response.find(`query user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).each(function (idx, item) {
+                        let $item = $(item),
+                            subscription = $item.find('subscription').text(),
+                            id = $item.find('id').text();
+                        if (subscription === 'none') {
+                            this.get(id) && this.get(id).destroy();
+                            this.account.groupchat_settings.removeParticipantFromList(this.get('jid'), id);
+                        }
+                        else
+                            this.createFromStanza($item);
+                    }.bind(this));
                     callback && callback(response);
-                }, function (error) {
+                }, (error) => {
                     errback && errback(error);
                 });
             },

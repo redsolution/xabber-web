@@ -795,7 +795,7 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
-            xabber.notifications_placeholder && xabber.right_panel.$el.addClass('notifications-request');
+            xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
             $('body').switchClass('xabber-login', name === 'login');
             $('body').switchClass('on-xabber-login', name !== 'login');
             var new_attrs = {stamp: _.uniqueId()};
@@ -886,7 +886,7 @@ define("xabber-views", function () {
         },
 
         onUpdatedScreen: function (name) {
-            xabber.notifications_placeholder && xabber.right_panel.$el.append(xabber.notifications_placeholder.$el);
+            xabber.notifications_placeholder && xabber.main_panel.$el.append(xabber.notifications_placeholder.$el);
             if ((name === 'account_settings') || ((name === 'all-chats') &&
                 (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||

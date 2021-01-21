@@ -230,14 +230,16 @@ define([
         pretty_size: function (size) {
             if (!size)
                 return "";
+            if (_.isNaN(Number(size)))
+                return size;
             if (size < 1024) {
                 return size+' B';
             } else if (size < 1048576) {
-                return (size/1024).toFixed(2)+' KB';
+                return (size/1024).toFixed(2)+' KiB';
             } else if (size < 1073741824) {
-                return (size/1048576).toFixed(2)+' MB';
+                return (size/1048576).toFixed(2)+' MiB';
             } else {
-                return (size/1073741824).toFixed(2)+' GB';
+                return (size/1073741824).toFixed(2)+' GiB';
             }
         },
 
