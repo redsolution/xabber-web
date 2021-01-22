@@ -136,7 +136,8 @@ define("xabber-templates", [
     "text!templates/svg/volume-off-variant.html",
     "text!templates/svg/message-group.html",
     "text!templates/svg/xabber-offline.html",
-    "text!templates/svg/xabber-online.html"
+    "text!templates/svg/xabber-online.html",
+    "text!templates/svg/saved-messages.html"
 ], function (_, $) {
 
     _.templateSettings = {
@@ -321,6 +322,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.message-group');
     addSvgTemplate('svg.xabber-offline');
     addSvgTemplate('svg.xabber-online');
+    addSvgTemplate('svg.saved-messages');
 
     return templates;
 });

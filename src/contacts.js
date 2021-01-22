@@ -1927,12 +1927,9 @@ define("xabber-contacts", function () {
                 this.participantsRequest(function (version) {
                     if (this.model.get('group_info')) {
                         (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
-                        if (this.model.get('group_info').status === 'inactive')
-                            return;
                         if (this.participants.length != this.model.get('group_info').members_num) {
                             this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
                             this.participants.resetParticipants();
-                            this.model.get('group_info').members_num = 0;
                             this.updateParticipants();
                             return;
                         }
@@ -3066,11 +3063,8 @@ define("xabber-contacts", function () {
                 this.account.sendFast(iq, (response) => {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
-                    if (version) {
-                        (this.version === 0) && this.resetParticipants();
-                        this.version = Number(version);
-                    }
-                    $response.find(`query user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).each(function (idx, item) {
+                    version && (this.version = Number(version));
+                    $response.find(`query user`).each(function (idx, item) {
                         let $item = $(item),
                             subscription = $item.find('subscription').text(),
                             id = $item.find('id').text();

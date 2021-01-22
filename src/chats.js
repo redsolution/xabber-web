@@ -1593,7 +1593,7 @@ define("xabber-chats", function () {
             }
             this.$el.switchClass('saved-chat', this.model.get('saved'));
             this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
-            this.model.get('saved') && this.$el.find('.circle-avatar').append($('<i/>').addClass('mdi mdi-24px mdi-bookmark-outline'));
+            this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
             this.account.settings.on("change:color", this.updateColorScheme, this);
         },
 
@@ -1748,17 +1748,17 @@ define("xabber-chats", function () {
                     if (msg_files.length > 1) {
                         let total_size = 0;
                         msg_files.forEach((f) => {total_size+=Number(f.size)});
-                        msg_text = $colored_span.text(`${msg_files.length} files, ${utils.pretty_size(total_size)}`);
+                        msg_text = $colored_span.text(`${msg_files.length} files` + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                     }
                     if (msg_files.length == 1)
-                        msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : `File, ${utils.pretty_size(msg_files[0].size)}`));
+                        msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : (`File` + (msg_files[0].size ? `, ${utils.pretty_size(msg_files[0].size)}` : ""))));
                     if (msg_images.length > 1) {
                         let total_size = 0;
                         msg_images.forEach((f) => {total_size+=Number(f.size)});
-                        msg_text = $colored_span.text(`${msg_images.length} images, ${utils.pretty_size(total_size)}`);
+                        msg_text = $colored_span.text(`${msg_images.length} images` + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                     }
                     if (msg_images.length == 1)
-                        msg_text = $colored_span.text(`Image, ${utils.pretty_size(msg_images[0].size)}`);
+                        msg_text = $colored_span.text(`Image` + (msg_images[0].size ? `, ${utils.pretty_size(msg_images[0].size)}` : ""));
                 }
                 this.$('.last-msg').html("").append(msg_from).append(msg_text);
             }
@@ -6211,17 +6211,17 @@ define("xabber-chats", function () {
                       if (msg_files.length > 1) {
                           let total_size = 0;
                           msg_files.forEach((f) => {total_size+=Number(f.size)});
-                          msg_text = $colored_span.text(`${msg_files.length} files, ${utils.pretty_size(total_size)}`);
+                          msg_text = $colored_span.text(`${msg_files.length} files` + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                       }
                       if (msg_files.length == 1)
-                          msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : `File, ${utils.pretty_size(msg_files[0].size)}`));
+                          msg_text = $colored_span.text((msg_files[0].is_audio || msg_files[0].voice ? ("Voice message, " + utils.pretty_duration(msg_files[0].duration)) : (`File` + (msg_files[0].size ? `, ${utils.pretty_size(msg_files[0].size)}` : ""))));
                       if (msg_images.length > 1) {
                           let total_size = 0;
                           msg_images.forEach((f) => {total_size+=Number(f.size)});
-                          msg_text = $colored_span.text(`${msg_images.length} images, ${utils.pretty_size(total_size)}`);
+                          msg_text = $colored_span.text(`${msg_images.length} images` + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                       }
                       if (msg_images.length == 1)
-                          msg_text = $colored_span.text(`Image, ${utils.pretty_size(msg_images[0].size)}`);
+                          msg_text = $colored_span.text(`Image` + (msg_images[0].size ? `, ${utils.pretty_size(msg_images[0].size)}` : ""));
                   }
                   this.$('.last-msg').html("").append(msg_from).append(msg_text);
               }
@@ -6611,6 +6611,7 @@ define("xabber-chats", function () {
                   this.updateOneLiner();
               }, 1000*60*2);
               this.account = this.model.account;
+              this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
               this.model.on("close_chat", this.closeChat, this);
           },
 

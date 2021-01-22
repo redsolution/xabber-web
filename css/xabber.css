@@ -3703,7 +3703,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-item.saved-chat .status,
 .chat-item.saved-chat .chat-icon,
 .chat-item.saved-chat .last-msg-date,
-.chat-item.saved-chat .msg-delivering-state,
 .chat-item.saved-chat .muted-icon {
     display: none !important;
 }
@@ -3712,10 +3711,12 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     background-image: none;
 }
 
-.chat-item.saved-chat .circle-avatar i {
-    color: #FFF;
-    left: 8px;
+.chat-item.saved-chat .circle-avatar svg {
+    width: 24px;
+    height: 24px;
     top: 8px;
+    left: 8px;
+    fill: #FFF;
     position: absolute;
 }
 
@@ -4013,10 +4014,12 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     cursor: pointer;
 }
 
-.saved-chat.chat-head-wrap .circle-avatar i {
-    color: #FFF;
+.saved-chat.chat-head-wrap .circle-avatar svg {
     left: 8px;
     top: 8px;
+    width: 24px;
+    height: 24px;
+    fill: #FFF;
     position: absolute;
 }
 
@@ -8514,7 +8517,11 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .forward-panel-modal .list-item {
-    padding-left: 74px;
+    padding: 11px 24px 11px 74px;
+}
+
+.forward-panel-modal .chat-item .msg-delivering-state {
+    right: 24px;
 }
 
 .add-user-group-chat .list-item.selected,
