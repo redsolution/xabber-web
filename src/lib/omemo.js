@@ -37,7 +37,10 @@
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
             this._connection.sendIQ(iq, callback, function (err) {
-                ($(err).find('error').attr('code') == 404 && !jid) && createDeviceNode.call(this, callback);
+                if ($(err).find('error').attr('code') == 404 && !jid)
+                    createDeviceNode.call(this, callback);
+                else
+                    errback && errback();
             }.bind(this));
         };
 

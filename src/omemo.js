@@ -48,12 +48,12 @@ define("xabber-omemo", function () {
                     this._pending_devices = true;
                     this._dfd_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), function (cb) {
+                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
                             this.updateDevices((this.account.background_connection || this.account.connection).omemo.parseUserDevices($(cb)));
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
-                        }.bind(this), function () {
+                        }, () => {
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
@@ -1340,6 +1340,7 @@ define("xabber-omemo", function () {
                     } else {
                         peer.getDevicesNode().then(() => {
                             counter = Object.keys(peer.devices).length;
+                            !counter && dfd.resolve('nil');
                             for (let device_id in peer.devices) {
                                 let device = peer.devices[device_id];
                                 device.getBundle().then(({pk, spk, ik}) => {

@@ -5741,7 +5741,7 @@ canvas {
     justify-content: flex-start;
     flex-direction: row;
     align-items: center;
-    height: 56px;
+    height: 64px;
 }
 
 input[type=range].voice-message-volume {
@@ -8522,6 +8522,10 @@ input[type='range'].voice-message-volume:focus {
 
 .forward-panel-modal .chat-item .msg-delivering-state {
     right: 24px;
+}
+
+.forward-panel-modal .chat-item .msg-counter {
+    right: 30px;
 }
 
 .add-user-group-chat .list-item.selected,

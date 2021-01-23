@@ -34541,7 +34541,10 @@ Strophe.RSM.prototype = {
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
             this._connection.sendIQ(iq, callback, function (err) {
-                ($(err).find('error').attr('code') == 404 && !jid) && createDeviceNode.call(this, callback);
+                if ($(err).find('error').attr('code') == 404 && !jid)
+                    createDeviceNode.call(this, callback);
+                else
+                    errback && errback();
             }.bind(this));
         };
 
@@ -46459,7 +46462,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (9)","version_description":""}'
+'{"version_number":"2.2.0 (10)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -65699,7 +65702,6 @@ define("xabber-chats", [],function () {
             "keyup .input-message .rich-textarea": "keyUp",
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
-            "mouseup .attach-voice-message": "writeVoiceMessage",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
@@ -66491,6 +66493,10 @@ define("xabber-chats", [],function () {
                     chunks = [],
                     $mic = this.$('.send-area .attach-voice-message'),
                     onSuccess = function(stream) {
+                    if (!$mic.is(":hover")) {
+                        $mic.removeClass('recording ground-color-50');
+                        return;
+                    }
                     let mediaRecorder = new MediaRecorder(stream),
                         timer = 1, start_time, end_time,
                         mic_hover = true;
@@ -68502,12 +68508,12 @@ define("xabber-omemo", [],function () {
                     this._pending_devices = true;
                     this._dfd_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), function (cb) {
+                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
                             this.updateDevices((this.account.background_connection || this.account.connection).omemo.parseUserDevices($(cb)));
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
-                        }.bind(this), function () {
+                        }, () => {
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
@@ -69794,6 +69800,7 @@ define("xabber-omemo", [],function () {
                     } else {
                         peer.getDevicesNode().then(() => {
                             counter = Object.keys(peer.devices).length;
+                            !counter && dfd.resolve('nil');
                             for (let device_id in peer.devices) {
                                 let device = peer.devices[device_id];
                                 device.getBundle().then(({pk, spk, ik}) => {

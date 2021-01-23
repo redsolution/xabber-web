@@ -7047,7 +7047,6 @@ define("xabber-chats", function () {
             "keyup .input-message .rich-textarea": "keyUp",
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
-            "mouseup .attach-voice-message": "writeVoiceMessage",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
@@ -7839,6 +7838,10 @@ define("xabber-chats", function () {
                     chunks = [],
                     $mic = this.$('.send-area .attach-voice-message'),
                     onSuccess = function(stream) {
+                    if (!$mic.is(":hover")) {
+                        $mic.removeClass('recording ground-color-50');
+                        return;
+                    }
                     let mediaRecorder = new MediaRecorder(stream),
                         timer = 1, start_time, end_time,
                         mic_hover = true;
