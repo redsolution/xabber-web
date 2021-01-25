@@ -5753,6 +5753,7 @@ define("xabber-chats", function () {
                     let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
                         contact = this.account.contacts.mergeContact(group_jid);
                     contact.set('group_chat', true);
+                    contact.set('subscription_preapproved', true);
                     contact.pres('subscribed');
                     contact.pushInRoster(null, function () {
                         contact.pres('subscribe');

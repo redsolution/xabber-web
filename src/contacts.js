@@ -1236,8 +1236,8 @@ define("xabber-contacts", function () {
                     if ($target.attr('id') === "outcoming-subscription")
                         contact.askRequest();
                     else {
-                        contact.acceptRequest();
                         contact.set('subscription_preapproved', true);
+                        contact.acceptRequest();
                     }
                 }
                 else {
@@ -2433,6 +2433,7 @@ define("xabber-contacts", function () {
                         let group_jid = $(iq_response).find('query localpart').text() + '@' + this.contact.domain,
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
+                        contact.set('subscription_preapproved', true);
                         contact.pres('subscribed');
                         contact.pushInRoster(null, function () {
                             contact.pres('subscribe');
@@ -3316,6 +3317,7 @@ define("xabber-contacts", function () {
 
             join: function () {
                 let contact = this.model;
+                contact.set('subscription_preapproved', true);
                 contact.acceptRequest();
                 contact.pushInRoster(null, function () {
                     contact.askRequest();
@@ -4269,6 +4271,7 @@ define("xabber-contacts", function () {
                 if (subscription === 'both') {
                     attrs.subscription_request_out = false;
                     attrs.subscription_request_in = false;
+                    attrs.subscription_preapproved = undefined;
                 }
                 if (subscription === 'from')
                     attrs.subscription_request_in = false;
@@ -4960,6 +4963,7 @@ define("xabber-contacts", function () {
                         .siblings('.errors').text(error_text);
                 } else {
                     contact.pushInRoster({name: name, groups: groups}, function () {
+                        contact.set('subscription_preapproved', true);
                         contact.pres('subscribed');
                         contact.pres('subscribe');
                         contact.trigger('presence', contact, 'subscribe_from');
