@@ -1733,7 +1733,7 @@ define("xabber-chats", function () {
             let msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'), msg_from = "",
                 forwarded_message = msg.get('forwarded_message'),
-                msg_files = msg.get('files') || [], msg_images = msg.get('images')  || [],
+                msg_files = msg.get('files') || [], msg_images = msg.get('images') || [],
                 msg_text = forwarded_message ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText(),
                 msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact && this.contact.my_info && this.contact.my_info.attributes || {};
             this.model.set({timestamp: timestamp});
@@ -1742,6 +1742,10 @@ define("xabber-chats", function () {
             msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
             if (msg_files.length || msg_images.length) {
                 let $colored_span = $('<span class="text-color-500"/>');
+                if (msg.get('type') === 'file_upload') {
+                    msg_images = msg_files.filter(f => f.type && utils.isImageType(f.type));
+                    msg_files = msg_files.filter(f => !(f.type && utils.isImageType(f.type)));
+                }
                 if (msg_files.length && msg_images.length)
                     msg_text = $colored_span.text(msg_files.length + msg_images.length + ' attachments');
                 else {
@@ -4024,13 +4028,6 @@ define("xabber-chats", function () {
               }
           },
 
-        isImageType: function(type) {
-            if (type.indexOf('image') != -1)
-                return true;
-            else
-                return false;
-        },
-
         initJingleMessage: function (media_type) {
             xabber.current_voip_call && xabber.current_voip_call.destroy();
             media_type = media_type || {};
@@ -4126,7 +4123,7 @@ define("xabber-chats", function () {
                 });
             }.bind(this));
             $(files).each(function(idx, file) {
-                if (this.isImageType(file.type)) {
+                if (utils.isImageType(file.type)) {
                     var reader = new FileReader(), deferred = new $.Deferred();
                     Images.compressImage(file).done(function (image) {
                         reader.readAsDataURL(image);
@@ -4214,7 +4211,7 @@ define("xabber-chats", function () {
             $message.find('.repeat-upload').hide();
             $message.find('.status').hide();
             $message.find('.progress').show();
-            var files_count = 0;
+            let files_count = 0;
             $(message.get('files')).each(function(idx, file) {
                 let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
                 enc_file.iv && (delete enc_file.iv);
@@ -4305,7 +4302,7 @@ define("xabber-chats", function () {
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
-                if (this.isImageType(file_.type)) {
+                if (utils.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
                 }
@@ -7417,8 +7414,8 @@ define("xabber-chats", function () {
         },
 
         updateInfoInBottom: function () {
-            if (this.contac && this.contact.my_info) {
-                var nickname = this.contact.my_info.get('nickname'),
+            if (this.contact && this.contact.my_info) {
+                let nickname = this.contact.my_info.get('nickname'),
                     badge = this.contact.my_info.get('badge'),
                     avatar = this.contact.my_info.get('b64_avatar'),
                     role = this.contact.my_info.get('role');

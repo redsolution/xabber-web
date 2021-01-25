@@ -176,6 +176,13 @@ define([
             return Math.floor(seconds / 86400) + ' days ago';
         },
 
+        isImageType: function(type) {
+            if (type.indexOf('image') > -1)
+                return true;
+            else
+                return false;
+        },
+
         file_type_icon: function (mime_type) {
             let filetype = utils.pretty_file_type(mime_type);
             if (filetype === 'image')

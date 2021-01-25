@@ -313,7 +313,7 @@
                 result.resolve(true);
             } else {
                 if (!self.cache.ignore_notifications_warning)
-                    this.notifications_placeholder = new xabber.NotificationsPlaceholder();
+                    self.notifications_placeholder = new self.NotificationsPlaceholder();
                 result.resolve(undefined);
             }
             return result.promise();
