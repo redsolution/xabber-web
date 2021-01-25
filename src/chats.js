@@ -206,9 +206,9 @@ define("xabber-chats", function () {
 
             if (options.replaced) {
                 let by_jid = $message.children('replace').attr('by'),
-                    converstion = $message.children('replace').attr('conversation');
+                    conversation = $message.children('replace').attr('conversation');
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: converstion}));
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: conversation}));
                     return;
                 }
                 $message = $message.children('replace').children('message');
@@ -3250,8 +3250,10 @@ define("xabber-chats", function () {
         updateMessage: function (item) {
             let $message, images = item.get('images'), emoji = item.get('only_emoji'),
                 files =  item.get('files');
-            if (item instanceof xabber.Message)
+            if (item instanceof xabber.Message) {
+                this.updateMentions(item);
                 $message = this.$('.chat-message[data-uniqueid="' + item.get('unique_id') + '"]');
+            }
             else
                 return;
             $message.children('.msg-wrap').children('.chat-msg-content').html(utils.markupBodyMessage(item).emojify({tag_name: 'div', emoji_size: utils.emoji_size(emoji)}));
@@ -4606,6 +4608,8 @@ define("xabber-chats", function () {
                         options.blocked = true;
                     else
                         options.blocked = false;
+                    if (!options.blocked && !this.contact.participants.get(participant_id))
+                        return;
                     participant = new xabber.Participant(options, {contact: this.contact});
                     participant_properties_panel.open(participant, {});
                 }.bind(this));
@@ -8308,7 +8312,7 @@ define("xabber-chats", function () {
             }.bind(this));
             mentions.forEach(function (mention) {
                 let mention_attrs = {xmlns: Strophe.NS.MARKUP};
-                mention.is_gc && (mention_attrs = Strophe.NS.GROUP_CHAT);
+                mention.is_gc && (mention_attrs.node = Strophe.NS.GROUP_CHAT);
                 $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + forwarded_body.length, end: mention.end + forwarded_body.length, type: 'decoration'})
                     .c('mention', mention_attrs).t(mention.target).up().up();
             }.bind(this));
