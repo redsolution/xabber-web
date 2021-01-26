@@ -2739,6 +2739,13 @@ define("xabber-contacts", function () {
                 this.update(function () {
                     this.$el.openModal({
                         ready: function () {
+                            this.$('.select-timer .dropdown-button').dropdown({
+                                inDuration: 100,
+                                outDuration: 100,
+                                constrainWidth: false,
+                                hover: false,
+                                alignment: 'left'
+                            });
                             this.updateScrollBar();
                         }.bind(this),
                         complete: function () {
@@ -2766,14 +2773,6 @@ define("xabber-contacts", function () {
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
                 this.account.sendFast(iq_get_rights, function(iq_all_rights) {
                     this.showDefaultRestrictions(iq_all_rights);
-                    let dropdown_settings = {
-                        inDuration: 100,
-                        outDuration: 100,
-                        constrainWidth: false,
-                        hover: false,
-                        alignment: 'left'
-                    };
-                    this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
                     callback && callback();
                 }.bind(this),
                     function () {
@@ -2863,13 +2862,6 @@ define("xabber-contacts", function () {
                         }
                     }
                 }.bind(this));
-                this.$('.select-timer .dropdown-button').dropdown({
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    alignment: 'left'
-                });
             },
 
             saveChanges: function () {

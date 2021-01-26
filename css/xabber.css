@@ -8524,6 +8524,10 @@ input[type='range'].voice-message-volume:focus {
     right: 24px;
 }
 
+.forward-panel-modal .chat-item.saved-chat .msg-delivering-state {
+    display: none;
+}
+
 .forward-panel-modal .chat-item .msg-counter {
     right: 30px;
 }

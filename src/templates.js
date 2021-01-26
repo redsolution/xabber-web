@@ -106,6 +106,7 @@ define("xabber-templates", [
     "text!templates/chats/messages/template-for-4.html",
     "text!templates/chats/messages/template-for-5.html",
     "text!templates/chats/messages/template-for-6.html",
+    "text!templates/chats/messages/saved_main.html",
     "text!templates/chats/archive_placeholder.html",
     "text!templates/chats/group_chats/pinned_message_panel.html",
     "text!templates/chats/group_chats/add_group_chat.html",
@@ -290,6 +291,7 @@ define("xabber-templates", [
     addTemplate('chats.messages.template-for-4');
     addTemplate('chats.messages.template-for-5');
     addTemplate('chats.messages.template-for-6');
+    addTemplate('chats.messages.saved_main');
     addTemplate('chats.archive_placeholder');
     addTemplate('chats.group_chats.pinned_message_panel');
     addTemplate('chats.group_chats.add_group_chat');

@@ -25,6 +25,57 @@ define("xabber-mentions", function () {
                 this.account = this.contact.account;
                 this.item_view = new xabber.MentionItemView({model: this});
                 this.contact.on("destroy", this.destroy, this);
+                this.message.on("change:last_replace_time", this.onMessageUpdated, this);
+            },
+
+            onMessageUpdated: function () {
+                if (this.message.get('mentions') && this.message.get('mentions').length) {
+                    this.message.get('mentions').forEach(function (mention) {
+                        let mention_target = mention.target || "",
+                            id = mention_target.match(/\?id=\w*/),
+                            jid = mention_target.match(/\?jid=.*/);
+                        if (id)
+                            mention_target = id[0].slice(4);
+                        else if (jid)
+                            mention_target = jid[0].slice(5);
+                        else
+                            mention_target = "";
+                        if (id) {
+                            if (this.contact.my_info) {
+                                if (mention_target === this.contact.my_info.get('id'))
+                                    this.item_view.updateLastMessage();
+                                else
+                                    this.destroy();
+                            }
+                            else if (this.contact.get('group_chat')) {
+                                if (this._pending_my_info) {
+                                    this._pending_my_info.done(function () {
+                                        if (mention_target === this.contact.my_info.get('id'))
+                                            this.item_view.updateLastMessage();
+                                        else
+                                            this.destroy();
+                                        this._pending_my_info = null;
+                                    }.bind(this));
+                                }
+                                else {
+                                    this._pending_my_info = new $.Deferred();
+                                    this.contact.getMyInfo(function () {
+                                        if (mention_target === this.contact.my_info.get('id'))
+                                            this.item_view.updateLastMessage();
+                                        else
+                                            this.destroy();
+                                        this._pending_my_info.resolve();
+                                    }.bind(this));
+                                }
+                            }
+                        } else if (jid && mention_target === this.account.get('jid')) {
+                            this.item_view.updateLastMessage();
+                        }
+                        else
+                            this.destroy();
+                    }.bind(this));
+                } else
+                    this.destroy();
             }
         });
 

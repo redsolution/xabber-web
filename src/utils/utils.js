@@ -95,11 +95,11 @@ define([
         },
 
         utoa: function (str) {
-            return window.btoa(unescape(encodeURIComponent(str)));
+            return window.btoa(_.unescape(encodeURIComponent(str)));
         },
 
         atou: function (str) {
-            return decodeURIComponent(escape(window.atob(str)));
+            return decodeURIComponent(_.escape(window.atob(str)));
         },
 
         now: function () {

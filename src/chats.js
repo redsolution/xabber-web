@@ -823,7 +823,7 @@ define("xabber-chats", function () {
                   chat.messages.createSystemMessage({
                       from_jid: this.account.get('jid'),
                       session_id: $message.find('reject').attr('id'),
-                      message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')'
+                      message: ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call, ' + utils.pretty_duration(duration)
                   });
               }
               else {
@@ -1151,7 +1151,7 @@ define("xabber-chats", function () {
                     let duration = $jingle_msg_reject.children('call').attr('duration'),
                         initiator = $jingle_msg_reject.children('call').attr('initiator');
                     if (duration && initiator)
-                        msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call (' + utils.pretty_duration(duration) + ')';
+                        msg_text = ((initiator && initiator === this.account.get('jid')) ? 'Outgoing' : 'Incoming') + ' call, ' + utils.pretty_duration(duration);
                     else
                         msg_text = 'Cancelled call';
                 }
@@ -3493,13 +3493,18 @@ define("xabber-chats", function () {
                 (attrs.encrypted || this.model.get('encrypted')) ? 'encrypted' : ""
             ];
 
-            let markup_body = utils.markupBodyMessage(message);
+            let markup_body = utils.markupBodyMessage(message), $message;
 
-            var $message = $(templates.messages.main(_.extend(attrs, {
-                is_sender: is_sender,
-                message: markup_body,
-                classlist: classes.join(' ')
-            })));
+            /*if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length) {
+                $message = $(templates.messages.saved_main(_.extend(attrs, {
+                    classlist: classes.join(' ')
+                })));
+            } else*/
+                $message = $(templates.messages.main(_.extend(attrs, {
+                    is_sender: is_sender,
+                    message: markup_body,
+                    classlist: classes.join(' ')
+                })));
 
             if (attrs.hasOwnProperty('is_trusted'))
                 $message.attr('data-trust', attrs.is_trusted);
@@ -3627,7 +3632,7 @@ define("xabber-chats", function () {
                         let data_form = utils.render_data_form(fwd_msg.get('data_form'));
                         $f_message.find('.chat-msg-content').append(data_form);
                     }
-                    $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message);
+                    $message.children('.msg-wrap').length ? $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message) : $message.children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
             }
@@ -6266,15 +6271,19 @@ define("xabber-chats", function () {
                     chat = this.account.chats.get(id);
                 if (chat) {
                     if (id == `${this.account.get('jid')}:saved`) {
+                        let $cloned_item = $(item).clone().removeClass('hidden');
+                        $cloned_item.find('.last-msg').text("Forward here to save");
                         this.saved_chat = true;
-                        this.$('.chat-list-wrap').prepend($(item).clone().removeClass('hidden'));
+                        this.$('.chat-list-wrap').prepend($cloned_item);
                     } else
                         this.$('.chat-list-wrap').append($(item).clone().removeClass('hidden'));
                 }
             }.bind(this));
             if (!this.saved_chat) {
-                let saved_chat = this.account.chats.getSavedChat();
-                this.$('.chat-list-wrap').prepend(saved_chat.item_view.$el.clone());
+                let saved_chat = this.account.chats.getSavedChat(),
+                    $cloned_item = saved_chat.item_view.$el.clone();
+                $cloned_item.text("Forward here to save");
+                this.$('.chat-list-wrap').prepend($cloned_item);
             }
             this.$('.chat-list-wrap').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text('Recent chats'));
             this.$('.chat-list-wrap').append($('<div/>', { class: 'forward-panel-list-title contacts-title hidden'}).text('Contacts'));
