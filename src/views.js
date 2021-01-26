@@ -1256,9 +1256,9 @@ define("xabber-views", function () {
 
         events: {
             "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
-            "mousedown .setting.notifications label": "setNotifications",
-            "mousedown .setting.message-preview label": "setMessagePreview",
-            "mousedown .setting.call-attention label": "setCallAttention",
+            "click .setting.notifications label": "setNotifications",
+            "click .setting.message-preview label": "setMessagePreview",
+            "click .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
@@ -1271,7 +1271,7 @@ define("xabber-views", function () {
         render: function () {
             var settings = this.model.attributes;
             this.$('.notifications input[type=checkbox]').prop({
-                checked: settings.notifications
+                checked: settings.notifications && xabber._cache.get('notifications')
             });
             this.$('.message-preview input[type=checkbox]')
                 .prop({checked: settings.message_preview});
@@ -1298,14 +1298,27 @@ define("xabber-views", function () {
         },
 
         setNotifications: function (ev) {
-            let value = this.model.get('notifications');
+            let value = this.model.get('notifications'),
+                $target = $(ev.target);
+            ev.preventDefault();
             if (value === null) {
                 utils.callback_popup_message("Browser doesn't support notifications", 1500);
-            } else
-                value = !value;
-            this.model.save('notifications', value);
-            ev.preventDefault();
-            $(ev.target).closest('input').prop('checked', value);
+            } else {
+                value = value && xabber._cache.get('notifications');
+                if (!xabber._cache.get('notifications')) {
+                    window.Notification.requestPermission((permission) => {
+                        xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
+                        xabber.notifications_placeholder && xabber.notifications_placeholder.close();
+                        value = (permission === 'granted');
+                        this.model.save('notifications', value ? value : this.model.get('notifications'));
+                        $target.closest('.setting.notifications').find('input').prop('checked', value);
+                    });
+                } else {
+                    value = !value;
+                    this.model.save('notifications', value);
+                    $target.closest('.setting.notifications').find('input').prop('checked', value);
+                }
+            }
         },
 
         setMessagePreview: function (ev) {

@@ -4190,6 +4190,8 @@ define("xabber-contacts", function () {
                     xabber.toolbar_view.recountAllMessageCounter();
                 }.bind(this));
                 xabber.chats_view.hideChatsFeedback();
+                if (!request_with_stamp)
+                    this.account.chats.getSavedChat();
                 return true;
             },
 

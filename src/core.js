@@ -314,7 +314,7 @@
             } else {
                 if (!self.cache.ignore_notifications_warning)
                     self.notifications_placeholder = new self.NotificationsPlaceholder();
-                result.resolve(undefined);
+                result.resolve(false);
             }
             return result.promise();
         },

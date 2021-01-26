@@ -5071,6 +5071,7 @@ define("xabber-chats", function () {
             if (!chat) {
                 chat = xabber.chats.create(attrs, {account: this.account});
                 this.add(chat);
+                chat.trigger("load_last_history");
             }
             return chat;
         },
