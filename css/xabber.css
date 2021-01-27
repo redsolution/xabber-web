@@ -4479,6 +4479,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     display: none;
 }
 
+.fwd-message.selected,
 .chat-message.selected {
     background-color: #FFEBEE;
     background-image: unset !important;
@@ -4713,6 +4714,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     font-size: 12px;
     padding-left: 8px;
     margin-bottom: 4px;
+}
+
+.chat-message.saved-main .fwd-msgs-block {
+    padding: 0 !important;
 }
 
 .chat-message .fwd-msgs-block:hover > .collapsed-forwarded-message {
@@ -5294,14 +5299,26 @@ img.fwd-img-preview {
     display: none;
 }
 
+.saved-main .fwd-message {
+    padding: 7px 0;
+    margin: 0;
+}
+
+.saved-main .fwd-message .circle-avatar {
+    left: 16px;
+}
+
 .fwd-message.with-author .circle-avatar {
     display: block;
 }
 
-
 .fwd-message .msg-wrap {
     width: 100%;
     padding: 0 20px 0 40px;
+}
+
+.saved-main .fwd-message .msg-wrap {
+    padding: 0 32px 0 64px;
 }
 
 .fwd-message .msg-time {

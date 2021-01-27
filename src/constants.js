@@ -127,6 +127,7 @@ var constants = {
     MSG_DELIVERED: 2,
     MSG_DISPLAYED: 3,
     MSG_ARCHIVED: 4,
+    MSG_SAVED: 5,
 
     RSM_ATTRIBUTES: ['max', 'first', 'last', 'after', 'before', 'index', 'count'],
     MAM_ATTRIBUTES: ['with', 'start', 'end'],
@@ -547,6 +548,7 @@ constants.MSG_STATE[constants.MSG_DELIVERED] = 'delivered';
 constants.MSG_STATE[constants.MSG_DISPLAYED] = 'displayed';
 constants.MSG_STATE[constants.MSG_ARCHIVED] = 'archived';
 constants.MSG_STATE[constants.MSG_BLOCKED] = 'not-allowed';
+constants.MSG_STATE[constants.MSG_SAVED] = 'saved';
 
 constants.MSG_VERBOSE_STATE = {};
 constants.MSG_VERBOSE_STATE[constants.MSG_ERROR] = 'Message error';
@@ -556,6 +558,7 @@ constants.MSG_VERBOSE_STATE[constants.MSG_DELIVERED] = 'Message delivered to use
 constants.MSG_VERBOSE_STATE[constants.MSG_DISPLAYED] = 'Message read';
 constants.MSG_VERBOSE_STATE[constants.MSG_ARCHIVED] = 'Message from archive';
 constants.MSG_VERBOSE_STATE[constants.MSG_BLOCKED] = 'Message error';
+constants.MSG_VERBOSE_STATE[constants.MSG_SAVED] = 'Message saved';
 
 
 if (typeof define === "function") {

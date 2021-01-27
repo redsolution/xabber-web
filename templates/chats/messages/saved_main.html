@@ -1,3 +1,8 @@
 <div class="chat-message saved-main main {{classlist}}" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">
     <div class="fwd-msgs-block"></div>
+    <div class="right-side noselect">
+        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
+        <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
+        <div class="edited-info one-line hidden"></div>
+    </div>
 </div>

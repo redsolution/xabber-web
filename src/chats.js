@@ -3495,11 +3495,11 @@ define("xabber-chats", function () {
 
             let markup_body = utils.markupBodyMessage(message), $message;
 
-            /*if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length) {
+            if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length) {
                 $message = $(templates.messages.saved_main(_.extend(attrs, {
                     classlist: classes.join(' ')
                 })));
-            } else*/
+            } else
                 $message = $(templates.messages.main(_.extend(attrs, {
                     is_sender: is_sender,
                     message: markup_body,
@@ -3586,6 +3586,10 @@ define("xabber-chats", function () {
                         from_id: from_id
                     })));
 
+                    if (this.model.get('saved') && $message.hasClass('saved-main')) {
+                        $f_message.append($message.children('.right-side').clone());
+                    }
+
                     if (fwd_msg.get('forwarded_message')) {
                         var fwd_messages_count = fwd_msg.get('forwarded_message').length,
                             fwd_messages_link = fwd_messages_count + ' forwarded message' + ((fwd_messages_count > 1) ? 's' : "");
@@ -3635,6 +3639,9 @@ define("xabber-chats", function () {
                     $message.children('.msg-wrap').length ? $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message) : $message.children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
+                if (this.model.get('saved')) {
+                    $message.children('.right-side').remove();
+                }
             }
             else
                 $message.find('.fwd-msgs-block').remove();
@@ -3780,10 +3787,10 @@ define("xabber-chats", function () {
                 is_same_sender = ($msg.data('from') === $prev_msg.data('from')),
                 is_same_date = moment($msg.data('time')).startOf('day')
                         .isSame(moment($prev_msg.data('time')).startOf('day'));
-            if (!is_same_date) {
+            if (!is_same_date || $prev_msg.hasClass('saved-message')) {
                 this.getDateIndicator($msg.data('time')).insertBefore($msg);
                 this.showMessageAuthor($msg);
-            } else if (is_system || !is_same_sender) {
+            } else if (is_system || !is_same_sender || $prev_msg.hasClass('saved-main')) {
                 this.showMessageAuthor($msg);
             } else {
                 this.hideMessageAuthor($msg);
@@ -3791,7 +3798,7 @@ define("xabber-chats", function () {
             if ($msg.hasClass('forwarding')) {
                 var $fwd_message = $msg.find('.fwd-message');
                 $fwd_message.each(function (idx, fwd_msg_item) {
-                    var $fwd_msg_item = $(fwd_msg_item),
+                    let $fwd_msg_item = $(fwd_msg_item),
                         $prev_fwd_message = (idx > 0) ? $fwd_msg_item.prev() : [];
                     $fwd_msg_item.switchClass('hide-date', is_same_date && $prev_fwd_message.length);
                     $fwd_msg_item.removeClass('hide-time');
@@ -4521,7 +4528,7 @@ define("xabber-chats", function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
+                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-message'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
@@ -4658,6 +4665,9 @@ define("xabber-chats", function () {
                     is_forwarded = $fwd_message.length > 0,
                     no_select_message = $msg.attr('data-no-select-on-mouseup');
                 $msg.attr('data-no-select-on-mouseup', '');
+
+                if ($msg.hasClass('saved-main'))
+                    $elem = $elem.closest('.fwd-message');
 
                 if ($elem.hasClass('data-form-field')) {
                     msg = this.model.messages.get($msg.data('uniqueid'));
@@ -4834,7 +4844,7 @@ define("xabber-chats", function () {
                         return false;
                     }
                     if (!no_select_message) {
-                        $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        $msg.hasClass('saved-main') ? $elem.switchClass('selected', !$elem.hasClass('selected')) : $msg.switchClass('selected', !$msg.hasClass('selected'));
                         this.bottom.manageSelectedMessages();
                     }
                 }.bind(this);
@@ -6373,11 +6383,17 @@ define("xabber-chats", function () {
         },
 
         forwardTo: function (chat_item) {
-            chat_item.content.bottom.setForwardedMessages(this.messages);
-            this.messages = [];
-            this.close().done(function () {
-                chat_item.open({clear_search: true});
-            });
+            if (chat_item.model.get('saved')) {
+                chat_item.content.onSubmit("", this.messages, {saved: true});
+                this.messages = [];
+                this.close();
+            } else {
+                chat_item.content.bottom.setForwardedMessages(this.messages);
+                this.messages = [];
+                this.close().done(function () {
+                    chat_item.open({clear_search: true});
+                });
+            }
         }
     });
 
