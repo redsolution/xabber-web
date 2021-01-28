@@ -41932,6 +41932,7 @@ var constants = {
     MSG_DELIVERED: 2,
     MSG_DISPLAYED: 3,
     MSG_ARCHIVED: 4,
+    MSG_SAVED: 5,
 
     RSM_ATTRIBUTES: ['max', 'first', 'last', 'after', 'before', 'index', 'count'],
     MAM_ATTRIBUTES: ['with', 'start', 'end'],
@@ -42352,6 +42353,7 @@ constants.MSG_STATE[constants.MSG_DELIVERED] = 'delivered';
 constants.MSG_STATE[constants.MSG_DISPLAYED] = 'displayed';
 constants.MSG_STATE[constants.MSG_ARCHIVED] = 'archived';
 constants.MSG_STATE[constants.MSG_BLOCKED] = 'not-allowed';
+constants.MSG_STATE[constants.MSG_SAVED] = 'saved';
 
 constants.MSG_VERBOSE_STATE = {};
 constants.MSG_VERBOSE_STATE[constants.MSG_ERROR] = 'Message error';
@@ -42361,6 +42363,7 @@ constants.MSG_VERBOSE_STATE[constants.MSG_DELIVERED] = 'Message delivered to use
 constants.MSG_VERBOSE_STATE[constants.MSG_DISPLAYED] = 'Message read';
 constants.MSG_VERBOSE_STATE[constants.MSG_ARCHIVED] = 'Message from archive';
 constants.MSG_VERBOSE_STATE[constants.MSG_BLOCKED] = 'Message error';
+constants.MSG_VERBOSE_STATE[constants.MSG_SAVED] = 'Message saved';
 
 
 if (typeof define === "function") {
@@ -43031,7 +43034,7 @@ define('text!templates/chats/message_item.html',[],function () { return '<div cl
 define('text!templates/chats/messages/main.html',[],function () { return '<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <div class="edited-info one-line hidden"></div>\n        {[ if (is_sender) { ]}\n            <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n            <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">retry</div></div>\n        {[ } ]}\n        <div class="msg-copy-link" title="Copy link"><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/chats/messages/forwarded.html',[],function () { return '<div class="fwd-message" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-from-id="{{from_id}}" data-from="{{from_jid}}">\n    <div class="fwd-left-side noselect">\n        <div class="circle-avatar"><!--<img>--></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="fwd-msg-author-wrap">\n            <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if ((role)&&(role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n            <div class="msg-time selectable-text one-line" title="{{time}}">{{short_time}}</div>\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n    </div>\n</div>\n';});
+define('text!templates/chats/messages/forwarded.html',[],function () { return '<div class="fwd-message" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-from-id="{{from_id}}" data-from="{{from_jid}}">\n    <div class="fwd-left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n    <div class="msg-wrap">\n        <div class="fwd-msg-author-wrap">\n            <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if ((role)&&(role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n            <div class="msg-time selectable-text one-line" title="{{time}}">{{short_time}}</div>\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/chats/messages/system.html',[],function () { return '<div class="chat-message system"  data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="msg-wrap">\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n    </div>\n</div>\n';});
@@ -43070,7 +43073,7 @@ define('text!templates/chats/messages/template-for-5.html',[],function () { retu
 define('text!templates/chats/messages/template-for-6.html',[],function () { return '<div class="image-collection zoom-gallery template-for-6"><div class="img-content-wrap template-for-6 main-row"><div class="img-content-template template-for-6 main"><img src="{{images[0].sources[0]}}" title="{{images[0].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[0].sources[0]}}"></div><div class="template-for-6 minor-1"><div class="img-content-template template-for-6"><img src="{{images[1].sources[0]}}" title="{{images[1].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[1].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[2].sources[0]}}" title="{{images[2].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[2].sources[0]}}"></div></div></div>\n<div class="template-for-6 minor-2"><div class="img-content-template template-for-6"><img src="{{images[3].sources[0]}}" title="{{images[3].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[3].sources[0]}}"></div>\n<div class="img-content-template template-for-6"><img src="{{images[4].sources[0]}}" title="{{images[4].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[4].sources[0]}}"></div>\n<div class="img-content-template template-for-6 last-image"><img src="{{images[5].sources[0]}}" title="{{images[5].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[5].sources[0]}}">\n{[ if (images.length > 6) { ]}<span class="image-counter"></span>{[ for (var i=6; i < images.length; i++) {]} <div class="img-content-template hidden"><img src="{{images[i].sources[0]}}" title="{{images[i].description}}" class="uploaded-img-for-collage popup-img" data-mfp-src="{{images[i].sources[0]}}"></div> {[}} ]}</div></div></div>\n';});
 
 
-define('text!templates/chats/messages/saved_main.html',[],function () { return '<div class="chat-message saved-main main {{classlist}}" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="fwd-msgs-block"></div>\n</div>\n';});
+define('text!templates/chats/messages/saved_main.html',[],function () { return '<div class="chat-message saved-main main {{classlist}}" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="fwd-msgs-block"></div>\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n        <div class="edited-info one-line hidden"></div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/chats/archive_placeholder.html',[],function () { return '<div class="text">Archive chats are not implemented yet</div>';});
@@ -44791,7 +44794,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (12)","version_description":""}'
+'{"version_number":"2.2.0 (13)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46174,7 +46177,7 @@ define("xabber-views", [],function () {
             var count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
             xabber.accounts.each(function(account) {
                 account.chats.each(function (chat) {
-                    if (chat.contact && !chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
+                    if (chat.contact && !chat.contact.get('muted')) {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
@@ -56015,7 +56018,7 @@ define("xabber-contacts", [],function () {
                         last_read_msg = $unread_messages.attr('after'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
-                        unread_msgs_count = Number($unread_messages.attr('count')),
+                        unread_msgs_count = Number($unread_messages.attr('count')) || 0,
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     if ($item.children('deleted').length) {
@@ -60490,11 +60493,11 @@ define("xabber-chats", [],function () {
 
             let markup_body = utils.markupBodyMessage(message), $message;
 
-            /*if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length) {
+            if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length == 1) {
                 $message = $(templates.messages.saved_main(_.extend(attrs, {
                     classlist: classes.join(' ')
                 })));
-            } else*/
+            } else
                 $message = $(templates.messages.main(_.extend(attrs, {
                     is_sender: is_sender,
                     message: markup_body,
@@ -60581,6 +60584,10 @@ define("xabber-chats", [],function () {
                         from_id: from_id
                     })));
 
+                    if (this.model.get('saved') && $message.hasClass('saved-main')) {
+                        $f_message.append($message.children('.right-side').clone());
+                    }
+
                     if (fwd_msg.get('forwarded_message')) {
                         var fwd_messages_count = fwd_msg.get('forwarded_message').length,
                             fwd_messages_link = fwd_messages_count + ' forwarded message' + ((fwd_messages_count > 1) ? 's' : "");
@@ -60630,6 +60637,9 @@ define("xabber-chats", [],function () {
                     $message.children('.msg-wrap').length ? $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message) : $message.children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
+                if (this.model.get('saved') && $message.hasClass('saved-main')) {
+                    $message.children('.right-side').remove();
+                }
             }
             else
                 $message.find('.fwd-msgs-block').remove();
@@ -60778,7 +60788,7 @@ define("xabber-chats", [],function () {
             if (!is_same_date) {
                 this.getDateIndicator($msg.data('time')).insertBefore($msg);
                 this.showMessageAuthor($msg);
-            } else if (is_system || !is_same_sender) {
+            } else if (is_system || !is_same_sender || $prev_msg.hasClass('saved-main')) {
                 this.showMessageAuthor($msg);
             } else {
                 this.hideMessageAuthor($msg);
@@ -60786,7 +60796,7 @@ define("xabber-chats", [],function () {
             if ($msg.hasClass('forwarding')) {
                 var $fwd_message = $msg.find('.fwd-message');
                 $fwd_message.each(function (idx, fwd_msg_item) {
-                    var $fwd_msg_item = $(fwd_msg_item),
+                    let $fwd_msg_item = $(fwd_msg_item),
                         $prev_fwd_message = (idx > 0) ? $fwd_msg_item.prev() : [];
                     $fwd_msg_item.switchClass('hide-date', is_same_date && $prev_fwd_message.length);
                     $fwd_msg_item.removeClass('hide-time');
@@ -61516,7 +61526,7 @@ define("xabber-chats", [],function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system'))
+                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
@@ -61691,6 +61701,8 @@ define("xabber-chats", [],function () {
                     } else if (from_jid === this.model.get('jid')) {
                         this.contact.showDetails('all-chats');
                     } else {
+                        if (from_jid == from_id)
+                            return;
                         var contact = this.account.contacts.mergeContact(from_jid);
                         contact.showDetails();
                     }
@@ -61830,7 +61842,9 @@ define("xabber-chats", [],function () {
                     }
                     if (!no_select_message) {
                         $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        ev.preventDefault();
                         this.bottom.manageSelectedMessages();
+                        return false;
                     }
                 }.bind(this);
 
@@ -63277,7 +63291,7 @@ define("xabber-chats", [],function () {
             if (!this.saved_chat) {
                 let saved_chat = this.account.chats.getSavedChat(),
                     $cloned_item = saved_chat.item_view.$el.clone();
-                $cloned_item.text("Forward here to save");
+                $cloned_item.find('.last-msg').text("Forward here to save");
                 this.$('.chat-list-wrap').prepend($cloned_item);
             }
             this.$('.chat-list-wrap').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text('Recent chats'));
@@ -63368,7 +63382,13 @@ define("xabber-chats", [],function () {
         },
 
         forwardTo: function (chat_item) {
-            chat_item.content.bottom.setForwardedMessages(this.messages);
+            if (chat_item.model.get('saved')) {
+                this.messages.forEach((message) => {
+                    chat_item.content.onSubmit("", [message]);
+                });
+            }
+            else
+                chat_item.content.bottom.setForwardedMessages(this.messages);
             this.messages = [];
             this.close().done(function () {
                 chat_item.open({clear_search: true});
@@ -64183,15 +64203,15 @@ define("xabber-chats", [],function () {
             this.account.on('trusting_updated', this.updateEncrypted, this);
             if (this.contact) {
                 this.contact.on("change:blocked", this.onBlockedUpdate, this);
-                this.contact.on("reply_selected_messages", this.replyMessages, this);
-                this.contact.on("forward_selected_messages", this.forwardMessages, this);
-                this.contact.on("copy_selected_messages", this.copyMessages, this);
-                this.contact.on("delete_selected_messages", this.deleteMessages, this);
-                this.contact.on("edit_selected_message", this.showEditPanel, this);
-                this.contact.on("pin_selected_message", this.pinMessage, this);
                 this.contact.on('update_my_info', this.updateInfoInBottom, this);
-                this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
             }
+            this.model.on("reply_selected_messages", this.replyMessages, this);
+            this.model.on("forward_selected_messages", this.forwardMessages, this);
+            this.model.on("copy_selected_messages", this.copyMessages, this);
+            this.model.on("delete_selected_messages", this.deleteMessages, this);
+            this.model.on("edit_selected_message", this.showEditPanel, this);
+            this.model.on("pin_selected_message", this.pinMessage, this);
+            this.model.on("reset_selected_messages", this.resetSelectedMessages, this);
             this.content_view = (this.view.data.get('visible') ? this.view : this.model.messages_view) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
@@ -65094,7 +65114,12 @@ define("xabber-chats", [],function () {
                 return;
             }
             if (text || this.fwd_messages.length) {
-                this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
+                if (this.model.get('saved') && this.fwd_messages.length && !text)
+                    this.fwd_messages.forEach((message) => {
+                        this.view.onSubmit("", [message]);
+                    });
+                else
+                    this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
             xabber.chats_view.clearSearch();
@@ -65242,7 +65267,7 @@ define("xabber-chats", [],function () {
                 }
                 $message_actions.find('.pin-message-wrap').showIf(this.model.get('group_chat')).switchClass('non-active', ((length !== 1) && this.model.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
-                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.model.get('blocked'));
+                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.content_view.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
                 !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {
                 !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
@@ -65292,7 +65317,7 @@ define("xabber-chats", [],function () {
                 markups = text_markups.markup_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
                 $message = $build('message').attrs({xmlns: undefined});
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
@@ -65399,8 +65424,10 @@ define("xabber-chats", [],function () {
         createTextMessage: function (messages, fwd_msg_indicator) {
             let text_message = "";
             for (var i = 0; i < messages.length; i++) {
-                let $msg = messages[i],
-                    current_date = moment($msg.get('timestamp')).startOf('day'),
+                let $msg = messages[i];
+                if (this.model.get('saved') && $msg.get('forwarded_message') && $msg.get('forwarded_message').length === 1 && !$msg.get('message'))
+                    $msg = $msg.get('forwarded_message')[0];
+                let current_date = moment($msg.get('timestamp')).startOf('day'),
                     prev_date = (i) ? moment(messages[i - 1].get('timestamp')).startOf('day') : moment(0),
                     msg_sender = "";
                     if (prev_date.format('x') != current_date.format('x')) {
@@ -65425,7 +65452,12 @@ define("xabber-chats", [],function () {
                 msgs = [];
             $msgs.each(function (idx, item) {
                 let msg = this.messages_arr.get(item.dataset.uniqueid);
-                msg && msgs.push(msg);
+                if (msg) {
+                    if (this.model.get('saved') && msg.get('forwarded_message') && msg.get('forwarded_message').length && !msg.get('message')) {
+                        msgs = msgs.concat(msg.get('forwarded_message'));
+                    } else
+                        msgs.push(msg);
+                }
             }.bind(this));
             this.resetSelectedMessages();
             this.setForwardedMessages(msgs);
@@ -65438,7 +65470,12 @@ define("xabber-chats", [],function () {
                 msgs = [];
             $msgs.each(function (idx, item) {
                 let msg = this.messages_arr.get(item.dataset.uniqueid);
-                msg && msgs.push(msg);
+                if (msg) {
+                    if (this.model.get('saved') && msg.get('forwarded_message') && msg.get('forwarded_message').length && !msg.get('message')) {
+                        msgs = msgs.concat(msg.get('forwarded_message'));
+                    } else
+                        msgs.push(msg);
+                }
             }.bind(this));
             this.resetSelectedMessages();
             if (!xabber.forward_panel)
@@ -66608,25 +66645,25 @@ define("xabber-ui", [],function () {
                     if (!ev.ctrlKey && !ev.metaKey) {
                         switch (ev.keyCode) {
                             case 67:
-                                attrs.chat_item.contact.trigger('copy_selected_messages');
+                                attrs.chat_item.model.trigger('copy_selected_messages');
                                 break;
                             case 68:
-                                attrs.chat_item.contact.trigger('delete_selected_messages');
+                                attrs.chat_item.model.trigger('delete_selected_messages');
                                 break;
                             case 69:
-                                attrs.chat_item.contact.trigger('edit_selected_message');
+                                attrs.chat_item.model.trigger('edit_selected_message');
                                 break;
                             case 70:
-                                attrs.chat_item.contact.trigger('forward_selected_messages');
+                                attrs.chat_item.model.trigger('forward_selected_messages');
                                 break;
                             case 80:
-                                attrs.chat_item.contact.trigger('pin_selected_message');
+                                attrs.chat_item.model.trigger('pin_selected_message');
                                 break;
                             case 82:
-                                attrs.chat_item.contact.trigger('reply_selected_messages');
+                                attrs.chat_item.model.trigger('reply_selected_messages');
                                 break;
                             case constants.KEY_ESCAPE:
-                                attrs.chat_item.contact.trigger('reset_selected_messages');
+                                attrs.chat_item.model.trigger('reset_selected_messages');
                                 break;
                         }
                         ev.preventDefault();
