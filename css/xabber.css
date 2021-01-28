@@ -4652,6 +4652,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     padding: 2px 4px 0px 4px;
 }
 
+.saved-main .chat-msg-author-role {
+    display: none;
+}
+
 .group-chat-participant .participant-info .badge,
 .chat-msg-author-badge {
     display: inline-flex;
@@ -5300,7 +5304,6 @@ img.fwd-img-preview {
 }
 
 .saved-main .fwd-message {
-    padding: 7px 0;
     margin: 0;
 }
 
@@ -5318,7 +5321,7 @@ img.fwd-img-preview {
 }
 
 .saved-main .fwd-message .msg-wrap {
-    padding: 0 32px 0 64px;
+    padding: 0 112px 0 64px;
 }
 
 .fwd-message .msg-time {

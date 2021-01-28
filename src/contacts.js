@@ -4132,7 +4132,7 @@ define("xabber-contacts", function () {
                         last_read_msg = $unread_messages.attr('after'),
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
-                        unread_msgs_count = Number($unread_messages.attr('count')),
+                        unread_msgs_count = Number($unread_messages.attr('count')) || 0,
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
                     if ($item.children('deleted').length) {

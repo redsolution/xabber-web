@@ -26,25 +26,25 @@ define("xabber-ui", function () {
                     if (!ev.ctrlKey && !ev.metaKey) {
                         switch (ev.keyCode) {
                             case 67:
-                                attrs.chat_item.contact.trigger('copy_selected_messages');
+                                attrs.chat_item.model.trigger('copy_selected_messages');
                                 break;
                             case 68:
-                                attrs.chat_item.contact.trigger('delete_selected_messages');
+                                attrs.chat_item.model.trigger('delete_selected_messages');
                                 break;
                             case 69:
-                                attrs.chat_item.contact.trigger('edit_selected_message');
+                                attrs.chat_item.model.trigger('edit_selected_message');
                                 break;
                             case 70:
-                                attrs.chat_item.contact.trigger('forward_selected_messages');
+                                attrs.chat_item.model.trigger('forward_selected_messages');
                                 break;
                             case 80:
-                                attrs.chat_item.contact.trigger('pin_selected_message');
+                                attrs.chat_item.model.trigger('pin_selected_message');
                                 break;
                             case 82:
-                                attrs.chat_item.contact.trigger('reply_selected_messages');
+                                attrs.chat_item.model.trigger('reply_selected_messages');
                                 break;
                             case constants.KEY_ESCAPE:
-                                attrs.chat_item.contact.trigger('reset_selected_messages');
+                                attrs.chat_item.model.trigger('reset_selected_messages');
                                 break;
                         }
                         ev.preventDefault();

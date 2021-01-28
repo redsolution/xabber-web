@@ -3495,7 +3495,7 @@ define("xabber-chats", function () {
 
             let markup_body = utils.markupBodyMessage(message), $message;
 
-            if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length) {
+            if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length == 1) {
                 $message = $(templates.messages.saved_main(_.extend(attrs, {
                     classlist: classes.join(' ')
                 })));
@@ -3639,7 +3639,7 @@ define("xabber-chats", function () {
                     $message.children('.msg-wrap').length ? $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message) : $message.children('.fwd-msgs-block').append($f_message);
                 }.bind(this));
                 this.updateScrollBar();
-                if (this.model.get('saved')) {
+                if (this.model.get('saved') && $message.hasClass('saved-main')) {
                     $message.children('.right-side').remove();
                 }
             }
@@ -3787,7 +3787,7 @@ define("xabber-chats", function () {
                 is_same_sender = ($msg.data('from') === $prev_msg.data('from')),
                 is_same_date = moment($msg.data('time')).startOf('day')
                         .isSame(moment($prev_msg.data('time')).startOf('day'));
-            if (!is_same_date || $prev_msg.hasClass('saved-message')) {
+            if (!is_same_date) {
                 this.getDateIndicator($msg.data('time')).insertBefore($msg);
                 this.showMessageAuthor($msg);
             } else if (is_system || !is_same_sender || $prev_msg.hasClass('saved-main')) {
@@ -4528,7 +4528,7 @@ define("xabber-chats", function () {
                 }
                 else
                     $message.insertAfter($prev_msg);
-                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-message'))
+                if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
                     this.showMessageAuthor($message);
                 else
                     this.hideMessageAuthor($message);
@@ -4666,9 +4666,6 @@ define("xabber-chats", function () {
                     no_select_message = $msg.attr('data-no-select-on-mouseup');
                 $msg.attr('data-no-select-on-mouseup', '');
 
-                if ($msg.hasClass('saved-main'))
-                    $elem = $elem.closest('.fwd-message');
-
                 if ($elem.hasClass('data-form-field')) {
                     msg = this.model.messages.get($msg.data('uniqueid'));
                     if (msg)
@@ -4706,6 +4703,8 @@ define("xabber-chats", function () {
                     } else if (from_jid === this.model.get('jid')) {
                         this.contact.showDetails('all-chats');
                     } else {
+                        if (from_jid == from_id)
+                            return;
                         var contact = this.account.contacts.mergeContact(from_jid);
                         contact.showDetails();
                     }
@@ -4844,8 +4843,10 @@ define("xabber-chats", function () {
                         return false;
                     }
                     if (!no_select_message) {
-                        $msg.hasClass('saved-main') ? $elem.switchClass('selected', !$elem.hasClass('selected')) : $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        $msg.switchClass('selected', !$msg.hasClass('selected'));
+                        ev.preventDefault();
                         this.bottom.manageSelectedMessages();
+                        return false;
                     }
                 }.bind(this);
 
@@ -6292,7 +6293,7 @@ define("xabber-chats", function () {
             if (!this.saved_chat) {
                 let saved_chat = this.account.chats.getSavedChat(),
                     $cloned_item = saved_chat.item_view.$el.clone();
-                $cloned_item.text("Forward here to save");
+                $cloned_item.find('.last-msg').text("Forward here to save");
                 this.$('.chat-list-wrap').prepend($cloned_item);
             }
             this.$('.chat-list-wrap').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text('Recent chats'));
@@ -6384,16 +6385,16 @@ define("xabber-chats", function () {
 
         forwardTo: function (chat_item) {
             if (chat_item.model.get('saved')) {
-                chat_item.content.onSubmit("", this.messages, {saved: true});
-                this.messages = [];
-                this.close();
-            } else {
-                chat_item.content.bottom.setForwardedMessages(this.messages);
-                this.messages = [];
-                this.close().done(function () {
-                    chat_item.open({clear_search: true});
+                this.messages.forEach((message) => {
+                    chat_item.content.onSubmit("", [message]);
                 });
             }
+            else
+                chat_item.content.bottom.setForwardedMessages(this.messages);
+            this.messages = [];
+            this.close().done(function () {
+                chat_item.open({clear_search: true});
+            });
         }
     });
 
@@ -7204,15 +7205,15 @@ define("xabber-chats", function () {
             this.account.on('trusting_updated', this.updateEncrypted, this);
             if (this.contact) {
                 this.contact.on("change:blocked", this.onBlockedUpdate, this);
-                this.contact.on("reply_selected_messages", this.replyMessages, this);
-                this.contact.on("forward_selected_messages", this.forwardMessages, this);
-                this.contact.on("copy_selected_messages", this.copyMessages, this);
-                this.contact.on("delete_selected_messages", this.deleteMessages, this);
-                this.contact.on("edit_selected_message", this.showEditPanel, this);
-                this.contact.on("pin_selected_message", this.pinMessage, this);
                 this.contact.on('update_my_info', this.updateInfoInBottom, this);
-                this.contact.on("reset_selected_messages", this.resetSelectedMessages, this);
             }
+            this.model.on("reply_selected_messages", this.replyMessages, this);
+            this.model.on("forward_selected_messages", this.forwardMessages, this);
+            this.model.on("copy_selected_messages", this.copyMessages, this);
+            this.model.on("delete_selected_messages", this.deleteMessages, this);
+            this.model.on("edit_selected_message", this.showEditPanel, this);
+            this.model.on("pin_selected_message", this.pinMessage, this);
+            this.model.on("reset_selected_messages", this.resetSelectedMessages, this);
             this.content_view = (this.view.data.get('visible') ? this.view : this.model.messages_view) || this.view;
             var $rich_textarea = this.$('.input-message .rich-textarea'),
                 rich_textarea = $rich_textarea[0],
@@ -8115,7 +8116,12 @@ define("xabber-chats", function () {
                 return;
             }
             if (text || this.fwd_messages.length) {
-                this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
+                if (this.model.get('saved') && this.fwd_messages.length && !text)
+                    this.fwd_messages.forEach((message) => {
+                        this.view.onSubmit("", [message]);
+                    });
+                else
+                    this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
             xabber.chats_view.clearSearch();
@@ -8263,7 +8269,7 @@ define("xabber-chats", function () {
                 }
                 $message_actions.find('.pin-message-wrap').showIf(this.model.get('group_chat')).switchClass('non-active', ((length !== 1) && this.model.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
-                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.model.get('blocked'));
+                $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.content_view.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
                 !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(length + ' message' + ((length > 1) ? 's selected' : ' selected'));
             } else {
                 !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
@@ -8313,7 +8319,7 @@ define("xabber-chats", function () {
                 markups = text_markups.markup_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('group_chat') ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
                 $message = $build('message').attrs({xmlns: undefined});
             forward_ref && forward_ref.forEach(function (fwd, idx) {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
@@ -8420,8 +8426,10 @@ define("xabber-chats", function () {
         createTextMessage: function (messages, fwd_msg_indicator) {
             let text_message = "";
             for (var i = 0; i < messages.length; i++) {
-                let $msg = messages[i],
-                    current_date = moment($msg.get('timestamp')).startOf('day'),
+                let $msg = messages[i];
+                if (this.model.get('saved') && $msg.get('forwarded_message') && $msg.get('forwarded_message').length === 1 && !$msg.get('message'))
+                    $msg = $msg.get('forwarded_message')[0];
+                let current_date = moment($msg.get('timestamp')).startOf('day'),
                     prev_date = (i) ? moment(messages[i - 1].get('timestamp')).startOf('day') : moment(0),
                     msg_sender = "";
                     if (prev_date.format('x') != current_date.format('x')) {
@@ -8446,7 +8454,12 @@ define("xabber-chats", function () {
                 msgs = [];
             $msgs.each(function (idx, item) {
                 let msg = this.messages_arr.get(item.dataset.uniqueid);
-                msg && msgs.push(msg);
+                if (msg) {
+                    if (this.model.get('saved') && msg.get('forwarded_message') && msg.get('forwarded_message').length && !msg.get('message')) {
+                        msgs = msgs.concat(msg.get('forwarded_message'));
+                    } else
+                        msgs.push(msg);
+                }
             }.bind(this));
             this.resetSelectedMessages();
             this.setForwardedMessages(msgs);
@@ -8459,7 +8472,12 @@ define("xabber-chats", function () {
                 msgs = [];
             $msgs.each(function (idx, item) {
                 let msg = this.messages_arr.get(item.dataset.uniqueid);
-                msg && msgs.push(msg);
+                if (msg) {
+                    if (this.model.get('saved') && msg.get('forwarded_message') && msg.get('forwarded_message').length && !msg.get('message')) {
+                        msgs = msgs.concat(msg.get('forwarded_message'));
+                    } else
+                        msgs.push(msg);
+                }
             }.bind(this));
             this.resetSelectedMessages();
             if (!xabber.forward_panel)

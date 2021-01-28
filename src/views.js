@@ -981,7 +981,7 @@ define("xabber-views", function () {
             var count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
             xabber.accounts.each(function(account) {
                 account.chats.each(function (chat) {
-                    if (chat.contact && !chat.contact.get('muted')) { // if ($chat.contact.get('archived') && $chat.contact.get('muted'))
+                    if (chat.contact && !chat.contact.get('muted')) {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
