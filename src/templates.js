@@ -12,6 +12,7 @@ define("xabber-templates", [
     "text!templates/base/about.html",
     "text!templates/base/omemo_enable.html",
     "text!templates/base/omemo_item.html",
+    "text!templates/base/backgrounds_gallery.html",
 
     "text!templates/api_service/xabber_login.html",
     "text!templates/api_service/xabber_login_by_email.html",
@@ -198,6 +199,7 @@ define("xabber-templates", [
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
     addTemplate('base.omemo_item');
+    addTemplate('base.backgrounds_gallery');
 
     addTemplate('api_service.xabber_login');
     addTemplate('api_service.xabber_login_by_email');

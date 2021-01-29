@@ -152,14 +152,11 @@ define([
 
         pretty_short_month_date: function (timestamp) {
             var datetime = timestamp ? moment(timestamp) : moment(),
-                day = moment(datetime).startOf('day'),
-                year = moment(datetime).startOf('year');
+                day = moment(datetime).startOf('day');
             if (day.isSame(moment().startOf('day'))) {
                 return datetime.format('HH:mm:ss');
-            } else if (year.isSame(moment().startOf('year'))) {
-                return datetime.format('MMM D, YYYY HH:mm:ss');
             } else {
-                return datetime.format('DD/MM/gg, HH:mm:ss');
+                return datetime.format('MMM D, YYYY HH:mm:ss');
             }
         },
 

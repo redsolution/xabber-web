@@ -168,6 +168,7 @@
                 notifications: true,
                 message_preview: false,
                 sound: true,
+                background: {type: 'default'},
                 sound_on_message: 'beep_up',
                 call_attention: true,
                 sound_on_attention: 'attention',

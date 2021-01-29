@@ -1260,6 +1260,7 @@ define("xabber-views", function () {
             "click .setting.message-preview label": "setMessagePreview",
             "click .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
+            "change .background input[type=radio][name=background]": "setBackground",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
         },
@@ -1281,6 +1282,8 @@ define("xabber-views", function () {
             this.$('.sound input[type=radio][name=sound][value="'+sound_value+'"]')
                     .prop('checked', true);
             this.$('.hotkeys input[type=radio][name=hotkeys][value='+settings.hotkeys+']')
+                    .prop('checked', true);
+            this.$('.background input[type=radio][name=background][value='+settings.background.type+']')
                     .prop('checked', true);
             return this;
         },
@@ -1322,26 +1325,38 @@ define("xabber-views", function () {
         },
 
         setMessagePreview: function (ev) {
-            var value = !this.model.get('message_preview');
+            let value = !this.model.get('message_preview');
             this.model.save('message_preview', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);
         },
 
         setCallAttention: function (ev) {
-            var value = !this.model.get('call_attention');
+            let value = !this.model.get('call_attention');
             this.model.save('call_attention', value);
             ev.preventDefault();
             $(ev.target).closest('input').prop('checked', value);
         },
 
         setSound: function (ev) {
-            var value = ev.target.value;
+            let value = ev.target.value;
             if (value) {
                 xabber.playAudio(value);
                 this.model.save({sound: true, sound_on_message: value});
             } else {
                 this.model.save('sound', false);
+            }
+        },
+
+        setBackground: function (ev) {
+            let value = ev.target.value;
+            if (value == 'default') {
+                this.model.save('background', {type: 'default'});
+            } else if (value == 'repeating-pattern') {
+                /*let background_view = new xabber.SetBackgroundView();
+                background_view.render({type: value});*/
+            } else if (value == 'image') {
+
             }
         },
 
@@ -1352,6 +1367,52 @@ define("xabber-views", function () {
         deleteAllAccounts: function (ev) {
             utils.dialogs.ask("Quit Xabber Web", "Do you really want to quit Xabber? You will quit from all currently logged in XMPP accounts.", null, { ok_button_text: 'quit'}).done(function (res) {
                 res && xabber.trigger('quit');
+            });
+        }
+    });
+
+    xabber.SetBackgroundView = xabber.BasicView.extend({
+        className: 'modal main-modal settings-background background-panel',
+        template: templates.backgrounds_gallery,
+        ps_selector: '.modal-content',
+        ps_settings: {theme: 'item-list'},
+
+        events: {
+            "click .menu-btn": "updateActiveMenu"
+        },
+
+        render: function (options) {
+            this.$('.menu-btn').removeClass('active');
+            this.$('.menu-btn[data-screen-name="library"]').addClass('active');
+            if (options.type == 'repeating-pattern')
+                this.$('.modal-header span').text('Select pattern');
+            else
+                this.$('.modal-header span').text('Select image');
+            this.$el.openModal({
+                ready: function () {
+
+                }.bind(this),
+                complete: this.close.bind(this)
+            });
+        },
+
+        updateActiveMenu: function (ev) {
+            let screen_name = ev.target.getAttribute('data-screen-name');
+            this.$('.menu-btn').removeClass('active');
+            this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+            this.updateScreen(screen_name);
+        },
+
+        updateScreen: function (name) {
+            this.$('.screen-wrap').addClass('hidden');
+            this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
             });
         }
     });

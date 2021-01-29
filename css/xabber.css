@@ -8829,6 +8829,81 @@ ul.restrictions-list-content>li {
     padding: 6px 48px;
 }
 
+/* -------------- BACKGROUND SETTING MODAL -------------- */
+
+.main-modal.settings-background {
+    width: 90% !important;
+    max-width: 1024px !important;
+    max-height: calc(100% - 200px) !important;
+}
+
+.main-modal.settings-background .menu-wrap {
+    display: flex;
+    flex-direction: row;
+    font-weight: 400;
+    height: 44px;
+    line-height: 44px;
+}
+
+.main-modal.settings-background .modal-content {
+    min-height: 200px;
+    padding: 8px !important;
+}
+
+.settings-background .modal-content .upload-wrap {
+    margin: 4px;
+    border: 4px dashed #E0E0E0;
+    height: 256px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.settings-background .upload-wrap .upload-text {
+    color: #9E9E9E;
+    font-size: 19px;
+    text-align: center;
+}
+
+.settings-background .upload-wrap .upload-button {
+    position: relative;
+}
+
+.settings-background .upload-wrap input[type="file"] {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
+}
+
+.main-modal.settings-background .menu-wrap .menu-btn {
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.main-modal.settings-background .menu-wrap .menu-btn:hover,
+.main-modal.settings-background .menu-wrap .menu-btn.active {
+    border-bottom: 2px solid #424242;
+    box-shadow: unset;
+}
+
+.main-modal.settings-background .menu-btn:not(:first-child) {
+    margin: 0 0 0 24px;
+}
+
+.main-modal.settings-background .modal-header {
+    height: 85px;
+    padding: 16px 24px 0 14px;
+    border-bottom: 1px solid #E0E0E0;
+    box-shadow: #42424233 0px 1px 5px 1px;
+}
+
+.modal.settings-background .modal-footer {
+    border-top: 1px solid #E0E0E0;
+}
+
 
 /* -------------- EMOJI ------------- */
 

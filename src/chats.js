@@ -2504,8 +2504,8 @@ define("xabber-chats", function () {
         },
 
         updateName: function (contact) {
-            var name = contact.get('name'),
-                jid = this.model.get('jid');
+            let name = contact.get('name'),
+                jid = contact.get('jid');
             if (contact === this.contact) {
                 this.$('.chat-message.with-author[data-from="'+jid+'"]').each(function () {
                     $(this).find('.chat-msg-author').text(name);

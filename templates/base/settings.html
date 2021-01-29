@@ -32,7 +32,11 @@
                 <i class="mdi mdi-24px mdi-volume-high"></i>
                 <div class="settings-block-name one-line">Sounds</div>
             </div>
-            {[if (PERSONAL_AREA_URL) {]}
+            <div class="settings-tab" data-block-name="background">
+                <i class="mdi mdi-24px mdi-image"></i>
+                <div class="settings-block-name one-line">Background</div>
+            </div>
+            {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
             <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">
                 <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>
                 <div class="settings-block-name one-line">{{PERSONAL_AREA_URL.label}}</div>
@@ -205,6 +209,30 @@
                     </div>
                 </div>
 
+                <div class="settings-block-wrap background">
+                    <div class="block-header">
+                        <span class="block-name">Background</span>
+                    </div>
+
+                    <div class="setting background radio-button field-wrap">
+                        <div class="field radio-field clickable-field">
+                            <form action="#">
+                                <p>
+                                    <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />
+                                    <label for="{{view.cid}}-default">Default</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />
+                                    <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>
+                                </p>
+                                <p>
+                                    <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />
+                                    <label for="{{view.cid}}-image">Image</label>
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

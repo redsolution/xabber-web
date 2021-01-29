@@ -1,0 +1,31 @@
+<div class="modal-header">
+    <span></span>
+    <div class="menu-wrap">
+        <div data-screen-name="library" class="menu-btn btn-library">Library</div>
+        <div data-screen-name="upload" class="menu-btn btn-upload">Upload</div>
+        <div data-screen-name="web-address" class="menu-btn btn-web-address">Web address (URL)</div>
+    </div>
+</div>
+<div class="modal-content">
+    <div data-screen="library" class="screen-wrap library-wrap"></div>
+    <div data-screen="upload" class="hidden screen-wrap upload-wrap">
+        <div class="upload-text">Drag image here<br>or</div>
+        <div class="upload-button">
+            <button type="file">Choose image to upload</button>
+            <input type="file">
+        </div>
+    </div>
+    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">
+        <div class="web-address">
+            <div class="label">Enter image URL:</div>
+            <input class="label"/>
+        </div>
+        <div class="image-preview">
+            <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button class="btn-flat btn-main text-color-700 non-active btn-add">Add</button>
+    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+</div>
