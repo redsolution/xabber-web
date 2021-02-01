@@ -8,19 +8,21 @@
 </div>
 <div class="modal-content">
     <div data-screen="library" class="screen-wrap library-wrap"></div>
-    <div data-screen="upload" class="hidden screen-wrap upload-wrap">
-        <div class="upload-text">Drag image here<br>or</div>
-        <div class="upload-button">
-            <button type="file">Choose image to upload</button>
-            <input type="file">
-        </div>
+    <div data-screen="upload" class="hidden screen-wrap">
+        <div class="upload-wrap">
+            <div class="upload-text">Drag image here<br>or</div>
+            <div class="upload-button">
+                <button type="file">Choose image to upload</button>
+                <input type="file">
+            </div></div>
     </div>
     <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">
         <div class="web-address">
             <div class="label">Enter image URL:</div>
-            <input class="label"/>
+            <input class="url"/>
         </div>
         <div class="image-preview">
+            <img class="hidden">
             <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>
         </div>
     </div>

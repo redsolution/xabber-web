@@ -8850,6 +8850,11 @@ ul.restrictions-list-content>li {
     padding: 8px !important;
 }
 
+.settings-background .modal-content .screen-wrap[data-screen=upload] {
+    display: flex;
+    flex-direction: column;
+}
+
 .settings-background .modal-content .upload-wrap {
     margin: 4px;
     border: 4px dashed #E0E0E0;
@@ -8858,6 +8863,28 @@ ul.restrictions-list-content>li {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    -webkit-transition: height .3s;
+    -moz-transition: height .3s;
+    -ms-transition: height .3s;
+    -o-transition: height .3s;
+    transition: height .3s;
+    order: 1
+}
+
+.settings-background .modal-content .upload-wrap.file-drop {
+    border-color: #F44336;
+}
+
+.settings-background .modal-content img + .upload-wrap {
+    height: 128px;
+}
+
+.settings-background .screen-wrap[data-screen=upload] img {
+    order: 2;
+    width: fit-content;
+    margin: 8px auto;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .settings-background .upload-wrap .upload-text {
@@ -8904,6 +8931,47 @@ ul.restrictions-list-content>li {
     border-top: 1px solid #E0E0E0;
 }
 
+.modal.settings-background .web-address {
+    display: flex;
+    flex-direction: row;
+    padding: 0 16px;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.settings-background .web-address .label {
+    flex-basis: 144px;
+}
+
+.modal.settings-background .web-address .url {
+    height: 28px;
+    line-height: 28px;
+    padding: 0;
+    margin: 0;
+}
+
+.modal.settings-background .image-preview {
+    min-height: 256px;
+    display: flex;
+    justify-content: center;
+    margin: 12px 0;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal.settings-background .image-preview p {
+    color: #9E9E9E;
+    order: 1;
+}
+
+.modal.settings-background .image-preview img {
+    max-width: 100%;
+    order: 2;
+}
+
+.modal.settings-background .image-preview img:not(.hidden) + p {
+    display: none;
+}
 
 /* -------------- EMOJI ------------- */
 

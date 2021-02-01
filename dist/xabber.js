@@ -43494,6 +43494,7 @@ var constants = {
 
     FAVICON_DEFAULT: "images/favicon.png",
     FAVICON_MESSAGE: "images/favicon-message.png",
+    BACKGROUND_IMAGE: "images/background.png",
 
     WIDTH_MEDIUM:   1420,
     WIDTH_NARROW:   1280,
@@ -44474,7 +44475,7 @@ define('text!templates/base/fingerprints.html',[],function () { return '<div cla
 define('text!templates/base/fingerprint_item.html',[],function () { return '<div class="row">\n    <div title="Device ID: {{id}}&#10;Label: {[if (label) {]}{{label}}{[}else{]}none{[}]}&#10;Device ID is a unique identifier for your contact\'s device. You maintain separate encryption session with each device." class="device-wrap">\n        {[if (edit_setting) {]}\n        <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}\n        {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}\n        <div class="device-id one-line">{{id}}</div>\n        {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}\n        {[if (edit_setting) {]}<div class="set-label-label hidden">set label</div>{[}]}\n    </div>\n    <div class="fingerprint-wrap">\n    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>\n    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}\n    </div>\n    <div data-trust="{{trust}}" class="buttons">\n        {[if (trust !== null) {]}\n        <div class="dropdown-button" data-activates="select-status-{{id}}">\n            <div class="trust-item-wrap btn-main btn-flat">\n                <div data-value="{{trust}}">{{trust}}</div>\n            </div>\n        </div>\n        <div id="select-status-{{id}}" class="dropdown-content noselect">\n            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">Ignore</div>\n            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">Trust</div>\n            {[if (delete_button){]}\n            <div class="btn-main btn-flat btn-delete text-color-red-500">Delete</div>\n            {[}]}\n        </div>\n        {[}]}\n    </div>\n</div>';});
 
 
-define('text!templates/base/jingle_message_calling.html',[],function () { return '<i class="mdi mdi-phone btn-collapse"></i>\n<div class="call-header">\n    Xabber voice call\n    <div class="calling-status"/>\n</div>\n<div class="blur-background"></div>\n<div class="contact-info">\n    <div class="name one-line"/>\n    <div class="calling-status"/>\n</div>\n<div class="video-wrap">\n    <video autoplay loop class="blank-video hidden">\n        <source src="{{constants.BLANK_VIDEO.MP4}}">\n        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">\n        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">\n    </video>\n    <audio autoplay class="webrtc-remote-audio hidden"/>\n    <video autoplay muted class="webrtc-local-video collapsed hidden"/>\n    <div class="default-screen">\n        <div class="circle-avatar"/>\n        <div class="name one-line"/>\n    </div>\n</div>\n<div class="buttons-panel">\n    <div class="buttons-wrap">\n        <div class="btn-wrap" title="Collapse window"><svg class="btn-collapse mdi-24px" viewBox="0 0 24 24">\n            <path d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>\n        </svg></div>\n        <div class="btn-wrap" title="Fullscreen mode"><svg class="btn-full-screen mdi-24px" viewBox="0 0 24 24">\n            <path d="M11,21H3V13H5V17.59L17.59,5H13V3H21V11H19V6.41L6.41,19H11V21Z" />\n        </svg></div>\n        <i title="Mute" class="btn-volume mdi mdi-24px mdi-volume-high"/>\n        <i title="Mute microphone" class="btn-microphone mdi mdi-24px mdi-microphone"/>\n        <i title="Switch on/off video" class="btn-video mdi mdi-24px mdi-video"/>\n        <i title="Share screen" class="btn-share-screen mdi mdi-24px mdi-monitor"/>\n        <i title="Accept call" class="btn-accept mdi mdi-24px mdi-phone"/>\n        <i title="Decline call" class="btn-cancel mdi mdi-24px mdi-phone-hangup"/>\n    </div>\n</div>';});
+define('text!templates/base/jingle_message_calling.html',[],function () { return '<i class="mdi mdi-phone btn-collapse"></i>\n<div class="call-header">\n    Xabber voice call\n    <div class="calling-status"/>\n</div>\n<div class="blur-background"></div>\n<div class="contact-info">\n    <div class="name one-line"/>\n    <div class="calling-status"/>\n</div>\n<div class="video-wrap">\n    <video autoplay loop class="blank-video hidden">\n        <source src="{{constants.BLANK_VIDEO.MP4}}">\n        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">\n        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">\n    </video>\n    <audio autoplay class="webrtc-remote-audio hidden"/>\n    <video autoplay muted class="webrtc-local-video collapsed hidden"/>\n    <div class="default-screen">\n        <div class="circle-avatar"/>\n        <div class="name one-line"/>\n    </div>\n</div>\n<div class="buttons-panel">\n    <div class="buttons-wrap">\n        <div class="btn-wrap" title="Collapse window"><svg class="btn-collapse mdi-24px" viewBox="0 0 24 24">\n            <path d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>\n        </svg></div>\n        <div class="btn-wrap" title="Fullscreen mode"><svg class="btn-full-screen mdi-24px" viewBox="0 0 24 24">\n            <path d="M11,21H3V13H5V17.59L17.59,5H13V3H21V11H19V6.41L6.41,19H11V21Z" />\n        </svg></div>\n        <i title="Mute microphone" class="btn-microphone mdi mdi-24px mdi-microphone"/>\n        <i title="Switch on/off video" class="btn-video mdi mdi-24px mdi-video"/>\n        <i title="Mute" class="btn-volume mdi mdi-24px mdi-volume-high"/>\n        <i title="Share screen" class="btn-share-screen mdi mdi-24px mdi-monitor"/>\n        <i title="Accept call" class="btn-accept mdi mdi-24px mdi-phone"/>\n        <i title="Decline call" class="btn-cancel mdi mdi-24px mdi-phone-hangup"/>\n    </div>\n</div>';});
 
 
 define('text!templates/base/input_widget.html',[],function () { return '<div class="input-widget-wrap {{field_name}}-wrap">\n    <div class="{{field_name}} field-text one-line"></div>\n    <div class="btn-rename">\n        <span>rename</span>\n    </div>\n    <div class="{{field_name}}-input-wrap">\n        <input class="{{field_name}}-input field-input hidden" type="{{field_type}}" placeholder="{{placeholder}}">\n    </div>\n</div>\n';});
@@ -44495,7 +44496,7 @@ define('text!templates/base/omemo_enable.html',[],function () { return '<div cla
 define('text!templates/base/omemo_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="encryption-icon">\n    <svg viewBox="0 0 24 24">\n        <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z" />\n    </svg>\n</div>\n<div class="recent-chat-info">\n    <p class="last-msg one-line">Enable encryption?</p>\n    <p class="account-jid one-line"></p>\n</div>\n';});
 
 
-define('text!templates/base/backgrounds_gallery.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="library" class="menu-btn btn-library">Library</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">Upload</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">Web address (URL)</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="library" class="screen-wrap library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap upload-wrap">\n        <div class="upload-text">Drag image here<br>or</div>\n        <div class="upload-button">\n            <button type="file">Choose image to upload</button>\n            <input type="file">\n        </div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">Enter image URL:</div>\n            <input class="label"/>\n        </div>\n        <div class="image-preview">\n            <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">Add</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n</div>';});
+define('text!templates/base/backgrounds_gallery.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="library" class="menu-btn btn-library">Library</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">Upload</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">Web address (URL)</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="library" class="screen-wrap library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">Drag image here<br>or</div>\n            <div class="upload-button">\n                <button type="file">Choose image to upload</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">Enter image URL:</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">Add</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n</div>';});
 
 
 define('text!templates/api_service/xabber_login.html',[],function () { return '<div class="login-panel">\n    <div class="login-panel-head noselect">\n        <img src="images/xabber-logo.png" class="client-logo">\n        <span class="client-name">Xabber</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n        </div>\n        <div class="login-form-header">Email Login</div>\n        <div class="input-field email-name">\n            <input id="username" type="text" name="username">\n            <label for="username">Email</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">Password</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">Forgot password?</a>\n            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>\n        </div>\n        <div class="social-auth-wrap"><div class="social-header">\n            <div class="divider"></div>\n            <div class="social-header-tip">New Account</div>\n        </div></div>\n        <div class="registration-footer">\n            <div class="registration-tip-wrap">\n                <span class="registration-tip">No XMPP account?</span>\n                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/?source=Xabber Web" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>\n            </div>\n        </div>\n        <div class="clearfix"></div>\n    </div>\n</div>\n';});
@@ -46479,7 +46480,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (14)","version_description":""}'
+'{"version_number":"2.2.0 (15)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -47669,11 +47670,37 @@ define("xabber-views", [],function () {
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
             $('body').append(this.$el);
+            this.updateBackground();
             $('#modals').insertAfter(this.$el);
         },
 
         addScreen: function (name, attrs) {
             this.screen_map.set(name, attrs);
+        },
+
+        updateBackground: function () {
+            let background_settings = xabber.settings.background || {};
+            if (background_settings.image) {
+                if (background_settings.type === 'repeating-pattern') {
+                    this.$el.css({
+                        'background-repeat': 'repeat',
+                        'background-size': 'unset',
+                        'background-image': `url("${background_settings.image}")`
+                    });
+                } else if (background_settings.type === 'image') {
+                    this.$el.css({
+                        'background-repeat': 'no-repeat',
+                        'background-size': 'cover',
+                        'background-image': `url("${background_settings.image}")`
+                    });
+                }
+            } else {
+                this.$el.css({
+                    'background-repeat': 'repeat',
+                    'background-size': 'unset',
+                    'background-image': `url("${constants.BACKGROUND_IMAGE}")`
+                });
+            }
         },
 
         setScreen: function (name, attrs, options) {
@@ -48165,9 +48192,13 @@ define("xabber-views", [],function () {
                     .prop('checked', true);
             this.$('.hotkeys input[type=radio][name=hotkeys][value='+settings.hotkeys+']')
                     .prop('checked', true);
-            this.$('.background input[type=radio][name=background][value='+settings.background.type+']')
-                    .prop('checked', true);
+            this.updateBackgroundSetting();
             return this;
+        },
+
+        updateBackgroundSetting: function () {
+            this.$('.background input[type=radio][name=background][value='+this.model.get('background').type+']')
+                .prop('checked', true);
         },
 
         jumpToBlock: function (ev) {
@@ -48234,11 +48265,10 @@ define("xabber-views", [],function () {
             let value = ev.target.value;
             if (value == 'default') {
                 this.model.save('background', {type: 'default'});
-            } else if (value == 'repeating-pattern') {
-                /*let background_view = new xabber.SetBackgroundView();
-                background_view.render({type: value});*/
-            } else if (value == 'image') {
-
+                xabber.body.updateBackground();
+            } else if (value == 'repeating-pattern' || value == 'image') {
+                let background_view = new xabber.SetBackgroundView();
+                background_view.render({type: value, model: this.model});
             }
         },
 
@@ -48260,13 +48290,19 @@ define("xabber-views", [],function () {
         ps_settings: {theme: 'item-list'},
 
         events: {
-            "click .menu-btn": "updateActiveMenu"
+            "click .menu-btn": "updateActiveMenu",
+            'change input[type="file"]': "onFileInputChanged",
+            'keyup input.url': "onInputChanged",
+            "click .btn-add": "addBackground",
+            "click .btn-cancel": "close"
         },
 
         render: function (options) {
+            this.model = options.model;
+            this.type = options.type;
             this.$('.menu-btn').removeClass('active');
             this.$('.menu-btn[data-screen-name="library"]').addClass('active');
-            if (options.type == 'repeating-pattern')
+            if (this.type == 'repeating-pattern')
                 this.$('.modal-header span').text('Select pattern');
             else
                 this.$('.modal-header span').text('Select image');
@@ -48276,6 +48312,33 @@ define("xabber-views", [],function () {
                 }.bind(this),
                 complete: this.close.bind(this)
             });
+            let draggable = this.$('.upload-wrap');
+            draggable[0].ondragenter = function (ev) {
+                ev.preventDefault();
+                draggable.addClass('file-drop');
+            };
+            draggable[0].ondragover = function (ev) {
+                ev.preventDefault();
+            };
+            draggable[0].ondragleave = function (ev) {
+                if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                    return;
+                ev.preventDefault();
+                draggable.removeClass('file-drop');
+            };
+            draggable[0].ondrop = function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                draggable.removeClass('file-drop');
+                let files = ev.dataTransfer.files || [], file;
+                for (let i = 0; i < files.length; i++) {
+                    if (utils.isImageType(files[i].type)) {
+                        file = files[i];
+                        break;
+                    }
+                }
+                file && this.addFile(file);
+            }.bind(this);
         },
 
         updateActiveMenu: function (ev) {
@@ -48288,9 +48351,98 @@ define("xabber-views", [],function () {
         updateScreen: function (name) {
             this.$('.screen-wrap').addClass('hidden');
             this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+            this.scrollToTop();
+        },
+
+        updateActiveButton: function () {
+            let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                non_active = true;
+            if ($active_screen.attr('data-screen') == 'library') {
+                $active_screen.find('img.active').length && (non_active = false);
+            } else {
+                $active_screen.find('img:not(.hidden)').length && (non_active = false);
+            }
+            this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+        },
+
+        onFileInputChanged: function (ev) {
+            let target = ev.target, file;
+            for (let i = 0; i < target.files.length; i++) {
+                if (utils.isImageType(target.files[i].type)) {
+                    file = target.files[i];
+                    break;
+                }
+            }
+            file && this.addFile(file);
+            $(target).val('');
+        },
+
+        addFile: function (file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let image_prev = new Image(),
+                    src = e.target.result;
+                image_prev.src = src;
+                this.$('.screen-wrap[data-screen="upload"] img').detach();
+                this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                this.updateActiveButton();
+            }.bind(this);
+            reader.readAsDataURL(file);
+        },
+
+        onInputChanged: function (ev) {
+            if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                return;
+            if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                let url = ev.target.value.trim();
+                this.$('.image-preview img')[0].onload = () => {
+                    this.$('.image-preview img').removeClass('hidden');
+                    this.updateActiveButton();
+                };
+                this.$('.image-preview img').addClass('hidden')[0].src = url;
+                this.updateActiveButton();
+            } else {
+                this.$('.image-preview img').addClass('hidden')[0].src = "";
+                this.updateActiveButton();
+            }
+        },
+
+        addBackground: function () {
+            if (this.$('.btn-add').hasClass('non-active'))
+                return;
+            let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+            dfd.done((img) => {
+                this.model.save('background', {type: this.type, image: img});
+                xabber.body.updateBackground();
+                this.close();
+            });
+            if ($active_screen.attr('data-screen') == 'library') {
+                image = $active_screen.find('img.active')[0].src;
+                dfd.resolve(image);
+            } else {
+                image = $active_screen.find('img:not(.hidden)')[0].src;
+                if ($active_screen.attr('data-screen') == 'web-address') {
+                    let request = {
+                        type: "GET",
+                        url: image,
+                        headers: {"Access-Control-Allow-Origin": "*"},
+                        dataType: 'blob',
+                        success: function (data) {
+                            image = data;
+                            dfd.resolve(image);
+                        },
+                        error: function () {
+                            dfd.resolve(image);
+                        }.bind(this)
+                    };
+                    $.ajax(request);
+                } else
+                    dfd.resolve(image);
+            }
         },
 
         close: function () {
+            xabber.settings_view.updateBackgroundSetting();
             this.$el.closeModal({ complete: function () {
                     this.$el.detach();
                     this.data.set('visible', false);
@@ -57539,6 +57691,7 @@ define("xabber-contacts", [],function () {
                 _.each(_.clone(this.models), function (contact) {
                     contact.destroy();
                 });
+                this.account.trigger('remove_saved_chat');
             },
 
             handlePresence: function (presence, jid) {
@@ -65504,6 +65657,7 @@ define("xabber-chats", [],function () {
             this.contact.on("change:blocked", this.onChangedBlocked, this);
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
+            this.contact.on("change:subscription", this.updateMenu, this);
             this.contact.on("change:in_roster", this.updateMenu, this);
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
@@ -65518,7 +65672,6 @@ define("xabber-chats", [],function () {
                 hover: false
             });
             this.$('.chat-head-menu').hide();
-            this.updateMenu();
             this.updateStatusMsg();
             this.updateGroupChatHead();
             return this;
@@ -65568,7 +65721,7 @@ define("xabber-chats", [],function () {
         },
 
         updateMenu: function () {
-            var is_group_chat = this.contact.get('group_chat');
+            let is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') == 'both');
             this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
@@ -65700,11 +65853,12 @@ define("xabber-chats", [],function () {
         },
 
         updateGroupChatHead: function () {
-            var is_group_chat = this.contact.get('group_chat');
+            let is_group_chat = this.contact.get('group_chat');
             this.updateIcon();
             this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio'));
             this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
+            this.updateMenu();
         },
 
         updateIcon: function () {

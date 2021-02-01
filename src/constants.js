@@ -6,6 +6,7 @@ var constants = {
 
     FAVICON_DEFAULT: "images/favicon.png",
     FAVICON_MESSAGE: "images/favicon-message.png",
+    BACKGROUND_IMAGE: "images/background.png",
 
     WIDTH_MEDIUM:   1420,
     WIDTH_NARROW:   1280,
