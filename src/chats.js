@@ -6759,6 +6759,7 @@ define("xabber-chats", function () {
             this.contact.on("change:blocked", this.onChangedBlocked, this);
             this.contact.on("change:muted", this.updateNotifications, this);
             this.contact.on("change:group_chat", this.updateGroupChatHead, this);
+            this.contact.on("change:subscription", this.updateMenu, this);
             this.contact.on("change:in_roster", this.updateMenu, this);
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
@@ -6773,7 +6774,6 @@ define("xabber-chats", function () {
                 hover: false
             });
             this.$('.chat-head-menu').hide();
-            this.updateMenu();
             this.updateStatusMsg();
             this.updateGroupChatHead();
             return this;
@@ -6823,7 +6823,7 @@ define("xabber-chats", function () {
         },
 
         updateMenu: function () {
-            var is_group_chat = this.contact.get('group_chat');
+            let is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') == 'both');
             this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
@@ -6955,11 +6955,12 @@ define("xabber-chats", function () {
         },
 
         updateGroupChatHead: function () {
-            var is_group_chat = this.contact.get('group_chat');
+            let is_group_chat = this.contact.get('group_chat');
             this.updateIcon();
             this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio'));
             this.$('.btn-set-status').showIf(is_group_chat);
             this.$('.contact-status').hideIf(is_group_chat);
+            this.updateMenu();
         },
 
         updateIcon: function () {

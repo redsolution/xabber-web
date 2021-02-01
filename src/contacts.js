@@ -3906,6 +3906,7 @@ define("xabber-contacts", function () {
                 _.each(_.clone(this.models), function (contact) {
                     contact.destroy();
                 });
+                this.account.trigger('remove_saved_chat');
             },
 
             handlePresence: function (presence, jid) {
