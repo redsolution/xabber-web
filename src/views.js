@@ -1469,6 +1469,7 @@ define("xabber-views", function () {
             this.$('.screen-wrap').addClass('hidden');
             this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
             this.scrollToTop();
+            this.updateActiveButton();
         },
 
         updateActiveButton: function () {
