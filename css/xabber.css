@@ -6325,6 +6325,40 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
+.settings-block-wrap.background .current-background-wrap {
+    width: 160px;
+    height: 90px;
+    position: relative;
+}
+
+.settings-block-wrap.background .current-background-wrap:hover {
+    cursor: pointer;
+}
+
+.settings-block-wrap.background .current-background-wrap .dark-placeholder {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    color: #FFF;
+}
+
+.settings-block-wrap.background .current-background-wrap:hover .dark-placeholder {
+    display: flex;
+    z-index: 10;
+}
+
+.settings-block-wrap.background .current-background {
+    width: 100%;
+    background-repeat: no-repeat;
+    height: 100%;
+    background-size: cover;
+    z-index: 5;
+}
+
 .xmpp-account {
     position: relative;
     width: 100%;
@@ -8971,6 +9005,39 @@ ul.restrictions-list-content>li {
 
 .modal.settings-background .image-preview img:not(.hidden) + p {
     display: none;
+}
+
+.modal.settings-background .library-wrap {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    row-gap: 8px;
+    column-gap: 8px;
+    flex-wrap: wrap;
+    padding-left: 8px;
+}
+
+.modal.settings-background .library-wrap>div {
+    position: relative;
+    flex-basis: calc(12.5% - 8px);
+    height: 80px;
+    min-width: 80px;
+    cursor: pointer;
+}
+
+.modal.settings-background .library-wrap .repeating-pattern-item {
+    background-repeat: repeat;
+}
+
+.modal.settings-background .library-wrap .image-item {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-color: #E0E0E0;
+}
+
+.modal.settings-background .library-wrap>div.active {
+    border: 2px solid #F44336;
+    box-sizing: border-box;
 }
 
 /* -------------- EMOJI ------------- */

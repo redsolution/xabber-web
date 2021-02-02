@@ -150,6 +150,10 @@ define(["xabber-dependencies"], function (deps) {
         $image_el.css(css);
     };
 
+    var getCachedBackground = function (base64) {
+        return getCachedImage(base64.replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')).url;
+    };
+
     var getAvatarFromFile = function (file) {
         var image_obj = new Image(),
              src = window.URL.createObjectURL(file),
@@ -203,6 +207,7 @@ define(["xabber-dependencies"], function (deps) {
         getDefaultAvatar: getDefaultAvatar,
         getAvatarFromFile: getAvatarFromFile,
         getDefaultColor: getAccountColor,
+        getCachedBackground: getCachedBackground,
         compressImage: compressImage
     };
 });

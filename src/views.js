@@ -802,13 +802,13 @@ define("xabber-views", function () {
                     this.$el.css({
                         'background-repeat': 'repeat',
                         'background-size': 'unset',
-                        'background-image': `url("${background_settings.image}")`
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
                     });
                 } else if (background_settings.type === 'image') {
                     this.$el.css({
                         'background-repeat': 'no-repeat',
                         'background-size': 'cover',
-                        'background-image': `url("${background_settings.image}")`
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
                     });
                 }
             } else {
@@ -1316,6 +1316,9 @@ define("xabber-views", function () {
         updateBackgroundSetting: function () {
             this.$('.background input[type=radio][name=background][value='+this.model.get('background').type+']')
                 .prop('checked', true);
+            if (this.model.get('background').image) {
+                this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
+            }
         },
 
         jumpToBlock: function (ev) {
@@ -1408,6 +1411,7 @@ define("xabber-views", function () {
 
         events: {
             "click .menu-btn": "updateActiveMenu",
+            "click .library-wrap>div": "setActiveImage",
             'change input[type="file"]': "onFileInputChanged",
             'keyup input.url': "onInputChanged",
             "click .btn-add": "addBackground",
@@ -1417,12 +1421,13 @@ define("xabber-views", function () {
         render: function (options) {
             this.model = options.model;
             this.type = options.type;
+            this.createLibrary();
             this.$('.menu-btn').removeClass('active');
             this.$('.menu-btn[data-screen-name="library"]').addClass('active');
             if (this.type == 'repeating-pattern')
-                this.$('.modal-header span').text('Select pattern');
+                this.$('.modal-header span').text('Select Background Pattern');
             else
-                this.$('.modal-header span').text('Select image');
+                this.$('.modal-header span').text('Select Background Image');
             this.$el.openModal({
                 ready: function () {
 
@@ -1476,11 +1481,31 @@ define("xabber-views", function () {
             let $active_screen = this.$('.screen-wrap:not(.hidden)'),
                 non_active = true;
             if ($active_screen.attr('data-screen') == 'library') {
-                $active_screen.find('img.active').length && (non_active = false);
+                $active_screen.find('div.active').length && (non_active = false);
             } else {
                 $active_screen.find('img:not(.hidden)').length && (non_active = false);
             }
             this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+        },
+
+        createLibrary: function () {
+            let images = Array(8);
+            for (let i = 0; i < images.length; i++) {
+                let img = $(`<div class="${this.type}-item"/>`);
+                    img.css('background-image', `url(${images[i]})`);
+                this.$('.library-wrap').append(img);
+            }
+        },
+
+        setActiveImage: function (ev) {
+            let $target = $(ev.target);
+            if ($target.hasClass('active'))
+                $target.removeClass('active');
+            else {
+                this.$('.library-wrap>div').removeClass('active');
+                $target.addClass('active');
+            }
+            this.updateActiveButton();
         },
 
         onFileInputChanged: function (ev) {

@@ -1879,7 +1879,7 @@ define("xabber-accounts", function () {
                 });
                 setTimeout(function () {
                     this.model.omemo.onConnected();
-                }.bind(this), 2000);
+                }.bind(this), 1000);
             },
 
             destroyOmemo: function () {
