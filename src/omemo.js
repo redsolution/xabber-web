@@ -195,10 +195,12 @@ define("xabber-omemo", function () {
             },
 
             renderOwnDevices: function () {
-                let devices_count = _.keys(this.model.own_devices).length;
-                this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
-                this.updateFingerprints(this.model.own_devices);
-                this.updateOwnFingerprint();
+                this.omemo.getMyDevices().then(() => {
+                    let devices_count = _.keys(this.model.own_devices).length;
+                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
+                    this.updateFingerprints(this.model.own_devices);
+                    this.updateOwnFingerprint();
+                });
             },
 
             render: function () {
@@ -315,14 +317,15 @@ define("xabber-omemo", function () {
                                 let fingerprint = device.generateFingerprint();
                                 if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
                                     device.set('fingerprint', fingerprint);
+                                this.$('.this-device-content').append(this.addRow(device.id, device.get('label'), null, device.get('fingerprint')));
                             });
                         }
                     } else {
                         omemo.store.getIdentityKeyPair().then((ik) => {
                             let pubKey = ik.pubKey;
                             if (pubKey.byteLength == 33)
-                                pubKey.slice(1);
-                            let fingerprint = Array.from(new Uint8Array(ik)).map(b => b.toString(16).padStart(2, "0")).join("");
+                                pubKey = pubKey.slice(1);
+                            let fingerprint = Array.from(new Uint8Array(pubKey)).map(b => b.toString(16).padStart(2, "0")).join("");
                             this.$('.this-device-content').append(this.addRow(omemo.get('device_id'), this.account.settings.get('device_label_text'), null, fingerprint));
                         });
                     }
@@ -899,8 +902,8 @@ define("xabber-omemo", function () {
             addDevice: function () {
                 let device_id = this.get('device_id');
                 if (this.connection) {
-                    let omemo = (this.account.background_connection || this.account.connection).omemo;
-                    if (omemo.devices.length) {
+                    let omemo = this.account.connection.omemo;
+                    if (Object.keys(omemo.devices).length) {
                         let device = omemo.devices[device_id];
                         if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                             let label = this.account.settings.get('device_label_text');
@@ -913,7 +916,11 @@ define("xabber-omemo", function () {
                     }
                     else
                         omemo.getDevicesNode(null, function (cb) {
-                            omemo.devices = omemo.parseUserDevices($(cb));
+                            this.account.connection.omemo.devices = omemo.parseUserDevices($(cb));
+                            for (let dev_id in this.account.connection.omemo.devices) {
+                                if (!this.own_devices[dev_id])
+                                    this.own_devices[dev_id] = new xabber.Device({jid: this.account.get('jid'), id: dev_id}, { account: this.account, store: this.store});
+                            }
                             let device = omemo.devices[device_id];
                             if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
@@ -1026,13 +1033,13 @@ define("xabber-omemo", function () {
                     node = $message.find('items').attr('node');
                 if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
                     if (node == `${Strophe.NS.OMEMO}:devices`) {
-                        let devices = (this.account.background_connection || this.account.connection).omemo.parseUserDevices($message);
+                        let devices = this.account.connection.omemo.parseUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
                             let has_devices = this.own_devices && Object.keys(this.own_devices).length,
                                 has_changes = this.hasChanges(this.own_devices, devices);
-                            (this.account.background_connection || this.account.connection).omemo.devices = devices;
+                            this.account.connection.omemo.devices = devices;
                             let device_id = this.get('device_id'),
-                                device = (this.account.background_connection || this.account.connection).omemo.devices[device_id];
+                                device = this.account.connection.omemo.devices[device_id];
                             /*if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
                                 (this.account.background_connection || this.account.connection).omemo.publishDevice(device_id, label, () => {
@@ -1062,7 +1069,7 @@ define("xabber-omemo", function () {
                             device_id = $item.attr('id'),
                             $bundle = $item.children(`bundle[xmlns="${Strophe.NS.OMEMO}"]`), device;
                         if (from_jid === this.account.get('jid')) {
-                            if ((this.account.background_connection || this.account.connection).omemo.devices && (this.account.background_connection || this.account.connection).omemo.devices[device_id]) {
+                            if (this.account.connection.omemo.devices && this.account.connection.omemo.devices[device_id]) {
                                 if (!this.own_devices[device_id])
                                     this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
                                 device = this.own_devices[device_id];

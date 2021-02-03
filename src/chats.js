@@ -5917,7 +5917,7 @@ define("xabber-chats", function () {
         },
 
         onScroll: function () {
-            if (this.getScrollBottom() < 12 && !this._load_chats_timeout) {
+            if (this.getScrollBottom() < 12 && !this._load_chats_timeout && this.isVisible()) {
                 this._load_chats_timeout = setTimeout(function () {
                     this.hideChatsFeedback();
                 }.bind(this), 5000);
@@ -5927,9 +5927,9 @@ define("xabber-chats", function () {
                     this.updateScrollBar();
                 }
                 accounts.forEach(function (account) {
-                        let options = {max: xabber.settings.mam_messages_limit};
-                        account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
-                        account.roster.syncFromServer(options);
+                    let options = {max: xabber.settings.mam_messages_limit};
+                    account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
+                    account.roster.syncFromServer(options);
                 }.bind(this));
             }
         },

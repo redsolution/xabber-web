@@ -1287,6 +1287,7 @@ define("xabber-views", function () {
             "click .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
             "change .background input[type=radio][name=background]": "setBackground",
+            "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
         },
@@ -1319,6 +1320,8 @@ define("xabber-views", function () {
             if (this.model.get('background').image) {
                 this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
             }
+            this.$('.current-background-wrap').switchClass('hidden', !this.model.get('background').image);
+            this.updateScrollBar();
         },
 
         jumpToBlock: function (ev) {
@@ -1386,9 +1389,18 @@ define("xabber-views", function () {
             if (value == 'default') {
                 this.model.save('background', {type: 'default'});
                 xabber.body.updateBackground();
+                this.updateBackgroundSetting();
             } else if (value == 'repeating-pattern' || value == 'image') {
                 let background_view = new xabber.SetBackgroundView();
                 background_view.render({type: value, model: this.model});
+            }
+        },
+
+        changeBackgroundImage: function () {
+            let type = this.model.get('background').type;
+            if (type == 'repeating-pattern' || type == 'image') {
+                let background_view = new xabber.SetBackgroundView();
+                background_view.render({type: type, model: this.model});
             }
         },
 
@@ -1416,6 +1428,10 @@ define("xabber-views", function () {
             'keyup input.url': "onInputChanged",
             "click .btn-add": "addBackground",
             "click .btn-cancel": "close"
+        },
+
+        _initialize: function () {
+            this.$('input.url')[0].onpaste = this.onPaste.bind(this);
         },
 
         render: function (options) {
@@ -1461,6 +1477,16 @@ define("xabber-views", function () {
                 }
                 file && this.addFile(file);
             }.bind(this);
+        },
+
+        onPaste: function (ev) {
+            let url = ev.clipboardData.getData('text').trim();
+            this.$('.image-preview img')[0].onload = () => {
+                this.$('.image-preview img').removeClass('hidden');
+                this.updateActiveButton();
+            };
+            this.$('.image-preview img').addClass('hidden')[0].src = url;
+            this.updateActiveButton();
         },
 
         updateActiveMenu: function (ev) {
@@ -1555,12 +1581,15 @@ define("xabber-views", function () {
                 return;
             let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
             dfd.done((img) => {
-                this.model.save('background', {type: this.type, image: img});
+                if (img)
+                    this.model.save('background', {type: this.type, image: img});
+                else
+                    this.model.save('background', {type: 'default'});
                 xabber.body.updateBackground();
                 this.close();
             });
             if ($active_screen.attr('data-screen') == 'library') {
-                image = $active_screen.find('img.active')[0].src;
+                image = $active_screen.find('div.active')[0].src;
                 dfd.resolve(image);
             } else {
                 image = $active_screen.find('img:not(.hidden)')[0].src;

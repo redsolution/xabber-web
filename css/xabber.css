@@ -9011,10 +9011,7 @@ ul.restrictions-list-content>li {
     position: relative;
     display: flex;
     flex-direction: row;
-    row-gap: 8px;
-    column-gap: 8px;
     flex-wrap: wrap;
-    padding-left: 8px;
 }
 
 .modal.settings-background .library-wrap>div {
@@ -9022,6 +9019,7 @@ ul.restrictions-list-content>li {
     flex-basis: calc(12.5% - 8px);
     height: 80px;
     min-width: 80px;
+    margin: 4px;
     cursor: pointer;
 }
 

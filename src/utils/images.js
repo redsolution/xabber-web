@@ -151,6 +151,8 @@ define(["xabber-dependencies"], function (deps) {
     };
 
     var getCachedBackground = function (base64) {
+        if (base64.indexOf('http') == 0)
+            return base64;
         return getCachedImage(base64.replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')).url;
     };
 
