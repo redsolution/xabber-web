@@ -473,6 +473,13 @@ define([
             }
         },
 
+        getCookie: function (name) {
+            let matches = window.document.cookie.match(new RegExp(
+                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
+        },
+
         isMobile: {
             Android: function () {
                 return navigator.userAgent.match(/Android/i);

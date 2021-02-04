@@ -786,6 +786,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 1050px;
     height: 100%;
     margin: 0 auto;
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
 }
 
 .main-wrap.notifications-request {
@@ -797,6 +800,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     float: left;
     position: relative;
     background-color: #FFFFFF;
+    /*background-color: rgba(255, 255, 255, .9);*/
 }
 
 .left-panel-wrap {
@@ -844,7 +848,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: absolute;
     bottom: 0;
     width: 100%;
-    background-color: #FFFFFF;
+    background-color: transparent;
 }
 
 .chat-bottom-blocked-wrap {
@@ -4353,8 +4357,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: relative;
     width: 100%;
     padding: 7px 0;
-    border-top: 1px solid #FFF;
-    border-bottom: 1px solid #FFF;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     cursor: pointer;
     -webkit-transition: background-color .3s;
     -moz-transition: background-color .3s;
@@ -4572,7 +4576,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .fixed-day-indicator {
-    background-color: white;
+    background-color: rgba(255, 255, 255, .5);
     display: inline-block;
     padding: 4px 16px;
     border-radius: 50px;
@@ -5617,7 +5621,7 @@ img.fwd-img-preview {
     right: 0;
     bottom: 1px;
     width: 40px;
-    background-color: #FFFFFF;
+    background-color: transparent;
     z-index: 1;
 }
 
@@ -6365,7 +6369,7 @@ input[type='range'].voice-message-volume:focus {
     height: 48px;
     margin: 1px;
     padding: 8px 8px 4px 28px;
-    background-color: rgba(255,255,255,0.5);
+    background-color: transparent;
     cursor: pointer;
 }
 
@@ -9014,7 +9018,7 @@ ul.restrictions-list-content>li {
     flex-wrap: wrap;
 }
 
-.modal.settings-background .library-wrap>div {
+.modal.settings-background .library-wrap .image-item {
     position: relative;
     flex-basis: calc(12.5% - 8px);
     height: 80px;
@@ -9023,18 +9027,14 @@ ul.restrictions-list-content>li {
     cursor: pointer;
 }
 
-.modal.settings-background .library-wrap .repeating-pattern-item {
-    background-repeat: repeat;
-}
-
 .modal.settings-background .library-wrap .image-item {
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
     background-color: #E0E0E0;
 }
 
-.modal.settings-background .library-wrap>div.active {
-    border: 2px solid #F44336;
+.modal.settings-background .library-wrap .image-item.active {
+    outline: 2px solid #F44336;
     box-sizing: border-box;
 }
 

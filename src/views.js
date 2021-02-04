@@ -890,7 +890,7 @@ define("xabber-views", function () {
             });
 
             xabber.on("update_screen", this.onUpdatedScreen, this);
-            this.data.on("change:add_menu_state", this.onChangedAddMenuState, this);
+            // this.data.on("change:add_menu_state", this.onChangedAddMenuState, this);
             this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
             this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
             this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
@@ -1387,6 +1387,7 @@ define("xabber-views", function () {
         setBackground: function (ev) {
             let value = ev.target.value;
             if (value == 'default') {
+                // window.document.cookie = encodeURIComponent('background={"type": "default"}');
                 this.model.save('background', {type: 'default'});
                 xabber.body.updateBackground();
                 this.updateBackgroundSetting();
@@ -1402,6 +1403,17 @@ define("xabber-views", function () {
                 let background_view = new xabber.SetBackgroundView();
                 background_view.render({type: type, model: this.model});
             }
+            /*
+            let background = utils.getCookie('background');
+            if (background) {
+                background = JSON.parse(background);
+                let type = background.type;
+                if (type == 'repeating-pattern' || type == 'image') {
+                    let background_view = new xabber.SetBackgroundView();
+                    background_view.render({type: type, model: this.model});
+                }
+            }
+            */
         },
 
         setHotkeys: function (ev) {
@@ -1423,7 +1435,7 @@ define("xabber-views", function () {
 
         events: {
             "click .menu-btn": "updateActiveMenu",
-            "click .library-wrap>div": "setActiveImage",
+            "click .library-wrap .image-item": "setActiveImage",
             'change input[type="file"]': "onFileInputChanged",
             'keyup input.url': "onInputChanged",
             "click .btn-add": "addBackground",
@@ -1432,6 +1444,7 @@ define("xabber-views", function () {
 
         _initialize: function () {
             this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+            this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         },
 
         render: function (options) {
@@ -1479,6 +1492,41 @@ define("xabber-views", function () {
             }.bind(this);
         },
 
+        onScrollY: function () {
+            if (this.$('.screen-wrap:not(.hidden)').attr('data-screen') === 'library' && this.getScrollBottom() < 5) {
+                this.loadMoreImages();
+            }
+        },
+
+        getImagesFromXML: function (callback) {
+            if (this.model.img_library) {
+                callback && callback();
+                return;
+            }
+            var request = {
+                type: "GET",
+                contentType: "application/xml",
+                dataType: 'xml',
+                success: function (data, textStatus, jqXHR) {
+                    let images = [];
+                    $(data).find('image').each((idx, img) => {
+                        let $img = $(img),
+                            thumbnail = $img.children('thumbnail').text(),
+                            fs_img = $img.children('fullscreen-image').text();
+                        images.push({thumbnail, fs_img});
+                    });
+                    this.model.img_library = images;
+                    callback && callback();
+                }.bind(this)
+            };
+            if (this.type == 'repeating-pattern') {
+                request.url = './background-images.xml';
+            } else {
+               request.url = './background-images.xml';
+            }
+            $.ajax(request);
+        },
+
         onPaste: function (ev) {
             let url = ev.clipboardData.getData('text').trim();
             this.$('.image-preview img')[0].onload = () => {
@@ -1515,10 +1563,19 @@ define("xabber-views", function () {
         },
 
         createLibrary: function () {
-            let images = Array(8);
-            for (let i = 0; i < images.length; i++) {
-                let img = $(`<div class="${this.type}-item"/>`);
-                    img.css('background-image', `url(${images[i]})`);
+            this.getImagesFromXML(() => {
+                this.loadMoreImages(40);
+            });
+        },
+
+        loadMoreImages: function (count) {
+            !count && (count = 20);
+            let current_count = this.$(`.image-item`).length;
+            for (let i = current_count; i < (current_count + count); i++) {
+                let img = $(`<div class="image-item"/>`),
+                    img_sources = this.model.img_library[i];
+                img.css('background-image', `url("${img_sources.thumbnail}")`);
+                img.attr('data-src', img_sources.fs_img);
                 this.$('.library-wrap').append(img);
             }
         },
@@ -1581,15 +1638,19 @@ define("xabber-views", function () {
                 return;
             let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
             dfd.done((img) => {
-                if (img)
+                if (img) {
+                    // window.document.cookie = encodeURIComponent(`background={"type": "${this.type}"}, "image": "${img}"`);
                     this.model.save('background', {type: this.type, image: img});
-                else
+                }
+                else {
+                    // window.document.cookie = encodeURIComponent(`background={"type": "default"}`);
                     this.model.save('background', {type: 'default'});
+                }
                 xabber.body.updateBackground();
                 this.close();
             });
             if ($active_screen.attr('data-screen') == 'library') {
-                image = $active_screen.find('div.active')[0].src;
+                image = $active_screen.find('div.active').attr('data-src');
                 dfd.resolve(image);
             } else {
                 image = $active_screen.find('img:not(.hidden)')[0].src;
