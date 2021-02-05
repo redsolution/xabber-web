@@ -34,7 +34,7 @@
             </div>
             <div class="settings-tab" data-block-name="background">
                 <i class="mdi mdi-24px mdi-image"></i>
-                <div class="settings-block-name one-line">Background</div>
+                <div class="settings-block-name one-line">Appearance</div>
             </div>
             {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
             <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">
@@ -211,29 +211,61 @@
 
                 <div class="settings-block-wrap background">
                     <div class="block-header">
-                        <span class="block-name">Background</span>
+                        <span class="block-name">Appearance</span>
                     </div>
 
-                    <div class="setting background radio-button field-wrap">
-                        <div class="field radio-field clickable-field">
+                    <div class="background-setting-wrap">
+                        <div class="setting-name">Background</div>
+                        <div class="setting background radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />
+                                        <label for="{{view.cid}}-default">Default</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />
+                                        <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />
+                                        <label for="{{view.cid}}-image">Image</label>
+                                    </p>
+                                </form>
+                            </div>
+                            <div class="current-background-wrap hidden">
+                                <div class="dark-placeholder">Update</div>
+                                <div class="current-background"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vignetting-setting-wrap hidden">
+                        <div class="setting-name">Vignetting</div>
+                        <div class="setting vignetting-setting field-wrap">
                             <form action="#">
-                                <p>
-                                    <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />
-                                    <label for="{{view.cid}}-default">Default</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />
-                                    <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />
-                                    <label for="{{view.cid}}-image">Image</label>
+                                <p class="range-field">
+                                    <input type="range" id="#vignetting" min="0" max="200" />
                                 </p>
                             </form>
                         </div>
-                        <div class="current-background-wrap hidden">
-                            <div class="dark-placeholder">Update</div>
-                            <div class="current-background"></div>
+                    </div>
+
+                    <div class="toolbar-color-setting-wrap hidden">
+                        <div class="setting-name">Toolbar icons color</div>
+                        <div class="setting toolbar-color-setting field-wrap">
+
+                        </div>
+                    </div>
+
+                    <div class="blur-setting-wrap hidden">
+                        <div class="setting-name">Blur</div>
+                        <div class="setting blur-setting field-wrap">
+                            <form action="#">
+                                <p class="range-field">
+                                    <input type="range" id="#blur" min="0" max="200" />
+                                </p>
+                            </form>
                         </div>
                     </div>
                 </div>

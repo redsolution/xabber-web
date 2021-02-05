@@ -802,20 +802,23 @@ define("xabber-views", function () {
                     this.$el.css({
                         'background-repeat': 'repeat',
                         'background-size': 'unset',
-                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`,
+                        'box-shadow': 'inset 0px 0px 120px 70px rgba(0, 0, 0, 0.7)'
                     });
                 } else if (background_settings.type === 'image') {
                     this.$el.css({
                         'background-repeat': 'no-repeat',
                         'background-size': 'cover',
-                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`,
+                        'box-shadow': 'inset 0px 0px 120px 70px rgba(0, 0, 0, 0.7)'
                     });
                 }
             } else {
                 this.$el.css({
                     'background-repeat': 'repeat',
                     'background-size': 'unset',
-                    'background-image': `url("${constants.BACKGROUND_IMAGE}")`
+                    'background-image': `url("${constants.BACKGROUND_IMAGE}")`,
+                    'box-shadow': 'none'
                 });
             }
         },
@@ -1459,7 +1462,7 @@ define("xabber-views", function () {
                 this.$('.modal-header span').text('Select Background Image');
             this.$el.openModal({
                 ready: function () {
-
+                    this.$('.modal-content').css('max-height', this.$el.height() - 141).perfectScrollbar({theme: 'item-list'});
                 }.bind(this),
                 complete: this.close.bind(this)
             });
@@ -1499,32 +1502,48 @@ define("xabber-views", function () {
         },
 
         getImagesFromXML: function (callback) {
-            if (this.model.img_library) {
+            if (this.type == 'repeating-pattern' && this.model.patterns_library || this.type == 'images' && this.model.img_library) {
                 callback && callback();
                 return;
             }
-            var request = {
+            let request = {
                 type: "GET",
                 contentType: "application/xml",
                 dataType: 'xml',
-                success: function (data, textStatus, jqXHR) {
-                    let images = [];
-                    $(data).find('image').each((idx, img) => {
-                        let $img = $(img),
-                            thumbnail = $img.children('thumbnail').text(),
-                            fs_img = $img.children('fullscreen-image').text();
-                        images.push({thumbnail, fs_img});
-                    });
-                    this.model.img_library = images;
+                success: function (data) {
+                    if (this.type == 'repeating-pattern') {
+                        this.onGetPatternsCallback(data);
+                    } else {
+                        this.onGetImagesCallback(data);
+                    }
                     callback && callback();
                 }.bind(this)
             };
             if (this.type == 'repeating-pattern') {
-                request.url = './background-images.xml';
+                request.url = './background-patterns.xml';
             } else {
-               request.url = './background-images.xml';
+                request.url = './background-images.xml';
             }
             $.ajax(request);
+        },
+
+        onGetPatternsCallback: function (data) {
+            let images = [];
+            $(data).find('image').each((idx, img) => {
+                images.push({thumbnail: $(img).text()});
+            });
+            this.model.patterns_library = images;
+        },
+
+        onGetImagesCallback: function (data) {
+            let images = [];
+            $(data).find('image').each((idx, img) => {
+                let $img = $(img),
+                    thumbnail = $img.children('thumbnail').text(),
+                    fs_img = $img.children('fullscreen-image').text();
+                images.push({thumbnail, fs_img});
+            });
+            this.model.img_library = images;
         },
 
         onPaste: function (ev) {
@@ -1571,11 +1590,15 @@ define("xabber-views", function () {
         loadMoreImages: function (count) {
             !count && (count = 20);
             let current_count = this.$(`.image-item`).length;
+            if (this.type == 'repeating-pattern' && current_count >= this.model.patterns_library.length || this.type == 'images' && current_count >= this.model.img_library.length)
+                return;
             for (let i = current_count; i < (current_count + count); i++) {
                 let img = $(`<div class="image-item"/>`),
-                    img_sources = this.model.img_library[i];
+                    img_sources = this.type == 'repeating-pattern' ? this.model.patterns_library[i] : this.model.img_library[i];
+                if (!img_sources)
+                    break;
                 img.css('background-image', `url("${img_sources.thumbnail}")`);
-                img.attr('data-src', img_sources.fs_img);
+                img.attr('data-src', this.type == 'repeating-pattern' ? img_sources.thumbnail : img_sources.fs_img);
                 this.$('.library-wrap').append(img);
             }
         },
