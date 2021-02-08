@@ -44484,7 +44484,7 @@ define('text!templates/base/input_widget.html',[],function () { return '<div cla
 define('text!templates/base/toolbar.html',[],function () { return '<div class="toolbar-item all-chats active" title="All chats">\n    <div class="border"></div>\n    <img class="logo" src="images/xabber-logo.png">\n    <span class="all-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item chats" title="Chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>\n    <span class="msg-indicator"></span>\n</div>\n\n<div class="toolbar-item group-chats" title="Group chats">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" data-svgname="message-group"></svg>\n    <span class="group-msg-indicator"></span>\n</div>\n\n<div class="toolbar-item mentions" title="Mentions">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-at"></svg>\n    <span class="mentions-indicator"></span>\n</div>\n\n<div class="toolbar-item archive-chats" title="Archive chats">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>\n    <span class="archive-msg-indicator hidden"></span>\n</div>\n\n<div class="toolbar-item contacts" title="Contacts">\n    <div class="border"></div>\n    <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>\n</div>\n\n<div class="toolbar-item search" title="Search">\n    <div class="border"></div>\n    <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="ic-searching"></svg>\n</div>\n\n<div class="add-something-wrap">\n    <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title="Add group, contact or account">\n        <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>\n    </div>\n\n    <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">\n        <div class="add-variant contact">\n            <i class="mdi mdi-20px mdi-account-plus"></i>\n            <span class="text">Add Contact</span>\n        </div>\n        <div class="add-variant public-groupchat">\n            <i class="mdi mdi-20px mdi-account-multiple-plus"></i>\n            <span class="text">Create Group</span>\n        </div>\n        <div class="add-variant incognito-groupchat">\n            <svg class="mdi mdi-20px" viewBox="0 0 24 24">\n                <path d="M13 11A3 3 0 1 0 10 8A3 3 0 0 0 13 11M13 7A1 1 0 1 1 12 8A1 1 0 0 1 13 7M17.11 10.86A5 5 0 0 0 17.11 5.14A2.91 2.91 0 0 1 18 5A3 3 0 0 1 18 11A2.91 2.91 0 0 1 17.11 10.86M13 13C7 13 7 17 7 17V19H19V17S19 13 13 13M9 17C9 16.71 9.32 15 13 15C16.5 15 16.94 16.56 17 17M24 17V19H21V17A5.6 5.6 0 0 0 19.2 13.06C24 13.55 24 17 24 17M8 12H5V15H3V12H0V10H3V7H5V10H8Z" />\n            </svg>\n            <span class="text">Create Incognito Group</span>\n        </div>\n        <div class="add-variant account">\n            <i class="mdi mdi-20px mdi-account-circle"></i>\n            <span class="text">Add Account</span>\n        </div>\n    </div>\n</div>\n\n<div class="divider noselect"></div>\n\n<div class="accounts-wrap">\n    <div class="accounts">\n    </div>\n</div>\n\n<div class="toolbar-bottom">\n    <div class="toolbar-item about" title="About">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-information"></i>\n    </div>\n    <div class="toolbar-item settings" title="Settings">\n        <div class="border"></div>\n        <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>\n    </div>\n</div>\n';});
 
 
-define('text!templates/base/settings.html',[],function () { return '    <div class="left-column noselect">\n        <div class="main-info-wrap xabber-info-wrap">\n            <div class="picture-wrap">\n                <img class="logo" src="images/xabber-logo-96.png"/>\n            </div>\n            <div class="name">Xabber for Web</div>\n            <div class="version"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">\n                <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>\n                <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>\n                <div class="settings-block-name one-line">Xabber Account</div>\n            </div>\n            <div class="settings-tab" data-block-name="xmpp-accounts">\n                <i class="mdi mdi-24px mdi-settings"/>\n                <div class="settings-block-name one-line">XMPP Accounts</div>\n            </div>\n            <div class="settings-tab" data-block-name="keyboard">\n                <i class="mdi mdi-24px mdi-keyboard"></i>\n                <div class="settings-block-name one-line">Keyboard</div>\n            </div>\n            <div class="settings-tab" data-block-name="contact-list">\n                <i class="mdi mdi-24px mdi-account-multiple"></i>\n                <div class="settings-block-name one-line">Contact list</div>\n            </div>\n            <div class="settings-tab" data-block-name="notifications">\n                <i class="mdi mdi-24px mdi-bell"></i>\n                <div class="settings-block-name one-line">Notifications</div>\n            </div>\n            <div class="settings-tab" data-block-name="sounds">\n                <i class="mdi mdi-24px mdi-volume-high"></i>\n                <div class="settings-block-name one-line">Sounds</div>\n            </div>\n            <div class="settings-tab" data-block-name="background">\n                <i class="mdi mdi-24px mdi-image"></i>\n                <div class="settings-block-name one-line">Appearance</div>\n            </div>\n            {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}\n            <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">\n                <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>\n                <div class="settings-block-name one-line">{{PERSONAL_AREA_URL.label}}</div>\n            </div>\n            </a>\n            {[}]}\n        </div>\n        <div class="settings-tabs-bottom-wrap">\n            <div class="settings-tab delete-all-accounts">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">Quit Xabber Web</div>\n            </div>\n        </div>\n    </div>\n\n    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>Settings</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content">\n                <div class="settings-block-wrap xabber-account">\n                    <div class="block-header">\n                        <span class="block-name">Xabber account</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap xmpp-accounts">\n                    <div class="block-header">\n                        <span class="block-name">XMPP accounts</span>\n                    </div>\n                    <div class="setting xmpp-account-list">\n                        <div class="accounts-head-wrap">\n                            <div class="accounts-head xmppid-head">XMPP ID</div>\n                            <div class="accounts-head sync-head">Sync</div>\n                            <div class="accounts-head enabled-head">Enabled</div>\n                        </div>\n                        <span class="no-accounts-tip">No accounts</span>\n                        <div class="move-account-to-bottom droppable"></div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap keyboard">\n                    <div class="block-header">\n                        <span class="block-name">Keyboard</span>\n                    </div>\n\n                    <div class="setting hotkeys radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />\n                                    <label for="{{view.cid}}-enter">Send message on Enter</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />\n                                    <label for="{{view.cid}}-ctrlenter">Send message on Ctrl+Enter</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap contact-list">\n                    <div class="block-header">\n                        <span class="block-name">Contact list</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap notifications">\n                    <div class="block-header">\n                        <span class="block-name">Notifications</span>\n                    </div>\n\n                    <div class="setting notifications field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Desktop notifications</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="notifications">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting message-preview field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Message preview</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="message-preview">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting call-attention field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Call attention</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="call-attention">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap sounds">\n                    <div class="block-header">\n                        <span class="block-name">Sounds</span>\n                    </div>\n                    <div class="setting sound radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="sound" value="" type="radio" id="{{view.cid}}-sound-no" />\n                                    <label for="{{view.cid}}-sound-no">No sound</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_up" type="radio" id="{{view.cid}}-sound-beep-up" />\n                                    <label for="{{view.cid}}-sound-beep-up">Beep Up</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="tiny_noize" type="radio" id="{{view.cid}}-sound-tiny-noize" />\n                                    <label for="{{view.cid}}-sound-tiny-noize">Tiny Noize</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="retro_game" type="radio" id="{{view.cid}}-sound-retro-game" />\n                                    <label for="{{view.cid}}-sound-retro-game">Retro Game</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pixel_beep" type="radio" id="{{view.cid}}-sound-pixel-beep" />\n                                    <label for="{{view.cid}}-sound-pixel-beep">Pixel Beep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_positive" type="radio" id="{{view.cid}}-sound-beep-positive" />\n                                    <label for="{{view.cid}}-sound-beep-positive">Beep Positive</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="good_chime" type="radio" id="{{view.cid}}-sound-good-chime" />\n                                    <label for="{{view.cid}}-sound-good-chime">Good Chime</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="cellular_click" type="radio" id="{{view.cid}}-sound-cellular-click" />\n                                    <label for="{{view.cid}}-sound-cellular-click">Cellular Click</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="bleep" type="radio" id="{{view.cid}}-sound-bleep" />\n                                    <label for="{{view.cid}}-sound-bleep">Bleep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="mono_u" type="radio" id="{{view.cid}}-sound-mono-u" />\n                                    <label for="{{view.cid}}-sound-mono-u">Mono U</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="plop" type="radio" id="{{view.cid}}-sound-plop" />\n                                    <label for="{{view.cid}}-sound-plop">Plop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="ether" type="radio" id="{{view.cid}}-sound-ether" />\n                                    <label for="{{view.cid}}-sound-ether">Ether</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pop" type="radio" id="{{view.cid}}-sound-pop" />\n                                    <label for="{{view.cid}}-sound-pop">Pop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="computer_chime" type="radio" id="{{view.cid}}-sound-computer-chime" />\n                                    <label for="{{view.cid}}-sound-computer-chime">Computer Chime</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap background">\n                    <div class="block-header">\n                        <span class="block-name">Appearance</span>\n                    </div>\n\n                    <div class="background-setting-wrap">\n                        <div class="setting-name">Background</div>\n                        <div class="setting background radio-button field-wrap">\n                            <div class="field radio-field clickable-field">\n                                <form action="#">\n                                    <p>\n                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />\n                                        <label for="{{view.cid}}-default">Default</label>\n                                    </p>\n                                    <p>\n                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />\n                                        <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>\n                                    </p>\n                                    <p>\n                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />\n                                        <label for="{{view.cid}}-image">Image</label>\n                                    </p>\n                                </form>\n                            </div>\n                            <div class="current-background-wrap hidden">\n                                <div class="dark-placeholder">Update</div>\n                                <div class="current-background"></div>\n                            </div>\n                        </div>\n                    </div>\n\n                    <div class="vignetting-setting-wrap hidden">\n                        <div class="setting-name">Vignetting</div>\n                        <div class="setting vignetting-setting field-wrap">\n                            <form action="#">\n                                <p class="range-field">\n                                    <input type="range" id="#vignetting" min="0" max="200" />\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n\n                    <div class="toolbar-color-setting-wrap hidden">\n                        <div class="setting-name">Toolbar icons color</div>\n                        <div class="setting toolbar-color-setting field-wrap">\n\n                        </div>\n                    </div>\n\n                    <div class="blur-setting-wrap hidden">\n                        <div class="setting-name">Blur</div>\n                        <div class="setting blur-setting field-wrap">\n                            <form action="#">\n                                <p class="range-field">\n                                    <input type="range" id="#blur" min="0" max="200" />\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
+define('text!templates/base/settings.html',[],function () { return '    <div class="left-column noselect">\n        <div class="main-info-wrap xabber-info-wrap">\n            <div class="picture-wrap">\n                <img class="logo" src="images/xabber-logo-96.png"/>\n            </div>\n            <div class="name">Xabber for Web</div>\n            <div class="version"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">\n                <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>\n                <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>\n                <div class="settings-block-name one-line">Xabber Account</div>\n            </div>\n            <div class="settings-tab" data-block-name="xmpp-accounts">\n                <i class="mdi mdi-24px mdi-settings"/>\n                <div class="settings-block-name one-line">XMPP Accounts</div>\n            </div>\n            <div class="settings-tab" data-block-name="keyboard">\n                <i class="mdi mdi-24px mdi-keyboard"></i>\n                <div class="settings-block-name one-line">Keyboard</div>\n            </div>\n            <div class="settings-tab" data-block-name="contact-list">\n                <i class="mdi mdi-24px mdi-account-multiple"></i>\n                <div class="settings-block-name one-line">Contact list</div>\n            </div>\n            <div class="settings-tab" data-block-name="notifications">\n                <i class="mdi mdi-24px mdi-bell"></i>\n                <div class="settings-block-name one-line">Notifications</div>\n            </div>\n            <div class="settings-tab" data-block-name="sounds">\n                <i class="mdi mdi-24px mdi-volume-high"></i>\n                <div class="settings-block-name one-line">Sounds</div>\n            </div>\n            <div class="settings-tab" data-block-name="background">\n                <i class="mdi mdi-24px mdi-image"></i>\n                <div class="settings-block-name one-line">Appearance</div>\n            </div>\n            {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}\n            <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">\n                <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>\n                <div class="settings-block-name one-line">{{PERSONAL_AREA_URL.label}}</div>\n            </div>\n            </a>\n            {[}]}\n        </div>\n        <div class="settings-tabs-bottom-wrap">\n            <div class="settings-tab delete-all-accounts">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">Quit Xabber Web</div>\n            </div>\n        </div>\n    </div>\n\n    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>Settings</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content">\n                <div class="settings-block-wrap xabber-account">\n                    <div class="block-header">\n                        <span class="block-name">Xabber account</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap xmpp-accounts">\n                    <div class="block-header">\n                        <span class="block-name">XMPP accounts</span>\n                    </div>\n                    <div class="setting xmpp-account-list">\n                        <div class="accounts-head-wrap">\n                            <div class="accounts-head xmppid-head">XMPP ID</div>\n                            <div class="accounts-head sync-head">Sync</div>\n                            <div class="accounts-head enabled-head">Enabled</div>\n                        </div>\n                        <span class="no-accounts-tip">No accounts</span>\n                        <div class="move-account-to-bottom droppable"></div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap keyboard">\n                    <div class="block-header">\n                        <span class="block-name">Keyboard</span>\n                    </div>\n\n                    <div class="setting hotkeys radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />\n                                    <label for="{{view.cid}}-enter">Send message on Enter</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />\n                                    <label for="{{view.cid}}-ctrlenter">Send message on Ctrl+Enter</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap contact-list">\n                    <div class="block-header">\n                        <span class="block-name">Contact list</span>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap notifications">\n                    <div class="block-header">\n                        <span class="block-name">Notifications</span>\n                    </div>\n\n                    <div class="setting notifications field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Desktop notifications</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="notifications">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting message-preview field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Message preview</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="message-preview">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                    <div class="setting call-attention field-wrap">\n                        <div class="field clickable-field switch small">\n                            <span class="field-name">Call attention</span>\n                            <label class="field-value">\n                                <input type="checkbox" name="call-attention">\n                                <span class="lever"></span>\n                            </label>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap sounds">\n                    <div class="block-header">\n                        <span class="block-name">Sounds</span>\n                    </div>\n                    <div class="setting sound radio-button field-wrap">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="sound" value="" type="radio" id="{{view.cid}}-sound-no" />\n                                    <label for="{{view.cid}}-sound-no">No sound</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_up" type="radio" id="{{view.cid}}-sound-beep-up" />\n                                    <label for="{{view.cid}}-sound-beep-up">Beep Up</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="tiny_noize" type="radio" id="{{view.cid}}-sound-tiny-noize" />\n                                    <label for="{{view.cid}}-sound-tiny-noize">Tiny Noize</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="retro_game" type="radio" id="{{view.cid}}-sound-retro-game" />\n                                    <label for="{{view.cid}}-sound-retro-game">Retro Game</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pixel_beep" type="radio" id="{{view.cid}}-sound-pixel-beep" />\n                                    <label for="{{view.cid}}-sound-pixel-beep">Pixel Beep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="beep_positive" type="radio" id="{{view.cid}}-sound-beep-positive" />\n                                    <label for="{{view.cid}}-sound-beep-positive">Beep Positive</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="good_chime" type="radio" id="{{view.cid}}-sound-good-chime" />\n                                    <label for="{{view.cid}}-sound-good-chime">Good Chime</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="cellular_click" type="radio" id="{{view.cid}}-sound-cellular-click" />\n                                    <label for="{{view.cid}}-sound-cellular-click">Cellular Click</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="bleep" type="radio" id="{{view.cid}}-sound-bleep" />\n                                    <label for="{{view.cid}}-sound-bleep">Bleep</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="mono_u" type="radio" id="{{view.cid}}-sound-mono-u" />\n                                    <label for="{{view.cid}}-sound-mono-u">Mono U</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="plop" type="radio" id="{{view.cid}}-sound-plop" />\n                                    <label for="{{view.cid}}-sound-plop">Plop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="ether" type="radio" id="{{view.cid}}-sound-ether" />\n                                    <label for="{{view.cid}}-sound-ether">Ether</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="pop" type="radio" id="{{view.cid}}-sound-pop" />\n                                    <label for="{{view.cid}}-sound-pop">Pop</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="sound" value="computer_chime" type="radio" id="{{view.cid}}-sound-computer-chime" />\n                                    <label for="{{view.cid}}-sound-computer-chime">Computer Chime</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n\n                <div class="settings-block-wrap background">\n                    <div class="block-header">\n                        <span class="block-name">Appearance</span>\n                    </div>\n\n                    <div class="background-setting-wrap">\n                        <div class="setting-name">Background</div>\n                        <div class="setting background radio-button field-wrap">\n                            <div class="field radio-field clickable-field">\n                                <form action="#">\n                                    <p>\n                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />\n                                        <label for="{{view.cid}}-default">Default</label>\n                                    </p>\n                                    <p>\n                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />\n                                        <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>\n                                    </p>\n                                    <p>\n                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />\n                                        <label for="{{view.cid}}-image">Image</label>\n                                    </p>\n                                </form>\n                            </div>\n                            <div class="current-background-wrap">\n                                <div class="dark-placeholder">Update</div>\n                                <div class="current-background"></div>\n                            </div>\n                        </div>\n                    </div>\n\n                    <div class="vignetting-setting-wrap">\n                        <div class="setting-name">Vignetting</div>\n                        <div class="setting vignetting-setting field-wrap">\n                            <form action="#">\n                                <p class="range-field">\n                                    <input type="range" id="vignetting" min="0" max="200" />\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n\n                    <div class="toolbar-color-setting-wrap hidden">\n                        <div class="setting-name">Toolbar icons color</div>\n                        <div class="setting toolbar-color-setting field-wrap">\n                        </div>\n                    </div>\n\n                    <div class="blur-setting-wrap">\n                        <div class="setting-name">Blur</div>\n                        <div class="setting blur-setting field-wrap">\n                            <form action="#">\n                                <p class="range-field">\n                                    <input type="range" id="blur" min="0" max="100" />\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
 
 
 define('text!templates/base/about.html',[],function () { return '    <div class="left-column noselect">\n        <div class="main-info-wrap xabber-info-wrap">\n            <div class="picture-wrap">\n                <img class="logo" src="images/xabber-logo-96.png"/>\n            </div>\n            <div class="name">Xabber for Web</div>\n            <div class="version"></div>\n        </div>\n    </div>\n\n    <div class="right-column noselect">\n        <div class="settings-panel-head">\n            <span>About</span>\n        </div>\n\n        <div class="panel-content-wrap">\n            <div class="panel-content">\n                <div class="settings-block-wrap about">\n                    <div class="block-content">\n                        Xabber is an open source XMPP messenger for Android, iOS and Web platforms. It is build around open standards, interoperability, design and great user experience. Versions of Xabber for every platform are built to provide a continuous chat experience between them.\n                    </div>\n                    <div class="block-content">\n                        You will find more information on our official website <a href="https://www.xabber.com" target="_blank">https://www.xabber.com</a>\n                    </div>\n                    <div class="block-header">\n                        <span class="block-name">XMPP protocol</span>\n                    </div>\n                    <div class="block-content">\n                        Extensible Messaging and Presence Protocol (XMPP) is a communications protocol for message-oriented middleware based on XML (Extensible Markup Language). It enables the near-real-time exchange of structured yet extensible data between any two or more network entities. The protocol was originally named Jabber, and was developed by the Jabber open-source community in 1999 for near real-time instant messaging (IM),presence information, and contact list maintenance.\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">XMPP Extension Protocols</span>\n                    </div>\n                    <div class="block-content">\n                        XMPP is highly extensible, via extensions known as XEPs (XMPP Extension Protocol). Xabber supports a number of popular XEPs that are essential to providing great chat experience for our users.\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">Developers</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber for Android was originally developed by <a href="http://redsolution.com" target="_blank">Redsolution</a> — an international software and services company currently based in Estonia. Since then, a number of individuals joined Xabber as developers, testers and translators.\n                    </div>\n                    <div class="block-content">\n                        Our goal is to create a stable, reliable, interoperable and user friendly ecosystem for instant messaging that does not rely on proprietary services and data silos. We welcome anyone who believes in open standards and free information interchange to take part in moving Xabber forward.\n                    </div>\n                    <div class="block-content">\n                        Follow us on Twitter and Github.\n                    </div>\n                    <div class="block-content flex-content">\n                        <img class="logo" src="images/redsolution-logo.png"/>\n                        <a href="https://twitter.com/Xabber_XMPP" target="_blank"><div class="btn-social twitter-color">\n                            <i class="mdi mdi-28px mdi-twitter"></i>\n                        </div></a>\n                        <a href="https://github.com/redsolution/xabber-web" target="_blank"><img class="btn-social github-logo" src="images/ic_github.png"/></a>\n                    </div>\n\n\n                    <div class="block-header">\n                        <span class="block-name">Translators</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber is available in multiple languages thanks to many fine people from all over the world. We have created a special page on our website to acknowledge their efforts.\n                    </div>\n                    <div class="block-content">\n                        You may join their ranks and help us improve translation quality by contributing your translations to <a href="https://crowdin.com/project/xabber" target="_blank">Xabber project</a>\n                    </div>\n\n                    <div class="block-header">\n                        <span class="block-name">License</span>\n                    </div>\n                    <div class="block-content">\n                        Xabber for Web source code is licensed under GNU AGPL v.3 license and is available on <a href="https://github.com/redsolution/xabber-web" target="_blank">GitHub</a>\n                    </div>\n                    <div class="block-content">\n                        Graphical images are licensed under Creative Commons Attribution Share-Alike (CC BY-SA) license.\n                    </div>\n                    <div class="block-content">\n                        Xabber & Redsolution logo are property of <a href="https://redsolution.com" target="_blank">Redsolution, OÜ</a>\n                    </div>\n                    <div class="block-content">\n                        View Xabber for Web <a href="https://github.com/redsolution/xabber-web/blob/master/LICENSE" target="_blank">license file</a> for more information.\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n';});
@@ -44497,6 +44497,9 @@ define('text!templates/base/omemo_item.html',[],function () { return '<div class
 
 
 define('text!templates/base/backgrounds_gallery.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="library" class="menu-btn btn-library">Library</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">Upload</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">Web address (URL)</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="library" class="screen-wrap library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">Drag image here<br>or</div>\n            <div class="upload-button">\n                <button type="file">Choose image to upload</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">Enter image URL:</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">Set</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>\n</div>';});
+
+
+define('text!templates/base/color_picker.html',[],function () { return '<div class="material-color-picker">\n    <div class="material-color-picker__left-panel">\n        <ol class="color-selector">\n            {[materialColors.forEach(function (color) {]}\n            <li>\n                <input name="material-color" class="with-gap" id="material-color-{{color.color}}" type="radio">\n                <label class="text-color-{{color.color}}-500"></label>\n            </li>\n            {[})]}\n        </ol>\n    </div>\n    <div class="material-color-picker__right-panel">\n        {[materialColors.forEach(function (color) {]}\n        <div class="color-palette-wrapper">\n            <h2 class="color-palette-header">{[color.color.replace(/-/g, " ")]}</h2>\n            {[color.variations.forEach(function (variation) {]}\n            <ol class="color-palette">\n                <li id="clipboardItem" class="color-palette__item ground-color-{{color.color}}-{{variation.weight}}">\n                    <span>{{variation.weight}}</span>\n                    <span>{{variation.hex}}</span>\n                </li>\n            </ol>\n            {[})]}\n        </div>\n        {[})]}\n    </div>\n</div>';});
 
 
 define('text!templates/api_service/xabber_login.html',[],function () { return '<div class="login-panel">\n    <div class="login-panel-head noselect">\n        <img src="images/xabber-logo.png" class="client-logo">\n        <span class="client-name">Xabber</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n        </div>\n        <div class="login-form-header">Email Login</div>\n        <div class="input-field email-name">\n            <input id="username" type="text" name="username">\n            <label for="username">Email</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">Password</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">Forgot password?</a>\n            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>\n        </div>\n        <div class="social-auth-wrap"><div class="social-header">\n            <div class="divider"></div>\n            <div class="social-header-tip">New Account</div>\n        </div></div>\n        <div class="registration-footer">\n            <div class="registration-tip-wrap">\n                <span class="registration-tip">No XMPP account?</span>\n                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/?source=Xabber Web" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>\n            </div>\n        </div>\n        <div class="clearfix"></div>\n    </div>\n</div>\n';});
@@ -44867,6 +44870,7 @@ define("xabber-templates", [
     "text!templates/base/omemo_enable.html",
     "text!templates/base/omemo_item.html",
     "text!templates/base/backgrounds_gallery.html",
+    "text!templates/base/color_picker.html",
 
     "text!templates/api_service/xabber_login.html",
     "text!templates/api_service/xabber_login_by_email.html",
@@ -45054,6 +45058,7 @@ define("xabber-templates", [
     addTemplate('base.omemo_enable');
     addTemplate('base.omemo_item');
     addTemplate('base.backgrounds_gallery');
+    addTemplate('base.color_picker');
 
     addTemplate('api_service.xabber_login');
     addTemplate('api_service.xabber_login_by_email');
@@ -46494,7 +46499,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (19)","version_description":""}'
+'{"version_number":"2.2.0 (20)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46683,6 +46688,7 @@ define('xabber-environment',[
                 message_preview: false,
                 sound: true,
                 background: {type: 'default'},
+                appearance: {blur: 0, vignetting: 0},
                 sound_on_message: 'beep_up',
                 call_attention: true,
                 sound_on_attention: 'attention',
@@ -47699,15 +47705,13 @@ define("xabber-views", [],function () {
                     this.$el.css({
                         'background-repeat': 'repeat',
                         'background-size': 'unset',
-                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`,
-                        'box-shadow': 'inset 0px 0px 120px 70px rgba(0, 0, 0, 0.7)'
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
                     });
                 } else if (background_settings.type === 'image') {
                     this.$el.css({
                         'background-repeat': 'no-repeat',
                         'background-size': 'cover',
-                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`,
-                        'box-shadow': 'inset 0px 0px 120px 70px rgba(0, 0, 0, 0.7)'
+                        'background-image': `url("${utils.images.getCachedBackground(background_settings.image)}")`
                     });
                 }
             } else {
@@ -47718,6 +47722,25 @@ define("xabber-views", [],function () {
                     'box-shadow': 'none'
                 });
             }
+            this.updateBoxShadow(xabber.settings.appearance.vignetting);
+        },
+
+        updateBoxShadow: function (value) {
+            if (!Number(value))
+                this.$el.css({
+                    'box-shadow': `unset`
+                });
+            else
+                this.$el.css({
+                'box-shadow': `inset 0px 0px 120px ${value}px rgba(0, 0, 0, 0.7)`
+            });
+        },
+
+        updateBlur: function (value) {
+            xabber.main_panel.$el.css({
+                "backdrop-filter": `blur(${value}px)`,
+                "-webkit-backdrop-filter": `blur(${value}px)`
+            });
         },
 
         setScreen: function (name, attrs, options) {
@@ -48186,6 +48209,8 @@ define("xabber-views", [],function () {
             "click .setting.message-preview label": "setMessagePreview",
             "click .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
+            "change #vignetting": "changeVignetting",
+            "change #blur": "changeBlur",
             "change .background input[type=radio][name=background]": "setBackground",
             "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
@@ -48221,6 +48246,9 @@ define("xabber-views", [],function () {
                 this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
             }
             this.$('.current-background-wrap').switchClass('hidden', !this.model.get('background').image);
+            let appearance = this.model.get('appearance');
+            this.$('#blur')[0].value = appearance.blur;
+            this.$('#vignetting')[0].value = appearance.vignetting;
             this.updateScrollBar();
         },
 
@@ -48316,6 +48344,20 @@ define("xabber-views", [],function () {
             */
         },
 
+        changeBlur: function () {
+            let value = this.$('#blur')[0].value,
+                appearance = this.model.get('appearance');
+            xabber.body.updateBlur(value);
+            this.model.save('appearance', _.extend(appearance, {blur: value}));
+        },
+
+        changeVignetting: function () {
+            let value = this.$('#vignetting')[0].value,
+                appearance = this.model.get('appearance');
+            xabber.body.updateBoxShadow(value);
+            this.model.save('appearance', _.extend(appearance, {vignetting: value}));
+        },
+
         setHotkeys: function (ev) {
             this.model.save('hotkeys', ev.target.value);
         },
@@ -48325,6 +48367,893 @@ define("xabber-views", [],function () {
                 res && xabber.trigger('quit');
             });
         }
+    });
+
+
+    xabber.ColorPicker = xabber.BasicView.extend({
+        className: 'modal main-modal color-picker',
+        materialColors: [
+            {
+                color: "red",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FFEBEE"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#FFCDD2"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#EF9A9A"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#E57373"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#EF5350"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#F44336"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#E53935"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#D32F2F"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#C62828"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#B71C1C"
+                    }
+                ]
+            },
+            {
+                color: "pink",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FCE4EC"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#F8BBD0"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#F48FB1"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#F06292"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#EC407A"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#E91E63"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#D81B60"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#C2185B"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#AD1457"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#880E4F"
+                    }
+                ]
+            },
+            {
+                color: "purple",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#F3E5F5"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#E1BEE7"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#CE93D8"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#BA68C8"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#AB47BC"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#9C27B0"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#8E24AA"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#7B1FA2"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#6A1B9A"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#4A148C"
+                    }
+                ]
+            },
+            {
+                color: "deep-purple",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#EDE7F6"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#D1C4E9"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#B39DDB"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#9575CD"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#7E57C2"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#673AB7"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#5E35B1"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#512DA8"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#4527A0"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#311B92"
+                    }
+                ]
+            },
+            {
+                color: "indigo",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E8EAF6"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#C5CAE9"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#9FA8DA"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#7986CB"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#5C6BC0"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#3F51B5"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#3949AB"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#303F9F"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#283593"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#1A237E"
+                    }
+                ]
+            },
+            {
+                color: "blue",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E3F2FD"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#BBDEFB"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#90CAF9"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#64B5F6"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#42A5F5"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#2196F3"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#1E88E5"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#1976D2"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#1565C0"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#0D47A1"
+                    }
+                ]
+            },
+            {
+                color: "light-blue",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E1F5FE"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#B3E5FC"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#81D4FA"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#4FC3F7"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#29B6F6"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#03A9F4"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#039BE5"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#0288D1"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#0277BD"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#01579B"
+                    }
+                ]
+            },
+            {
+                color: "cyan",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E0F7FA"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#B2EBF2"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#80DEEA"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#4DD0E1"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#26C6DA"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#00BCD4"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#00ACC1"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#0097A7"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#00838F"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#006064"
+                    }
+                ]
+            },
+            {
+                color: "teal",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E0F2F1"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#B2DFDB"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#80CBC4"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#4DB6AC"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#26A69A"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#009688"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#00897B"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#00796B"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#00695C"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#004D40"
+                    }
+                ]
+            },
+            {
+                color: "green",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#E8F5E9"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#C8E6C9"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#A5D6A7"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#81C784"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#66BB6A"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#4CAF50"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#43A047"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#388E3C"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#2E7D32"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#1B5E20"
+                    }
+                ]
+            },
+            {
+                color: "light-green",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#F1F8E9"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#DCEDC8"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#C5E1A5"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#AED581"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#9CCC65"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#8BC34A"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#7CB342"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#689F38"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#558B2F"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#33691E"
+                    }
+                ]
+            },
+            {
+                color: "lime",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#F9FBE7"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#F0F4C3"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#E6EE9C"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#DCE775"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#D4E157"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#CDDC39"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#C0CA33"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#AFB42B"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#9E9D24"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#827717"
+                    }
+                ]
+            },
+            {
+                color: "yellow",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FFFDE7"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#FFF9C4"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#FFF59D"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#FFF176"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#FFEE58"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#FFEB3B"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#FDD835"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#FBC02D"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#F9A825"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#F57F17"
+                    }
+                ]
+            },
+            {
+                color: "amber",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FFF8E1"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#FFECB3"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#FFE082"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#FFD54F"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#FFCA28"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#FFC107"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#FFB300"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#FFA000"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#FF8F00"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#FF6F00"
+                    }
+                ]
+            },
+            {
+                color: "orange",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FFF3E0"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#FFE0B2"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#FFCC80"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#FFB74D"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#FFA726"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#FF9800"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#FB8C00"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#F57C00"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#EF6C00"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#E65100"
+                    }
+                ]
+            },
+            {
+                color: "deep-orange",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FBE9E7"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#FFCCBC"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#FFAB91"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#FF8A65"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#FF7043"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#FF5722"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#F4511E"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#E64A19"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#D84315"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#BF360C"
+                    }
+                ]
+            },
+            {
+                color: "brown",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#EFEBE9"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#D7CCC8"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#BCAAA4"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#A1887F"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#8D6E63"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#795548"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#6D4C41"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#5D4037"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#4E342E"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#3E2723"
+                    }
+                ]
+            },
+            {
+                color: "grey",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#FAFAFA"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#F5F5F5"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#EEEEEE"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#E0E0E0"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#BDBDBD"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#9E9E9E"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#757575"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#616161"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#424242"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#212121"
+                    }
+                ]
+            },
+            {
+                color: "blue-grey",
+                variations: [
+                    {
+                        weight: 50,
+                        hex: "#ECEFF1"
+                    },
+                    {
+                        weight: 100,
+                        hex: "#CFD8DC"
+                    },
+                    {
+                        weight: 200,
+                        hex: "#B0BEC5"
+                    },
+                    {
+                        weight: 300,
+                        hex: "#90A4AE"
+                    },
+                    {
+                        weight: 400,
+                        hex: "#78909C"
+                    },
+                    {
+                        weight: 500,
+                        hex: "#607D8B"
+                    },
+                    {
+                        weight: 600,
+                        hex: "#546E7A"
+                    },
+                    {
+                        weight: 700,
+                        hex: "#455A64"
+                    },
+                    {
+                        weight: 800,
+                        hex: "#37474F"
+                    },
+                    {
+                        weight: 900,
+                        hex: "#263238"
+                    }
+                ]
+            }
+        ],
+
+        ps_selector: '.container',
+
+        _initialize() {
+            this.$el.html(templates.color_picker({materialColors: this.materialColors}));
+        },
+
+        render: function () {
+            this.$el.openModal({
+                ready: function () {
+                }.bind(this),
+                complete: this.close.bind(this)
+            });
+
+        },
+
+
+        close: function () {
+            this.$el.closeModal({ complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
+        }
+
     });
 
     xabber.SetBackgroundView = xabber.BasicView.extend({
@@ -48359,7 +49288,7 @@ define("xabber-views", [],function () {
                 this.$('.modal-header span').text('Select Background Image');
             this.$el.openModal({
                 ready: function () {
-                    this.$('.modal-content').css('max-height', this.$el.height() - 141).perfectScrollbar({theme: 'item-list'});
+                    this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
                 }.bind(this),
                 complete: this.close.bind(this)
             });
@@ -48918,6 +49847,7 @@ define("xabber-views", [],function () {
 
         this.main_panel = this.body.addChild('main', this.NodeView, {
             classlist: 'main-wrap'});
+        this.body.updateBlur(this.settings.appearance.blur);
         this.left_panel = this.main_panel.addChild(
             'left', this.NodeView, {classlist: 'panel-wrap left-panel-wrap'});
         this.right_panel = this.main_panel.addChild(

@@ -1,0 +1,27 @@
+<div class="material-color-picker">
+    <div class="material-color-picker__left-panel">
+        <ol class="color-selector">
+            {[materialColors.forEach(function (color) {]}
+            <li>
+                <input name="material-color" class="with-gap" id="material-color-{{color.color}}" type="radio">
+                <label class="text-color-{{color.color}}-500"></label>
+            </li>
+            {[})]}
+        </ol>
+    </div>
+    <div class="material-color-picker__right-panel">
+        {[materialColors.forEach(function (color) {]}
+        <div class="color-palette-wrapper">
+            <h2 class="color-palette-header">{[color.color.replace(/-/g, " ")]}</h2>
+            {[color.variations.forEach(function (variation) {]}
+            <ol class="color-palette">
+                <li id="clipboardItem" class="color-palette__item ground-color-{{color.color}}-{{variation.weight}}">
+                    <span>{{variation.weight}}</span>
+                    <span>{{variation.hex}}</span>
+                </li>
+            </ol>
+            {[})]}
+        </div>
+        {[})]}
+    </div>
+</div>
