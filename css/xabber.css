@@ -771,6 +771,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 500;
 }
 
+.client-body-wrap .blur-overlay {
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
 .roster-right-container {
     position: absolute;
     top: 0;
@@ -790,8 +799,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 1050px;
     height: 100%;
     margin: 0 auto;
-    backdrop-filter: blur(50px);
-    -webkit-backdrop-filter: blur(50px);
     box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
 }
 
@@ -2198,8 +2205,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     right: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(50px);
-    -webkit-backdrop-filter: blur(50px);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
 }
 
 .roster-right-container .expanded-wrap.solid {
@@ -5826,7 +5833,7 @@ input[type=range].voice-message-volume::-ms-thumb {
     margin-top: -2px;
 }
 
-input[type=range] + .thumb.active {
+input[type=range] + .thumb {
     display: none;
 }
 
@@ -6389,6 +6396,21 @@ input[type='range'].voice-message-volume:focus {
     background-color: #cccccc;
 }
 
+.settings-block-wrap.background .selected-color-wrap .selected-color-item {
+    width: 32px;
+    height: 32px;
+    background-color: #E0E0E0;
+}
+
+.settings-block-wrap.background .toolbar-color-setting-wrap .selected-color-wrap {
+    margin: 0 0 16px 0;
+    cursor: pointer;
+    display: flex;
+    width: min-content;
+    max-width: 256px;
+    align-items: center;
+}
+
 .xmpp-account {
     position: relative;
     width: 100%;
@@ -6587,130 +6609,93 @@ input[type='range'].voice-message-volume:focus {
 
 /* ----------------- COLOR PICKER -------------------- */
 
-.material-color-picker {
+.modal.color-picker {
+    width: min-content;
+}
+
+.color-picker .material-color-picker-wrap {
     display: flex;
-    width: 32em;
-    margin: 0 auto;
+    flex-direction: column;
+    margin: 8px;
     background-color: white;
-    border: 1px solid #78909c;
-    border-radius: 0.5em;
-    box-shadow: 0 1em 8em rgba(0, 0, 0, .35);
 }
 
-material-color-picker__left-panel {
-     z-index: 1;
- }
-
-material-color-picker__left-panel {
-     position: relative;
-     flex-grow: 1;
-     overflow: hidden;
- }
-
-.color-selector {
+.color-picker .color-palette-wrapper {
     display: flex;
-    flex-direction: column;
-    padding: 1em 0;
-    border-right: 0.25em solid #E0E0E0;
+    flex-direction: row;
 }
 
-.material-color-picker input[type='radio'] {
-    display: none;
+.color-picker .color-palette-item {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    margin: 1px;
 }
 
-.color-selector label {
-    position: relative !important;
-    display: inline-block !important;
-    padding: 0.5em 1.5em !important;
-    cursor: pointer !important;
-    height: unset !important;
-    width: unset !important;
-}
-
-.material-color-picker input[type=radio] + label {
-    padding-left: 1.5em !important;
-}
-
-.color-selector label::before {
-    content: '';
-    position: relative !important;
-    display: inline-block;
-    vertical-align: middle;
-    padding: 0.75em;
-    background-color: currentColor;
-    border-radius: 50%;
-    border: unset !important;
-}
-
-.color-selector label::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin: 0 !important;
-    z-index: unset !important;
-    transform: translate(-50%, -50%) !important;
-    padding: 0.5em !important;
-    border: 0.25em solid !important;
-    border-radius: 50% !important;
-    transition: padding 250ms;
-}
-
-.material-color-picker input[type='radio']:checked + label::after {
-    padding: 1em !important;
-    background-color: unset;
-}
-
-.color-palette-wrapper {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    transform: translateX(-100%);
-    transition: transform 250 ms;
-
-    display: flex;
-    flex-direction: column;
-    padding: 1.5em;
-}
-
-
-.color-palette-header {
-    display: flex;
-    justify-content: space-between;
-    margin: 0;
-    margin-bottom: 1em;
-    font-weight: 400;
-    color: #757575;
-}
-
-.color-palette {
-@include list-reset;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.color-palette__item {
-    position: relative;
+.color-picker .selected-color-wrap {
+    padding: 8px 1px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex-grow: 1;
-
-    margin: 0.25em 0;
-    padding: 0 1em;
-    border-radius: 0.25em;
-    font-family: "Roboto Mono", monospace;
-
-    transition: transform 250ms;
-    cursor: pointer;
+    position: relative;
 }
 
-.color-palette:hover {
-     transform: scale(1.05);
- }
+.toolbar-color-setting-wrap .selected-color-name,
+.color-picker .selected-color-name {
+    text-transform: capitalize;
+    font-weight: 500;
+    color: #424242;
+    margin: 2px 0;
+    font-size: 14px;
+    line-height: 16px;
+}
+
+.color-picker .selected-color-item {
+    width: 32px;
+    height: 32px;
+}
+
+.toolbar-color-setting-wrap .selected-color-info,
+.color-picker .selected-color-info {
+    margin: 0 8px;
+    width: 128px;
+}
+
+.toolbar-color-setting-wrap .selected-color-hex,
+.color-picker .selected-color-hex {
+    color: #9E9E9E;
+    font-size: 13px;
+    line-height: 14px;
+    height: 16px;
+}
+
+.color-picker .selected-color-hex-input {
+    display: block;
+    margin: 0 !important;
+    height: 14px !important;
+    line-height: 14px !important;
+    font-size: 13px !important;
+    color: #424242 !important;
+    border-bottom: 1px solid #616161 !important;
+    outline: none !important;
+    padding-bottom: 1px !important;
+    box-shadow: none !important;
+}
+
+.color-picker .btn-set {
+    position: absolute;
+    right: 8px;
+    top: 4px;
+}
+
+.modal.color-picker .modal-header {
+    height: unset;
+    padding: 16px 8px 8px 16px;
+}
+
+.modal.color-picker .modal-footer {
+    padding: 0 8px;
+    height: unset;
+}
 
 /* ------------------- ACCOUNT SETTINGS --------------- */
 
@@ -6942,35 +6927,31 @@ material-color-picker__left-panel {
 }
 
 .color-values .color-name {
-    float: left;
-    height: 24px;
     font-size: 16px;
-    line-height: 24px;
 }
 
 .color-values .color-value .color-pattern {
-    float: left;
     width: 16px;
     height: 16px;
-    margin: 4px 4px 4px 14px;
+    margin: 0px 14px 0px 4px;
     border-radius: 50%;
 }
 
 .color-values {
     top: 24px !important;
     left: 33px !important;
-    width: 140px !important;
+    width: 144px !important;
     overflow: hidden;
 }
 
-.color-values .color-name {
-    width: 100px;
-}
-
 .color-values .color-value {
-    height: 28px;
+    height: 32px;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
     min-height: initial;
-    padding: 3px;
+    padding: 4px 8px;
 }
 
 

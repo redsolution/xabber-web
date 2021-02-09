@@ -829,12 +829,12 @@ define("xabber-views", function () {
                 });
             else
                 this.$el.css({
-                'box-shadow': `inset 0px 0px 120px ${value}px rgba(0, 0, 0, 0.7)`
+                'box-shadow': `${value}px 0 100px 1px rgba(0, 0, 0, 0.7) inset, -${value}px 0 100px -1px rgba(0, 0, 0, 0.7) inset`
             });
         },
 
         updateBlur: function (value) {
-            xabber.main_panel.$el.css({
+            xabber.blur_overlay.$el.css({
                 "backdrop-filter": `blur(${value}px)`,
                 "-webkit-backdrop-filter": `blur(${value}px)`
             });
@@ -929,6 +929,11 @@ define("xabber-views", function () {
                 hover: false,
                 alignment: 'left'
             });
+        },
+
+        updateColor: function (color) {
+            this.$('.toolbar-icon').css('color', color);
+            this.$('.toolbar-icon path').css('fill', color);
         },
 
         onUpdatedScreen: function (name) {
@@ -1308,6 +1313,7 @@ define("xabber-views", function () {
             "change .sound input[type=radio][name=sound]": "setSound",
             "change #vignetting": "changeVignetting",
             "change #blur": "changeBlur",
+            "click .selected-color-wrap": "openColorPicker",
             "change .background input[type=radio][name=background]": "setBackground",
             "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
@@ -1333,6 +1339,13 @@ define("xabber-views", function () {
             this.$('.hotkeys input[type=radio][name=hotkeys][value='+settings.hotkeys+']')
                     .prop('checked', true);
             this.updateBackgroundSetting();
+            this.updateColor();
+            this.$('.toolbar-main-color-setting-wrap .dropdown-button').dropdown({
+                inDuration: 100,
+                outDuration: 100,
+                belowOrigin: true,
+                hover: false
+            });
             return this;
         },
 
@@ -1347,6 +1360,20 @@ define("xabber-views", function () {
             this.$('#blur')[0].value = appearance.blur;
             this.$('#vignetting')[0].value = appearance.vignetting;
             this.updateScrollBar();
+        },
+
+        updateColor: function () {
+            let color = this.model.get('appearance').color || '#E0E0E0';
+            this.$('.selected-color-item').css('background-color', color);
+            this.$('.selected-color-hex').text(color);
+            let material_color = xabber.ColorPicker.prototype.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == color.toLowerCase()));
+            if (material_color) {
+                let tone = material_color.variations.find(v => v.hex.toLowerCase() == color.toLowerCase());
+                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+            } else {
+                this.$('.selected-color-name').text(`Custom color`);
+            }
+            xabber.toolbar_view.updateColor(color);
         },
 
         jumpToBlock: function (ev) {
@@ -1439,6 +1466,12 @@ define("xabber-views", function () {
                 }
             }
             */
+        },
+
+        openColorPicker: function () {
+            if (!this.colorPicker)
+                this.colorPicker = new xabber.ColorPicker({model: this.model});
+            this.colorPicker.render();
         },
 
         changeBlur: function () {
@@ -2327,26 +2360,113 @@ define("xabber-views", function () {
             }
         ],
 
-        ps_selector: '.container',
+        ps_selector: '.material-color-picker-wrap',
+        events: {
+            "click .color-palette-item": "selectColor",
+            "click .selected-color-hex": "updateInputField",
+            "focusout .selected-color-hex-input": "focusoutInputField",
+            "keyup .selected-color-hex-input": "keyUpInput",
+            "click .btn-set": "setColor"
+        },
 
-        _initialize() {
+        _initialize(options) {
+            this.model = options.model;
             this.$el.html(templates.color_picker({materialColors: this.materialColors}));
         },
 
         render: function () {
             this.$el.openModal({
                 ready: function () {
+                    let $input = this.$('.selected-color-hex-input'),
+                        $color_hex = this.$('.selected-color-hex'),
+                        value = this.model.get('appearance').color || '#E0E0E0';
+                    let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+                    if (material_color) {
+                        let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+                        this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+                    } else {
+                        this.$('.selected-color-name').text(`Custom color`);
+                    }
+                    if (value) {
+                        this.$('.selected-color-wrap').removeClass('hidden');
+                        $input.addClass('hidden');
+                        $color_hex.removeClass('hidden').text(value);
+                        value && this.$('.selected-color-item').css('background-color', value);
+                    }
                 }.bind(this),
                 complete: this.close.bind(this)
             });
 
         },
 
+        updateInputField: function () {
+            let $input = this.$('.selected-color-hex-input'),
+                $color_hex = this.$('.selected-color-hex');
+            $input.removeClass('hidden');
+            $input[0].value = $color_hex.text();
+            $color_hex.addClass('hidden');
+        },
+
+        keyUpInput: function (ev) {
+            if (ev.keyCode == constants.KEY_ENTER) {
+                ev.preventDefault();
+                this.focusoutInputField();
+            }
+            let $input = this.$('.selected-color-hex-input'),
+                value = $input[0].value.trim();
+            this.$('.selected-color-item').css('background-color', value);
+            let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+            if (material_color) {
+                let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+            } else {
+                this.$('.selected-color-name').text(`Custom color`);
+            }
+        },
+
+        focusoutInputField: function () {
+            let $input = this.$('.selected-color-hex-input'),
+                $color_hex = this.$('.selected-color-hex'),
+                value = $input[0].value.trim();
+            let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+            if (material_color) {
+                let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+            } else {
+                this.$('.selected-color-name').text(`Custom color`);
+            }
+            $input.addClass('hidden');
+            $color_hex.removeClass('hidden').text(value);
+            this.$('.selected-color-item').css('background-color', value);
+        },
+
+        selectColor: function (ev) {
+            let $target = $(ev.target),
+                hex = $target.attr('data-hex'),
+                color_name = $target.closest('.color-palette-wrapper').attr('data-color-name').replace(/-/g, " "),
+                weight = $target.attr('data-weight');
+            this.$('.selected-color-wrap').removeClass('hidden');
+            this.$('.selected-color-item').css('background-color', hex);
+            this.$('.selected-color-name').text(`${color_name} ${weight}`);
+            this.$('.selected-color-hex').text(hex);
+            let $input = this.$('.selected-color-hex-input'),
+                $color_hex = this.$('.selected-color-hex');
+            $input.addClass('hidden');
+            $color_hex.removeClass('hidden');
+        },
+
+        setColor: function () {
+            this.close();
+            let appearance = this.model.get('appearance');
+            this.model.save('appearance', _.extend(appearance, {color: this.$('.selected-color-hex').text()}));
+
+        },
 
         close: function () {
             this.$el.closeModal({ complete: function () {
                     this.$el.detach();
                     this.data.set('visible', false);
+                    xabber.settings_view.updateColor();
                 }.bind(this)
             });
         }
@@ -2941,6 +3061,10 @@ define("xabber-views", function () {
             classlist: 'login-page-wrap', el: $(document).find('.login-container')[0]});
 
         this.toolbar_view = this.body.addChild('toolbar', this.ToolbarView);
+        this.settings.appearance.color && this.toolbar_view.updateColor(this.settings.appearance.color);
+
+        this.blur_overlay = this.body.addChild('blur_overlay', this.NodeView, {
+            classlist: 'blur-overlay'});
 
         this.main_panel = this.body.addChild('main', this.NodeView, {
             classlist: 'main-wrap'});

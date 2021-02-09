@@ -1,27 +1,27 @@
-<div class="material-color-picker">
-    <div class="material-color-picker__left-panel">
-        <ol class="color-selector">
-            {[materialColors.forEach(function (color) {]}
-            <li>
-                <input name="material-color" class="with-gap" id="material-color-{{color.color}}" type="radio">
-                <label class="text-color-{{color.color}}-500"></label>
-            </li>
-            {[})]}
-        </ol>
-    </div>
-    <div class="material-color-picker__right-panel">
+<div class="modal-header">Toolbar Icons Color</div>
+<div class="material-color-picker-wrap">
+    <div class="material-color-picker">
         {[materialColors.forEach(function (color) {]}
-        <div class="color-palette-wrapper">
-            <h2 class="color-palette-header">{[color.color.replace(/-/g, " ")]}</h2>
+        <div data-color-name="{{color.color}}" class="color-palette-wrapper">
+            {[var default_color = color.variations.find(v => v.weight == 500);]}
+            <div data-weight="500" data-hex="{{default_color.hex}}" style="background-color: {{default_color.hex}}" class="color-palette-item">
+            </div>
             {[color.variations.forEach(function (variation) {]}
-            <ol class="color-palette">
-                <li id="clipboardItem" class="color-palette__item ground-color-{{color.color}}-{{variation.weight}}">
-                    <span>{{variation.weight}}</span>
-                    <span>{{variation.hex}}</span>
-                </li>
-            </ol>
+            <div data-weight="{{variation.weight}}" data-hex="{{variation.hex}}" style="background-color: {{variation.hex}}" class="color-palette-item">
+            </div>
             {[})]}
         </div>
         {[})]}
+    </div>
+</div>
+<div class="modal-footer">
+    <div class="hidden selected-color-wrap">
+        <div class="selected-color-item"></div>
+        <div class="selected-color-info">
+            <div class="selected-color-name"></div>
+            <div class="selected-color-hex"></div>
+            <input class="selected-color-hex-input hidden"/>
+        </div>
+        <button class="btn-flat btn-main btn-dark btn-set">Set</button>
     </div>
 </div>

@@ -169,7 +169,7 @@
                 message_preview: false,
                 sound: true,
                 background: {type: 'default'},
-                appearance: {blur: 0, vignetting: 0},
+                appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
                 sound_on_message: 'beep_up',
                 call_attention: true,
                 sound_on_attention: 'attention',

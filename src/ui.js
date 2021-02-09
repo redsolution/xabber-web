@@ -136,6 +136,7 @@ define("xabber-ui", function () {
         });
 
         this.body.addScreen('settings', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 wide: { settings: null }
@@ -144,11 +145,13 @@ define("xabber-ui", function () {
         });
 
         this.body.addScreen('add_account', {
+            blur_overlay: null,
             toolbar: null,
             login: null
         });
 
         this.body.addScreen('about', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 wide: { about: null }
@@ -161,6 +164,7 @@ define("xabber-ui", function () {
             path_acc_vcard_edit = new this.ViewPath('account.vcard_edit');
 
         this.body.addScreen('account_settings', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 wide: {
@@ -193,6 +197,7 @@ define("xabber-ui", function () {
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
         this.body.addScreen('contacts', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 left: { contacts: null },
@@ -202,6 +207,7 @@ define("xabber-ui", function () {
         });
 
         this.body.addScreen('search', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 wide: { discovering_main: null}
@@ -210,6 +216,7 @@ define("xabber-ui", function () {
         });
 
         this.body.addScreen('mentions', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 left: { mentions: null },
@@ -219,6 +226,7 @@ define("xabber-ui", function () {
         });
 
         this.body.addScreen('all-chats', {
+            blur_overlay: null,
             toolbar: null,
             main: {
                 left: { chats: null },
