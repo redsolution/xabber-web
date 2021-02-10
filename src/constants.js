@@ -360,6 +360,9 @@ var constants = {
     MESSAGE_ARCHIVE_DB_NAME: 'MessageArchive',
     STANZA_MAX_SIZE: Math.pow(2,16),
 
+    BLUR_VALUE: 25,
+    VIGNETTING_VALUE: 128,
+
     ONELINERS: [
         "Ready to rock?",
         "Groovy!",

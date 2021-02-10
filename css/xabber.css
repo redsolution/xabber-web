@@ -980,20 +980,313 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     fill: #E0E0E0;
 }
 
-.toolbar .toolbar-item.active .toolbar-icon {
-    color: #F44336;
-}
-.toolbar .toolbar-item.active svg.toolbar-icon path {
-    fill: #F44336;
+/* ------------- TOOLBAR COLORS -------------- */
+[data-main-color=red] .toolbar .active .border {
+    background-color: #F44336;
 }
 
-.toolbar .toolbar-item:hover .toolbar-icon {
-    color: #D32F2F;
+[data-main-color=red] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #F44336 !important;
 }
-.toolbar .toolbar-item:hover svg.toolbar-icon path {
-    fill: #D32F2F;
+[data-main-color=red] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #F44336 !important;
 }
 
+[data-main-color=red] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #D32F2F !important;
+}
+[data-main-color=red] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #D32F2F !important;
+}
+
+
+[data-main-color=pink] .toolbar .active .border {
+    background-color: #E91E63;
+}
+[data-main-color=pink] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #E91E63 !important;
+}
+[data-main-color=pink] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #E91E63 !important;
+}
+
+[data-main-color=pink] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #C2185B !important;
+}
+[data-main-color=pink] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #C2185B !important;
+}
+
+
+[data-main-color=purple] .toolbar .active .border {
+    background-color: #9C27B0;
+}
+[data-main-color=purple] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #9C27B0 !important;
+}
+[data-main-color=purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #9C27B0 !important;
+}
+
+[data-main-color=purple] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #7B1FA2 !important;
+}
+[data-main-color=purple] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #7B1FA2 !important;
+}
+
+
+[data-main-color=deep-purple] .toolbar .active .border {
+    background-color: #673AB7;
+}
+[data-main-color=deep-purple] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #673AB7 !important;
+}
+[data-main-color=deep-purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #673AB7 !important;
+}
+
+[data-main-color=deep-purple] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #512DA8 !important;
+}
+[data-main-color=deep-purple] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #512DA8 !important;
+}
+
+
+[data-main-color=indigo] .toolbar .active .border {
+    background-color: #3F51B5;
+}
+[data-main-color=indigo] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #3F51B5 !important;
+}
+[data-main-color=indigo] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #3F51B5 !important;
+}
+
+[data-main-color=indigo] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #303F9F !important;
+}
+[data-main-color=indigo] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #303F9F !important;
+}
+
+
+[data-main-color=blue] .toolbar .active .border {
+    background-color: #2196F3;
+}
+[data-main-color=blue] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #2196F3 !important;
+}
+[data-main-color=blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #2196F3 !important;
+}
+
+[data-main-color=blue] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #1976D2 !important;
+}
+[data-main-color=blue] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #1976D2 !important;
+}
+
+
+[data-main-color=light-blue] .toolbar .active .border {
+    background-color: #03A9F4;
+}
+[data-main-color=light-blue] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #03A9F4 !important;
+}
+[data-main-color=light-blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #03A9F4 !important;
+}
+
+[data-main-color=light-blue] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #0288D1 !important;
+}
+[data-main-color=light-blue] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #0288D1 !important;
+}
+
+
+[data-main-color=cyan] .toolbar .active .border {
+    background-color: #00BCD4;
+}
+[data-main-color=cyan] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #00BCD4 !important;
+}
+[data-main-color=cyan] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #00BCD4 !important;
+}
+
+[data-main-color=cyan] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #0097A7 !important;
+}
+[data-main-color=cyan] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #0097A7 !important;
+}
+
+
+[data-main-color=teal] .toolbar .active .border {
+    background-color: #009688;
+}
+[data-main-color=teal] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #009688 !important;
+}
+[data-main-color=teal] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #009688 !important;
+}
+
+[data-main-color=teal] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #00796B !important;
+}
+[data-main-color=teal] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #00796B !important;
+}
+
+
+[data-main-color=green] .toolbar .active .border {
+    background-color: #4CAF50;
+}
+[data-main-color=green] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #4CAF50 !important;
+}
+[data-main-color=green] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #4CAF50 !important;
+}
+
+[data-main-color=green] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #388E3C !important;
+}
+[data-main-color=green] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #388E3C !important;
+}
+
+
+[data-main-color=light-green] .toolbar .active .border {
+    background-color: #8BC34A;
+}
+[data-main-color=light-green] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #8BC34A !important;
+}
+[data-main-color=light-green] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #8BC34A !important;
+}
+
+[data-main-color=light-green] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #689F38 !important;
+}
+[data-main-color=light-green] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #689F38 !important;
+}
+
+
+[data-main-color=lime] .toolbar .active .border {
+    background-color: #CDDC39;
+}
+[data-main-color=lime] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #CDDC39 !important;
+}
+[data-main-color=lime] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #CDDC39 !important;
+}
+
+[data-main-color=lime] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #AFB42B !important;
+}
+[data-main-color=lime] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #AFB42B !important;
+}
+
+
+[data-main-color=amber] .toolbar .active .border {
+    background-color: #FFC107;
+}
+[data-main-color=amber] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #FFC107 !important;
+}
+[data-main-color=amber] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #FFC107 !important;
+}
+
+[data-main-color=amber] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #FFA000 !important;
+}
+[data-main-color=amber] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #FFA000 !important;
+}
+
+
+[data-main-color=orange] .toolbar .active .border {
+    background-color: #FF9800;
+}
+[data-main-color=orange] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #FF9800 !important;
+}
+[data-main-color=orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #FF9800 !important;
+}
+
+[data-main-color=orange] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #F57C00 !important;
+}
+[data-main-color=orange] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #F57C00 !important;
+}
+
+
+[data-main-color=deep-orange] .toolbar .active .border {
+    background-color: #FF5722;
+}
+[data-main-color=deep-orange] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #FF5722 !important;
+}
+[data-main-color=deep-orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #FF5722 !important;
+}
+
+[data-main-color=deep-orange] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #E64A19 !important;
+}
+[data-main-color=deep-orange] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #E64A19 !important;
+}
+
+
+[data-main-color=brown] .toolbar .active .border {
+    background-color: #795548;
+}
+[data-main-color=brown] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #795548 !important;
+}
+[data-main-color=brown] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #795548 !important;
+}
+
+[data-main-color=brown] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #5D4037 !important;
+}
+[data-main-color=brown] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #5D4037 !important;
+}
+
+
+[data-main-color=blue-grey] .toolbar .active .border {
+    background-color: #607D8B;
+}
+[data-main-color=blue-grey] .toolbar .toolbar-item.active .toolbar-icon {
+    color: #607D8B !important;
+}
+[data-main-color=blue-grey] .toolbar .toolbar-item.active svg.toolbar-icon path {
+    fill: #607D8B !important;
+}
+
+[data-main-color=blue-grey] .toolbar .toolbar-item:hover .toolbar-icon {
+    color: #455A64 !important;
+}
+[data-main-color=blue-grey] .toolbar .toolbar-item:hover svg.toolbar-icon path {
+    fill: #455A64 !important;
+}
+/* -------------------------------------------- */
 .toolbar .border {
     position: absolute;
     width: 2px;
@@ -1004,7 +1297,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .toolbar .active .border {
     display: block !important;
-    background-color: #F44336;
 }
 
 .toolbar .divider {
@@ -3687,24 +3979,329 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border-color: #F8F8F8;
 }
 
-.mention-info-wrap.active,
-.mention-info-wrap.active:hover,
-.chat-item.active,
-.omemo-item.active,
-.message-item.active,
-.message-item.active:hover,
-.chat-item.active:hover {
+/* ------------- ACTIVE ITEM COLOR ------------- */
+
+[data-main-color=red] .mention-info-wrap.active,
+[data-main-color=red] .mention-info-wrap.active:hover,
+[data-main-color=red] .chat-item.active,
+[data-main-color=red] .omemo-item.active,
+[data-main-color=red] .message-item.active,
+[data-main-color=red] .message-item.active:hover,
+[data-main-color=red] .chat-item.active:hover {
     background-color: #FFEBEE;
 }
 
-
-.message-item.active .chat-icon,
-.message-item.active:hover .chat-icon,
-.chat-item.active .chat-icon,
-.chat-item.active:hover .chat-icon {
+[data-main-color=red] .message-item.active .chat-icon,
+[data-main-color=red] .message-item.active:hover .chat-icon,
+[data-main-color=red] .chat-item.active .chat-icon,
+[data-main-color=red] .chat-item.active:hover .chat-icon {
     border-color: #FFEBEE;
 }
 
+
+[data-main-color=pink] .mention-info-wrap.active,
+[data-main-color=pink] .mention-info-wrap.active:hover,
+[data-main-color=pink] .chat-item.active,
+[data-main-color=pink] .omemo-item.active,
+[data-main-color=pink] .message-item.active,
+[data-main-color=pink] .message-item.active:hover,
+[data-main-color=pink] .chat-item.active:hover {
+    background-color: #FCE4EC;
+}
+
+
+[data-main-color=pink] .message-item.active .chat-icon,
+[data-main-color=pink] .message-item.active:hover .chat-icon,
+[data-main-color=pink] .chat-item.active .chat-icon,
+[data-main-color=pink] .chat-item.active:hover .chat-icon {
+    border-color: #FCE4EC;
+}
+
+
+[data-main-color=purple] .mention-info-wrap.active,
+[data-main-color=purple] .mention-info-wrap.active:hover,
+[data-main-color=purple] .chat-item.active,
+[data-main-color=purple] .omemo-item.active,
+[data-main-color=purple] .message-item.active,
+[data-main-color=purple] .message-item.active:hover,
+[data-main-color=purple] .chat-item.active:hover {
+    background-color: #F3E5F5;
+}
+
+
+[data-main-color=purple] .message-item.active .chat-icon,
+[data-main-color=purple] .message-item.active:hover .chat-icon,
+[data-main-color=purple] .chat-item.active .chat-icon,
+[data-main-color=purple] .chat-item.active:hover .chat-icon {
+    border-color: #F3E5F5;
+}
+
+
+[data-main-color=deep-purple] .mention-info-wrap.active,
+[data-main-color=deep-purple] .mention-info-wrap.active:hover,
+[data-main-color=deep-purple] .chat-item.active,
+[data-main-color=deep-purple] .omemo-item.active,
+[data-main-color=deep-purple] .message-item.active,
+[data-main-color=deep-purple] .message-item.active:hover,
+[data-main-color=deep-purple] .chat-item.active:hover {
+    background-color: #EDE7F6;
+}
+
+
+[data-main-color=deep-purple] .message-item.active .chat-icon,
+[data-main-color=deep-purple] .message-item.active:hover .chat-icon,
+[data-main-color=deep-purple] .chat-item.active .chat-icon,
+[data-main-color=deep-purple] .chat-item.active:hover .chat-icon {
+    border-color: #EDE7F6;
+}
+
+
+[data-main-color=indigo] .mention-info-wrap.active,
+[data-main-color=indigo] .mention-info-wrap.active:hover,
+[data-main-color=indigo] .chat-item.active,
+[data-main-color=indigo] .omemo-item.active,
+[data-main-color=indigo] .message-item.active,
+[data-main-color=indigo] .message-item.active:hover,
+[data-main-color=indigo] .chat-item.active:hover {
+    background-color: #E8EAF6;
+}
+
+
+[data-main-color=indigo] .message-item.active .chat-icon,
+[data-main-color=indigo] .message-item.active:hover .chat-icon,
+[data-main-color=indigo] .chat-item.active .chat-icon,
+[data-main-color=indigo] .chat-item.active:hover .chat-icon {
+    border-color: #E8EAF6;
+}
+
+
+[data-main-color=blue] .mention-info-wrap.active,
+[data-main-color=blue] .mention-info-wrap.active:hover,
+[data-main-color=blue] .chat-item.active,
+[data-main-color=blue] .omemo-item.active,
+[data-main-color=blue] .message-item.active,
+[data-main-color=blue] .message-item.active:hover,
+[data-main-color=blue] .chat-item.active:hover {
+    background-color: #E3F2FD;
+}
+
+
+[data-main-color=blue] .message-item.active .chat-icon,
+[data-main-color=blue] .message-item.active:hover .chat-icon,
+[data-main-color=blue] .chat-item.active .chat-icon,
+[data-main-color=blue] .chat-item.active:hover .chat-icon {
+    border-color: #E3F2FD;
+}
+
+
+[data-main-color=light-blue] .mention-info-wrap.active,
+[data-main-color=light-blue] .mention-info-wrap.active:hover,
+[data-main-color=light-blue] .chat-item.active,
+[data-main-color=light-blue] .omemo-item.active,
+[data-main-color=light-blue] .message-item.active,
+[data-main-color=light-blue] .message-item.active:hover,
+[data-main-color=light-blue] .chat-item.active:hover {
+    background-color: #E1F5FE;
+}
+
+
+[data-main-color=light-blue] .message-item.active .chat-icon,
+[data-main-color=light-blue] .message-item.active:hover .chat-icon,
+[data-main-color=light-blue] .chat-item.active .chat-icon,
+[data-main-color=light-blue] .chat-item.active:hover .chat-icon {
+    border-color: #E1F5FE;
+}
+
+
+[data-main-color=cyan] .mention-info-wrap.active,
+[data-main-color=cyan] .mention-info-wrap.active:hover,
+[data-main-color=cyan] .chat-item.active,
+[data-main-color=cyan] .omemo-item.active,
+[data-main-color=cyan] .message-item.active,
+[data-main-color=cyan] .message-item.active:hover,
+[data-main-color=cyan] .chat-item.active:hover {
+    background-color: #E0F7FA;
+}
+
+
+[data-main-color=cyan] .message-item.active .chat-icon,
+[data-main-color=cyan] .message-item.active:hover .chat-icon,
+[data-main-color=cyan] .chat-item.active .chat-icon,
+[data-main-color=cyan] .chat-item.active:hover .chat-icon {
+    border-color: #E0F7FA;
+}
+
+
+[data-main-color=teal] .mention-info-wrap.active,
+[data-main-color=teal] .mention-info-wrap.active:hover,
+[data-main-color=teal] .chat-item.active,
+[data-main-color=teal] .omemo-item.active,
+[data-main-color=teal] .message-item.active,
+[data-main-color=teal] .message-item.active:hover,
+[data-main-color=teal] .chat-item.active:hover {
+    background-color: #E0F2F1;
+}
+
+
+[data-main-color=teal] .message-item.active .chat-icon,
+[data-main-color=teal] .message-item.active:hover .chat-icon,
+[data-main-color=teal] .chat-item.active .chat-icon,
+[data-main-color=teal] .chat-item.active:hover .chat-icon {
+    border-color: #E0F2F1;
+}
+
+
+[data-main-color=green] .mention-info-wrap.active,
+[data-main-color=green] .mention-info-wrap.active:hover,
+[data-main-color=green] .chat-item.active,
+[data-main-color=green] .omemo-item.active,
+[data-main-color=green] .message-item.active,
+[data-main-color=green] .message-item.active:hover,
+[data-main-color=green] .chat-item.active:hover {
+    background-color: #E8F5E9;
+}
+
+
+[data-main-color=green] .message-item.active .chat-icon,
+[data-main-color=green] .message-item.active:hover .chat-icon,
+[data-main-color=green] .chat-item.active .chat-icon,
+[data-main-color=green] .chat-item.active:hover .chat-icon {
+    border-color: #E8F5E9;
+}
+
+
+[data-main-color=light-green] .mention-info-wrap.active,
+[data-main-color=light-green] .mention-info-wrap.active:hover,
+[data-main-color=light-green] .chat-item.active,
+[data-main-color=light-green] .omemo-item.active,
+[data-main-color=light-green] .message-item.active,
+[data-main-color=light-green] .message-item.active:hover,
+[data-main-color=light-green] .chat-item.active:hover {
+    background-color: #F1F8E9;
+}
+
+
+[data-main-color=light-green] .message-item.active .chat-icon,
+[data-main-color=light-green] .message-item.active:hover .chat-icon,
+[data-main-color=light-green] .chat-item.active .chat-icon,
+[data-main-color=light-green] .chat-item.active:hover .chat-icon {
+    border-color: #F1F8E9;
+}
+
+
+[data-main-color=lime] .mention-info-wrap.active,
+[data-main-color=lime] .mention-info-wrap.active:hover,
+[data-main-color=lime] .chat-item.active,
+[data-main-color=lime] .omemo-item.active,
+[data-main-color=lime] .message-item.active,
+[data-main-color=lime] .message-item.active:hover,
+[data-main-color=lime] .chat-item.active:hover {
+    background-color: #F9FBE7;
+}
+
+
+[data-main-color=lime] .message-item.active .chat-icon,
+[data-main-color=lime] .message-item.active:hover .chat-icon,
+[data-main-color=lime] .chat-item.active .chat-icon,
+[data-main-color=lime] .chat-item.active:hover .chat-icon {
+    border-color: #F9FBE7;
+}
+
+
+[data-main-color=amber] .mention-info-wrap.active,
+[data-main-color=amber] .mention-info-wrap.active:hover,
+[data-main-color=amber] .chat-item.active,
+[data-main-color=amber] .omemo-item.active,
+[data-main-color=amber] .message-item.active,
+[data-main-color=amber] .message-item.active:hover,
+[data-main-color=amber] .chat-item.active:hover {
+    background-color: #FFF8E1;
+}
+
+
+[data-main-color=amber] .message-item.active .chat-icon,
+[data-main-color=amber] .message-item.active:hover .chat-icon,
+[data-main-color=amber] .chat-item.active .chat-icon,
+[data-main-color=amber] .chat-item.active:hover .chat-icon {
+    border-color: #FFF8E1;
+}
+
+
+[data-main-color=orange] .mention-info-wrap.active,
+[data-main-color=orange] .mention-info-wrap.active:hover,
+[data-main-color=orange] .chat-item.active,
+[data-main-color=orange] .omemo-item.active,
+[data-main-color=orange] .message-item.active,
+[data-main-color=orange] .message-item.active:hover,
+[data-main-color=orange] .chat-item.active:hover {
+    background-color: #FFF3E0;
+}
+
+
+[data-main-color=orange] .message-item.active .chat-icon,
+[data-main-color=orange] .message-item.active:hover .chat-icon,
+[data-main-color=orange] .chat-item.active .chat-icon,
+[data-main-color=orange] .chat-item.active:hover .chat-icon {
+    border-color: #FFF3E0;
+}
+
+
+[data-main-color=deep-orange] .mention-info-wrap.active,
+[data-main-color=deep-orange] .mention-info-wrap.active:hover,
+[data-main-color=deep-orange] .chat-item.active,
+[data-main-color=deep-orange] .omemo-item.active,
+[data-main-color=deep-orange] .message-item.active,
+[data-main-color=deep-orange] .message-item.active:hover,
+[data-main-color=deep-orange] .chat-item.active:hover {
+    background-color: #FBE9E7;
+}
+
+
+[data-main-color=deep-orange] .message-item.active .chat-icon,
+[data-main-color=deep-orange] .message-item.active:hover .chat-icon,
+[data-main-color=deep-orange] .chat-item.active .chat-icon,
+[data-main-color=deep-orange] .chat-item.active:hover .chat-icon {
+    border-color: #FBE9E7;
+}
+
+
+[data-main-color=brown] .mention-info-wrap.active,
+[data-main-color=brown] .mention-info-wrap.active:hover,
+[data-main-color=brown] .chat-item.active,
+[data-main-color=brown] .omemo-item.active,
+[data-main-color=brown] .message-item.active,
+[data-main-color=brown] .message-item.active:hover,
+[data-main-color=brown] .chat-item.active:hover {
+    background-color: #EFEBE9;
+}
+
+
+[data-main-color=brown] .message-item.active .chat-icon,
+[data-main-color=brown] .message-item.active:hover .chat-icon,
+[data-main-color=brown] .chat-item.active .chat-icon,
+[data-main-color=brown] .chat-item.active:hover .chat-icon {
+    border-color: #EFEBE9;
+}
+
+
+[data-main-color=blue-grey] .mention-info-wrap.active,
+[data-main-color=blue-grey] .mention-info-wrap.active:hover,
+[data-main-color=blue-grey] .chat-item.active,
+[data-main-color=blue-grey] .omemo-item.active,
+[data-main-color=blue-grey] .message-item.active,
+[data-main-color=blue-grey] .message-item.active:hover,
+[data-main-color=blue-grey] .chat-item.active:hover {
+    background-color: #ECEFF1;
+}
+
+
+[data-main-color=blue-grey] .message-item.active .chat-icon,
+[data-main-color=blue-grey] .message-item.active:hover .chat-icon,
+[data-main-color=blue-grey] .chat-item.active .chat-icon,
+[data-main-color=blue-grey] .chat-item.active:hover .chat-icon {
+    border-color: #ECEFF1;
+}
+/* ---------------------------------------------- */
 .message-item .circle-avatar,
 .mention-item .circle-avatar,
 .chat-item .circle-avatar {
@@ -6320,6 +6917,21 @@ input[type='range'].voice-message-volume:focus {
     color: #424242;
 }
 
+.settings-panel .setting.vignetting-setting,
+.settings-panel .setting.blur-setting {
+    display: flex;
+    align-items: center;
+    padding: 0px 24px 12px;
+}
+
+.settings-block-wrap.background .input-field.checkbox-field {
+    margin: 0 16px 0 0;
+    padding: 0;
+    overflow: hidden;
+    width: 18px;
+    height: 18px;
+}
+
 .settings-block-wrap.xmpp-accounts .xmppid-head {
     left: 40px;
 }
@@ -6381,13 +6993,25 @@ input[type='range'].voice-message-volume:focus {
 .settings-block-wrap.background .vignetting-setting-wrap form,
 .settings-block-wrap.background .blur-setting-wrap form {
     width: 166px;
+    position: relative;
+}
+
+
+.settings-block-wrap.background .vignetting-setting-wrap .disabled,
+.settings-block-wrap.background .blur-setting-wrap .disabled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: rgba(255, 255, 255, 0.6);
 }
 
 .settings-block-wrap.background .vignetting-setting-wrap input,
 .settings-block-wrap.background .blur-setting-wrap input {
     height: 8px;
     outline: unset;
-    margin: 0 0 16px;
     background-color: #c2c0c2;
 }
 
@@ -6400,6 +7024,7 @@ input[type='range'].voice-message-volume:focus {
     width: 32px;
     height: 32px;
     background-color: #E0E0E0;
+    border: 1px solid #E0E0E0;
 }
 
 .settings-block-wrap.background .toolbar-color-setting-wrap .selected-color-wrap {
@@ -6409,6 +7034,31 @@ input[type='range'].voice-message-volume:focus {
     width: min-content;
     max-width: 256px;
     align-items: center;
+}
+
+.settings-block-wrap.background .toolbar-main-color-setting-wrap .current-main-color-wrap {
+    display: flex;
+    align-items: center;
+    width: min-content;
+    max-width: 256px;
+    cursor: pointer;
+}
+
+.settings-block-wrap.background .toolbar-main-color-setting-wrap .current-main-color {
+    width: 32px;
+    height: 32px;
+}
+
+.settings-block-wrap.background .toolbar-main-color-setting-wrap .color-name {
+    text-transform: capitalize;
+    font-weight: 500;
+    color: #424242;
+    margin: 2px 0;
+    font-size: 14px;
+    line-height: 16px;
+    margin: 0 8px;
+    width: max-content;
+    max-width: 128px;
 }
 
 .xmpp-account {
@@ -6695,6 +7345,25 @@ input[type='range'].voice-message-volume:focus {
 .modal.color-picker .modal-footer {
     padding: 0 8px;
     height: unset;
+}
+
+/* ----------------- MAIN COLOR PICKER -------------------- */
+
+.modal.main-color-picker {
+    width: 256px;
+    max-height: calc(100% - 200px);
+}
+
+.modal.main-color-picker .color-values {
+    width: 100% !important;
+}
+
+.modal.main-color-picker .color-values .color-value {
+    cursor: pointer;
+}
+
+.modal.main-color-picker .color-values .color-value:hover {
+    background-color: #eee;
 }
 
 /* ------------------- ACCOUNT SETTINGS --------------- */

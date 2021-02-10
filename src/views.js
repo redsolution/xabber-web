@@ -788,11 +788,17 @@ define("xabber-views", function () {
             this.screen_map.on("change", this.onScreenMapChanged, this);
             $('body').append(this.$el);
             this.updateBackground();
+            this.updateMainColor();
             $('#modals').insertAfter(this.$el);
+            xabber.on('update_main_color', this.updateMainColor, this);
         },
 
         addScreen: function (name, attrs) {
             this.screen_map.set(name, attrs);
+        },
+
+        updateMainColor: function () {
+            this.$el.attr('data-main-color', xabber.settings.main_color);
         },
 
         updateBackground: function () {
@@ -823,7 +829,8 @@ define("xabber-views", function () {
         },
 
         updateBoxShadow: function (value) {
-            if (!Number(value))
+            value = Number(value);
+            if (!value)
                 this.$el.css({
                     'box-shadow': `unset`
                 });
@@ -834,6 +841,7 @@ define("xabber-views", function () {
         },
 
         updateBlur: function (value) {
+            value = Number(value);
             xabber.blur_overlay.$el.css({
                 "backdrop-filter": `blur(${value}px)`,
                 "-webkit-backdrop-filter": `blur(${value}px)`
@@ -1313,7 +1321,10 @@ define("xabber-views", function () {
             "change .sound input[type=radio][name=sound]": "setSound",
             "change #vignetting": "changeVignetting",
             "change #blur": "changeBlur",
+            "change #blur_switch": "switchBlur",
+            "change #vignetting_switch": "switchVignetting",
             "click .selected-color-wrap": "openColorPicker",
+            "click .current-main-color-wrap": "openMainColorPicker",
             "change .background input[type=radio][name=background]": "setBackground",
             "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
@@ -1322,6 +1333,7 @@ define("xabber-views", function () {
 
         _initialize: function () {
             this.$('.xabber-info-wrap .version').text(xabber.get('version_number'));
+            xabber.on('update_main_color', this.updateMainColor, this);
         },
 
         render: function () {
@@ -1340,6 +1352,7 @@ define("xabber-views", function () {
                     .prop('checked', true);
             this.updateBackgroundSetting();
             this.updateColor();
+            this.updateMainColor();
             this.$('.toolbar-main-color-setting-wrap .dropdown-button').dropdown({
                 inDuration: 100,
                 outDuration: 100,
@@ -1349,6 +1362,11 @@ define("xabber-views", function () {
             return this;
         },
 
+        updateMainColor: function () {
+            this.$('.toolbar-main-color-setting').attr('data-color', this.model.get('main_color'));
+            this.$('.toolbar-main-color-setting .color-name').text(this.model.get('main_color').replace(/-/g, " "));
+        },
+
         updateBackgroundSetting: function () {
             this.$('.background input[type=radio][name=background][value='+this.model.get('background').type+']')
                 .prop('checked', true);
@@ -1356,9 +1374,16 @@ define("xabber-views", function () {
                 this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
             }
             this.$('.current-background-wrap').switchClass('hidden', !this.model.get('background').image);
-            let appearance = this.model.get('appearance');
-            this.$('#blur')[0].value = appearance.blur;
-            this.$('#vignetting')[0].value = appearance.vignetting;
+            let appearance = this.model.get('appearance'),
+                blur_switched = appearance.blur !== false,
+                vignetting_switched = appearance.vignetting !== false;
+            this.$('#blur_switch')[0].checked = blur_switched;
+            this.$('.blur-setting .disabled').switchClass('hidden', blur_switched);
+            this.$('#blur')[0].value = blur_switched ? appearance.blur : constants.BLUR_VALUE;
+
+            this.$('#vignetting_switch')[0].checked = vignetting_switched;
+            this.$('.vignetting-setting .disabled').switchClass('hidden', vignetting_switched);
+            this.$('#vignetting')[0].value = vignetting_switched ? appearance.vignetting : constants.VIGNETTING_VALUE;
             this.updateScrollBar();
         },
 
@@ -1455,23 +1480,18 @@ define("xabber-views", function () {
                 let background_view = new xabber.SetBackgroundView();
                 background_view.render({type: type, model: this.model});
             }
-            /*
-            let background = utils.getCookie('background');
-            if (background) {
-                background = JSON.parse(background);
-                let type = background.type;
-                if (type == 'repeating-pattern' || type == 'image') {
-                    let background_view = new xabber.SetBackgroundView();
-                    background_view.render({type: type, model: this.model});
-                }
-            }
-            */
         },
 
         openColorPicker: function () {
             if (!this.colorPicker)
                 this.colorPicker = new xabber.ColorPicker({model: this.model});
             this.colorPicker.render();
+        },
+
+        openMainColorPicker: function () {
+            if (!this.mainColorPicker)
+                this.mainColorPicker = new xabber.mainColorPicker({model: this.model});
+            this.mainColorPicker.render();
         },
 
         changeBlur: function () {
@@ -1488,6 +1508,26 @@ define("xabber-views", function () {
             this.model.save('appearance', _.extend(appearance, {vignetting: value}));
         },
 
+        switchVignetting: function () {
+            let is_switched = this.$('#vignetting_switch:checked').length,
+                appearance = this.model.get('appearance'),
+                value = is_switched ? constants.VIGNETTING_VALUE : false;
+            this.$('.vignetting-setting .disabled').switchClass('hidden', is_switched);
+            this.$('#vignetting')[0].value = constants.VIGNETTING_VALUE;
+            this.model.save('appearance', _.extend(appearance, {vignetting: value}));
+            xabber.body.updateBoxShadow(value);
+        },
+
+        switchBlur: function () {
+            let is_switched = this.$('#blur_switch:checked').length,
+                appearance = this.model.get('appearance'),
+                value = is_switched ? constants.BLUR_VALUE : false;
+            this.$('.blur-setting .disabled').switchClass('hidden', is_switched);
+            this.$('#blur')[0].value = constants.BLUR_VALUE;
+            this.model.save('appearance', _.extend(appearance, {blur: value}));
+            xabber.body.updateBlur(value);
+        },
+
         setHotkeys: function (ev) {
             this.model.save('hotkeys', ev.target.value);
         },
@@ -1499,6 +1539,45 @@ define("xabber-views", function () {
         }
     });
 
+    xabber.mainColorPicker = xabber.BasicView.extend({
+        className: 'modal main-modal main-color-picker',
+        template: templates.color_scheme,
+        ps_selector: '.modal-content',
+        ps_settings: {theme: 'item-list'},
+
+        events: {
+            "click .color-value": "setColor"
+        },
+
+        _initialize: function (options) {
+            this.model = options.model;
+        },
+
+        render: function () {
+            this.$el.openModal({
+                ready: function () {
+                    this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                }.bind(this),
+                complete: this.close.bind(this)
+            });
+        },
+
+        setColor: function (ev) {
+            let color = $(ev.target).closest('.color-value').attr('data-value');
+            this.model.save('main_color', color);
+            xabber.trigger('update_main_color');
+            this.close();
+        },
+
+        close: function () {
+            this.$el.closeModal({ complete: function () {
+                    this.$el.detach();
+                    this.data.set('visible', false);
+                }.bind(this)
+            });
+        }
+
+    });
 
     xabber.ColorPicker = xabber.BasicView.extend({
         className: 'modal main-modal color-picker',

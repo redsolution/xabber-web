@@ -243,7 +243,12 @@
                     <div class="vignetting-setting-wrap">
                         <div class="setting-name">Vignette</div>
                         <div class="setting vignetting-setting field-wrap">
+                            <div class="input-field checkbox-field new-group-checkbox">
+                                <input type="checkbox" class="filled-in" id="vignetting_switch"/>
+                                <label for="vignetting_switch"></label>
+                            </div>
                             <form action="#">
+                                <div class="disabled hidden"></div>
                                 <p class="range-field">
                                     <input type="range" id="vignetting" min="0" max="200" />
                                 </p>
@@ -253,7 +258,12 @@
                     <div class="blur-setting-wrap">
                         <div class="setting-name">Blur</div>
                         <div class="setting blur-setting field-wrap">
+                            <div class="input-field checkbox-field new-group-checkbox">
+                                <input type="checkbox" class="filled-in" id="blur_switch"/>
+                                <label for="blur_switch"></label>
+                            </div>
                             <form action="#">
+                                <div class="disabled hidden"></div>
                                 <p class="range-field">
                                     <input type="range" id="blur" min="0" max="100" />
                                 </p>
@@ -272,9 +282,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="hidden toolbar-main-color-setting-wrap">
+                    <div class="toolbar-main-color-setting-wrap">
                         <div class="setting-name">Main color</div>
-                       <div class="current-main-color"></div>
+                       <div class="setting toolbar-main-color-setting field-wrap">
+                           <div class="current-main-color-wrap">
+                               <div class="current-main-color ground-color-500"></div>
+                               <div class="color-name"></div>
+                           </div>
+                       </div>
                     </div>
                 </div>
             </div>

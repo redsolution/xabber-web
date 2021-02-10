@@ -170,6 +170,7 @@
                 sound: true,
                 background: {type: 'default'},
                 appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
+                main_color: 'red',
                 sound_on_message: 'beep_up',
                 call_attention: true,
                 sound_on_attention: 'attention',

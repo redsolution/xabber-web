@@ -14,6 +14,7 @@ define("xabber-templates", [
     "text!templates/base/omemo_item.html",
     "text!templates/base/backgrounds_gallery.html",
     "text!templates/base/color_picker.html",
+    "text!templates/base/color_scheme.html",
 
     "text!templates/api_service/xabber_login.html",
     "text!templates/api_service/xabber_login_by_email.html",
@@ -202,6 +203,7 @@ define("xabber-templates", [
     addTemplate('base.omemo_item');
     addTemplate('base.backgrounds_gallery');
     addTemplate('base.color_picker');
+    addTemplate('base.color_scheme');
 
     addTemplate('api_service.xabber_login');
     addTemplate('api_service.xabber_login_by_email');
