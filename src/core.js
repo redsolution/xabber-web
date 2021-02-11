@@ -169,6 +169,7 @@
                 message_preview: false,
                 sound: true,
                 background: {type: 'default'},
+                side_panel: {theme: 'dark', blur: false, transparency: 50},
                 appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
                 main_color: 'red',
                 sound_on_message: 'beep_up',

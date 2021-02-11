@@ -1,4 +1,4 @@
-let names = [
+let badges_names = [
         'blocked',
         'bot-variant',
         'bot',
@@ -12,8 +12,16 @@ let names = [
         'rss',
         'server'
     ],
+    material_icons = [
+        'palette',
+        'saved-messages'
+    ],
     fs = require('fs');
-names.forEach((name) => {
+badges_names.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/icon/${name}.svg`, 'utf-8');
+    fs.writeFileSync(`./templates/svg/${name}.html`, svg);
+});
+material_icons.forEach((name) => {
+    let svg = fs.readFileSync(`../xabber-icons/icon/material/${name}.svg`, 'utf-8');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });

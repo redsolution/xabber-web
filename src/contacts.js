@@ -4580,10 +4580,32 @@ define("xabber-contacts", function () {
 
             __initialize: function () {
                 this.updateCounter();
+                this.updateTheme();
+                this.updateBlur();
+                this.updateTransparency();
                 this.model.on("activate deactivate destroy", this.updateCounter, this);
                 this.data.on("change", this.updateLayout, this);
                 var pinned = this._settings.get('pinned');
                 this.data.set({expanded: pinned, pinned: pinned});
+            },
+
+            updateTheme: function (theme) {
+                theme = theme || xabber.settings.side_panel.theme;
+                this.$el.attr('data-theme', theme);
+                this.updateTransparency();
+            },
+
+            updateTransparency: function (transparency) {
+                transparency = transparency || xabber.settings.side_panel.transparency;
+                if (xabber.settings.side_panel.theme == 'dark')
+                    this.$el.css('background-color', `rgba(0, 0, 0, ${1 - transparency/100})`);
+                else
+                    this.$el.css('background-color', `rgba(255, 255, 255, ${1 - transparency/100})`);
+            },
+
+            updateBlur: function (blur) {
+                blur = _.isUndefined(blur) ? xabber.settings.side_panel.blur : blur;
+                this.$el.switchClass('with-blur', blur);
             },
 
             expand: function () {

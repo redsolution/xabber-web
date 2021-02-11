@@ -362,6 +362,7 @@ var constants = {
 
     BLUR_VALUE: 25,
     VIGNETTING_VALUE: 128,
+    TRANSPARENCY_VALUE: 50,
 
     ONELINERS: [
         "Ready to rock?",

@@ -33,7 +33,7 @@
                 <div class="settings-block-name one-line">Sounds</div>
             </div>
             <div class="settings-tab" data-block-name="background">
-                <i class="mdi mdi-24px mdi-image"></i>
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
                 <div class="settings-block-name one-line">Appearance</div>
             </div>
             {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
@@ -220,16 +220,16 @@
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
-                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default" />
-                                        <label for="{{view.cid}}-default">Default</label>
+                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default-background" />
+                                        <label for="{{view.cid}}-default-background">Default</label>
                                     </p>
                                     <p>
-                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern" />
-                                        <label for="{{view.cid}}-repeating-pattern">Repeating pattern</label>
+                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern-background" />
+                                        <label for="{{view.cid}}-repeating-pattern-background">Repeating pattern</label>
                                     </p>
                                     <p>
-                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image" />
-                                        <label for="{{view.cid}}-image">Image</label>
+                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image-background" />
+                                        <label for="{{view.cid}}-image-background">Image</label>
                                     </p>
                                 </form>
                             </div>
@@ -238,36 +238,33 @@
                                 <div class="current-background"></div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="vignetting-setting-wrap">
-                        <div class="setting-name">Vignette</div>
-                        <div class="setting vignetting-setting field-wrap">
-                            <div class="input-field checkbox-field new-group-checkbox">
-                                <input type="checkbox" class="filled-in" id="vignetting_switch"/>
-                                <label for="vignetting_switch"></label>
+                        <div class="vignetting-setting-wrap">
+                            <div class="setting vignetting-setting field-wrap">
+                                <div class="input-field checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="vignetting_switch"/>
+                                    <label for="vignetting_switch">Vignette</label>
+                                </div>
+                                <form action="#">
+                                    <div class="disabled hidden"></div>
+                                    <p class="range-field">
+                                        <input type="range" id="vignetting" min="0" max="200" />
+                                    </p>
+                                </form>
                             </div>
-                            <form action="#">
-                                <div class="disabled hidden"></div>
-                                <p class="range-field">
-                                    <input type="range" id="vignetting" min="0" max="200" />
-                                </p>
-                            </form>
                         </div>
-                    </div>
-                    <div class="blur-setting-wrap">
-                        <div class="setting-name">Blur</div>
-                        <div class="setting blur-setting field-wrap">
-                            <div class="input-field checkbox-field new-group-checkbox">
-                                <input type="checkbox" class="filled-in" id="blur_switch"/>
-                                <label for="blur_switch"></label>
+                        <div class="blur-setting-wrap">
+                            <div class="setting blur-setting field-wrap">
+                                <div class="input-field checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="blur_switch"/>
+                                    <label for="blur_switch">Blur</label>
+                                </div>
+                                <form action="#">
+                                    <div class="disabled hidden"></div>
+                                    <p class="range-field">
+                                        <input type="range" id="blur" min="0" max="100" />
+                                    </p>
+                                </form>
                             </div>
-                            <form action="#">
-                                <div class="disabled hidden"></div>
-                                <p class="range-field">
-                                    <input type="range" id="blur" min="0" max="100" />
-                                </p>
-                            </form>
                         </div>
                     </div>
                     <div class="toolbar-color-setting-wrap">
@@ -290,6 +287,39 @@
                                <div class="color-name"></div>
                            </div>
                        </div>
+                    </div>
+                    <div class="side-panel-setting-wrap">
+                        <div class="setting-name">Contacts side panel</div>
+                        <div class="setting side-panel-setting field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="side-panel" value="dark" type="radio" id="{{view.cid}}-dark-side-panel" />
+                                        <label for="{{view.cid}}-dark-side-panel">Dark</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="side-panel" value="light" type="radio" id="{{view.cid}}-light-side-panel" />
+                                        <label for="{{view.cid}}-light-side-panel">Light</label>
+                                    </p>
+                                </form>
+                            </div>
+                            <div class="input-field checkbox-field">
+                                <input type="checkbox" class="filled-in" id="side_panel_blur_switch"/>
+                                <label for="side_panel_blur_switch">Blur</label>
+                            </div>
+                            <div class="transparency-setting">
+                                <div class="input-field checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="transparency_switch"/>
+                                    <label for="transparency_switch">Transparency</label>
+                                </div>
+                                <form action="#">
+                                    <div class="disabled hidden"></div>
+                                    <p class="range-field">
+                                        <input type="range" id="transparency" min="0" max="100" />
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

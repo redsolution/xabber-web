@@ -1321,11 +1321,15 @@ define("xabber-views", function () {
             "change .sound input[type=radio][name=sound]": "setSound",
             "change #vignetting": "changeVignetting",
             "change #blur": "changeBlur",
+            "change #transparency": "changeTransparency",
             "change #blur_switch": "switchBlur",
             "change #vignetting_switch": "switchVignetting",
             "click .selected-color-wrap": "openColorPicker",
             "click .current-main-color-wrap": "openMainColorPicker",
             "change .background input[type=radio][name=background]": "setBackground",
+            "change .background input[type=radio][name=side-panel]": "setSidePanelTheme",
+            "change #side_panel_blur_switch": "setSidePanelBlur",
+            "change #transparency_switch": "switchTransparency",
             "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
@@ -1353,6 +1357,7 @@ define("xabber-views", function () {
             this.updateBackgroundSetting();
             this.updateColor();
             this.updateMainColor();
+            this.updateSidePanelSetting();
             this.$('.toolbar-main-color-setting-wrap .dropdown-button').dropdown({
                 inDuration: 100,
                 outDuration: 100,
@@ -1399,6 +1404,16 @@ define("xabber-views", function () {
                 this.$('.selected-color-name').text(`Custom color`);
             }
             xabber.toolbar_view.updateColor(color);
+        },
+
+        updateSidePanelSetting: function () {
+            let side_panel_settings = this.model.get('side_panel'),
+                transparency_switched = side_panel_settings.transparency !== false;
+            this.$('#side_panel_blur_switch')[0].checked = side_panel_settings.blur;
+            this.$('#transparency_switch')[0].checked = transparency_switched;
+            this.$('.transparency-setting .disabled').switchClass('hidden', transparency_switched);
+            this.$('#transparency')[0].value = transparency_switched ? side_panel_settings.transparency : constants.TRANSPARENCY_VALUE;
+            this.$(`#${this.cid}-${side_panel_settings.theme}-side-panel`)[0].checked = true;
         },
 
         jumpToBlock: function (ev) {
@@ -1474,6 +1489,20 @@ define("xabber-views", function () {
             }
         },
 
+        setSidePanelTheme: function (ev) {
+            let value = ev.target.value,
+                side_panel_settings = this.model.get('side_panel');
+            this.model.save('side_panel', _.extend(side_panel_settings, {theme: value}));
+            xabber.roster_view.updateTheme(value);
+        },
+
+        setSidePanelBlur: function () {
+            let value = this.$('#side_panel_blur_switch')[0].checked,
+                side_panel_settings = this.model.get('side_panel');
+            this.model.save('side_panel', _.extend(side_panel_settings, {blur: value}));
+            xabber.roster_view.updateBlur(value);
+        },
+
         changeBackgroundImage: function () {
             let type = this.model.get('background').type;
             if (type == 'repeating-pattern' || type == 'image') {
@@ -1499,6 +1528,23 @@ define("xabber-views", function () {
                 appearance = this.model.get('appearance');
             xabber.body.updateBlur(value);
             this.model.save('appearance', _.extend(appearance, {blur: value}));
+        },
+
+        switchTransparency: function () {
+            let is_switched = this.$('#transparency_switch')[0].checked,
+                side_panel_settings = this.model.get('side_panel'),
+                value = is_switched ? constants.TRANSPARENCY_VALUE : false;
+            this.$('.transparency-setting .disabled').switchClass('hidden', is_switched);
+            this.$('#transparency')[0].value = constants.TRANSPARENCY_VALUE;
+            this.model.save('side_panel', _.extend(side_panel_settings, {transparency: value}));
+            xabber.roster_view.updateTransparency(value);
+        },
+
+        changeTransparency: function () {
+            let value = this.$('#transparency')[0].value,
+                side_panel_settings = this.model.get('side_panel');
+            this.model.save('side_panel', _.extend(side_panel_settings, {transparency: value}));
+            xabber.roster_view.updateTransparency(value);
         },
 
         changeVignetting: function () {
