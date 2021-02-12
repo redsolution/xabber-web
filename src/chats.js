@@ -323,6 +323,7 @@ define("xabber-chats", function () {
                                 nickname: $user.children('nickname').text() || user_jid || user_id,
                                 role: $user.children('role').text(),
                                 avatar: $user.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').children('info').attr('id'),
+                                avatar_url: $user.children('metadata[xmlns="' + Strophe.NS.PUBSUB_AVATAR_METADATA + '"]').children('info').attr('url'),
                                 badge: $user.children('badge').text()
                             },
                             from_jid: user_jid || user_id,
@@ -5174,6 +5175,7 @@ define("xabber-chats", function () {
                 return;
             if (node.indexOf(Strophe.NS.PUBSUB_AVATAR_METADATA) > -1) {
                 let member_id = this.parsePubSubNode(node),
+                    photo_url =  $message.find('info').attr('url'),
                     contact = this.account.contacts.get(from_jid);
                 if (contact) {
                     if (member_id) {
@@ -5186,19 +5188,36 @@ define("xabber-chats", function () {
                         if (photo_id && (this.account.chat_settings.getHashAvatar(member_id) != photo_id)) {
                             let member_node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + member_id;
                             contact.getAvatar(photo_id, member_node, function (new_avatar) {
-                                this.account.chat_settings.updateCachedAvatars(member_id, photo_id, new_avatar);
-                                if (contact.my_info) {
-                                    if (member_id == contact.my_info.id) {
-                                        contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar});
-                                        contact.trigger('update_my_info');
+                                    this.account.chat_settings.updateCachedAvatars(member_id, photo_id, new_avatar);
+                                    if (contact.my_info) {
+                                        if (member_id == contact.my_info.id) {
+                                            contact.my_info.set({avatar: photo_id, b64_avatar: new_avatar});
+                                            contact.trigger('update_my_info');
+                                        }
                                     }
-                                }
-                                let participant = contact.participants && contact.participants.get(member_id);
-                                if (participant) {
-                                    participant.set({avatar: photo_id, b64_avatar: new_avatar});
-                                    this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
-                                }
-                            }.bind(this));
+                                    let participant = contact.participants && contact.participants.get(member_id);
+                                    if (participant) {
+                                        participant.set({avatar: photo_id, b64_avatar: new_avatar});
+                                        this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
+                                    }
+                                }.bind(this),
+                                function () {
+                                    if (photo_url) {
+                                        this.account.chat_settings.updateCachedAvatars(member_id, photo_id, photo_url);
+                                        if (contact.my_info) {
+                                            if (member_id == contact.my_info.id) {
+                                                contact.my_info.set({avatar: photo_id, b64_avatar: photo_url});
+                                                contact.trigger('update_my_info');
+                                            }
+                                        }
+                                        let participant = contact.participants && contact.participants.get(member_id);
+                                        if (participant) {
+                                            participant.set({avatar: photo_id, b64_avatar: photo_url});
+                                            this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
+                                        }
+                                        return;
+                                    }
+                                }.bind(this));
                         }
                     }
                     else if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.PUBSUB_AVATAR) {
@@ -5211,8 +5230,12 @@ define("xabber-chats", function () {
                             contact.updateCachedInfo();
                             return;
                         }
-                        if ((photo_id !== "") && (contact.get('photo_hash') === photo_id))
+                        if ((photo_id !== "") && (contact.get('photo_hash') === photo_id)) {
                             return;
+                        } else if (photo_url) {
+                            contact.cached_image = photo_url;
+                            contact.set({photo_hash: photo_id, image: photo_url, avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
+                        }
                         contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, function (data_avatar) {
                             contact.cached_image = Images.getCachedImage(data_avatar);
                             contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
@@ -5223,18 +5246,22 @@ define("xabber-chats", function () {
                     }
                 }
                 else if (from_jid === this.account.get('jid')) {
+                    if (photo_url) {
+                        let avatar_attrs = {photo_hash: photo_id, image: photo_url, avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR};
+                        this.account.cached_image = photo_url;
+                        this.account.save(avatar_attrs);
+                        return;
+                    }
                     if (!photo_id) {
                         let image = Images.getDefaultAvatar(this.account.get('name'));
                         this.account.cached_image = Images.getCachedImage(image);
                         let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: image};
-                        this.account.set(avatar_attrs);
                         this.account.save(avatar_attrs);
                         return;
                     }
                     this.account.getAvatar(photo_id, function (data_avatar) {
                         this.account.cached_image = Images.getCachedImage(data_avatar);
                         let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
-                        this.account.set(avatar_attrs);
                         this.account.save(avatar_attrs);
                     }.bind(this));
                 }

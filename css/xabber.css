@@ -6492,8 +6492,8 @@ input[type=range].voice-message-volume::-ms-thumb {
     margin-top: -2px;
 }
 
-:not(.settings-block-wrap.background) input[type=range] + .thumb {
-    display: none;
+.chat-msg-content input[type=range] + .thumb {
+    display: none !important;
 }
 
 .settings-block-wrap.background input[type=range] + .thumb {
