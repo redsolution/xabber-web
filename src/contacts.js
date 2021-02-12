@@ -5092,7 +5092,7 @@ define("xabber-contacts", function () {
                     contact.resources.reset();
                     contact.resetStatus();
                 });
-                if (this.connection && this.connection.do_synchronization) {
+                if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
                     let options = {},
                         max_count = Math.trunc(xabber.chats_view.$el[0].clientHeight/56) > 20 ? Math.trunc(xabber.chats_view.$el[0].clientHeight/56) : 20;
                     !this.roster.last_chat_msg_id && (options.max = ++max_count);
