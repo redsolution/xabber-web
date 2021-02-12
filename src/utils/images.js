@@ -46,7 +46,7 @@ define(["xabber-dependencies"], function (deps) {
         // save often used image and get blob url for it
         if (image instanceof CachedImage) {
             return image;
-        } else if (image.indexOf('http') == 0) {
+        } else if (image && _.isString(image) && image.indexOf('http') == 0) {
             return {url: image};
         }
         return _image_cache[image] || new CachedImage(image);
