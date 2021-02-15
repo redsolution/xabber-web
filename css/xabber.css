@@ -886,6 +886,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: absolute;
     width: 100%;
     display: flex;
+    max-height: calc(48px * 5);
     flex-direction: column;
 }
 
@@ -895,9 +896,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     line-height: 48px;
     position: relative;
     background-color: #FBC02D;
-    padding: 0 0 0 24px;
     width: 100%;
     border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+
+.notifications-placeholder {
+    padding: 0 0 0 24px;
+}
+
+.omemo-enable-placeholder .msg-text {
+    padding: 0 0 0 24px;
 }
 
 .omemo-enable-placeholder span.btn-enable,
@@ -916,6 +924,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     cursor: pointer;
 }
 
+.notifications-placeholder button:hover {
+    background-color: #F9A825;
+}
+
+.notifications-placeholder button,
+.omemo-enable-placeholder button {
+    position: absolute;
+    top: 6px;
+    right: 64px;
+    cursor: pointer;
+}
 
 /* ----------------- MENTIONS PANEL ---------------- */
 
