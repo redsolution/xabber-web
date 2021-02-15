@@ -805,10 +805,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
 }
 
-.main-wrap.notifications-request {
-    padding-bottom: 48px;
-}
-
 .panel-wrap {
     height: 100%;
     float: left;
@@ -885,22 +881,33 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 100;
 }
 
-.notifications-placeholder {
+.wide-placeholders-wrap {
     bottom: 0;
     position: absolute;
-    height: 48px;
-    line-height: 48px;
-    background-color: #FBC02D;
     width: 100%;
-    padding: 0 0 0 24px;
+    display: flex;
+    flex-direction: column;
 }
 
+.omemo-enable-placeholder,
+.notifications-placeholder {
+    height: 48px;
+    line-height: 48px;
+    position: relative;
+    background-color: #FBC02D;
+    padding: 0 0 0 24px;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
+
+.omemo-enable-placeholder span.btn-enable,
 .notifications-placeholder span {
     font-weight: 500;
     text-decoration: underline;
     cursor: pointer;
 }
 
+.omemo-enable-placeholder .mdi-close,
 .notifications-placeholder .mdi-close {
     position: absolute;
     top: 13px;
@@ -908,6 +915,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     right: 12px;
     cursor: pointer;
 }
+
 
 /* ----------------- MENTIONS PANEL ---------------- */
 

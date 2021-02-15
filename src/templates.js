@@ -11,7 +11,6 @@ define("xabber-templates", [
     "text!templates/base/settings.html",
     "text!templates/base/about.html",
     "text!templates/base/omemo_enable.html",
-    "text!templates/base/omemo_item.html",
     "text!templates/base/backgrounds_gallery.html",
     "text!templates/base/color_picker.html",
     "text!templates/base/color_scheme.html",
@@ -201,7 +200,6 @@ define("xabber-templates", [
     addTemplate('base.settings');
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
-    addTemplate('base.omemo_item');
     addTemplate('base.backgrounds_gallery');
     addTemplate('base.color_picker');
     addTemplate('base.color_scheme');

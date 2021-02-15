@@ -8551,6 +8551,7 @@ define("xabber-chats", function () {
         _initialize: function (options) {
             this.$el.html('Xabber for Web needs your permission to <span class="btn-request-notifications">enable desktop notifications</span>');
             this.$el.append($('<i/>').addClass('mdi mdi-22px mdi-close'));
+            xabber.on("update_screen", this.onUpdatedScreen, this);
         },
 
         requestNotifications: function () {
@@ -8560,11 +8561,18 @@ define("xabber-chats", function () {
             });
         },
 
+        onUpdatedScreen: function () {
+            if (!xabber.notifications_placeholder)
+                return;
+            xabber.placeholders_wrap.$el.append(this.$el);
+            xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
+        },
+
         close: function () {
             xabber._cache.save('ignore_notifications_warning', true);
             this.remove();
             xabber.notifications_placeholder = undefined;
-            xabber.main_panel.$el.removeClass('notifications-request');
+            xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
         }
     });
 
@@ -8766,8 +8774,8 @@ define("xabber-chats", function () {
             }
             return true;
         }.bind(this));
-        if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_view) {
-            this.omemo_enable_view = new xabber.OMEMOEnableView({account: this});
+        if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_placeholder) {
+            this.omemo_enable_placeholder = new xabber.OMEMOEnablePlaceholder({account: this});
         }
     }, true, true);
 
