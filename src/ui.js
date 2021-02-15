@@ -139,7 +139,8 @@ define("xabber-ui", function () {
             blur_overlay: null,
             toolbar: null,
             main: {
-                wide: { settings: null }
+                wide: { settings: null },
+                placeholders: null
             },
             roster: null
         });
@@ -154,7 +155,8 @@ define("xabber-ui", function () {
             blur_overlay: null,
             toolbar: null,
             main: {
-                wide: { about: null }
+                wide: { about: null },
+                placeholders: null
             },
             roster: null
         });
@@ -172,7 +174,8 @@ define("xabber-ui", function () {
                         left: path_acc_settings_left,
                         right: path_acc_settings_right
                     }
-                }
+                },
+                placeholders: null
             },
             roster: null
         });
@@ -201,7 +204,8 @@ define("xabber-ui", function () {
             toolbar: null,
             main: {
                 left: { contacts: null },
-                right: { contact_placeholder: null }
+                right: { contact_placeholder: null },
+                placeholders: null
             },
             roster: null
         });
@@ -210,7 +214,8 @@ define("xabber-ui", function () {
             blur_overlay: null,
             toolbar: null,
             main: {
-                wide: { discovering_main: null}
+                wide: { discovering_main: null},
+                placeholders: null
             },
             roster: null
         });
@@ -220,7 +225,8 @@ define("xabber-ui", function () {
             toolbar: null,
             main: {
                 left: { mentions: null },
-                right: { mentions_placeholder: null }
+                right: { mentions_placeholder: null },
+                placeholders: null
             },
             roster: null
         });
@@ -230,7 +236,8 @@ define("xabber-ui", function () {
             toolbar: null,
             main: {
                 left: { chats: null },
-                right: { chat_placeholder: null }
+                right: { chat_placeholder: null },
+                placeholders: null
             },
             roster: null
         });

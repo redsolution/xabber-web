@@ -1807,73 +1807,23 @@ define("xabber-omemo", function () {
             }
         });
 
-        xabber.OMEMOItemView = xabber.BasicView.extend({
-            className: 'omemo-item list-item',
-            template: templates.omemo_item,
-
-            events: {
-                'click': 'openByClick'
-            },
-
-            _initialize: function (options) {
-                this.model = options.model;
-                this.account = this.model.account;
-                this.$el.attr('data-id', this.account.id);
-                this.updateColorScheme();
-                this.$('.account-jid').text(this.account.get('jid'));
-                xabber.chats_view.addChild(this.account.id, this);
-                xabber.chats_view.$('.chat-list-wrap').prepend(this.$el);
-                this.account.settings.on("change:color", this.updateColorScheme, this);
-            },
-
-            openByClick: function () {
-                if (xabber.chats_view.active_chat) {
-                    xabber.chats_view.active_chat.model.set('active', false);
-                    xabber.chats_view.active_chat = null;
-                }
-                this.$el.addClass('active');
-                xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'enable_encryption', chat_item: null, omemo_item: this});
-            },
-
-            updateColorScheme: function () {
-                var color = this.account.settings.get('color');
-                this.$el.attr('data-color', color);
-            },
-
-            close: function () {
-                xabber.chats_view.removeChild(this.account.id);
-            }
-        });
-
-        xabber.OMEMOEnableView = xabber.BasicView.extend({
-            className: 'details-panel omemo-enable-view',
-            template: templates.omemo_enable,
-            avatar_size: constants.AVATAR_SIZES.OMEMO_ENABLE_SETTING,
+        xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
+            className: 'omemo-enable-placeholder',
 
             events: {
                 'click .btn-enable': 'enableOmemo',
-                'click .btn-cancel': 'disableOmemo',
-                'click .btn-escape': 'close'
+                'click .btn-escape': 'disableOmemo'
             },
 
             _initialize: function (options) {
                 this.account = options.account;
                 this.updateColorScheme();
-                this.$('.msg-text').html(`<p class="msg-header">Enable end-to-end encryption for account ${this.account.get('jid')}?</p>This will allow you and your contacts exchange private messages using encrypted chats. Remember to always verify the identity of your chat partners by verifying digital fingerprints of their devices.`);
-                this.addChatItem();
-                this.updateAvatar();
+                this.$el.html(templates.omemo_enable({jid: this.account.get('jid')}));
+                xabber.placeholders_wrap.$el.append(this.$el);
+                xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
                 xabber.on("update_screen", this.onUpdatedScreen, this);
-                this.account.on("change:image", this.updateAvatar, this);
                 this.account.session.on("change:connected", this.updateConnected, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
-            },
-
-            updateAvatar: function () {
-                this.$('.circle-avatar .avatar').setAvatar(this.account.cached_image, this.avatar_size);
-            },
-
-            addChatItem: function () {
-                this.chat_item = new xabber.OMEMOItemView({model: this});
             },
 
             updateColorScheme: function () {
@@ -1881,14 +1831,11 @@ define("xabber-omemo", function () {
                 this.$el.attr('data-color', color);
             },
 
-            onUpdatedScreen: function () {
-                if (this.isVisible())
-                    this.chat_item.$el.addClass('active');
-            },
-
-            onChangedVisibility: function () {
-                if (!this.isVisible())
-                    this.chat_item.$el.removeClass('active');
+            onUpdatedScreen: function (is_init) {
+                if (!this.account.omemo_enable_placeholder)
+                    return;
+                xabber.placeholders_wrap.$el.append(this.$el);
+                xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
             },
 
             updateConnected: function () {
@@ -1915,9 +1862,9 @@ define("xabber-omemo", function () {
             },
 
             close: function () {
-                this.chat_item.close();
                 this.trigger('remove') && this.remove();
-                this.account.omemo_enable_view = undefined;
+                this.account.omemo_enable_placeholder = undefined;
+                xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
             }
         });
 

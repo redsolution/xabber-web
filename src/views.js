@@ -945,7 +945,6 @@ define("xabber-views", function () {
         },
 
         onUpdatedScreen: function (name) {
-            xabber.notifications_placeholder && xabber.main_panel.$el.append(xabber.notifications_placeholder.$el);
             if ((name === 'account_settings') || ((name === 'all-chats') &&
                 (this.$('.toolbar-item.all-chats').hasClass('active') ||
                     this.$('.toolbar-item.group-chats').hasClass('active') ||
@@ -3200,6 +3199,7 @@ define("xabber-views", function () {
             'right', this.NodeView, {classlist: 'panel-wrap right-panel-wrap'});
         this.wide_panel = this.main_panel.addChild(
             'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
+        this.placeholders_wrap = this.main_panel.addChild('placeholders', this.NodeView, {classlist: 'wide-placeholders-wrap'});
         this.settings_view = this.wide_panel.addChild(
             'settings', this.SettingsView, {model: this._settings});
     }, xabber);
