@@ -365,8 +365,11 @@ var constants = {
     TRANSPARENCY_VALUE: 50,
 
     CLIENT_NAME: 'Xabber for Web',
+    SHORT_CLIENT_NAME: 'Xabber',
     CLIENT_LOGO: 'images/xabber-logo-96.png',
+    TOOLBAR_LOGO: 'images/xabber-logo.png',
     CONNECT_XABBER_ACCOUNT: true,
+    SCREEN_ABOUT: true,
 
     ONELINERS: [
         "Ready to rock?",

@@ -208,7 +208,11 @@
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',
                 'CLIENT_NAME',
+                'SHORT_CLIENT_NAME',
                 'CLIENT_LOGO',
+                'TOOLBAR_LOGO',
+                'CONNECT_XABBER_ACCOUNT',
+                'SCREEN_ABOUT',
                 'DISABLE_LOOKUP_WS'
             ]));
 
@@ -219,6 +223,11 @@
                 window.xabber = this;
                 _.extend(window, env);
             }
+
+            if (config.CLIENT_NAME && !config.SHORT_CLIENT_NAME)
+                constants.SHORT_CLIENT_NAME = config.CLIENT_NAME;
+            else if (!config.CLIENT_NAME && config.SHORT_CLIENT_NAME)
+                constants.CLIENT_NAME = config.SHORT_CLIENT_NAME;
 
             if (config.TURN_SERVERS_LIST) {
                 if (_.isArray(config.TURN_SERVERS_LIST))

@@ -1,6 +1,6 @@
 <div class="toolbar-item all-chats active" title="All chats">
     <div class="border"></div>
-    <img class="logo" src="images/xabber-logo.png">
+    <img class="logo" src="{{TOOLBAR_LOGO}}">
     <span class="all-msg-indicator"></span>
 </div>
 
@@ -73,10 +73,12 @@
 </div>
 
 <div class="toolbar-bottom">
+    {[if (SCREEN_ABOUT) {]}
     <div class="toolbar-item about" title="About">
         <div class="border"></div>
         <i class="toolbar-icon mdi mdi-24px mdi-information"></i>
     </div>
+    {[}]}
     <div class="toolbar-item settings" title="Settings">
         <div class="border"></div>
         <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>

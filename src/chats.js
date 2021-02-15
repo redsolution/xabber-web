@@ -8549,7 +8549,7 @@ define("xabber-chats", function () {
         },
 
         _initialize: function (options) {
-            this.$el.html('Xabber for Web needs your permission to <span class="btn-request-notifications">enable desktop notifications</span><button class="btn-request-notifications btn-flat btn-dark btn-main">Allow</button>');
+            this.$el.html('${constants.CLIENT_NAME} needs your permission to <span class="btn-request-notifications">enable desktop notifications</span><button class="btn-request-notifications btn-flat btn-dark btn-main">Allow</button>');
             this.$el.append($('<i/>').addClass('mdi mdi-22px mdi-close'));
             xabber.on("update_screen", this.onUpdatedScreen, this);
         },
