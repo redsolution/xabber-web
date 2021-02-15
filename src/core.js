@@ -207,6 +207,7 @@
                 'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',
+                'CLIENT_NAME',
                 'DISABLE_LOOKUP_WS'
             ]));
 

@@ -364,6 +364,8 @@ var constants = {
     VIGNETTING_VALUE: 128,
     TRANSPARENCY_VALUE: 50,
 
+    CLIENT_NAME: 'Xabber for Web',
+
     ONELINERS: [
         "Ready to rock?",
         "Groovy!",
