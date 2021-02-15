@@ -1197,7 +1197,7 @@ define("xabber-api-service", function () {
         },
 
         login: function () {
-            if (xabber.accounts.connected.length > 1)
+            if (xabber.add_api_account_view && xabber.accounts.connected.length > 1)
                 xabber.add_api_account_view.show();
             else {
                 var account = xabber.accounts.connected[0];
@@ -1248,27 +1248,35 @@ define("xabber-api-service", function () {
 
 
     xabber.once("start", function () {
-        this.account_settings_list = new this.AccountSettingsList(null, {
-            storage_name: this.getStorageName() + '-account-settings'
-        });
-        this.account_settings_list.fetch();
-        this.account_settings_list.order_timestamp = new this.AccountsOrderTimestamp(
-            {id: 'accounts-order-timestamp'},
-            {storage_name: this.getStorageName(), fetch: 'after'}
-        );
+            this.account_settings_list = new this.AccountSettingsList(null, {
+                storage_name: this.getStorageName() + '-account-settings'
+            });
+            this.account_settings_list.fetch();
+            this.account_settings_list.order_timestamp = new this.AccountsOrderTimestamp(
+                {id: 'accounts-order-timestamp'},
+                {storage_name: this.getStorageName(), fetch: 'after'}
+            );
+        if (constants.CONNECT_XABBER_ACCOUNT) {
+            this.api_account = new this.APIAccount({id: 'api-account'},
+                {
+                    storage_name: this.getStorageName(), fetch: 'before',
+                    settings_list: this.account_settings_list
+                });
+        }
 
-        this.api_account = new this.APIAccount({id: 'api-account'},
-            {storage_name: this.getStorageName(), fetch: 'before',
-             settings_list: this.account_settings_list});
+            this.xabber_login_panel = xabber.login_page.addChild(
+                'xabber_login', this.XabberLoginPanel, {model: this.api_account});
 
-        this.xabber_login_panel = xabber.login_page.addChild(
-            'xabber_login', this.XabberLoginPanel, {model: this.api_account});
+        if (constants.CONNECT_XABBER_ACCOUNT) {
+            this.settings_view.addChild('api-account', this.APIAccountView,
+                {model: this.api_account});
 
-        this.settings_view.addChild('api-account', this.APIAccountView,
-            {model: this.api_account});
-
-        this.add_api_account_view = new this.AddAPIAccountView({model: this.api_account});
-        this.email_auth_view = new xabber.XabberLoginByEmailPanel({parent: this.add_api_account_view, model: this.api_account});
+            this.add_api_account_view = new this.AddAPIAccountView({model: this.api_account});
+            this.email_auth_view = new xabber.XabberLoginByEmailPanel({
+                parent: this.add_api_account_view,
+                model: this.api_account
+            });
+        }
     }, xabber);
 
     return xabber;

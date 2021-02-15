@@ -208,6 +208,7 @@
                 'DEFAULT_LOGIN_SCREEN',
                 'STORAGE_NAME_ENDING',
                 'CLIENT_NAME',
+                'CLIENT_LOGO',
                 'DISABLE_LOOKUP_WS'
             ]));
 

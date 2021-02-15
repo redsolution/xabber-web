@@ -279,15 +279,24 @@ define("xabber-ui", function () {
         this.body.setScreen('blank');
 
         // initial synchronization
-        this.api_account.once("settings_result", function (result) {
-            if (result === null && !this.accounts.length) {
-                this.body.setScreen('login');
-            } else if (this.body.isScreen('blank')) {
-                this.body.setScreen('all-chats');
-            }
-        }, this);
+        if (this.api_account) {
+            this.api_account.once("settings_result", function (result) {
+                if (result === null && !this.accounts.length) {
+                    this.body.setScreen('login');
+                } else if (this.body.isScreen('blank')) {
+                    this.body.setScreen('all-chats');
+                }
+            }, this);
 
-        this.api_account.ready.then(this.api_account.start.bind(this.api_account));
+            this.api_account.ready.then(this.api_account.start.bind(this.api_account));
+        } else {
+            if (!this.accounts.length)
+                this.body.setScreen('login');
+            else if (this.body.isScreen('blank'))
+                this.body.setScreen('all-chats');
+            xabber.trigger("bind_xmpp_accounts");
+        }
+
     }, xabber);
 
     return xabber;

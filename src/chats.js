@@ -5415,7 +5415,7 @@ define("xabber-chats", function () {
                 let code =  $message.find('confirm').attr('id');
                 if (($message.attr('from') == this.account.xabber_auth.api_jid) && ($message.attr('id') == this.account.xabber_auth.request_id)) {
                     this.account.verifyXabberAccount(code, function (data) {
-                        if (this.account.get('auto_login_xa')) {
+                        if (xabber.api_account && this.account.get('auto_login_xa')) {
                             xabber.api_account.save('token', data);
                             xabber.api_account.login_by_token();
                         }
