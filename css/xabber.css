@@ -925,7 +925,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .notifications-placeholder button:hover {
-    background-color: #F57F17;
+    background-color: #F9A825;
 }
 
 .notifications-placeholder button,
