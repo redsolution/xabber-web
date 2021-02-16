@@ -1831,9 +1831,10 @@ define("xabber-omemo", function () {
                 this.$el.attr('data-color', color);
             },
 
-            onUpdatedScreen: function (is_init) {
+            onUpdatedScreen: function () {
                 if (!this.account.omemo_enable_placeholder)
                     return;
+                this.$el.detach();
                 xabber.placeholders_wrap.$el.append(this.$el);
                 xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
             },
