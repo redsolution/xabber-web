@@ -8564,6 +8564,7 @@ define("xabber-chats", function () {
         onUpdatedScreen: function () {
             if (!xabber.notifications_placeholder)
                 return;
+            this.$el.detach();
             xabber.placeholders_wrap.$el.append(this.$el);
             xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
         },
