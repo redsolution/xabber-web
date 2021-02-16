@@ -44830,7 +44830,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (25)","version_description":""}'
+'{"version_number":"2.2.0 (26)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -59362,7 +59362,7 @@ define("xabber-chats", [],function () {
           },
 
           accept: function () {
-              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -67149,6 +67149,7 @@ define("xabber-chats", [],function () {
         onUpdatedScreen: function () {
             if (!xabber.notifications_placeholder)
                 return;
+            this.$el.detach();
             xabber.placeholders_wrap.$el.append(this.$el);
             xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
         },
@@ -70369,9 +70370,10 @@ define("xabber-omemo", [],function () {
                 this.$el.attr('data-color', color);
             },
 
-            onUpdatedScreen: function (is_init) {
+            onUpdatedScreen: function () {
                 if (!this.account.omemo_enable_placeholder)
                     return;
+                this.$el.detach();
                 xabber.placeholders_wrap.$el.append(this.$el);
                 xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
             },
