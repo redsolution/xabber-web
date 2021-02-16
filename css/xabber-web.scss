@@ -1,0 +1,97 @@
+/* -------------- COMMON CLASSES ---------------- */
+
+/* ---- Materialize CSS override ---- */
+
+
+
+
+
+
+
+/* ------- Quill CSS override ------- */
+.ql-tooltip {
+  z-index: 5;
+}
+
+.ql-editor {
+  padding: 0 40px 0 0 !important;
+
+  &.ql-blank::before {
+    left: inherit !important;
+    right: inherit !important;
+    font-style: inherit !important;
+  }
+}
+
+.ql-container.ql-snow {
+  border: none !important;
+}
+
+.ql-toolbar {
+  &.ql-snow {
+    display: none;
+    position: absolute;
+    bottom: -40px;
+    left: 64px;
+    border: none !important;
+    z-index: 100;
+
+    &.active {
+      display: inline-block;
+    }
+    .ql-editor blockquote {
+      border-left: 2px solid #ccc !important;
+      padding-left: 8px !important;
+      margin: 0 !important;
+    }
+  }
+}
+
+
+/* ---------- Perfect scrollbar themes ------------------ */
+
+.ps-container {
+  > .ps-scrollbar-y-rail {
+    width: 8px !important;
+    z-index: 1;
+  }
+  > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+    width: 6px !important;
+    right: 1px !important;
+    border-radius: 3px !important;
+  }
+}
+
+.ps-theme-item-list.ps-container > .ps-scrollbar-y-rail {
+  width: 4px !important;
+}
+
+.ps-theme-item-list.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  width: 4px !important;
+  right: 0 !important;
+  border-radius: 2px !important;
+}
+
+.ps-theme-roster-right.ps-container > .ps-scrollbar-y-rail {
+  width: 4px !important;
+  right: 4px !important;
+}
+
+.ps-theme-roster-right.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  width: 4px !important;
+  right: 0 !important;
+  border-radius: 2px !important;
+}
+
+.ps-theme-existing-chats-list.ps-container > .ps-scrollbar-y-rail {
+  width: 0px !important;
+}
+
+.ps-theme-existing-chats-list.ps-container > .ps-scrollbar-y-rail > .ps-scrollbar-y {
+  width: 0px !important;
+  right: 0 !important;
+  border-radius: 2px !important;
+}
+
+/* ------------------------------------------------------ */
+
