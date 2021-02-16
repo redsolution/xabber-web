@@ -777,7 +777,7 @@ define("xabber-chats", function () {
           },
 
           accept: function () {
-              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -8564,6 +8564,7 @@ define("xabber-chats", function () {
         onUpdatedScreen: function () {
             if (!xabber.notifications_placeholder)
                 return;
+            this.$el.detach();
             xabber.placeholders_wrap.$el.append(this.$el);
             xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
         },
