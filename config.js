@@ -31,6 +31,8 @@ require.config({
         "sha1_hasher":              "src/lib/sha1.min",
         "omemo":                    "src/lib/omemo",
         "qrcode":                   "src/lib/VanillaQR.min",
+        "locales":                  "src/lib/locales.min",
+        "libsignal":                "src/lib/libsignal-protocol",
 
         // Xabber sources
         "xabber-version":           "version",
