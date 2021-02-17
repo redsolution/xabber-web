@@ -39,6 +39,20 @@
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         },
 
+        setLocale: function () {
+            let _locale = window.navigator.language,
+                _locale_lang = _locale.slice(0, 2),
+                translation_json = {};
+            locale.init('en');
+            locale.add(_locale_lang, translation_json);
+            this.locale = new locale.i18n();
+            this.locale.to(_locale_lang);
+        },
+
+        parseTranslation: function (_locale) {
+
+        },
+
         error: function (msg) {
             if (constants.LOG_LEVEL >= constants.LOG_LEVEL_ERROR) {
                 console.error(msg);

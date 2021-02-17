@@ -15,6 +15,7 @@ define([
     "strophe.caps",
     "strophe.pubsub",
     "omemo",
+    "locales",
     "backbone.localsync",
     "sha1_hasher",
     "materialize",
