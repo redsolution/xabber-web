@@ -21,6 +21,7 @@ require.config({
         "slug":                     "node_modules/slug/slug",
         "sha256":                   "node_modules/js-sha256/src/sha256",
         "magnific-popup":           "node_modules/magnific-popup/dist/jquery.magnific-popup",
+        "i18next":                  "node_modules/i18next/i18next.min",
 
         // modified libs and plugins
         "backbone.localsync":       "src/lib/backbone.localsync",
@@ -31,8 +32,7 @@ require.config({
         "sha1_hasher":              "src/lib/sha1.min",
         "omemo":                    "src/lib/omemo",
         "qrcode":                   "src/lib/VanillaQR.min",
-        "locales":                  "src/lib/locales.min",
-        "libsignal":                "src/lib/libsignal-protocol",
+        "i18next-post":             "src/lib/i18nextSprintfPostProcessor.min",
 
         // Xabber sources
         "xabber-version":           "version",

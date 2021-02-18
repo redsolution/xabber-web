@@ -42,11 +42,21 @@
         setLocale: function () {
             let _locale = window.navigator.language,
                 _locale_lang = _locale.slice(0, 2),
-                translation_json = {};
-            locale.init('en');
-            locale.add(_locale_lang, translation_json);
-            this.locale = new locale.i18n();
-            this.locale.to(_locale_lang);
+                en_translation = {},
+                _locale_translation = this.parseTranslation(_locale);
+            i18next.use(i18next_sprintf);
+            i18next.init({
+                lng: _locale,
+                debug: false,
+                resources: {
+                    en: {
+                        translation: en_translation
+                    },
+                    [_locale_lang]: {
+                        translation: _locale_translation
+                    }
+                }
+            });
         },
 
         parseTranslation: function (_locale) {
