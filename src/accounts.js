@@ -1897,8 +1897,8 @@ define("xabber-accounts", function () {
             },
 
             purgeKeys: function () {
-                utils.dialogs.ask("Purge encryption keys", `This will unpublish all encryption keys and remove them from your server and this device. All decrypted will be permanently deleted, you will not be able to recover them in the future. To resume encrypted messaging you will have to perform fingerprint verification procedures again, with each of your contacts.\n\nUse this measure only as a last resort.`,
-                    null, { ok_button_text: 'purge keys'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString('omemo__dialog_purge_keys__header'), xabber.getString('omemo__dialog_purge_keys__text'),
+                    null, { ok_button_text: xabber.getString('omemo__dialog_purge_keys__button_purge_keys')}).done(function (result) {
                     if (result) {
                         if (this.model.omemo) {
                             let device_id = this.model.omemo.get('device_id');

@@ -6,6 +6,8 @@
     var constants = env.constants,
         _ = env._,
         $ = env.$,
+        xabber_i18next = env.xabber_i18next,
+        xabber_i18next_sprintf = env.xabber_i18next_sprintf,
         uuid = env.uuid,
         utils = env.utils;
 
@@ -33,6 +35,7 @@
             this.cache = this._cache.attributes;
             this.cacheFavicons();
             this.extendFunction();
+            this.setLocale();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
@@ -44,19 +47,33 @@
                 _locale_lang = _locale.slice(0, 2),
                 en_translation = {},
                 _locale_translation = this.parseTranslation(_locale);
-            i18next.use(i18next_sprintf);
-            i18next.init({
-                lng: _locale,
+            xabber_i18next.use(xabber_i18next_sprintf);
+            xabber_i18next.init({
+                lng: 'en',
                 debug: false,
                 resources: {
                     en: {
-                        translation: en_translation
-                    },
+                       translation: translations
+                    }/*,
                     [_locale_lang]: {
                         translation: _locale_translation
-                    }
+                    }*/
                 }
             });
+            // xabber_i18next.changeLanguage(_locale_lang);
+            this.en_translation = xabber_i18next.getFixedT('en');
+        },
+
+        getString: function (id, params) {
+            if (xabber_i18next.exists(id)) {
+                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params});
+            } else {
+                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params});
+            }
+        },
+
+        getQuanityString: function (id, count, params) {
+
         },
 
         parseTranslation: function (_locale) {

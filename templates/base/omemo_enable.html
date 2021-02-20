@@ -1,5 +1,4 @@
 <div class="msg-text ground-color-300">
-    <span class="btn-enable">Enable</span> <span title="This will allow you and your contacts exchange private messages using encrypted chats. Remember to always verify the identity of your chat partners by verifying digital fingerprints of their devices.">end-to-end encryption</span> for account <b>{{jid}}</b>?
-</div>
+    <span title="{[print(xabber.getString('omemo__alert_enable__tooltip'))]}" class="btn-enable">{[print(xabber.getString("omemo__alert_enable__link"))]}</span> {[print(xabber.getString("omemo__alert_enable__text", [jid]))]}</div>
 <i class="mdi mdi-22px mdi-close btn-escape"></i>
-<button class="btn-enable btn-flat hover-ground-color-500 btn-dark btn-main">Enable</button>
+<button class="btn-enable btn-flat hover-ground-color-500 btn-dark btn-main">{[print(xabber.getString("omemo__alert_enable__link"))]}</button>

@@ -190,12 +190,12 @@
 
             <div class="settings-block-wrap omemo-info">
                 <div class="block-header">
-                    <span class="block-name">OMEMO settings</span>
+                    <span class="block-name">{[print(xabber.getString("omemo__settings__section_header"))]}</span>
                 </div>
                 <div class="omemo-settings-wrap">
                     <div class="settings">
                         <div class="setting-wrap omemo-enable">
-                            <span>OMEMO encryption</span>
+                            <span>{[print(xabber.getString("omemo__settings__toggle_enable_encryption"))]}</span>
                             <div class="field setting-use-omemo switch normal">
                                 <label class="field-value">
                                     <input type="checkbox">
@@ -204,7 +204,7 @@
                             </div>
                         </div>
                         <div class="setting-wrap send-chat-states">
-                            <span>Send typing notifications</span>
+                            <span>{[print(xabber.getString("omemo__settings__toggle_send_typing_notifications"))]}</span>
                             <div class="field setting-send-chat-states switch normal">
                                 <label class="field-value">
                                     <input type="checkbox">
@@ -213,10 +213,10 @@
                             </div>
                         </div>
                         <div class="setting-wrap manage-devices">
-                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Manage devices</button>
+                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>
                         </div>
                         <div class="setting-wrap purge-keys">
-                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Purge keys</button>
+                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>
                         </div>
                     </div>
                 </div>

@@ -60,6 +60,8 @@ require.config({
         "xabber-ui":                "src/ui",
         "xabber-omemo":             "src/omemo",
 
+        "xabber-translations":      "translations/omemo",
+
         // main file
         "xabber":                   "src/xabber"
     }

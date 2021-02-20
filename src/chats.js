@@ -7395,7 +7395,7 @@ define("xabber-chats", function () {
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
                         if (is_trusted == 'none')
-                            this.$el.prepend(templates.encryption_warning({color: 'amber', message: 'New device has published encryption keys for your account. If it wasn\'t you, it looks like you might have a problem.'}));
+                            this.$el.prepend(templates.encryption_warning({color: 'amber', message: `New device has published encryption keys for your account. If it wasn't you, it looks like you might have a problem.`}));
                         else
                             this.$el.prepend(templates.encryption_warning({color: 'red', message: 'Public keys for your device you previously trusted have changed. This <i>should not</i> be happening, ever. You are likely being hacked, or your software is severely malfunctioning.'}));
                         xabber.chat_body.updateHeight();
@@ -7433,7 +7433,7 @@ define("xabber-chats", function () {
                 });
             } else {
                 this.$el.addClass('loading');
-                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text('OMEMO disabled'));
+                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text('OMEMO encryption is disabled'));
             }
         },
 

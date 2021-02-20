@@ -29,8 +29,8 @@ define([
         moment: moment,
         WaveSurfer: WaveSurfer,
         slug: slug,
-        i18next: i18next,
-        i18next_sprintf: i18next_sprintf,
+        xabber_i18next: i18next,
+        xabber_i18next_sprintf: i18next_sprintf,
         sha256: sha256,
         magnificPopup: magnificPopup,
         Strophe: Strophe

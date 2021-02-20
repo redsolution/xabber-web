@@ -175,7 +175,7 @@ define("xabber-omemo", function () {
                     let contact = this.account.contacts.get(this.jid);
                     name = contact ? contact.get('name') : this.jid;
                 }
-                this.$('.header').text(`${name} fingerprints`);
+                this.$('.header').text(xabber.getString('omemo__dialog_fingerprints__header', [name]));
                 this.data.set('visible', true);
                 this.show();
                 this.$('div.fingerprints-content').html(env.templates.contacts.preloader());
