@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="omemo__alert_enable__link">Enable</string>
+    <string name="omemo__alert_enable__link_text">Enable</string>
     <string name="omemo__alert_enable__tooltip">This will allow you and your contacts exchange private messages using encrypted chats. Remember to always verify the identity of your chat partners by verifying digital fingerprints of their devices.</string>
     <string name="omemo__alert_enable__text">end-to-end encryption for account <b>%s</b>?</string>
-    <string name="omemo__dialog_fingerprints__button_ignore_text">Ignore</string>
-    <string name="omemo__dialog_fingerprints__button_trust_text">Trust</string>
-    <string name="omemo__dialog_fingerprints__button_delete_text">Delete</string>
+    <string name="omemo__dialog_fingerprints__button_ignore">Ignore</string>
+    <string name="omemo__dialog_fingerprints__button_trust">Trust</string>
+    <string name="omemo__dialog_fingerprints__button_delete">Delete</string>
     <string name="omemo__dialog_fingerprints__button_error">Error</string>
     <string name="omemo__dialog_fingerprints__button_unknown">Unknown</string>
-    <string name="omemo__dialog_fingerprints__description_text">You must carefully verify that this device fingerprints match the once visible to your chat partner. For maximum security, this should be done via another communication channel. Preferrably, in person.</string>
-    <string name="omemo__dialog_fingerprints__learn_more_text">Learn more about encryption and safe key exchange</string>
-    <string name="omemo__dialog_fingerprints__learn_more_link">https://www.xabber.com/encryption/</string>
-    <string name="omemo__dialog_fingerprints__this_device_text">this device</string>
+    <string name="omemo__dialog_fingerprints__text_description">You must carefully verify that this device fingerprints match the once visible to your chat partner. For maximum security, this should be done via another communication channel. Preferrably, in person.</string>
+    <string name="omemo__dialog_fingerprints__text_learn_more">Learn more about encryption and safe key exchange</string>
+    <string name="omemo__dialog_fingerprints__link_learn_more">https://www.xabber.com/encryption/</string>
+    <string name="omemo__dialog_fingerprints__text_this_device">this device</string>
 
     <string name="omemo__dialog_fingerprints__textfield_device_id_tooltip">Device ID: %s\nLabel: %s\nDevice ID is a unique identifier for your contact's device. You maintain separate encryption session with each device.</string>
 

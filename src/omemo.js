@@ -243,7 +243,7 @@ define("xabber-omemo", function () {
                     $container = this.$('div.fingerprints-content');
                 dfd.done((f_count) => {
                     if (!f_count)
-                        $container.html($('<div class="empty-table">No fingerprints yet</div>'));
+                        $container.html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
                     else
                         this.$('.dropdown-button').dropdown({
                             inDuration: 100,
@@ -395,7 +395,7 @@ define("xabber-omemo", function () {
             deleteDevice: function (ev) {
                 let $target = $(ev.target).closest('div.row'),
                     device_id = Number($target.find('div.device-id').text());
-                utils.dialogs.ask("Delete device", `Do you really want to delete device ${device_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done(function (result) {
                     if (result) {
                         $target.detach();
                         delete this.model.own_devices[device_id];

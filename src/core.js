@@ -67,9 +67,10 @@
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
                 return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params});
-            } else {
+            } else if (this.en_translation) {
                 return this.en_translation(id, { postProcess: 'sprintf', sprintf: params});
-            }
+            } else
+                return "";
         },
 
         getQuanityString: function (id, count, params) {
