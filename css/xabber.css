@@ -1443,6 +1443,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .toolbar .add-variant .text {
     height: 19px;
     font-size: 16px;
+    text-transform: capitalize;
     line-height: 19px;
     color: #C0C0C0;
 }

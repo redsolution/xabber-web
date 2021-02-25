@@ -51,6 +51,7 @@
             xabber_i18next.init({
                 lng: 'en',
                 debug: false,
+                pluralSeparator: '-',
                 resources: {
                     en: {
                        translation: translations
@@ -66,9 +67,9 @@
 
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
-                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params});
+                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
             } else if (this.en_translation) {
-                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params});
+                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
             } else
                 return "";
         },

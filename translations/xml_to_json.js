@@ -38,6 +38,6 @@ fs.readdirSync('./values').forEach(file => {
             json[`${id}_${count}`] = parseChildren(items[j]);
         }
     }
-
-    fs.writeFileSync(`${file.slice(0, file.length - 4)}.js`, `let translations = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return translations;});`);
 });
+
+fs.writeFileSync(`en_lang.js`, `let translations = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return translations;});`);

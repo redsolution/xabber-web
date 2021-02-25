@@ -1,5 +1,5 @@
 <div class="row">
-    <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]).replace(/\\n/g, '&#10;'))]}" class="device-wrap">
+    <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap">
         {[if (edit_setting) {]}
         <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}
         {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}
