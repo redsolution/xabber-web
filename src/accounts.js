@@ -1787,8 +1787,10 @@ define("xabber-accounts", function () {
             },
 
             revokeAllXTokens: function () {
-                if (this.model.x_tokens_list)
-                    this.model.revokeAllXTokens(function () {}.bind(this));
+                utils.dialogs.ask("Terminate sessions", "Are you sure you want to terminate all other sessions?", null, { ok_button_text: 'terminate'}).done((result) => {
+                    if (result && this.model.x_tokens_list)
+                        this.model.revokeAllXTokens(function () {}.bind(this));
+                });
             },
 
             updateSyncState: function () {
