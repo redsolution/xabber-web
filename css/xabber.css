@@ -858,7 +858,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     position: absolute;
     bottom: 0;
     width: 100%;
-    background-color: transparent;
+    background-color: #FFF;
 }
 
 .chat-bottom-blocked-wrap {
@@ -6322,7 +6322,7 @@ img.fwd-img-preview {
     right: 0;
     bottom: 1px;
     width: 40px;
-    background-color: transparent;
+    background-color: #FFF;
     z-index: 1;
 }
 
@@ -6520,7 +6520,7 @@ input[type=range].voice-message-volume::-ms-thumb {
     margin-top: -2px;
 }
 
-.chat-msg-content input[type=range] + .thumb {
+.chat-msg-media-content input[type=range] + .thumb {
     display: none !important;
 }
 
