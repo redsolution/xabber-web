@@ -2624,9 +2624,9 @@ define("xabber-views", function () {
             this.$('.menu-btn').removeClass('active');
             this.$('.menu-btn[data-screen-name="library"]').addClass('active');
             if (this.type == 'repeating-pattern')
-                this.$('.modal-header span').text('Select Background Pattern');
+                this.$('.modal-header span').text(xabber.getString("settings__dialog_background__header_pattern"));
             else
-                this.$('.modal-header span').text('Select Background Image');
+                this.$('.modal-header span').text(xabber.getString("settings__dialog_background__header_image"));
             this.$el.openModal({
                 ready: function () {
                     this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});

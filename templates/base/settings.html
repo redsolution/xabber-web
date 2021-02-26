@@ -3,7 +3,7 @@
             <div class="picture-wrap">
                 <img class="logo" src="images/xabber-logo-96.png"/>
             </div>
-            <div class="name">{{constants.CLIENT_NAME}}}</div>
+            <div class="name">{{constants.CLIENT_NAME}}</div>
             <div class="version"></div>
         </div>
         <div class="settings-tabs-wrap">
@@ -215,26 +215,26 @@
                     </div>
 
                     <div class="background-setting-wrap">
-                        <div class="setting-name">Background</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</div>
                         <div class="setting background radio-button field-wrap">
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
                                         <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default-background" />
-                                        <label for="{{view.cid}}-default-background">Default</label>
+                                        <label for="{{view.cid}}-default-background">{[print(xabber.getString("settings__section_appearance__background__label_default"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern-background" />
-                                        <label for="{{view.cid}}-repeating-pattern-background">Repeating pattern</label>
+                                        <label for="{{view.cid}}-repeating-pattern-background">{[print(xabber.getString("settings__section_appearance__background__label_pattern"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image-background" />
-                                        <label for="{{view.cid}}-image-background">Image</label>
+                                        <label for="{{view.cid}}-image-background">{[print(xabber.getString("settings__section_appearance__background__label_image"))]}</label>
                                     </p>
                                 </form>
                             </div>
                             <div class="current-background-wrap">
-                                <div class="dark-placeholder">Update</div>
+                                <div class="dark-placeholder">{[print(xabber.getString("settings__section_appearance__background__button_update"))]}</div>
                                 <div class="current-background"></div>
                             </div>
                         </div>
@@ -242,7 +242,7 @@
                             <div class="setting vignetting-setting field-wrap">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="vignetting_switch"/>
-                                    <label for="vignetting_switch">Vignette</label>
+                                    <label for="vignetting_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_vignette"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
@@ -256,7 +256,7 @@
                             <div class="setting blur-setting field-wrap">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="blur_switch"/>
-                                    <label for="blur_switch">Blur</label>
+                                    <label for="blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
@@ -268,7 +268,7 @@
                         </div>
                     </div>
                     <div class="toolbar-color-setting-wrap">
-                        <div class="setting-name">Toolbar icons color</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</div>
                         <div class="setting toolbar-color-setting field-wrap">
                             <div class="selected-color-wrap">
                                 <div class="selected-color-item"></div>
@@ -280,7 +280,7 @@
                         </div>
                     </div>
                     <div class="toolbar-main-color-setting-wrap">
-                        <div class="setting-name">Main color</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</div>
                        <div class="setting toolbar-main-color-setting field-wrap">
                            <div class="current-main-color-wrap">
                                <div class="current-main-color ground-color-500"></div>
@@ -289,28 +289,28 @@
                        </div>
                     </div>
                     <div class="side-panel-setting-wrap">
-                        <div class="setting-name">Contacts side panel</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_side_panel"))]}</div>
                         <div class="setting side-panel-setting field-wrap">
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
                                         <input class="with-gap" name="side-panel" value="dark" type="radio" id="{{view.cid}}-dark-side-panel" />
-                                        <label for="{{view.cid}}-dark-side-panel">Dark</label>
+                                        <label for="{{view.cid}}-dark-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_dark"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="side-panel" value="light" type="radio" id="{{view.cid}}-light-side-panel" />
-                                        <label for="{{view.cid}}-light-side-panel">Light</label>
+                                        <label for="{{view.cid}}-light-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_light"))]}</label>
                                     </p>
                                 </form>
                             </div>
                             <div class="input-field checkbox-field">
                                 <input type="checkbox" class="filled-in" id="side_panel_blur_switch"/>
-                                <label for="side_panel_blur_switch">Blur</label>
+                                <label for="side_panel_blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
                             </div>
                             <div class="transparency-setting">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="transparency_switch"/>
-                                    <label for="transparency_switch">Transparency</label>
+                                    <label for="transparency_switch">{[print(xabber.getString("settings__section_appearance__side_panel__checkbox_transparency"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>

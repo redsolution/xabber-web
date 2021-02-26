@@ -1,33 +1,33 @@
 <div class="modal-header">
     <span></span>
     <div class="menu-wrap">
-        <div data-screen-name="library" class="menu-btn btn-library">Library</div>
-        <div data-screen-name="upload" class="menu-btn btn-upload">Upload</div>
-        <div data-screen-name="web-address" class="menu-btn btn-web-address">Web address (URL)</div>
+        <div data-screen-name="library" class="menu-btn btn-library">{[print(xabber.getString("settings__dialog_background__menu_item_library"))]}</div>
+        <div data-screen-name="upload" class="menu-btn btn-upload">{[print(xabber.getString("settings__dialog_background__menu_item_upload"))]}</div>
+        <div data-screen-name="web-address" class="menu-btn btn-web-address">{[print(xabber.getString("settings__dialog_background__menu_item_url"))]}</div>
     </div>
 </div>
 <div class="modal-content">
     <div data-screen="library" class="screen-wrap library-wrap"></div>
     <div data-screen="upload" class="hidden screen-wrap">
         <div class="upload-wrap">
-            <div class="upload-text">Drag image here<br>or</div>
+            <div class="upload-text">{[print(xabber.getString("settings__dialog_background__section_upload__text"))]}</div>
             <div class="upload-button">
-                <button type="file">Choose image to upload</button>
+                <button type="file">{[print(xabber.getString("settings__dialog_background__section_upload__button_upload"))]}</button>
                 <input type="file">
             </div></div>
     </div>
     <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">
         <div class="web-address">
-            <div class="label">Enter image URL:</div>
+            <div class="label">{[print(xabber.getString("settings__dialog_background__section_url__label"))]}</div>
             <input class="url"/>
         </div>
         <div class="image-preview">
             <img class="hidden">
-            <p>If you entered the correct URL, a thumbnail image will appear here. It may take a few minutes for a large image to load.</p>
+            <p>{[print(xabber.getString("settings__dialog_background__section_url__placeholder_preview"))]}</p>
         </div>
     </div>
 </div>
 <div class="modal-footer">
-    <button class="btn-flat btn-main text-color-700 non-active btn-add">Set</button>
-    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("set"))]}</button>
+    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
 </div>

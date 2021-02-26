@@ -9829,6 +9829,7 @@ ul.restrictions-list-content>li {
     color: #9E9E9E;
     font-size: 19px;
     text-align: center;
+    white-space: pre-wrap;
 }
 
 .settings-background .upload-wrap .upload-button {
