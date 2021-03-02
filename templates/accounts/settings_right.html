@@ -1,6 +1,6 @@
 <div class="right-column noselect">
     <div class="settings-panel-head">
-        <span>Account settings</span>
+        <span>{[print(xabber.getString("account_editor"))]}</span>
         <div class="field enabled-state switch normal">
             <label class="field-value">
                 <input type="checkbox">
@@ -14,7 +14,7 @@
 
             <div class="settings-block-wrap connection">
                 <div class="block-header">
-                    <span class="block-name">Connection settings</span>
+                    <span class="block-name">{[print(xabber.getString("account_connection_settings"))]}</span>
                 </div>
                 <div class="connection-wrap">
                     <div class="readonly-setting">
@@ -25,21 +25,21 @@
                         </div>
                     </div>
                     <div class="buttons-wrap">
-                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Set password</button>
-                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">Reconnect</button>
+                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_set_pass"))]}</button>
+                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("settings_account__button_reconnect"))]}</button>
                     </div>
                 </div>
             </div>
 
             <div class="settings-block-wrap tokens">
                 <div class="block-header">
-                    <span class="block-name">Active sessions</span>
+                    <span class="block-name">{[print(xabber.getString("account_active_sessions"))]}</span>
                 </div>
                 <div class="tokens-wrap">
                     <div class="current-token-wrap">
                         <div class="sessions-wrap current-session selectable-text"></div>
                         <div class="buttons-wrap">
-                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">Terminate all others sessions</p>
+                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>
                         </div>
                     </div>
                     <div class="all-sessions-wrap">
@@ -50,7 +50,7 @@
 
             <div class="settings-block-wrap synchronization">
                 <div class="block-header">
-                    <span class="block-name">Synchronization</span>
+                    <span class="block-name">{[print(xabber.getString("account_sync"))]}</span>
                 </div>
                 <div class="synchronization-wrap">
                     <div class="readonly-setting">
@@ -63,10 +63,10 @@
                     <div class="xabber-account-features-wrap">
                         <div class="sync-enable-wrap">
                             <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>
-                            <label for="{{view.cid}}_sync_account">Enable synchronization</label>
+                            <label for="{{view.cid}}_sync_account">{[print(xabber.getString("account_sync_enable_summary"))]}</label>
                         </div>
                         <div class="buttons-wrap">
-                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Delete settings</button>
+                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("delete_settings_button"))]}</button>
                         </div>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
 
             <div class="settings-block-wrap color-scheme">
                 <div class="block-header">
-                    <span class="block-name">Color scheme</span>
+                    <span class="block-name">{[print(xabber.getString("account_color_scheme"))]}</span>
                 </div>
                 <div class="color-scheme-wrap">
                     <div class="account-color">
@@ -84,71 +84,71 @@
                         </div>
                         <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">
                             <li class="color-value" data-value="red">
-                                <div class="color-name text-color-red-700">red</div>
+                                <div class="color-name text-color-red-700">{[print(xabber.getString("account_color_name_red"))]}</div>
                                 <div class="color-pattern ground-color-red-700"></div>
                             </li>
                             <li class="color-value" data-value="pink">
-                                <div class="color-name text-color-pink-700">pink</div>
+                                <div class="color-name text-color-pink-700">{[print(xabber.getString("account_color_name_pink"))]}</div>
                                 <div class="color-pattern ground-color-pink-700"></div>
                             </li>
                             <li class="color-value" data-value="purple">
-                                <div class="color-name text-color-purple-700">purple</div>
+                                <div class="color-name text-color-purple-700">{[print(xabber.getString("account_color_name_purple"))]}</div>
                                 <div class="color-pattern ground-color-purple-700"></div>
                             </li>
                             <li class="color-value" data-value="deep-purple">
-                                <div class="color-name text-color-deep-purple-700">deep purple</div>
+                                <div class="color-name text-color-deep-purple-700">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</div>
                                 <div class="color-pattern ground-color-deep-purple-700"></div>
                             </li>
                             <li class="color-value" data-value="indigo">
-                                <div class="color-name text-color-indigo-700">indigo</div>
+                                <div class="color-name text-color-indigo-700">{[print(xabber.getString("account_color_name_indigo"))]}</div>
                                 <div class="color-pattern ground-color-indigo-700"></div>
                             </li>
                             <li class="color-value" data-value="blue">
-                                <div class="color-name text-color-blue-700">blue</div>
+                                <div class="color-name text-color-blue-700">{[print(xabber.getString("account_color_name_blue"))]}</div>
                                 <div class="color-pattern ground-color-blue-700"></div>
                             </li>
                             <li class="color-value" data-value="light-blue">
-                                <div class="color-name text-color-light-blue-700">light blue</div>
+                                <div class="color-name text-color-light-blue-700">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</div>
                                 <div class="color-pattern ground-color-light-blue-700"></div>
                             </li>
                             <li class="color-value" data-value="cyan">
-                                <div class="color-name text-color-cyan-700">cyan</div>
+                                <div class="color-name text-color-cyan-700">{[print(xabber.getString("account_color_name_cyan"))]}</div>
                                 <div class="color-pattern ground-color-cyan-700"></div>
                             </li>
                             <li class="color-value" data-value="teal">
-                                <div class="color-name text-color-teal-700">teal</div>
+                                <div class="color-name text-color-teal-700">{[print(xabber.getString("account_color_name_teal"))]}</div>
                                 <div class="color-pattern ground-color-teal-700"></div>
                             </li>
                             <li class="color-value" data-value="green">
-                                <div class="color-name text-color-green-700">green</div>
+                                <div class="color-name text-color-green-700">{[print(xabber.getString("account_color_name_green"))]}</div>
                                 <div class="color-pattern ground-color-green-700"></div>
                             </li>
                             <li class="color-value" data-value="light-green">
-                                <div class="color-name text-color-light-green-700">light green</div>
+                                <div class="color-name text-color-light-green-700">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</div>
                                 <div class="color-pattern ground-color-light-green-700"></div>
                             </li>
                             <li class="color-value" data-value="lime">
-                                <div class="color-name text-color-lime-700">lime</div>
+                                <div class="color-name text-color-lime-700">{[print(xabber.getString("account_color_name_lime"))]}</div>
                                 <div class="color-pattern ground-color-lime-700"></div>
                             </li>
                             <li class="color-value" data-value="amber">
-                                <div class="color-name text-color-amber-700">amber</div>
+                                <div class="color-name text-color-amber-700">{[print(xabber.getString("account_color_name_amber"))]}</div>
                                 <div class="color-pattern ground-color-amber-700"></div>
                             </li>
                             <li class="color-value" data-value="orange">
-                                <div class="color-name text-color-orange-700">orange</div>
+                                <div class="color-name text-color-orange-700">{[print(xabber.getString("account_color_name_orange"))]}</div>
                                 <div class="color-pattern ground-color-orange-700"></div>
                             </li>
                             <li class="color-value" data-value="deep-orange">
-                                <div class="color-name text-color-deep-orange-700">deep orange</div>
+                                <div class="color-name text-color-deep-orange-700">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</div>
                                 <div class="color-pattern ground-color-deep-orange-700"></div>
                             </li>
                             <li class="color-value" data-value="brown">
-                                <div class="color-name text-color-brown-700">brown</div>
+                                <div class="color-name text-color-brown-700">{[print(xabber.getString("account_color_name_brown"))]}</div>
                                 <div class="color-pattern ground-color-brown-700"></div>
                             </li>
                             <li class="color-value" data-value="blue-grey">
-                                <div class="color-name text-color-blue-grey-700">blue grey</div>
+                                <div class="color-name text-color-blue-grey-700">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</div>
                                 <div class="color-pattern ground-color-blue-grey-700"></div>
                             </li>
                         </ul>
@@ -158,27 +158,27 @@
 
             <div class="settings-block-wrap xmpp-resources">
                 <div class="block-header">
-                    <span class="block-name">XMPP Resources</span>
+                    <span class="block-name">{[print(xabber.getString("account_xmpp_resources"))]}</span>
                 </div>
                 <div class="resources-wrap">
                     <div class="resource-wrap main-resource">
                         <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>
                         <div class="info status-info">
-                            <div class="label">Status:</div>
+                            <div class="label">{[print(xabber.getString("settings_account__label_status"))]}:</div>
                             <div class="value status-message one-line"></div>
                             <div class="status"></div>
                         </div>
                         <div class="info client-info">
-                            <div class="label">Client:</div>
+                            <div class="label">{[print(xabber.getString("settings_account__label_client"))]}:</div>
                             <div class="value client one-line"></div>
                         </div>
                         <div class="info resource-info">
-                            <div class="label">Resource:</div>
+                            <div class="label">{[print(xabber.getString("account_resource"))]}:</div>
                             <div class="value resource one-line"></div>
-                            <div class="device-indicator text-color-700">(this device)</div>
+                            <div class="device-indicator text-color-700">({[print(xabber.getString("settings_account__label_this_device"))]})</div>
                         </div>
                         <div class="info priority-info">
-                            <div class="label">Priority:</div>
+                            <div class="label">{[print(xabber.getString("account_priority"))]}:</div>
                             <div class="value priority"></div>
                         </div>
                     </div>
@@ -224,7 +224,7 @@
 
             <div class="settings-block-wrap server-info">
                 <div class="block-header">
-                    <span class="block-name">Server capabilities</span>
+                    <span class="block-name">{[print(xabber.getString("account_server_info_description"))]}</span>
                 </div>
                 <div class="capabilities-wrap">
                     <div class="capabilities">
@@ -234,15 +234,15 @@
 
             <div class="settings-block-wrap blocklist-info">
                 <div class="block-header">
-                    <span class="block-name">Blocked contacts</span>
+                    <span class="block-name">{[print(xabber.getString("blocked_contacts"))]}</span>
                 </div>
                 <div class="blocklist-wrap">
                     <div class="blocked-items">
-                        <div class="placeholder">No blocked contacts yet</div>
+                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>
                         <div class="blocked-domains-wrap hidden">
                             <div class="blocked-item domains-item">
                                 <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
-                                <div class="blocked-item-header one-line">Blocked domains</div>
+                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_domain"))]}</div>
                                 <div class="blocked-item-description one-line"/>
                             </div>
                             <div class="blocked-domains blocked-list hidden"/>
@@ -250,27 +250,27 @@
                         <div class="blocked-invitations-wrap hidden">
                             <div class="blocked-item invitations-item">
                                 <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
-                                <div class="blocked-item-header one-line">Group invitations</div>
-                                <div class="blocked-item-description">Blocking is used to mark group invitations as 'read'</div>
+                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_group_invitations"))]}</div>
+                                <div class="blocked-item-description">{[print(xabber.getString("blocked_group_invitations_summary_full"))]}</div>
                             </div>
                             <div class="blocked-invitations blocked-list hidden"/>
                         </div>
                         <div class="blocked-contacts-wrap hidden">
                             <div class="blocked-item contacts-item">
                                 <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>
-                                <div class="blocked-item-header one-line">Blocked contacts</div>
+                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_contacts"))]}</div>
                                 <div class="blocked-item-description one-line"/>
                             </div>
                             <div class="blocked-contacts blocked-list hidden"/>
                         </div>
-                        <button class="btn-block btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">Block</button>
+                        <button class="btn-block btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>
                     </div>
                 </div>
             </div>
 
             <div class="settings-block-wrap groups-info">
                 <div class="block-header">
-                    <span class="block-name">Circles</span>
+                    <span class="block-name">{[print(xabber.getString("settings_account__section_header_circles"))]}</span>
                 </div>
                 <div class="groups-wrap">
                     <div class="groups">
