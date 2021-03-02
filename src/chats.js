@@ -1534,7 +1534,7 @@ define("xabber-chats", function () {
 
         deleteFromSynchronization: function (callback, errback) {
             let conversation_options = {jid: this.get('jid')};
-            this.get('encrypted') && (conversation_options.encrypted = true);
+            this.get('encrypted') && (conversation_options.type = 'encrypted');
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', conversation_options);
