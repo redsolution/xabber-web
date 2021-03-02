@@ -1507,7 +1507,7 @@ define("xabber-chats", function () {
                 iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.get('jid'));
-            this.get('encryped') && (retract_attrs.type = 'encrypted');
+            this.get('encrypted') && (retract_attrs.type = 'encrypted');
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
                     var all_messages = this.messages.models;
@@ -7626,6 +7626,8 @@ define("xabber-chats", function () {
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
+                        if (!attrs.id)
+                            return;
                         attrs.nickname = attrs.nickname ? Strophe.xmlescape(attrs.nickname) : attrs.id;
                         let mention_item = $(templates.group_chats.mention_item(attrs));
                         mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname') || participant.get('jid') || participant.get('id')), this.mention_avatar_size);
@@ -7767,7 +7769,7 @@ define("xabber-chats", function () {
                     }
                     if (mention_position > -1) {
                         let mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("").replace(/\s?(@|[+])/, "");
-                            if (this.contact.participants.length && this.contact.participants.version > 0) {
+                            if (this.contact.participants.length && this.contact.participants.version > 0 && (this.contact.get('group_info') && this.contact.participants && this.contact.get('group_info').members_num == this.contact.participants.length)) {
                                 this.updateMentionsList(mention_text);
                             } else {
                                 this.contact.participants.participantsRequest({version: 0}, function () {
@@ -7902,56 +7904,57 @@ define("xabber-chats", function () {
                     let mediaRecorder = new MediaRecorder(stream),
                         timer = 1, start_time, end_time,
                         mic_hover = true;
-                    mediaRecorder.start();
-                    mediaRecorder.onstart = function() {
-                        this.view.sendChatState('composing', 'voice');
-                        this._chatstate_send_timeout = setInterval(function () {
+                        mediaRecorder.onstart = function() {
                             this.view.sendChatState('composing', 'voice');
-                        }.bind(this), constants.CHATSTATE_INTERVAL_COMPOSING_AUDIO);
-                        start_time = moment.now();
-                        let $bottom_panel = this.$('.message-input-panel'),
-                            $timer_elem = this.$('.input-voice-message .timer'),
-                            $status_msg = this.$('.input-voice-message .voice-msg-status'),
-                            $voice_visualizer = this.$('.input-voice-message .voice-visualizer');
-                        $timer_elem.text('0:00');
-                        $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
-                        $bottom_panel.addClass('voice-message-recording');
+                            this._chatstate_send_timeout = setInterval(function () {
+                                this.view.sendChatState('composing', 'voice');
+                            }.bind(this), constants.CHATSTATE_INTERVAL_COMPOSING_AUDIO);
+                            start_time = moment.now();
+                            let $bottom_panel = this.$('.message-input-panel'),
+                                $timer_elem = this.$('.input-voice-message .timer'),
+                                $status_msg = this.$('.input-voice-message .voice-msg-status'),
+                                $voice_visualizer = this.$('.input-voice-message .voice-visualizer');
+                            $timer_elem.text('0:00');
+                            $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
+                            $bottom_panel.addClass('voice-message-recording');
 
-                        let timerId = setInterval(function() {
-                                if ($mic.hasClass('recording') && (timer < constants.VOICE_MSG_TIME)) {
-                                    if (timer%1 == 0)
-                                        $timer_elem.text(utils.pretty_duration(timer));
-                                    timer = (timer*10 + 2)/10;
-                                    mic_hover = $bottom_panel.is(":hover");
-                                    if (!mic_hover)
-                                        $status_msg.css('color', '#D32F2F').text('Release to cancel record');
+                            let timerId = setInterval(function() {
+                                    if ($mic.hasClass('recording') && (timer < constants.VOICE_MSG_TIME)) {
+                                        if (timer%1 == 0)
+                                            $timer_elem.text(utils.pretty_duration(timer));
+                                        timer = (timer*10 + 2)/10;
+                                        mic_hover = $bottom_panel.is(":hover");
+                                        if (!mic_hover)
+                                            $status_msg.css('color', '#D32F2F').text('Release to cancel record');
+                                        else
+                                            $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
+                                    }
                                     else
-                                        $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
-                                }
-                                else
-                                {
-                                    mic_hover = $bottom_panel.is(":hover");
-                                    mediaRecorder.stop();
-                                    $mic.removeClass('recording ground-color-50');
-                                    $bottom_panel.removeClass('voice-message-recording');
-                                    clearInterval(timerId);
-                                }
-                            }.bind(this), 200),
-                            flag = false,
-                            timerIdDot = setInterval(function() {
-                                if ($mic.hasClass('recording')) {
-                                    if (flag)
-                                        $voice_visualizer.css('background-color', '#FFF');
+                                    {
+                                        mic_hover = $bottom_panel.is(":hover");
+                                        mediaRecorder.stop();
+                                        $mic.removeClass('recording ground-color-50');
+                                        $bottom_panel.removeClass('voice-message-recording');
+                                        clearInterval(timerId);
+                                    }
+                                }.bind(this), 200),
+                                flag = false,
+                                timerIdDot = setInterval(function() {
+                                    if ($mic.hasClass('recording')) {
+                                        if (flag)
+                                            $voice_visualizer.css('background-color', '#FFF');
+                                        else
+                                            $voice_visualizer.css('background-color', '#D32F2F');
+                                        flag = !flag;
+                                    }
                                     else
-                                        $voice_visualizer.css('background-color', '#D32F2F');
-                                    flag = !flag;
-                                }
-                                else
-                                    clearInterval(timerIdDot);
-                            }, 500);
-                    }.bind(this);
+                                        clearInterval(timerIdDot);
+                                }, 500);
+                        }.bind(this);
 
-                    mediaRecorder.onstop = function(e) {
+                        mediaRecorder.start();
+
+                        mediaRecorder.onstop = function() {
                         clearInterval(this._chatstate_send_timeout);
                         this.view.sendChatState('paused');
                         end_time = moment.now();
