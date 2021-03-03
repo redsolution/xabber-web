@@ -5926,6 +5926,10 @@ img.fwd-img-preview {
     white-space: nowrap;
 }
 
+.chat-message .chat-msg-media-content .file-container {
+    overflow: hidden;
+}
+
 .chat-file-info .filename {
     display: inline-block;
     max-width: 100%;

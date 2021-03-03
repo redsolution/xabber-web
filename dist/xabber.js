@@ -46513,7 +46513,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (28)","version_description":""}'
+'{"version_number":"2.2.0 (29)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -57044,7 +57044,7 @@ define("xabber-contacts", [],function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
-                this.model.on("update_participants", this.updateParticipants, this);
+                this.participants.on("participants_updated", this.onParticipantsUpdated, this);
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
@@ -57059,7 +57059,9 @@ define("xabber-contacts", [],function () {
             },
 
             updateParticipants: function () {
-                this.participantsRequest(function (version) {
+                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
+                    let $response = $(response),
+                        version = $response.find('query').attr('version');
                     if (this.model.get('group_info')) {
                         (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                         if (this.participants.length != this.model.get('group_info').members_num) {
@@ -57073,13 +57075,21 @@ define("xabber-contacts", [],function () {
                         return;
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
-                    this.participants.each(function (participant) {
-                        this.renderMemberItem(participant);
-                    }.bind(this));
-                    this.$el.removeClass('request-waiting');
+                    this.renderParticipants();
                 }.bind(this), function () {
                     this.$el.removeClass('request-waiting');
                 }.bind(this));
+            },
+
+            onParticipantsUpdated: function () {
+                this.isVisible() && this.renderParticipants();
+            },
+
+            renderParticipants: function () {
+                this.participants.each(function (participant) {
+                    this.renderMemberItem(participant);
+                }.bind(this));
+                this.$el.removeClass('request-waiting');
             },
 
             blockParticipant: function (ev) {
@@ -57118,16 +57128,6 @@ define("xabber-contacts", [],function () {
                                 });
                     }
                 }.bind(this));
-            },
-
-            participantsRequest: function (callback, errback) {
-                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
-                    let $response = $(response),
-                        version = $response.find('query').attr('version');
-                    callback && callback(version);
-                }.bind(this), function (error) {
-                    errback && errback(error);
-                });
             },
 
             renderMemberItem: function (participant) {
@@ -58060,7 +58060,8 @@ define("xabber-contacts", [],function () {
 
             initialize: function (_attrs, options) {
                 let attrs = _.clone(_attrs);
-                this.contact = options.contact;
+                this.model = options.model;
+                this.contact = this.model.contact;
                 this.account = this.contact.account;
                 this.on("change:avatar", this.getBase64Avatar, this);
                 this.set(attrs);
@@ -58126,6 +58127,7 @@ define("xabber-contacts", [],function () {
                 this.account = this.contact.account;
                 this.version = this.account.groupchat_settings.getParticipantsListVersion(this.contact.get('jid'));
                 this.getCachedParticipants();
+                this.contact.on("update_participants", this.updateParticipants, this);
                 this.on("change:nickname", this.sort, this);
             },
 
@@ -58146,7 +58148,7 @@ define("xabber-contacts", [],function () {
                 if (participant)
                     participant.set(attrs);
                 else {
-                    participant = this.create(attrs, {contact: this.contact});
+                    participant = this.create(attrs, {model: this});
                 }
                 return participant;
             },
@@ -58173,6 +58175,12 @@ define("xabber-contacts", [],function () {
                     });
                 }.bind(this));
                 return pretty_rights;
+            },
+
+            updateParticipants: function () {
+                this.participantsRequest({version: this.version}, () => {
+                    this.trigger("participants_updated");
+                });
             },
 
             participantsRequest: function (options, callback, errback) {
@@ -65610,6 +65618,14 @@ define("xabber-chats", [],function () {
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
 
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
+                if (!contact)
+                    return;
+                let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
+                if (participant_version && contact.participants && contact.participants.version < participant_version)
+                    contact.trigger('update_participants');
+            }
+
             if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
                 if (!chat)
                     return;
@@ -67303,11 +67319,11 @@ define("xabber-chats", [],function () {
                 utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
                 (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
-                        if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteFromSynchronization();
-                        }
                         if (rewrite_support) {
                             this.model.retractAllMessages(false);
+                        }
+                        if (this.account.connection && this.account.connection.do_synchronization) {
+                            this.model.deleteFromSynchronization();
                         }
                         else {
                             let all_messages = this.model.messages.models;
