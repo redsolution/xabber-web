@@ -72,30 +72,37 @@ define("xabber-contacts", function () {
                     status_text = "";
                 if (this.get('blocked'))
                     status_text = 'Contact blocked';
-                else if (subscription === 'from') {
-                    if (out_request)
-                        status_text = 'Subscription request pending';
-                    else
-                        status_text = 'Subscribed to your status';
-                } else if (!subscription) {
-                    if (out_request)
-                        status_text =  'Subscription request pending';
-                    else if (in_request)
-                        status_text = 'Incoming subscription request';
-                    else if (_.isNull(subscription))
+                else if (this.get('group_chat')) {
+                    if (this.get('group_info')) {
+                        status_text = this.get('group_info').members_num;
+                        if (this.get('group_info').members_num > 1)
+                            status_text += ' members';
+                        else
+                            status_text += ' member';
+                        if (this.get('group_info').online_members_num > 0)
+                            status_text += ', ' + this.get('group_info').online_members_num + ' online';
+                    } else if (!subscription)
                         status_text = 'No subscriptions';
                     else
-                        status_text = 'Not in your contacts';
-                } else if (this.get('group_info')) {
-                    status_text = this.get('group_info').members_num;
-                    if (this.get('group_info').members_num > 1)
-                        status_text += ' members';
-                    else
-                        status_text += ' member';
-                    if (this.get('group_info').online_members_num > 0)
-                        status_text += ', ' + this.get('group_info').online_members_num + ' online';
-                } else
-                    status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                } else {
+                    if (subscription === 'from') {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else
+                            status_text = 'Subscribed to your status';
+                    } else if (!subscription) {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else if (in_request)
+                            status_text = 'Incoming subscription request';
+                        else if (_.isNull(subscription))
+                            status_text = 'No subscriptions';
+                        else
+                            status_text = 'Not in your contacts';
+                    } else
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                }
                 return status_text;
             },
 
@@ -1909,7 +1916,7 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
-                this.model.on("update_participants", this.updateParticipants, this);
+                this.participants.on("participants_updated", this.onParticipantsUpdated, this);
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
@@ -1924,7 +1931,9 @@ define("xabber-contacts", function () {
             },
 
             updateParticipants: function () {
-                this.participantsRequest(function (version) {
+                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
+                    let $response = $(response),
+                        version = $response.find('query').attr('version');
                     if (this.model.get('group_info')) {
                         (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                         if (this.participants.length != this.model.get('group_info').members_num) {
@@ -1938,13 +1947,21 @@ define("xabber-contacts", function () {
                         return;
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
-                    this.participants.each(function (participant) {
-                        this.renderMemberItem(participant);
-                    }.bind(this));
-                    this.$el.removeClass('request-waiting');
+                    this.renderParticipants();
                 }.bind(this), function () {
                     this.$el.removeClass('request-waiting');
                 }.bind(this));
+            },
+
+            onParticipantsUpdated: function () {
+                this.isVisible() && this.renderParticipants();
+            },
+
+            renderParticipants: function () {
+                this.participants.each(function (participant) {
+                    this.renderMemberItem(participant);
+                }.bind(this));
+                this.$el.removeClass('request-waiting');
             },
 
             blockParticipant: function (ev) {
@@ -1983,16 +2000,6 @@ define("xabber-contacts", function () {
                                 });
                     }
                 }.bind(this));
-            },
-
-            participantsRequest: function (callback, errback) {
-                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
-                    let $response = $(response),
-                        version = $response.find('query').attr('version');
-                    callback && callback(version);
-                }.bind(this), function (error) {
-                    errback && errback(error);
-                });
             },
 
             renderMemberItem: function (participant) {
@@ -2925,7 +2932,8 @@ define("xabber-contacts", function () {
 
             initialize: function (_attrs, options) {
                 let attrs = _.clone(_attrs);
-                this.contact = options.contact;
+                this.model = options.model;
+                this.contact = this.model.contact;
                 this.account = this.contact.account;
                 this.on("change:avatar", this.getBase64Avatar, this);
                 this.set(attrs);
@@ -2991,6 +2999,7 @@ define("xabber-contacts", function () {
                 this.account = this.contact.account;
                 this.version = this.account.groupchat_settings.getParticipantsListVersion(this.contact.get('jid'));
                 this.getCachedParticipants();
+                this.contact.on("update_participants", this.updateParticipants, this);
                 this.on("change:nickname", this.sort, this);
             },
 
@@ -3011,7 +3020,7 @@ define("xabber-contacts", function () {
                 if (participant)
                     participant.set(attrs);
                 else {
-                    participant = this.create(attrs, {contact: this.contact});
+                    participant = this.create(attrs, {model: this});
                 }
                 return participant;
             },
@@ -3038,6 +3047,12 @@ define("xabber-contacts", function () {
                     });
                 }.bind(this));
                 return pretty_rights;
+            },
+
+            updateParticipants: function () {
+                this.participantsRequest({version: this.version}, () => {
+                    this.trigger("participants_updated");
+                });
             },
 
             participantsRequest: function (options, callback, errback) {

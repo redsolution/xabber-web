@@ -1534,7 +1534,7 @@ define("xabber-chats", function () {
 
         deleteFromSynchronization: function (callback, errback) {
             let conversation_options = {jid: this.get('jid')};
-            this.get('encrypted') && (conversation_options.encrypted = true);
+            this.get('encrypted') && (conversation_options.type = 'encrypted');
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', conversation_options);
@@ -5340,6 +5340,14 @@ define("xabber-chats", function () {
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
 
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
+                if (!contact)
+                    return;
+                let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
+                if (participant_version && contact.participants && contact.participants.version < participant_version)
+                    contact.trigger('update_participants');
+            }
+
             if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
                 if (!chat)
                     return;
@@ -7033,11 +7041,11 @@ define("xabber-chats", function () {
                 utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
                 (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
-                        if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteFromSynchronization();
-                        }
                         if (rewrite_support) {
                             this.model.retractAllMessages(false);
+                        }
+                        if (this.account.connection && this.account.connection.do_synchronization) {
+                            this.model.deleteFromSynchronization();
                         }
                         else {
                             let all_messages = this.model.messages.models;
