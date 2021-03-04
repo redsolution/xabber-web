@@ -3286,8 +3286,8 @@ define("xabber-chats", function () {
                                 is_audio = false;
                         }
                         let mdi_icon_class = utils.file_type_icon(file.type);
-                        _.extend(file_attrs[idx], { is_audio: is_audio, duration: utils.pretty_duration(file_attrs[idx].duration), mdi_icon: mdi_icon_class, size: utils.pretty_size(file_attrs[idx].size)});
-                        template_for_file_content = is_audio ? $(templates.messages.audio_file(file_attrs[idx])) : $(templates.messages.file(file_attrs[idx]));
+                        _.extend(file_attrs[idx], { is_audio: is_audio, duration: utils.pretty_duration(file_attrs[idx].duration), waveform_id: 'waveform' + moment.now(), mdi_icon: mdi_icon_class, size: utils.pretty_size(file_attrs[idx].size)});
+                        template_for_file_content = is_audio ? $(templates.messages.audio_file_waveform(file_attrs[idx])) : $(templates.messages.file(file_attrs[idx]));
                         $message.find('.chat-msg-media-content').append(template_for_file_content);
                     }.bind(this));
                 }
@@ -3374,12 +3374,13 @@ define("xabber-chats", function () {
             }
         },
 
-        renderVoiceMessage: function (element, file_url) {
+        renderVoiceMessage: function (element) {
             let not_expanded_msg = element.innerHTML,
-                unique_id = 'waveform' + moment.now(),
                 $elem = $(element),
-                $msg_element = $elem.closest('.link-file');
-            $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
+                $msg_element = $elem.closest('.link-file'),
+                $waveform = $msg_element.find('.waveform'),
+                file_url = $waveform.attr('data-url'),
+                unique_id = $waveform[0].id;
             let aud = this.createAudio(file_url, unique_id);
 
             aud.on('ready', function () {
@@ -3539,8 +3540,8 @@ define("xabber-chats", function () {
                         }
                         ((file_attrs.length === 1) && is_audio) && (file.name = 'Voice message');
                         let mdi_icon_class = utils.file_type_icon(file.type);
-                        _.extend(copied_attrs, { is_audio: is_audio, duration: utils.pretty_duration(copied_attrs.duration), mdi_icon: mdi_icon_class, size: utils.pretty_size(copied_attrs.size) });
-                        template_for_file_content = is_audio ? $(templates.messages.audio_file(copied_attrs)) : $(templates.messages.file(copied_attrs));
+                        _.extend(copied_attrs, { is_audio: is_audio, duration: utils.pretty_duration(copied_attrs.duration), mdi_icon: mdi_icon_class, size: utils.pretty_size(copied_attrs.size), waveform_id: 'waveform' + moment.now() });
+                        template_for_file_content = is_audio ? $(templates.messages.audio_file_waveform(copied_attrs)) : $(templates.messages.file(copied_attrs));
                         $message.find('.chat-msg-media-content').append(template_for_file_content);
                     }.bind(this));
                 }
@@ -3627,8 +3628,8 @@ define("xabber-chats", function () {
                                 }
                                 ((file_attrs.length === 1) && is_audio) && (file.name = 'Voice message');
                                 let mdi_icon_class = utils.file_type_icon(file.type);
-                                _.extend(copied_attrs, { is_audio: is_audio, duration: utils.pretty_duration(copied_attrs.duration), mdi_icon: mdi_icon_class, size: utils.pretty_size(copied_attrs.size)});
-                                template_for_file_content = is_audio ? $(templates.messages.audio_file(copied_attrs)) : $(templates.messages.file(copied_attrs));
+                                _.extend(copied_attrs, { is_audio: is_audio, duration: utils.pretty_duration(copied_attrs.duration), mdi_icon: mdi_icon_class, waveform_id: 'waveform' + moment.now(), size: utils.pretty_size(copied_attrs.size)});
+                                template_for_file_content = is_audio ? $(templates.messages.audio_file_waveform(copied_attrs)) : $(templates.messages.file(copied_attrs));
                                 $f_message.find('.chat-msg-media-content').append(template_for_file_content);
                             }.bind(this));
                         }
@@ -4375,8 +4376,8 @@ define("xabber-chats", function () {
                         template_for_file_content,
                         mdi_icon_class = utils.file_type_icon(item.type);
                     ((files_.length === 1) && is_audio) && (file_attrs.name = 'Voice message');
-                    _.extend(file_attrs, {size: utils.pretty_size(item.size), is_audio: is_audio, duration: utils.pretty_duration(item.duration), mdi_icon: mdi_icon_class});
-                    template_for_file_content = is_audio ? $(templates.messages.audio_file(file_attrs)) : $(templates.messages.file(file_attrs));
+                    _.extend(file_attrs, {size: utils.pretty_size(item.size), is_audio: is_audio, duration: utils.pretty_duration(item.duration), waveform_id: 'waveform' + moment.now(), mdi_icon: mdi_icon_class});
+                    template_for_file_content = is_audio ? $(templates.messages.audio_file_waveform(file_attrs)) : $(templates.messages.file(file_attrs));
                     $message.find('.chat-msg-content').append(template_for_file_content);
                 }.bind(this));
             }
