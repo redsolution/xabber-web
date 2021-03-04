@@ -72,30 +72,37 @@ define("xabber-contacts", function () {
                     status_text = "";
                 if (this.get('blocked'))
                     status_text = 'Contact blocked';
-                else if (subscription === 'from') {
-                    if (out_request)
-                        status_text = 'Subscription request pending';
-                    else
-                        status_text = 'Subscribed to your status';
-                } else if (!subscription) {
-                    if (out_request)
-                        status_text =  'Subscription request pending';
-                    else if (in_request)
-                        status_text = 'Incoming subscription request';
-                    else if (_.isNull(subscription))
+                else if (this.get('group_chat')) {
+                    if (this.get('group_info')) {
+                        status_text = this.get('group_info').members_num;
+                        if (this.get('group_info').members_num > 1)
+                            status_text += ' members';
+                        else
+                            status_text += ' member';
+                        if (this.get('group_info').online_members_num > 0)
+                            status_text += ', ' + this.get('group_info').online_members_num + ' online';
+                    } else if (!subscription)
                         status_text = 'No subscriptions';
                     else
-                        status_text = 'Not in your contacts';
-                } else if (this.get('group_info')) {
-                    status_text = this.get('group_info').members_num;
-                    if (this.get('group_info').members_num > 1)
-                        status_text += ' members';
-                    else
-                        status_text += ' member';
-                    if (this.get('group_info').online_members_num > 0)
-                        status_text += ', ' + this.get('group_info').online_members_num + ' online';
-                } else
-                    status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                } else {
+                    if (subscription === 'from') {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else
+                            status_text = 'Subscribed to your status';
+                    } else if (!subscription) {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else if (in_request)
+                            status_text = 'Incoming subscription request';
+                        else if (_.isNull(subscription))
+                            status_text = 'No subscriptions';
+                        else
+                            status_text = 'Not in your contacts';
+                    } else
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                }
                 return status_text;
             },
 
