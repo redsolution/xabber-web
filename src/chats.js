@@ -4391,7 +4391,7 @@ define("xabber-chats", function () {
 
         createAudio: function(file_url, unique_id) {
             var audio = WaveSurfer.create({
-                container: "#" + unique_id,
+                container: this.$(`#${unique_id}`)[0],
                 scrollParent: false,
                 barWidth: 3,
                 height: 48,
