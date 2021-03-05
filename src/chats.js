@@ -3178,6 +3178,9 @@ define("xabber-chats", function () {
             } else {
                 $message.insertAfter(this.$('.chat-message').eq(index - 1));
             }
+            $message.find('.waveform').each((idx, waveform) => {
+                $(waveform).closest('.link-file')[0].voice_message = this.renderVoiceMessage($(waveform).closest('.file-container')[0]);
+            });
             var $next_message = $message.nextAll('.chat-message').first();
             this.updateMessageInChat($message[0]);
             if ($next_message.length) {
@@ -3375,8 +3378,7 @@ define("xabber-chats", function () {
         },
 
         renderVoiceMessage: function (element) {
-            let not_expanded_msg = element.innerHTML,
-                $elem = $(element),
+            let $elem = $(element),
                 $msg_element = $elem.closest('.link-file'),
                 $waveform = $msg_element.find('.waveform'),
                 file_url = $waveform.attr('data-url'),
@@ -3390,10 +3392,7 @@ define("xabber-chats", function () {
             }.bind(this));
 
             aud.on('error', function () {
-                $elem.removeClass('voice-message-rendering');
-                element.innerHTML = not_expanded_msg;
                 aud.unAll();
-                $elem.find('.voice-message-play').get(0).remove();
                 utils.callback_popup_message("This type of audio isn't supported in Your browser", 3000);
             }.bind(this));
 
@@ -4756,41 +4755,16 @@ define("xabber-chats", function () {
                     return;
                 }
 
-                if ($elem.hasClass('voice-message-play') || $elem.hasClass('no-uploaded')) {
-                    let $audio_elem = $elem.closest('.link-file'),
-                        f_url = $audio_elem.find('.file-link-download').attr('href');
-                    $audio_elem.find('.mdi-play').removeClass('no-uploaded');
-                    if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                        let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                            uri = $elem.attr('href'),
-                            file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                        if (file && file.iv && file.key) {
-                            this.model.messages.decryptFile(f_url, file.iv, file.key).then((result) => {
-                                if (result === null)
-                                    return;
-                                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
-                                this.prev_audio_message && this.prev_audio_message.voice_message.pause();
-                                this.prev_audio_message = $audio_elem[0];
-                            });
-                        }
-                    } else {
-                        $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
-                        this.prev_audio_message && this.prev_audio_message.voice_message.pause();
-                        this.prev_audio_message = $audio_elem[0];
-                    }
-                    return;
-                }
-
                 if ($elem.hasClass('mdi-play')) {
                     let $audio_elem = $elem.closest('.link-file');
-                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
                     this.prev_audio_message = $audio_elem[0];
                     $audio_elem[0].voice_message.play();
                     return;
                 }
 
                 if ($elem.hasClass('mdi-pause')) {
-                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
                     return;
                 }
 
