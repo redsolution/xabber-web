@@ -3388,7 +3388,6 @@ define("xabber-chats", function () {
             aud.on('ready', function () {
                 let duration = Math.round(aud.getDuration());
                 $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
-                aud.play();
             }.bind(this));
 
             aud.on('error', function () {
