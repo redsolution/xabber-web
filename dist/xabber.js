@@ -46513,7 +46513,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (29)","version_description":""}'
+'{"version_number":"2.2.0 (30)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -55207,30 +55207,37 @@ define("xabber-contacts", [],function () {
                     status_text = "";
                 if (this.get('blocked'))
                     status_text = 'Contact blocked';
-                else if (subscription === 'from') {
-                    if (out_request)
-                        status_text = 'Subscription request pending';
-                    else
-                        status_text = 'Subscribed to your status';
-                } else if (!subscription) {
-                    if (out_request)
-                        status_text =  'Subscription request pending';
-                    else if (in_request)
-                        status_text = 'Incoming subscription request';
-                    else if (_.isNull(subscription))
+                else if (this.get('group_chat')) {
+                    if (this.get('group_info')) {
+                        status_text = this.get('group_info').members_num;
+                        if (this.get('group_info').members_num > 1)
+                            status_text += ' members';
+                        else
+                            status_text += ' member';
+                        if (this.get('group_info').online_members_num > 0)
+                            status_text += ', ' + this.get('group_info').online_members_num + ' online';
+                    } else if (!subscription)
                         status_text = 'No subscriptions';
                     else
-                        status_text = 'Not in your contacts';
-                } else if (this.get('group_info')) {
-                    status_text = this.get('group_info').members_num;
-                    if (this.get('group_info').members_num > 1)
-                        status_text += ' members';
-                    else
-                        status_text += ' member';
-                    if (this.get('group_info').online_members_num > 0)
-                        status_text += ', ' + this.get('group_info').online_members_num + ' online';
-                } else
-                    status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                } else {
+                    if (subscription === 'from') {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else
+                            status_text = 'Subscribed to your status';
+                    } else if (!subscription) {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else if (in_request)
+                            status_text = 'Incoming subscription request';
+                        else if (_.isNull(subscription))
+                            status_text = 'No subscriptions';
+                        else
+                            status_text = 'Not in your contacts';
+                    } else
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                }
                 return status_text;
             },
 
@@ -70291,8 +70298,8 @@ define("xabber-omemo", [],function () {
                     this._pending_devices = true;
                     this._dfd_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
-                            this.updateDevices((this.account.background_connection || this.account.connection).omemo.parseUserDevices($(cb)));
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
+                            this.updateDevices(this.account.connection.omemo.parseUserDevices($(cb)));
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
@@ -70431,7 +70438,6 @@ define("xabber-omemo", [],function () {
             renderDevices: function () {
                 this.model.getDevicesNode().then(() => {
                     let devices_count = _.keys(this.model.devices).length;
-                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
                     this.updateFingerprints(this.model.devices);
                 });
                 this.updateOwnFingerprint();
@@ -70440,7 +70446,6 @@ define("xabber-omemo", [],function () {
             renderOwnDevices: function () {
                 this.omemo.getMyDevices().then(() => {
                     let devices_count = _.keys(this.model.own_devices).length;
-                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
                     this.updateFingerprints(this.model.own_devices);
                     this.updateOwnFingerprint();
                 });
@@ -70474,7 +70479,7 @@ define("xabber-omemo", [],function () {
                 if (label == this.account.settings.get('device_label_text'))
                     return;
                 this.account.settings.save('device_label_text', label);
-                (this.account.background_connection || this.account.connection).omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, function () {
                     this.updateOwnFingerprint();
                 }.bind(this));
             },
@@ -70496,6 +70501,8 @@ define("xabber-omemo", [],function () {
                             container: this.$('.fingerprints-content')[0],
                             alignment: 'left'
                         });
+                    this.jid == this.account.get('jid') && f_count++;
+                    this.$('.additional-info').text(this.jid + ', ' + f_count + (f_count > 1 ? ' devices' : ' device'));
                     $container.find('.preloader-wrapper').detach();
                 });
                 for (var device_id in devices) {
@@ -70518,7 +70525,7 @@ define("xabber-omemo", [],function () {
                             dfd.resolve($container.find('div.row').length);
                     }
                     else {
-                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
@@ -70848,7 +70855,7 @@ define("xabber-omemo", [],function () {
             },
 
             closeSession: function (reason) {
-                (this.account.background_connection || this.account.connection).omemo.sendOptOut({
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.sendOptOut({
                     to: this.jid,
                     reason: reason
                 }, function () {
@@ -70861,7 +70868,7 @@ define("xabber-omemo", [],function () {
                     this._pending_bundle = true;
                     this._dfd_bundle = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 $spk = $bundle.find('spk'),
@@ -71722,7 +71729,7 @@ define("xabber-omemo", [],function () {
             publish: function (spk, ik, pks) {
                 if (!this.account.connection)
                     return;
-                let conn_omemo = (this.account.background_connection || this.account.connection).omemo,
+                let conn_omemo = ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo,
                     prekeys = [];
                 pks.forEach(function (pk) {
                     let id = pk.keyId,
@@ -71799,12 +71806,12 @@ define("xabber-omemo", [],function () {
                     this.set('resend_bundle', true);
                     return;
                 }
-                (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
                         this.publish(spk, ik.pubKey, pks);
                     }.bind(this),
                     function (err) {
                         if (($(err).find('error').attr('code') == 404))
-                            (this.account.background_connection || this.account.connection).omemo.createBundleNode(function () {
+                            ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.createBundleNode(function () {
                                 this.publish(spk, ik.pubKey, pks);
                             }.bind(this));
                     }.bind(this));

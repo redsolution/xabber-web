@@ -229,7 +229,7 @@ define("xabber-omemo", function () {
                 if (label == this.account.settings.get('device_label_text'))
                     return;
                 this.account.settings.save('device_label_text', label);
-                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, function () {
                     this.updateOwnFingerprint();
                 }.bind(this));
             },
