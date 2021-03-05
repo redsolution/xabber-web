@@ -24,14 +24,14 @@
         <div class="details-icon-wrap" title="Click to copy"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg></div>
         <div class="info jabber-id">
             <div class="value one-line"></div>
-            <div class="label">Jabber ID</div>
+            <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>
         </div>
     </div>
     <div class="info-wrap personal-info-wrap hidden">
         <i title="Click to copy" class="details-icon mdi mdi-24px mdi-account-card-details"></i>
         <div class="info first-name">
             <div class="value one-line"></div>
-            <div class="label">First name</div>
+            <div class="label">{[print(xabber.getString("vcard_given_name"))]}</div>
         </div>
         <div class="info middle-name">
             <div class="value one-line"></div>
@@ -39,11 +39,11 @@
         </div>
         <div class="info last-name">
             <div class="value one-line"></div>
-            <div class="label">Surname</div>
+            <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>
         </div>
         <div class="info fullname">
             <div class="value one-line"></div>
-            <div class="label">Full name</div>
+            <div class="label">{[print(xabber.getString("vcard_full_name"))]}</div>
         </div>
     </div>
     <div class="info-wrap nickname-info-wrap hidden">
@@ -64,7 +64,7 @@
         <i title="Click to copy" class="details-icon mdi mdi-24px mdi-briefcase"></i>
         <div class="info org-name">
             <div class="value one-line"></div>
-            <div class="label">Company</div>
+            <div class="label">{[print(xabber.getString("vcard_organization"))]}</div>
         </div>
         <div class="info job-title">
             <div class="value one-line"></div>
@@ -72,7 +72,7 @@
         </div>
         <div class="info org-unit">
             <div class="value one-line"></div>
-            <div class="label">Unit</div>
+            <div class="label">{[print(xabber.getString("vcard_organization_unit"))]}</div>
         </div>
         <div class="info role">
             <div class="value one-line"></div>
@@ -83,7 +83,7 @@
         <i title="Click to copy" class="details-icon mdi mdi-24px mdi-web"></i>
         <div class="info url">
             <div class="value one-line"></div>
-            <div class="label">Website</div>
+            <div class="label">{[print(xabber.getString("vcard_url"))]}</div>
         </div>
     </div>
     <div class="info-wrap description-info-wrap hidden">
@@ -105,11 +105,11 @@
         </div>
         <div class="info phone-mobile">
             <div class="value one-line"></div>
-            <div class="label">Mobile</div>
+            <div class="label">{[print(xabber.getString("vcard_type_mobile"))]}</div>
         </div>
         <div class="info phone-default">
             <div class="value one-line"></div>
-            <div class="label">Phone</div>
+            <div class="label">{[print(xabber.getString("vcard_telephone"))]}</div>
         </div>
     </div>
     <div class="info-wrap email-info-wrap hidden">
@@ -120,7 +120,7 @@
         </div>
         <div class="info email-home">
             <div class="value one-line"></div>
-            <div class="label">Personal</div>
+            <div class="label">{[print(xabber.getString("vcard_type_personal"))]}</div>
         </div>
         <div class="info email-default">
             <div class="value one-line"></div>
@@ -156,8 +156,8 @@
             <div class="region value one-line"></div>
             <div class="pcode value one-line"></div>
             <div class="country value one-line"></div>
-            <div class="label">Address</div>
+            <div class="label">{[print(xabber.getString("vcard_address"))]}</div>
         </div>
     </div>
-    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">Edit</button>
+    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("edit_vcard"))]}</button>
 </div>

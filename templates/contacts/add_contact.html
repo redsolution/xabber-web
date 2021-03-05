@@ -1,10 +1,10 @@
 <div class="modal-content-wrap">
     <div class="modal-header">
-        <span>Add Contact</span>
+        <span>{[print(xabber.getString("dialog_add_contact__header"))]}</span>
     </div>
     <div class="modal-content">
         <div class="row account-field">
-            <div class="field-header">Account</div>
+            <div class="field-header">{[print(xabber.getString("contact_account"))]}</div>
             <div class="multiple-acc">
                 <div class="account-dropdown-wrap">
                     <div class="dropdown-button" data-activates="select-account-for-add-contact">
@@ -28,23 +28,23 @@
         <div class="row name-field">
             <div class="input-field">
                 <input id="new_contact_username" type="text" name="username">
-                <label for="new_contact_username">Contact JID</label>
+                <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>
                 <span class="errors fixed"></span>
             </div>
             <div class="input-field">
                 <input id="new_contact_name" type="text" name="contact_name" required>
-                <label for="new_contact_name">Contact name</label>
+                <label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>
             </div>
             <span class="add-contact-feedback red-text"></span>
         </div>
         <div class="row groups-field">
-            <div class="field-header">Circles</div>
+            <div class="field-header">{[print(xabber.getString("contact_circle"))]}</div>
             <div class="groups checkbox-list">
             </div>
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn-flat btn-main btn-add">Add</button>
-        <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+        <button class="btn-flat btn-main btn-add">{[print(xabber.getString("dialog_add_contact__button_add"))]}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("dialog_add_contact__button_cancel"))]}</button>
     </div>
 </div>
