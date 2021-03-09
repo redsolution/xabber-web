@@ -3876,7 +3876,10 @@ define("xabber-chats", function () {
                 $(forwarded_message).each(function (idx, fwd_msg) {
                     let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
                         idx_begin = legacy_body.length,
+                        fwd = $(fwd_msg.get('xml')).clone(),
                         idx_end = legacy_body.concat(legacy_fwd_msg).length;
+                    if (!fwd.attr('from'))
+                        fwd.attr('from', this.account.get('jid'));
                     stanza.c('reference', {
                         xmlns: Strophe.NS.REFERENCE,
                         type: 'mutable',
@@ -3887,7 +3890,7 @@ define("xabber-chats", function () {
                         .c('delay', {
                             xmlns: 'urn:xmpp:delay',
                             stamp: fwd_msg.get('time')
-                        }).up().cnode(fwd_msg.get('xml')).up().up().up();
+                        }).up().cnode(fwd[0]).up().up().up();
                     legacy_body = legacy_body.concat(legacy_fwd_msg);
                     mutable_content.push({
                         start: idx_begin,
