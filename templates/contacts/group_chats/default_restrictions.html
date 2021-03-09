@@ -1,11 +1,11 @@
-<div class="modal-header"><div class="panel-header black-text">Default restrictions</div></div>
+<div class="modal-header"><div class="panel-header black-text">{[print(xabber.getString("groupchat_default_restrictions"))]}</div></div>
 <div class="modal-content">
     <div class="default-restrictions-list-wrap"></div>
-    <p class="default-restrictions-info">These restrictions will be automatically applied to all new group members</p>
+    <p class="default-restrictions-info">{[print(xabber.getString("dialog_default_restrictions__placeholder"))]}</p>
 </div>
 <div class="modal-footer">
     <div class="buttons-wrap">
-        <button class="btn-default-restrictions-save btn-flat btn-main non-active">Save</button>
-        <button class="btn-default-restrictions-cancel btn-flat btn-main btn-dark">Cancel</button>
+        <button class="btn-default-restrictions-save btn-flat btn-main non-active">{[print(xabber.getString("save"))]}</button>
+        <button class="btn-default-restrictions-cancel btn-flat btn-main btn-dark">{[print(xabber.getString("cancel"))]}</button>
     </div>
 </div>

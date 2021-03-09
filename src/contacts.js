@@ -3251,7 +3251,6 @@ define("xabber-contacts", function () {
             render: function (options) {
                 this.updateAvatar();
                 this.updateName();
-                this.renderButtons();
             },
 
             update: function () {
@@ -3287,13 +3286,6 @@ define("xabber-contacts", function () {
                     this.$('.main-info .name-wrap').removeClass('name-is-jid');
                     this.$('.main-info  .jid').text(this.model.get('jid'));
                 }
-            },
-
-            renderButtons: function () {
-                this.$('.buttons-wrap .btn-accept').hideIf(!this.private_invite);
-                this.$('.buttons-wrap .btn-block').hideIf(this.private_invite);
-                this.$('.buttons-wrap .btn-join').showIf(!this.private_invite);
-                this.$('.buttons-wrap .btn-decline-all').showIf(this.private_invite);
             },
 
             blockInvitation: function () {

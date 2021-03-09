@@ -1,9 +1,9 @@
 <div class="search-form-header">
     <div class="messages-search-form search-form">
         <i class="search-icon mdi mdi-20px mdi-magnify"></i>
-        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search messages" autofocus>
+        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("chat__search_messages_panel__placeholder"))]}' autofocus>
     </div>
-    <div class="text-color-700 btn-cancel-searching">cancel</div>
+    <div class="text-color-700 btn-cancel-searching">{[print(xabber.getString("cancel"))]}</div>
 </div>
 <div class="pinned-message"></div>
 <div class="elements-in-top">
@@ -11,7 +11,7 @@
     <div class="chat-day-indicator fixed-day-indicator-wrap hidden"><div class="fixed-day-indicator"></div></div>
 </div>
 <div class="load-history-feedback hidden"></div>
-<div class="participant-messages-header hidden"><div class="messages-by-header">Messages by <div class="participant-nickname text-color-700"></div></div><div class="text-color-700 btn-cancel-selection">cancel</div><div class="btn-retract-messages">delete all</div></div>
+<div class="participant-messages-header hidden"><div class="messages-by-header">{[print(xabber.getString("chat__placeholder_participant_messages__messages_by"))]} <div class="participant-nickname text-color-700"></div></div><div class="text-color-700 btn-cancel-selection">{[print(xabber.getString("cancel"))]}</div><div class="btn-retract-messages">{[print(xabber.getString("chat_settings__button_delete_all"))]}</div></div>
 <div class="chat-content">
 </div>
 <div class="chat-notification hidden one-line"></div>

@@ -1033,8 +1033,7 @@ define("xabber-api-service", function () {
                 var email_id = email.id,
                     email_address = email.email,
                     is_verified = email.verified,
-                    verified_status = (is_verified) ? 'Verified' : 'Unverified',
-                    email_item_html = $(templates.linked_email_item({email_id: email_id, email: email_address, verified: is_verified, verified_status: verified_status, color: this.default_color}));
+                    email_item_html = $(templates.linked_email_item({email_id: email_id, email: email_address, verified: is_verified, color: this.default_color}));
                 email_item_html.insertBefore(this.$('#email.not-linked'));
             }.bind(this));
             _.each(linked_social, function(social) {

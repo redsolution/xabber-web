@@ -75,7 +75,6 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/right_expire_variants.html",
     "text!templates/contacts/group_chats/pinned_message.html",
     "text!templates/contacts/group_chats/participant_details_item.html",
-    "text!templates/contacts/group_chats/participant_placeholder.html",
     "text!templates/contacts/group_chats/participants.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
     "text!templates/contacts/group_chats/private_participant_details.html",
@@ -109,7 +108,6 @@ define("xabber-templates", [
     "text!templates/chats/messages/template-for-5.html",
     "text!templates/chats/messages/template-for-6.html",
     "text!templates/chats/messages/saved_main.html",
-    "text!templates/chats/archive_placeholder.html",
     "text!templates/chats/group_chats/pinned_message_panel.html",
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
@@ -263,7 +261,6 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
     addTemplate('contacts.group_chats.participant_details_item');
-    addTemplate('contacts.group_chats.participant_placeholder');
     addTemplate('contacts.group_chats.participants');
     addTemplate('contacts.group_chats.badge_edit_view');
     addTemplate('contacts.group_chats.private_participant_details');
@@ -297,7 +294,6 @@ define("xabber-templates", [
     addTemplate('chats.messages.template-for-5');
     addTemplate('chats.messages.template-for-6');
     addTemplate('chats.messages.saved_main');
-    addTemplate('chats.archive_placeholder');
     addTemplate('chats.group_chats.pinned_message_panel');
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
