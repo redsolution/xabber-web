@@ -298,6 +298,7 @@ define("xabber-chats", function () {
                                 key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
                             uri = uri.slice(0, uri.length - 44 - 16 - 1);
                             _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                            attrs.has_encrypted_files = true;
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
                             images.push(file_attrs);
@@ -3112,10 +3113,10 @@ define("xabber-chats", function () {
         },
 
 
-          decryptImages: function (message) {
+          decryptImages: function (message, force) {
             let scrolled_from_bottom = this.getScrollBottom(),
                 unique_id = message.get('unique_id');
-              if (this.model.get('encrypted') || message.get('encrypted')) {
+              if (this.model.get('encrypted') || message.get('encrypted') || force) {
                   let images = message.get('images') || [];
                   if (images.length) {
                       images.forEach((img) => {
@@ -3451,7 +3452,8 @@ define("xabber-chats", function () {
                 avatar_id = user_info.avatar,
                 role = user_info.role,
                 badge = user_info.badge,
-                from_id = user_info.id;
+                from_id = user_info.id,
+                has_encrypted_files = attrs.has_encrypted_files;
 
             if (is_sender && this.model.get('group_chat')) {
                 if (this.contact.my_info) {
@@ -3566,6 +3568,7 @@ define("xabber-chats", function () {
                         badge = user_info.badge,
                         from_id = user_info.id,
                         from_jid = attrs.from_jid;
+                    !has_encrypted_files && (has_encrypted_files = attrs.has_encrypted_files);
                     if (is_sender) {
                         username = Strophe.xmlescape(user_info.nickname || this.account.get('name'));
                     } else {
@@ -3647,8 +3650,8 @@ define("xabber-chats", function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            if (attrs.encrypted || this.model.get('encrypted')) {
-                this.decryptImages(message);
+            if (attrs.encrypted || this.model.get('encrypted') || has_encrypted_files) {
+                this.decryptImages(message, has_encrypted_files);
             }
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
@@ -4642,21 +4645,19 @@ define("xabber-chats", function () {
             let $elem = $(ev.target);
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
-                if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                    let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                        uri = $elem.attr('href'),
-                        file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                    if (file && file.iv && file.key) {
-                        this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
-                            if (result === null)
-                                return;
-                            let download = document.createElement("a");
-                            download.href = result;
-                            download.download = file.name;
-                            download.click();
-                        });
-                        return;
-                    }
+                let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    uri = $elem.attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                if (file && file.iv && file.key) {
+                    this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let download = document.createElement("a");
+                        download.href = result;
+                        download.download = file.name;
+                        download.click();
+                    });
+                    return;
                 } else
                     xabber.openWindow($elem.attr('href'));
             }
