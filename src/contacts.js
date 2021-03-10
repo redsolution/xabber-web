@@ -1869,7 +1869,7 @@ define("xabber-contacts", function () {
                                 $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
                             }.bind(this));
                             if (!$(response).find('query').find('user').length)
-                                this.$el.html(this.$error.text('Block list is empty'));
+                                this.$el.html(this.$error.text(xabber.getString("groupchat_blocklist_empty")));
                         }
                     }, (err) => {
                         if (this.$el.prev().find(`.list-variant[data-value="${this.status}"] a`).hasClass('active'))
@@ -1923,7 +1923,7 @@ define("xabber-contacts", function () {
             },
 
             updateParticipants: function () {
-                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
+                this.model.participants.participantsRequest({version: this.participants.version }, (response) => {
                     let $response = $(response),
                         version = $response.find('query').attr('version');
                     if (this.model.get('group_info')) {
@@ -1940,9 +1940,9 @@ define("xabber-contacts", function () {
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
                     this.renderParticipants();
-                }.bind(this), function () {
+                }, () => {
                     this.$el.removeClass('request-waiting');
-                }.bind(this));
+                });
             },
 
             onParticipantsUpdated: function () {
@@ -1958,8 +1958,8 @@ define("xabber-contacts", function () {
 
             blockParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Block member", "Do you want to block "+
-                    $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'block'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("groupchat__dialog_block_member__header"), xabber.getString("groupchat__dialog_block_member__confirm", [$target.find('.participant-info .nickname').text()]),
+                    null, { ok_button_text: xabber.getString("groupchat_block")}).done(function (result) {
                     if (result) {
                         let participant = this.participants.get($target.attr('data-id'));
                         if (participant)
@@ -1977,8 +1977,8 @@ define("xabber-contacts", function () {
 
             kickParticipant: function (ev) {
                 let $target = $(ev.target).closest('.participant-wrap');
-                utils.dialogs.ask("Kick member", "Do you want to kick "+
-                    $target.find('.participant-info .nickname').text() + "?", null, { ok_button_text: 'kick'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("groupchat_kick_member"), xabber.getString("groupchat_do_you_really_want_to_kick_membername", [$target.find('.participant-info .nickname').text()]),
+                    null, { ok_button_text: xabber.getString("groupchat_kick")}).done(function (result) {
                     if (result) {
                         let participant = this.participants.get($target.attr('data-id'));
                         if (participant)
@@ -2019,24 +2019,23 @@ define("xabber-contacts", function () {
             },
 
             updateMemberAvatar: function (member) {
-                let image = Images.getDefaultAvatar(member.nickname || member.jid || member.id);
-                var $avatar = (member.id) ? this.$('tr[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
+                let image = Images.getDefaultAvatar(member.nickname || member.jid || member.id),
+                    $avatar = (member.id) ? this.$('tr[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
                 $avatar.setAvatar(image, this.member_avatar_size);
                 if (member.avatar) {
                     let cached_avatar = this.account.chat_settings.getB64Avatar(member.id);
-                    if (this.account.chat_settings.getHashAvatar(member.id) == member.avatar && cached_avatar) {
+                    if (this.account.chat_settings.getHashAvatar(member.id) == member.avatar && cached_avatar)
                         $avatar.setAvatar(cached_avatar, this.member_avatar_size);
-                    }
                     else {
-                        var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + member.id;
-                        this.model.getAvatar(member.avatar, node, function (avatar) {
+                        let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
+                        this.model.getAvatar(member.avatar, node, (avatar) => {
                             this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
                             this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
                             if (this.account.get('jid') === member.jid) {
                                 this.model.my_info.set('b64_avatar', avatar);
                                 this.model.trigger('update_my_info');
                             }
-                        }.bind(this));
+                        });
                     }
                 }
             },
@@ -2050,7 +2049,7 @@ define("xabber-contacts", function () {
                     participant = this.model.participants.get(participant_id);
                 (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
                 this.model.participants.participantsRequest({id: participant_id}, function (response) {
-                    let data_form = this.account.parseDataForm($(response).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                    let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                     this.participant_properties_panel.open(participant, data_form);
                 }.bind(this));
             },
@@ -2064,14 +2063,14 @@ define("xabber-contacts", function () {
 
             searchParticipant: function () {
                 let query = this.$('.participants-search-form input').val().toLowerCase();
-                this.$('.members-list-wrap .participant-wrap').each(function (idx, item) {
+                this.$('.members-list-wrap .participant-wrap').each((idx, item) => {
                     let $this = $(item),
                         participant_id = $this.data('id'),
-                        participant = this.model.participants.find(participant => participant.get('id') === participant_id);
-                    var jid = participant.get('jid').toLowerCase(),
+                        participant = this.model.participants.find(participant => participant.get('id') === participant_id),
+                        jid = participant.get('jid').toLowerCase(),
                         name = participant.get('nickname').toLowerCase();
                     $this.hideIf(name.indexOf(query) < 0 && jid.indexOf(query) < 0);
-                }.bind(this));
+                });
                 if (query)
                     this.$('.close-search-icon').show();
                 else
@@ -2079,8 +2078,7 @@ define("xabber-contacts", function () {
             },
 
             clearSearch: function (ev) {
-                if (ev)
-                    ev && ev.preventDefault();
+                ev && ev.preventDefault();
                 this.$('.search-input').val('');
                 this.searchParticipant();
             }
@@ -2198,14 +2196,13 @@ define("xabber-contacts", function () {
 
             updateMemberAvatar: function (member) {
                 let participant_id = member.get('id'),
-                    $avatar = this.$('.participant-details-item[data-id="'+ participant_id +'"] .circle-avatar');
+                    $avatar = this.$(`.participant-details-item[data-id="${participant_id}"] .circle-avatar`);
                 member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
                 $avatar.setAvatar(member.image, this.member_details_avatar_size);
                 this.$('.participant-details-item[data-id="'+ member.id +'"]').emojify('.badge', {emoji_size: 18});
                 if (member.get('avatar')) {
-                    if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id))) {
+                    if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)))
                         $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
-                    }
                     else {
                         let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
                         this.contact.getAvatar(member.avatar, node, function (avatar) {
@@ -2223,38 +2220,37 @@ define("xabber-contacts", function () {
                 !$(ev.target).hasClass('non-active') && this.render(this.participant);
             },
 
-            getMessages: function (options, callback) {
+            getMessages: function (options) {
                 let chat = this.account.chats.getChat(this.contact);
                 chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
-                chat.messages_view.messagesRequest(options, function () {
+                chat.messages_view.messagesRequest(options, () => {
                     this.close();
                     xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
-                }.bind(this));
+                });
             },
 
             changeAvatar: function (ev) {
-                var field = ev.target;
-                if (!field.files.length) {
+                let field = ev.target;
+                if (!field.files.length)
                     return;
-                }
-                var file = field.files[0];
+                let file = field.files[0];
                 field.value = '';
                 if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
-                    utils.dialogs.error('File is too large');
+                    utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
                     return;
                 } else if (!file.type.startsWith('image')) {
-                    utils.dialogs.error('Wrong image');
+                    utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
                     return;
                 }
 
-                utils.images.getAvatarFromFile(file).done(function (image) {
+                utils.images.getAvatarFromFile(file).done((image) => {
                     if (image) {
                         file.base64 = image;
                         this.new_avatar = file;
                         this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size);
                         this.updateSaveButton();
                     }
-                }.bind(this));
+                });
             },
 
             changeTimerValue: function (ev) {
@@ -2268,7 +2264,7 @@ define("xabber-contacts", function () {
                 $property_value.text($property_item.text());
                 $property_value.attr('data-value', $property_item.attr('data-value'));
                 if ($property_item.attr('data-value') === '0') {
-                    $property_value.addClass('default-value').text('set timer');
+                    $property_value.addClass('default-value').text(xabber.getString("dialog_rights__button_set_timer"));
                 } else if ($property_value.hasClass('default-value'))
                     $property_value.removeClass('default-value');
                 if (!$input_item.prop('checked')) {
@@ -2321,7 +2317,7 @@ define("xabber-contacts", function () {
             },
 
             checkKeydown: function (ev) {
-                if (ev.keyCode === constants.KEY_ENTER) {
+                if (ev && ev.keyCode === constants.KEY_ENTER) {
                     ev.preventDefault();
                     $(document.activeElement).blur();
                 }
@@ -2348,14 +2344,10 @@ define("xabber-contacts", function () {
             },
 
             block: function () {
-                utils.dialogs.ask("Block member", "Do you want to block "+
-                    this.participant.get('nickname') + "?", null, { ok_button_text: 'block'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("groupchat__dialog_block_member__header"), xabber.getString("groupchat__dialog_block_member__confirm", [this.participant.get('nickname')]),
+                    null, { ok_button_text: xabber.getString("groupchat_block")}).done(function (result) {
                     if (result) {
-                        this.participant.block(function () {
-                                this.close();
-                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
-                            }.bind(this),
+                        this.participant.block(() => {this.close();},
                             function (error) {
                                 if ($(error).find('not-allowed').length)
                                     utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
@@ -2367,13 +2359,11 @@ define("xabber-contacts", function () {
             kick: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
                     return;
-                utils.dialogs.ask("Kick member", "Do you want to kick "+
-                    this.participant.get('nickname') + "?", null, { ok_button_text: 'kick'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("groupchat_kick_member"), xabber.getString("groupchat_do_you_really_want_to_kick_membername", [this.participant.get('nickname')]),
+                    null, { ok_button_text: xabber.getString("groupchat_kick")}).done(function (result) {
                     if (result) {
                         this.participant.kick(function () {
                                 this.close();
-                                /*this.model.$el.find('.members-list-wrap .participant-wrap[data-id="' + this.participant.get('id') + '"]').remove();
-                                this.model.$el.find('.members-list-wrap').perfectScrollbar('update');*/
                             }.bind(this),
                             function (error) {
                                 if ($(error).find('not-allowed').length)
@@ -2426,15 +2416,15 @@ define("xabber-contacts", function () {
                     participant_in_roster = this.account.contacts.get(participant_jid);
                 if (!participant_jid || this.contact.get('incognito_chat')) {
                     let iq = $iq({to: this.contact.domain, type: 'set'})
-                        .c('query', { xmlns: Strophe.NS.GROUP_CHAT + '#create'})
+                        .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#create`})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
-                    this.account.sendIQ(iq, function (iq_response) {
+                    this.account.sendIQ(iq, (iq_response) => {
                         let group_jid = $(iq_response).find('query localpart').text() + '@' + this.contact.domain,
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
                         contact.set('subscription_preapproved', true);
                         contact.pres('subscribed');
-                        contact.pushInRoster(null, function () {
+                        contact.pushInRoster(null, () => {
                             contact.pres('subscribe');
                             contact.getMyInfo();
                             this.close();
@@ -2443,12 +2433,12 @@ define("xabber-contacts", function () {
                             let chat = this.account.chats.getChat(contact);
                             chat.messages.createSystemMessage({
                                 from_jid: group_jid,
-                                message: 'Initiating private chat with ' + this.participant.get('nickname') + ' from ' + this.contact.get('jid') + '. If your invitation is accepted, you won\'t see each other\'s real XMPP IDs.'
+                                message: xabber.getString("groupchat__private_chat__text_message_init", [this.participant.get('nickname'), this.contact.get('jid')])
                             });
-                        }.bind(this));
-                    }.bind(this), function (error) {
+                        });
+                    }, (error) => {
                         let $error = $(error),
-                            private_chat_jid = $error.find('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"] jid').text();
+                            private_chat_jid = $error.find(`x[xmlns="${Strophe.NS.GROUP_CHAT}"] jid`).text();
                         if (private_chat_jid) {
                             let contact = this.account.contacts.mergeContact(private_chat_jid),
                                 chat = this.account.chats.getChat(contact);
@@ -2459,7 +2449,7 @@ define("xabber-contacts", function () {
                         let err_text = $(error).find('text[lang="en"]').text() || $(error).find('text').first().text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
                         this.close();
                         utils.dialogs.error(err_text);
-                    }.bind(this));
+                    });
                 }
                 else {
                     if (participant_in_roster)
@@ -2495,7 +2485,7 @@ define("xabber-contacts", function () {
                     else {
                         $right_item.removeClass('changed');
                         if ($right_item.hasClass('changed-timer'))
-                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text('set timer').attr('data-value', "");
+                            $right_item.find('.timer-item-wrap .property-value').addClass('default-value').text(xabber.getString("dialog_rights__button_set_timer")).attr('data-value', "");
                     }
                 }
                 this.updateSaveButton();
@@ -2521,7 +2511,7 @@ define("xabber-contacts", function () {
                     has_changes = true;
                     iq_changes.c('nickname').t(nickname_value).up();
                 }
-                this.$('.right-item').each(function(idx, right_item) {
+                this.$('.right-item').each((idx, right_item) => {
                     if ($(right_item).hasClass('changed')) {
                         var $right_item = $(right_item),
                             right_name = $right_item.find('.field input')[0].id;
@@ -2543,15 +2533,14 @@ define("xabber-contacts", function () {
                             }
                         }
                     }
-                }.bind(this));
+                });
                 if (changed_avatar)
-                    this.contact.pubAvatar(changed_avatar, ('#' + member_id), function () {
+                    this.contact.pubAvatar(changed_avatar, ('#' + member_id), () => {
                         this.$('.buttons-wrap button').removeClass('non-active');
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        // this.model.$('.members-list-wrap .list-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_avatar_size);
-                        this.$('.participant-details-item[data-id="'+ member_id +'"] .circle-avatar').setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                        this.$(`.participant-details-item[data-id="${member_id}"] .circle-avatar`).setAvatar(changed_avatar.base64, this.member_details_avatar_size);
                         this.close();
-                    }.bind(this), function (error) {
+                    }, function (error) {
                         this.$('.buttons-wrap button').removeClass('non-active');
                         $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                         let error_text = $(error).find('text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
@@ -2559,30 +2548,29 @@ define("xabber-contacts", function () {
                     });
                 if (has_changes)
                     this.account.sendIQ(iq_changes,
-                        function () {
+                        () => {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.participant.set('nickname', nickname_value);
                             this.close();
-                        }.bind(this),
-                        function (error) {
+                        },
+                        (error) => {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.close();
-                            if ($(error).find('not-allowed').length) {
+                            if ($(error).find('not-allowed').length)
                                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
-                            }
-                        }.bind(this));
+                        });
                 if (rights_changed) {
                     let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
-                    this.account.sendIQ(iq_rights_changes, function () {
+                    this.account.sendIQ(iq_rights_changes, () => {
                             this.close();
-                        }.bind(this),
-                        function (error) {
+                        },
+                        (error) => {
                             this.close();
                             if ($(error).find('not-allowed').length)
                                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
-                        }.bind(this));
+                        });
                 }
                 $btn.blur();
             }
@@ -2615,12 +2603,12 @@ define("xabber-contacts", function () {
                         this.data.set('visible', false);
                     }.bind(this)
                 });
-                var $insert_emoticon = this.$('.insert-emoticon'),
+                let $insert_emoticon = this.$('.insert-emoticon'),
                     $emoji_panel_wrap = this.$('.emoticons-panel-wrap'),
                     $emoji_panel = this.$('.emoticons-panel'),
                     _timeout;
 
-                for (var emoji_list in Emoji.all) {
+                for (let emoji_list in Emoji.all) {
                     let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
                         list_name = emoji_list.replace(/ /g, '_');
                     $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
@@ -2666,10 +2654,9 @@ define("xabber-contacts", function () {
                 }.bind(this));
                 $emoji_panel_wrap.mousedown(function (ev) {
                     if (ev && ev.preventDefault) { ev.preventDefault(); }
-                    if (ev.button) {
+                    if (ev.button)
                         return;
-                    }
-                    var $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
+                    let $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
                     $target.length && this.typeEmoticon($target.data('emoji'));
                 }.bind(this));
             },
@@ -2680,28 +2667,26 @@ define("xabber-contacts", function () {
 
             saveNewBadge: function () {
                 let new_badge = this.$('.badge-text').getTextFromRichTextarea();
-                if (Array.from(new_badge).length > 32) {
-                    this.$('.modal-content .error').text("Badge can't be longer than 32 symbols");
-                }
+                if (Array.from(new_badge).length > 32)
+                    this.$('.modal-content .error').text(xabber.getString("groupchat__set_badge__error_length"));
                 else {
                     if (new_badge != this.participant.get('badge')) {
                         let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-                            .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
+                            .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`})
                             .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
-                        this.account.sendIQ(iq_changes, function () {
-                                this.model.updateBadge(new_badge);
-                                this.close();
-                            }.bind(this),
-                            function () {
-                                this.$('.modal-content .error').text(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
-                            }.bind(this))
+                        this.account.sendIQ(iq_changes, () => {
+                            this.model.updateBadge(new_badge);
+                            this.close();
+                        }, () => {
+                            this.$('.modal-content .error').text(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+                        })
                     }
                 }
             },
 
             typeEmoticon: function (emoji) {
-                var emoji_node = emoji.emojify({tag_name: 'span'}),
+                let emoji_node = emoji.emojify({tag_name: 'span'}),
                     $textarea = this.$('.badge-text');
                 $textarea.focus().pasteHtmlAtCaret(emoji_node);
             },
@@ -2769,19 +2754,18 @@ define("xabber-contacts", function () {
                 this.actual_default_restrictions = [];
                 this.$('button').blur();
                 let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
-                    .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'});
-                this.account.sendFast(iq_get_rights, function(iq_all_rights) {
+                    .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`});
+                this.account.sendFast(iq_get_rights, (iq_all_rights) => {
                     this.showDefaultRestrictions(iq_all_rights);
                     callback && callback();
-                }.bind(this),
-                    function () {
-                        utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
-                    }.bind(this));
+                }, () => {
+                    utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
+                });
             },
 
             updateSaveButton: function () {
                 let has_changes = false;
-                this.$('.default-restrictions-list-wrap .right-item').each(function (idx, item) {
+                this.$('.default-restrictions-list-wrap .right-item').each((idx, item) => {
                     let $item = $(item),
                         restriction_name = $item.find('input').attr('id'),
                         restriction_expires = $item.find('.select-timer .property-value').attr('data-value');
@@ -2792,7 +2776,7 @@ define("xabber-contacts", function () {
                         else if (this.actual_default_restrictions.find(restriction => restriction.name == restriction_name))
                             has_changes = true;
                     }
-                }.bind(this));
+                });
                 this.$('.btn-default-restrictions-save').switchClass('non-active', !has_changes);
             },
 
@@ -2800,12 +2784,12 @@ define("xabber-contacts", function () {
                 let $target = $(ev.target);
                 if (!$target.prop('checked')) {
                     $target.closest('.right-item').find('.select-timer .property-value').attr('data-value', "").addClass('default-value')
-                        .text('set timer');
+                        .text(xabber.getString("dialog_rights__button_set_timer"));
                 }
             },
 
             keyUpInput: function (ev) {
-                if (ev.keyCode === constants.KEY_ENTER)
+                if (ev && ev.keyCode === constants.KEY_ENTER)
                     $(ev.target).click();
             },
 
@@ -2824,7 +2808,7 @@ define("xabber-contacts", function () {
                 $property_value.attr('data-value', $property_item.attr('data-value'));
                 if ($property_item.attr('data-value') == 0) {
                     $property_value.addClass('default-value');
-                    $property_value.text('set timer');
+                    $property_value.text(xabber.getString("dialog_rights__button_set_timer"));
                 } else if ($property_value.hasClass('default-value'))
                     $property_value.removeClass('default-value');
                 if (!$input_item.prop('checked'))
@@ -2833,9 +2817,9 @@ define("xabber-contacts", function () {
             },
 
             showDefaultRestrictions: function (iq_all_rights) {
-                let data_form = this.account.parseDataForm($(iq_all_rights).find('x[xmlns="' + Strophe.NS.DATAFORM + '"]'));
+                let data_form = this.account.parseDataForm($(iq_all_rights).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                 data_form && (this.default_restrictions = _.clone(data_form));
-                data_form.fields.forEach(function (field) {
+                data_form.fields.forEach((field) => {
                     if (field.type === 'fixed' || field.type === 'hidden')
                         return;
                     let attrs = {
@@ -2860,7 +2844,7 @@ define("xabber-contacts", function () {
                                 .text(attrs.expires);
                         }
                     }
-                }.bind(this));
+                });
             },
 
             saveChanges: function () {
@@ -2868,10 +2852,10 @@ define("xabber-contacts", function () {
                     return;
                 this.$('button').blur();
                 let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
-                        .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#default-rights'}),
+                        .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`}),
                     has_new_default_restrictions = false,
                     data_form = _.clone(this.default_restrictions);
-                this.$('.default-restrictions-list-wrap .right-item').each(function (idx, item) {
+                this.$('.default-restrictions-list-wrap .right-item').each((idx, item) => {
                     let $item = $(item),
                         restriction_name = $item.find('input').attr('id'),
                         restriction_expires = $item.find('.select-timer .property-value').attr('data-value');
@@ -2892,7 +2876,7 @@ define("xabber-contacts", function () {
                             has_new_default_restrictions = true;
                         }
                     }
-                }.bind(this));
+                });
 
                 if (has_new_default_restrictions) {
                     this.account.addDataFormToStanza(iq_change_default_rights, data_form);
@@ -2911,9 +2895,9 @@ define("xabber-contacts", function () {
                     new_expire_time = expire_time_item.val(),
                     $restriction_item = expire_time_item.prev();
                 if (expire_time_item.val() == '0')
-                    $restriction_item .find('.restriction-description').text('Indefinitely');
+                    $restriction_item .find('.restriction-description').text(xabber.getString("groupchat__rights_timer__indefinitely"));
                 else
-                    $restriction_item .find('.restriction-description').text('For ' + new_expire_time);
+                    $restriction_item .find('.restriction-description').text(xabber.getString("groupchat__rights_timer__text_expire", [Number(new_expire_time)]));
                 $restriction_item .find('input').removeClass().addClass(new_expire_time);
                 expire_time_item.remove();
             }
@@ -2972,7 +2956,7 @@ define("xabber-contacts", function () {
             block: function (callback, errback) {
                 let id = this.get('id'),
                     iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-                        .c('block', {xmlns: Strophe.NS.GROUP_CHAT + '#block'})
+                        .c('block', {xmlns: `${Strophe.NS.GROUP_CHAT}#block`})
                         .c('id').t(id);
                 this.account.sendIQ(iq, function () {
                     callback && callback();
@@ -3083,7 +3067,7 @@ define("xabber-contacts", function () {
 
             search: function (query) {
                 let list = [];
-                this.models.forEach(function (participant) {
+                this.models.forEach((participant) => {
                     let jid = participant.get('jid');
                     if (query) {
                         query = query.toLowerCase();
@@ -3092,7 +3076,7 @@ define("xabber-contacts", function () {
                             list.push(participant);
                     } else
                         list.push(participant);
-                }.bind(this));
+                });
                 return list;
             },
 
@@ -3189,9 +3173,8 @@ define("xabber-contacts", function () {
                 let all_participants_lists = _.clone(this.get('participants_lists')),
                     participants_list = all_participants_lists.find(list => list.jid === jid) || [],
                     participants_list_idx = all_participants_lists.indexOf(participants_list);
-                if (participants_list_idx != -1) {
+                if (participants_list_idx != -1)
                     all_participants_lists.splice(participants_list_idx, 1);
-                }
                 all_participants_lists.push({jid: jid, participants_list: updated_participants_list, version: participants_list.version});
                 this.save('participants_lists', all_participants_lists);
             },
@@ -3199,7 +3182,7 @@ define("xabber-contacts", function () {
             removeParticipantFromList: function (jid, participant_id) {
                 let participants_list = this.getParticipantsList(jid);
                 if (participants_list.length) {
-                    var participant_idx = participants_list.indexOf(participants_list.find(participant => participant.id === participant_id));
+                    let participant_idx = participants_list.indexOf(participants_list.find(participant => participant.id === participant_id));
                     if (participant_idx != -1)
                         participants_list.splice(participant_idx, 1);
                     this.setParticipantsList(jid, participants_list);
@@ -3209,9 +3192,8 @@ define("xabber-contacts", function () {
             resetParticipantsList: function (jid) {
                 let all_participants_lists = _.clone(this.get('participants_lists')),
                     participants_list_idx = all_participants_lists.indexOf(all_participants_lists.find(list => list.jid === jid));
-                if (participants_list_idx != -1) {
+                if (participants_list_idx != -1)
                     all_participants_lists.splice(participants_list_idx, 1);
-                }
                 all_participants_lists.push({jid: jid, participants_list: [], version: 0});
                 this.save('participants_lists', all_participants_lists);
             }
@@ -3224,29 +3206,25 @@ define("xabber-contacts", function () {
             avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
             events: {
-                "click .btn-chat": "openChat",
-                "click .btn-accept": "join",
                 "click .btn-join": "join",
                 "click .btn-decline": "reject",
-                "click .btn-decline-all": "declineAll",
-                "click .btn-block": "blockContact",
-                "click .btn-escape": "closeInvitationView"
+                "click .btn-block": "blockContact"
             },
 
             _initialize: function (options) {
                 this.account = this.model.account;
-                this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : 'You are invited to group chat. If you accept, ' + this.account.get('jid') + ' username shall be visible to group chat members');
+                this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : xabber.getString("groupchat__public_group__text_invitation", [this.account.get('jid')]));
                 this.message = options.message;
                 this.model.on("change", this.update, this);
             },
 
-            render: function (options) {
+            render: function () {
                 this.updateAvatar();
                 this.updateName();
             },
 
             update: function () {
-                var changed = this.model.changed;
+                let changed = this.model.changed;
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
             },
@@ -3264,7 +3242,7 @@ define("xabber-contacts", function () {
             },
 
             updateAvatar: function () {
-                var image = this.model.cached_image;
+                let image = this.model.cached_image;
                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
             },
 
@@ -3288,7 +3266,7 @@ define("xabber-contacts", function () {
                     iq_unblocking = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING}),
                     iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.model.get('jid') + '/' + moment.now()});
-                this.account.sendIQ(iq_get_blocking, function (iq_blocking_items) {
+                this.account.sendIQ(iq_get_blocking, (iq_blocking_items) => {
                     let items = $(iq_blocking_items).find('item');
                     if (items.length > 0) {
                         items.each(function (idx, item) {
@@ -3298,12 +3276,12 @@ define("xabber-contacts", function () {
                         });
                     }
                     if ($(iq_unblocking.nodeTree).find('item').length)
-                        this.account.sendIQ(iq_unblocking, function () {
+                        this.account.sendIQ(iq_unblocking, () => {
                             this.account.sendIQ(iq_set_blocking);
-                        }.bind(this));
+                        });
                     else
                         this.account.sendIQ(iq_set_blocking);
-                }.bind(this));
+                });
             },
 
             join: function () {
@@ -3331,20 +3309,9 @@ define("xabber-contacts", function () {
                 });
             },
 
-            declineAll: function () {
-                if (this.model.get('private_chat') && this.model.get('private_chat') !== true) {
-                    let pres = $pres({from: this.account.connection.jid, to: this.model.get('private_chat')})
-                        .c('peer-to-peer').t(false);
-                    this.account.sendPres(pres);
-                }
-                this.model.trigger('remove_invite', this.model);
-                this.closeChat();
-            },
-
-            blockContact: function (ev) {
-                var contact = this.model;
-                utils.dialogs.ask("Block contact", "Do you want to block "+
-                    contact.get('name')+"?", null, { ok_button_text: 'block'}).done(function (result) {
+            blockContact: function () {
+                let contact = this.model;
+                utils.dialogs.ask(xabber.getString("contact_block"), xabber.getString("block_contact_confirm", [contact.get('name'), this.account.get('jid')]), null, { ok_button_text: xabber.getString("contact_bar_block")}).done(function (result) {
                     if (result) {
                         contact.trigger('remove_invite', contact);
                         contact.block();
@@ -3385,11 +3352,11 @@ define("xabber-contacts", function () {
                 return name;
             },
 
-            keyUp: function (ev) {
-                var value = this.getValue();
+            keyUp: function () {
+                let value = this.getValue();
                 this.$input.switchClass('changed', this.$input.val() !== value);
                 if (!this.$input.val())
-                    this.$input.prop('placeholder', this.getDefaultName() || 'Set contact name');
+                    this.$input.prop('placeholder', this.getDefaultName() || xabber.getString("contact_settings__hint_set_name"));
             }
         });
 
@@ -3411,7 +3378,7 @@ define("xabber-contacts", function () {
             render: function () {
                 this.$el.html(this.template());
                 if (this.model.get('in_roster')) {
-                    var groups = _.clone(this.model.get('groups')),
+                    let groups = _.clone(this.model.get('groups')),
                         all_groups = _.map(this.account.groups.notSpecial(), function (group) {
                             var name = group.get('name');
                             return {name: name, checked: _.contains(groups, name), id: uuid()};
@@ -3425,7 +3392,7 @@ define("xabber-contacts", function () {
             },
 
             editGroup: function (ev) {
-                var $target = $(ev.target),
+                let $target = $(ev.target),
                     $input = $target.siblings('input'),
                     checked = !$input.prop('checked'),
                     group_name = $input.attr('data-groupname'),
@@ -3441,13 +3408,13 @@ define("xabber-contacts", function () {
             },
 
             checkNewGroup: function (ev) {
-                var name = $(ev.target).val(),
+                let name = $(ev.target).val(),
                     $checkbox = this.$('.new-group-checkbox');
                 $checkbox.showIf(name && !this.account.groups.get(name));
             },
 
-            addNewGroup: function (ev) {
-                var $input = this.$('.new-group-name input'),
+            addNewGroup: function () {
+                let $input = this.$('.new-group-name input'),
                     name = $input.val(),
                     groups = _.clone(this.model.get('groups')),
                     idx = groups.indexOf(name);
@@ -3470,7 +3437,7 @@ define("xabber-contacts", function () {
 
             comparator: function (contact1, contact2) {
                 if (xabber.settings.roster.sorting === 'online-first') {
-                    var s1 = contact1.get('status'),
+                    let s1 = contact1.get('status'),
                         s2 = contact2.get('status'),
                         sw1 = constants.STATUS_WEIGHTS[s1],
                         sw2 = constants.STATUS_WEIGHTS[s2],
@@ -3487,7 +3454,7 @@ define("xabber-contacts", function () {
             },
 
             onContactChanged: function (contact) {
-                var changed = contact.changed;
+                let changed = contact.changed;
                 if (_.has(changed, 'name') || _.has(changed, 'status_updated')) {
                     this.sort();
                     this.trigger('update_contact_item', contact);
@@ -3505,9 +3472,8 @@ define("xabber-contacts", function () {
                 attrs.name || (attrs.name = attrs.id);
                 this.set(attrs);
                 this._settings = this.account.groups_settings.get(attrs.name);
-                if (!this._settings) {
+                if (!this._settings)
                     this._settings = this.account.groups_settings.create({name: attrs.name});
-                }
                 this.settings = this._settings.attributes;
                 this.contacts = new xabber.GroupContacts(null, {group: this});
                 this.settings_view = new xabber.GroupSettingsView({model: this});
@@ -3521,13 +3487,13 @@ define("xabber-contacts", function () {
             },
 
             updateCounter: function () {
-                var all = this.contacts.length,
+                let all = this.contacts.length,
                     online = all - this.contacts.where({status: 'offline'}).length;
                 this.set('counter', {all: all, online: online});
             },
 
             renameGroup: function (new_name) {
-                var name = this.get('name'),
+                let name = this.get('name'),
                     attrs = _.clone(this.settings);
                 attrs.name = new_name;
                 this._settings.destroy();
@@ -3536,7 +3502,7 @@ define("xabber-contacts", function () {
                 this.set({id: new_name, name: new_name});
                 this.trigger('rename', this, name);
                 _.each(_.clone(this.contacts.models), function (contact) {
-                    var groups = _.clone(contact.get('groups')),
+                    let groups = _.clone(contact.get('groups')),
                         index = groups.indexOf(name);
                     if (index >= 0) {
                         groups.splice(index, 1);
@@ -3550,10 +3516,10 @@ define("xabber-contacts", function () {
             },
 
             deleteGroup: function () {
-                var name = this.get('name');
+                let name = this.get('name');
                 this._settings.destroy();
                 _.each(_.clone(this.contacts.models), function (contact) {
-                    var groups = _.clone(contact.get('groups')),
+                    let groups = _.clone(contact.get('groups')),
                         index = groups.indexOf(name);
                     if (index >= 0) {
                         groups.splice(index, 1);
@@ -3576,7 +3542,7 @@ define("xabber-contacts", function () {
             },
 
             onChangedRosterSettings: function () {
-                var changed = xabber._roster_settings.changed;
+                let changed = xabber._roster_settings.changed;
                 if (_.has(changed, 'show_offline')) {
                     this._settings.trigger('change:show_offline');
                 }
@@ -3616,7 +3582,7 @@ define("xabber-contacts", function () {
             },
 
             updateExpanded: function () {
-                var expanded = this.data.get('expanded');
+                let expanded = this.data.get('expanded');
                 this.$el.switchClass('shrank', !expanded);
                 this.$('.arrow').switchClass('mdi-chevron-down', expanded);
                 this.$('.arrow').switchClass('mdi-chevron-right', !expanded);
@@ -3625,7 +3591,7 @@ define("xabber-contacts", function () {
             },
 
             updateGroupIcon: function () {
-                var mdi_icon, show_offline = this.model.settings.show_offline;
+                let mdi_icon, show_offline = this.model.settings.show_offline;
                 if (show_offline === 'default') {
                     mdi_icon = 'settings';
                 } else if (show_offline === 'yes') {
@@ -3641,12 +3607,12 @@ define("xabber-contacts", function () {
             },
 
             updateMembersCounter: function () {
-                var counter = this.model.get('counter');
+                let counter = this.model.get('counter');
                 this.$('.participant-counter').text('('+counter.online+'/'+counter.all+')');
             },
 
             onContactAdded: function (contact) {
-                var view = this.addChild(contact.get('jid'), this.item_view, {model: contact});
+                let view = this.addChild(contact.get('jid'), this.item_view, {model: contact});
                 this.updateContactItem(contact);
             },
 
@@ -3656,9 +3622,9 @@ define("xabber-contacts", function () {
             },
 
             updateContactItem: function (contact) {
-                var view = this.child(contact.get('jid'));
+                let view = this.child(contact.get('jid'));
                 if (!view) return;
-                var roster_settings = xabber.settings.roster,
+                let roster_settings = xabber.settings.roster,
                     group_settings = this.model.settings,
                     is_default_show_offline = group_settings.show_offline === 'default',
                     show_offline = group_settings.show_offline === 'yes' ||
@@ -3666,7 +3632,7 @@ define("xabber-contacts", function () {
                     is_offline = constants.STATUS_WEIGHTS[contact.get('status')] >= 6;
 
                 view.$el.switchClass('invisible', is_offline && !show_offline).detach();
-                var index = this.model.contacts.indexOf(contact);
+                let index = this.model.contacts.indexOf(contact);
                 if (index === 0) {
                     this.$('.group-head').after(view.$el);
                 } else {
@@ -3677,7 +3643,7 @@ define("xabber-contacts", function () {
                 return view;
             },
 
-            showSettingsIcon: function (ev) {
+            showSettingsIcon: function () {
                 this.$('.group-icon').attr('data-mdi', 'settings').removeClass('hidden');
             },
 
@@ -3688,13 +3654,13 @@ define("xabber-contacts", function () {
 
             onChangedOfflineSetting: function () {
                 this.updateGroupIcon();
-                var roster_settings = xabber.settings.roster,
+                let roster_settings = xabber.settings.roster,
                     group_settings = this.model.settings,
                     is_default_show_offline = group_settings.show_offline === 'default',
                     show_offline = group_settings.show_offline === 'yes' ||
                         (is_default_show_offline && roster_settings.show_offline === 'yes');
                 _.each(this.children, function (view) {
-                    var is_offline = constants.STATUS_WEIGHTS[view.model.get('status')] >= 6;
+                    let is_offline = constants.STATUS_WEIGHTS[view.model.get('status')] >= 6;
                     view.$el.switchClass('invisible', is_offline && !show_offline);
                 });
                 this.parent.parent.onListChanged();
@@ -3716,7 +3682,7 @@ define("xabber-contacts", function () {
             },
 
             toggle: function () {
-                var expanded = !this.data.get('expanded');
+                let expanded = !this.data.get('expanded');
                 this.data.set('expanded', expanded);
                 this.model._settings.save('expanded', expanded);
             }
@@ -3751,7 +3717,7 @@ define("xabber-contacts", function () {
 
             _initialize: function () {
                 this._settings = this.model._settings;
-                var name = this.model.get('name');
+                let name = this.model.get('name');
                 if (this.model.isSpecial()) {
                     this.$('.group-name input').attr('readonly', true);
                     this.$('.btn-delete').addClass('hidden');
@@ -3778,15 +3744,15 @@ define("xabber-contacts", function () {
 
             validateName: function (name) {
                 if (!name) {
-                    return 'Please input name!';
+                    return xabber.getString("dialog_add_circle__error__text_input_name");
                 }
                 if (this.model.collection.get(name)) {
-                    return 'Wrong name';
+                    return xabber.getString("dialog_add_circle__error__text_wrong_name");
                 }
             },
 
             applySettings: function () {
-                var new_name = this.$('.group-name input').val();
+                let new_name = this.$('.group-name input').val();
                 if (new_name !== this.model.get('name')) {
                     var name_error = this.validateName(new_name);
                     if (name_error) {
@@ -3800,11 +3766,11 @@ define("xabber-contacts", function () {
             },
 
             deleteGroup: function () {
-                var name = this.model.get('name');
-                utils.dialogs.ask('Remove group', "Do you want to remove group "+name+"?", null, { ok_button_text: 'remove'})
-                    .done(function (result) {
+                let name = this.model.get('name');
+                utils.dialogs.ask(xabber.getString("circle_remove"), xabber.getString("circle_remove_confirm", [name]), null, { ok_button_text: xabber.getString("remove")})
+                    .done((result) => {
                         result && this.model.deleteGroup();
-                    }.bind(this));
+                    });
             },
 
             onHide: function () {
@@ -3953,7 +3919,7 @@ define("xabber-contacts", function () {
             },
 
             onBlockingIQ: function (iq) {
-                let $elem = $(iq).find('[xmlns="' + Strophe.NS.BLOCKING + '"]'),
+                let $elem = $(iq).find(`[xmlns="${Strophe.NS.BLOCKING}"]`),
                     tag = $elem[0].tagName.toLowerCase(),
                     blocked = tag.startsWith('block');
                 $elem.find('item').each(function (idx, item) {
@@ -3988,7 +3954,7 @@ define("xabber-contacts", function () {
             },
 
             update: function (contact, event) {
-                var contains = contact.get('in_roster') || contact.get('known');
+                let contains = contact.get('in_roster') || contact.get('known');
                 if (contains) {
                     if (!this.get(contact)) {
                         this.add(contact);
@@ -4003,10 +3969,9 @@ define("xabber-contacts", function () {
             },
 
             onContactAdded: function (contact) {
-                if (!contact.get('in_roster')) {
+                if (!contact.get('in_roster'))
                     return;
-                }
-                var groups = contact.get('groups');
+                let groups = contact.get('groups');
                 if (!groups.length) {
                     this.addContactToGroup(contact, constants.GENERAL_GROUP_ID);
                 } else {
@@ -4015,12 +3980,12 @@ define("xabber-contacts", function () {
             },
 
             onContactChanged: function (contact) {
-                var changed = contact.changed,
+                let changed = contact.changed,
                     known_changed = _.has(changed, 'known'),
                     in_roster_changed = _.has(changed, 'in_roster'),
                     groups_changed = _.has(changed, 'groups');
                 if (in_roster_changed || known_changed || groups_changed) {
-                    var groups;
+                    let groups;
                     if (contact.get('in_roster')) {
                         groups = _.clone(contact.get('groups'));
                         if (!groups.length) {
@@ -4030,7 +3995,7 @@ define("xabber-contacts", function () {
                         groups = [];
                     }
                     // TODO: optimize
-                    var groups_to_remove = this.groups.filter(function (group) {
+                    let groups_to_remove = this.groups.filter(function (group) {
                         return !_.contains(groups, group.get('id'));
                     });
                     _.each(groups_to_remove, function (group) {
@@ -4048,11 +4013,10 @@ define("xabber-contacts", function () {
             },
 
             getGroup: function (name) {
-                var group = this.groups.get(name);
-                if (group) {
+                let group = this.groups.get(name);
+                if (group)
                     return group;
-                }
-                var attrs = {id: name};
+                let attrs = {id: name};
                 if (name === constants.GENERAL_GROUP_ID) {
                     attrs.name = xabber.settings.roster.general_group_name;
                 } else if (name === constants.NON_ROSTER_GROUP_ID) {
@@ -4062,7 +4026,7 @@ define("xabber-contacts", function () {
             },
 
             addContactToGroup: function (contact, name) {
-                var group = this.getGroup(name);
+                let group = this.getGroup(name);
                 group.contacts.add(contact);
             },
 
@@ -4096,11 +4060,11 @@ define("xabber-contacts", function () {
                 this.account.set('last_sync', sync_timestamp);
                 let last_chat_msg_id = $(iq).find('set last'),
                     encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-                    retract_version = $(iq).find('query conversation[type="chat"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version');
+                    retract_version = $(iq).find('query conversation[type="chat"]').first().children(`metadata[node="${Strophe.NS.REWRITE}"]`).children('retract').attr('version');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
                 if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
-                    xabber.chats_view.$('.load-chats-feedback').text('All chats loaded');
+                    xabber.chats_view.$('.load-chats-feedback').text(xabber.getString("synchronization__text_all_chats_loaded"));
                     return;
                 }
                 if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
@@ -4320,7 +4284,7 @@ define("xabber-contacts", function () {
             },
 
             updateAvatar: function () {
-                var image = this.account.cached_image;
+                let image = this.account.cached_image;
                 this.$info.find('.circle-avatar').setAvatar(image, this.avatar_size);
             },
 
@@ -4329,14 +4293,14 @@ define("xabber-contacts", function () {
             },
 
             updateExpanded: function () {
-                var expanded = this.data.get('expanded');
+                let expanded = this.data.get('expanded');
                 this.$el.switchClass('shrank', !expanded);
                 this.parent.updateScrollBar();
             },
 
             updateGroupPosition: function (view) {
                 view.$el.detach();
-                var index = this.groups.indexOf(view.model);
+                let index = this.groups.indexOf(view.model);
                 if (index === 0) {
                     this.$info.after(view.$el);
                 } else {
@@ -4346,12 +4310,12 @@ define("xabber-contacts", function () {
             },
 
             onGroupAdded: function (group) {
-                var view = this.addChild(group.get('id'), this.group_view, {model: group});
+                let view = this.addChild(group.get('id'), this.group_view, {model: group});
                 this.updateGroupPosition(view);
             },
 
             onGroupRenamed: function (group, old_name) {
-                var view = this.child(old_name);
+                let view = this.child(old_name);
                 delete this.children[old_name];
                 this.children[group.get('name')] = view;
                 view && this.updateGroupPosition(view);
@@ -4384,13 +4348,13 @@ define("xabber-contacts", function () {
                     this.updateGlobalCounter, this);
             },
 
-            updateCounter: function (contact) {
-                var all = this.roster.length,
+            updateCounter: function () {
+                let all = this.roster.length,
                     online = all - this.roster.where({status: 'offline'}).length;
                 this.$info.find('.counter').text(online + '/' + all);
             },
 
-            updateGlobalCounter: function (contact) {
+            updateGlobalCounter: function () {
                 this.parent.updateCounter();
             }
         });
@@ -4407,9 +4371,9 @@ define("xabber-contacts", function () {
             search: function (query) {
                 this.$el.removeClass('shrank');
                 this.$('.group-head').addClass('hidden');
-                var count = 0, hashes = {};
+                let count = 0, hashes = {};
                 this.$('.roster-contact').each(function (idx, item) {
-                    var $item = $(item),
+                    let $item = $(item),
                         jid = $item.data('jid'),
                         contact = this.roster.get(jid);
                     if (!contact) return;
@@ -4418,7 +4382,7 @@ define("xabber-contacts", function () {
                         return;
                     }
                     hashes[contact.hash_id] = true;
-                    var name = contact.get('name').toLowerCase(),
+                    let name = contact.get('name').toLowerCase(),
                         hide = name.indexOf(query) < 0 && jid.indexOf(query) < 0;
                     $item.hideIf(hide);
                     hide || count++;
@@ -4506,7 +4470,7 @@ define("xabber-contacts", function () {
             },
 
             openBlockWindow: function () {
-                utils.dialogs.ask_enter_value("Block", "Block a specific xmpp address", {input_placeholder_value: 'name@example.com'}, { ok_button_text: 'block'}).done(function (result) {
+                utils.dialogs.ask_enter_value(xabber.getString("contact_bar_block"), xabber.getString("dialog_block_xmpp_address__text"), {input_placeholder_value: xabber.getString("dialog_block_xmpp_address__hint_address")}, { ok_button_text: xabber.getString("contact_bar_block")}).done(function (result) {
                     if (result) {
                         let contact = this.account.contacts.get(result);
                         if (contact)
@@ -4532,7 +4496,7 @@ define("xabber-contacts", function () {
             },
 
             updateOneRosterView: function (account) {
-                var jid = account.get('jid'),
+                let jid = account.get('jid'),
                     view = this.child(jid);
                 if (view) {
                     view.$el.detach();
@@ -4541,7 +4505,7 @@ define("xabber-contacts", function () {
                 } else {
                     return;
                 }
-                var index = this.model.connected.indexOf(account);
+                let index = this.model.connected.indexOf(account);
                 if (index === 0) {
                     this.$('.contact-list').prepend(view.$el);
                 } else {
@@ -4553,7 +4517,7 @@ define("xabber-contacts", function () {
             updateRosterViews: function () {
                 _.each(this.children, function (view) { view.detach(); });
                 this.model.each(function (account) {
-                    var jid = account.get('jid'), view = this.child(jid);
+                    let jid = account.get('jid'), view = this.child(jid);
                     view && this.$('.contact-list').append(view.$el);
                 }.bind(this));
                 this.updateScrollBar();
@@ -4584,7 +4548,7 @@ define("xabber-contacts", function () {
                 this.updateTransparency();
                 this.model.on("activate deactivate destroy", this.updateCounter, this);
                 this.data.on("change", this.updateLayout, this);
-                var pinned = this._settings.get('pinned');
+                let pinned = this._settings.get('pinned');
                 this.data.set({expanded: pinned, pinned: pinned});
             },
 
@@ -4612,19 +4576,18 @@ define("xabber-contacts", function () {
             },
 
             collaps: function () {
-                if (!this.data.get('pinned')) {
+                if (!this.data.get('pinned'))
                     this.data.set('expanded', false);
-                }
             },
 
             pinUnpin: function () {
-                var pinned = !this.data.get('pinned');
+                let pinned = !this.data.get('pinned');
                 this._settings.save('pinned', pinned);
                 this.data.set('pinned', pinned);
             },
 
             updateLayout: function () {
-                var changed = this.data.changed;
+                let changed = this.data.changed;
                 if (_.has(changed, 'expanded') || _.has(changed, 'pinned')) {
                     xabber.trigger('update_layout', {roster_state_changed: true});
                 }
@@ -4660,7 +4623,7 @@ define("xabber-contacts", function () {
             },
 
             getContactForItem: function (item) {
-                var $item = $(item),
+                let $item = $(item),
                     account_jid = $item.parent().parent().data('jid'),
                     jid = $item.data('jid'),
                     roster_view = this.child(account_jid);
@@ -4721,7 +4684,7 @@ define("xabber-contacts", function () {
                     }
                 }
                 else {
-                    var contact = this.getContactForItem(selection);
+                    let contact = this.getContactForItem(selection);
                     contact && contact.showDetails();
                 }
             },
@@ -4819,11 +4782,11 @@ define("xabber-contacts", function () {
 
             render: function (options) {
                 if (!xabber.accounts.connected.length) {
-                    utils.dialogs.error('No connected accounts found.');
+                    utils.dialogs.error(xabber.getString("dialog_add_contact__error__text_no_accounts"));
                     return;
                 }
                 options || (options = {});
-                var accounts = options.account ? [options.account] : xabber.accounts.connected,
+                let accounts = options.account ? [options.account] : xabber.accounts.connected,
                     jid = options.jid || '';
                 this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
                     .removeClass('invalid');
@@ -4860,7 +4823,7 @@ define("xabber-contacts", function () {
             },
 
             renderAccountItem: function (account) {
-                var $item = $(templates.add_contact_account_item({jid: account.get('jid')}));
+                let $item = $(templates.add_contact_account_item({jid: account.get('jid')}));
                 $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
                 return $item;
             },
@@ -4876,7 +4839,7 @@ define("xabber-contacts", function () {
             },
 
             updateGroups: function () {
-                var selected = this.group_data.get('selected');
+                let selected = this.group_data.get('selected');
                 this.$('.groups').html(templates.groups_checkbox_list({
                     groups: _.map(this.group_data.get('groups'), function (name) {
                         return { name: name, id: uuid(), checked: _.contains(selected, name) };
@@ -4886,14 +4849,14 @@ define("xabber-contacts", function () {
             },
 
             selectAccount: function (ev) {
-                var $item = $(ev.target).closest('.account-item-wrap'),
+                let $item = $(ev.target).closest('.account-item-wrap'),
                     account = xabber.accounts.get($item.data('jid'));
                 this.bindAccount(account);
             },
 
             editGroup: function (ev) {
                 ev.preventDefault();
-                var $target = $(ev.target),
+                let $target = $(ev.target),
                     $input = $target.siblings('input'),
                     checked = !$input.prop('checked'),
                     group_name = $input.attr('data-groupname'),
@@ -4909,19 +4872,19 @@ define("xabber-contacts", function () {
             },
 
             checkNewGroup: function (ev) {
-                var name = $(ev.target).val(),
+                let name = $(ev.target).val(),
                     $checkbox = this.$('.new-group-checkbox');
                 $checkbox.showIf(name && !_.contains(this.group_data.get('groups'), name));
             },
 
             addNewGroup: function (ev) {
                 ev.preventDefault();
-                var $input = this.$('.new-group-name input'),
+                let $input = this.$('.new-group-name input'),
                     name = $input.val(),
                     groups = _.clone(this.group_data.get('groups')),
                     idx = groups.indexOf(name);
                 if (idx < 0) {
-                    var selected = _.clone(this.group_data.get('selected'));
+                    let selected = _.clone(this.group_data.get('selected'));
                     selected.push(name);
                     groups.push(name);
                     this.group_data.set({groups: groups, selected: selected});
@@ -4955,23 +4918,23 @@ define("xabber-contacts", function () {
 
             addContact: function () {
                 this.$('span.errors').text('').addClass('hidden');
-                var jid = this.$('input[name=username]').removeClass('invalid').val().trim(),
+                let jid = this.$('input[name=username]').removeClass('invalid').val().trim(),
                     name = this.$('input[name=contact_name]').removeClass('invalid').val(),
                     groups = this.group_data.get('selected'),
                     contact, error_text,
                     regexp = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 jid = Strophe.getBareJidFromJid(jid);
                 if (!jid) {
-                    error_text = 'Input username!';
+                    error_text = xabber.getString("dialog_add_contact__error__text_input_username");
                 } else if (jid === this.account.get('jid')) {
-                    error_text = 'Can not add yourself to contacts!';
+                    error_text = xabber.getString("dialog_add_contact__error__text_can_not_add_youself");
                 } else if (!regexp.test(jid)) {
-                    error_text = 'Invalid jid';
+                    error_text = xabber.getString("dialog_add_contact__error__text_invalid_jid");
                 }
                 else {
                     contact = this.account.contacts.mergeContact(jid);
                     if (contact.get('in_roster')) {
-                        error_text = 'Contact is already in your roster!';
+                        error_text = xabber.getString("dialog_add_contact__error__text_already_in_roster");
                     }
                 }
                 if (error_text) {
@@ -5027,8 +4990,8 @@ define("xabber-contacts", function () {
                 pinned: true,
                 show_offline: 'yes',
                 sorting: 'online-first',
-                general_group_name: 'General',
-                non_roster_group_name: 'Not in roster'
+                general_group_name: xabber.getString("circles__name_general_circle"),
+                non_roster_group_name: xabber.getString("circles__name_non_roster_circle")
             }
         });
 

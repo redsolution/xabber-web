@@ -28,7 +28,7 @@ define("xabber-chats", function () {
         },
 
         initialize: function () {
-            var time = this.get('time'), attrs = {};
+            let time = this.get('time'), attrs = {};
             if (time) {
                 attrs.timestamp = Number(moment(time));
             } else {
@@ -47,7 +47,7 @@ define("xabber-chats", function () {
         },
 
         getText: function () {
-            var forwarded_message = this.get('forwarded_message');
+            let forwarded_message = this.get('forwarded_message');
             if (forwarded_message) {
                 return forwarded_message.get('message');
             }
@@ -59,7 +59,7 @@ define("xabber-chats", function () {
         },
 
         getVerboseState: function () {
-            var state = constants.MSG_VERBOSE_STATE[this.get('state')];
+            let state = constants.MSG_VERBOSE_STATE[this.get('state')];
             if (this.account) {
                 if (!this.account.isOnline()) {
                     state = 'Message will be sent when you get online.'
