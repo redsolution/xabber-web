@@ -349,7 +349,7 @@ define("xabber-omemo", function () {
                     is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
-                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text(xabber.getString('omemo__dialog_fingerprints__button_trust'));
                 this.omemo.updateFingerprints(this.jid, device_id, fingerprint, true);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'trusted') {
@@ -368,7 +368,7 @@ define("xabber-omemo", function () {
                     is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
-                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text(xabber.getString('omemo__dialog_fingerprints__button_error'));
                 this.omemo.updateFingerprints(this.jid, device_id, fingerprint, false);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'ignore') {

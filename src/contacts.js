@@ -224,9 +224,9 @@ define("xabber-contacts", function () {
                         this.set({status_message: 'Server'});
                         return;
                     }
-                    var iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
+                    let iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
                     this.account.sendIQ(iq, function (iq) {
-                        var last_seen = this.getLastSeenStatus(iq);
+                        let last_seen = this.getLastSeenStatus(iq);
                         if (this.get('status') == 'offline')
                             this.set({status_message: last_seen});
                         return this;
@@ -251,12 +251,12 @@ define("xabber-contacts", function () {
             },
 
             getAvatar: function (avatar, node, callback, errback) {
-                var iq_request_avatar = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid')})
+                let iq_request_avatar = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid')})
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
                 this.account.sendIQinBackground(iq_request_avatar, function (iq) {
-                    var pubsub_avatar = $(iq).find('data').text();
+                    let pubsub_avatar = $(iq).find('data').text();
                     if (pubsub_avatar == "")
                         errback && errback(xabber.getString("pubsub__error__text_empty_node"));
                     else
@@ -265,7 +265,7 @@ define("xabber-contacts", function () {
             },
 
             pubAvatar: function (image, node, callback, errback) {
-                var avatar_hash = sha1(image.base64),
+                let avatar_hash = sha1(image.base64),
                     iq_pub_data = $iq({from: this.account.get('jid'), type: 'set', to: this.get('jid') })
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA + node})
@@ -291,7 +291,7 @@ define("xabber-contacts", function () {
             },
 
             getLastSeenStatus: function(iq) {
-                var seconds = $(iq).children('query').attr('seconds'),
+                let seconds = $(iq).children('query').attr('seconds'),
                     message_time = moment.now() - 1000*seconds;
                 this.set({ last_seen: message_time });
                 return utils.pretty_last_seen(seconds);
@@ -305,9 +305,9 @@ define("xabber-contacts", function () {
 
             pushInRoster: function (attrs, callback, errback) {
                 attrs || (attrs = {});
-                var name = attrs.name || this.get('roster_name'),
+                let name = attrs.name || this.get('roster_name'),
                     groups = attrs.groups || this.get('groups');
-                var iq = $iq({type: 'set'})
+                let iq = $iq({type: 'set'})
                     .c('query', {xmlns: Strophe.NS.ROSTER})
                     .c('item', {jid: this.get('jid'), name: name});
                 _.each(groups, function (group) {
@@ -319,7 +319,7 @@ define("xabber-contacts", function () {
             },
 
             removeFromRoster: function (callback, errback) {
-                var iq = $iq({type: 'set'})
+                let iq = $iq({type: 'set'})
                     .c('query', {xmlns: Strophe.NS.ROSTER})
                     .c('item', {jid: this.get('jid'), subscription: "remove"});
                 this.account.cached_roster.removeFromRoster(this.get('jid'));
@@ -428,7 +428,7 @@ define("xabber-contacts", function () {
             },
 
             block: function (callback, errback) {
-                var iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                let iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
                 this.set('blocked', true);
@@ -436,7 +436,7 @@ define("xabber-contacts", function () {
             },
 
             unblock: function (callback, errback) {
-                var iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
+                let iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
                 this.account.sendIQ(iq, callback, errback);
                 this.set('blocked', false);
@@ -460,7 +460,7 @@ define("xabber-contacts", function () {
             },
 
             handlePresence: function (presence) {
-                var $presence = $(presence),
+                let $presence = $(presence),
                     type = presence.getAttribute('type'),
                     $vcard_update = $presence.find(`x[xmlns="${Strophe.NS.VCARD_UPDATE}"]`);
                 if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
@@ -518,7 +518,7 @@ define("xabber-contacts", function () {
                     this.set('subscription_request_out', false);
                     // this.trigger('presence', this, 'unsubscribed');
                 } else {
-                    var jid = presence.getAttribute('from'),
+                    let jid = presence.getAttribute('from'),
                         resource = Strophe.getResourceFromJid(jid),
                         priority = Number($presence.find('priority').text()),
                         status = $presence.find('show').text() || 'online',
@@ -532,7 +532,7 @@ define("xabber-contacts", function () {
                         resource_obj && resource_obj.destroy();
                     } else {
                         this.set({ last_seen: undefined });
-                        var attrs = {
+                        let attrs = {
                             resource: resource,
                             priority: priority,
                             status: status
@@ -594,7 +594,7 @@ define("xabber-contacts", function () {
                 let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('full_jid') || this.get('jid') })
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights` });
                 this.account.sendIQ(iq_get_rights, function(iq_all_rights) {
-                    var all_permissions = $(iq_all_rights).find('permission'),
+                    let all_permissions = $(iq_all_rights).find('permission'),
                         all_restrictions = $(iq_all_rights).find('restriction');
                     this.all_rights = {permissions: all_permissions, restrictions: all_restrictions};
                     callback && callback();
@@ -602,7 +602,7 @@ define("xabber-contacts", function () {
             },
 
             getMessageByStanzaId: function (stanza_id, callback) {
-                var queryid = uuid(),
+                let queryid = uuid(),
                     iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
                         .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                         .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
@@ -610,8 +610,8 @@ define("xabber-contacts", function () {
                         .c('value').t(Strophe.NS.MAM).up().up()
                         .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})
                         .c('value').t(stanza_id);
-                var handler = this.account.connection.addHandler(function (message) {
-                    var $msg = $(message);
+                let handler = this.account.connection.addHandler(function (message) {
+                    let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid)
                         callback && callback($msg);
                     return true;
@@ -631,11 +631,11 @@ define("xabber-contacts", function () {
                     this.renderPinnedMessage(null, pinned_msg_elem);
                 }
                 else {
-                    var $msg = $message.find('result message').first();
+                    let $msg = $message.find('result message').first();
                     if (this.get('pinned_message'))
                         if (this.get('pinned_message').stanza_id === $msg.find('stanza-id').attr('id'))
                             return;
-                    var message = this.account.chats.receiveChatMessage($message, {pinned_message: true});
+                    let message = this.account.chats.receiveChatMessage($message, {pinned_message: true});
                     this.set('pinned_message', message);
                     this.renderPinnedMessage(message, pinned_msg_elem);
                 }
@@ -647,7 +647,7 @@ define("xabber-contacts", function () {
                     pinned_msg_elem.siblings('.chat-content').css({'height':'100%'});
                 }
                 else {
-                    var images = message.get('images'),
+                    let images = message.get('images'),
                         files = message.get('files'),
                         fwd_message = message.get('forwarded_message'),
                         fwd_msg_author = null,
@@ -687,7 +687,7 @@ define("xabber-contacts", function () {
                         },
                         pinned_msg_html = $(templates.group_chats.pinned_message(pinned_msg));
                     pinned_msg_elem.html(pinned_msg_html).emojify('.chat-msg-content', {emoji_size: 18});
-                    var height_pinned_msg = pinned_msg_elem.height();
+                    let height_pinned_msg = pinned_msg_elem.height();
                     pinned_msg_elem.siblings('.chat-content').css({
                         'height': 'calc(100% - ' + height_pinned_msg + 'px)'
                     });
@@ -824,10 +824,9 @@ define("xabber-contacts", function () {
             },
 
             close: function () {
-                var value = this.$('.status-message').val();
-                if (!value) {
+                let value = this.$('.status-message').val();
+                if (!value)
                     this.do_change();
-                }
                 this.closeModal();
             },
 
@@ -880,7 +879,7 @@ define("xabber-contacts", function () {
                         return;
                     }
                     if (this.model.get('last_seen')) {
-                    var seconds = (moment.now() - this.model.get('last_seen'))/1000,
+                    let seconds = (moment.now() - this.model.get('last_seen'))/1000,
                         new_status = utils.pretty_last_seen(seconds);
                     this.model.set({ status_message: new_status });
                     }
@@ -902,7 +901,7 @@ define("xabber-contacts", function () {
             lastSeenUpdated: function () {
                 if (this.model.get('status') == 'offline' && this.model.get('last_seen') && _.isUndefined(this.interval_last)) {
                     this.interval_last = setInterval(function() {
-                        var seconds = (moment.now() - this.model.get('last_seen'))/1000,
+                        let seconds = (moment.now() - this.model.get('last_seen'))/1000,
                             new_status = utils.pretty_last_seen(seconds);
                         this.model.set({ status_message: new_status });
                     }.bind(this), 60000);
@@ -1139,7 +1138,7 @@ define("xabber-contacts", function () {
             },
 
             update: function () {
-                var changed = this.model.changed;
+                let changed = this.model.changed;
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
                 if (_.has(changed, 'status_updated')) this.updateStatus();
@@ -1294,7 +1293,7 @@ define("xabber-contacts", function () {
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
-                var muted = !this.model.get('muted');
+                let muted = !this.model.get('muted');
                 this.model.set('muted', muted);
                 this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
             },
@@ -1380,7 +1379,7 @@ define("xabber-contacts", function () {
             },
 
             update: function () {
-                var changed = this.model.changed;
+                let changed = this.model.changed;
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
                 if (_.has(changed, 'muted')) this.updateNotifications();
@@ -1415,7 +1414,7 @@ define("xabber-contacts", function () {
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
-                var muted = !this.model.get('muted');
+                let muted = !this.model.get('muted');
                 this.model.set('muted', muted);
                 this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
             },
@@ -2513,7 +2512,7 @@ define("xabber-contacts", function () {
                 }
                 this.$('.right-item').each((idx, right_item) => {
                     if ($(right_item).hasClass('changed')) {
-                        var $right_item = $(right_item),
+                        let $right_item = $(right_item),
                             right_name = $right_item.find('.field input')[0].id;
                         if ($right_item.find('.field input:checked').val()) {
                             let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value'),
@@ -2891,7 +2890,7 @@ define("xabber-contacts", function () {
             },
 
             changeExpiresTime: function (ev) {
-                var expire_time_item = $(ev.target),
+                let expire_time_item = $(ev.target),
                     new_expire_time = expire_time_item.val(),
                     $restriction_item = expire_time_item.prev();
                 if (expire_time_item.val() == '0')
@@ -3380,7 +3379,7 @@ define("xabber-contacts", function () {
                 if (this.model.get('in_roster')) {
                     let groups = _.clone(this.model.get('groups')),
                         all_groups = _.map(this.account.groups.notSpecial(), function (group) {
-                            var name = group.get('name');
+                            let name = group.get('name');
                             return {name: name, checked: _.contains(groups, name), id: uuid()};
                         });
                     this.$('.groups').html(templates.groups_checkbox_list({
@@ -3447,7 +3446,7 @@ define("xabber-contacts", function () {
                         return sw1_offline ? 1 : -1;
                     }
                 }
-                var name1, name2;
+                let name1, name2;
                 name1 = contact1.get('name').toLowerCase();
                 name2 = contact2.get('name').toLowerCase();
                 return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
@@ -3754,7 +3753,7 @@ define("xabber-contacts", function () {
             applySettings: function () {
                 let new_name = this.$('.group-name input').val();
                 if (new_name !== this.model.get('name')) {
-                    var name_error = this.validateName(new_name);
+                    let name_error = this.validateName(new_name);
                     if (name_error) {
                         this.$('.group-name .errors').text(name_error).removeClass('hidden');
                         return;
@@ -3914,7 +3913,7 @@ define("xabber-contacts", function () {
             },
 
             getFromServer: function () {
-                var iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
+                let iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
                 this.account.sendIQ(iq, this.onBlockingIQ.bind(this));
             },
 
@@ -4217,7 +4216,7 @@ define("xabber-contacts", function () {
                 }
                 let groups = [];
                 $(item).find('group').each(function () {
-                    var group = $(this).text();
+                    let group = $(this).text();
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
                 let attrs = {
@@ -4646,7 +4645,7 @@ define("xabber-contacts", function () {
                     return;
                 }
                 this.clearSearchSelection();
-                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                let $selection = this.$('.list-item[data-id="'+id+'"]');
                 if ($selection.length) {
                     this.selection_id = id;
                 } else {
