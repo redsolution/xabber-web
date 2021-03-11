@@ -8044,13 +8044,14 @@ define("xabber-chats", function () {
         },
 
         submit: function (ev) {
-            var $rich_textarea = this.$('.input-message .rich-textarea'),
+            let $rich_textarea = this.$('.input-message .rich-textarea'),
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
                 text = $rich_textarea.getTextFromRichTextarea();
+            this.$('.mentions-list').html("").hide();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
-                var emoji = emoji_item.innerText;
+                let emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];

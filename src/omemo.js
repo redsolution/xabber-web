@@ -1827,12 +1827,12 @@ define("xabber-omemo", function () {
             },
 
             updateColorScheme: function () {
-                var color = this.account.settings.get('color');
+                let color = this.account.settings.get('color');
                 this.$el.attr('data-color', color);
             },
 
             onUpdatedScreen: function () {
-                if (!this.account.omemo_enable_placeholder)
+                if (!this.account.omemo_enable_placeholder || this.account.omemo_enable_placeholder.cid !== this.cid)
                     return;
                 this.$el.detach();
                 xabber.placeholders_wrap.$el.append(this.$el);

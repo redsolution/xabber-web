@@ -46513,7 +46513,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (30)","version_description":""}'
+'{"version_number":"2.2.0 (32)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -60583,6 +60583,7 @@ define("xabber-chats", [],function () {
                                 key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
                             uri = uri.slice(0, uri.length - 44 - 16 - 1);
                             _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                            attrs.has_encrypted_files = true;
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
                             images.push(file_attrs);
@@ -63397,10 +63398,10 @@ define("xabber-chats", [],function () {
         },
 
 
-          decryptImages: function (message) {
+          decryptImages: function (message, force) {
             let scrolled_from_bottom = this.getScrollBottom(),
                 unique_id = message.get('unique_id');
-              if (this.model.get('encrypted') || message.get('encrypted')) {
+              if (this.model.get('encrypted') || message.get('encrypted') || force) {
                   let images = message.get('images') || [];
                   if (images.length) {
                       images.forEach((img) => {
@@ -63736,7 +63737,8 @@ define("xabber-chats", [],function () {
                 avatar_id = user_info.avatar,
                 role = user_info.role,
                 badge = user_info.badge,
-                from_id = user_info.id;
+                from_id = user_info.id,
+                has_encrypted_files = attrs.has_encrypted_files;
 
             if (is_sender && this.model.get('group_chat')) {
                 if (this.contact.my_info) {
@@ -63851,6 +63853,7 @@ define("xabber-chats", [],function () {
                         badge = user_info.badge,
                         from_id = user_info.id,
                         from_jid = attrs.from_jid;
+                    !has_encrypted_files && (has_encrypted_files = attrs.has_encrypted_files);
                     if (is_sender) {
                         username = Strophe.xmlescape(user_info.nickname || this.account.get('name'));
                     } else {
@@ -63932,8 +63935,8 @@ define("xabber-chats", [],function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            if (attrs.encrypted || this.model.get('encrypted')) {
-                this.decryptImages(message);
+            if (attrs.encrypted || this.model.get('encrypted') || has_encrypted_files) {
+                this.decryptImages(message, has_encrypted_files);
             }
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
@@ -64161,7 +64164,10 @@ define("xabber-chats", [],function () {
                 $(forwarded_message).each(function (idx, fwd_msg) {
                     let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
                         idx_begin = legacy_body.length,
+                        fwd = $(fwd_msg.get('xml')).clone(),
                         idx_end = legacy_body.concat(legacy_fwd_msg).length;
+                    if (!fwd.attr('from'))
+                        fwd.attr('from', this.account.get('jid'));
                     stanza.c('reference', {
                         xmlns: Strophe.NS.REFERENCE,
                         type: 'mutable',
@@ -64172,7 +64178,7 @@ define("xabber-chats", [],function () {
                         .c('delay', {
                             xmlns: 'urn:xmpp:delay',
                             stamp: fwd_msg.get('time')
-                        }).up().cnode(fwd_msg.get('xml')).up().up().up();
+                        }).up().cnode(fwd[0]).up().up().up();
                     legacy_body = legacy_body.concat(legacy_fwd_msg);
                     mutable_content.push({
                         start: idx_begin,
@@ -64924,21 +64930,19 @@ define("xabber-chats", [],function () {
             let $elem = $(ev.target);
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
-                if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                    let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                        uri = $elem.attr('href'),
-                        file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                    if (file && file.iv && file.key) {
-                        this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
-                            if (result === null)
-                                return;
-                            let download = document.createElement("a");
-                            download.href = result;
-                            download.download = file.name;
-                            download.click();
-                        });
-                        return;
-                    }
+                let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    uri = $elem.attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                if (file && file.iv && file.key) {
+                    this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let download = document.createElement("a");
+                        download.href = result;
+                        download.download = file.name;
+                        download.click();
+                    });
+                    return;
                 } else
                     xabber.openWindow($elem.attr('href'));
             }
@@ -68325,13 +68329,14 @@ define("xabber-chats", [],function () {
         },
 
         submit: function (ev) {
-            var $rich_textarea = this.$('.input-message .rich-textarea'),
+            let $rich_textarea = this.$('.input-message .rich-textarea'),
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
                 text = $rich_textarea.getTextFromRichTextarea();
+            this.$('.mentions-list').html("").hide();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
-                var emoji = emoji_item.innerText;
+                let emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
