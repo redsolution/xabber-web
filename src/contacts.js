@@ -1,6 +1,6 @@
 define("xabber-contacts", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             constants = env.constants,
             templates = env.templates.contacts,
             utils = env.utils,

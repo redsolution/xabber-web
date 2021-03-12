@@ -1,6 +1,6 @@
 define("xabber-accounts", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             constants = env.constants,
             templates = env.templates.accounts,
             utils = env.utils,
