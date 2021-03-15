@@ -1,6 +1,6 @@
 define("xabber-mentions", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             constants = env.constants,
             templates = env.templates.mentions,
             utils = env.utils,
@@ -30,7 +30,7 @@ define("xabber-mentions", function () {
 
             onMessageUpdated: function () {
                 if (this.message.get('mentions') && this.message.get('mentions').length) {
-                    this.message.get('mentions').forEach(function (mention) {
+                    this.message.get('mentions').forEach((mention) => {
                         let mention_target = mention.target || "",
                             id = mention_target.match(/\?id=\w*/),
                             jid = mention_target.match(/\?jid=.*/);
@@ -49,23 +49,23 @@ define("xabber-mentions", function () {
                             }
                             else if (this.contact.get('group_chat')) {
                                 if (this._pending_my_info) {
-                                    this._pending_my_info.done(function () {
+                                    this._pending_my_info.done(() => {
                                         if (mention_target === this.contact.my_info.get('id'))
                                             this.item_view.updateLastMessage();
                                         else
                                             this.destroy();
                                         this._pending_my_info = null;
-                                    }.bind(this));
+                                    });
                                 }
                                 else {
                                     this._pending_my_info = new $.Deferred();
-                                    this.contact.getMyInfo(function () {
+                                    this.contact.getMyInfo(() => {
                                         if (mention_target === this.contact.my_info.get('id'))
                                             this.item_view.updateLastMessage();
                                         else
                                             this.destroy();
                                         this._pending_my_info.resolve();
-                                    }.bind(this));
+                                    });
                                 }
                             }
                         } else if (jid && mention_target === this.account.get('jid')) {
@@ -73,7 +73,7 @@ define("xabber-mentions", function () {
                         }
                         else
                             this.destroy();
-                    }.bind(this));
+                    });
                 } else
                     this.destroy();
             }
@@ -155,7 +155,7 @@ define("xabber-mentions", function () {
 
             selectItem: function (id) {
                 this.clearSearchSelection();
-                var $selection = this.$('.list-item[data-id="'+id+'"]');
+                let $selection = this.$('.list-item[data-id="'+id+'"]');
                 if ($selection.length) {
                     this.selection_id = id;
                 } else {
@@ -230,17 +230,17 @@ define("xabber-mentions", function () {
             },
 
             readAllMentions: function () {
-                xabber.accounts.connected.forEach(function (account) {
+                xabber.accounts.connected.forEach((account) => {
                     let mentions = _.clone(account.unreaded_mentions.models);
-                    _.each(mentions, (function (mention) {
+                    _.each(mentions, ((mention) => {
                         let msgid = mention.message.get('msgid'),
                             archive_id = mention.message.get('archive_id'),
                             contact_archive_id = mention.message.get('contact_archive_id'),
                             chat = account.chats.getChat(mention.contact);
                         mention.message.set('is_unread', false);
                         chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
-                    }.bind(this)));
-                }.bind(this));
+                    }));
+                });
             },
 
             updateLeftIndicator: function (accounts) {
@@ -256,7 +256,7 @@ define("xabber-mentions", function () {
 
             onChangedActiveStatus: function (mention) {
                 if (mention.get('active')) {
-                    var previous_mention = this.active_mention;
+                    let previous_mention = this.active_mention;
                     this.active_mention = this.child(mention.id);
                     previous_mention && previous_mention.model.set('active', false);
                 }
@@ -390,15 +390,15 @@ define("xabber-mentions", function () {
                             this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                         }
                         else {
-                            var node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + user_info.id;
-                            this.contact.getAvatar(user_info.avatar, node, function (data_avatar) {
+                            let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + user_info.id;
+                            this.contact.getAvatar(user_info.avatar, node, (data_avatar) => {
                                 image = data_avatar;
                                 this.account.chat_settings.updateCachedAvatars(user_info.id, user_info.avatar, data_avatar);
                                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                            }.bind(this), function () {
+                            }, () => {
                                 let default_avatar = Images.getDefaultAvatar(user_info.nickname || user_info.jid || user_info.id);
                                 this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
-                            }.bind(this));
+                            });
                         }
                     }
                     else {
@@ -422,7 +422,7 @@ define("xabber-mentions", function () {
             },
 
             updateColorScheme: function () {
-                var color = this.account.settings.get('color');
+                let color = this.account.settings.get('color');
                 this.$el.attr('data-color', color);
             }
 

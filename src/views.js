@@ -1,6 +1,6 @@
 define("xabber-views", function () {
   return function (xabber) {
-    var env = xabber.env,
+    let env = xabber.env,
         constants = env.constants,
         templates = env.templates.base,
         utils = env.utils,
@@ -11,8 +11,8 @@ define("xabber-views", function () {
     xabber.ViewPath = function (str) {
         this.path = str.split('.');
         this.applyTo = function (obj) {
-            var result = obj;
-            for (var idx = 0; idx < this.path.length; idx++) {
+            let result = obj;
+            for (let idx = 0; idx < this.path.length; idx++) {
                 if (!(result = _.result(result, this.path[idx]))) {
                     return null;
                 }
@@ -94,7 +94,7 @@ define("xabber-views", function () {
         },
 
         addChild: function (name, constructor, options) {
-            var view;
+            let view;
             if (constructor instanceof Backbone.View) {
                 view = constructor;
                 view.parent = this;
@@ -110,7 +110,7 @@ define("xabber-views", function () {
 
         removeChild: function (name, options) {
             options || (options = {});
-            var view = this.children[name];
+            let view = this.children[name];
             if (view) {
                 delete this.children[name];
                 options.soft ? view.detach() : (view.trigger("remove") && view.remove());
@@ -118,9 +118,9 @@ define("xabber-views", function () {
         },
 
         removeChildren: function () {
-            _.each(_.keys(this.children), function (view_id) {
+            _.each(_.keys(this.children), (view_id) => {
                 this.removeChild(view_id);
-            }.bind(this));
+            });
         },
 
         setCustomCss: function (styles) {
@@ -133,7 +133,7 @@ define("xabber-views", function () {
 
         saveScrollBarOffset: function () {
             if (this.ps_container && this.isVisible()) {
-                var scroll_top = this.data.get('scroll_top');
+                let scroll_top = this.data.get('scroll_top');
                 if (typeof scroll_top === "undefined") {
                     this.data.set('scroll_top', this.getScrollTop());
                 }
@@ -165,13 +165,13 @@ define("xabber-views", function () {
         },
 
         scrollToBottom: function () {
-            var scrollHeight = this.ps_container[0].scrollHeight,
+            let scrollHeight = this.ps_container[0].scrollHeight,
                 offsetHeight = this.ps_container[0].offsetHeight;
             this.scrollTo(scrollHeight - offsetHeight);
         },
 
         scrollToChild: function ($child) {
-            var scrollTop = _.reduce($child.prevAll(), function (sum, el) {
+            let scrollTop = _.reduce($child.prevAll(), function (sum, el) {
                 return sum + el.offsetHeight + 2;
             }, 0);
             this.scrollTo(scrollTop);
@@ -192,7 +192,7 @@ define("xabber-views", function () {
             if (this.isScrolledToTop()) {
                 return 0;
             }
-            var scrollTop = this.ps_container[0].scrollTop,
+            let scrollTop = this.ps_container[0].scrollTop,
                 scrollHeight = this.ps_container[0].scrollHeight,
                 offsetHeight = this.ps_container[0].offsetHeight;
             return scrollTop / (scrollHeight - offsetHeight);
@@ -203,7 +203,7 @@ define("xabber-views", function () {
         },
 
         isScrolledToBottom: function () {
-            var scrollTop = this.ps_container[0].scrollTop,
+            let scrollTop = this.ps_container[0].scrollTop,
                 scrollHeight = this.ps_container[0].scrollHeight,
                 offsetHeight = this.ps_container[0].offsetHeight;
             return scrollHeight === scrollTop + offsetHeight;
@@ -217,14 +217,14 @@ define("xabber-views", function () {
             });
             this.$el.children().detach();
             tree = this.patchTree(tree, options) || tree;
-            _.each(this.children, function (view, name) {
+            _.each(this.children, (view, name) => {
                 if (_.has(tree, name)) {
                     if (name !== 'login')
                         this.$el.append(view.$el);
                     this.$el.switchClass('hidden', name === 'login');
                     view.show(options, tree[name]);
                 }
-            }.bind(this));
+            });
             return this.render(options);
         },
 
@@ -241,7 +241,7 @@ define("xabber-views", function () {
         className: 'container',
 
         render: function (options, path) {
-            var new_view = path.applyTo(options);
+            let new_view = path.applyTo(options);
             this.$el.children().detach();
             if (this.view !== new_view) {
                 this.onHide(options);
@@ -275,7 +275,7 @@ define("xabber-views", function () {
             this.ids = this.$('.list-item:not(.hidden)').map(function () {
                 return $(this).data('id');
             }).toArray();
-            var $selection = this.getSelectedItem();
+            let $selection = this.getSelectedItem();
             if (ev.keyCode === constants.KEY_ARROW_DOWN) {
                 return this.selectNextItem();
             }
@@ -304,7 +304,7 @@ define("xabber-views", function () {
             if (!id)
                 return;
             this.clearSearchSelection();
-            var $selection = this.$('.list-item[data-id="'+id+'"]');
+            let $selection = this.$('.list-item[data-id="'+id+'"]');
             if ($selection.length) {
                 this.selection_id = id;
             } else {
@@ -329,7 +329,7 @@ define("xabber-views", function () {
 
         updateSearch: function () {
             if (!this._update_search_timeout) {
-                var query = this.$('.search-input').val();
+                let query = this.$('.search-input').val();
                 this.$('.search-form').switchClass('active', query);
                 this.clearSearchSelection();
                 if (query)
@@ -340,10 +340,10 @@ define("xabber-views", function () {
                 }
                 this.updateScrollBar();
                 this.query = false;
-                this._update_search_timeout = setTimeout(function () {
+                this._update_search_timeout = setTimeout(() => {
                     this._update_search_timeout = null;
                     this.query && this.updateSearch();
-                }.bind(this), 150);
+                }, 150);
             } else {
                 this.query = true;
             }
@@ -387,7 +387,7 @@ define("xabber-views", function () {
               this.ids = this.$('.list-item:not(.hidden)').map(function () {
                   return $(this).data('id');
               }).toArray();
-              var $selection = this.getSelectedItem();
+              let $selection = this.getSelectedItem();
               if (ev.keyCode === constants.KEY_ARROW_DOWN) {
                   return this.selectNextItem();
               }
@@ -415,7 +415,7 @@ define("xabber-views", function () {
                   this.queryid = uuid();
                   options.query_id = this.queryid;
                   let accounts = xabber.accounts.connected;
-                  accounts.forEach(function (account) {
+                  accounts.forEach((account) => {
                       let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
                       if (!first_message || account.searched_msgs_loaded) {
                           // this._loading_messages = false;
@@ -423,8 +423,8 @@ define("xabber-views", function () {
                       }
                       options.account = account;
                       options.before = first_message.get('archive_id');
-                      this.MAMRequest(this.query_text, options, function (messages) {
-                          _.each(messages, function (message) {
+                      this.MAMRequest(this.query_text, options, (messages) => {
+                          _.each(messages, (message) => {
                               let message_from_stanza = account.chats.receiveChatMessage(message,
                                   _.extend({is_searched: true}, options)
                                   ),
@@ -439,12 +439,12 @@ define("xabber-views", function () {
                               } else {
                                   $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
                               }
-                          }.bind(this));
+                          });
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                           this.updateScrollBar();
                           this._loading_messages = false;
-                      }.bind(this));
-                  }.bind(this));
+                      });
+                  });
                   (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
               }
           },
@@ -456,7 +456,7 @@ define("xabber-views", function () {
               this.ids = this.$('.searched-lists-wrap .list-item:not(.hidden)').map(function () {
                   return $(this).data('id');
               }).toArray();
-              var $selection = this.getSelectedItemWithQuery();
+              let $selection = this.getSelectedItemWithQuery();
               if (ev.keyCode === constants.KEY_ARROW_DOWN) {
                   return this.selectNextItemWithQuery();
               }
@@ -488,7 +488,7 @@ define("xabber-views", function () {
                   return;
               }
               this.clearSearchSelection();
-              var $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
+              let $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
               if ($selection.length) {
                   this.selection_id = id;
               } else {
@@ -527,7 +527,7 @@ define("xabber-views", function () {
               });
               let query_chats = _.clone(xabber.chats);
               query_chats.comparator = 'timestamp';
-              query_chats.sort('timestamp').forEach(function (chat) {
+              query_chats.sort('timestamp').forEach((chat) => {
                   let jid = chat.get('jid').toLowerCase(),
                       name = chat.contact ? (chat.contact.get('roster_name') || chat.contact.get('name')) : chat.get('name');
                   name && (name = name.toLowerCase());
@@ -545,17 +545,17 @@ define("xabber-views", function () {
                               else
                                   this.$('.chats-list').append(chat_item);
                               this.updateChatItem(chat_item);
-                              chat_item.click(function () {
+                              chat_item.click(() => {
                                   this.$('.list-item.active').removeClass('active');
                                   xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
                                   chat_item.addClass('active');
-                              }.bind(this));
+                              });
                           }
                       }
                   }
-              }.bind(this));
-              xabber.accounts.each(function (account) {
-                  account.contacts.each(function (contact) {
+              });
+              xabber.accounts.each((account) => {
+                  account.contacts.each((contact) => {
                       let jid = contact.get('jid').toLowerCase(),
                           name = contact.get('roster_name') || contact.get('name'),
                           chat = account.chats.get(contact.hash_id),
@@ -572,30 +572,30 @@ define("xabber-views", function () {
                                   item_list.insertBefore(this.$('.contacts-list .by-jid').first());
                               else
                                   this.$('.contacts-list').append(item_list);
-                              item_list.click(function () {
+                              item_list.click(() => {
                                   this.$('.list-item.active').removeClass('active');
                                   let chat = account.chats.getChat(contact);
                                   chat && xabber.chats_view.openChat(chat.item_view, {clear_search: false, screen: xabber.body.screen.get('name')});
                                   item_list.addClass('active');
-                              }.bind(this));
+                              });
                           }
-                  }.bind(this));
-              }.bind(this));
+                  });
+              });
               this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children().length);
               this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contacts-list').children().length);
               this.$('.messages-list-wrap').addClass('hidden').find('.messages-list').html("");
               if (query.length >= 2) {
-                  this.keyup_timeout = setTimeout(function () {
+                  this.keyup_timeout = setTimeout(() => {
                       this.queryid = uuid();
                       this.searchMessages(query, {query_id: this.queryid});
-                  }.bind(this), 1000);
+                  }, 1000);
               }
           },
 
           updateChatItem: function (chat_item) {
-              /*var date_width = chat_item.find('.last-msg-date').width();
+              /*let date_width = chat_item.find('.last-msg-date').width();
               chat_item.find('.chat-title-wrap').css('padding-right', date_width + 5);
-              var title_width = chat_item.find('.chat-title-wrap').width();
+              let title_width = chat_item.find('.chat-title-wrap').width();
               chat_item.find('.chat-title').css('max-width', title_width);*/
           },
 
@@ -607,13 +607,13 @@ define("xabber-views", function () {
               !options.before && (options.before = "");
               xabber.all_searched_messages = new xabber.SearchedMessages();
               let accounts = xabber.accounts.connected;
-              accounts.forEach(function (account) {
+              accounts.forEach((account) => {
                   account.searched_msgs_loaded = false;
                   options.account = account;
-                  this.MAMRequest(query, options, function (messages) {
+                  this.MAMRequest(query, options, (messages) => {
                       if (!this.query_text)
                           return;
-                      _.each(messages, function (message) {
+                      _.each(messages, (message) => {
                           if (!this.query_text)
                               return;
                           let message_from_stanza = account.chats.receiveChatMessage(message,
@@ -629,12 +629,12 @@ define("xabber-views", function () {
                           } else {
                               $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
                           }
-                      }.bind(this));
+                      });
                       this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                       this.updateScrollBar();
                       this._loading_messages = false;
-                  }.bind(this));
-              }.bind(this));
+                  });
+              });
               (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
           },
 
@@ -649,19 +649,19 @@ define("xabber-views", function () {
                       .c('value').t(Strophe.NS.MAM).up().up()
                       .c('field', {'var': 'withtext'})
                       .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
-                  handler = account.connection.addHandler(function (message) {
+                  handler = account.connection.addHandler((message) => {
                       let $msg = $(message);
                       if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
                           messages.push(message);
                       }
                       return true;
-                  }.bind(this), env.Strophe.NS.MAM);
+                  }, env.Strophe.NS.MAM);
               account.sendIQ(iq,
                   function (res) {
                       account.connection.deleteHandler(handler);
-                      var $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
+                      let $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
                       if ($fin.length && $fin.attr('queryid') === queryid) {
-                          var rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
+                          let rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
                           rsm_complete && (account.searched_msgs_loaded = true);
                       }
                       callback && callback(messages);
@@ -732,7 +732,7 @@ define("xabber-views", function () {
         },
 
         onChangedInputMode: function () {
-            var input_mode = this.data.get('input_mode');
+            let input_mode = this.data.get('input_mode');
             this.$value.hideIf(input_mode);
             this.$btn.hideIf(input_mode);
             this.$input.showIf(input_mode).focus();
@@ -740,7 +740,7 @@ define("xabber-views", function () {
 
         keyDown: function (ev) {
             ev.stopPropagation();
-            var value = this.getValue();
+            let value = this.getValue();
             if (ev.keyCode === constants.KEY_ENTER) {
                 this.changeValue();
             } else if (ev.keyCode === constants.KEY_ESCAPE) {
@@ -750,7 +750,7 @@ define("xabber-views", function () {
         },
 
         keyUp: function (ev) {
-            var value = this.getValue();
+            let value = this.getValue();
             this.$input.switchClass('changed', this.$input.val() !== value);
         },
 
@@ -763,14 +763,14 @@ define("xabber-views", function () {
         },
 
         changeValue: function () {
-            var value = this.getValue(),
+            let value = this.getValue(),
                 new_value = this.$input.removeClass('changed').val();
             new_value !== value && this.setValue(new_value);
             this.data.set('input_mode', false);
         },
 
         updateValue: function () {
-            var value = this.getValue();
+            let value = this.getValue();
             this.$value.text(value);
             this.$input.val(value);
         }
@@ -852,7 +852,7 @@ define("xabber-views", function () {
             xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
             $('body').switchClass('xabber-login', name === 'login');
             $('body').switchClass('on-xabber-login', name !== 'login');
-            var new_attrs = {stamp: _.uniqueId()};
+            let new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
             }
@@ -864,14 +864,14 @@ define("xabber-views", function () {
         },
 
         onScreenMapChanged: function () {
-            var name = this.screen.get('name');
+            let name = this.screen.get('name');
             if (_.has(this.screen_map.changed, name)) {
                 this.update();
             }
         },
 
         update: function () {
-            var options = this.screen.attributes,
+            let options = this.screen.attributes,
                 tree = this.screen_map.get(options.name);
             if (typeof tree !== "undefined") {
                 this.onShow(options, tree);
@@ -1036,9 +1036,9 @@ define("xabber-views", function () {
         },
 
         setAllMessageCounter: function () {
-            var count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
-            xabber.accounts.each(function(account) {
-                account.chats.each(function (chat) {
+            let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
+            xabber.accounts.each((account) => {
+                account.chats.each((chat) => {
                     if (chat.contact && !chat.contact.get('muted')) {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
@@ -1046,9 +1046,9 @@ define("xabber-views", function () {
                         else
                             count_msg += chat.get('unread') + chat.get('const_unread');
                     }
-                }.bind(this));
+                });
                 mentions += account.unreaded_mentions.length;
-            }.bind(this));
+            });
             return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
         },
 
@@ -1061,22 +1061,22 @@ define("xabber-views", function () {
         },
 
         onChangedMessageCounter: function () {
-            var c = this.data.get('msg_counter');
+            let c = this.data.get('msg_counter');
             this.$('.msg-indicator').switchClass('unread', c).text();
         },
 
         onChangedGroupMessageCounter: function () {
-            var c = this.data.get('group_msg_counter');
+            let c = this.data.get('group_msg_counter');
             this.$('.group-msg-indicator').switchClass('unread', c).text();
         },
 
         onChangedMentionsCounter: function () {
-            var c = this.data.get('mentions_counter');
+            let c = this.data.get('mentions_counter');
             this.$('.mentions-indicator').switchClass('unread', c).text();
         },
 
         onChangedAllMessageCounter: function () {
-            var c = this.data.get('all_msg_counter');
+            let c = this.data.get('all_msg_counter');
             this.$('.all-msg-indicator').switchClass('unread', c).text(c);
         },
     });
@@ -1118,7 +1118,7 @@ define("xabber-views", function () {
             this.updateName();
             this.updateCallingStatus(options.status);
             if (options.status === 'in') {
-                this.updateStatusText('Calling...');
+                this.updateStatusText(xabber.getString("dialog_jingle_message__status_calling"));
             }
             else {
                 this.model.set('status', 'calling');
@@ -1127,13 +1127,13 @@ define("xabber-views", function () {
             this.updateButtons();
             this.$el.openModal({
                 dismissible: false,
-                ready: function () {
+                ready: () => {
                     this.updateAvatar();
-                }.bind(this),
-                complete: function () {
+                },
+                complete: () => {
                     this.$el.detach();
                     this.data.set('visible', false);
-                }.bind(this)
+                }
             });
 
         },
@@ -1169,9 +1169,9 @@ define("xabber-views", function () {
         cancelFullScreen: function () {
             if (document.exitFullscreen) {
                 let full_screen_el = document.fullscreenElement;
-                full_screen_el && document.exitFullscreen().then(function () {
+                full_screen_el && document.exitFullscreen().then(() => {
                     document.fullscreenElement && this.cancelFullScreen();
-                }.bind(this));
+                });
             } else if (document.mozCancelFullScreen) { /* Firefox */
                 let full_screen_el = document.mozFullScreenElement;
                 full_screen_el && document.mozCancelFullScreen();
@@ -1285,11 +1285,11 @@ define("xabber-views", function () {
         },
 
         onDestroy: function () {
-            this.updateStatusText(this.model.get('status') == 'busy' ? "Line busy" : "Disconnected");
-            setTimeout(function () {
+            this.updateStatusText(xabber.getString(this.model.get('status') == 'busy' ? "dialog_jingle_message__status_busy" : "dialog_jingle_message__status_disconnected"));
+            setTimeout(() => {
                 this.close();
                 this.$el.detach();
-            }.bind(this), 3000);
+            }, 3000);
         },
 
         videoCall: function () {
@@ -1340,7 +1340,7 @@ define("xabber-views", function () {
         },
 
         render: function () {
-            var settings = this.model.attributes;
+            let settings = this.model.attributes;
             this.$('.notifications input[type=checkbox]').prop({
                 checked: settings.notifications && xabber._cache.get('notifications')
             });
@@ -1348,7 +1348,7 @@ define("xabber-views", function () {
                 .prop({checked: settings.message_preview});
             this.$('.call-attention input[type=checkbox]')
                 .prop({checked: settings.call_attention});
-            var sound_value = settings.sound ? settings.sound_on_message : '';
+            let sound_value = settings.sound ? settings.sound_on_message : '';
             this.$('.sound input[type=radio][name=sound][value="'+sound_value+'"]')
                     .prop('checked', true);
             this.$('.hotkeys input[type=radio][name=hotkeys][value='+settings.hotkeys+']')
@@ -1372,7 +1372,7 @@ define("xabber-views", function () {
         },
 
         updateBackgroundSetting: function () {
-            this.$('.background input[type=radio][name=background][value='+this.model.get('background').type+']')
+            this.$(`.background input[type=radio][name=background][value=${this.model.get('background').type}]`)
                 .prop('checked', true);
             if (this.model.get('background').image) {
                 this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
@@ -1400,7 +1400,7 @@ define("xabber-views", function () {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == color.toLowerCase());
                 this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
             } else {
-                this.$('.selected-color-name').text(`Custom color`);
+                this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
             xabber.toolbar_view.updateColor(color);
         },
@@ -1416,7 +1416,7 @@ define("xabber-views", function () {
         },
 
         jumpToBlock: function (ev) {
-            var $tab = $(ev.target).closest('.settings-tab'),
+            let $tab = $(ev.target).closest('.settings-tab'),
                 $elem = this.$('.settings-block-wrap.' + $tab.data('block-name'));
             if ($tab.hasClass('link-button')) {
                 $tab.parent().siblings().removeClass('active');
@@ -1432,7 +1432,7 @@ define("xabber-views", function () {
                 $target = $(ev.target);
             ev.preventDefault();
             if (value === null) {
-                utils.callback_popup_message("Browser doesn't support notifications", 1500);
+                utils.callback_popup_message(xabber.getString("notifications__toast_notifications_not_supported"), 1500);
             } else {
                 value = value && xabber._cache.get('notifications');
                 if (!xabber._cache.get('notifications')) {
@@ -1578,7 +1578,7 @@ define("xabber-views", function () {
         },
 
         deleteAllAccounts: function (ev) {
-            utils.dialogs.ask("Quit Xabber Web", "Do you really want to quit Xabber? You will quit from all currently logged in XMPP accounts.", null, { ok_button_text: 'quit'}).done(function (res) {
+            utils.dialogs.ask(xabber.getString("button_quit"), xabber.getString("settings__dialog_quit_client__confirm", [constants.CLIENT_NAME]), null, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
                 res && xabber.trigger('quit');
             });
         }
@@ -1600,9 +1600,9 @@ define("xabber-views", function () {
 
         render: function () {
             this.$el.openModal({
-                ready: function () {
+                ready: () => {
                     this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
-                }.bind(this),
+                },
                 complete: this.close.bind(this)
             });
         },
@@ -1615,10 +1615,10 @@ define("xabber-views", function () {
         },
 
         close: function () {
-            this.$el.closeModal({ complete: function () {
+            this.$el.closeModal({ complete: () => {
                     this.$el.detach();
                     this.data.set('visible', false);
-                }.bind(this)
+                }
             });
         }
 
@@ -2500,7 +2500,7 @@ define("xabber-views", function () {
 
         render: function () {
             this.$el.openModal({
-                ready: function () {
+                ready: () => {
                     let $input = this.$('.selected-color-hex-input'),
                         $color_hex = this.$('.selected-color-hex'),
                         value = this.model.get('appearance').color || '#E0E0E0';
@@ -2509,7 +2509,7 @@ define("xabber-views", function () {
                         let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
                         this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
                     } else {
-                        this.$('.selected-color-name').text(`Custom color`);
+                        this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
                     }
                     if (value) {
                         this.$('.selected-color-wrap').removeClass('hidden');
@@ -2517,7 +2517,7 @@ define("xabber-views", function () {
                         $color_hex.removeClass('hidden').text(value);
                         value && this.$('.selected-color-item').css('background-color', value);
                     }
-                }.bind(this),
+                },
                 complete: this.close.bind(this)
             });
 
@@ -2544,7 +2544,7 @@ define("xabber-views", function () {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
                 this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
             } else {
-                this.$('.selected-color-name').text(`Custom color`);
+                this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
         },
 
@@ -2557,7 +2557,7 @@ define("xabber-views", function () {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
                 this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
             } else {
-                this.$('.selected-color-name').text(`Custom color`);
+                this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
             $input.addClass('hidden');
             $color_hex.removeClass('hidden').text(value);
@@ -2587,11 +2587,11 @@ define("xabber-views", function () {
         },
 
         close: function () {
-            this.$el.closeModal({ complete: function () {
+            this.$el.closeModal({ complete: () => {
                     this.$el.detach();
                     this.data.set('visible', false);
                     xabber.settings_view.updateColor();
-                }.bind(this)
+                }
             });
         }
 
@@ -2628,9 +2628,9 @@ define("xabber-views", function () {
             else
                 this.$('.modal-header span').text(xabber.getString("settings__dialog_background__header_image"));
             this.$el.openModal({
-                ready: function () {
+                ready: () => {
                     this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
-                }.bind(this),
+                },
                 complete: this.close.bind(this)
             });
             let draggable = this.$('.upload-wrap');
@@ -2647,7 +2647,7 @@ define("xabber-views", function () {
                 ev.preventDefault();
                 draggable.removeClass('file-drop');
             };
-            draggable[0].ondrop = function (ev) {
+            draggable[0].ondrop = (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 draggable.removeClass('file-drop');
@@ -2659,7 +2659,7 @@ define("xabber-views", function () {
                     }
                 }
                 file && this.addFile(file);
-            }.bind(this);
+            };
         },
 
         onScrollY: function () {
@@ -2677,14 +2677,14 @@ define("xabber-views", function () {
                 type: "GET",
                 contentType: "application/xml",
                 dataType: 'xml',
-                success: function (data) {
+                success: (data) => {
                     if (this.type == 'repeating-pattern') {
                         this.onGetPatternsCallback(data);
                     } else {
                         this.onGetImagesCallback(data);
                     }
                     callback && callback();
-                }.bind(this)
+                }
             };
             if (this.type == 'repeating-pattern') {
                 request.url = './background-patterns.xml';
@@ -2795,14 +2795,14 @@ define("xabber-views", function () {
 
         addFile: function (file) {
             let reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = (e) => {
                 let image_prev = new Image(),
                     src = e.target.result;
                 image_prev.src = src;
                 this.$('.screen-wrap[data-screen="upload"] img').detach();
                 this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
                 this.updateActiveButton();
-            }.bind(this);
+            };
             reader.readAsDataURL(file);
         },
 
@@ -2829,11 +2829,9 @@ define("xabber-views", function () {
             let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
             dfd.done((img) => {
                 if (img) {
-                    // window.document.cookie = encodeURIComponent(`background={"type": "${this.type}"}, "image": "${img}"`);
                     this.model.save('background', {type: this.type, image: img});
                 }
                 else {
-                    // window.document.cookie = encodeURIComponent(`background={"type": "default"}`);
                     this.model.save('background', {type: 'default'});
                 }
                 xabber.body.updateBackground();
@@ -2854,9 +2852,9 @@ define("xabber-views", function () {
                             image = data;
                             dfd.resolve(image);
                         },
-                        error: function () {
+                        error: () => {
                             dfd.resolve(image);
-                        }.bind(this)
+                        }
                     };
                     $.ajax(request);
                 } else
@@ -2866,10 +2864,10 @@ define("xabber-views", function () {
 
         close: function () {
             xabber.settings_view.updateBackgroundSetting();
-            this.$el.closeModal({ complete: function () {
+            this.$el.closeModal({ complete: () => {
                     this.$el.detach();
                     this.data.set('visible', false);
-                }.bind(this)
+                }
             });
         }
     });
@@ -2898,7 +2896,7 @@ define("xabber-views", function () {
             if (ev.which != 1) {
                 return;
             }
-            var draghandle_elem = ev.target.closest('.drag-handle'),
+            let draghandle_elem = ev.target.closest('.drag-handle'),
                 elem = draghandle_elem && draghandle_elem.closest('.draggable');
             if (!elem) {
                 return this.resetElem();
@@ -2915,7 +2913,7 @@ define("xabber-views", function () {
             if (!this.get('elem')) {
                 return;
             }
-            var avatar = this.get('avatar');
+            let avatar = this.get('avatar');
             if (!avatar) {
                 if (    Math.abs(ev.pageX - this.get('downX')) < 3 &&
                         Math.abs(ev.pageY - this.get('downY')) < 3) {
@@ -2926,7 +2924,7 @@ define("xabber-views", function () {
                     return this.resetElem();
                 }
                 this.set('avatar', avatar);
-                var coords = this.getCoords(avatar);
+                let coords = this.getCoords(avatar);
                 this.set({
                     shiftX: this.get('downX') - coords.left,
                     shiftY: this.get('downY') - coords.top
@@ -2935,13 +2933,13 @@ define("xabber-views", function () {
             }
             avatar.style.left = ev.pageX - this.get('shiftX') + 'px';
             avatar.style.top = ev.pageY - this.get('shiftY') + 'px';
-            var drop_elem = this.findDropElem(ev);
+            let drop_elem = this.findDropElem(ev);
             this.updateDropElem(drop_elem);
             return;
         },
 
         onMouseUp: function (ev) {
-            var selector = document.querySelector('.recording');
+            let selector = document.querySelector('.recording');
             if (selector) {
                 $(selector).removeClass('recording');
                 return;
@@ -2955,7 +2953,7 @@ define("xabber-views", function () {
         },
 
         getCoords: function (elem) {
-            var box = elem.getBoundingClientRect();
+            let box = elem.getBoundingClientRect();
             return {
                 top: box.top + window.pageYOffset,
                 left: box.left + window.pageXOffset
@@ -2963,10 +2961,10 @@ define("xabber-views", function () {
         },
 
         createAvatar: function () {
-            var avatar = this.get('elem'),
+            let avatar = this.get('elem'),
                 $avatar = $(avatar),
                 draghandle_elem = this.get('draghandle_elem');
-            var old = {
+            let old = {
                 parent: avatar.parentNode,
                 nextSibling: avatar.nextSibling,
                 position: avatar.position || '',
@@ -2996,14 +2994,14 @@ define("xabber-views", function () {
         },
 
         startDrag: function (ev) {
-            var avatar = this.get('avatar');
+            let avatar = this.get('avatar');
             window.document.body.appendChild(avatar);
             avatar.style.zIndex = 9999;
             avatar.style.position = 'absolute';
         },
 
         finishDrag: function (ev) {
-            var elem = this.get('elem'),
+            let elem = this.get('elem'),
                 avatar = this.get('avatar'),
                 drop_elem = this.findDropElem(ev);
             avatar.rollback();
@@ -3015,9 +3013,9 @@ define("xabber-views", function () {
         },
 
         findDropElem: function (ev) {
-            var avatar = this.get('avatar');
+            let avatar = this.get('avatar');
             avatar.hidden = true;
-            var elem = window.document.elementFromPoint(ev.clientX, ev.clientY);
+            let elem = window.document.elementFromPoint(ev.clientX, ev.clientY);
             avatar.hidden = false;
             if (!elem) {
                 return null;
@@ -3026,7 +3024,7 @@ define("xabber-views", function () {
         },
 
         updateDropElem: function (drop_elem) {
-            var old_drop_elem = this.get('drop_elem');
+            let old_drop_elem = this.get('drop_elem');
             this.set('drop_elem', drop_elem);
             old_drop_elem && $(old_drop_elem).removeClass('drag-on');
             drop_elem && $(drop_elem).addClass('drag-on');
@@ -3052,14 +3050,14 @@ define("xabber-views", function () {
         startBlinkingFavicon: function () {
             if (this._blink_interval)
                 return;
-            this._blink_interval = setInterval(function () {
-                var $icon = $("link[rel='shortcut icon']"), url;
+            this._blink_interval = setInterval(() => {
+                let $icon = $("link[rel='shortcut icon']"), url;
                 if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1)
                     url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
                 else
                     url = this.cache.favicon || constants.FAVICON_DEFAULT;
                 $icon.attr('href', url);
-            }.bind(this), 1000);
+            }, 1000);
         },
 
         stopBlinkingFavicon: function () {
@@ -3074,21 +3072,21 @@ define("xabber-views", function () {
         onChangedAllMessageCounter: function () {
             if (this.get('all_msg_counter')) {
                 this.startBlinkingFavicon();
-                window.document.title = "Messages (" + this.get('all_msg_counter') + ")";
+                window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter')]);
             } else {
                 this.stopBlinkingFavicon();
-                window.document.title = 'Xabber Web';
+                window.document.title = constants.CLIENT_NAME;
             }
         },
 
         setAllMessageCounter: function () {
             let count_msg = 0;
-            xabber.accounts.each(function(account) {
-                account.chats.each(function (chat) {
+            xabber.accounts.each((account) => {
+                account.chats.each((chat) => {
                     if (chat.contact && !chat.contact.get('muted'))
                         count_msg += chat.get('unread') + chat.get('const_unread');
-                }.bind(this));
-            }.bind(this));
+                });
+            });
             return count_msg;
         },
 
@@ -3107,13 +3105,13 @@ define("xabber-views", function () {
         },
 
         openWindow: function (url) {
-            utils.openWindow(url, function () {
-                utils.dialogs.error('Could not open new tab. Please allow popups');
-            }.bind(this));
+            utils.openWindow(url, () => {
+                utils.dialogs.error(xabber.getString("notifications__error__text_could_not_open_new_tab"));
+            });
         },
 
         popupNotification: function (params) {
-            var notification = new window.Notification(params.title, {
+            let notification = new window.Notification(params.title, {
                 body: params.text,
                 icon: params.icon
             });
@@ -3123,9 +3121,9 @@ define("xabber-views", function () {
 
         playAudio: function (name, loop) {
             loop = loop || false;
-            var filename = constants.SOUNDS[name];
+            let filename = constants.SOUNDS[name];
             if (filename) {
-                var audio = new window.Audio(filename);
+                let audio = new window.Audio(filename);
                 audio.loop = loop;
                 audio.play();
                 return audio;
@@ -3141,7 +3139,7 @@ define("xabber-views", function () {
         },
 
         registerDOMEvents: function () {
-            var self = this;
+            let self = this;
 
             $(window).on("blur focus", function (ev) {
                 self.set('focused', ev.type === 'focus');
@@ -3155,11 +3153,11 @@ define("xabber-views", function () {
                 self.trigger('update_layout', {size_changed: true});
             });
 
-            window.document.body.ondragover = function (ev) {
+            window.document.body.ondragover = (ev) => {
                 ev.preventDefault();
             };
 
-            window.document.body.ondrop = function (ev) {
+            window.document.body.ondrop = (ev) => {
                 ev.preventDefault();
             };
         }

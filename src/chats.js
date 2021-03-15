@@ -7176,7 +7176,7 @@ define("xabber-chats", function () {
                     ]
                 },
                 formats: ['bold', 'italic', 'underline', 'strike', 'blockquote', 'clean', 'emoji', 'mention'],
-                placeholder: this.model.get('encrypted') ? 'Write an encrypted message...' : 'Write a message...',
+                placeholder: xabber.getString(this.model.get('encrypted') ? "chat_bottom__hint_default_encrypted" : "chat_bottom__hint_default"),
                 scrollingContainer: '.rich-textarea',
                 theme: 'snow'
             });
@@ -7392,7 +7392,7 @@ define("xabber-chats", function () {
                 });
             } else {
                 this.$el.addClass('loading');
-                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text('OMEMO encryption is disabled'));
+                this.$el.prepend($('<div class="omemo-disabled warning-wrap"/>').text(xabber.getString("omemo__chat__placeholder_encryption_disabled")));
             }
         },
 
@@ -7671,7 +7671,7 @@ define("xabber-chats", function () {
             if (ev.keyCode === constants.KEY_ARROW_UP) {
                 if (!text) {
                     let $msg = this.view.$(`.chat-message[data-from="${this.account.get('jid')}"]`).last();
-                    (!$msg.length && this.contact.participants) && ($msg = this.view.$('.chat-message[data-from="' + this.contact.participants.find(m => m.get('jid') === this.account.get('jid')).get('id') + '"]').last());
+                    (!$msg.length && this.contact.participants) && ($msg = this.view.$(`.chat-message[data-from="${this.contact.participants.find(m => m.get('jid') === this.account.get('jid')).get('id')}"]`).last());
                     let edit_msg = this.messages_arr.get($msg.data('uniqueid'));
                     this.edit_message = edit_msg;
                     this.setEditedMessage(edit_msg);
@@ -8220,7 +8220,7 @@ define("xabber-chats", function () {
 
         unsetForwardedMessages: function (ev) {
             ev && ev.preventDefault && ev.preventDefault();
-            $rich_textarea = this.$('.input-message .rich-textarea');
+            let $rich_textarea = this.$('.input-message .rich-textarea');
             this.fwd_messages = [];
             if (this.edit_message) {
                 $rich_textarea.flushRichTextarea();

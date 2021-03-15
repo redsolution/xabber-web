@@ -247,29 +247,29 @@ define("xabber-accounts", function () {
                         instructions = $dataform.children('instructions').text(),
                         fields = [],
                         data_form = {};
-                    $dataform.children('field').each(function (idx, field) {
+                    $dataform.children('field').each((idx, field) => {
                         let $field = $(field),
                             attrs = {},
                             field_var = $field.attr('var'),
                             field_type = $field.attr('type'),
                             field_label = $field.attr('label'),
                             field_value = [], field_options = [];
-                        $field.children('value').each(function (i, value) {
+                        $field.children('value').each((i, value) => {
                             field_value.push($(value).text());
-                        }.bind(this));
-                        $field.children('option').each(function (i, option) {
+                        });
+                        $field.children('option').each((i, option) => {
                             let $option = $(option),
                                 val = $option.children('value').text(),
                                 lbl = $option.attr('label');
                             field_options.push({value: val, label: lbl});
-                        }.bind(this));
+                        });
                         field_var && (attrs.var = field_var);
                         field_type && (attrs.type = field_type);
                         field_label && (attrs.label = field_label);
                         field_value.length && (attrs.values = field_value);
                         field_options.length && (attrs.options = field_options);
                         fields.push(attrs);
-                    }.bind(this));
+                    });
                     type && (data_form.type = type);
                     title && (data_form.title = title);
                     instructions && (data_form.instructions = instructions);
@@ -286,9 +286,9 @@ define("xabber-accounts", function () {
                     delete field_attrs.values;
                     delete field_attrs.options;
                     $stanza.c('field', field_attrs);
-                    field.values && field.values.forEach(function (value) {
+                    field.values && field.values.forEach((value) => {
                         $stanza.c('value').t(value).up();
-                    }.bind(this));
+                    });
                     $stanza.up();
                 });
                 return $stanza;
@@ -394,13 +394,13 @@ define("xabber-accounts", function () {
                         conn_feedback:  xabber.getString("application_state_reconnect_after_some_seconds", [timeout/1000]),
                         auth_failed: false
                     });
-                    setTimeout(function () {
+                    setTimeout(() => {
                         this.connFeedback(xabber.getString("application_state_connecting"));
                         this.restoreStatus();
                         this.createBackgroundConnection();
                         this.createFastConnection();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
-                    }.bind(this), timeout);
+                    }, timeout);
                 },
 
                 connectionCallback: function (status, condition) {
