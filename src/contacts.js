@@ -80,7 +80,7 @@ define("xabber-contacts", function () {
                     } else if (!subscription)
                         status_text = xabber.getString("contact_state_no_subscriptions");
                     else
-                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || xabber.getString(this.get('status'));
                 } else {
                     if (subscription === 'from') {
                         if (out_request)
@@ -97,7 +97,7 @@ define("xabber-contacts", function () {
                         else
                             status_text = xabber.getString("contact_state_not_in_contact_list");
                     } else
-                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || xabber.getString(this.get('status'));
                 }
                 return status_text;
             },

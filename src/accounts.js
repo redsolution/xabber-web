@@ -763,7 +763,7 @@ define("xabber-accounts", function () {
                 },
 
                 getStatusMessage: function () {
-                    return this.get('status_message') || constants.STATUSES[this.get('status')];
+                    return this.get('status_message') || xabber.getString([this.get('status')]);
                 },
 
                 setStatus: function (status, message) {
@@ -1339,7 +1339,7 @@ define("xabber-accounts", function () {
             update: function () {
                 let attrs = this.model.attributes;
                 this.$('.status').attr('data-status', attrs.status);
-                this.$('.status-message').text(attrs.status_message || constants.STATUSES[attrs.status]);
+                this.$('.status-message').text(attrs.status_message || xabber.getString(attrs.status));
                 this.$('.client').text(attrs.client || xabber.getString("please_wait"));
                 this.$('.resource').text(attrs.resource);
                 this.$('.priority').text(attrs.priority);
@@ -2161,7 +2161,7 @@ define("xabber-accounts", function () {
             },
 
             clearStatusMessageInput: function () {
-                let verbose_status = constants.STATUSES[this.account.get('status')];
+                let verbose_status = xabber.getString(this.account.get('status'));
                 this.$('.status-message').val('').attr('placeholder', verbose_status)
                     .removeClass('filled');
             },

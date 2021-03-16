@@ -65,6 +65,15 @@
             this.en_translation = xabber_i18next.getFixedT('en');
         },
 
+        getOneLiners: function () {
+            if (xabber_i18next.exists("motivating_oneliner")) {
+                return xabber_i18next.t("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else if (this.en_translation) {
+                return this.en_translation("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else
+                return [];
+        },
+
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
                 return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');

@@ -59,7 +59,7 @@ define("xabber-chats", function () {
         },
 
         getVerboseState: function () {
-            let state = constants.MSG_VERBOSE_STATE[this.get('state')];
+            let state = xabber.getString(constants.MSG_VERBOSE_STATE[this.get('state')]);
             if (this.account) {
                 if (!this.account.isOnline())
                     state = xabber.getString("account_is_offline");
@@ -6642,8 +6642,8 @@ define("xabber-chats", function () {
           },
 
           updateOneLiner: function () {
-              let rand_idx = _.random(0, constants.ONELINERS.length - 1),
-                  one_liner = constants.ONELINERS[rand_idx];
+              let rand_idx = _.random(0, xabber.getOneLiners().length - 1),
+                  one_liner = xabber.getOneLiners()[rand_idx].replace(/\\n/, "");
               if (!one_liner) {
                   this.updateOneLiner();
                   return;
@@ -7240,16 +7240,15 @@ define("xabber-chats", function () {
                 i = 0,
                 all_sprites = Object.keys(Emoji.all).length;
             for (let emoji_list in Emoji.all) {
-                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
-                    list_name = emoji_list.replace(/ /g, '_');
-                $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`);
+                $(`<div id=${emoji_list} class="emoji-list-header">${xabber.getString(constants.EMOJI_LIST_NAME(emoji_list))}</div>`).appendTo($emoji_list_wrap);
                 _.each(Emoji.all[emoji_list], function (emoji) {
                     $('<div class="emoji-wrap"/>').html(
-                        emoji.emojify({emoji_size: 24, sprite: list_name})
+                        emoji.emojify({emoji_size: 24, sprite: emoji_list})
                     ).appendTo($emoji_list_wrap);
                 });
                 $emoji_list_wrap.appendTo($emoji_panel);
-                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: list_name, title: constants.EMOJI_LIST_NAME(emoji_list), tag_name: 'a', emoji_size: 20}));
+                $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list, title: xabber.getString(constants.EMOJI_LIST_NAME(emoji_list)), tag_name: 'a', emoji_size: 20}));
                 let img = new Image();
                 img.onload = () => {
                     onloaded_sprites++;
@@ -7539,8 +7538,8 @@ define("xabber-chats", function () {
         },
 
         setOneLiner: function () {
-            let rand_idx = _.random(0, constants.ONELINERS.length - 1),
-                placeholder = constants.ONELINERS[rand_idx];
+            let rand_idx = _.random(0, xabber.getOneLiners().length - 1),
+                placeholder = xabber.getOneLiners()[rand_idx].replace(/\\n/, "");
             if (!placeholder) {
                 this.setOneLiner();
                 return;
