@@ -773,7 +773,7 @@ define("xabber-chats", function () {
           },
 
           accept: function () {
-              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -789,7 +789,7 @@ define("xabber-chats", function () {
           reject: function (reason) {
               if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
                   return;
-              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
                   let end = moment.now(),
