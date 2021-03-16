@@ -857,7 +857,7 @@ define("xabber-api-service", function () {
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
-            $account_wrap.find('.sync-tip').text(constants.SYNC_WAY_DATA[sync_way].tip);
+            $account_wrap.find('.sync-tip').text(xabber.getString(constants.SYNC_WAY_DATA[sync_way].tip));
         },
 
         updateSyncOptions: function () {

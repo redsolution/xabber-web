@@ -341,7 +341,7 @@ define("xabber-mentions", function () {
                     forwarded_message = msg.get('forwarded_message'),
                     msg_files = msg.get('files'),
                     msg_images = msg.get('images'),
-                    msg_text = (forwarded_message) ? (msg.get('message') || ((forwarded_message.length > 1) ? (forwarded_message.length + ' forwarded messages') : 'Forwarded message').italics()) : msg.getText();
+                    msg_text = (forwarded_message) ? (msg.get('message') || xabber.getString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText();
                 this.model.set({timestamp: timestamp});
                 if (msg_files || msg_images) {
                     let $colored_span = $('<span class="text-color-500"/>');
@@ -350,17 +350,17 @@ define("xabber-mentions", function () {
                         msg_images = (msg_images.length > 0) ? msg_images : undefined;
                     }
                     if (msg_files && msg_images)
-                        msg_text = $colored_span.text(msg_files.length + msg_images.length + ' files');
+                        msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                     else {
                         if (msg_files) {
                             if (msg_files.length > 1)
-                                msg_text = $colored_span.text(msg_files.length + ' files');
+                                msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__files", msg_files.length));
                             if (msg_files.length == 1)
                                 msg_text = $colored_span.text(msg_files[0].name);
                         }
                         if (msg_images) {
                             if (msg_images.length > 1)
-                                msg_text = $colored_span.text(msg_images.length + ' images');
+                                msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__images", [msg_images.length]));
                             if (msg_images.length == 1)
                                 msg_text = $colored_span.text(msg_images[0].name);
                         }

@@ -1770,7 +1770,7 @@ define("xabber-accounts", function () {
                     state = 'off';
                 else
                     state = this.model.settings.get('synced') ? 'yes' : 'no';
-                this.$('.sync-status').text(constants.SYNCED_STATUS_DATA[state].tip);
+                this.$('.sync-status').text(xabber.getString(constants.SYNCED_STATUS_DATA[state].tip));
                 let mdiclass = constants.SYNCED_STATUS_DATA[state].icon,
                     $sync_icon = this.$('.sync-status-icon');
                 $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))

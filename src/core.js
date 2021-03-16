@@ -75,7 +75,21 @@
         },
 
         getQuanityString: function (id, count, params) {
-
+            let lang = xabber_i18next.language,
+                plurals = xabber_i18next.services.pluralResolver.getRule(lang);
+            if (!plurals)
+                return;
+            let _count = parseInt(count, 10);
+            xabber_i18next.services.pluralResolver.options.compatibilityJSON = 'v0';
+            let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
+            suffix.replace(/-/g, '_');
+            if (xabber_i18next.language == 'en') {
+                if (!suffix || suffix && !suffix.length)
+                    suffix = '_0';
+                else
+                    suffix = '_1';
+            }
+            return this.getString(`${id}_plural${suffix}`, (params || [count]));
         },
 
         parseTranslation: function (_locale) {
@@ -110,12 +124,13 @@
             // get version.js file from server and parse it
             let rawFile = new XMLHttpRequest();
             rawFile.open("GET", "version.js?"+uuid(), true);
-            rawFile.onreadystatechange = function () {
+            rawFile.onreadystatechange = () => {
                 if (rawFile.readyState === 4 && rawFile.status === 200) {
+                    let text, json;
                     rawFile.onreadystatechange = null;
                     try {
-                        let text = rawFile.responseText,
-                            json = JSON.parse(text.split('\n')[1].slice(1, -1));
+                        text = rawFile.responseText;
+                        json = JSON.parse(text.split('\n')[1].slice(1, -1));
                     } catch (e) {
                         return;
                     }
@@ -124,7 +139,7 @@
                         version_description: json.version_description
                     });
                 }
-            }.bind(this);
+            };
             rawFile.send();
         },
 

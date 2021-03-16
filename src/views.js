@@ -544,7 +544,6 @@ define("xabber-views", function () {
                                   chat_item.insertBefore(this.$('.chats-list .by-jid').first());
                               else
                                   this.$('.chats-list').append(chat_item);
-                              this.updateChatItem(chat_item);
                               chat_item.click(() => {
                                   this.$('.list-item.active').removeClass('active');
                                   xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
@@ -564,7 +563,7 @@ define("xabber-views", function () {
                       if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
                           if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
                               let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
-                                  item_list = xabber.contacts_view.$('.account-roster-wrap[data-jid="' + account.get('jid') + '"] .list-item[data-jid="' + jid + '"]').first().clone().data('account-jid', account.get('jid'));
+                                  item_list = xabber.contacts_view.$(`.account-roster-wrap[data-jid="${account.get('jid')}"] .list-item[data-jid="${jid}"]`).first().clone().data('account-jid', account.get('jid'));
                               item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).addClass(searched_by).prepend($('<div class="account-indicator ground-color-700"/>'));
                               if (searched_by === 'by-name')
                                   this.$('.contacts-list').prepend(item_list);
@@ -590,13 +589,6 @@ define("xabber-views", function () {
                       this.searchMessages(query, {query_id: this.queryid});
                   }, 1000);
               }
-          },
-
-          updateChatItem: function (chat_item) {
-              /*let date_width = chat_item.find('.last-msg-date').width();
-              chat_item.find('.chat-title-wrap').css('padding-right', date_width + 5);
-              let title_width = chat_item.find('.chat-title-wrap').width();
-              chat_item.find('.chat-title').css('max-width', title_width);*/
           },
 
           searchMessages: function (query, options) {
@@ -659,7 +651,7 @@ define("xabber-views", function () {
               account.sendIQ(iq,
                   function (res) {
                       account.connection.deleteHandler(handler);
-                      let $fin = $(res).find('fin[xmlns="'+Strophe.NS.MAM+'"]');
+                      let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
                       if ($fin.length && $fin.attr('queryid') === queryid) {
                           let rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
                           rsm_complete && (account.searched_msgs_loaded = true);
@@ -918,7 +910,6 @@ define("xabber-views", function () {
             });
 
             xabber.on("update_screen", this.onUpdatedScreen, this);
-            // this.data.on("change:add_menu_state", this.onChangedAddMenuState, this);
             this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
             this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
             this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
@@ -1398,7 +1389,7 @@ define("xabber-views", function () {
             let material_color = xabber.ColorPicker.prototype.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == color.toLowerCase()));
             if (material_color) {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == color.toLowerCase());
-                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+                this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
             } else {
                 this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
@@ -1478,7 +1469,6 @@ define("xabber-views", function () {
         setBackground: function (ev) {
             let value = ev.target.value;
             if (value == 'default') {
-                // window.document.cookie = encodeURIComponent('background={"type": "default"}');
                 this.model.save('background', {type: 'default'});
                 xabber.body.updateBackground();
                 this.updateBackgroundSetting();
@@ -2507,7 +2497,7 @@ define("xabber-views", function () {
                     let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
                     if (material_color) {
                         let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
-                        this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+                        this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
                     } else {
                         this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
                     }
@@ -2542,7 +2532,7 @@ define("xabber-views", function () {
             let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
             if (material_color) {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
-                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+                this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
             } else {
                 this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
@@ -2555,7 +2545,7 @@ define("xabber-views", function () {
             let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
             if (material_color) {
                 let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
-                this.$('.selected-color-name').text(`${material_color.color.replace(/-/g, " ")} ${tone.weight}`);
+                this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
             } else {
                 this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
             }
@@ -2567,11 +2557,11 @@ define("xabber-views", function () {
         selectColor: function (ev) {
             let $target = $(ev.target),
                 hex = $target.attr('data-hex'),
-                color_name = $target.closest('.color-palette-wrapper').attr('data-color-name').replace(/-/g, " "),
+                color_name = $target.closest('.color-palette-wrapper').attr('data-color-name').replace(/-/g, "_"),
                 weight = $target.attr('data-weight');
             this.$('.selected-color-wrap').removeClass('hidden');
             this.$('.selected-color-item').css('background-color', hex);
-            this.$('.selected-color-name').text(`${color_name} ${weight}`);
+            this.$('.selected-color-name').text(xabber.getString(`account_color_name_${color_name}`).replace(/-/g, " ").replace(/-/g, " ") + ` ${weight}`);
             this.$('.selected-color-hex').text(hex);
             let $input = this.$('.selected-color-hex-input'),
                 $color_hex = this.$('.selected-color-hex');

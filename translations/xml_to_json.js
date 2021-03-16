@@ -34,8 +34,7 @@ fs.readdirSync('./values').forEach(file => {
         let id =  plurals[i].getAttribute('name'),
             items = plurals[i].getElementsByTagName('item'), str = "";
         for (let j = 0; j < items.length; j++) {
-            let count = items[j].getAttribute('quantity');
-            json[`${id}_${count}`] = parseChildren(items[j]);
+            json[`${id}_plural_${j}`] = parseChildren(items[j]);
         }
     }
 });

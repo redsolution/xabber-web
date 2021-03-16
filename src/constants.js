@@ -197,42 +197,42 @@ var constants = {
 
     SYNC_WAY_DATA: {
         no: {
-            tip: 'Settings are already synchronized',
+            tip: 'xabber_account__sync__settings_already_synced',
             icon: 'mdi-cloud-check'
         },
         from_server: {
-            tip: 'Settings will be downloaded from the cloud',
+            tip: 'xabber_account__sync__settings_will_be_downloaded',
             icon: 'mdi-cloud-download'
         },
         to_server: {
-            tip: 'Local settings will be uploaded to cloud',
+            tip: 'xabber_account__sync__settings_will_be_uploaded',
             icon: 'mdi-cloud-upload'
         },
         delete: {
-            tip: 'Local account will be deleted',
+            tip: 'xabber_account__sync__acc_will_be_deleted',
             icon: 'mdi-delete'
         },
         off_local: {
-            tip: 'Local account',
+            tip: 'xabber_account__sync__local_acc',
             icon: 'mdi-cloud-outline-off'
         },
         off_remote: {
-            tip: 'Remote account',
+            tip: 'xabber_account__sync__remote_acc',
             icon: 'mdi-cloud-outline-off'
         }
     },
 
     SYNCED_STATUS_DATA: {
         off: {
-            tip: 'Synchronization disabled',
+            tip: 'xabber_account__sync_status__disabled',
             icon: 'mdi-cloud-outline-off'
         },
         yes: {
-            tip: 'Settings are synchronized',
+            tip: 'xabber_account__sync_status__synced',
             icon: 'mdi-cloud-check'
         },
         no: {
-            tip: 'Settings are not synchronized with cloud',
+            tip: 'xabber_account__sync_status__not_synced',
             icon: 'mdi-cloud'
         }
     },
