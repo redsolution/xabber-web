@@ -82,9 +82,9 @@ define("xabber-accounts", function () {
                     this.updateColorScheme();
                     this.settings.on("change:color", this.updateColorScheme, this);
                     this.on("change:photo_hash", this.getVCard, this);
-                    _.each(this._init_plugins, function (plugin) {
+                    _.each(this._init_plugins, (plugin) => {
                         plugin.call(this);
-                    }.bind(this));
+                    });
                     this.connection.xmlInput = function (xml) {
                         xabber.info('input');
                         xabber.info(xml);
@@ -448,14 +448,14 @@ define("xabber-accounts", function () {
                 },
 
                 authXabberAccount: function (callback) {
-                    this.requestPassword(function(data) {
+                    this.requestPassword((data) => {
                         this.xabber_auth = { api_jid: data.api_jid, request_id: data.request_id };
                         if (this.code_requests.length > 0) {
                             let verifying_code = this.code_requests.find(verifying_mess => (verifying_mess.jid === this.xabber_auth.api_jid && verifying_mess.id === this.xabber_auth.request_id));
                             if (verifying_code) {
                                 let idx_verifying_code = this.code_requests.indexOf(verifying_code);
                                 (idx_verifying_code > -1) && this.code_requests.splice(idx_verifying_code, 1);
-                                this.verifyXabberAccount(verifying_code.code, function (data) {
+                                this.verifyXabberAccount(verifying_code.code, (data) => {
                                     this._waiting_code = false;
                                     let iq_send_auth_mark = $iq({type: 'set'})
                                         .c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE})
@@ -465,7 +465,7 @@ define("xabber-accounts", function () {
                                     xabber.api_account.login_by_token();
                                     this.sendIQ(iq_send_auth_mark);
                                     callback && callback();
-                                }.bind(this));
+                                });
                             }
                             if (this.code_requests.length) {
                                 let msg_attrs = {
@@ -476,7 +476,7 @@ define("xabber-accounts", function () {
                                 this.createMessageFromIQ(msg_attr);
                             }
                         }
-                    }.bind(this));
+                    });
                 },
 
                 requestPassword: function(callback) {
@@ -564,8 +564,8 @@ define("xabber-accounts", function () {
                             type: 'get',
                             to: this.connection.domain
                         }).c('query', {xmlns: `${Strophe.NS.AUTH_TOKENS}#items`});
-                    this.sendIQ(iq, function (tokens) {
-                        $(tokens).find('field').each(function (idx, token) {
+                    this.sendIQ(iq, (tokens) => {
+                        $(tokens).find('field').each((idx, token) => {
                             let $token = $(token),
                                 client = $token.find('client').text(),
                                 device = $token.find('device').text(),
@@ -574,10 +574,10 @@ define("xabber-accounts", function () {
                                 last_auth = Number($token.find('last-auth').text())*1000,
                                 ip_address = $token.find('ip').text();
                             tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
-                        }.bind(this));
+                        });
                         this.x_tokens_list = tokens_list;
                         this.settings_right && this.settings_right.updateXTokens();
-                    }.bind(this));
+                    });
                 },
 
                 onTokenRevoked: function () {
@@ -617,16 +617,16 @@ define("xabber-accounts", function () {
                     this.trigger('activate', this);
                     this.session.get('no_reconnect') && this.session.set('no_reconnect', false);
                     this.afterConnected();
-                    _.each(this._after_connected_plugins, function (plugin) {
+                    _.each(this._after_connected_plugins, (plugin) => {
                         plugin.call(this);
-                    }.bind(this));
+                    });
                 },
 
                 onBackgroundConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
-                        _.each(this._after_background_connected_plugins, function (plugin) {
+                        _.each(this._after_background_connected_plugins, (plugin) => {
                             plugin.call(this);
-                        }.bind(this));
+                        });
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         this.background_conn_manager = undefined;
                         this.background_connection = undefined;
@@ -635,9 +635,9 @@ define("xabber-accounts", function () {
 
                 onFastConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
-                        _.each(this._after_fast_connected_plugins, function (plugin) {
+                        _.each(this._after_fast_connected_plugins, (plugin) => {
                             plugin.call(this);
-                        }.bind(this));
+                        });
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         this.fast_conn_manager = undefined;
                         this.fast_connection = undefined;
@@ -647,9 +647,9 @@ define("xabber-accounts", function () {
                 onReconnected: function () {
                     this.connFeedback(xabber.getString("account_state_connected"));
                     this.afterConnected();
-                    _.each(this._after_reconnected_plugins, function (plugin) {
+                    _.each(this._after_reconnected_plugins, (plugin) => {
                         plugin.call(this);
-                    }.bind(this));
+                    });
                 },
 
                 afterConnected: function () {
@@ -657,9 +657,9 @@ define("xabber-accounts", function () {
                     this.enableCarbons();
                     this.getVCard();
                     this.sendPendingStanzas();
-                    /*setTimeout(function () {
+                    /*setTimeout(() => {
                         this.sendPendingMessages();
-                    }.bind(this), 5000);*/
+                    }, 5000);*/
                 },
 
                 getAllMessageRetractions: function (encrypted, callback) {
@@ -683,11 +683,11 @@ define("xabber-accounts", function () {
                 },
 
                 sendPendingMessages: function () {
-                    _.each(this._pending_messages, function (item) {
+                    _.each(this._pending_messages, (item) => {
                         let msg = this.messages.get(item.msg_id), $msg_iq;
                         msg && ($msg_iq = msg.get('xml')) && msg.set('state', constants.MSG_PENDING);
                         $msg_iq && this.sendMsg($msg_iq);
-                    }.bind(this));
+                    });
                 },
 
                 _after_connected_plugins: [],
@@ -730,7 +730,7 @@ define("xabber-accounts", function () {
                     let jid = this.get('jid'),
                         is_callback = _.isFunction(callback);
                     ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
-                        function (vcard) {
+                        (vcard) => {
                             let attrs = {
                                 vcard: vcard,
                                 vcard_updated: moment.now()
@@ -747,7 +747,7 @@ define("xabber-accounts", function () {
                             }
                             this.save(attrs);
                             is_callback && callback(vcard);
-                        }.bind(this),
+                        },
                         function () {
                             is_callback && callback(null);
                         }
@@ -1760,7 +1760,7 @@ define("xabber-accounts", function () {
             revokeAllXTokens: function () {
                 utils.dialogs.ask(xabber.getString("settings_account__dialog_terminate_sessions__header"), xabber.getString("terminate_all_sessions_title"), null, { ok_button_text: xabber.getString("button_terminate")}).done((result) => {
                     if (result && this.model.x_tokens_list)
-                        this.model.revokeAllXTokens(function () {}.bind(this));
+                        this.model.revokeAllXTokens(() => {});
                 });
             },
 
@@ -1848,9 +1848,9 @@ define("xabber-accounts", function () {
                     storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
                     fetch: 'before'
                 });
-                setTimeout(function () {
+                setTimeout(() => {
                     this.model.omemo.onConnected();
-                }.bind(this), 1000);
+                }, 1000);
             },
 
             destroyOmemo: function () {
@@ -2047,13 +2047,13 @@ define("xabber-accounts", function () {
 
             updateList: function () {
                 _.each(this.children, function (view) { view.detach(); });
-                this.model.each(function (account) {
+                this.model.each((account) => {
                     let jid = account.get('jid'), view = this.child(jid);
                     if (!view) {
                         view = this.addChild(jid, xabber.AccountSettingsItemView, {model: account});
                     }
                     this.$('.no-accounts-tip').before(view.$el);
-                }.bind(this));
+                });
                 this.updateHtml();
                 this.parent.updateScrollBar();
             },
@@ -2580,11 +2580,11 @@ define("xabber-accounts", function () {
                 return;
             });
 
-            window.onbeforeunload = function () {
+            window.onbeforeunload = () => {
                 _.each(this.accounts.connected, function (account) {
                     account.sendPresence('offline');
                 });
-            }.bind(this);
+            };
 
             this.login_page.patchTree = function (tree, options) {
                 let login_screen = options.login_screen || constants.DEFAULT_LOGIN_SCREEN;

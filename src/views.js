@@ -1571,6 +1571,14 @@ define("xabber-views", function () {
             utils.dialogs.ask(xabber.getString("button_quit"), xabber.getString("settings__dialog_quit_client__confirm", [constants.CLIENT_NAME]), null, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
                 res && xabber.trigger('quit');
             });
+        },
+
+        changeLanguale: function () {
+            utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("dialog_version_update__button_reload")}).done(() => {
+                if (result) {
+
+                }
+            });
         }
     });
 

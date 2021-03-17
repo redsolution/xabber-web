@@ -36,6 +36,10 @@
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__appearance"))]}</div>
             </div>
+            <div class="settings-tab" data-block-name="interface_language">
+                <i class="mdi mdi-24px mdi-translate"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__interface_language"))]}</div>
+            </div>
             {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
             <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">
                 <i class="mdi mdi-24px mdi-{{PERSONAL_AREA_URL.icon_name}}"></i>
@@ -319,6 +323,20 @@
                                     </p>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="settings-block-wrap interface_language">
+                    <div class="block-header">
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
+                    </div>
+                    <div>
+                        <div class=""> <!-- xabber.getString("settings__section_interface_language__text_description___link"); xabber.getString("settings__section_interface_language__text_description__text_link") -->
+                            {[print(xabber.getString("settings__section_interface_language__text_description_no_translations"))]}<br><br>
+                            {[print(xabber.getString("settings__section_interface_language__text_description_translation_platform",
+                            [`<a href=''>link</a>`]))]}
                         </div>
                     </div>
                 </div>

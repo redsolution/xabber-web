@@ -1,13 +1,13 @@
 define("xabber-strophe", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             uuid = env.uuid,
             $iq = env.$iq,
             Strophe = env.Strophe,
             constants = env.constants;
 
         Strophe.log = function (log_level, msg) {
-            var do_log = (constants.LOG_LEVEL === constants.LOG_LEVEL_DEBUG) ||
+            let do_log = (constants.LOG_LEVEL === constants.LOG_LEVEL_DEBUG) ||
                 (constants.LOG_LEVEL >= constants.LOG_LEVEL_WARN &&
                     log_level >= Strophe.LogLevel.WARN) ||
                 (constants.LOG_LEVEL >= constants.LOG_LEVEL_ERROR &&
@@ -18,10 +18,10 @@ define("xabber-strophe", function () {
             }
         };
 
-        var utf16to8 = function (str) {
-            var i, c;
-            var out = "";
-            var len = str.length;
+        let utf16to8 = function (str) {
+            let i, c;
+            let out = "";
+            let len = str.length;
             for (i = 0; i < len; i++) {
                 c = str.charCodeAt(i);
                 if ((c >= 0x0000) && (c <= 0x007F)) {
@@ -46,7 +46,7 @@ define("xabber-strophe", function () {
         };
 
         Strophe.SASLXTOKEN.prototype.onChallenge = function (connection) {
-            var auth_str = String.fromCharCode(0) + connection.authcid +
+            let auth_str = String.fromCharCode(0) + connection.authcid +
                 String.fromCharCode(0) + connection.pass;
             return utf16to8(auth_str);
         };
@@ -113,16 +113,16 @@ define("xabber-strophe", function () {
                     return false;
                 } else {
                     if (this.x_token_auth && (!this.x_token || (parseInt(this.x_token.expire)*1000 < env.moment.now()))) {
-                        this.getXToken(function (success) {
+                        this.getXToken((success) => {
                             let token = $(success).find('token').text(),
                                 expires_at = $(success).find('expire').text(),
                                 token_uid = $(success).find('token-uid').text();
                             this.x_token = {token: token, expire: expires_at, token_uid: token_uid };
                             this.pass = token;
                             this._send_auth_bind();
-                        }.bind(this), function () {
+                        }, () => {
                             this._send_auth_bind();
-                        }.bind(this));
+                        });
                     }
                     else {
                         this._send_auth_bind();
@@ -135,7 +135,7 @@ define("xabber-strophe", function () {
                 this._addSysHandler(this._sasl_bind_cb.bind(this), null, null,
                     null, "_bind_auth_2");
 
-                var resource = Strophe.getResourceFromJid(this.jid);
+                let resource = Strophe.getResourceFromJid(this.jid);
                 if (resource) {
                     this.send($iq({type: "set", id: "_bind_auth_2"})
                         .c('bind', {xmlns: Strophe.NS.BIND})
@@ -158,7 +158,7 @@ define("xabber-strophe", function () {
                     .c('device').t(`PC, ${window.navigator.platform}, ${env.utils.getBrowser()}`);
 
                 handler = function (stanza) {
-                    var iqtype = stanza.getAttribute('type');
+                    let iqtype = stanza.getAttribute('type');
                     if (iqtype == 'result') {
                         if (callback) {
                             callback(stanza);
@@ -189,7 +189,7 @@ define("xabber-strophe", function () {
                 '&quot;': '"',
                 '&apos;': "'"
             };
-            var escaper = function(match) {
+            let escaper = function(match) {
                 return reg_exp[match];
             };
             // Regexes for identifying a key that needs to be escaped

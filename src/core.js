@@ -191,9 +191,9 @@
         },
 
         detectMediaDevices: function () {
-            this.getMediaDevices(function (media_devices) {
+            this.getMediaDevices((media_devices) => {
                 this.set(media_devices);
-            }.bind(this));
+            });
         },
 
         getMediaDevices: function (callback, errback) {
@@ -250,10 +250,10 @@
         }),
 
         start: function () {
-            this.check_config.done(function (result) {
+            this.check_config.done((result) => {
                 this.check_config = undefined;
                 result && this.trigger('start');
-            }.bind(this));
+            });
         },
 
         configure: function (config) {
