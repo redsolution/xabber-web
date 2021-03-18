@@ -3,13 +3,15 @@
         return factory(env);
     });
 }(this, function (env) {
-    var constants = env.constants,
+    let constants = env.constants,
         _ = env._,
         $ = env.$,
+        xabber_i18next = env.xabber_i18next,
+        xabber_i18next_sprintf = env.xabber_i18next_sprintf,
         uuid = env.uuid,
         utils = env.utils;
 
-    var Xabber = Backbone.Model.extend({
+    let Xabber = Backbone.Model.extend({
         defaults: {
             version_number: env.version_number,
             actual_version_number: env.version_number,
@@ -33,10 +35,74 @@
             this.cache = this._cache.attributes;
             this.cacheFavicons();
             this.extendFunction();
+            this.setLocale();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
+        },
+
+        setLocale: function () {
+            let _locale = window.navigator.language,
+                _locale_lang = _locale.slice(0, 2),
+                en_translation = {},
+                _locale_translation = this.parseTranslation(_locale);
+            xabber_i18next.use(xabber_i18next_sprintf);
+            xabber_i18next.init({
+                lng: 'en',
+                debug: false,
+                pluralSeparator: '-',
+                resources: {
+                    en: {
+                       translation: translations
+                    }/*,
+                    [_locale_lang]: {
+                        translation: _locale_translation
+                    }*/
+                }
+            });
+            // xabber_i18next.changeLanguage(_locale_lang);
+            this.en_translation = xabber_i18next.getFixedT('en');
+        },
+
+        getOneLiners: function () {
+            if (xabber_i18next.exists("motivating_oneliner")) {
+                return xabber_i18next.t("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else if (this.en_translation) {
+                return this.en_translation("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else
+                return [];
+        },
+
+        getString: function (id, params) {
+            if (xabber_i18next.exists(id)) {
+                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
+            } else if (this.en_translation) {
+                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
+            } else
+                return "";
+        },
+
+        getQuanityString: function (id, count, params) {
+            let lang = xabber_i18next.language,
+                plurals = xabber_i18next.services.pluralResolver.getRule(lang);
+            if (!plurals)
+                return;
+            let _count = parseInt(count, 10);
+            xabber_i18next.services.pluralResolver.options.compatibilityJSON = 'v0';
+            let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
+            suffix.replace(/-/g, '_');
+            if (xabber_i18next.language == 'en') {
+                if (!suffix || suffix && !suffix.length)
+                    suffix = '_0';
+                else
+                    suffix = '_1';
+            }
+            return this.getString(`${id}_plural${suffix}`, (params || [count]));
+        },
+
+        parseTranslation: function (_locale) {
+
         },
 
         error: function (msg) {
@@ -65,14 +131,15 @@
 
         readActualVersion: function () {
             // get version.js file from server and parse it
-            var rawFile = new XMLHttpRequest();
+            let rawFile = new XMLHttpRequest();
             rawFile.open("GET", "version.js?"+uuid(), true);
-            rawFile.onreadystatechange = function () {
+            rawFile.onreadystatechange = () => {
                 if (rawFile.readyState === 4 && rawFile.status === 200) {
+                    let text, json;
                     rawFile.onreadystatechange = null;
                     try {
-                        var text = rawFile.responseText,
-                            json = JSON.parse(text.split('\n')[1].slice(1, -1));
+                        text = rawFile.responseText;
+                        json = JSON.parse(text.split('\n')[1].slice(1, -1));
                     } catch (e) {
                         return;
                     }
@@ -81,7 +148,7 @@
                         version_description: json.version_description
                     });
                 }
-            }.bind(this);
+            };
             rawFile.send();
         },
 
@@ -124,21 +191,21 @@
         },
 
         detectMediaDevices: function () {
-            this.getMediaDevices(function (media_devices) {
+            this.getMediaDevices((media_devices) => {
                 this.set(media_devices);
-            }.bind(this));
+            });
         },
 
         getMediaDevices: function (callback, errback) {
             if (window.navigator && window.navigator.mediaDevices) {
                 window.navigator.mediaDevices.enumerateDevices()
-                    .then(function (devices) {
+                    .then((devices) => {
                         let media_devices = {audio: false, video: false};
                         (devices.find(device => device.kind === 'audioinput')) && (media_devices.audio = true);
                         (devices.find(device => device.kind === 'videoinput')) && (media_devices.video = true);
                         callback && callback(media_devices);
                     })
-                    .catch(function (err) {
+                    .catch((err) => {
                         errback && errback(err);
                     });
             }
@@ -147,15 +214,11 @@
         throwNewVersion: function () {
             if (!constants.CHECK_VERSION)
                 return;
-            var version_number = this.get('actual_version_number'),
+            let version_number = this.get('actual_version_number'),
                 version_description = this.get('version_description');
-            utils.dialogs.common(
-                'Update Xabber Web',
-                'New version '+version_number+' is available. '
-                +'<div class="new-version-description">'+version_description+'</div>'
-                +'Reload page to fetch this changes?',
-                {ok_button: {text: 'reload'}, cancel_button: {text: 'not now'}}
-            ).done(function (result) {
+            utils.dialogs.common(this.getString("dialog_version_update__header", [constants.CLIENT_NAME]), `${this.getString("dialog_version_update__confirm_text__new_version", [version_number])}<div class="new-version-description">${version_description}</div>${this.getString("dialog_version_update__confirm_text__question_reload_page")}`,
+                {ok_button: {text: this.getString("dialog_version_update__button_reload")}, cancel_button: {text: this.getString("dialog_version_update__option_not_now")}}
+            ).done((result) => {
                 if (result) {
                     window.location.reload(true);
                 }
@@ -187,10 +250,10 @@
         }),
 
         start: function () {
-            this.check_config.done(function (result) {
+            this.check_config.done((result) => {
                 this.check_config = undefined;
                 result && this.trigger('start');
-            }.bind(this));
+            });
         },
 
         configure: function (config) {
@@ -216,7 +279,7 @@
                 'DISABLE_LOOKUP_WS'
             ]));
 
-            var log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
+            let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
             constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
 
             if (constants.DEBUG) {
@@ -237,35 +300,31 @@
             }
 
             if (utils.isMobile.any()) {
-                var ios_msg = 'Sorry, but Xabber for Web does not support iOS browsers. ',
-                    android_msg = 'You should use Xabber for Android client.',
-                    any_mobile_msg = 'Sorry, but Xabber for Web may not work correctly on your device. ',
-                    goto_site_msg = 'Go to <a href="www.xabber.com">Xabber site</a> for more details.',
+                let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),
+                    android_msg = this.getString("warning__client_not_support_android_browser"),
+                    any_mobile_msg = this.getString("warning__client_not_support_mobile", [constants.CLIENT_NAME]),
                     msg;
                 if (utils.isMobile.iOS()) {
-                    msg = ios_msg + goto_site_msg;
+                    msg = ios_msg;
                 } else if (utils.isMobile.Android()) {
                     msg = any_mobile_msg + android_msg;
                 } else {
-                    msg = any_mobile_msg + goto_site_msg;
+                    msg = any_mobile_msg;
                 }
                 utils.dialogs.error(msg);
                 this.check_config.resolve(false);
                 return;
             }
             if (!constants.CONNECTION_URL) {
-                utils.dialogs.error('Missing connection URL!');
+                utils.dialogs.error(this.getString("client_error__missing_connection_url"));
                 this.check_config.resolve(false);
                 return;
             }
 
-            var self = this;
+            let self = this;
             if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
-                utils.dialogs.warning(
-                    'Your web browser does not support storing data locally. '+
-                    'In Safari, the most common cause of this is using "Private Browsing Mode". '+
-                    'So, you will need log in after page refresh again.',
-                    [{name: 'ignore', text: 'Don\'t show this message again'}]
+                utils.dialogs.warning(this.getString("client_warning__no_local_storage"),
+                    [{name: this.getString("ignore"), text: this.getString("client_error__option_show_msg_again")}]
                 ).done(function (res) {
                     res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
                 });
@@ -285,10 +344,10 @@
         },
 
         fetchURLParams: function () {
-            var splitted_url = window.location.href.split(/[?#]/);
+            let splitted_url = window.location.href.split(/[?#]/);
             this.url_params = {};
             if (splitted_url.length > 1) {
-                var idx, param, params = splitted_url[1].split('&');
+                let idx, param, params = splitted_url[1].split('&');
                 for (idx = 0; idx < params.length; idx++) {
                     param = params[idx].split('=');
                     if (param.length === 1) {
@@ -302,7 +361,7 @@
         },
 
         getStorageName: function () {
-            var name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            let name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
             if (constants.STORAGE_NAME_ENDING) {
                 name = name + '-' + constants.STORAGE_NAME_ENDING;
             }
@@ -310,8 +369,8 @@
         },
 
         cleanUpStorage: function () {
-            var full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
-            for (var key in window.localStorage) {
+            let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            for (let key in window.localStorage) {
                 if (key.startsWith('xabber') &&
                         !key.startsWith(full_storage_name)) {
                     window.localStorage.removeItem(key);
@@ -335,7 +394,7 @@
         },
 
         setUpPushNotifications: function () {
-            var result = new $.Deferred(),
+            let result = new $.Deferred(),
                 self = this;
 
             firebase.initializeApp({
@@ -364,11 +423,11 @@
                     });
 
                     navigator.serviceWorker.addEventListener('message', function (event) {
-                        var data = event.data;
+                        let data = event.data;
                         if (data['firebase-messaging-msg-type'] === 'push-msg-received') {
-                            var message = data['firebase-messaging-msg-data'];
+                            let message = data['firebase-messaging-msg-data'];
                             if (message && message.data && message.from === constants.GCM_SENDER_ID) {
-                                var payload;
+                                let payload;
                                 try {
                                     payload = JSON.parse(atob(message.data.body));
                                 } catch (e) {

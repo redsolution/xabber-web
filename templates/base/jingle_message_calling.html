@@ -1,6 +1,6 @@
 <i class="mdi mdi-phone btn-collapse"></i>
 <div class="call-header">
-    {{SHORT_CLIENT_NAME}} voice call
+    {[print(xabber.getString("dialog_jingle_message__header", [SHORT_CLIENT_NAME]))]}
     <div class="calling-status"/>
 </div>
 <div class="blur-background"></div>
@@ -10,9 +10,9 @@
 </div>
 <div class="video-wrap">
     <video autoplay loop class="blank-video hidden">
-        <source src="{{constants.BLANK_VIDEO.MP4}}">
-        <source src="{{constants.BLANK_VIDEO.OGG}}" type="video/ogg">
-        <source src="{{constants.BLANK_VIDEO.WEBM}}" type="video/webm">
+        <source src="{{BLANK_VIDEO.MP4}}">
+        <source src="{{BLANK_VIDEO.OGG}}" type="video/ogg">
+        <source src="{{BLANK_VIDEO.WEBM}}" type="video/webm">
     </video>
     <audio autoplay class="webrtc-remote-audio hidden"/>
     <video autoplay muted class="webrtc-local-video collapsed hidden"/>

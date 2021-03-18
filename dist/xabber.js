@@ -44830,7 +44830,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0 (26)","version_description":""}'
+'{"version_number":"2.2.0 (34)","version_description":""}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -52268,8 +52268,10 @@ define("xabber-accounts", [],function () {
             },
 
             revokeAllXTokens: function () {
-                if (this.model.x_tokens_list)
-                    this.model.revokeAllXTokens(function () {}.bind(this));
+                utils.dialogs.ask("Terminate sessions", "Are you sure you want to terminate all other sessions?", null, { ok_button_text: 'terminate'}).done((result) => {
+                    if (result && this.model.x_tokens_list)
+                        this.model.revokeAllXTokens(function () {}.bind(this));
+                });
             },
 
             updateSyncState: function () {
@@ -53522,30 +53524,37 @@ define("xabber-contacts", [],function () {
                     status_text = "";
                 if (this.get('blocked'))
                     status_text = 'Contact blocked';
-                else if (subscription === 'from') {
-                    if (out_request)
-                        status_text = 'Subscription request pending';
-                    else
-                        status_text = 'Subscribed to your status';
-                } else if (!subscription) {
-                    if (out_request)
-                        status_text =  'Subscription request pending';
-                    else if (in_request)
-                        status_text = 'Incoming subscription request';
-                    else if (_.isNull(subscription))
+                else if (this.get('group_chat')) {
+                    if (this.get('group_info')) {
+                        status_text = this.get('group_info').members_num;
+                        if (this.get('group_info').members_num > 1)
+                            status_text += ' members';
+                        else
+                            status_text += ' member';
+                        if (this.get('group_info').online_members_num > 0)
+                            status_text += ', ' + this.get('group_info').online_members_num + ' online';
+                    } else if (!subscription)
                         status_text = 'No subscriptions';
                     else
-                        status_text = 'Not in your contacts';
-                } else if (this.get('group_info')) {
-                    status_text = this.get('group_info').members_num;
-                    if (this.get('group_info').members_num > 1)
-                        status_text += ' members';
-                    else
-                        status_text += ' member';
-                    if (this.get('group_info').online_members_num > 0)
-                        status_text += ', ' + this.get('group_info').online_members_num + ' online';
-                } else
-                    status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                } else {
+                    if (subscription === 'from') {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else
+                            status_text = 'Subscribed to your status';
+                    } else if (!subscription) {
+                        if (out_request)
+                            status_text = 'Subscription request pending';
+                        else if (in_request)
+                            status_text = 'Incoming subscription request';
+                        else if (_.isNull(subscription))
+                            status_text = 'No subscriptions';
+                        else
+                            status_text = 'Not in your contacts';
+                    } else
+                        status_text = this.get('status_message') || constants.STATUSES[this.get('status')];
+                }
                 return status_text;
             },
 
@@ -55359,7 +55368,7 @@ define("xabber-contacts", [],function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
-                this.model.on("update_participants", this.updateParticipants, this);
+                this.participants.on("participants_updated", this.onParticipantsUpdated, this);
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
@@ -55374,7 +55383,9 @@ define("xabber-contacts", [],function () {
             },
 
             updateParticipants: function () {
-                this.participantsRequest(function (version) {
+                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
+                    let $response = $(response),
+                        version = $response.find('query').attr('version');
                     if (this.model.get('group_info')) {
                         (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
                         if (this.participants.length != this.model.get('group_info').members_num) {
@@ -55388,13 +55399,21 @@ define("xabber-contacts", [],function () {
                         return;
                     version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
                     (this.participants.version < version) && this.participants.updateVersion();
-                    this.participants.each(function (participant) {
-                        this.renderMemberItem(participant);
-                    }.bind(this));
-                    this.$el.removeClass('request-waiting');
+                    this.renderParticipants();
                 }.bind(this), function () {
                     this.$el.removeClass('request-waiting');
                 }.bind(this));
+            },
+
+            onParticipantsUpdated: function () {
+                this.isVisible() && this.renderParticipants();
+            },
+
+            renderParticipants: function () {
+                this.participants.each(function (participant) {
+                    this.renderMemberItem(participant);
+                }.bind(this));
+                this.$el.removeClass('request-waiting');
             },
 
             blockParticipant: function (ev) {
@@ -55433,16 +55452,6 @@ define("xabber-contacts", [],function () {
                                 });
                     }
                 }.bind(this));
-            },
-
-            participantsRequest: function (callback, errback) {
-                this.model.participants.participantsRequest({version: this.participants.version }, function (response) {
-                    let $response = $(response),
-                        version = $response.find('query').attr('version');
-                    callback && callback(version);
-                }.bind(this), function (error) {
-                    errback && errback(error);
-                });
             },
 
             renderMemberItem: function (participant) {
@@ -56375,7 +56384,8 @@ define("xabber-contacts", [],function () {
 
             initialize: function (_attrs, options) {
                 let attrs = _.clone(_attrs);
-                this.contact = options.contact;
+                this.model = options.model;
+                this.contact = this.model.contact;
                 this.account = this.contact.account;
                 this.on("change:avatar", this.getBase64Avatar, this);
                 this.set(attrs);
@@ -56441,6 +56451,7 @@ define("xabber-contacts", [],function () {
                 this.account = this.contact.account;
                 this.version = this.account.groupchat_settings.getParticipantsListVersion(this.contact.get('jid'));
                 this.getCachedParticipants();
+                this.contact.on("update_participants", this.updateParticipants, this);
                 this.on("change:nickname", this.sort, this);
             },
 
@@ -56461,7 +56472,7 @@ define("xabber-contacts", [],function () {
                 if (participant)
                     participant.set(attrs);
                 else {
-                    participant = this.create(attrs, {contact: this.contact});
+                    participant = this.create(attrs, {model: this});
                 }
                 return participant;
             },
@@ -56488,6 +56499,12 @@ define("xabber-contacts", [],function () {
                     });
                 }.bind(this));
                 return pretty_rights;
+            },
+
+            updateParticipants: function () {
+                this.participantsRequest({version: this.version}, () => {
+                    this.trigger("participants_updated");
+                });
             },
 
             participantsRequest: function (options, callback, errback) {
@@ -58883,6 +58900,7 @@ define("xabber-chats", [],function () {
                                 key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
                             uri = uri.slice(0, uri.length - 44 - 16 - 1);
                             _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                            attrs.has_encrypted_files = true;
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
                             images.push(file_attrs);
@@ -59362,7 +59380,7 @@ define("xabber-chats", [],function () {
           },
 
           accept: function () {
-              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -59378,7 +59396,7 @@ define("xabber-chats", [],function () {
           reject: function (reason) {
               if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
                   return;
-              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
                   let end = moment.now(),
@@ -60092,7 +60110,7 @@ define("xabber-chats", [],function () {
                 iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.get('jid'));
-            this.get('encryped') && (retract_attrs.type = 'encrypted');
+            this.get('encrypted') && (retract_attrs.type = 'encrypted');
             iq_retraction.c('retract-all', retract_attrs);
             this.account.sendIQ(iq_retraction, function (iq_response) {
                     var all_messages = this.messages.models;
@@ -60119,7 +60137,7 @@ define("xabber-chats", [],function () {
 
         deleteFromSynchronization: function (callback, errback) {
             let conversation_options = {jid: this.get('jid')};
-            this.get('encrypted') && (conversation_options.encrypted = true);
+            this.get('encrypted') && (conversation_options.type = 'encrypted');
             let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.account.get('jid')})
                 .c('delete', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', conversation_options);
@@ -61697,10 +61715,10 @@ define("xabber-chats", [],function () {
         },
 
 
-          decryptImages: function (message) {
+          decryptImages: function (message, force) {
             let scrolled_from_bottom = this.getScrollBottom(),
                 unique_id = message.get('unique_id');
-              if (this.model.get('encrypted') || message.get('encrypted')) {
+              if (this.model.get('encrypted') || message.get('encrypted') || force) {
                   let images = message.get('images') || [];
                   if (images.length) {
                       images.forEach((img) => {
@@ -62036,7 +62054,8 @@ define("xabber-chats", [],function () {
                 avatar_id = user_info.avatar,
                 role = user_info.role,
                 badge = user_info.badge,
-                from_id = user_info.id;
+                from_id = user_info.id,
+                has_encrypted_files = attrs.has_encrypted_files;
 
             if (is_sender && this.model.get('group_chat')) {
                 if (this.contact.my_info) {
@@ -62151,6 +62170,7 @@ define("xabber-chats", [],function () {
                         badge = user_info.badge,
                         from_id = user_info.id,
                         from_jid = attrs.from_jid;
+                    !has_encrypted_files && (has_encrypted_files = attrs.has_encrypted_files);
                     if (is_sender) {
                         username = Strophe.xmlescape(user_info.nickname || this.account.get('name'));
                     } else {
@@ -62232,8 +62252,8 @@ define("xabber-chats", [],function () {
             else
                 $message.find('.fwd-msgs-block').remove();
 
-            if (attrs.encrypted || this.model.get('encrypted')) {
-                this.decryptImages(message);
+            if (attrs.encrypted || this.model.get('encrypted') || has_encrypted_files) {
+                this.decryptImages(message, has_encrypted_files);
             }
             return $message.hyperlinkify({selector: '.chat-text-content'}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         },
@@ -62461,7 +62481,10 @@ define("xabber-chats", [],function () {
                 $(forwarded_message).each(function (idx, fwd_msg) {
                     let legacy_fwd_msg = Array.from(_.escape(_.unescape(this.bottom.createTextMessage([fwd_msg], ">"))) + ((idx === forwarded_message.length - 1 && !body.length) ? "" : '\n')),
                         idx_begin = legacy_body.length,
+                        fwd = $(fwd_msg.get('xml')).clone(),
                         idx_end = legacy_body.concat(legacy_fwd_msg).length;
+                    if (!fwd.attr('from'))
+                        fwd.attr('from', this.account.get('jid'));
                     stanza.c('reference', {
                         xmlns: Strophe.NS.REFERENCE,
                         type: 'mutable',
@@ -62472,7 +62495,7 @@ define("xabber-chats", [],function () {
                         .c('delay', {
                             xmlns: 'urn:xmpp:delay',
                             stamp: fwd_msg.get('time')
-                        }).up().cnode(fwd_msg.get('xml')).up().up().up();
+                        }).up().cnode(fwd[0]).up().up().up();
                     legacy_body = legacy_body.concat(legacy_fwd_msg);
                     mutable_content.push({
                         start: idx_begin,
@@ -63224,21 +63247,19 @@ define("xabber-chats", [],function () {
             let $elem = $(ev.target);
             if ($elem.hasClass('file-link-download')) {
                 ev.preventDefault();
-                if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                    let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                        uri = $elem.attr('href'),
-                        file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                    if (file && file.iv && file.key) {
-                        this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
-                            if (result === null)
-                                return;
-                            let download = document.createElement("a");
-                            download.href = result;
-                            download.download = file.name;
-                            download.click();
-                        });
-                        return;
-                    }
+                let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    uri = $elem.attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                if (file && file.iv && file.key) {
+                    this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let download = document.createElement("a");
+                        download.href = result;
+                        download.download = file.name;
+                        download.click();
+                    });
+                    return;
                 } else
                     xabber.openWindow($elem.attr('href'));
             }
@@ -63924,6 +63945,14 @@ define("xabber-chats", [],function () {
 
             let contact = this.account.contacts.get(msg_from), chat;
             contact && (chat = this.account.chats.getChat(contact));
+
+            if ($message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').length) {
+                if (!contact)
+                    return;
+                let participant_version = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').attr('version');
+                if (participant_version && contact.participants && contact.participants.version < participant_version)
+                    contact.trigger('update_participants');
+            }
 
             if ($message.children('attention[xmlns="' + Strophe.NS.ATTENTION + '"]').length && xabber.settings.call_attention) {
                 if (!chat)
@@ -65618,11 +65647,11 @@ define("xabber-chats", [],function () {
                 utils.dialogs.ask("Delete chat", "Are you sure you want to <b>delete all message history</b> for this chat?" +
                 (rewrite_support ? "" : ("\nWarning! <b>" + this.account.domain + "</b> server does not support message deletion. Only local message history will be deleted.").fontcolor('#E53935')), null, { ok_button_text: rewrite_support? 'delete' : 'delete locally'}).done(function (result) {
                     if (result) {
-                        if (this.account.connection && this.account.connection.do_synchronization) {
-                            this.model.deleteFromSynchronization();
-                        }
                         if (rewrite_support) {
                             this.model.retractAllMessages(false);
+                        }
+                        if (this.account.connection && this.account.connection.do_synchronization) {
+                            this.model.deleteFromSynchronization();
                         }
                         else {
                             let all_messages = this.model.messages.models;
@@ -66211,6 +66240,8 @@ define("xabber-chats", [],function () {
                     this.$('.mentions-list')[0].scrollTop = 0;
                     participants.forEach(function (participant) {
                         let attrs = _.clone(participant.attributes);
+                        if (!attrs.id)
+                            return;
                         attrs.nickname = attrs.nickname ? Strophe.xmlescape(attrs.nickname) : attrs.id;
                         let mention_item = $(templates.group_chats.mention_item(attrs));
                         mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname') || participant.get('jid') || participant.get('id')), this.mention_avatar_size);
@@ -66352,7 +66383,7 @@ define("xabber-chats", [],function () {
                     }
                     if (mention_position > -1) {
                         let mention_text = Array.from(to_caret_text).slice(mention_position, caret_position).join("").replace(/\s?(@|[+])/, "");
-                            if (this.contact.participants.length && this.contact.participants.version > 0) {
+                            if (this.contact.participants.length && this.contact.participants.version > 0 && (this.contact.get('group_info') && this.contact.participants && this.contact.get('group_info').members_num == this.contact.participants.length)) {
                                 this.updateMentionsList(mention_text);
                             } else {
                                 this.contact.participants.participantsRequest({version: 0}, function () {
@@ -66487,56 +66518,57 @@ define("xabber-chats", [],function () {
                     let mediaRecorder = new MediaRecorder(stream),
                         timer = 1, start_time, end_time,
                         mic_hover = true;
-                    mediaRecorder.start();
-                    mediaRecorder.onstart = function() {
-                        this.view.sendChatState('composing', 'voice');
-                        this._chatstate_send_timeout = setInterval(function () {
+                        mediaRecorder.onstart = function() {
                             this.view.sendChatState('composing', 'voice');
-                        }.bind(this), constants.CHATSTATE_INTERVAL_COMPOSING_AUDIO);
-                        start_time = moment.now();
-                        let $bottom_panel = this.$('.message-input-panel'),
-                            $timer_elem = this.$('.input-voice-message .timer'),
-                            $status_msg = this.$('.input-voice-message .voice-msg-status'),
-                            $voice_visualizer = this.$('.input-voice-message .voice-visualizer');
-                        $timer_elem.text('0:00');
-                        $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
-                        $bottom_panel.addClass('voice-message-recording');
+                            this._chatstate_send_timeout = setInterval(function () {
+                                this.view.sendChatState('composing', 'voice');
+                            }.bind(this), constants.CHATSTATE_INTERVAL_COMPOSING_AUDIO);
+                            start_time = moment.now();
+                            let $bottom_panel = this.$('.message-input-panel'),
+                                $timer_elem = this.$('.input-voice-message .timer'),
+                                $status_msg = this.$('.input-voice-message .voice-msg-status'),
+                                $voice_visualizer = this.$('.input-voice-message .voice-visualizer');
+                            $timer_elem.text('0:00');
+                            $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
+                            $bottom_panel.addClass('voice-message-recording');
 
-                        let timerId = setInterval(function() {
-                                if ($mic.hasClass('recording') && (timer < constants.VOICE_MSG_TIME)) {
-                                    if (timer%1 == 0)
-                                        $timer_elem.text(utils.pretty_duration(timer));
-                                    timer = (timer*10 + 2)/10;
-                                    mic_hover = $bottom_panel.is(":hover");
-                                    if (!mic_hover)
-                                        $status_msg.css('color', '#D32F2F').text('Release to cancel record');
+                            let timerId = setInterval(function() {
+                                    if ($mic.hasClass('recording') && (timer < constants.VOICE_MSG_TIME)) {
+                                        if (timer%1 == 0)
+                                            $timer_elem.text(utils.pretty_duration(timer));
+                                        timer = (timer*10 + 2)/10;
+                                        mic_hover = $bottom_panel.is(":hover");
+                                        if (!mic_hover)
+                                            $status_msg.css('color', '#D32F2F').text('Release to cancel record');
+                                        else
+                                            $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
+                                    }
                                     else
-                                        $status_msg.css('color', '#9E9E9E').text('Release outside this form to cancel');
-                                }
-                                else
-                                {
-                                    mic_hover = $bottom_panel.is(":hover");
-                                    mediaRecorder.stop();
-                                    $mic.removeClass('recording ground-color-50');
-                                    $bottom_panel.removeClass('voice-message-recording');
-                                    clearInterval(timerId);
-                                }
-                            }.bind(this), 200),
-                            flag = false,
-                            timerIdDot = setInterval(function() {
-                                if ($mic.hasClass('recording')) {
-                                    if (flag)
-                                        $voice_visualizer.css('background-color', '#FFF');
+                                    {
+                                        mic_hover = $bottom_panel.is(":hover");
+                                        mediaRecorder.stop();
+                                        $mic.removeClass('recording ground-color-50');
+                                        $bottom_panel.removeClass('voice-message-recording');
+                                        clearInterval(timerId);
+                                    }
+                                }.bind(this), 200),
+                                flag = false,
+                                timerIdDot = setInterval(function() {
+                                    if ($mic.hasClass('recording')) {
+                                        if (flag)
+                                            $voice_visualizer.css('background-color', '#FFF');
+                                        else
+                                            $voice_visualizer.css('background-color', '#D32F2F');
+                                        flag = !flag;
+                                    }
                                     else
-                                        $voice_visualizer.css('background-color', '#D32F2F');
-                                    flag = !flag;
-                                }
-                                else
-                                    clearInterval(timerIdDot);
-                            }, 500);
-                    }.bind(this);
+                                        clearInterval(timerIdDot);
+                                }, 500);
+                        }.bind(this);
 
-                    mediaRecorder.onstop = function(e) {
+                        mediaRecorder.start();
+
+                        mediaRecorder.onstop = function() {
                         clearInterval(this._chatstate_send_timeout);
                         this.view.sendChatState('paused');
                         end_time = moment.now();
@@ -66614,13 +66646,14 @@ define("xabber-chats", [],function () {
         },
 
         submit: function (ev) {
-            var $rich_textarea = this.$('.input-message .rich-textarea'),
+            let $rich_textarea = this.$('.input-message .rich-textarea'),
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
                 text = $rich_textarea.getTextFromRichTextarea();
+            this.$('.mentions-list').html("").hide();
             $rich_textarea.find('.emoji').each(function (idx, emoji_item) {
-                var emoji = emoji_item.innerText;
+                let emoji = emoji_item.innerText;
                 this.account.chat_settings.updateLastEmoji(emoji);
             }.bind(this));
             let content_concat = [];
@@ -68587,8 +68620,8 @@ define("xabber-omemo", [],function () {
                     this._pending_devices = true;
                     this._dfd_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
-                            this.updateDevices((this.account.background_connection || this.account.connection).omemo.parseUserDevices($(cb)));
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
+                            this.updateDevices(this.account.connection.omemo.parseUserDevices($(cb)));
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
@@ -68727,7 +68760,6 @@ define("xabber-omemo", [],function () {
             renderDevices: function () {
                 this.model.getDevicesNode().then(() => {
                     let devices_count = _.keys(this.model.devices).length;
-                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
                     this.updateFingerprints(this.model.devices);
                 });
                 this.updateOwnFingerprint();
@@ -68736,7 +68768,6 @@ define("xabber-omemo", [],function () {
             renderOwnDevices: function () {
                 this.omemo.getMyDevices().then(() => {
                     let devices_count = _.keys(this.model.own_devices).length;
-                    this.$('.additional-info').text(this.jid + ', ' + devices_count + (devices_count > 1 ? ' devices' : ' device'));
                     this.updateFingerprints(this.model.own_devices);
                     this.updateOwnFingerprint();
                 });
@@ -68770,7 +68801,7 @@ define("xabber-omemo", [],function () {
                 if (label == this.account.settings.get('device_label_text'))
                     return;
                 this.account.settings.save('device_label_text', label);
-                (this.account.background_connection || this.account.connection).omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, function () {
                     this.updateOwnFingerprint();
                 }.bind(this));
             },
@@ -68792,6 +68823,8 @@ define("xabber-omemo", [],function () {
                             container: this.$('.fingerprints-content')[0],
                             alignment: 'left'
                         });
+                    this.jid == this.account.get('jid') && f_count++;
+                    this.$('.additional-info').text(this.jid + ', ' + f_count + (f_count > 1 ? ' devices' : ' device'));
                     $container.find('.preloader-wrapper').detach();
                 });
                 for (var device_id in devices) {
@@ -68814,7 +68847,7 @@ define("xabber-omemo", [],function () {
                             dfd.resolve($container.find('div.row').length);
                     }
                     else {
-                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
@@ -69144,7 +69177,7 @@ define("xabber-omemo", [],function () {
             },
 
             closeSession: function (reason) {
-                (this.account.background_connection || this.account.connection).omemo.sendOptOut({
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.sendOptOut({
                     to: this.jid,
                     reason: reason
                 }, function () {
@@ -69157,7 +69190,7 @@ define("xabber-omemo", [],function () {
                     this._pending_bundle = true;
                     this._dfd_bundle = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 $spk = $bundle.find('spk'),
@@ -70018,7 +70051,7 @@ define("xabber-omemo", [],function () {
             publish: function (spk, ik, pks) {
                 if (!this.account.connection)
                     return;
-                let conn_omemo = (this.account.background_connection || this.account.connection).omemo,
+                let conn_omemo = ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo,
                     prekeys = [];
                 pks.forEach(function (pk) {
                     let id = pk.keyId,
@@ -70095,12 +70128,12 @@ define("xabber-omemo", [],function () {
                     this.set('resend_bundle', true);
                     return;
                 }
-                (this.account.background_connection || this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
                         this.publish(spk, ik.pubKey, pks);
                     }.bind(this),
                     function (err) {
                         if (($(err).find('error').attr('code') == 404))
-                            (this.account.background_connection || this.account.connection).omemo.createBundleNode(function () {
+                            ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.createBundleNode(function () {
                                 this.publish(spk, ik.pubKey, pks);
                             }.bind(this));
                     }.bind(this));
@@ -70366,12 +70399,12 @@ define("xabber-omemo", [],function () {
             },
 
             updateColorScheme: function () {
-                var color = this.account.settings.get('color');
+                let color = this.account.settings.get('color');
                 this.$el.attr('data-color', color);
             },
 
             onUpdatedScreen: function () {
-                if (!this.account.omemo_enable_placeholder)
+                if (!this.account.omemo_enable_placeholder || this.account.omemo_enable_placeholder.cid !== this.cid)
                     return;
                 this.$el.detach();
                 xabber.placeholders_wrap.$el.append(this.$el);

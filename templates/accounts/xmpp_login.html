@@ -5,24 +5,24 @@
     <div class="login-panel-form xmpp-login-form noselect">
         <div class="input-field">
             <input id="jid" type="text" name="jid">
-            <label for="jid">XMPP ID</label>
+            <label for="jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field">
             <input id="password" type="password" name="password">
-            <label for="password">Password</label>
+            <label for="password">{[print(xabber.getString("hint_pass"))]}</label>
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{REGISTER_XMPP_ACCOUNT}}" target="_blank" class="btn-flat btn-main btn-forgot-password">Register an XMPP account</a>{[}]}
-            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>
+            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{REGISTER_XMPP_ACCOUNT}}" target="_blank" class="btn-flat btn-main btn-forgot-password">{[print(xabber.getString("xmpp_login__button_register_account"))]}</a>{[}]}
+            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>
         </div>
         <div class="clearfix"></div>
         {[if (constants.USE_SOCIAL_AUTH){]}
         <div class="social-auth-wrap">
             <div class="social-header">
                 <div class="divider"></div>
-                <div class="social-header-tip">Social Login</div>
+                <div class="social-header-tip">{[print(xabber.getString("tutorial_title_8"))]}</div>
             </div>
             <div class="social-buttons">
                 <div class="btn-social google-color" data-provider="google">

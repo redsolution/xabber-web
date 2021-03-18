@@ -1,6 +1,6 @@
 define("xabber-api-service", function () {
   return function (xabber) {
-    var env = xabber.env,
+    let env = xabber.env,
         constants = env.constants,
         templates = env.templates.api_service,
         utils = env.utils,
@@ -42,7 +42,7 @@ define("xabber-api-service", function () {
         model: xabber.AccountSettings,
 
         create_from_server: function (settings_item) {
-            var settings = this.create(_.extend({
+            let settings = this.create(_.extend({
                 jid: settings_item.jid,
                 timestamp: settings_item.timestamp,
                 to_sync: true,
@@ -87,14 +87,14 @@ define("xabber-api-service", function () {
                 }
             }, this);
             xabber.on("push_message", function (message) {
-                if (    this.get('connected') &&
+                if (this.get('connected') &&
                         message.username === this.get('username') &&
                         message.from_token !== this.get('token') &&
                         message.action === 'settings_updated') {
                     this.synchronize_main_settings();
                     this.synchronize_order_settings();
                 }
-                if (    this.get('connected') &&
+                if (this.get('connected') &&
                     message.username === this.get('username') &&
                     message.from_token !== this.get('token') &&
                     message.action === 'account_updated') {
@@ -104,10 +104,10 @@ define("xabber-api-service", function () {
 
             this.ready = new $.Deferred();
             if (xabber.url_params.social_auth) {
-                var social_auth = xabber.url_params.social_auth;
+                let social_auth = xabber.url_params.social_auth;
                 delete xabber.url_params.social_auth;
                 try {
-                    var data = JSON.parse(atob(social_auth));
+                    let data = JSON.parse(atob(social_auth));
                     this.save('token', null);
                     this.social_login(data);
                     return;
@@ -125,19 +125,19 @@ define("xabber-api-service", function () {
         },
 
         _call_method: function (method, url, data, callback, errback) {
-            var request = {
+            let request = {
                 type: method,
                 url: constants.API_SERVICE_URL + url,
                 headers: {"Authorization": "Token " + this.get('token')},
                 context: this,
                 contentType: "application/json",
                 dataType: 'json',
-                success: function (data, textStatus, jqXHR) {
+                success: (data, textStatus, jqXHR) => {
                     callback && callback(data);
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: (jqXHR, textStatus, errorThrown) => {
                     this.onAPIError(jqXHR, errback);
-                }.bind(this)
+                }
             };
             if (data) {
                 request.data = JSON.stringify(data);
@@ -147,14 +147,14 @@ define("xabber-api-service", function () {
 
         add_source: function (data) {
             return _.extend({
-                source: 'Xabber Web '+xabber.get('version_number')
+                source: `${constants.CLIENT_NAME} ${xabber.get('version_number')}`
             }, data);
         },
 
         get_settings: function () {
             if (this.get('token') !== null) {
                 this._call_method('GET', '/accounts/current/', null,
-                    function (data) {
+                    (data) => {
                         if (data.account_status === 'registered') {
                             this.onUserData(data);
                             this._call_method('GET', '/accounts/current/client-settings/', null,
@@ -162,12 +162,11 @@ define("xabber-api-service", function () {
                                 this.onSettingsFailed.bind(this)
                             );
                         } else {
-                            utils.dialogs.error('Your Xabber account has not permission to synchronize ' +
-                                'settings of XMPP accounts!');
+                            utils.dialogs.error(xabber.getString("xabber_account__sync__error_no_permission_to_sync"));
                             this.save({token: null, connected: false});
                             this.trigger('settings_result', null);
                         }
-                    }.bind(this),
+                    },
                     this.onSettingsFailed.bind(this)
                 );
             } else {
@@ -188,7 +187,7 @@ define("xabber-api-service", function () {
 
         synchronize_main_settings: function () {
             if (this.get('connected')) {
-                var data = _.map(this.list.where({to_sync: true}), function (settings) {
+                let data = _.map(this.list.where({to_sync: true}), function (settings) {
                     return settings.request_data();
                 });
                 if (data.length) {
@@ -207,8 +206,8 @@ define("xabber-api-service", function () {
 
         synchronize_order_settings: function () {
             if (this.get('connected') && this.get('sync_all')) {
-                var timestamp = this.list.order_timestamp.get('timestamp');
-                var data = this.list.map(function (settings) {
+                let timestamp = this.list.order_timestamp.get('timestamp');
+                let data = this.list.map(function (settings) {
                     return {jid: settings.get('jid'), order: settings.get('order')};
                 });
                 this._call_method('PATCH', '/accounts/current/client-settings/',
@@ -222,21 +221,21 @@ define("xabber-api-service", function () {
         },
 
         fetch_from_server: function (data) {
-            var deleted_list = data.deleted,
+            let deleted_list = data.deleted,
                 settings_list = data.settings_data,
                 order_timestamp = data.order_data.timestamp,
                 order_list = data.order_data.settings,
                 list = this.list,
                 sync_all = this.get('sync_all');
-            _.each(deleted_list, function (item) {
-                var settings = list.get(item.jid);
+            _.each(deleted_list, (item) => {
+                let settings = list.get(item.jid);
                 if (settings && settings.get('to_sync') &&
                         settings.get('timestamp') <= item.timestamp) {
                     settings.trigger('delete_account', true);
                 }
             });
             _.each(settings_list, function (settings_item) {
-                var settings = list.get(settings_item.jid);
+                let settings = list.get(settings_item.jid);
                 if (settings) {
                     if (settings.get('to_sync')) {
                         settings.save(_.extend({
@@ -253,7 +252,7 @@ define("xabber-api-service", function () {
                 }
             });
             if (sync_all) {
-                var order_map = {}, max_order = 1;
+                let order_map = {}, max_order = 1;
                 _.each(order_list, function (order_item) {
                     order_map[order_item.jid] = order_item.order;
                     if (order_item.order > max_order) {
@@ -261,8 +260,8 @@ define("xabber-api-service", function () {
                     }
                 });
                 list.order_timestamp.save('timestamp', order_timestamp);
-                list.each(function (settings) {
-                    var jid = settings.get('jid'),
+                list.each((settings) => {
+                    let jid = settings.get('jid'),
                         order = order_map[jid];
                     if (!order) {
                         max_order += 1;
@@ -276,7 +275,7 @@ define("xabber-api-service", function () {
         },
 
         onAPIError: function (jqXHR, errback) {
-            var status = jqXHR.status,
+            let status = jqXHR.status,
                 response = jqXHR.responseJSON;
             if (status === 403) {
                 this.save({connected: false, token: null});
@@ -288,13 +287,11 @@ define("xabber-api-service", function () {
                             settings.trigger('delete_account', true);
                         });
                     } else if (response.reason === 'expired'){
-                        utils.dialogs.common(
-                            'Error',
-                            'Token for your Xabber account expired. Do you want relogin?',
-                            {ok_button: {text: 'yes'}, cancel_button: {text: 'not now'}}
-                        ).done(function (result) {
+                        utils.dialogs.common(xabber.getString("xabber_account__login__dialog_error__header"), xabber.getString("xabber_account__login__dialog_error__text"),
+                            {ok_button: {text: xabber.getString("yes")}, cancel_button: {text: xabber.getString("dialog_version_update__option_not_now")}}
+                        ).done((result) => {
                             result && this.trigger('relogin');
-                        }.bind(this));
+                        });
                     }
                 }
             }
@@ -302,21 +299,21 @@ define("xabber-api-service", function () {
         },
 
         _login: function (credentials, callback, errback) {
-            var request = {
+            let request = {
                 type: 'POST',
                 url: constants.API_SERVICE_URL + '/accounts/login/',
                 contentType: "application/json",
                 dataType: 'json',
                 data: JSON.stringify(this.add_source()),
                 success: callback,
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: (jqXHR, textStatus, errorThrown) => {
                     this.onAPIError(jqXHR, errback);
-                }.bind(this)
+                }
             };
             if (credentials.token) {
                 request.headers = {"Authorization": "Token " + credentials.token};
             } else {
-                var username = credentials.username,
+                let username = credentials.username,
                     password = credentials.password;
                 request.headers = {"Authorization": "Basic " + utils.utoa(username+':'+password)};
             }
@@ -341,14 +338,14 @@ define("xabber-api-service", function () {
                 dataType: 'json',
                 data: JSON.stringify(this.add_source(credentials)),
                 success: this.onSocialLogin.bind(this),
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: (jqXHR, textStatus, errorThrown) => {
                     this.onAPIError(jqXHR, this.onSocialLoginFailed.bind(this));
-                }.bind(this)
+                }
             });
         },
 
         revoke_token: function () {
-            var token = this.get('token');
+            let token = this.get('token');
             if (token !== null) {
                 this._call_method('delete', '/accounts/current/tokens/', {token: token});
             }
@@ -386,12 +383,12 @@ define("xabber-api-service", function () {
         onSocialLoginFailed: function (response, status) {
             this.save('connected', false);
             xabber.body.setScreen('settings');
-            utils.dialogs.error('Authentication failed for Xabber account.');
+            utils.dialogs.error(xabber.getString("xabber_account__login__error_auth_failed"));
             this.ready.resolve();
         },
 
         onUserData: function (data) {
-            var name, xmpp_binding_jid;
+            let name, xmpp_binding_jid;
             if (data.first_name && data.last_name) {
                 name = data.first_name + ' ' + data.last_name;
             } else {
@@ -404,7 +401,7 @@ define("xabber-api-service", function () {
         },
 
         onSettings: function (data) {
-            var sync_request = this.get('sync_request');
+            let sync_request = this.get('sync_request');
             this.save('sync_request', undefined);
             if (sync_request === 'window') {
                 if (!xabber.sync_settings_view)
@@ -420,23 +417,23 @@ define("xabber-api-service", function () {
         },
 
         logout: function () {
-            utils.dialogs.ask("Quit", "You will quit from Xabber Account. You will not be able to use enhanced Xabber services, but basic XMPP will work as usual.",
+            utils.dialogs.ask(xabber.getString("button_quit"), xabber.getString("logout_summary"),
                               [{name: 'delete_accounts', checked: true,
-                                text: 'Delete synced XMPP accounts'}], { ok_button_text: 'quit'}).done(function (res) {
+                                text: xabber.getString("xabber_account__dialog_logout__option_delete_accounts")}], { ok_button_text: xabber.getString("button_quit")}).done((res) => {
                 if (res) {
                     if (xabber.accounts.connected.length > 0)
-                        _.each(xabber.accounts.connected, function (account){
+                        _.each(xabber.accounts.connected, (account) => {
                             account.set('auto_login_xa', false);
                             account.save('auto_login_xa', false);
-                        }.bind(this));
+                        });
                     this.revoke_token();
                     if (res.delete_accounts) {
-                        _.each(this.list.where({to_sync: true}), function (settings) {
+                        _.each(this.list.where({to_sync: true}), (settings) => {
                             settings.trigger('delete_account', true);
                         });
                     }
                 }
-            }.bind(this));
+            });
         },
 
         start: function () {
@@ -488,17 +485,17 @@ define("xabber-api-service", function () {
             }
             this.data.set('authentication', true);
             this.authFeedback({});
-            var username = this.$username_input.val(),
+            let username = this.$username_input.val(),
                 password = this.$password_input.val();
             if (!username) {
-                return this.errorFeedback({username: 'Please input username!'});
+                return this.errorFeedback({username: xabber.getString("account_auth__error__text_input_username")});
             }
             username = username.trim();
             if (!password)  {
-                return this.errorFeedback({password: 'Please input password!'});
+                return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
             }
             password = password.trim();
-            this.authFeedback({password: 'Authentication...'});
+            this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
             this.model.login(username, password);
         },
 
@@ -520,7 +517,7 @@ define("xabber-api-service", function () {
         },
 
         updateButtons: function () {
-            var authentication = this.data.get('authentication');
+            let authentication = this.data.get('authentication');
             this.$('.btn-log-in').switchClass('disabled', authentication);
         },
 
@@ -542,11 +539,11 @@ define("xabber-api-service", function () {
         },
 
         onLoginFailed: function (response) {
-            this.errorFeedback({password: (response && response.detail) || 'Authentication failed'});
+            this.errorFeedback({password: (response && response.detail) || xabber.getString("connection__error__text_authentication_failed_short")});
         },
 
         socialAuth: function (ev) {
-            var origin = window.location.href,
+            let origin = window.location.href,
                 provider = $(ev.target).closest('.btn-social').data('provider');
             if (provider == 'email') {
                 this.closeModal();
@@ -638,26 +635,26 @@ define("xabber-api-service", function () {
 
         render: function (options) {
             if (!xabber.accounts.connected.length) {
-                utils.dialogs.error('No connected accounts found.');
+                utils.dialogs.error(xabber.getString("dialog_add_contact__error__text_no_accounts"));
                 return;
             }
             options || (options = {});
-            var accounts = xabber.accounts.connected,
+            let accounts = xabber.accounts.connected,
                 jid = options.jid || '';
             this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
                 .removeClass('invalid');
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
             this.$('.account-field .dropdown-content').empty();
-            _.each(accounts, function (account) {
+            _.each(accounts, (account) => {
                 this.$('.account-field .dropdown-content').append(
                     this.renderAccountItem(account));
-            }.bind(this));
+            });
             this.bindAccount(accounts[0]);
             this.$('span.errors').text('');
             this.$el.openModal({
                 opacity: 0.9,
-                ready: function () {
+                ready: () => {
                     this.onRender.bind(this);
                     this.$('.account-field .dropdown-button').dropdown({
                         inDuration: 100,
@@ -666,7 +663,7 @@ define("xabber-api-service", function () {
                         hover: false,
                         alignment: 'left',
                     });
-                }.bind(this),
+                },
                 complete: this.closeModal.bind(this)
             });
             return this;
@@ -678,13 +675,13 @@ define("xabber-api-service", function () {
         },
 
         renderAccountItem: function (account) {
-            var $item = $(env.templates.contacts.add_contact_account_item({jid: account.get('jid')}));
+            let $item = $(env.templates.contacts.add_contact_account_item({jid: account.get('jid')}));
             $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
             return $item;
         },
 
         selectAccount: function (ev) {
-            var $item = $(ev.target).closest('.account-item-wrap'),
+            let $item = $(ev.target).closest('.account-item-wrap'),
                 account = xabber.accounts.get($item.data('jid'));
             this.bindAccount(account);
             this.loginXabberAccount(account);
@@ -743,7 +740,7 @@ define("xabber-api-service", function () {
 
         onRender: function () {
             this.$('.accounts-wrap').empty();
-            var list = this.model.list,
+            let list = this.model.list,
                 accounts_map = {},
                 deleted_map = {},
                 settings_map = {},
@@ -760,7 +757,7 @@ define("xabber-api-service", function () {
             });
 
             // Make synchronization list
-            _.each(settings_map, function (obj, jid) {
+            _.each(settings_map, (obj, jid) => {
                 // pick accounts that are present on server only
                 if (!list.get(jid)) {
                     accounts_map[jid] = _.extend({
@@ -769,9 +766,9 @@ define("xabber-api-service", function () {
                         sync_way: 'from_server'
                     }, obj);
                 }
-            }.bind(this));
-            list.each(function (settings) {
-                var jid = settings.get('jid'),
+            });
+            list.each((settings) => {
+                let jid = settings.get('jid'),
                     obj = settings_map[jid],
                     sync_way;
                 if (_.has(deleted_map, jid)) {
@@ -805,15 +802,15 @@ define("xabber-api-service", function () {
                     }, _.omit(settings.attributes, ['order']));
                     settings.save('synced', false);
                 }
-            }.bind(this));
+            });
 
             // fetch server order of accounts and merge it with local order
-            var max_order = _.max(order_map) || 0;
-            _.each(order_map, function (order, jid) {
+            let max_order = _.max(order_map) || 0;
+            _.each(order_map, (order, jid) => {
                 accounts_map[jid].order = order;
             });
-            list.each(function (settings) {
-                var jid = settings.get('jid');
+            list.each((settings) => {
+                let jid = settings.get('jid');
                 if (!accounts_map[jid].order) {
                     accounts_map[jid].order = (++max_order);
                 }
@@ -830,8 +827,8 @@ define("xabber-api-service", function () {
         },
 
         addAccountHtml: function (settings) {
-            var jid = settings.jid;
-            var $account_el = $(templates.sync_settings_account_item({
+            let jid = settings.jid;
+            let $account_el = $(templates.sync_settings_account_item({
                 jid: jid,
                 view: this
             }));
@@ -839,13 +836,13 @@ define("xabber-api-service", function () {
         },
 
         updateAccountHtml: function (account_wrap) {
-            var $account_wrap = $(account_wrap),
+            let $account_wrap = $(account_wrap),
                 jid = $account_wrap.data('jid'),
                 account_item = this.accounts_map[jid];
             this.sync_all && (account_item.to_sync = true);
             $account_wrap.switchClass('sync', account_item.to_sync);
             $account_wrap.find('.sync-one').prop('checked', account_item.to_sync);
-            var sync_way;
+            let sync_way;
             if (account_item.to_sync) {
                 sync_way = account_item.sync_way;
             } else if (this.model.list.get(jid)) {
@@ -853,41 +850,41 @@ define("xabber-api-service", function () {
             } else {
                 sync_way = 'off_remote';
             }
-            var mdiclass = constants.SYNC_WAY_DATA[sync_way].icon,
+            let mdiclass = constants.SYNC_WAY_DATA[sync_way].icon,
                 $sync_icon = $account_wrap.find('.sync-icon');
             $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
                 .attr('data-mdiclass', mdiclass).addClass(mdiclass);
-            $account_wrap.find('.sync-tip').text(constants.SYNC_WAY_DATA[sync_way].tip);
+            $account_wrap.find('.sync-tip').text(xabber.getString(constants.SYNC_WAY_DATA[sync_way].tip));
         },
 
         updateSyncOptions: function () {
-            var list = this.model.list,
+            let list = this.model.list,
                 sync_all = this.sync_all,
                 accounts_map = this.accounts_map;
             this.$('.sync-all').prop('checked', sync_all ? 'checked' : '');
             this.$('.sync-one').prop('disabled', sync_all ? 'disabled' : '');
-            this.$('.account-wrap').each(function (idx, el) {
+            this.$('.account-wrap').each((idx, el) => {
                 this.updateAccountHtml(el);
-            }.bind(this));
+            });
         },
 
         changeSyncAll: function (ev) {
-            var $target = $(ev.target),
+            let $target = $(ev.target),
                 sync_all = $target.prop('checked');
             this.sync_all = sync_all;
             this.$('.sync-one').prop('disabled', sync_all ? 'disabled' : '');
             if (sync_all) {
-                _.each(this.accounts, function (account_item) {
+                _.each(this.accounts, (account_item) => {
                     account_item.to_sync = true;
                 });
-                this.$('.account-wrap').each(function (idx, el) {
+                this.$('.account-wrap').each((idx, el) => {
                     this.updateAccountHtml(el);
-                }.bind(this));
+                });
             }
         },
 
         changeSyncOne: function (ev) {
-            var $target = $(ev.target),
+            let $target = $(ev.target),
                 value = $target.prop('checked'),
                 $account_wrap = $target.closest('.account-wrap'),
                 jid = $account_wrap.data('jid');
@@ -896,13 +893,13 @@ define("xabber-api-service", function () {
         },
 
         changeSyncWay: function (ev) {
-            var $account_wrap = $(ev.target).closest('.account-wrap'),
+            let $account_wrap = $(ev.target).closest('.account-wrap'),
                 jid = $account_wrap.data('jid'),
                 account_item = this.accounts_map[jid];
             if (!account_item.to_sync || !account_item.sync_choose) {
                 return;
             }
-            var sync_choose = account_item.sync_choose,
+            let sync_choose = account_item.sync_choose,
                 idx = sync_choose.indexOf(account_item.sync_way) + 1;
             if (idx === sync_choose.length) {
                 idx = 0;
@@ -912,18 +909,18 @@ define("xabber-api-service", function () {
         },
 
         syncSettings: function () {
-            var list = this.model.list,
+            let list = this.model.list,
                 sync_all = this.sync_all;
             this.model.save('sync_all', this.sync_all);
             _.each(this.accounts, function (account_item) {
-                var jid = account_item.jid,
+                let jid = account_item.jid,
                     settings = list.get(jid);
                 if (settings) {
                     settings.save('to_sync', account_item.to_sync);
                     if (sync_all) {
                         settings.save('order', account_item.order);
                     }
-                    var sync_way = account_item.sync_way;
+                    let sync_way = account_item.sync_way;
                     if (sync_way === 'to_server') {
                         settings.update_timestamp();
                     } else if (sync_way === 'from_server' || sync_way === 'delete') {
@@ -1013,58 +1010,57 @@ define("xabber-api-service", function () {
         },
 
         updateExpanded: function () {
-            var expanded = this.data.get('expanded');
+            let expanded = this.data.get('expanded');
             this.$('.arrow').switchClass('mdi-chevron-down', expanded);
             this.$('.arrow').switchClass('mdi-chevron-right', !expanded);
             this.$('.social-linked-wrap').showIf(expanded);
         },
 
         updateSocialBindings: function () {
-            var linked_emails = this.model.get('linked_email_list'),
+            let linked_emails = this.model.get('linked_email_list'),
                 linked_social = this.model.get('linked_social');
             this.$('.email-linked').remove();
             this.$('.social-account').each(function (idx, item) {
-                var $social_item = $(item);
+                let $social_item = $(item);
                 $social_item.addClass('not-linked');
-                $social_item.find('.synced-info').text('Not linked');
+                $social_item.find('.synced-info').text(xabber.getString("title_not_linked_account"));
                 $social_item.find('.btn-link').text('link').removeClass('btn-unlink');
             });
-            _.each(linked_emails, function(email) {
-                var email_id = email.id,
+            _.each(linked_emails, (email) => {
+                let email_id = email.id,
                     email_address = email.email,
                     is_verified = email.verified,
-                    verified_status = (is_verified) ? 'Verified' : 'Unverified',
-                    email_item_html = $(templates.linked_email_item({email_id: email_id, email: email_address, verified: is_verified, verified_status: verified_status, color: this.default_color}));
+                    email_item_html = $(templates.linked_email_item({email_id: email_id, email: email_address, verified: is_verified, color: this.default_color}));
                 email_item_html.insertBefore(this.$('#email.not-linked'));
-            }.bind(this));
-            _.each(linked_social, function(social) {
-                var social_provider = social.provider,
+            });
+            _.each(linked_social, (social) => {
+                let social_provider = social.provider,
                     social_name = social.first_name + " " + social.last_name;
                 this.$('.'+ social_provider + '-linked').removeClass('not-linked');
                 this.$('.' + social_provider + '-linked .btn-link').text('unlink').addClass('btn-unlink');
-                this.$('.'+ social_provider + '-linked .synced-info').html($('<div class="name one-line">' + social_name + '</div><div class="verified-status one-line">Linked ' + social_provider + ' account</div>'));
-            }.bind(this));
+                this.$('.'+ social_provider + '-linked .synced-info').html($(`<div class="name one-line">${social_name}</div><div class="verified-status one-line">${xabber.getString("title_linked_account", [social_provider])}</div>`));
+            });
         },
 
         linkSocial: function (ev) {
             if ((this.model.get('token'))&&(!$(ev.target).hasClass('btn-unlink'))) {
-                var social_elem = $(ev.target).closest('.social-linked-item-wrap'),
+                let social_elem = $(ev.target).closest('.social-linked-item-wrap'),
                     provider = social_elem.attr('id');
                 if (provider === 'email') {
-                    utils.dialogs.ask_enter_value("Add email", null, {input_placeholder_value: 'Enter email address'}, { ok_button_text: 'link'}).done(function (mail) {
+                    utils.dialogs.ask_enter_value(xabber.getString("xabber_account__dialog_add_email__header"), null, {input_placeholder_value: xabber.getString("xabber_account__dialog_add_email__hint_enter_email")}, { ok_button_text: xabber.getString("action_connect")}).done((mail) => {
                         if (mail) {
                             this.model._call_method('POST', '/accounts/current/email_list/', {email: mail},
-                                function (mail_data) {
-                                    var email_list = this.model.get('linked_email_list');
+                                (mail_data) => {
+                                    let email_list = this.model.get('linked_email_list');
                                     email_list.push(mail_data);
                                     this.model.set('linked_email_list', email_list);
                                     this.updateSocialBindings();
-                                }.bind(this),
-                                function (jqXHR, textStatus, errorThrown) {
+                                },
+                                (jqXHR, textStatus, errorThrown) => {
                                     this.$('span.errors ').text(jqXHR.email[0]);
-                                }.bind(this));
+                                });
                         }
-                    }.bind(this));
+                    });
                 }
                 else {
                     this.openAccount();
@@ -1073,70 +1069,66 @@ define("xabber-api-service", function () {
         },
 
         verifyEmail: function (ev) {
-            var $target = $(ev.target),
+            let $target = $(ev.target),
                 $email_html = $target.closest('.social-linked-item-wrap'),
                 email_address = $email_html.data('email');
-            utils.dialogs.ask_enter_value("Confirm email", null, {input_placeholder_value: 'Enter verification code'}, { ok_button_text: 'verify', resend_button_text: 'resend code', resend_to: email_address}).done(function (code) {
+            utils.dialogs.ask_enter_value(xabber.getString("title_email_confirm"), null, {input_placeholder_value: xabber.getString("xabber_account__dialog_confirm_email__hint_enter_code")}, { ok_button_text: xabber.getString("button_confirm"), resend_button_text: xabber.getString("button_resend_link"), resend_to: email_address}).done((code) => {
                 if (code) {
                     if (code === email_address) {
                         this.model._call_method('POST', '/accounts/current/email_list/', {email: code});
                     }
                     else {
                         this.model._call_method('POST', '/accounts/email_confirmation/', {code: code},
-                            function (mail_data) {
-                                var email_list = mail_data.email_list;
+                            (mail_data) => {
+                                let email_list = mail_data.email_list;
                                 this.model.set('linked_email_list', email_list);
                                 this.updateSocialBindings();
-                            }.bind(this),
-                            function (jqXHR, textStatus, errorThrown) {
-                                this.$('span.errors ').text(jqXHR.code[0]);
-                            }.bind(this));
+                            }, (jqXHR, textStatus, errorThrown) => {
+                                this.$('span.errors').text(jqXHR.code[0]);
+                            });
                     }
                 }
-            }.bind(this));
+            });
         },
 
         unlinkSocial: function (ev) {
-            var $target = $(ev.target);
+            let $target = $(ev.target);
             if (!$target.hasClass('btn-verify-email')) {
-                var $social_html = $target.closest('.social-linked-item-wrap');
-                var provider = $social_html.attr('id'),
+                let $social_html = $target.closest('.social-linked-item-wrap');
+                let provider = $social_html.attr('id'),
                     is_email = $social_html.data('email');
                 if (is_email) {
-                    var email_address = $social_html.data('email');
-                    utils.dialogs.ask("Unlink email", "Do you want to unlink email " +
-                        email_address + "?", null, {ok_button_text: 'unlink'}).done(function (result) {
+                    let email_address = $social_html.data('email');
+                    utils.dialogs.ask(xabber.getString("xabber_account__dialog_unlink_email__header"), xabber.getString("title_delete_email"), null, {ok_button_text: xabber.getString("action_disconnect")}).done((result) => {
                         if (result) {
                             this.model._call_method('DELETE', '/accounts/current/email_list/' + $social_html.data('id') + '/', null,
-                                function (mail_data) {
-                                    var email_list = this.model.get('linked_email_list'),
+                                (mail_data) => {
+                                    let email_list = this.model.get('linked_email_list'),
                                         deleted_mail_index = email_list.indexOf(email_list.find(email => email.id === $social_html.data('id')));
                                     email_list.splice(deleted_mail_index, 1);
                                     this.model.set('linked_email_list', email_list);
                                     this.updateSocialBindings();
-                                }.bind(this),
-                                function (jqXHR, textStatus, errorThrown) {
+                                }, (jqXHR, textStatus, errorThrown) => {
                                     this.model.get_settings();
-                                }.bind(this));
+                                });
                         }
-                    }.bind(this));
+                    });
                 }
                 else if (provider !== 'email') {
-                    utils.dialogs.ask("Unlink social account", "Do you want to unlink " + provider + " account?", null, {ok_button_text: 'unlink'}).done(function (result) {
+                    utils.dialogs.ask(xabber.getString("xabber_account__dialog_unlink_social__header"), xabber.getString("title_delete_social", [provider]), null, {ok_button_text: xabber.getString("action_disconnect")}).done((result) => {
                         if (result) {
                             this.model._call_method('POST', '/accounts/current/social_unbind/', {provider: provider},
-                                function () {
-                                    var social_list = this.model.get('linked_social'),
+                                () => {
+                                    let social_list = this.model.get('linked_social'),
                                         deleted_social_index = social_list.indexOf(social_list.find(social => social.provider === provider));
                                     social_list.splice(deleted_social_index, 1);
                                     this.model.set('linked_social', social_list);
                                     this.updateSocialBindings();
-                                }.bind(this),
-                                function (jqXHR, textStatus, errorThrown) {
+                                }, (jqXHR, textStatus, errorThrown) => {
                                     this.model.get_settings();
-                                }.bind(this));
+                                });
                         }
-                    }.bind(this));
+                    });
                 }
             }
         },
@@ -1147,13 +1139,13 @@ define("xabber-api-service", function () {
         },
 
         updateAvatar: function () {
-            var name = this.model.get('name'),
+            let name = this.model.get('name'),
                 image = this.model.get('image') || utils.images.getDefaultAvatar(name);
             this.$('.circle-avatar').setAvatar(utils.images.getCachedImage(image), this.avatar_size);
         },
 
         updateForConnectedStatus: function () {
-            var connected = this.model.get('connected');
+            let connected = this.model.get('connected');
             this.$tab.switchClass('online', connected)
                      .switchClass('offline', !connected);
             this.$('.linked-social-accounts-and-emails').showIf(connected);
@@ -1170,15 +1162,15 @@ define("xabber-api-service", function () {
         },
 
         updateSyncButton: function () {
-            var sync = this.data.get('sync');
+            let sync = this.data.get('sync');
             this.$('.btn-sync .button').hideIf(sync);
             this.$('.btn-sync .preloader-wrapper').showIf(sync);
         },
 
         updateLastSyncInfo: function () {
-            var last_sync = this.model.get('last_sync');
+            let last_sync = this.model.get('last_sync');
             if (last_sync) {
-                var time_delta = utils.now() - last_sync;
+                let time_delta = utils.now() - last_sync;
                 this.$('.last-sync-info').text('Synced ' + utils.pretty_timedelta(time_delta));
             } else {
                 this.$('.last-sync-info').text('Not synced');
@@ -1200,7 +1192,7 @@ define("xabber-api-service", function () {
             if (xabber.add_api_account_view && xabber.accounts.connected.length > 1)
                 xabber.add_api_account_view.show();
             else {
-                var account = xabber.accounts.connected[0];
+                let account = xabber.accounts.connected[0];
                 if (account) {
                     account.set('auto_login_xa', true);
                     account.authXabberAccount();
@@ -1213,13 +1205,13 @@ define("xabber-api-service", function () {
         },
 
         onPasswordResetFailed: function () {
-            utils.dialogs.error("For reset password need at least one confirmed email");
+            utils.dialogs.error(xabber.getString("password_reset_need_email"));
         },
 
         setPassword: function () {
-            var email_list = this.model.get('linked_email_list');
+            let email_list = this.model.get('linked_email_list');
             if (email_list) {
-                var verified_email = email_list.find(mail => mail.verified === true);
+                let verified_email = email_list.find(mail => mail.verified === true);
                 if (email_list.indexOf(verified_email) != -1) {
                     $.ajax({
                         type: 'POST',
@@ -1227,10 +1219,9 @@ define("xabber-api-service", function () {
                         contentType: "application/json",
                         dataType: 'json',
                         data: JSON.stringify({email: verified_email.email}),
-                        success: function () {
-                            utils.dialogs.notify("Set password", "Request for set password sent on email " +
-                                verified_email.email);
-                        }.bind(this),
+                        success: () => {
+                            utils.dialogs.notify(xabber.getString("button_reset_pass"), xabber.getString("password_reset_success", [verified_email.email]));
+                        },
                         error: this.onPasswordResetFailed.bind(this)
                     });
                 }

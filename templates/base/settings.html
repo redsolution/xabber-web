@@ -11,32 +11,36 @@
             <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">
                 <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>
                 <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>
-                <div class="settings-block-name one-line">Xabber Account</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__xabber_account"))]}</div>
             </div>
             {[}]}
             <div class="settings-tab" data-block-name="xmpp-accounts">
                 <i class="mdi mdi-24px mdi-settings"/>
-                <div class="settings-block-name one-line">XMPP Accounts</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__xmpp_account"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="keyboard">
                 <i class="mdi mdi-24px mdi-keyboard"></i>
-                <div class="settings-block-name one-line">Keyboard</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__keyboard"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="contact-list">
                 <i class="mdi mdi-24px mdi-account-multiple"></i>
-                <div class="settings-block-name one-line">Contact list</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("category_contact_list"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="notifications">
                 <i class="mdi mdi-24px mdi-bell"></i>
-                <div class="settings-block-name one-line">Notifications</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__notifications"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="sounds">
                 <i class="mdi mdi-24px mdi-volume-high"></i>
-                <div class="settings-block-name one-line">Sounds</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="background">
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
-                <div class="settings-block-name one-line">Appearance</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__appearance"))]}</div>
+            </div>
+            <div class="settings-tab" data-block-name="interface_language">
+                <i class="mdi mdi-24px mdi-translate"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__interface_language"))]}</div>
             </div>
             {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
             <a href="{{PERSONAL_AREA_URL.url}}" target="_blank"><div class="link-button settings-tab" data-block-name="{{PERSONAL_AREA_URL.label}}">
@@ -49,14 +53,14 @@
         <div class="settings-tabs-bottom-wrap">
             <div class="settings-tab delete-all-accounts">
                 <i class="mdi mdi-24px mdi-logout-variant"></i>
-                <div class="settings-block-name">Quit {{SHORT_CLIENT_NAME}}</div>
+                <div class="settings-block-name">{[print(xabber.getString("button_quit"))]}</div>
             </div>
         </div>
     </div>
 
     <div class="right-column noselect">
         <div class="settings-panel-head">
-            <span>Settings</span>
+            <span>{[print(xabber.getString("preference_editor"))]}</span>
         </div>
 
         <div class="panel-content-wrap">
@@ -64,28 +68,28 @@
                 {[if (CONNECT_XABBER_ACCOUNT) {]}
                 <div class="settings-block-wrap xabber-account">
                     <div class="block-header">
-                        <span class="block-name">Xabber account</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__xabber_account"))]}</span>
                     </div>
                 </div>
                 {[}]}
                 <div class="settings-block-wrap xmpp-accounts">
                     <div class="block-header">
-                        <span class="block-name">XMPP accounts</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__xmpp_account"))]}</span>
                     </div>
                     <div class="setting xmpp-account-list">
                         <div class="accounts-head-wrap">
-                            <div class="accounts-head xmppid-head">XMPP ID</div>
-                            <div class="accounts-head sync-head">Sync</div>
-                            <div class="accounts-head enabled-head">Enabled</div>
+                            <div class="accounts-head xmppid-head">{[print(xabber.getString("settings__section_xmpp_accounts__table_header_xmpp_id"))]}</div>
+                            <div class="accounts-head sync-head">{[print(xabber.getString("settings__section_xmpp_accounts__table_header_sync"))]}</div>
+                            <div class="accounts-head enabled-head">{[print(xabber.getString("settings__section_xmpp_accounts__table_header_enabled"))]}</div>
                         </div>
-                        <span class="no-accounts-tip">No accounts</span>
+                        <span class="no-accounts-tip">{[print(xabber.getString("settings__section_xmpp_accounts__text_no_accounts"))]}</span>
                         <div class="move-account-to-bottom droppable"></div>
                     </div>
                 </div>
 
                 <div class="settings-block-wrap keyboard">
                     <div class="block-header">
-                        <span class="block-name">Keyboard</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__keyboard"))]}</span>
                     </div>
 
                     <div class="setting hotkeys radio-button field-wrap">
@@ -93,11 +97,11 @@
                             <form action="#">
                                 <p>
                                     <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />
-                                    <label for="{{view.cid}}-enter">Send message on Enter</label>
+                                    <label for="{{view.cid}}-enter">{[print(xabber.getString("settings__section_keyboard__label_send_on_enter"))]}</label>
                                 </p>
                                 <p>
                                     <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />
-                                    <label for="{{view.cid}}-ctrlenter">Send message on Ctrl+Enter</label>
+                                    <label for="{{view.cid}}-ctrlenter">{[print(xabber.getString("settings__section_keyboard__label_send_on_ctrlenter"))]}</label>
                                 </p>
                             </form>
                         </div>
@@ -106,18 +110,18 @@
 
                 <div class="settings-block-wrap contact-list">
                     <div class="block-header">
-                        <span class="block-name">Contact list</span>
+                        <span class="block-name">{[print(xabber.getString("category_contact_list"))]}</span>
                     </div>
                 </div>
 
                 <div class="settings-block-wrap notifications">
                     <div class="block-header">
-                        <span class="block-name">Notifications</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__notifications"))]}</span>
                     </div>
 
                     <div class="setting notifications field-wrap">
                         <div class="field clickable-field switch small">
-                            <span class="field-name">Desktop notifications</span>
+                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_desktop_notifications"))]}</span>
                             <label class="field-value">
                                 <input type="checkbox" name="notifications">
                                 <span class="lever"></span>
@@ -126,7 +130,7 @@
                     </div>
                     <div class="setting message-preview field-wrap">
                         <div class="field clickable-field switch small">
-                            <span class="field-name">Message preview</span>
+                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</span>
                             <label class="field-value">
                                 <input type="checkbox" name="message-preview">
                                 <span class="lever"></span>
@@ -135,7 +139,7 @@
                     </div>
                     <div class="setting call-attention field-wrap">
                         <div class="field clickable-field switch small">
-                            <span class="field-name">Call attention</span>
+                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_call_attention"))]}</span>
                             <label class="field-value">
                                 <input type="checkbox" name="call-attention">
                                 <span class="lever"></span>
@@ -146,7 +150,7 @@
 
                 <div class="settings-block-wrap sounds">
                     <div class="block-header">
-                        <span class="block-name">Sounds</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__sounds"))]}</span>
                     </div>
                     <div class="setting sound radio-button field-wrap">
                         <div class="field radio-field clickable-field">
@@ -214,30 +218,30 @@
 
                 <div class="settings-block-wrap background">
                     <div class="block-header">
-                        <span class="block-name">Appearance</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__appearance"))]}</span>
                     </div>
 
                     <div class="background-setting-wrap">
-                        <div class="setting-name">Background</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</div>
                         <div class="setting background radio-button field-wrap">
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
                                         <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default-background" />
-                                        <label for="{{view.cid}}-default-background">Default</label>
+                                        <label for="{{view.cid}}-default-background">{[print(xabber.getString("settings__section_appearance__background__label_default"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern-background" />
-                                        <label for="{{view.cid}}-repeating-pattern-background">Repeating pattern</label>
+                                        <label for="{{view.cid}}-repeating-pattern-background">{[print(xabber.getString("settings__section_appearance__background__label_pattern"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image-background" />
-                                        <label for="{{view.cid}}-image-background">Image</label>
+                                        <label for="{{view.cid}}-image-background">{[print(xabber.getString("settings__section_appearance__background__label_image"))]}</label>
                                     </p>
                                 </form>
                             </div>
                             <div class="current-background-wrap">
-                                <div class="dark-placeholder">Update</div>
+                                <div class="dark-placeholder">{[print(xabber.getString("settings__section_appearance__background__button_update"))]}</div>
                                 <div class="current-background"></div>
                             </div>
                         </div>
@@ -245,7 +249,7 @@
                             <div class="setting vignetting-setting field-wrap">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="vignetting_switch"/>
-                                    <label for="vignetting_switch">Vignette</label>
+                                    <label for="vignetting_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_vignette"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
@@ -259,7 +263,7 @@
                             <div class="setting blur-setting field-wrap">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="blur_switch"/>
-                                    <label for="blur_switch">Blur</label>
+                                    <label for="blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
@@ -271,7 +275,7 @@
                         </div>
                     </div>
                     <div class="toolbar-color-setting-wrap">
-                        <div class="setting-name">Toolbar icons color</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</div>
                         <div class="setting toolbar-color-setting field-wrap">
                             <div class="selected-color-wrap">
                                 <div class="selected-color-item"></div>
@@ -283,7 +287,7 @@
                         </div>
                     </div>
                     <div class="toolbar-main-color-setting-wrap">
-                        <div class="setting-name">Main color</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</div>
                        <div class="setting toolbar-main-color-setting field-wrap">
                            <div class="current-main-color-wrap">
                                <div class="current-main-color ground-color-500"></div>
@@ -292,28 +296,28 @@
                        </div>
                     </div>
                     <div class="side-panel-setting-wrap">
-                        <div class="setting-name">Contacts side panel</div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_side_panel"))]}</div>
                         <div class="setting side-panel-setting field-wrap">
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
                                         <input class="with-gap" name="side-panel" value="dark" type="radio" id="{{view.cid}}-dark-side-panel" />
-                                        <label for="{{view.cid}}-dark-side-panel">Dark</label>
+                                        <label for="{{view.cid}}-dark-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_dark"))]}</label>
                                     </p>
                                     <p>
                                         <input class="with-gap" name="side-panel" value="light" type="radio" id="{{view.cid}}-light-side-panel" />
-                                        <label for="{{view.cid}}-light-side-panel">Light</label>
+                                        <label for="{{view.cid}}-light-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_light"))]}</label>
                                     </p>
                                 </form>
                             </div>
                             <div class="input-field checkbox-field">
                                 <input type="checkbox" class="filled-in" id="side_panel_blur_switch"/>
-                                <label for="side_panel_blur_switch">Blur</label>
+                                <label for="side_panel_blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
                             </div>
                             <div class="transparency-setting">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="transparency_switch"/>
-                                    <label for="transparency_switch">Transparency</label>
+                                    <label for="transparency_switch">{[print(xabber.getString("settings__section_appearance__side_panel__checkbox_transparency"))]}</label>
                                 </div>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
@@ -322,6 +326,22 @@
                                     </p>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-block-wrap interface_language">
+                    <div class="block-header">
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
+                    </div>
+                    <div class="setting interface-language-setting">
+                        <div class="languages-list">
+                            {[print(xabber.getString("settings__languages_list___item_default"))]}
+                        </div>
+                        <div class="description">
+                            {[print(xabber.getString("settings__section_interface_language__text_description_no_translations", [SHORT_CLIENT_NAME, SHORT_CLIENT_NAME, SHORT_CLIENT_NAME]))]}<br><br>
+                            {[print(xabber.getString("settings__section_interface_language__text_description_translation_platform",
+                            [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]))]}
                         </div>
                     </div>
                 </div>

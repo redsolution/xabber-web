@@ -1,7 +1,6 @@
 define("xabber-discovery", function () {
   return function (xabber) {
-    var env = xabber.env,
-        constants = env.constants,
+    let env = xabber.env,
         $ = env.$,
         _ = env._,
         moment = env.moment,
@@ -27,7 +26,7 @@ define("xabber-discovery", function () {
         },
 
         render: function () {
-            var name = this.model.get('verbose_name'),
+            let name = this.model.get('verbose_name'),
                 supports = this.model.get('supports');
             this.$('.feature-name').text(name);
             this.$('.supports').text(supports ? 'Available' : 'Unavailable')
@@ -62,7 +61,7 @@ define("xabber-discovery", function () {
         },
 
         addFeature: function (namespace, verbose_name) {
-            var feature = this.create({
+            let feature = this.create({
                 namespace: namespace,
                 verbose_name: verbose_name
             });
@@ -96,7 +95,7 @@ define("xabber-discovery", function () {
 
         onItems: function (stanza) {
             let groupchat_servers_list = [];
-            $(stanza).find('query item').each(function (idx, item) {
+            $(stanza).find('query item').each((idx, item) => {
                 let jid = $(item).attr('jid'),
                     name = $(item).attr('name'),
                     node = $(item).attr('node');
@@ -109,15 +108,15 @@ define("xabber-discovery", function () {
                     jid,
                     null,
                     this.onInfo.bind(this));
-            }.bind(this));
+            });
         },
 
         onInfo: function (stanza) {
-            var $stanza = $(stanza),
+            let $stanza = $(stanza),
                 from = $stanza.attr('from'),
                 self = this;
             $stanza.find('feature').each(function () {
-                var namespace = $(this).attr('var');
+                let namespace = $(this).attr('var');
                 self.create({
                     'var': namespace,
                     from: from
@@ -128,11 +127,11 @@ define("xabber-discovery", function () {
         },
 
         onFeatureAdded: function (feature) {
-            var _var = feature.get('var'),
+            let _var = feature.get('var'),
                 client_feature = this.account.client_features.get(_var);
             client_feature && client_feature.set('supports', true);
 
-            var prefs = feature.get('preferences') || {};
+            let prefs = feature.get('preferences') || {};
             if (_var === Strophe.NS.MAM && prefs.default !== 'always') {
                 this.account.sendIQ(
                     $iq({type: 'get'}).c('prefs', {xmlns: Strophe.NS.MAM}),
@@ -142,10 +141,10 @@ define("xabber-discovery", function () {
         },
 
         receiveMAMPreferences: function (feature, iq) {
-            var $prefs = $(iq).find('prefs[xmlns="'+Strophe.NS.MAM+'"]');
-            var default_pref = $prefs.attr('default');
+            let $prefs = $(iq).find('prefs[xmlns="'+Strophe.NS.MAM+'"]');
+            let default_pref = $prefs.attr('default');
             if (default_pref !== 'always') {
-                var stanza = $iq({'type': 'set'})
+                let stanza = $iq({'type': 'set'})
                     .c('prefs', {xmlns: Strophe.NS.MAM, 'default': 'always'});
                 $prefs.children().each(function (idx, child) {
                     stanza.cnode(child).up();
@@ -173,11 +172,11 @@ define("xabber-discovery", function () {
         },
 
         onInfo: function (stanza) {
-            var $stanza = $(stanza),
+            let $stanza = $(stanza),
                 from = $stanza.attr('from'),
                 self = this;
             $stanza.find('feature').each(function () {
-                var namespace = $(this).attr('var');
+                let namespace = $(this).attr('var');
                 self.create({
                     'var': namespace,
                     from: from
@@ -213,20 +212,20 @@ define("xabber-discovery", function () {
         this.last_stanza_timestamp = moment.now();
 
         this.connection.deleteHandler(this._last_stanza_handler);
-        this._last_stanza_handler = this.connection.addHandler(function () {
+        this._last_stanza_handler = this.connection.addHandler(() => {
             this.last_stanza_timestamp = moment.now();
             return true;
-        }.bind(this));
+        });
 
         this.connection.deleteHandler(this._pong_handler);
-        this._pong_handler = this.connection.ping.addPingHandler(function (ping) {
+        this._pong_handler = this.connection.ping.addPingHandler((ping) => {
             this.last_stanza_timestamp = moment.now();
             this.connection.ping.pong(ping);
             return true;
-        }.bind(this));
+        });
 
         this.connection.deleteTimedHandler(this._ping_handler);
-        this._ping_handler = this.connection.addTimedHandler(30000, function () {
+        this._ping_handler = this.connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_stanza_timestamp;
             if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
                 if (this.connection.connected)
@@ -239,7 +238,7 @@ define("xabber-discovery", function () {
                 this.connection.ping.ping(this.get('jid'));
             }
             return true;
-        }.bind(this));
+        });
 
         this.server_features.request();
     }, true, true);
@@ -248,20 +247,20 @@ define("xabber-discovery", function () {
         this.last_background_stanza_timestamp = moment.now();
 
         this.background_connection.deleteHandler(this._last_background_stanza_handler);
-        this._last_background_stanza_handler = this.background_connection.addHandler(function () {
+        this._last_background_stanza_handler = this.background_connection.addHandler(() => {
             this.last_background_stanza_timestamp = moment.now();
             return true;
-        }.bind(this));
+        });
 
         this.background_connection.deleteHandler(this._background_pong_handler);
-        this._background_pong_handler = this.background_connection.ping.addPingHandler(function (ping) {
+        this._background_pong_handler = this.background_connection.ping.addPingHandler((ping) => {
             this.last_background_stanza_timestamp = moment.now();
             this.background_connection.ping.pong(ping);
             return true;
-        }.bind(this));
+        });
 
         this.background_connection.deleteTimedHandler(this._background_ping_handler);
-        this._background_ping_handler = this.background_connection.addTimedHandler(30000, function () {
+        this._background_ping_handler = this.background_connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_background_stanza_timestamp;
             if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
                 if (this.background_connection.connected)
@@ -274,27 +273,27 @@ define("xabber-discovery", function () {
                 this.background_connection.ping.ping(this.background_connection.jid);
             }
             return true;
-        }.bind(this));
+        });
     }, true, true);
 
     xabber.Account.addFastConnPlugin(function () {
         this.last_fast_stanza_timestamp = moment.now();
 
         this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
-        this._last_fast_stanza_handler = this.fast_connection.addHandler(function () {
+        this._last_fast_stanza_handler = this.fast_connection.addHandler(() => {
             this.last_fast_stanza_timestamp = moment.now();
             return true;
-        }.bind(this));
+        });
 
         this.fast_connection.deleteHandler(this._fast_pong_handler);
-        this._fast_pong_handler = this.fast_connection.ping.addPingHandler(function (ping) {
+        this._fast_pong_handler = this.fast_connection.ping.addPingHandler((ping) => {
             this.last_fast_stanza_timestamp = moment.now();
             this.fast_connection.ping.pong(ping);
             return true;
-        }.bind(this));
+        });
 
         this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
-        this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, function () {
+        this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_fast_stanza_timestamp;
             if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
                 if (this.fast_connection.connected)
@@ -307,11 +306,11 @@ define("xabber-discovery", function () {
                 this.fast_connection.ping.ping(this.fast_connection.jid);
             }
             return true;
-        }.bind(this));
+        });
     }, true, true);
 
     xabber.Account.addConnPlugin(function () {
-        var disco = this.connection.disco;
+        let disco = this.connection.disco;
         this.connection.addHandler(disco._onDiscoInfo.bind(disco),
                 Strophe.NS.DISCO_INFO, 'iq', 'get', null, null);
         this.connection.addHandler(disco._onDiscoItems.bind(disco),

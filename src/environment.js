@@ -4,11 +4,13 @@ define([
     "xabber-constants",
     "xabber-templates",
     "xabber-utils",
+    "xabber-translations",
     "xabber-version"
-], function(deps, constants, templates, utils, version) {
+], function(deps, constants, templates, utils, translations, version) {
     return _.extend({
         constants: constants,
         templates: templates,
+        translations: translations,
         utils: utils,
         uuid: utils.uuid
     }, version, deps);

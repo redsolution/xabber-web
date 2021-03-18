@@ -1,6 +1,6 @@
 define("xabber-searching", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             constants = env.constants,
             templates = env.templates.searching,
             utils = env.utils,
@@ -31,24 +31,24 @@ define("xabber-searching", function () {
 
             _initialize: function () {
                 this.data.on("change:color", this.colorUpdated, this);
-                this.$('.searching-properties-field .dropdown-button').on('click', function () {
+                this.$('.searching-properties-field .dropdown-button').on('click', () => {
                     this.toggleProperties();
-                }.bind(this));
+                });
             },
 
             render: function (options) {
                 this.endDiscovering();
                 this.data.set('color','#9E9E9E');
                 options || (options = {});
-                var accounts = xabber.accounts.connected,
+                let accounts = xabber.accounts.connected,
                     jid = options.jid || '';
                 this.$('.single-acc').showIf(accounts.length === 1);
                 this.$('.multiple-acc').hideIf(accounts.length === 1);
                 this.$('.account-field .dropdown-content').empty();
-                _.each(accounts, function (account) {
+                _.each(accounts, (account) => {
                     this.$('.account-field .dropdown-content').append(
                         this.renderAccountItem(account));
-                }.bind(this));
+                });
                 if (accounts.length)
                     this.bindAccount(accounts[0]);
                 this.$('#select-searching-properties .account-field .dropdown-button').dropdown({
@@ -62,7 +62,7 @@ define("xabber-searching", function () {
             },
 
             toggleProperties: function () {
-                var is_visible = this.isPropertiesVisible();
+                let is_visible = this.isPropertiesVisible();
                 this.$('#select-searching-properties').slideToggle("fast");
                 this.$('.arrow').switchClass('mdi-chevron-up', !is_visible);
                 this.$('.arrow').switchClass('mdi-chevron-down', is_visible);
@@ -76,12 +76,12 @@ define("xabber-searching", function () {
             },
 
             discover: function () {
-                var domain = _.escape(this.$('.search-input.simple-input-field').val());
+                let domain = _.escape(this.$('.search-input.simple-input-field').val());
                 if (domain) {
                     if (this.isPropertiesVisible())
                         this.toggleProperties();
                     this.$('.searching-more').html("");
-                    var searching_title = this.$('#searching_property_title').val(),
+                    let searching_title = this.$('#searching_property_title').val(),
                         searching_sort_by = this.$('#searching_property_sort_by').val();
                     this.$('.searching-result-wrap .preloader-wrapper').show();
                     this.searchExistingGroupChats(domain);
@@ -90,13 +90,13 @@ define("xabber-searching", function () {
 
             setColor: function () {
                 if (this.account) {
-                    var color = this.account.settings.get('color');
+                    let color = this.account.settings.get('color');
                     this.data.set('color', color);
                 }
             },
 
             colorUpdated: function () {
-                var color = this.data.get('color');
+                let color = this.data.get('color');
                 this.$el.attr('data-color', color);
             },
 
@@ -116,7 +116,7 @@ define("xabber-searching", function () {
             onDiscoveringError: function (error) {
                 this.endDiscovering();
                 this.$('.chats-list').html("");
-                this.$('.result-string').text('No matches for "' + $(error).attr('from') + '"');
+                this.$('.result-string').text(xabber.getString("discover__no_matches", [$(error).attr('from')]));
             },
 
             endDiscovering: function () {
@@ -124,46 +124,46 @@ define("xabber-searching", function () {
             },
 
             getGroupchatService: function (stanza) {
-                $(stanza).find('query item').each(function (idx, item) {
+                $(stanza).find('query item').each((idx, item) => {
                     if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
-                        var jid = $(item).attr('jid');
+                        let jid = $(item).attr('jid');
                         this.getGroupchatFeatures(jid);
                     }
-                }.bind(this));
+                });
                 this.endDiscovering();
             },
 
             getGroupchatFeatures: function (jid) {
-                var iq = $iq({type: 'get', to: jid})
+                let iq = $iq({type: 'get', to: jid})
                     .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
                 this.account.sendIQ(iq, this.getServerInfo.bind(this), this.onDiscoveringError.bind(this));
             },
 
             getServerInfo: function (stanza) {
-                $(stanza).find('query identity').each(function (idx, item) {
-                    var $item = $(item);
+                $(stanza).find('query identity').each((idx, item) => {
+                    let $item = $(item);
                     if (($item.attr('category') === 'conference') && ($item.attr('type') === 'server')) {
-                        var jid = $(stanza).attr('from');
+                        let jid = $(stanza).attr('from');
                         this.getChatsFromSever(jid);
                     }
-                }.bind(this));
+                });
             },
 
             getChatsFromSever: function (jid) {
-                var iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
-                this.account.sendIQ(iq, function (stanza) {
+                let iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
+                this.account.sendIQ(iq, (stanza) => {
                     this.$('.chats-list').html("");
-                    $(stanza).find('query item').each(function (idx, item) {
-                        var $item = $(item),
+                    $(stanza).find('query item').each((idx, item) => {
+                        let $item = $(item),
                             name = $item.attr('name'),
                             jid = $item.attr('jid'),
                             $chat_item_html = $(templates.existing_groupchat_item({name: name, jid: jid, color: this.account.settings.get('color')})),
                             avatar = Images.getDefaultAvatar(name);
                         $chat_item_html.find('.circle-avatar').setAvatar(avatar, 32);
                         $chat_item_html.appendTo(this.$('.searching-result-wrap .chats-list'));
-                    }.bind(this));
-                    this.$('.result-string').text('Discovered ' + $(stanza).find('query item').length + ' group chats by ' + this.account.get('jid'));
-                }.bind(this));
+                    });
+                    this.$('.result-string').text(xabber.getString("discover__text_discovered_groups", [$(stanza).find('query item').length, this.account.get('jid')]));
+                });
             },
 
             bindAccount: function (account) {
@@ -174,31 +174,31 @@ define("xabber-searching", function () {
             },
 
             renderAccountItem: function (account) {
-                var $item = $(templates.searching_account_item({jid: account.get('jid')}));
+                let $item = $(templates.searching_account_item({jid: account.get('jid')}));
                 return $item;
             },
 
             selectAccount: function (ev) {
-                var $item = $(ev.target).closest('.account-item-wrap'),
+                let $item = $(ev.target).closest('.account-item-wrap'),
                     account = xabber.accounts.get($item.data('jid'));
                 this.bindAccount(account);
             },
 
             getChatProperties: function (ev) {
-                var $target = $(ev.target).closest('.existing-chat-wrap'),
+                let $target = $(ev.target).closest('.existing-chat-wrap'),
                     jid = $target.data('jid'),
                     name = $target.data('name'),
                     request_iq = $iq({type: 'get', to: jid})
                         .c('query', {xmlns: Strophe.NS.DISCO_INFO});
-                this.account.sendIQ(request_iq, function (iq_response) {
-                    var $iq_response = $(iq_response),
+                this.account.sendIQ(request_iq, (iq_response) => {
+                    let $iq_response = $(iq_response),
                         description = $iq_response.find('field[var="description"] value').text(),
                         privacy = $iq_response.find('field[var="anonymous"] value').text(),
                         membership = $iq_response.find('field[var="model"] value').text(),
                         chat_properties = {jid: jid, name: name, privacy: privacy, description: description, membership: membership};
                     this.more_info_view = this.addChild('groupchat_properties', xabber.MoreInfoView,
                         {model: this, chat_properties: chat_properties, el: this.$('.searching-more')[0]})
-                }.bind(this));
+                });
             }
         });
 
@@ -224,11 +224,11 @@ define("xabber-searching", function () {
                 let contact = this.account.contacts.mergeContact(this.chat_properties.jid);
                 contact.set('group_chat', true);
                 contact.acceptRequest();
-                contact.pushInRoster(null, function () {
+                contact.pushInRoster(null, () => {
                     contact.askRequest();
                     contact.getMyInfo();
                     contact.sendPresent();
-                }.bind(this));
+                });
                 contact.trigger("open_chat", contact);
             }
         });
@@ -247,13 +247,13 @@ define("xabber-searching", function () {
 
             parseSearchingFields: function (iq_result) {
                 let $result = $(iq_result),
-                    $fields = $result.find('x[xmlns = "' + Strophe.NS.XDATA + '"] field'),
+                    $fields = $result.find(`x[xmlns = "${Strophe.NS.XDATA}"] field`),
                     supported_fields = [];
-                $fields.each(function (idx, field) {
+                $fields.each((idx, field) => {
                     let $field = $(field);
                     if ($field.attr('type') !== 'hidden')
                         supported_fields.push({var: $field.attr('var'), label: $field.attr('label')});
-                }.bind(this));
+                });
             },
         });
 
@@ -319,19 +319,19 @@ define("xabber-searching", function () {
             onSearched: function (result) {
                 let $result = $(result),
                     $chats = $($result.find('query item groupchat'));
-                $chats.each(function (idx, chat) {
+                $chats.each((idx, chat) => {
                     let $chat = $(chat),
                         chat_jid = $chat.attr('jid'),
                         attrs = {jid: chat_jid},
                         $properties = $chat.children();
-                    $properties.each(function (idx, property) {
+                    $properties.each((idx, property) => {
                         let $property = $(property),
                             property_name = $property[0].tagName.replace(/-/g, '_'),
                             property_value = $property.text();
                         _.extend(attrs, {[property_name]: property_value});
-                    }.bind(this));
+                    });
                     this.indexed_chats.push(attrs);
-                }.bind(this));
+                });
             }
         });
 
