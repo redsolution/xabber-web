@@ -324,6 +324,85 @@ var constants = {
         ]
     },
 
+    languages: {
+        "en": "English",
+        "ru": "Русский",
+        "sq": "Shqip",
+        "ar": "العربية",
+        "hy": "Հայերեն",
+        "az": "Azərbaycanca",
+        "be": "Беларуская",
+        "bs": "Bosanski",
+        "bg": "Български",
+        "ca": "Català",
+        "zh_cn": "简体中文",
+        "zn_tw": "中國傳統的",
+        "hr": "Hrvatski",
+        "cs": "Čeština",
+        "da": "Dansk",
+        "nl": "Nederlands",
+        "et": "Eesti",
+        "fil": "Pilipino", // ??
+        "fi": "Suomi",
+        "fr": "Français",
+        "ka": "ქართული",
+        "de": "Deutsch",
+        "el": "Ελληνικά",
+        "he": "עברית",
+        "hi": "हिन्दी",
+        "hu": "Magyar",
+        "is": "Íslenska",
+        "id": "Bahasa Indonesia",
+        "ga": "Gaeilge",
+        "it": "Italiano",
+        "ja": "日本語",
+        "": "Klingon", // ????????
+        "ko": "한국어",
+        "ku": "Kurdî", // ?????????
+        "": "kurmanji (kurdish)", // ??????????????
+        "ky": "Кыргызча",
+        "la": "Latina",
+        "lt": "Lietuvių",
+        "": "Luxembourgish", // fr-LU ?????????
+        "mk": "Македонски",
+        "ms": "Bahasa Melayu",
+        "mr": "मराठी",
+        "mn": "Монгол",
+        "": "Montenegrin (Cyrillic)", // ?????????
+        "": "Montenegrin (Latin)", // ?????????
+        "ne": "Nepālī",
+        "nn": "Norsk (nynorsk)",
+        "no": "Norsk (bokmål)",
+        "": "occitan", // ??????????????
+        "fa": "فارسی",
+        "pl": "Polski",
+        "pt": "Português",
+        "pt_bz": "Português, brasileiro", // ?????????????????
+        "pa": "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)",
+        "": "quenya", // ?????????????????
+        "ro": "Română",
+        "sco": "Scots",
+        "sr": "Српски / Srpski",
+        "si": "සිංහල",
+        "sk": "Slovenčina",
+        "sl": "Slovenščina",
+        "es": "Español",
+        "es-LA": "Spanish Latin America", // ?????????????
+        "sw": "Kiswahili",
+        "sv": "Svenska",
+        "ta": "தமிழ்",
+        "te": "తెలుగు",
+        "tg": "Тоҷикӣ",
+        "tr": "Türkçe",
+        "tk": "Türkmençe",
+        "uk": "Українська",
+        "uz": "Oʻzbekcha / Ўзбекча",
+        "vi": "Tiếng Việt",
+        "cy": "Cymraeg",
+        "yo": "Yorùbá",
+        "zu": "isiZulu"
+    },
+
     PERSONAL_AREA_URL: {},
 
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',

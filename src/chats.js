@@ -1717,7 +1717,7 @@ define("xabber-chats", function () {
                 timestamp = msg.get('timestamp'), msg_from = "",
                 forwarded_message = msg.get('forwarded_message'),
                 msg_files = msg.get('files') || [], msg_images = msg.get('images') || [],
-                msg_text = forwarded_message ? (msg.get('message') || xabber.getQuanityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
+                msg_text = forwarded_message ? (msg.get('message') || xabber.getQuantityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
                 msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact && this.contact.my_info && this.contact.my_info.attributes || {};
             this.model.set({timestamp: timestamp});
             if (this.model.get('group_chat'))
@@ -1777,7 +1777,7 @@ define("xabber-chats", function () {
                                 msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
                             }
                             else {
-                                msg_text = $('<i/>').text(xabber.getQuanityString("forwarded_messages_count", forwarded_message.length));
+                                msg_text = $('<i/>').text(xabber.getQuantityString("forwarded_messages_count", forwarded_message.length));
                                 this.$('.last-msg').html(msg_text);
                             }
                         }
@@ -3559,7 +3559,7 @@ define("xabber-chats", function () {
 
                     if (fwd_msg.get('forwarded_message')) {
                         let fwd_messages_count = fwd_msg.get('forwarded_message').length,
-                            fwd_messages_link = xabber.getQuanityString("forwarded_messages_count", fwd_messages_count);
+                            fwd_messages_link = xabber.getQuantityString("forwarded_messages_count", fwd_messages_count);
                         $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message', 'data-uniqueid': attrs.unique_id}).text(fwd_messages_link));
                     }
 
@@ -6205,7 +6205,7 @@ define("xabber-chats", function () {
                   forwarded_message = msg.get('forwarded_message'),
                   msg_files = msg.get('files') || [],
                   msg_images = msg.get('images') || [],
-                  msg_text = (forwarded_message) ? (msg.get('message') || xabber.getQuanityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
+                  msg_text = (forwarded_message) ? (msg.get('message') || xabber.getQuantityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
                   msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes || {}, msg_from = "";
               this.model.set({timestamp: timestamp});
               if (this.model.get('group_chat'))
@@ -6437,8 +6437,29 @@ define("xabber-chats", function () {
                 this.$('.modal-footer button').blur();
                 return;
             }
+            let selected_users_count = this.selected_contacts.length,
+                _dfd_invitations = new $.Deferred(), invitations_count = 0;
+            _dfd_invitations.done((count) => {
+                let toast_text;
+                if (!count) {
+                    toast_text = xabber.getQuantityString("groupchat__toast_invitation_not_sent", selected_users_count);
+                } else if (selected_users_count == 1) {
+                    toast_text = xabber.getString("groupchat__toast_invitation_sent");
+                } else if (count == selected_users_count)
+                    toast_text = xabber.getString("groupchat__toast_all_invitations_sent");
+                else
+                    toast_text = xabber.getString("groupchat__toast_invitations_sent_with_count", [Number(count), selected_users_count]);
+                utils.callback_popup_message(toast_text, 2000);
+            });
             $(this.selected_contacts).each((idx, item) => {
-                this.sendInvite(item);
+                this.sendInvite(item, () => {
+                    invitations_count++;
+                    if (idx == selected_users_count - 1)
+                        _dfd_invitations.resolve(invitations_count);
+                }, () => {
+                    if (idx == selected_users_count - 1)
+                        _dfd_invitations.resolve(invitations_count);
+                });
             });
             this.close();
         },
@@ -6471,19 +6492,21 @@ define("xabber-chats", function () {
             this.updateCounter();
         },
 
-        sendInvite: function (contact_jid) {
+        sendInvite: function (contact_jid, callback, errback) {
             let is_member_only = this.contact.get('group_info').model === 'member-only',
                 iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
-                .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
-                .c('jid').t(contact_jid).up()
-                .c('send').t(is_member_only).up()
-                .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]));
+                    .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
+                    .c('jid').t(contact_jid).up()
+                    .c('send').t(is_member_only).up()
+                    .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]));
             this.account.sendIQ(iq, () => {
-                    !is_member_only && this.sendInviteMessage(contact_jid);
-                    this.close();
-                }, (iq) => {
-                    this.onInviteError(iq);
-                });
+                !is_member_only && this.sendInviteMessage(contact_jid);
+                this.close();
+                callback && callback();
+            }, (iq) => {
+                this.onInviteError(iq);
+                errback && errback();
+            });
         },
 
         onInviteError: function (iq) {
@@ -8151,10 +8174,10 @@ define("xabber-chats", function () {
                 let msg = messages[0],
                     msg_author, msg_text, image_preview, $img_html_preview;
                 if (messages.length > 1) {
-                    msg_text = xabber.getQuanityString("forwarded_messages_count", messages.length);
+                    msg_text = xabber.getQuantityString("forwarded_messages_count", messages.length);
                 } else {
                     if (msg.get('forwarded_message')) {
-                        msg_text = xabber.getQuanityString("forwarded_messages_count", messages.length);
+                        msg_text = xabber.getQuantityString("forwarded_messages_count", messages.length);
                     }
                     else {
                         msg_text = (msg.get('message') || msg.get('original_message')).emojify();

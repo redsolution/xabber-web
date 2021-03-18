@@ -3556,8 +3556,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 /* ----------------- JINGLE MESSAGE VIEW -------------------- */
 
 .jingle-message-view {
-    width: 80vh;
-    height: 60vh;
+    width: 800px;
+    height: 600px;
+    max-width: 90%;
+    max-height: 90%;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background-color: rgba(255, 255, 255, .8);
@@ -7353,6 +7355,7 @@ input[type='range'].voice-message-volume:focus {
     padding: 2px 0 6px;
 }
 
+.settings-block-wrap.interface_language .description,
 .settings-block-wrap.xabber-account .xabber-account-tip {
     padding: 8px 0;
     font-size: 13px;
