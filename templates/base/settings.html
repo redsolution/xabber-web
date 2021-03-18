@@ -332,11 +332,14 @@
                     <div class="block-header">
                         <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
                     </div>
-                    <div>
-                        <div class=""> <!-- xabber.getString("settings__section_interface_language__text_description___link"); xabber.getString("settings__section_interface_language__text_description__text_link") -->
-                            {[print(xabber.getString("settings__section_interface_language__text_description_no_translations"))]}<br><br>
+                    <div class="setting interface-language-setting">
+                        <div class="languages-list">
+                            {[print(xabber.getString("settings__languages_list___item_default"))]}
+                        </div>
+                        <div class="description">
+                            {[print(xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]))]}<br><br>
                             {[print(xabber.getString("settings__section_interface_language__text_description_translation_platform",
-                            [`<a href=''>link</a>`]))]}
+                            [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]))]}
                         </div>
                     </div>
                 </div>
