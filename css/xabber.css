@@ -7355,6 +7355,7 @@ input[type='range'].voice-message-volume:focus {
     padding: 2px 0 6px;
 }
 
+.settings-block-wrap.interface_language .description,
 .settings-block-wrap.xabber-account .xabber-account-tip {
     padding: 8px 0;
     font-size: 13px;

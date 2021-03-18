@@ -83,7 +83,7 @@
                 return "";
         },
 
-        getQuanityString: function (id, count, params) {
+        getQuantityString: function (id, count, params) {
             let lang = xabber_i18next.language,
                 plurals = xabber_i18next.services.pluralResolver.getRule(lang);
             if (!plurals)

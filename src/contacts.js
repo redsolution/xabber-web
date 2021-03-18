@@ -74,7 +74,7 @@ define("xabber-contacts", function () {
                     status_text = xabber.getString("action_contact_blocked");
                 else if (this.get('group_chat')) {
                     if (this.get('group_info')) {
-                        status_text += xabber.getQuanityString("contact_groupchat_status_member", this.get('group_info').members_num);
+                        status_text += xabber.getQuantityString("contact_groupchat_status_member", this.get('group_info').members_num);
                         if (this.get('group_info').online_members_num > 0)
                             status_text += xabber.getString("contact_groupchat_status_online", [this.get('group_info').online_members_num || 0]);
                     } else if (!subscription)

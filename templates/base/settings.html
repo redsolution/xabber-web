@@ -333,8 +333,19 @@
                         <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
                     </div>
                     <div class="setting interface-language-setting">
-                        <div class="languages-list">
-                            {[print(xabber.getString("settings__languages_list___item_default"))]}
+                        <div class="languages-list field radio-field clickable-field">
+                            <form action="#">
+                                <p>
+                                    <input class="with-gap" name="language" value="default" type="radio" id="{{view.cid}}-default" />
+                                    <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default"))]}</label>
+                                </p>
+                                {[for (let lang in constants.languages) { if (!lang) continue;]}
+                                    <p>
+                                        <input class="with-gap" name="language" value="{{lang}}" type="radio" id="{{view.cid}}-{{lang}}" />
+                                        <label for="{{view.cid}}-{{lang}}">{[print(constants.languages[lang]);]}</label>
+                                    </p>
+                                {[}]}
+                            </form>
                         </div>
                         <div class="description">
                             {[print(xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]))]}<br><br>
