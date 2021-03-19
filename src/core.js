@@ -104,7 +104,7 @@
             let _count = parseInt(count, 10);
             xabber_i18next.services.pluralResolver.options.compatibilityJSON = 'v0';
             let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
-            suffix.replace(/-/g, '_');
+            suffix = suffix.replace(/-/g, "_");
             if (xabber_i18next.language == 'en') {
                 if (!suffix || suffix && !suffix.length)
                     suffix = '_0';
