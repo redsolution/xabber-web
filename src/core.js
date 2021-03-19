@@ -261,10 +261,12 @@
 
         start: function () {
             this.loadTranslations().then(() => {
-                this.check_config.done((result) => {
-                    this.check_config = undefined;
-                    result && this.trigger('start');
-                });
+                setTimeout(() => {
+                    this.check_config.done((result) => {
+                        this.check_config = undefined;
+                        result && this.trigger('start');
+                    });
+                }, 500);
             });
         },
 
