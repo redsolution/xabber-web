@@ -1309,6 +1309,7 @@ define("xabber-views", function () {
             "click .setting.message-preview label": "setMessagePreview",
             "click .setting.call-attention label": "setCallAttention",
             "change .sound input[type=radio][name=sound]": "setSound",
+            "change .languages-list input[type=radio][name=language]": "changeLanguage",
             "change #vignetting": "changeVignetting",
             "change #blur": "changeBlur",
             "change #transparency": "changeTransparency",
@@ -1340,10 +1341,12 @@ define("xabber-views", function () {
             this.$('.call-attention input[type=checkbox]')
                 .prop({checked: settings.call_attention});
             let sound_value = settings.sound ? settings.sound_on_message : '';
-            this.$('.sound input[type=radio][name=sound][value="'+sound_value+'"]')
+            this.$(`.sound input[type=radio][name=sound][value="${sound_value}"]`)
                     .prop('checked', true);
-            this.$('.hotkeys input[type=radio][name=hotkeys][value='+settings.hotkeys+']')
+            this.$(`.hotkeys input[type=radio][name=hotkeys][value=${settings.hotkeys}]`)
                     .prop('checked', true);
+            this.$(`.languages-list input[type=radio][name=language][value="${settings.language}"]`)
+                .prop('checked', true);
             this.updateBackgroundSetting();
             this.updateColor();
             this.updateMainColor();
@@ -1359,7 +1362,7 @@ define("xabber-views", function () {
 
         updateMainColor: function () {
             this.$('.toolbar-main-color-setting').attr('data-color', this.model.get('main_color'));
-            this.$('.toolbar-main-color-setting .color-name').text(this.model.get('main_color').replace(/-/g, " "));
+            this.$('.toolbar-main-color-setting .color-name').text(xabber.getString(`account_color_name_${this.model.get('main_color').replace(/-/g, "_")}`).replace(/-/g, " "));
         },
 
         updateBackgroundSetting: function () {
@@ -1573,10 +1576,12 @@ define("xabber-views", function () {
             });
         },
 
-        changeLanguale: function () {
-            utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("dialog_version_update__button_reload")}).done(() => {
+        changeLanguage: function (ev) {
+            let value = ev.target.value;
+            this.model.save('language', value);
+            utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("dialog_version_update__button_reload")}).done((result) => {
                 if (result) {
-
+                    window.location.reload(true);
                 }
             });
         }

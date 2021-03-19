@@ -1,0 +1,1 @@
+let translations = {}; typeof define === "function" && define(() => { return translations;});

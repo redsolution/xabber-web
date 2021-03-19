@@ -7771,7 +7771,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .blocked-items .blocked-item {
-    height: 48px;
+    min-height: 48px;
     position: relative;
     cursor: pointer;
 }
@@ -7791,7 +7791,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .blocked-items .blocked-item .blocked-item-description {
-    height: 24px;
+    min-height: 24px;
+    margin: 4px 0;
     line-height: 12px;
     font-weight: 300;
     font-size: 10px;

@@ -1909,6 +1909,7 @@ define("xabber-chats", function () {
           },
 
           backToBottom: function () {
+              this.openChat();
               this.scrollToBottom();
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           },
@@ -2922,7 +2923,7 @@ define("xabber-chats", function () {
                 return;
             }
             if (message)
-                this.bottom.showChatNotification(message);
+                this.bottom.showChatNotification(`${this.contact.get('name')} ${message}`);
             else
                 this.bottom.showChatNotification();
             this.chat_item.$('.last-msg').text(message);
