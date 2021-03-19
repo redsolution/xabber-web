@@ -2923,7 +2923,7 @@ define("xabber-chats", function () {
                 return;
             }
             if (message)
-                this.bottom.showChatNotification(message);
+                this.bottom.showChatNotification(`${this.contact.get('name')} ${message}`);
             else
                 this.bottom.showChatNotification();
             this.chat_item.$('.last-msg').text(message);
