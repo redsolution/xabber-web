@@ -1,0 +1,1 @@
+let translations = {"account_compression":"Comprime","account_host":"Hospes","account_password":"Signum","confirm_password":"Signum confirma","account_port":"Porta","account_priority":"Prioritas"}; typeof define === "function" && define(() => { return translations;});

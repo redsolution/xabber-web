@@ -32,11 +32,37 @@ fs.readdirSync('./values').forEach(file => {
 
     for (let i = 0; i < plurals.length; i++) {
         let id =  plurals[i].getAttribute('name'),
-            items = plurals[i].getElementsByTagName('item'), str = "";
+            items = plurals[i].getElementsByTagName('item');
         for (let j = 0; j < items.length; j++) {
-            json[`${id}_plural_${j}`] = parseChildren(items[j].replace(/%+\d+[$]/g, "%"));
+            json[`${id}_plural_${j}`] = parseChildren(items[j]);
         }
     }
 });
 
-fs.writeFileSync(`en_lang.js`, `let translations = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return translations;});`);
+
+let all_languages = fs.readdirSync('./languages').filter(file => file.indexOf('values-') == 0);
+all_languages.forEach((f_name) =>{
+    let translations = {};
+    fs.readdirSync(`./languages/${f_name}`).forEach(file => {
+        let xml = fs.readFileSync(`./languages/${f_name}/${file}`, 'utf-8'),
+            document = DOMParser.parseFromString(xml),
+            strings = document.getElementsByTagName('string'),
+            plurals = document.getElementsByTagName('plurals');
+        for (let i = 0; i < strings.length; i++) {
+            let id = strings[i].getAttribute('name');
+            translations[id] = parseChildren(strings[i]);
+        }
+
+        for (let i = 0; i < plurals.length; i++) {
+            let id =  plurals[i].getAttribute('name'),
+                items = plurals[i].getElementsByTagName('item');
+            for (let j = 0; j < items.length; j++) {
+                translations[`${id}_plural_${j}`] = parseChildren(items[j]);
+            }
+        }
+    });
+    fs.writeFileSync(`${f_name.slice(7)}.js`, `let translations = ${JSON.stringify(translations)}; typeof define === "function" && define(() => { return translations;});`);
+});
+
+
+fs.writeFileSync(`en_lang.js`, `let default_translation = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return default_translation;});`);

@@ -1909,6 +1909,7 @@ define("xabber-chats", function () {
           },
 
           backToBottom: function () {
+              this.openChat();
               this.scrollToBottom();
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           },

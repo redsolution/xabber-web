@@ -35,33 +35,46 @@
             this.cache = this._cache.attributes;
             this.cacheFavicons();
             this.extendFunction();
-            this.setLocale();
             this.check_config = new $.Deferred();
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         },
 
-        setLocale: function () {
-            let _locale = window.navigator.language,
-                _locale_lang = _locale.slice(0, 2),
-                en_translation = {},
-                _locale_translation = this.parseTranslation(_locale);
+        loadTranslations: async function () {
+            new Promise((resolve, reject) => {
+                if (this.settings.language == 'default' || this.settings.language == 'en') {
+                    this.setLocale();
+                    resolve();
+                    return;
+                } else {
+                    let lang = this.settings.language;
+                    require([`./translations/${lang.replace(/-/, "-r")}.js`], () => {
+                        this.setLocale(lang);
+                        resolve()
+                    }, () => {
+                        this.setLocale();
+                        resolve()
+                    });
+                }
+            });
+        },
+
+        setLocale: function (lang) {
+            let _translations = {
+                en: {
+                    translation: default_translation
+                }
+            };
+            lang && (_translations[lang] = {translation: translations});
             xabber_i18next.use(xabber_i18next_sprintf);
             xabber_i18next.init({
                 lng: 'en',
                 debug: false,
                 pluralSeparator: '-',
-                resources: {
-                    en: {
-                       translation: translations
-                    }/*,
-                    [_locale_lang]: {
-                        translation: _locale_translation
-                    }*/
-                }
+                resources: _translations
             });
-            // xabber_i18next.changeLanguage(_locale_lang);
+            lang && xabber_i18next.changeLanguage(lang);
             this.en_translation = xabber_i18next.getFixedT('en');
         },
 
@@ -76,9 +89,9 @@
 
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
-                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
+                return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
             } else if (this.en_translation) {
-                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/\\n/g, '&#10;');
+                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
             } else
                 return "";
         },
@@ -99,10 +112,6 @@
                     suffix = '_1';
             }
             return this.getString(`${id}_plural${suffix}`, (params || [count]));
-        },
-
-        parseTranslation: function (_locale) {
-
         },
 
         error: function (msg) {
@@ -240,6 +249,7 @@
                 sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',
+                language: 'default',
                 load_history: true,
                 mam_requests_limit: 200,
                 mam_messages_limit_start: 1,
@@ -250,9 +260,11 @@
         }),
 
         start: function () {
-            this.check_config.done((result) => {
-                this.check_config = undefined;
-                result && this.trigger('start');
+            this.loadTranslations().then(() => {
+                this.check_config.done((result) => {
+                    this.check_config = undefined;
+                    result && this.trigger('start');
+                });
             });
         },
 
