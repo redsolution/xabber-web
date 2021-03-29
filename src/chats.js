@@ -4297,6 +4297,7 @@ define("xabber-chats", function () {
             //  loaded and send image
             if (images.length > 0) {
                 if (images.length > 1) {
+                    let template_for_images;
                     if (images.length > 6) {
                         let tpl_name = 'template-for-6',
                             hidden_images = images.length - 5;
@@ -4305,8 +4306,8 @@ define("xabber-chats", function () {
                         template_for_images.find('.image-counter').text('+' + hidden_images);
                     }
                     else {
-                        let tpl_name = 'template-for-' + images.length,
-                            template_for_images = $(templates.messages[tpl_name]({images}));
+                        let tpl_name = 'template-for-' + images.length;
+                        template_for_images = $(templates.messages[tpl_name]({images}));
                     }
                     $message.removeClass('file-upload noselect');
                     $message.find('.chat-msg-content').removeClass('chat-file-content').html(template_for_images);
