@@ -105,6 +105,7 @@
             let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
             suffix = suffix.replace(/-/g, "_");
             if (xabber_i18next.language == 'en' || !xabber_i18next.exists(`${id}_plural${suffix}`)) {
+                suffix = xabber_i18next.services.pluralResolver.getSuffix("en", _count);
                 if (!suffix || suffix && !suffix.length)
                     suffix = '_0';
                 else

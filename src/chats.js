@@ -2546,6 +2546,8 @@ define("xabber-chats", function () {
 
         readMessages: function (timestamp) {
             let unread_messages = _.clone(this.model.messages_unread.models);
+            if (this.contact && this.contact.get('invitation'))
+                return;
             if (unread_messages.length) {
                 let msg = unread_messages[unread_messages.length - 1];
                 this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
@@ -6444,14 +6446,10 @@ define("xabber-chats", function () {
                 _dfd_invitations = new $.Deferred(), invitations_count = 0;
             _dfd_invitations.done((count) => {
                 let toast_text;
-                if (!count) {
-                    toast_text = xabber.getQuantityString("groupchat__toast_invitation_not_sent", selected_users_count);
-                } else if (selected_users_count == 1) {
-                    toast_text = xabber.getString("groupchat__toast_invitation_sent");
-                } else if (count == selected_users_count)
-                    toast_text = xabber.getString("groupchat__toast_all_invitations_sent");
+                if (count == selected_users_count)
+                    toast_text = xabber.getQuantityString("groupchat__toast__invitations_sent", selected_users_count);
                 else
-                    toast_text = xabber.getString("groupchat__toast_invitations_sent_with_count", [Number(count), selected_users_count]);
+                    toast_text = xabber.getQuantityString("groupchat__toast_failed_to_sent_invitations", selected_users_count);
                 utils.callback_popup_message(toast_text, 2000);
             });
             $(this.selected_contacts).each((idx, item) => {
