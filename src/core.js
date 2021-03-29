@@ -42,11 +42,10 @@
         },
 
         loadTranslations: async function () {
-            new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 if (this.settings.language == 'default' || this.settings.language == 'en') {
                     this.setLocale();
                     resolve();
-                    return;
                 } else {
                     let lang = this.settings.language;
                     require([`./translations/${lang.replace(/-/, "-r")}.js`], () => {
@@ -105,7 +104,7 @@
             xabber_i18next.services.pluralResolver.options.compatibilityJSON = 'v0';
             let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
             suffix = suffix.replace(/-/g, "_");
-            if (xabber_i18next.language == 'en') {
+            if (xabber_i18next.language == 'en' || !xabber_i18next.exists(`${id}_plural${suffix}`)) {
                 if (!suffix || suffix && !suffix.length)
                     suffix = '_0';
                 else
@@ -260,89 +259,87 @@
         }),
 
         start: function () {
-            this.loadTranslations().then(() => {
-                setTimeout(() => {
-                    this.check_config.done((result) => {
-                        this.check_config = undefined;
-                        result && this.trigger('start');
-                    });
-                }, 500);
+            this.check_config.done((result) => {
+                this.check_config = undefined;
+                result && this.trigger('start');
             });
         },
 
         configure: function (config) {
-            _.extend(constants, _.pick(config, [
-                'CONNECTION_URL',
-                'PERSONAL_AREA_URL',
-                'LOG_LEVEL',
-                'DEBUG',
-                'XABBER_ACCOUNT_URL',
-                'REGISTER_XMPP_ACCOUNT',
-                'API_SERVICE_URL',
-                'USE_SOCIAL_AUTH',
-                'CONTAINER',
-                'CHECK_VERSION',
-                'DEFAULT_LOGIN_SCREEN',
-                'STORAGE_NAME_ENDING',
-                'DISABLE_LOOKUP_WS'
-            ]));
+            this.loadTranslations().then(() => {
+                _.extend(constants, _.pick(config, [
+                    'CONNECTION_URL',
+                    'PERSONAL_AREA_URL',
+                    'LOG_LEVEL',
+                    'DEBUG',
+                    'XABBER_ACCOUNT_URL',
+                    'REGISTER_XMPP_ACCOUNT',
+                    'API_SERVICE_URL',
+                    'USE_SOCIAL_AUTH',
+                    'CONTAINER',
+                    'CHECK_VERSION',
+                    'DEFAULT_LOGIN_SCREEN',
+                    'STORAGE_NAME_ENDING',
+                    'DISABLE_LOOKUP_WS'
+                ]));
 
-            let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
-            constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
+                let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
+                constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
 
-            if (constants.DEBUG) {
-                window.xabber = this;
-                _.extend(window, env);
-            }
-
-            if (config.TURN_SERVERS_LIST) {
-                if (_.isArray(config.TURN_SERVERS_LIST))
-                    _.extend(constants, {TURN_SERVERS_LIST: config.TURN_SERVERS_LIST});
-                else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
-                    _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
-            }
-
-            if (utils.isMobile.any()) {
-                let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),
-                    android_msg = this.getString("warning__client_not_support_android_browser"),
-                    any_mobile_msg = this.getString("warning__client_not_support_mobile", [constants.CLIENT_NAME]),
-                    msg;
-                if (utils.isMobile.iOS()) {
-                    msg = ios_msg;
-                } else if (utils.isMobile.Android()) {
-                    msg = any_mobile_msg + android_msg;
-                } else {
-                    msg = any_mobile_msg;
+                if (constants.DEBUG) {
+                    window.xabber = this;
+                    _.extend(window, env);
                 }
-                utils.dialogs.error(msg);
-                this.check_config.resolve(false);
-                return;
-            }
-            if (!constants.CONNECTION_URL) {
-                utils.dialogs.error(this.getString("client_error__missing_connection_url"));
-                this.check_config.resolve(false);
-                return;
-            }
 
-            let self = this;
-            if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
-                utils.dialogs.warning(this.getString("client_warning__no_local_storage"),
-                    [{name: this.getString("ignore"), text: this.getString("client_error__option_show_msg_again")}]
-                ).done(function (res) {
-                    res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
-                });
-            }
+                if (config.TURN_SERVERS_LIST) {
+                    if (_.isArray(config.TURN_SERVERS_LIST))
+                        _.extend(constants, {TURN_SERVERS_LIST: config.TURN_SERVERS_LIST});
+                    else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
+                        _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
+                }
 
-            this.requestNotifications().done(function (granted) {
-                self._cache.save('notifications', granted);
-                if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
-                    self.setUpPushNotifications().done(function (res) {
-                        self.check_config.resolve(true);
+                if (utils.isMobile.any()) {
+                    let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),
+                        android_msg = this.getString("warning__client_not_support_android_browser"),
+                        any_mobile_msg = this.getString("warning__client_not_support_mobile", [constants.CLIENT_NAME]),
+                        msg;
+                    if (utils.isMobile.iOS()) {
+                        msg = ios_msg;
+                    } else if (utils.isMobile.Android()) {
+                        msg = any_mobile_msg + android_msg;
+                    } else {
+                        msg = any_mobile_msg;
+                    }
+                    utils.dialogs.error(msg);
+                    this.check_config.resolve(false);
+                    return;
+                }
+                if (!constants.CONNECTION_URL) {
+                    utils.dialogs.error(this.getString("client_error__missing_connection_url"));
+                    this.check_config.resolve(false);
+                    return;
+                }
+
+                let self = this;
+                if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
+                    utils.dialogs.warning(this.getString("client_warning__no_local_storage"),
+                        [{name: this.getString("ignore"), text: this.getString("client_error__option_show_msg_again")}]
+                    ).done(function (res) {
+                        res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
                     });
-                } else {
-                    self._cache.save('endpoint_key', undefined);
-                    self.check_config.resolve(true);
                 }
+
+                this.requestNotifications().done(function (granted) {
+                    self._cache.save('notifications', granted);
+                    if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
+                        self.setUpPushNotifications().done(function (res) {
+                            self.check_config.resolve(true);
+                        });
+                    } else {
+                        self._cache.save('endpoint_key', undefined);
+                        self.check_config.resolve(true);
+                    }
+                });
             });
         },
 

@@ -3387,15 +3387,16 @@ define("xabber-chats", function () {
         },
 
         createImageGrid: function (attrs) {
+            let template_for_images;
             if (attrs.images.length > 6) {
                 let tpl_name = 'template-for-6',
-                    hidden_images = attrs.images.length - 5,
-                    template_for_images = $(templates.messages[tpl_name](attrs));
+                    hidden_images = attrs.images.length - 5;
+                template_for_images = $(templates.messages[tpl_name](attrs));
                 template_for_images.find('.last-image').addClass('hidden-images');
                 template_for_images.find('.image-counter').text('+' + hidden_images);
             }
             else {
-                let tpl_name = 'template-for-' + attrs.images.length,
+                let tpl_name = 'template-for-' + attrs.images.length;
                 template_for_images = $(templates.messages[tpl_name](attrs));
             }
             return template_for_images;
