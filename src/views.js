@@ -1038,7 +1038,7 @@ define("xabber-views", function () {
                             count_msg += chat.get('unread') + chat.get('const_unread');
                     }
                 });
-                mentions += account.unreaded_mentions.length;
+                mentions += account.unread_mentions.length;
             });
             return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
         },

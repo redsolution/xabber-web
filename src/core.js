@@ -48,7 +48,7 @@
                     resolve();
                 } else {
                     let lang = this.settings.language;
-                    require([`./translations/${lang.replace(/-/, "-r")}.js`], () => {
+                    require([`./translations/${lang.replace(/-/g, "-r")}.js`], () => {
                         this.setLocale(lang);
                         resolve()
                     }, () => {

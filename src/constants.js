@@ -352,34 +352,34 @@ var constants = {
         "hi-IN": "हिन्दी",
         "hu-HU": "Magyar",
         "is-IS": "Íslenska",
-        // "id": "Bahasa Indonesia",
+        "in-ID": "Bahasa Indonesia",
         "ga-IE": "Gaeilge",
         "it-IT": "Italiano",
         "ja-JP": "日本語",
-        "": "Klingon", // ????????
+        "tlh-AA": "Klingon",
         "ko-KR": "한국어",
-        "ku-TR": "Kurdî", // ?????????
-        "": "kurmanji (kurdish)", // ??????????????
+        "ku-TR": "Kurdî",
+        "kmr-TR": "Kurmancî (Kurdî)",
         "ky-KG": "Кыргызча",
         "la-LA": "Latina",
         "lt-LT": "Lietuvių",
-        "": "Luxembourgish", // fr-LU ?????????
+        "lb-LU": "Luxembourgish",
         "mk-MK": "Македонски",
         "ms-MY": "Bahasa Melayu",
         "mr-IN": "मराठी",
         "mn-MN": "Монгол",
-        "": "Montenegrin (Cyrillic)", // ?????????
+        "sr-Cyrl-ME": "Montenegrin (Cyrillic)",
         "": "Montenegrin (Latin)", // ?????????
         "ne-NP": "Nepālī",
         "no-NO": "Norsk (nynorsk)",
         "nb-NO": "Norsk (bokmål)",
-        "": "occitan", // ??????????????
+        "oc-FR": "Occitan",
         "fa-IR": "فارسی",
         "pl-PL": "Polski",
         "pt-PT": "Português",
-        "pt-BR": "Português, brasileiro", // ?????????????????
+        "pt-BR": "Português, brasileiro",
         "pa-IN": "ਪੰਜਾਬੀ (ਗੁਰਮੁਖੀ)",
-        "": "quenya", // ?????????????????
+        "qya-AA": "quenya",
         "ro-RO": "Română",
         "sco-GB": "Scots",
         "sr-SP": "Српски / Srpski",
@@ -387,7 +387,7 @@ var constants = {
         "sk-SK": "Slovenčina",
         "sl-SI": "Slovenščina",
         "es-ES": "Español",
-        // "es-LA": "Spanish Latin America", // ?????????????
+        "es419": "Spanish Latin America",
         "sw-KE": "Kiswahili",
         "sv-SE": "Svenska",
         "ta-IN": "தமிழ்",

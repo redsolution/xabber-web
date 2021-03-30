@@ -231,7 +231,7 @@ define("xabber-mentions", function () {
 
             readAllMentions: function () {
                 xabber.accounts.connected.forEach((account) => {
-                    let mentions = _.clone(account.unreaded_mentions.models);
+                    let mentions = _.clone(account.unread_mentions.models);
                     _.each(mentions, ((mention) => {
                         let msgid = mention.message.get('msgid'),
                             archive_id = mention.message.get('archive_id'),
@@ -323,12 +323,12 @@ define("xabber-mentions", function () {
             },
 
             updateCounter:function () {
-                let unreaded = this.model.message.get('is_unread');
-                this.$('.msg-counter').switchClass('hidden', !unreaded);
-                if (unreaded)
-                    this.account.unreaded_mentions.add(this.model);
+                let unread = this.model.message.get('is_unread');
+                this.$('.msg-counter').switchClass('hidden', !unread);
+                if (unread)
+                    this.account.unread_mentions.add(this.model);
                 else
-                    this.account.unreaded_mentions.remove(this.model);
+                    this.account.unread_mentions.remove(this.model);
                 xabber.toolbar_view.recountAllMessageCounter();
             },
 
@@ -435,7 +435,7 @@ define("xabber-mentions", function () {
 
         xabber.Account.addInitPlugin(function () {
            this.mentions = new xabber.AccountMentions(null, {account: this});
-           this.unreaded_mentions = new xabber.Mentions(null, {account: this});
+           this.unread_mentions = new xabber.Mentions(null, {account: this});
         });
 
         xabber.once("start", function () {
