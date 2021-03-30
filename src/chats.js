@@ -3135,9 +3135,6 @@ define("xabber-chats", function () {
           },
 
         addMessage: function (message) {
-            if (message.get('auth_request')) {
-                // return;
-            }
             let $message = this.buildMessageHtml(message),
                 index = this.model.messages.indexOf(message);
             if (index === 0) {
@@ -3407,8 +3404,7 @@ define("xabber-chats", function () {
         buildMessageHtml: function (message) {
             let attrs = _.clone(message.attributes),
                 is_sender = (message instanceof xabber.Message) ? message.isSenderMe() : false,
-                user_info = attrs.user_info || {},
-                username = Strophe.xmlescape(user_info.nickname || this.model.get('saved') && this.account.get('name') || ((attrs.from_jid === this.contact.get('jid')) ? this.contact.get('name') : (is_sender ? ((this.contact.my_info) ? this.contact.my_info.get('nickname') : this.account.get('name')) : (this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid)))),
+                user_info = attrs.user_info || {}, username,
                 images = attrs.images,
                 emoji = message.get('only_emoji'),
                 files =  attrs.files,
@@ -3421,6 +3417,29 @@ define("xabber-chats", function () {
                 badge = user_info.badge,
                 from_id = user_info.id,
                 has_encrypted_files = attrs.has_encrypted_files;
+
+            username = user_info.nickname || this.model.get('saved') && this.account.get('name') || (attrs.from_jid === this.contact.get('jid') && this.contact.get('name'));
+            if (!username) {
+                if (is_sender) {
+                    if (this.model.get("group_chat")) {
+                        if (this.contact.my_info)
+                            username = this.contact.my_info.get('nickname');
+                        else if (this.contact)
+                            this.contact.getMyInfo(() => {
+                                username = this.contact.my_info.get('nickname');
+                                if ($message) {
+                                    $message.children(".msg-wrap").find(".chat-msg-author-wrap .chat-msg-author").text(Strophe.xmlescape(username));
+                                }
+                            });
+                        else
+                            username = this.account.get('name');
+                    } else
+                        username = this.account.get('name');
+                } else {
+                    username = this.account.contacts.get(attrs.from_jid) ? this.account.contacts.get(attrs.from_jid).get('name') : attrs.from_jid;
+                }
+            }
+            username = Strophe.xmlescape(username || "");
 
             if (is_sender && this.model.get('group_chat')) {
                 if (this.contact.my_info) {
