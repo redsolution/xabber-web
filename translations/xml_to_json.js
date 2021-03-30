@@ -1,7 +1,26 @@
 let fs = require('fs'),
     xmldom = require('xmldom'),
     json = {},
+    http = require('https');
     DOMParser = new xmldom.DOMParser;
+let args = process.argv.slice(2),
+    token = args[0],
+    translation_progress = {};
+http.get({protocol: "https:", host: "crowdin.com", path: "/api/v2/projects/110652/languages/progress?limit=200", headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+    let rawData = "";
+    res.setEncoding('utf8');
+    res.on('data', (body) => {
+        rawData += body;
+    });
+    res.on('end', () => {
+        let json = JSON.parse(rawData);
+        json.data.forEach((lang) => {
+            translation_progress[lang.data.languageId] = lang.data.translationProgress;
+        });
+    });
+});
+/*http.get({protocol: "https:", host: "crowdin.com", path: "/api/v2/projects/110652/languages/progress?limit=200", headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+});*/
 
 function parseChildren (elem) {
     let childrens = elem.childNodes, str = "";
@@ -65,4 +84,5 @@ all_languages.forEach((f_name) =>{
 });
 
 
+fs.writeFileSync(`translation_progress.js`, `let client_translation_progress = ${JSON.stringify(translation_progress)}; typeof define === "function" && define(() => { return client_translation_progress;});`);
 fs.writeFileSync(`en_lang.js`, `let default_translation = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return default_translation;});`);
