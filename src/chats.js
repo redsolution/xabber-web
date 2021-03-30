@@ -4105,35 +4105,43 @@ define("xabber-chats", function () {
                 encrypted: this.model.get('encrypted'),
                 submitted_here: true,
                 forwarded_message: null
-            };
-            if (!fwd_messages.length && text.removeEmoji() === "")
-                attrs.only_emoji = Array.from(text).length;
-            if (fwd_messages.length) {
-                var new_fwd_messages = [];
-                _.each(fwd_messages, function (msg) {
-                    if (this.account.forwarded_messages.indexOf(msg) < 0) {
-                        msg = this.saveForwardedMessage(msg);
-                    }
-                    new_fwd_messages.push(msg);
-                }.bind(this));
-                attrs.forwarded_message = new_fwd_messages;
-                var message = this.model.messages.create(attrs);
-                this.sendMessage(message);
-            } else if (text) {
-                var message = this.model.messages.create(attrs);
-                this.sendMessage(message);
-            }
-            if (this.contact && this.contact.get('archived') && !this.contact.get('muted')) {
-                message.set('muted', false);
-                this.head.archiveChat();
-                this.contact.set('archived', false);
-                xabber.chats_view.updateScreenAllChats();
-            }
-            if (this.model.get('group_chat') && xabber.toolbar_view.$('.active').hasClass('chats'))
-                if (this.contact && !this.contact.get('muted') && !this.contact.get('archived'))
+            }, _dfd_info = new $.Deferred();
+            _dfd_info.done(() => {
+                if (!fwd_messages.length && text.removeEmoji() === "")
+                    attrs.only_emoji = Array.from(text).length;
+                if (fwd_messages.length) {
+                    var new_fwd_messages = [];
+                    _.each(fwd_messages, function (msg) {
+                        if (this.account.forwarded_messages.indexOf(msg) < 0) {
+                            msg = this.saveForwardedMessage(msg);
+                        }
+                        new_fwd_messages.push(msg);
+                    }.bind(this));
+                    attrs.forwarded_message = new_fwd_messages;
+                    var message = this.model.messages.create(attrs);
+                    this.sendMessage(message);
+                } else if (text) {
+                    var message = this.model.messages.create(attrs);
+                    this.sendMessage(message);
+                }
+                if (this.contact && this.contact.get('archived') && !this.contact.get('muted')) {
+                    message.set('muted', false);
+                    this.head.archiveChat();
+                    this.contact.set('archived', false);
                     xabber.chats_view.updateScreenAllChats();
-            xabber.chats_view.scrollToTop();
-            xabber.chats_view.clearSearch();
+                }
+                if (this.model.get('group_chat') && xabber.toolbar_view.$('.active').hasClass('chats'))
+                    if (this.contact && !this.contact.get('muted') && !this.contact.get('archived'))
+                        xabber.chats_view.updateScreenAllChats();
+                xabber.chats_view.scrollToTop();
+                xabber.chats_view.clearSearch();
+            });
+            if (this.contact && this.contact.get("group_chat") && !this.contact.my_info)
+                this.contact.getMyInfo(() => {
+                    _dfd_info.resolve();
+                });
+            else
+                _dfd_info.resolve();
         },
 
         addFileMessage: function (files) {
