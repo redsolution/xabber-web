@@ -61,6 +61,7 @@ require.config({
         "xabber-omemo":             "src/omemo",
 
         "xabber-default-lang":      "translations/en_lang",
+        "xabber-translations-info": "translations/translation_progress",
 
         // main file
         "xabber":                   "src/xabber"
