@@ -1579,7 +1579,7 @@ define("xabber-views", function () {
         changeLanguage: function (ev) {
             let value = ev.target.value;
             this.model.save('language', value);
-            utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("dialog_version_update__button_reload")}).done((result) => {
+            utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
                 if (result) {
                     window.location.reload(true);
                 }

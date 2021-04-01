@@ -2,10 +2,12 @@ let fs = require('fs'),
     xmldom = require('xmldom'),
     json = {},
     http = require('https'),
+    unzip = require('unzip'),
     DOMParser = new xmldom.DOMParser,
     args = process.argv.slice(2),
     token = args[0],
-    translation_progress = {};
+    _pending_finished,
+    translation_progress = {en: 100};
 
 function loadTranslationsProgress () {
     return new Promise((resolve, reject) => {
@@ -150,27 +152,84 @@ function convertTranslationsToJSON () {
     });
 }
 
-function downloadTranslations () {
-    http.request({method: 'POST', protocol: "https:", host: "crowdin.com", path: "/api/v2/projects/110652/translations/builds", headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
-        console.log(res);
-        let rawData = "";
-        res.setEncoding('utf8');
-        res.on('data', (body) => {
-            rawData += body;
-            console.log(body);
+function getTranslationsURL () {
+    console.log('Build translations.....');
+    return new Promise((resolve, reject) => {
+        let request = http.request({method: 'POST', protocol: "https:", hostname: "crowdin.com", path: "/api/v2/projects/110652/translations/builds", headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+            let rawData = "";
+            res.setEncoding('utf8');
+            res.on('data', (body) => {
+                rawData += body;
+            });
+            res.on('end', () => {
+                let buildId = JSON.parse(rawData).data.id;
+                checkBuildProgress(buildId).then(() => {
+                    http.get({protocol: "https:", host: "crowdin.com", path: `/api/v2/projects/110652/translations/builds/${buildId}/download`, headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+                        let rawData = "";
+                        res.setEncoding('utf8');
+                        res.on('data', (body) => {
+                            rawData += body;
+                        });
+                        res.on('end', () => {
+                            let url = JSON.parse(rawData).data.url;
+                            resolve(url);
+                        });
+                    });
+                });
+            });
         });
-        res.on('end', () => {
-            console.log(rawData);
+        request.end();
+    });
+}
+
+function checkBuildProgress (buildId) {
+    return new Promise((resolve, reject) => {
+        _pending_finished = setInterval(() => {
+            http.get({protocol: "https:", host: "crowdin.com", path: `/api/v2/projects/110652/translations/builds/${buildId}`, headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+                let rawData = "";
+                res.setEncoding('utf8');
+                res.on('data', (body) => {
+                    rawData += body;
+                });
+                res.on('end', () => {
+                    let progress = JSON.parse(rawData).data.progress;
+                    if (progress == 100) {
+                        clearInterval(_pending_finished);
+                        resolve();
+                    }
+                });
+            });
+        }, 3000);
+    });
+}
+
+function downloadArchive (url) {
+    return new Promise((resolve, reject) => {
+        http.get(url, (response) => {
+            let pipe = response.pipe(unzip.Extract({path:'./languages'}));
+            pipe.on('finish', () => {
+                resolve();
+            });
         });
     });
 }
-// downloadTranslations();
+
+getTranslationsURL().then((url) => {
+    return downloadArchive(url);
+}).then(() => {
+    console.log('Translations loaded.....');
+    console.log('Converting translations.....');
+    convertTranslationsToJSON();
+    console.log('***Translations written successfully***');
+});
 
 loadTranslationsProgress().then(() => {
     return downloadStrings();
 }).then(() => {
     console.log('Strings loaded.....');
+    console.log('Converting strings.....');
     convertStringsToJSON();
+    console.log('***Strings written successfully***');
 
     fs.writeFileSync(`translation_progress.js`, `let client_translation_progress = ${JSON.stringify(translation_progress)}; typeof define === "function" && define(() => { return client_translation_progress;});`);
     fs.writeFileSync(`en_lang.js`, `let default_translation = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return default_translation;});`);

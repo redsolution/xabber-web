@@ -7008,6 +7008,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 0;
 }
 
+.settings-panel .languages-list.radio-field div label,
 .settings-panel .radio-field p label {
     height: 24px;
     padding-left: 36px;
@@ -7355,10 +7356,29 @@ input[type='range'].voice-message-volume:focus {
     padding: 2px 0 6px;
 }
 
-.settings-block-wrap.interface_language .description,
 .settings-block-wrap.xabber-account .xabber-account-tip {
     padding: 8px 0;
     font-size: 13px;
+}
+
+.settings-block-wrap.interface_language .description {
+    font-size: 14px;
+    padding: 0 24px;
+    position: absolute;
+    top: 0;
+    left: 60%;
+    color: #616161;
+}
+
+.settings-block-wrap.interface_language .languages-list .language-item {
+    min-height: 36px;
+    padding: 2px 0;
+}
+
+.settings-block-wrap.interface_language .language-item .translation-progress {
+    font-size: 12px;
+    color: #9E9E9E;
+    padding-left: 44px;
 }
 
 /* ----------------- COLOR PICKER -------------------- */
