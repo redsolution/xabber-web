@@ -41,6 +41,7 @@
     "strophe.js": "~1.2.13",
     "strophejs-plugins": "0.0.7",
     "underscore": "~1.8.3",
+    "unzip": "^0.1.11",
     "wavesurfer": ">0.0.0"
   }
 }

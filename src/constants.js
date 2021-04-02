@@ -139,6 +139,8 @@ var constants = {
         PUBSUB_AVATAR: 1
     },
 
+    EMAIL_FOR_JOIN_TRANSLATION: "info@xabber.com",
+
     AVATAR_SIZES: {
         TOOLBAR_ACCOUNT_ITEM:           32,
         SETTINGS_ACCOUNT_ITEM:          32,

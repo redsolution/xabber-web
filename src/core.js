@@ -25,6 +25,7 @@
             this.env = env;
             this.fetchURLParams();
             this.cleanUpStorage();
+            this.initDefaultLanguage();
             this.detectMediaDevices();
             window.navigator.mediaDevices && (window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this));
             this._settings = new this.Settings({id: 'settings'},
@@ -39,6 +40,14 @@
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
+        },
+
+        initDefaultLanguage: function () {
+            let lang = window.navigator.language,
+                progress = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));
+            if (progress != 100)
+                lang = 'en';
+            this.set("default_language", lang);
         },
 
         loadTranslations: async function () {
