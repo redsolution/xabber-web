@@ -1332,7 +1332,8 @@ define("xabber-views", function () {
         },
 
         render: function () {
-            let settings = this.model.attributes;
+            let settings = this.model.attributes,
+                lang = settings.language;
             this.$('.notifications input[type=checkbox]').prop({
                 checked: settings.notifications && xabber._cache.get('notifications')
             });
@@ -1345,7 +1346,8 @@ define("xabber-views", function () {
                     .prop('checked', true);
             this.$(`.hotkeys input[type=radio][name=hotkeys][value=${settings.hotkeys}]`)
                     .prop('checked', true);
-            this.$(`.languages-list input[type=radio][name=language][value="${settings.language}"]`)
+            (lang == xabber.get("default_language")) && (lang = 'default');
+            this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
                 .prop('checked', true);
             this.updateDescription();
             this.updateBackgroundSetting();

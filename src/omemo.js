@@ -252,7 +252,7 @@ define("xabber-omemo", function () {
                             alignment: 'left'
                         });
                     this.jid == this.account.get('jid') && f_count++;
-                    this.$('.additional-info').text(this.jid + ', ' + f_count + (f_count > 1 ? ' devices' : ' device'));
+                    this.$('.additional-info').text(xabber.getQuantityString("omemo__dialog_fingerprints__text_devices_count", f_count, [this.jid, f_count]));
                     $container.find('.preloader-wrapper').detach();
                 });
                 for (let device_id in devices) {

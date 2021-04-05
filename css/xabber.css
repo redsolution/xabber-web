@@ -4726,8 +4726,12 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     top: 8px;
     width: 24px;
     height: 24px;
-    fill: #FFF;
     position: absolute;
+}
+
+.chat-item.saved-chat .circle-avatar svg path,
+.saved-chat.chat-head-wrap .circle-avatar svg path {
+    fill: #FFF !important;
 }
 
 .saved-chat.chat-head-wrap .one-liner {
@@ -4832,6 +4836,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     left: initial !important;
     right: 0 !important;
     min-width: 200px !important;
+    width: auto !important;
+    max-width: 272px !important;
 }
 
 .xabber-account-menu {
@@ -6715,7 +6721,7 @@ input[type='range'].voice-message-volume:focus {
     display: block;
     font-size: 12px;
     height: 14px;
-    width: 64px;
+    width: 100%;
     color: #757575;
     line-height: 14px;
     margin-top: 4px;
@@ -6861,12 +6867,16 @@ input[type='range'].voice-message-volume:focus {
     color: #FFFFFF;
 }
 
-.settings-panel .settings-tab svg * {
+.settings-panel .settings-tab svg path {
     fill: #FFFFFF;
 }
 
 .settings-panel .settings-tab svg.mdi-palette rect {
     fill: transparent;
+}
+
+.settings-panel .settings-tab.xabber-account-tab svg * {
+    fill: #FFFFFF;
 }
 
 .settings-panel .settings-tab.xabber-account-tab.offline .xabber-online-icon,
@@ -7733,7 +7743,9 @@ input[type='range'].voice-message-volume:focus {
 .color-values {
     top: 24px !important;
     left: 33px !important;
-    width: 144px !important;
+    min-width: 144px !important;
+    width: auto !important;
+    max-width: 200px !important;
     overflow: hidden;
 }
 
@@ -8279,7 +8291,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .resource-wrap .info .label {
-    width: 56px;
+    min-width: 56px;
+    max-width: 72px;
     font-size: 12px;
     line-height: 14px;
     font-weight: 300;
@@ -8289,6 +8302,7 @@ input[type='range'].voice-message-volume:focus {
 .details-panel .resource-wrap .info .value {
     font-size: 12px;
     line-height: 14px;
+    padding-left: 4px;
     max-width: 240px;
     color: #9E9E9E;
 }
@@ -8578,7 +8592,8 @@ input[type='range'].voice-message-volume:focus {
 
 .edit-rights .participant-details-item .button-wrap,
 .details-panel .main-info .button-wrap {
-    width: 64px;
+    min-width: 64px;
+    max-width: 96px;
     margin: 8px;
     text-align: center;
 }
@@ -8629,7 +8644,7 @@ input[type='range'].voice-message-volume:focus {
 .edit-rights .participant-details-item .buttons-wrap .btn-name,
 .details-panel .buttons-wrap .btn-name {
     height: 14px;
-    width: 64px;
+    width: 100%;
     color: #616161;
     font-size: 12px;
     line-height: 14px;
