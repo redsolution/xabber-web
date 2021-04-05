@@ -332,14 +332,14 @@
 
                 <div class="settings-block-wrap interface_language">
                     <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language", [xabber.get("default_language")]))]}</span>
                     </div>
                     <div class="setting interface-language-setting">
                         <div class="languages-list field radio-field clickable-field">
                             <form action="#">
                                 <div class="language-item">
                                     <input class="with-gap" name="language" value="default" type="radio" id="{{view.cid}}-default" />
-                                    <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default"))]}</label>
+                                    <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default", [languages[xabber.get("default_language") || 'en']]))]}</label>
                                 </div>
                                 {[for (let lang in constants.languages) { if (!lang) continue;]}
                                 <div class="language-item">
@@ -351,11 +351,7 @@
                                 {[}]}
                             </form>
                         </div>
-                        <div class="description">
-                            {[print(xabber.getString("settings__section_interface_language__text_description_no_translations", [SHORT_CLIENT_NAME, SHORT_CLIENT_NAME, SHORT_CLIENT_NAME]))]}<br><br>
-                            {[print(xabber.getString("settings__section_interface_language__text_description_translation_platform",
-                            [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]))]}
-                        </div>
+                        <div class="description"></div>
                     </div>
                 </div>
             </div>

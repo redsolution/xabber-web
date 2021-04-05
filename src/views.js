@@ -1347,6 +1347,7 @@ define("xabber-views", function () {
                     .prop('checked', true);
             this.$(`.languages-list input[type=radio][name=language][value="${settings.language}"]`)
                 .prop('checked', true);
+            this.updateDescription();
             this.updateBackgroundSetting();
             this.updateColor();
             this.updateMainColor();
@@ -1578,12 +1579,38 @@ define("xabber-views", function () {
 
         changeLanguage: function (ev) {
             let value = ev.target.value;
-            this.model.save('language', value);
             utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
                 if (result) {
+                    this.model.save('language', value);
                     window.location.reload(true);
+                } else {
+                    this.$(`.languages-list input[type=radio][name=language][value="${this.model.get('language')}"]`)
+                        .prop('checked', true);
                 }
             });
+        },
+
+        updateDescription: function () {
+            let lang = this.model.get('language'),
+                progress = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));
+            (lang == 'default' || lang == 'en') && (progress = 100);
+            if (!_.isUndefined(progress)) {
+                let progress_text, platform_text;
+                if (progress == 100) {
+                    progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                    platform_text = xabber.getString("settings__interface_language__text_description_full_translation_platform",
+                        [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                } else if (progress == 0) {
+                    progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                    platform_text = xabber.getString("settings__interface_language__text_description_no_translation_platform",
+                            [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                } else {
+                    progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                    platform_text = xabber.getString("settings__section_interface_language__text_description_translation_platform",
+                        [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION]);
+                }
+                this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
+            }
         }
     });
 
