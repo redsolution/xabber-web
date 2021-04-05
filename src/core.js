@@ -53,6 +53,12 @@
         loadTranslations: async function (lang) {
             return new Promise((resolve, reject) => {
                 !lang && (lang = this.settings.language);
+                if (lang == 'default' && this.default_translation) {
+                    lang = this.get("default_language");
+                    let translation = this.default_translation;
+                    resolve({lang, translation});
+                    return;
+                }
                 require([`./translations/${lang.replace(/-/g, "-r")}.js`], (translation) => {
                     resolve({lang, translation})
                 }, () => {
@@ -64,10 +70,10 @@
         setLocale: function (lang, translations) {
             let default_lang = this.get("default_language"),
                 _translations = {
-                [default_lang]: {
-                    translation: this.default_translation
-                }
-            };
+                    [default_lang]: {
+                        translation: this.default_translation
+                    }
+                };
             lang && (_translations[lang] = {translation: translations});
             xabber_i18next.use(xabber_i18next_sprintf);
             xabber_i18next.init({
@@ -77,23 +83,21 @@
                 resources: _translations
             });
             lang && xabber_i18next.changeLanguage(lang);
-            this.default_translation = xabber_i18next.getFixedT(default_lang);
+            this.default_lang = xabber_i18next.getFixedT(default_lang);
         },
-
         getOneLiners: function () {
             if (xabber_i18next.exists("motivating_oneliner")) {
                 return xabber_i18next.t("motivating_oneliner").replace(/\\'/g, "'").split('\n');
-            } else if (this.default_translation) {
-                return this.default_translation("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else if (this.default_lang) {
+                return this.default_lang("motivating_oneliner").replace(/\\'/g, "'").split('\n');
             } else
                 return [];
         },
-
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
                 return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
-            } else if (this.default_translation) {
-                return this.default_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+            } else if (this.default_lang) {
+                return this.default_lang(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
             } else
                 return "";
         },
