@@ -1,1 +1,1 @@
-let translations = {}; typeof define === "function" && define(() => { return translations;});
+typeof define === "function" && define(() => { return {};});

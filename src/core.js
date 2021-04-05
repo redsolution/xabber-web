@@ -50,47 +50,41 @@
             this.set("default_language", lang);
         },
 
-        loadTranslations: async function () {
+        loadTranslations: async function (lang) {
             return new Promise((resolve, reject) => {
-                if (this.settings.language == 'default' || this.settings.language == 'en') {
-                    this.setLocale();
-                    resolve();
-                } else {
-                    let lang = this.settings.language;
-                    require([`./translations/${lang.replace(/-/g, "-r")}.js`], () => {
-                        this.setLocale(lang);
-                        resolve()
-                    }, () => {
-                        this.setLocale();
-                        resolve()
-                    });
-                }
+                !lang && (lang = this.settings.language);
+                require([`./translations/${lang.replace(/-/g, "-r")}.js`], (translation) => {
+                    resolve({lang, translation})
+                }, () => {
+                    resolve()
+                });
             });
         },
 
-        setLocale: function (lang) {
-            let _translations = {
-                en: {
-                    translation: default_translation
+        setLocale: function (lang, translations) {
+            let default_lang = this.get("default_language"),
+                _translations = {
+                [default_lang]: {
+                    translation: this.default_translation
                 }
             };
             lang && (_translations[lang] = {translation: translations});
             xabber_i18next.use(xabber_i18next_sprintf);
             xabber_i18next.init({
-                lng: 'en',
+                lng: default_lang,
                 debug: false,
                 pluralSeparator: '-',
                 resources: _translations
             });
             lang && xabber_i18next.changeLanguage(lang);
-            this.en_translation = xabber_i18next.getFixedT('en');
+            this.default_translation = xabber_i18next.getFixedT(default_lang);
         },
 
         getOneLiners: function () {
             if (xabber_i18next.exists("motivating_oneliner")) {
                 return xabber_i18next.t("motivating_oneliner").replace(/\\'/g, "'").split('\n');
-            } else if (this.en_translation) {
-                return this.en_translation("motivating_oneliner").replace(/\\'/g, "'").split('\n');
+            } else if (this.default_translation) {
+                return this.default_translation("motivating_oneliner").replace(/\\'/g, "'").split('\n');
             } else
                 return [];
         },
@@ -98,8 +92,8 @@
         getString: function (id, params) {
             if (xabber_i18next.exists(id)) {
                 return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
-            } else if (this.en_translation) {
-                return this.en_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+            } else if (this.default_translation) {
+                return this.default_translation(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
             } else
                 return "";
         },
@@ -276,7 +270,10 @@
         },
 
         configure: function (config) {
-            this.loadTranslations().then(() => {
+            this.loadTranslations(this.get('default_language')).then(({lang, translation}) => {
+                this.default_translation = translation;
+                return this.loadTranslations();}).then(({lang, translation}) => {
+                    this.setLocale(lang, translation);
                 _.extend(constants, _.pick(config, [
                     'CONNECTION_URL',
                     'PERSONAL_AREA_URL',

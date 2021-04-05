@@ -1,1 +1,1 @@
-let translations = {"account_compression":"Kutumia njia iliyofupishwa","account_host":"Mwenyeji","account_password":"Nenosiri","confirm_password":"Thibitisha nenosiri","account_port":"Pahali pa kuinigza"}; typeof define === "function" && define(() => { return translations;});
+typeof define === "function" && define(() => { return {"account_compression":"Kutumia njia iliyofupishwa","account_host":"Mwenyeji","account_password":"Nenosiri","confirm_password":"Thibitisha nenosiri","account_port":"Pahali pa kuinigza"};});
