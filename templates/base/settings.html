@@ -39,7 +39,7 @@
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__appearance"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="interface_language">
-                <i class="mdi mdi-24px mdi-translate"></i>
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="translate"></svg>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__interface_language"))]}</div>
             </div>
             {[if (PERSONAL_AREA_URL && Object.keys(PERSONAL_AREA_URL).length) {]}
@@ -332,7 +332,7 @@
 
                 <div class="settings-block-wrap interface_language">
                     <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language", [xabber.get("default_language")]))]}</span>
+                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
                     </div>
                     <div class="setting interface-language-setting">
                         <div class="languages-list field radio-field clickable-field">
@@ -341,7 +341,10 @@
                                     <input class="with-gap" name="language" value="default" type="radio" id="{{view.cid}}-default" />
                                     <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default", [languages[xabber.get("default_language") || 'en']]))]}</label>
                                 </div>
-                                {[for (let lang in constants.languages) { if (!lang) continue;]}
+                                {[if (!window.navigator.language.indexOf(xabber.get("default_language"))) {]}
+
+                                {[}]}
+                                {[for (let lang in constants.languages) { if (!lang || lang == xabber.get("default_language")) continue;]}
                                 <div class="language-item">
                                     <input class="with-gap" name="language" value="{{lang}}" type="radio" id="{{view.cid}}-{{lang}}" />
                                     <label for="{{view.cid}}-{{lang}}">{[print(constants.languages[lang]);]}</label>

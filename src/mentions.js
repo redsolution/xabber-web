@@ -339,30 +339,24 @@ define("xabber-mentions", function () {
                 let msg_time = msg.get('time'),
                     timestamp = msg.get('timestamp'),
                     forwarded_message = msg.get('forwarded_message'),
-                    msg_files = msg.get('files'),
-                    msg_images = msg.get('images'),
+                    msg_files = msg.get('files') || [],
+                    msg_images = msg.get('images') || [],
                     msg_text = (forwarded_message) ? (msg.get('message') || xabber.getString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText();
                 this.model.set({timestamp: timestamp});
-                if (msg_files || msg_images) {
+                if (msg_files.length || msg_images.length) {
                     let $colored_span = $('<span class="text-color-500"/>');
-                    if (msg_files && msg_images) {
-                        msg_files = (msg_files.length > 0) ? msg_files : undefined;
-                        msg_images = (msg_images.length > 0) ? msg_images : undefined;
-                    }
-                    if (msg_files && msg_images)
+                    if (msg_files.length && msg_images.length)
                         msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                     else {
-                        if (msg_files) {
-                            if (msg_files.length > 1)
-                                msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__files", msg_files.length));
-                            if (msg_files.length == 1)
-                                msg_text = $colored_span.text(msg_files[0].name);
+                        if (msg_files.length > 0) {
+                            let total_size = 0;
+                            msg_files.forEach((f) => {total_size+=Number(f.size)});
+                            msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__files", msg_files.length) + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                         }
-                        if (msg_images) {
-                            if (msg_images.length > 1)
-                                msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__images", [msg_images.length]));
-                            if (msg_images.length == 1)
-                                msg_text = $colored_span.text(msg_images[0].name);
+                        if (msg_images.length > 0) {
+                            let total_size = 0;
+                            msg_images.forEach((f) => {total_size+=Number(f.size)});
+                            msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__images", msg_images.length) + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
                         }
                     }
                     this.$('.last-msg').text("").append(msg_text);

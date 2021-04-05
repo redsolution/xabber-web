@@ -14,7 +14,9 @@ let badges_names = [
     ],
     material_icons = [
         'palette',
-        'saved-messages'
+        'saved-messages',
+        'translate',
+        'circles'
     ],
     fs = require('fs');
 badges_names.forEach((name) => {

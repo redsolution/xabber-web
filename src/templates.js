@@ -139,7 +139,9 @@ define("xabber-templates", [
     "text!templates/svg/xabber-offline.html",
     "text!templates/svg/xabber-online.html",
     "text!templates/svg/saved-messages.html",
-    "text!templates/svg/palette.html"
+    "text!templates/svg/palette.html",
+    "text!templates/svg/circles.html",
+    "text!templates/svg/translate.html"
 ], function (_, $) {
 
     _.templateSettings = {
@@ -327,6 +329,8 @@ define("xabber-templates", [
     addSvgTemplate('svg.xabber-online');
     addSvgTemplate('svg.saved-messages');
     addSvgTemplate('svg.palette');
+    addSvgTemplate('svg.circles');
+    addSvgTemplate('svg.translate');
 
     return templates;
 });

@@ -79,7 +79,7 @@ define("xabber-ui", function () {
                 pinned = this.roster_view.data.get('pinned');
             this.roster_view.$('.collapsed-wrap').hideIf(expanded);
             this.roster_view.$('.expanded-wrap').showIf(expanded);
-            this.roster_view.$('.btn-pin').hideIf(is_narrow).text(pinned ? 'unpin' : 'pin');
+            this.roster_view.$('.btn-pin').hideIf(is_narrow).text(pinned ? xabber.getString("group_chat__pinned_message__tooltip_unpin") : xabber.getString("message_pin"));
 
             if (is_narrow && pinned) {
                 this.roster_view.data.set({expanded: false, pinned: false});
