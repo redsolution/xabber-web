@@ -1,0 +1,69 @@
+"short_desription","Open source XMPP (Jabber) client with multi-account support","","Short description of application","80"
+"full_description","Open source Jabber (XMPP) client with multi-account support and clean and simple interface. Being both free (as in freedom!) and ad-free, Xabber is designed to be the best Jabber client for Android.
+
+Features:
+- Modern material interface
+- Multiple accounts support
+- Quick swipe between chats
+- Rich visibility settings for contacts and groups
+- Compatible with all standard XMPP servers
+- Multi user chat (MUC)
+- Chat history
+- Export history to SD card
+- Server side message archive support
+- Inline hyperlink support (web pages, YouTube, e-mail, phone numbers, XMPP Uri)
+- Avatars
+- View contact's information (vCard)
+- Grouping contacts by groups and/or accounts
+- Contact list management: add/remove/edit contacts, groups, subscriptions
+- Contact search
+- Notification setting for each contact
+- Notifications based on key phrase
+- Full Unicode support, chat in any language
+- Portrait and landscape views
+- Stream compression (not all servers supported for now)
+- Resources/priorities
+- OTR encryption
+- TLS support
+- Legacy SSL support
+- SASL support
+- Check for the server certificate
+- SRV record and DNS round robin support
+- Client software icons in contact list (Adium, Empathy, Gajim, Gtalk, iChat, Miranda, Pidgin, Psi, QIP, Xabber, Xabber VIP)
+- Typing notification support
+- Message delivery receipts
+- Shortcut to a chat on home screen
+
+Coming soon:
+- Tablet interface
+- File transfer
+
+Supported protocols:
+RFC-3920: Core
+RFC-3921: Instant Messaging and Presence
+XEP-0030: Service Discovery
+XEP-0128: Service Discovery Extensions
+XEP-0115: Entity Capabilities
+XEP-0054: vcard-temp
+XEP-0153: vCard-Based Avatars
+XEP-0045: Multi-User Chat (incompletely)
+XEP-0078: Non-SASL Authentication
+XEP-0138: Stream Compression
+XEP-0203: Delayed Delivery
+XEP-0091: Legacy Delayed Delivery
+XEP-0199: XMPP Ping
+XEP-0147: XMPP URI Scheme Query Components
+XEP-0085: Chat State Notifications
+XEP-0184: Message Delivery Receipts
+XEP-0155: Stanza Session Negotiation
+XEP-0059: Result Set Management
+XEP-0136: Message Archiving
+XEP-0224: Attention
+XEP-0077: In-Band Registration
+
+
+Check Xabber Beta version for early access to new features. Xabber Classic is available for old Android devices (2.3 and earlier).
+
+Source code of Xabber is available at https://github.com/redsolution/xabber-android under GNU GPLv3 license.
+
+For more information visit our website http://xabber.com or follow @xabber_xmpp at twitter.","","Full description of application","4000"

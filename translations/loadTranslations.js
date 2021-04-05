@@ -148,7 +148,7 @@ function convertTranslationsToJSON () {
                 }
             }
         });
-        fs.writeFileSync(`${f_name.slice(7)}.js`, `let translations = ${JSON.stringify(translations)}; typeof define === "function" && define(() => { return translations;});`);
+        fs.writeFileSync(`${f_name.slice(7)}.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(translations)};});`);
     });
 }
 
@@ -232,5 +232,5 @@ loadTranslationsProgress().then(() => {
     console.log('***Strings written successfully***');
 
     fs.writeFileSync(`translation_progress.js`, `let client_translation_progress = ${JSON.stringify(translation_progress)}; typeof define === "function" && define(() => { return client_translation_progress;});`);
-    fs.writeFileSync(`en_lang.js`, `let default_translation = ${JSON.stringify(json)}; typeof define === "function" && define(() => { return default_translation;});`);
+    fs.writeFileSync(`en.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(json)};});`);
 });
