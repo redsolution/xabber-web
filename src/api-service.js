@@ -1024,7 +1024,7 @@ define("xabber-api-service", function () {
                 let $social_item = $(item);
                 $social_item.addClass('not-linked');
                 $social_item.find('.synced-info').text(xabber.getString("title_not_linked_account"));
-                $social_item.find('.btn-link').text('link').removeClass('btn-unlink');
+                $social_item.find('.btn-link').text(xabber.getString("action_connect")).removeClass('btn-unlink');
             });
             _.each(linked_emails, (email) => {
                 let email_id = email.id,
@@ -1037,7 +1037,7 @@ define("xabber-api-service", function () {
                 let social_provider = social.provider,
                     social_name = social.first_name + " " + social.last_name;
                 this.$('.'+ social_provider + '-linked').removeClass('not-linked');
-                this.$('.' + social_provider + '-linked .btn-link').text('unlink').addClass('btn-unlink');
+                this.$('.' + social_provider + '-linked .btn-link').text(xabber.getString("action_disconnect")).addClass('btn-unlink');
                 this.$('.'+ social_provider + '-linked .synced-info').html($(`<div class="name one-line">${social_name}</div><div class="verified-status one-line">${xabber.getString("title_linked_account", [social_provider])}</div>`));
             });
         },
@@ -1171,9 +1171,9 @@ define("xabber-api-service", function () {
             let last_sync = this.model.get('last_sync');
             if (last_sync) {
                 let time_delta = utils.now() - last_sync;
-                this.$('.last-sync-info').text('Synced ' + utils.pretty_timedelta(time_delta));
+                this.$('.last-sync-info').text(xabber.getString("xabber_account__last_sync__text", [utils.pretty_timedelta(time_delta)]));
             } else {
-                this.$('.last-sync-info').text('Not synced');
+                this.$('.last-sync-info').text(xabber.getString("xabber_account__last_sync__not_synced"));
             }
         },
 

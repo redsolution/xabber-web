@@ -1119,7 +1119,14 @@ define("xabber-contacts", function () {
                 this.updateJingleButtons();
                 this.updateStatusMsg();
                 this.updateName();
+                this.setButtonsWidth();
                 this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
+            },
+
+            setButtonsWidth: function () {
+                let widths = [];
+                this.$('.main-info .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+                this.$('.main-info .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
             },
 
             onChangedVisibility: function () {
@@ -1368,6 +1375,7 @@ define("xabber-contacts", function () {
                 this.$('.tabs .indicator').remove();
                 this.$('.tabs').tabs();
                 this.$('.indicator').addClass('ground-color-500');
+                this.setButtonsWidth();
                 return this;
             },
 
@@ -1381,6 +1389,12 @@ define("xabber-contacts", function () {
 
             updateColorScheme: function () {
                 this.$el.attr('data-color', this.account.settings.get('color'));
+            },
+
+            setButtonsWidth: function () {
+                let widths = [];
+                this.$('.main-info .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+                this.$('.main-info .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
             },
 
             updateButtons: function () {
@@ -1629,7 +1643,7 @@ define("xabber-contacts", function () {
 
             update: function () {
                 let info = this.model.get('group_info') || {};
-                this.$('.block-name').text((info.privacy ? info.privacy : (this.model.get('incognito_group') ? xabber.getString("groupchat_incognito_group") : xabber.getString("groupchat_public_group"))));
+                this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
                 this.$('.jabber-id .value').text(info.jid);
                 this.$('.name .value').text(info.name);
                 this.$('.description .value').text(info.description);
@@ -1680,7 +1694,7 @@ define("xabber-contacts", function () {
             open: function (data_form) {
                 this.data_form = data_form;
                 let all_fixed = this.data_form.fields.filter(f => f.type == 'fixed' || f.type == 'hidden').length == this.data_form.fields.length;
-                this.$el.html(templates.group_chats.group_chat_properties_edit({all_fixed: all_fixed, fields: data_form.fields, anonymous: utils.pretty_name(this.contact.get('group_info').privacy), jid: this.model.get('jid')}));
+                this.$el.html(templates.group_chats.group_chat_properties_edit({all_fixed: all_fixed, fields: data_form.fields, privacy: this.contact.get('incognito_group'), jid: this.model.get('jid')}));
                 this.$el.openModal({
                     ready: () => {
                         this.$('.modal-content').css('height', this.$el.height() - 115).perfectScrollbar({theme: 'item-list'});
@@ -4975,12 +4989,17 @@ define("xabber-contacts", function () {
         });
 
         xabber.RosterSettings = Backbone.ModelWithStorage.extend({
-            defaults: {
-                pinned: true,
-                show_offline: 'yes',
-                sorting: 'online-first',
-                general_group_name: xabber.getString("circles__name_general_circle"),
-                non_roster_group_name: xabber.getString("circles__name_non_roster_circle")
+
+            defaults: function () {
+                let general_group_name = xabber.getString("circles__name_general_circle"),
+                    non_roster_group_name = xabber.getString("circles__name_non_roster_circle");
+                return {
+                    pinned: true,
+                    show_offline: 'yes',
+                    sorting: 'online-first',
+                    general_group_name,
+                    non_roster_group_name
+                };
             }
         });
 

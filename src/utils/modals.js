@@ -15,6 +15,15 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         this.options = options || {};
         this.closed = new $.Deferred();
     };
+
+    let getString = function (id, params) {
+        if (deps.xabber_i18next.exists(id)) {
+            return deps.xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+        } else if (deps.xabber_i18next.default_lang) {
+            return deps.xabber_i18next.default_lang(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+        } else
+            return "";
+    };
  
     _.extend(Modal.prototype, {
         open: function (options) {
@@ -123,8 +132,8 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                     var ok_button = buttons.ok_button,
                         cancel_button = buttons.cancel_button,
                         optional_buttons = (buttons.optional_buttons || []).reverse();
-                    ok_button && (ok_button = {text: ok_button.text || 'Ok'});
-                    cancel_button && (cancel_button = {text: cancel_button.text || 'Cancel'});
+                    ok_button && (ok_button = {text: ok_button.text || getString("ok")});
+                    cancel_button && (cancel_button = {text: cancel_button.text || getString("cancel")});
                     return templates.base.dialog({
                         header: header,
                         text: text,
@@ -185,11 +194,11 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
             },
 
             warning: function (text, dialog_options) {
-                return this.common('Warning', text, {ok_button: true}, dialog_options);
+                return this.common(getString("dialog_warning__header"), text, {ok_button: true}, dialog_options);
             },
 
             error: function (text, dialog_options) {
-                return this.common('Error', text, {ok_button: true}, dialog_options);
+                return this.common(getString("dialog_error__header"), text, {ok_button: true}, dialog_options);
             },
 
             ask: function (header, text, dialog_options, buttons) {

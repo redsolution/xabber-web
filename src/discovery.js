@@ -29,7 +29,7 @@ define("xabber-discovery", function () {
             let name = this.model.get('verbose_name'),
                 supports = this.model.get('supports');
             this.$('.feature-name').text(name);
-            this.$('.supports').text(supports ? 'Available' : 'Unavailable')
+            this.$('.supports').text(supports ? xabber.getString("account_settings__server_info__status_available") : xabber.getString("account_settings__server_info__status_unavailable"))
         }
     });
 
