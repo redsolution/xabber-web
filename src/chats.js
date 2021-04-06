@@ -7378,6 +7378,12 @@ define("xabber-chats", function () {
             return this;
         },
 
+        setButtonsWidth: function () {
+            let widths = [];
+            this.$('.message-actions-panel .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+            this.$('.message-actions-panel .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+        },
+
         updateEncrypted: function () {
             this.$el.children('.preloader-wrapper').detach();
             this.$el.children('.omemo-disabled').detach();
@@ -8297,6 +8303,7 @@ define("xabber-chats", function () {
             $message_actions.showIf(length);
             this.model.get('blocked') && this.$('.blocked-msg').hideIf(length);
             if (length) {
+                this.setButtonsWidth();
                 let my_msg = false;
                 if (length === 1) {
                     if ($selected_msgs.first().data('from') === this.account.get('jid'))

@@ -1410,6 +1410,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     top: -21px !important;
     left: 50px !important;
     min-width: 224px !important;
+    width: auto!important;
+    max-width: 256px;
     background-color: transparent;
     box-shadow: none;
     z-index: 1100;
@@ -1421,7 +1423,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     max-width: 100%;
     margin: 3px 0;
     display: inline-flex;
-    padding: 8px 16px 8px 42px;
+    align-items: center;
+    padding: 0 12px 0 8px;
     background-color: rgba(0, 0, 0, 0.85);
     border-radius: 18px;
     overflow: hidden;
@@ -1433,15 +1436,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .toolbar .add-variant .mdi {
-    position: absolute;
-    top: 8px;
-    left: 8px;
     color: #C0C0C0;
     fill: #C0C0C0;
 }
 
 .toolbar .add-variant .text {
     height: 19px;
+    margin-left: 12px;
     font-size: 16px;
     text-transform: capitalize;
     line-height: 19px;
@@ -7490,6 +7491,7 @@ input[type='range'].voice-message-volume:focus {
 
 .modal.main-color-picker .color-values {
     width: 100% !important;
+    max-width: unset!important;
 }
 
 .modal.main-color-picker .color-values .color-value {
@@ -7761,7 +7763,6 @@ input[type='range'].voice-message-volume:focus {
 
 
 .account-settings-panel .main-resource .device-indicator {
-    float: left;
     height: 14px;
     margin-left: 4px;
     font-size: 12px;
@@ -8281,13 +8282,22 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 0 6px 36px;
 }
 
+.details-panel .resource-wrap table {
+    table-layout: auto;
+    width: auto !important;
+}
+
+.details-panel .resource-wrap table td,
+.details-panel .resource-wrap table tr {
+    padding: 0;
+}
+
 .details-panel .resource-wrap .info {
     height: 22px;
 }
 
-.details-panel .resource-wrap .info > * {
-    float: left;
-    display: inline-block;
+.details-panel .resource-wrap .info td > * {
+    display: inline-flex;
 }
 
 .details-panel .resource-wrap .info .label {
@@ -8311,11 +8321,10 @@ input[type='range'].voice-message-volume:focus {
     font-size: 14px;
     line-height: 16px;
     color: #616161;
-    max-width: calc(100% - 56px - 24px);
 }
 
 .details-panel .resource-wrap .status-info .status {
-    margin: 4px 7px;
+    margin: auto 7px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -8569,8 +8578,12 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .main-info .buttons-menu-wrap {
-    right: 62px;
-    min-width: 192px;
+    min-width: 192px !important;
+    width: auto !important;
+    max-width: 256px !important;
+    top: 44px!important;
+    left: initial!important;
+    right: 56px!important;
 }
 
 .edit-rights .participant-details-item .buttons-wrap,
@@ -8588,6 +8601,12 @@ input[type='range'].voice-message-volume:focus {
     right: 12px;
     cursor: pointer;
     color: #424242;
+}
+
+.edit-rights .participant-details-item .buttons-menu-wrap {
+    width: auto!important;
+    min-width: 128px!important;
+    max-width: 256px!important;
 }
 
 .edit-rights .participant-details-item .button-wrap,

@@ -1593,9 +1593,9 @@ define("xabber-views", function () {
         },
 
         updateDescription: function () {
-            let lang = this.model.get('language'),
+            let lang = window.navigator.language,
                 progress = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));
-            (lang == 'default' || lang == 'en') && (progress = 100);
+            (lang == 'default' || !lang.indexOf('en')) && (progress = 100);
             if (!_.isUndefined(progress)) {
                 let progress_text, platform_text;
                 if (progress == 100) {

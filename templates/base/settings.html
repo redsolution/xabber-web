@@ -341,8 +341,7 @@
                                     <input class="with-gap" name="language" value="default" type="radio" id="{{view.cid}}-default" />
                                     <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default", [languages[xabber.get("default_language") || 'en']]))]}</label>
                                 </div>
-                                {[if (!window.navigator.language.indexOf(xabber.get("default_language"))) {]}
-
+                                {[if (window.navigator.language.indexOf(xabber.get("default_language")) < 0) {]}
                                 {[}]}
                                 {[for (let lang in constants.languages) { if (!lang || lang == xabber.get("default_language")) continue;]}
                                 <div class="language-item">
