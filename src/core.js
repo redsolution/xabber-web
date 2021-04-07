@@ -82,7 +82,10 @@
                 pluralSeparator: '-',
                 resources: _translations
             });
-            lang && xabber_i18next.changeLanguage(lang);
+            if (lang) {
+                xabber_i18next.changeLanguage(lang);
+                env.moment.lang(lang);
+            }
             xabber_i18next.default_lang = xabber_i18next.getFixedT(default_lang);
         },
         getOneLiners: function () {

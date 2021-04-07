@@ -5213,6 +5213,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     line-height: 14px;
     text-align: center;
     color: #9E9E9E;
+    text-transform: capitalize;
 }
 
 .chat-notification {
