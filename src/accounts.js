@@ -224,6 +224,12 @@ define("xabber-accounts", function () {
                 sendIQ: function () {
                     let res = this.connection.authenticated && this.get('status') !== 'offline';
                     if (res) {
+                        let elem = arguments[0];
+                        if (typeof(elem.tree) === "function" && elem.tree().getAttribute('type') == 'get') {
+                            let lang = xabber.settings.language;
+                            (lang == 'default') && (lang = xabber.get('default_language'));
+                            elem.tree().setAttribute('xml:lang', lang);
+                        }
                         this.connection.sendIQ.apply(this.connection, arguments);
                     } else {
                         this._pending_stanzas.push({stanza: arguments});
