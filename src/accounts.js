@@ -10,7 +10,8 @@ define("xabber-accounts", function () {
             Strophe = env.Strophe,
             _ = env._,
             moment = env.moment,
-            Images = utils.images;
+            Images = utils.images,
+            pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
 
         xabber.Account = Backbone.Model.extend({
@@ -1707,8 +1708,8 @@ define("xabber-accounts", function () {
                         device: token.device,
                         token_uid: token.token_uid,
                         ip: token.ip,
-                        last_auth: utils.pretty_datetime(token.last_auth),
-                        expire: utils.pretty_datetime(token.expire)
+                        last_auth: pretty_datetime(token.last_auth),
+                        expire: pretty_datetime(token.expire)
                     };
                     if (this.model.get('x_token')) {
                         if (this.model.get('x_token').token_uid == token.token_uid) {

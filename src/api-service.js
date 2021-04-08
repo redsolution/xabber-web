@@ -1171,7 +1171,7 @@ define("xabber-api-service", function () {
             let last_sync = this.model.get('last_sync');
             if (last_sync) {
                 let time_delta = utils.now() - last_sync;
-                this.$('.last-sync-info').text(xabber.getString("xabber_account__last_sync__text", [utils.pretty_timedelta(time_delta)]));
+                this.$('.last-sync-info').text(xabber.getString("xabber_account__last_sync__text", [env.moment(env.moment.now() - 1000*time_delta).fromNow()]));
             } else {
                 this.$('.last-sync-info').text(xabber.getString("xabber_account__last_sync__not_synced"));
             }

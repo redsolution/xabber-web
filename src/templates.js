@@ -149,23 +149,23 @@ define("xabber-templates", [
         interpolate : /\{\{([\s\S]+?)\}\}/g
     };
 
-    var templates = {};
+    let templates = {};
 
-    var insertSvg = function (html) {
-        var $html = $('<div/>').html(html);
+    let insertSvg = function (html) {
+        let $html = $('<div/>').html(html);
         $html.find('.mdi-svg-template').each(function () {
-            var $el = $(this);
-            var svg_name = $el.data('svgname');
+            let $el = $(this),
+                svg_name = $el.data('svgname');
             $el.removeClass('mdi-svg-template').addClass('mdi-'+svg_name)
                 .attr('data-svgname', null);
             $el.html(templates.svg[svg_name]());
-        })
+        });
         return $html.html();
     };
 
-    var _addTemplate = function (name, options) {
+    let _addTemplate = function (name, options) {
         options || (options = {});
-        var path = name.split('.'),
+        let path = name.split('.'),
             tpl = _.template(require('text!templates/'+path.join('/')+'.html')),
             tpl_name = path.pop(),
             res = templates;
@@ -182,11 +182,11 @@ define("xabber-templates", [
         }
     };
 
-    var addTemplate = function (name) {
+    let addTemplate = function (name) {
         _addTemplate(name, {is_svg: false});
     };
 
-    var addSvgTemplate = function (name) {
+    let addSvgTemplate = function (name) {
         _addTemplate(name, {is_svg: true});
     };
 
