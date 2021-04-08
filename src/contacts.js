@@ -12,7 +12,8 @@ define("xabber-contacts", function () {
             moment = env.moment,
             uuid = env.uuid,
             Images = utils.images,
-            Emoji = utils.emoji;
+            Emoji = utils.emoji,
+            pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
         xabber.Contact = Backbone.Model.extend({
             idAttribute: 'jid',
@@ -289,7 +290,7 @@ define("xabber-contacts", function () {
                 let seconds = $(iq).children('query').attr('seconds'),
                     message_time = moment.now() - 1000*seconds;
                 this.set({ last_seen: message_time });
-                return utils.pretty_last_seen(seconds);
+                return xabber.pretty_last_seen(seconds);
             },
 
             pres: function (type) {
@@ -674,7 +675,7 @@ define("xabber-contacts", function () {
                         msg_author = user_info.nickname || message.get('from_jid') || user_info.id,
                         pinned_msg = {
                             author: msg_author,
-                            time: utils.pretty_datetime(message.get('time')),
+                            time: pretty_datetime(message.get('time')),
                             message: msg_text,
                             fwd_author: fwd_msg_author
                         },
@@ -873,7 +874,7 @@ define("xabber-contacts", function () {
                     }
                     if (this.model.get('last_seen')) {
                     let seconds = (moment.now() - this.model.get('last_seen'))/1000,
-                        new_status = utils.pretty_last_seen(seconds);
+                        new_status = xabber.pretty_last_seen(seconds);
                     this.model.set({ status_message: new_status });
                     }
                 }
@@ -895,7 +896,7 @@ define("xabber-contacts", function () {
                 if (this.model.get('status') == 'offline' && this.model.get('last_seen') && _.isUndefined(this.interval_last)) {
                     this.interval_last = setInterval(() => {
                         let seconds = (moment.now() - this.model.get('last_seen'))/1000,
-                            new_status = utils.pretty_last_seen(seconds);
+                            new_status = xabber.pretty_last_seen(seconds);
                         this.model.set({ status_message: new_status });
                     }, 60000);
                 }
@@ -2614,7 +2615,7 @@ define("xabber-contacts", function () {
                 for (let emoji_list in Emoji.all) {
                     let $emoji_list_wrap = $(`<div class="emoji-list-wrap"/>`),
                         list_name = emoji_list.replace(/ /g, '_');
-                    $(`<div id=${list_name} class="emoji-list-header">${constants.EMOJI_LIST_NAME(emoji_list)}</div>`).appendTo($emoji_list_wrap);
+                    $(`<div id=${list_name} class="emoji-list-header">${xabber.getString(constants.EMOJI_LIST_NAME(emoji_list))}</div>`).appendTo($emoji_list_wrap);
                     _.each(Emoji.all[emoji_list], function (emoji) {
                         $('<div class="emoji-wrap"/>').html(
                             emoji.emojify({emoji_size: 24, sprite: list_name})

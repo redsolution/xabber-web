@@ -7,7 +7,8 @@ define("xabber-mentions", function () {
             $ = env.$,
             Strophe = env.Strophe,
             _ = env._,
-            Images = utils.images;
+            Images = utils.images,
+            pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
 
         xabber.Mention = Backbone.Model.extend({
@@ -366,7 +367,7 @@ define("xabber-mentions", function () {
                 }
                 this.$el.emojify('.last-msg', {emoji_size: 16});
                 this.$('.last-msg-date').text(utils.pretty_short_datetime(msg_time))
-                    .attr('title', utils.pretty_datetime(msg_time));
+                    .attr('title', pretty_datetime(msg_time));
             },
 
             updateActiveStatus: function () {

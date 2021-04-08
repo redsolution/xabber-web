@@ -148,6 +148,19 @@
             }
         },
 
+        pretty_last_seen: function (seconds) {
+            if (seconds >= 0 && seconds <= 120)
+                return this.getString("last_seen_now");
+            if (seconds > 120 && seconds < 3600)
+                return this.getString("last_seen_minutes", [seconds/60]);
+            if (seconds >= 3600 && seconds < 7200)
+                return this.getString("last_seen_hours");
+            if (seconds >= 3600*48*2)
+                return this.getString("last_seen_date", [env.moment().subtract(seconds, 'seconds').format('LL')]);
+            else
+                return this.getString("last_seen_date", [env.moment().subtract(seconds, 'seconds').calendar().toLowerCase()]);
+        },
+
         readActualVersion: function () {
             // get version.js file from server and parse it
             let rawFile = new XMLHttpRequest();

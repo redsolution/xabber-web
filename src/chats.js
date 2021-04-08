@@ -12,7 +12,9 @@ define("xabber-chats", function () {
         moment = env.moment,
         uuid = env.uuid,
         Images = utils.images,
-        Emoji = utils.emoji;
+        Emoji = utils.emoji,
+        pretty_date = (timestamp) => { return utils.pretty_date(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'dddd, D MMMM YYYY')},
+        pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
     xabber.Message = Backbone.Model.extend({
         idAttribute: 'unique_id',
@@ -1340,7 +1342,7 @@ define("xabber-chats", function () {
                     if (msg_state !== constants.MSG_DISPLAYED) {
                         let delivered_time = $received.children('time').attr('stamp');
                         if (delivered_time) {
-                            msg.set('time', utils.pretty_datetime(delivered_time));
+                            msg.set('time', pretty_datetime(delivered_time));
                             msg.set('timestamp', Number(delivered_time));
                         }
                     }
@@ -1697,14 +1699,14 @@ define("xabber-chats", function () {
                 is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg'));
             this.$('.last-msg').html(xabber.getString(is_empty ? "recent_chat__last_message_retracted" : "no_messages").italics());
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
-                .attr('title', utils.pretty_datetime(msg_time));
+                .attr('title', pretty_datetime(msg_time));
         },
 
         updateEncryptedChat: function () {
             let msg_time = this.model.get('timestamp');
             this.$('.last-msg').html(xabber.getString("recent_chat__decrypting_messages").italics());
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
-                .attr('title', utils.pretty_datetime(msg_time));
+                .attr('title', pretty_datetime(msg_time));
         },
 
         updateLastMessage: function (msg) {
@@ -1789,7 +1791,7 @@ define("xabber-chats", function () {
             }
             this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
             this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
-                .attr('title', utils.pretty_datetime(msg_time));
+                .attr('title', pretty_datetime(msg_time));
             this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                 .attr('data-state', msg.getState());
         },
@@ -2441,7 +2443,7 @@ define("xabber-chats", function () {
         updateContactStatus: function () {
             if (this.head.$('.contact-status').attr('data-status') == 'offline' && this.contact.get('last_seen')) {
                 let seconds = (moment.now() - this.contact.get('last_seen'))/1000,
-                    new_status = utils.pretty_last_seen(seconds);
+                    new_status = xabber.pretty_last_seen(seconds);
                 this.contact.set({status_message: new_status });
             }
         },
@@ -2577,7 +2579,7 @@ define("xabber-chats", function () {
         onScrollY: function () {
             if (this._scrolltop === 0) {
                 this.$('.fixed-day-indicator-wrap').css('opacity', 1);
-                this.current_day_indicator = utils.pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
+                this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
                 this.showDayIndicator(this.current_day_indicator);
             }
             this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
@@ -2621,7 +2623,7 @@ define("xabber-chats", function () {
             });
             if (indicator_idx) {
                 this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
-                this.current_day_indicator = utils.pretty_date(parseInt($($chatday_indicator[indicator_idx]).attr('data-time')));
+                this.current_day_indicator = pretty_date(parseInt($($chatday_indicator[indicator_idx]).attr('data-time')));
             }
             else {
                 $messages.each((idx, msg) => {
@@ -2633,7 +2635,7 @@ define("xabber-chats", function () {
                 });
                 if (indicator_idx) {
                     this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
-                    this.current_day_indicator = utils.pretty_date(parseInt($($messages[indicator_idx]).attr('data-time')));
+                    this.current_day_indicator = pretty_date(parseInt($($messages[indicator_idx]).attr('data-time')));
                 }
             }
             if (this.current_day_indicator !== null) {
@@ -2928,7 +2930,7 @@ define("xabber-chats", function () {
                 this.bottom.showChatNotification();
             this.chat_item.$('.last-msg').text(message);
             this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime())
-                .attr('title', utils.pretty_datetime());
+                .attr('title', pretty_datetime());
             this.chat_item.$('.msg-delivering-state').addClass('hidden');
         },
 
@@ -3261,7 +3263,7 @@ define("xabber-chats", function () {
             }
             let short_datetime = utils.pretty_short_datetime(item.get('last_replace_time')),
                 datetime = moment(item.get('last_replace_time')).format('D MMMM, YYYY HH:mm:ss'),
-                new_title = `${utils.pretty_datetime(item.get('time'))} ${xabber.getString("edited", [moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime])}`;
+                new_title = `${pretty_datetime(item.get('time'))} ${xabber.getString("edited", [moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime])}`;
             $message.find('.msg-time').prop('title', new_title);
             $message.find('.edited-info').removeClass('hidden').text(xabber.getString("chat_screen__message__label_edited")).prop('title', new_title);
             $message.hyperlinkify({selector: '.chat-text-content'});
@@ -3449,7 +3451,7 @@ define("xabber-chats", function () {
                 username: username,
                 state: (message instanceof xabber.Message) ? message.getState() : 'sent',
                 verbose_state: (message instanceof xabber.Message) ? message.getVerboseState() : 'sent',
-                time: utils.pretty_datetime(attrs.time),
+                time: pretty_datetime(attrs.time),
                 short_time: utils.pretty_time(attrs.time),
                 avatar_id: avatar_id,
                 is_image: is_image,
@@ -3562,7 +3564,7 @@ define("xabber-chats", function () {
                     let fwd_markup_body = utils.markupBodyMessage(fwd_msg);
 
                     let $f_message = $(templates.messages.forwarded(_.extend(attrs, {
-                        time: utils.pretty_datetime(attrs.time),
+                        time: pretty_datetime(attrs.time),
                         short_time: utils.pretty_short_month_date(attrs.time),
                         username: username,
                         avatar_id: avatar_id,
@@ -3643,7 +3645,7 @@ define("xabber-chats", function () {
         getDateIndicator: function (date) {
             let day_date = moment(date).startOf('day');
             return $('<div class="chat-day-indicator one-line noselect"' + (this.model.get('encrypted') ? (' data-trust="' + (this.bottom.$el.attr('data-trust') || this.bottom.$el.attr('data-contact-trust')) + '"') : "") + ' data-time="'+
-                day_date.format('x')+'">'+utils.pretty_date(day_date)+'</div>');
+                day_date.format('x')+'">'+pretty_date(day_date)+'</div>');
         },
 
         hideMessageAuthor: function ($msg) {
@@ -4502,7 +4504,7 @@ define("xabber-chats", function () {
                 'data-time': message.get('timestamp')
             });
             $message.detach();
-            $message.children('.right-side').find('.msg-time').attr({title: utils.pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
+            $message.children('.right-side').find('.msg-time').attr({title: pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
             message.get('user_info') && $message.attr('data-from-id', message.get('user_info').id);
             this.model.messages.sort();
             let index = this.model.messages.indexOf(message);
@@ -6268,7 +6270,7 @@ define("xabber-chats", function () {
               }
               this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
               this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
-                  .attr('title', utils.pretty_datetime(msg_time));
+                  .attr('title', pretty_datetime(msg_time));
               this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
                   .attr('data-state', msg.getState());
           },
@@ -7121,7 +7123,6 @@ define("xabber-chats", function () {
             "click .pin-message": "pinMessage",
             "click .copy-message": "copyMessages",
             "click .edit-message": "showEditPanel",
-            "click .btn-save": "submit",
             "click .delete-message": "deleteMessages",
             "click .close-message-panel": "resetSelectedMessages",
             "click .mention-item": "inputMention",
@@ -7563,18 +7564,10 @@ define("xabber-chats", function () {
         displayMicrophone: function () {
             this.$('.mdi-send').addClass('hidden');
             this.$('.attach-voice-message').removeClass('hidden');
-            this.$('.btn-save').addClass('hidden');
         },
 
         displaySend: function () {
             this.$('.mdi-send').removeClass('hidden');
-            this.$('.attach-voice-message').addClass('hidden');
-            this.$('.btn-save').addClass('hidden');
-        },
-
-        displaySaveButton: function () {
-            this.$('.btn-save').removeClass('hidden');
-            this.$('.mdi-send').addClass('hidden');
             this.$('.attach-voice-message').addClass('hidden');
         },
 
@@ -8183,7 +8176,7 @@ define("xabber-chats", function () {
             this.$('.fwd-messages-preview .msg-author').text(xabber.getString("edit_message__header"));
             this.$('.fwd-messages-preview .msg-text').html(Strophe.xmlescape(msg_text));
             this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
-            this.displaySaveButton();
+            this.displaySend();
             xabber.chat_body.updateHeight();
             let markup_body = utils.markupBodyMessage(message),
                 emoji_node = markup_body.emojify({tag_name: 'div'}),
@@ -8478,7 +8471,7 @@ define("xabber-chats", function () {
                     prev_date = (i) ? moment(messages[i - 1].get('timestamp')).startOf('day') : moment(0),
                     msg_sender = "";
                     if (prev_date.format('x') != current_date.format('x')) {
-                        text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + utils.pretty_date(current_date) + '\n';
+                        text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + pretty_date(current_date) + '\n';
                     }
                     msg_sender = $msg.isSenderMe() ? this.account.get('name') : ($msg.get('user_info') && $msg.get('user_info').nickname || (this.account.contacts.get($msg.get('from_jid')) ? this.account.contacts.get($msg.get('from_jid')).get('name') : $msg.get('from_jid')));
                     text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";

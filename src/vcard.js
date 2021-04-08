@@ -211,7 +211,7 @@ define("xabber-vcard", function () {
         },
 
         render: function () {
-            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : 'Contact details');
+            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : xabber.getString("vcard_screen__header"));
             this.data.set('refresh', false);
             this.update();
         },
@@ -303,7 +303,7 @@ define("xabber-vcard", function () {
                     value_text = $item.text();
                 value_text && (copied_text != "") && (copied_text += '\n');
                 value_text && (copied_text += value_text);
-                copied_text && utils.copyTextToClipboard(copied_text, 'Copied in clipboard', 'ERROR: Not copied in clipboard');
+                copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
             });
         },
 
@@ -479,7 +479,7 @@ define("xabber-vcard", function () {
         },
 
         updateSaveButton: function () {
-            this.$('.btn-vcard-save').text(this.data.get('saving') ? 'Saving...' : 'Save');
+            this.$('.btn-vcard-save').text(this.data.get('saving') ? xabber.getString("saving") : xabber.getString("vcard_edit__button_save"));
         },
 
         save: function () {
@@ -493,7 +493,7 @@ define("xabber-vcard", function () {
                     this.data.set('saving', false);
                 },
                 function () {
-                    utils.dialogs.error('Could not save vCard.');
+                    utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
                     this.data.set('saving', false);
                 }
             );

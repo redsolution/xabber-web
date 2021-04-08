@@ -111,14 +111,14 @@ define([
             return datetime.format('HH:mm:ss');
         },
 
-        pretty_date: function (timestamp) {
+        pretty_date: function (timestamp, format) {
             var datetime = timestamp ? moment(timestamp) : moment();
-            return datetime.format('dddd, MMMM D, YYYY');
+            return datetime.format(format || 'dddd, MMMM D, YYYY');
         },
 
-        pretty_datetime: function (timestamp) {
+        pretty_datetime: function (timestamp, format) {
             var datetime = timestamp ? moment(timestamp) : moment();
-            return datetime.format('MMMM D, YYYY HH:mm:ss');
+            return datetime.format(format || 'MMMM D, YYYY HH:mm:ss');
         },
 
         pretty_short_datetime_recent_chat: function (timestamp) {
@@ -158,19 +158,6 @@ define([
             } else {
                 return datetime.format('MMM D, YYYY HH:mm:ss');
             }
-        },
-
-        pretty_timedelta: function (seconds) {
-            if (seconds < 60) {
-                return 'just now';
-            }
-            if (seconds < 3600) {
-                return Math.floor(seconds / 60) + ' minutes ago';
-            }
-            if (seconds < 86400) {
-                return Math.floor(seconds / 3600) + ' hours ago';
-            }
-            return Math.floor(seconds / 86400) + ' days ago';
         },
 
         isImageType: function(type) {
@@ -245,19 +232,6 @@ define([
             } else {
                 return (size/1073741824).toFixed(2)+' GiB';
             }
-        },
-
-        pretty_last_seen: function (seconds) {
-            if ((seconds >= 0)&&(seconds < 60))
-                return 'last seen just now';
-            if ((seconds > 60)&&(seconds < 3600))
-                return ('last seen ' + Math.trunc(seconds/60) + ((seconds < 120) ? ' minute ago' : ' minutes ago'));
-            if ((seconds >= 3600)&&(seconds < 7200))
-                return ('last seen hour ago');
-            if ((seconds >= 3600*48*2))
-                return ('last seen '+ moment().subtract(seconds, 'seconds').format('LL'));
-            else
-                return ('last seen '+ (moment().subtract(seconds, 'seconds').calendar()).toLowerCase());
         },
 
         pretty_duration: function (duration) {
@@ -565,7 +539,7 @@ define([
                 let length = 0,
                     buffer = null;
 
-                for (var i in arguments) {
+                for (let i in arguments) {
                     buffer = arguments[i];
                     length += buffer.byteLength;
                 }
@@ -573,7 +547,7 @@ define([
                 let joined = new Uint8Array(length),
                     offset = 0;
 
-                for (var i in arguments) {
+                for (let i in arguments) {
                     buffer = arguments[i];
                     joined.set(new Uint8Array(buffer), offset);
                     offset += buffer.byteLength;
