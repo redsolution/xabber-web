@@ -434,7 +434,12 @@ var constants = {
     CLIENT_LOGO: 'images/xabber-logo-96.png',
     TOOLBAR_LOGO: 'images/xabber-logo.png',
     CONNECT_XABBER_ACCOUNT: true,
-    SCREEN_ABOUT: true
+    SCREEN_ABOUT: true,
+    CLIENT_URL: 'https://www.xabber.com',
+    DEVELOPER_URL: 'https://redsolution.com',
+    CLIENT_GITHUB_URL: 'https://github.com/redsolution/xabber-web',
+    PROJECT_CROWDIN_URL: 'https://crowdin.com/project/xabber',
+    CLIENT_LICENSE_GITHUB_URL: 'https://github.com/redsolution/xabber-web/blob/master/LICENSE'
 };
 
 constants.JINGLE_MSG_STATE = {};
