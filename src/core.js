@@ -152,7 +152,7 @@
             if (seconds >= 0 && seconds <= 120)
                 return this.getString("last_seen_now");
             if (seconds > 120 && seconds < 3600)
-                return this.getString("last_seen_minutes", [seconds/60]);
+                return this.getString("last_seen_minutes", [Math.trunc(seconds/60)]);
             if (seconds >= 3600 && seconds < 7200)
                 return this.getString("last_seen_hours");
             if (seconds >= 3600*48*2)
