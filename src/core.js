@@ -266,7 +266,7 @@
                 background: {type: 'default'},
                 side_panel: {theme: 'dark', blur: false, transparency: 50},
                 appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
-                main_color: 'red',
+                main_color: 'default',
                 sound_on_message: 'beep_up',
                 call_attention: true,
                 sound_on_attention: 'attention',
@@ -311,6 +311,7 @@
                     'SHORT_CLIENT_NAME',
                     'CLIENT_LOGO',
                     'TOOLBAR_LOGO',
+                    'MAIN_COLOR',
                     'CONNECT_XABBER_ACCOUNT',
                     'SCREEN_ABOUT',
                     'DISABLE_LOOKUP_WS'
@@ -318,6 +319,8 @@
 
                 let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
                 constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
+                (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
+                this.trigger("update_main_color");
 
                 if (constants.DEBUG) {
                     window.xabber = this;

@@ -428,6 +428,7 @@ var constants = {
     VIGNETTING_VALUE: 128,
     TRANSPARENCY_VALUE: 50,
 
+    MAIN_COLOR: 'red',
     CLIENT_NAME: 'Xabber for Web',
     SHORT_CLIENT_NAME: 'Xabber',
     CLIENT_LOGO: 'images/xabber-logo-96.png',
