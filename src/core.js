@@ -84,7 +84,7 @@
             });
             if (lang) {
                 xabber_i18next.changeLanguage(lang);
-                env.moment.lang(lang);
+                env.moment.locale(lang);
             }
             xabber_i18next.default_lang = xabber_i18next.getFixedT(default_lang);
         },
@@ -301,6 +301,8 @@
                     'DEBUG',
                     'XABBER_ACCOUNT_URL',
                     'REGISTER_XMPP_ACCOUNT',
+                    'REGISTER_XMPP_ACCOUNT_URL',
+                    'REGISTER_XMPP_ACCOUNT_TEXT',
                     'API_SERVICE_URL',
                     'USE_SOCIAL_AUTH',
                     'CONTAINER',
@@ -311,14 +313,14 @@
                     'SHORT_CLIENT_NAME',
                     'CLIENT_LOGO',
                     'TOOLBAR_LOGO',
-                    'MAIN_COLOR',
-                    'CONNECT_XABBER_ACCOUNT',
+                    'ENABLE_XABBER_ACCOUNT',
                     'SCREEN_ABOUT',
                     'DISABLE_LOOKUP_WS'
                 ]));
 
                 let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
                 constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
+                constants.MATERIAL_COLORS.includes(config.MAIN_COLOR) && (constants.MAIN_COLOR = config.MAIN_COLOR);
                 (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
                 this.trigger("update_main_color");
 

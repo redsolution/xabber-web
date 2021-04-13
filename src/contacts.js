@@ -2593,7 +2593,6 @@ define("xabber-contacts", function () {
             _initialize: function () {
                 this.account = this.model.account;
                 this.contact = this.model.contact;
-                this.$el.attr('data-color', this.account.settings.get('color'));
                 this.participant = this.model.participant;
                 this.$el.openModal({
                     ready: () => {
@@ -2666,7 +2665,10 @@ define("xabber-contacts", function () {
             },
 
             close: function () {
-                this.$el.closeModal({ complete: this.hide.bind(this) });
+                this.$el.closeModal({ complete: () => {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                }});
             },
 
             saveNewBadge: function () {

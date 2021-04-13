@@ -437,7 +437,7 @@ define("xabber-accounts", function () {
                             this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
-                        if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.CONNECT_XABBER_ACCOUNT)
+                        if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
@@ -937,7 +937,7 @@ define("xabber-accounts", function () {
                 },
 
                 registerIQHandler: function () {
-                    if (!constants.CONNECT_XABBER_ACCOUNT)
+                    if (!constants.ENABLE_XABBER_ACCOUNT)
                         return;
                     this.connection.deleteHandler(this._stanza_handler);
                     this._stanza_handler = this.connection.addHandler((iq) => {
@@ -1186,7 +1186,7 @@ define("xabber-accounts", function () {
             },
 
             getDefaultColor: function () {
-                let used_colors = {}, colors = constants.ACCOUNT_COLORS;
+                let used_colors = {}, colors = constants.MATERIAL_COLORS;
                 this.each(function (account) {
                     used_colors[account.settings.get('color')] = true;
                 });

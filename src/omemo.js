@@ -1038,12 +1038,6 @@ define("xabber-omemo", function () {
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
-                            /*if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
-                                let label = this.account.settings.get('device_label_text');
-                                (this.account.background_connection || this.account.connection).omemo.publishDevice(device_id, label, () => {
-                                    this.account.trigger('device_published');
-                                });
-                            }*/
                             if (has_changes) {
                                 this.account.trigger("devices_updated");
                             }

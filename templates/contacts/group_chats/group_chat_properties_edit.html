@@ -18,7 +18,7 @@
             <input value="{{field.values[0]}}" id="new_{{field.var}}_value" type="text" name="{{field.var}}" placeholder='{[print(xabber.getString("group_settings_edit__setting_name__hint"))]}' class="text-field">
         </div>
         {[} else if (field.type === 'text-multi') {]}
-        <textarea placeholder='{[print(xabber.getString("groupchat_example_description"))]}' id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea">{{field.values[0]}}</textarea>
+        <textarea placeholder='{[print(xabber.getString("groupchat_example_description"))]}' id="{{field.var}}" cols="30" rows="10" class="text-field materialize-textarea rich-textarea">{{field.values[0]}}</textarea>
         {[} else if (field.type === 'list-single') { field.options.forEach(function (option) {]}
         <div class="property-radio">
             <input {[if (option.value === field.values[0]){]}checked{[}]} id="{{option.value}}" name="{{field.var}}" type="radio" class="with-gap" required="">

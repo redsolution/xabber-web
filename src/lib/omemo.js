@@ -4,8 +4,6 @@
     });
 }(this, function (Strophe, $build, $iq) {
     Strophe.addConnectionPlugin('omemo', (function() {
-        if (typeof(libsignal) === "undefined")
-            throw new Error("Signal library required!");
         let conn, init;
         this._connection = null;
         init = function(c) {

@@ -7,7 +7,7 @@
             <div class="version"></div>
         </div>
         <div class="settings-tabs-wrap">
-            {[if (CONNECT_XABBER_ACCOUNT) {]}
+            {[if (ENABLE_XABBER_ACCOUNT) {]}
             <div class="settings-tab xabber-account-tab offline" data-block-name="xabber-account">
                 <svg class="mdi mdi-24px mdi-svg-template xabber-offline-icon" data-svgname="xabber-offline"></svg>
                 <svg class="mdi mdi-24px mdi-svg-template xabber-online-icon" data-svgname="xabber-online"></svg>
@@ -65,7 +65,7 @@
 
         <div class="panel-content-wrap">
             <div class="panel-content">
-                {[if (CONNECT_XABBER_ACCOUNT) {]}
+                {[if (ENABLE_XABBER_ACCOUNT) {]}
                 <div class="settings-block-wrap xabber-account">
                     <div class="block-header">
                         <span class="block-name">{[print(xabber.getString("settings__menu_item__xabber_account"))]}</span>

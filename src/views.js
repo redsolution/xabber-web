@@ -791,6 +791,7 @@ define("xabber-views", function () {
 
         updateMainColor: function () {
             this.$el.attr('data-main-color', xabber.settings.main_color);
+            this.$el.siblings('#modals').attr('data-main-color', xabber.settings.main_color);
         },
 
         updateBackground: function () {

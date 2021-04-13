@@ -1247,7 +1247,7 @@ define("xabber-api-service", function () {
                 {id: 'accounts-order-timestamp'},
                 {storage_name: this.getStorageName(), fetch: 'after'}
             );
-        if (constants.CONNECT_XABBER_ACCOUNT) {
+        if (constants.ENABLE_XABBER_ACCOUNT) {
             this.api_account = new this.APIAccount({id: 'api-account'},
                 {
                     storage_name: this.getStorageName(), fetch: 'before',
@@ -1258,7 +1258,7 @@ define("xabber-api-service", function () {
             this.xabber_login_panel = xabber.login_page.addChild(
                 'xabber_login', this.XabberLoginPanel, {model: this.api_account});
 
-        if (constants.CONNECT_XABBER_ACCOUNT) {
+        if (constants.ENABLE_XABBER_ACCOUNT) {
             this.settings_view.addChild('api-account', this.APIAccountView,
                 {model: this.api_account});
 

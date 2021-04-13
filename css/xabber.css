@@ -2,37 +2,6 @@
 
 /* ---- Materialize CSS override ---- */
 
-input:not([type]):focus:not([readonly]),
-input[type=text]:focus:not([readonly]),
-input[type=password]:focus:not([readonly]),
-input[type=email]:focus:not([readonly]),
-input[type=url]:focus:not([readonly]),
-input[type=time]:focus:not([readonly]),
-input[type=date]:focus:not([readonly]),
-input[type=datetime-local]:focus:not([readonly]),
-input[type=tel]:focus:not([readonly]),
-input[type=number]:focus:not([readonly]),
-input[type=search]:focus:not([readonly]),
-textarea.materialize-textarea:focus:not([readonly]) {
-    border-bottom: 1px solid #F44336;
-    box-shadow: 0 1px 0 0 #F44336;
-}
-
-input:not([type]):focus:not([readonly]) + label,
-input[type=text]:focus:not([readonly]) + label,
-input[type=password]:focus:not([readonly]) + label,
-input[type=email]:focus:not([readonly]) + label,
-input[type=url]:focus:not([readonly]) + label,
-input[type=time]:focus:not([readonly]) + label,
-input[type=date]:focus:not([readonly]) + label,
-input[type=datetime-local]:focus:not([readonly]) + label,
-input[type=tel]:focus:not([readonly]) + label,
-input[type=number]:focus:not([readonly]) + label,
-input[type=search]:focus:not([readonly]) + label,
-textarea.materialize-textarea:focus:not([readonly]) + label {
-    color: #F44336 !important;
-}
-
 input[type=text][readonly] {
     color: #616161;
     border-bottom: 1px dotted #616161;
@@ -380,13 +349,6 @@ button.btn-float-left {
     background-color: #C0C0C0 !important;
 }
 
-input[type=text].simple-input-field,
-input[type=text].simple-input-field:focus,
-input[type=text].simple-input-field:hover {
-    border: none !important;
-    box-shadow: none !important;
-}
-
 .circle-avatar {
     position: relative;
     overflow: hidden;
@@ -532,12 +494,12 @@ input[type=text].simple-input-field:hover {
 input.xabber-input {
     margin: 0 !important;
     height: 30px;
-    border-bottom: 1px solid rgba(0,0,0,0.12) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
     color: #616161;
 }
 
 input.xabber-input:focus {
-    border-bottom: 1px solid rgba(0,0,0,0.12) !important;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
     box-shadow: none !important;
 }
 
@@ -993,7 +955,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 /* ------------- MAIN COLORS SETTING -------------- */
-
+[data-main-color=red] .fwd-message.selected,
+[data-main-color=red] .chat-message.selected,
+[data-main-color=red] .chat-item.active .status,
+[data-main-color=red] .roster-left-container .roster-account-info.active,
+[data-main-color=red] .roster-left-container .group-head.active,
+[data-main-color=red] .roster-left-container .roster-contact.active,
+[data-main-color=red] .add-user-group-chat .list-item.selected,
+[data-main-color=red] .add-user-group-chat .list-item.click-selected {
+    background-color: #ffebee;
+}
 [data-main-color=red] .switch label input[type=checkbox]:checked + .lever {
     background-color: #E57373;
 }
@@ -1016,15 +987,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #F44336;
 }
-[data-main-color=red] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=red] .settings-background .library-wrap .image-item.active,
 [data-main-color=red] .new-version-description,
-[data-main-color=red] + #modals .modal-footer.extended .optional-button,
+[data-main-color=red] .modal-footer.extended .optional-button,
 [data-main-color=red] .btn-main,
+[data-main-color=red] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=red] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #F44336 !important;
+    color: #F44336;
 }
 [data-main-color=red] .toolbar .toolbar-item.active svg.toolbar-icon path {
-    fill: #F44336 !important;
+    fill: #F44336;
 }
 [data-main-color=red] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=red] input[type=checkbox].filled-in:checked + label:after,
@@ -1034,13 +1006,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=red] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=red] .details-panel .main-info .contact-name-input,
-[data-main-color=red] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=red] input:focus:not([readonly]),
+[data-main-color=red] .modal .rich-textarea:focus,
+[data-main-color=red] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=red] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=red] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=red] input[type="radio"].with-gap:checked+label:before {
     border-color: #F44336;
 }
-[data-main-color=red] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=red] input:focus:not([readonly]),
+[data-main-color=red] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #F44336 !important;
 }
 [data-main-color=red] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1051,6 +1026,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=pink] .fwd-message.selected,
+[data-main-color=pink] .chat-message.selected,
+[data-main-color=pink] .chat-item.active .status,
+[data-main-color=pink] .roster-left-container .roster-account-info.active,
+[data-main-color=pink] .roster-left-container .group-head.active,
+[data-main-color=pink] .roster-left-container .roster-contact.active,
+[data-main-color=pink] .add-user-group-chat .list-item.selected,
+[data-main-color=pink] .add-user-group-chat .list-item.click-selected {
+    background-color: #FCE4EC;
+}
 [data-main-color=pink] .switch label input[type=checkbox]:checked + .lever {
     background-color: #F06292;
 }
@@ -1073,12 +1058,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #E91E63;
 }
-[data-main-color=pink] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=pink] .settings-background .library-wrap .image-item.active,
 [data-main-color=pink] .new-version-description,
-[data-main-color=pink] + #modals .modal-footer.extended .optional-button,
+[data-main-color=pink] .modal-footer.extended .optional-button,
 [data-main-color=pink] .btn-main,
+[data-main-color=pink] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=pink] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #E91E63 !important;
+    color: #E91E63;
 }
 [data-main-color=pink] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #E91E63 !important;
@@ -1091,13 +1077,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=pink] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=pink] .details-panel .main-info .contact-name-input,
-[data-main-color=pink] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=pink] input:focus:not([readonly]),
+[data-main-color=pink] .modal .rich-textarea:focus,
+[data-main-color=pink] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=pink] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=pink] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=pink] input[type="radio"].with-gap:checked+label:before {
     border-color: #E91E63;
 }
-[data-main-color=pink] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=pink] input:focus:not([readonly]),
+[data-main-color=pink] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #E91E63 !important;
 }
 [data-main-color=pink] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1107,6 +1096,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     fill: #C2185B !important;
 }
 
+
+[data-main-color=purple] .fwd-message.selected,
+[data-main-color=purple] .chat-message.selected,
+[data-main-color=purple] .chat-item.active .status,
+[data-main-color=purple] .roster-left-container .roster-account-info.active,
+[data-main-color=purple] .roster-left-container .group-head.active,
+[data-main-color=purple] .roster-left-container .roster-contact.active,
+[data-main-color=purple] .add-user-group-chat .list-item.selected,
+[data-main-color=purple] .add-user-group-chat .list-item.click-selected {
+    background-color: #F3E5F5;
+}
 [data-main-color=purple] .switch label input[type=checkbox]:checked + .lever {
     background-color: #BA68C8;
 }
@@ -1129,12 +1129,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #9C27B0;
 }
-[data-main-color=purple] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=purple] .settings-background .library-wrap .image-item.active,
 [data-main-color=purple] .new-version-description,
-[data-main-color=purple] + #modals .modal-footer.extended .optional-button,
+[data-main-color=purple] .modal-footer.extended .optional-button,
 [data-main-color=purple] .btn-main,
+[data-main-color=purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=purple] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #9C27B0 !important;
+    color: #9C27B0;
 }
 [data-main-color=purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #9C27B0 !important;
@@ -1147,13 +1148,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=purple] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=purple] .details-panel .main-info .contact-name-input,
-[data-main-color=purple] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=purple] input:focus:not([readonly]),
+[data-main-color=purple] .modal .rich-textarea:focus,
+[data-main-color=purple] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=purple] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=purple] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=purple] input[type="radio"].with-gap:checked+label:before {
     border-color: #9C27B0;
 }
-[data-main-color=purple] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=purple] input:focus:not([readonly]),
+[data-main-color=purple] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #9C27B0 !important;
 }
 [data-main-color=purple] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1164,6 +1168,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=deep-purple] .fwd-message.selected,
+[data-main-color=deep-purple] .chat-message.selected,
+[data-main-color=deep-purple] .chat-item.active .status,
+[data-main-color=deep-purple] .roster-left-container .roster-account-info.active,
+[data-main-color=deep-purple] .roster-left-container .group-head.active,
+[data-main-color=deep-purple] .roster-left-container .roster-contact.active,
+[data-main-color=deep-purple] .add-user-group-chat .list-item.selected,
+[data-main-color=deep-purple] .add-user-group-chat .list-item.click-selected {
+    background-color: #EDE7F6;
+}
 [data-main-color=deep-purple] .switch label input[type=checkbox]:checked + .lever {
     background-color: #9575CD;
 }
@@ -1185,12 +1199,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #673AB7;
 }
-[data-main-color=deep-purple] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=deep-purple] .settings-background .library-wrap .image-item.active,
 [data-main-color=deep-purple] .new-version-description,
-[data-main-color=deep-purple] + #modals .modal-footer.extended .optional-button,
+[data-main-color=deep-purple] .modal-footer.extended .optional-button,
 [data-main-color=deep-purple] .btn-main,
+[data-main-color=deep-purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #673AB7 !important;
+    color: #673AB7;
 }
 [data-main-color=deep-purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #673AB7 !important;
@@ -1203,13 +1218,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=deep-purple] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=deep-purple] .details-panel .main-info .contact-name-input,
-[data-main-color=deep-purple] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=deep-purple] input:focus:not([readonly]),
+[data-main-color=deep-purple] .modal .rich-textarea:focus,
+[data-main-color=deep-purple] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=deep-purple] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=deep-purple] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=deep-purple] input[type="radio"].with-gap:checked+label:before {
     border-color: #673AB7;
 }
-[data-main-color=deep-purple] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=deep-purple] input:focus:not([readonly]),
+[data-main-color=deep-purple] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #673AB7 !important;
 }
 [data-main-color=deep-purple] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1220,6 +1238,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=indigo] .fwd-message.selected,
+[data-main-color=indigo] .chat-message.selected,
+[data-main-color=indigo] .chat-item.active .status,
+[data-main-color=indigo] .roster-left-container .roster-account-info.active,
+[data-main-color=indigo] .roster-left-container .group-head.active,
+[data-main-color=indigo] .roster-left-container .roster-contact.active,
+[data-main-color=indigo] .add-user-group-chat .list-item.selected,
+[data-main-color=indigo] .add-user-group-chat .list-item.click-selected {
+    background-color: #E8EAF6;
+}
 [data-main-color=indigo] .switch label input[type=checkbox]:checked + .lever {
     background-color: #7986CB;
 }
@@ -1242,12 +1270,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #3F51B5;
 }
-[data-main-color=indigo] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=indigo] .settings-background .library-wrap .image-item.active,
 [data-main-color=indigo] .new-version-description,
-[data-main-color=indigo] + #modals .modal-footer.extended .optional-button,
+[data-main-color=indigo] .modal-footer.extended .optional-button,
 [data-main-color=indigo] .btn-main,
+[data-main-color=indigo] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=indigo] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #3F51B5 !important;
+    color: #3F51B5;
 }
 [data-main-color=indigo] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #3F51B5 !important;
@@ -1260,13 +1289,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=indigo] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=indigo] .details-panel .main-info .contact-name-input,
-[data-main-color=indigo] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=indigo] input:focus:not([readonly]),
+[data-main-color=indigo] .modal .rich-textarea:focus,
+[data-main-color=indigo] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=indigo] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=indigo] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=indigo] input[type="radio"].with-gap:checked+label:before {
     border-color: #673AB7;
 }
-[data-main-color=indigo] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=indigo] input:focus:not([readonly]),
+[data-main-color=indigo] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #673AB7 !important;
 }
 [data-main-color=indigo] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1277,6 +1309,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=blue] .fwd-message.selected,
+[data-main-color=blue] .chat-message.selected,
+[data-main-color=blue] .chat-item.active .status,
+[data-main-color=blue] .roster-left-container .roster-account-info.active,
+[data-main-color=blue] .roster-left-container .group-head.active,
+[data-main-color=blue] .roster-left-container .roster-contact.active,
+[data-main-color=blue] .add-user-group-chat .list-item.selected,
+[data-main-color=blue] .add-user-group-chat .list-item.click-selected {
+    background-color: #E3F2FD;
+}
 [data-main-color=blue] .switch label input[type=checkbox]:checked + .lever {
     background-color: #64B5F6;
 }
@@ -1299,12 +1341,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #2196F3;
 }
-[data-main-color=blue] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=blue] .settings-background .library-wrap .image-item.active,
 [data-main-color=blue] .new-version-description,
-[data-main-color=blue] + #modals .modal-footer.extended .optional-button,
+[data-main-color=blue] .modal-footer.extended .optional-button,
 [data-main-color=blue] .btn-main,
+[data-main-color=blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #2196F3 !important;
+    color: #2196F3;
 }
 [data-main-color=blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #2196F3 !important;
@@ -1317,13 +1360,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=blue] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=blue] .details-panel .main-info .contact-name-input,
-[data-main-color=blue] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=blue] input:focus:not([readonly]),
+[data-main-color=blue] .modal .rich-textarea:focus,
+[data-main-color=blue] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=blue] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=blue] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=blue] input[type="radio"].with-gap:checked+label:before {
     border-color: #2196F3;
 }
-[data-main-color=blue] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=blue] input:focus:not([readonly]),
+[data-main-color=blue] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #2196F3 !important;
 }
 [data-main-color=blue] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1334,6 +1380,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=light-blue] .fwd-message.selected,
+[data-main-color=light-blue] .chat-message.selected,
+[data-main-color=light-blue] .chat-item.active .status,
+[data-main-color=light-blue] .roster-left-container .roster-account-info.active,
+[data-main-color=light-blue] .roster-left-container .group-head.active,
+[data-main-color=light-blue] .roster-left-container .roster-contact.active,
+[data-main-color=light-blue] .add-user-group-chat .list-item.selected,
+[data-main-color=light-blue] .add-user-group-chat .list-item.click-selected {
+    background-color: #E1F5FE;
+}
 [data-main-color=light-blue] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4FC3F7;
 }
@@ -1356,12 +1412,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #03A9F4;
 }
-[data-main-color=light-blue] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=light-blue] .settings-background .library-wrap .image-item.active,
 [data-main-color=light-blue] .new-version-description,
-[data-main-color=light-blue] + #modals .modal-footer.extended .optional-button,
+[data-main-color=light-blue] .modal-footer.extended .optional-button,
 [data-main-color=light-blue] .btn-main,
+[data-main-color=light-blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-blue] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #03A9F4 !important;
+    color: #03A9F4;
 }
 [data-main-color=light-blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #03A9F4 !important;
@@ -1374,13 +1431,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=light-blue] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=light-blue] .details-panel .main-info .contact-name-input,
-[data-main-color=light-blue] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=light-blue] input:focus:not([readonly]),
+[data-main-color=light-blue] .modal .rich-textarea:focus,
+[data-main-color=light-blue] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=light-blue] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=light-blue] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=light-blue] input[type="radio"].with-gap:checked+label:before {
     border-color: #03A9F4;
 }
-[data-main-color=light-blue] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=light-blue] input:focus:not([readonly]),
+[data-main-color=light-blue] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #03A9F4 !important;
 }
 [data-main-color=light-blue] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1391,6 +1451,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=cyan] .fwd-message.selected,
+[data-main-color=cyan] .chat-message.selected,
+[data-main-color=cyan] .chat-item.active .status,
+[data-main-color=cyan] .roster-left-container .roster-account-info.active,
+[data-main-color=cyan] .roster-left-container .group-head.active,
+[data-main-color=cyan] .roster-left-container .roster-contact.active,
+[data-main-color=cyan] .add-user-group-chat .list-item.selected,
+[data-main-color=cyan] .add-user-group-chat .list-item.click-selected {
+    background-color: #E0F7FA;
+}
 [data-main-color=cyan] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4DD0E1;
 }
@@ -1413,12 +1483,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #00BCD4;
 }
-[data-main-color=cyan] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=cyan] .settings-background .library-wrap .image-item.active,
 [data-main-color=cyan] .new-version-description,
-[data-main-color=cyan] + #modals .modal-footer.extended .optional-button,
+[data-main-color=cyan] .modal-footer.extended .optional-button,
 [data-main-color=cyan] .btn-main,
+[data-main-color=cyan] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=cyan] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #00BCD4 !important;
+    color: #00BCD4;
 }
 [data-main-color=cyan] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #00BCD4 !important;
@@ -1431,13 +1502,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=cyan] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=cyan] .details-panel .main-info .contact-name-input,
-[data-main-color=cyan] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=cyan] input:focus:not([readonly]),
+[data-main-color=cyan] .modal .rich-textarea:focus,
+[data-main-color=cyan] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=cyan] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=cyan] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=cyan] input[type="radio"].with-gap:checked+label:before {
     border-color: #00BCD4;
 }
-[data-main-color=cyan] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=cyan] input:focus:not([readonly]),
+[data-main-color=cyan] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #00BCD4 !important;
 }
 [data-main-color=cyan] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1448,6 +1522,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=teal] .fwd-message.selected,
+[data-main-color=teal] .chat-message.selected,
+[data-main-color=teal] .chat-item.active .status,
+[data-main-color=teal] .roster-left-container .roster-account-info.active,
+[data-main-color=teal] .roster-left-container .group-head.active,
+[data-main-color=teal] .roster-left-container .roster-contact.active,
+[data-main-color=teal] .add-user-group-chat .list-item.selected,
+[data-main-color=teal] .add-user-group-chat .list-item.click-selected {
+    background-color: #E0F2F1;
+}
 [data-main-color=teal] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4DB6AC;
 }
@@ -1470,12 +1554,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #009688;
 }
-[data-main-color=teal] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=teal] .settings-background .library-wrap .image-item.active,
 [data-main-color=teal] .new-version-description,
-[data-main-color=teal] + #modals .modal-footer.extended .optional-button,
+[data-main-color=teal] .modal-footer.extended .optional-button,
 [data-main-color=teal] .btn-main,
+[data-main-color=teal] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=teal] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #009688 !important;
+    color: #009688;
 }
 [data-main-color=teal] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #009688 !important;
@@ -1488,13 +1573,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=teal] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=teal] .details-panel .main-info .contact-name-input,
-[data-main-color=teal] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=teal] input:focus:not([readonly]),
+[data-main-color=teal] .modal .rich-textarea:focus,
+[data-main-color=teal] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=teal] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=teal] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=teal] input[type="radio"].with-gap:checked+label:before {
     border-color: #009688;
 }
-[data-main-color=teal] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=teal] input:focus:not([readonly]),
+[data-main-color=teal] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #009688 !important;
 }
 [data-main-color=teal] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1505,6 +1593,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=green] .fwd-message.selected,
+[data-main-color=green] .chat-message.selected,
+[data-main-color=green] .chat-item.active .status,
+[data-main-color=green] .roster-left-container .roster-account-info.active,
+[data-main-color=green] .roster-left-container .group-head.active,
+[data-main-color=green] .roster-left-container .roster-contact.active,
+[data-main-color=green] .add-user-group-chat .list-item.selected,
+[data-main-color=green] .add-user-group-chat .list-item.click-selected {
+    background-color: #E8F5E9;
+}
 [data-main-color=green] .switch label input[type=checkbox]:checked + .lever {
     background-color: #81C784;
 }
@@ -1527,12 +1625,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #4CAF50;
 }
-[data-main-color=green] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=green] .settings-background .library-wrap .image-item.active,
 [data-main-color=green] .new-version-description,
-[data-main-color=green] + #modals .modal-footer.extended .optional-button,
+[data-main-color=green] .modal-footer.extended .optional-button,
 [data-main-color=green] .btn-main,
+[data-main-color=green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=green] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #4CAF50 !important;
+    color: #4CAF50;
 }
 [data-main-color=green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #4CAF50 !important;
@@ -1545,13 +1644,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=green] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=green] .details-panel .main-info .contact-name-input,
-[data-main-color=green] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=green] input:focus:not([readonly]),
+[data-main-color=green] .modal .rich-textarea:focus,
+[data-main-color=green] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=green] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=green] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=green] input[type="radio"].with-gap:checked+label:before {
     border-color: #4CAF50;
 }
-[data-main-color=green] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=green] input:focus:not([readonly]),
+[data-main-color=green] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #4CAF50 !important;
 }
 [data-main-color=green] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1562,6 +1664,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=light-green] .fwd-message.selected,
+[data-main-color=light-green] .chat-message.selected,
+[data-main-color=light-green] .chat-item.active .status,
+[data-main-color=light-green] .roster-left-container .roster-account-info.active,
+[data-main-color=light-green] .roster-left-container .group-head.active,
+[data-main-color=light-green] .roster-left-container .roster-contact.active,
+[data-main-color=light-green] .add-user-group-chat .list-item.selected,
+[data-main-color=light-green] .add-user-group-chat .list-item.click-selected {
+    background-color: #F1F8E9;
+}
 [data-main-color=light-green] .switch label input[type=checkbox]:checked + .lever {
     background-color: #AED581;
 }
@@ -1584,25 +1696,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #8BC34A;
 }
-[data-main-color=light-green] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=light-green] .settings-background .library-wrap .image-item.active,
 [data-main-color=light-green] .new-version-description,
-[data-main-color=light-green] + #modals .modal-footer.extended .optional-button,
+[data-main-color=light-green] .modal-footer.extended .optional-button,
 [data-main-color=light-green] .btn-main,
+[data-main-color=light-green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-green] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #8BC34A !important;
+    color: #8BC34A;
 }
 [data-main-color=light-green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #8BC34A !important;
 }
+[data-main-color=light-green] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=light-green] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=light-green] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #8BC34A;
+    border-color: #8BC34A;
+}
 [data-main-color=light-green] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=light-green] .details-panel .main-info .contact-name-input,
-[data-main-color=light-green] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=light-green] input:focus:not([readonly]),
+[data-main-color=light-green] .modal .rich-textarea:focus,
+[data-main-color=light-green] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=light-green] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=light-green] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=light-green] input[type="radio"].with-gap:checked+label:before {
     border-color: #8BC34A;
 }
-[data-main-color=light-green] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=light-green] input:focus:not([readonly]),
+[data-main-color=light-green] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #8BC34A !important;
 }
 [data-main-color=light-green] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1613,6 +1735,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=lime] .fwd-message.selected,
+[data-main-color=lime] .chat-message.selected,
+[data-main-color=lime] .chat-item.active .status,
+[data-main-color=lime] .roster-left-container .roster-account-info.active,
+[data-main-color=lime] .roster-left-container .group-head.active,
+[data-main-color=lime] .roster-left-container .roster-contact.active,
+[data-main-color=lime] .add-user-group-chat .list-item.selected,
+[data-main-color=lime] .add-user-group-chat .list-item.click-selected {
+    background-color: #F9FBE7;
+}
 [data-main-color=lime] .switch label input[type=checkbox]:checked + .lever {
     background-color: #DCE775;
 }
@@ -1635,25 +1767,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #CDDC39;
 }
-[data-main-color=lime] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=lime] .settings-background .library-wrap .image-item.active,
 [data-main-color=lime] .new-version-description,
-[data-main-color=lime] + #modals .modal-footer.extended .optional-button,
+[data-main-color=lime] .modal-footer.extended .optional-button,
 [data-main-color=lime] .btn-main,
+[data-main-color=lime] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=lime] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #CDDC39 !important;
+    color: #CDDC39;
 }
 [data-main-color=lime] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #CDDC39 !important;
 }
+[data-main-color=lime] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=lime] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=lime] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #CDDC39;
+    border-color: #CDDC39;
+}
 [data-main-color=lime] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=lime] .details-panel .main-info .contact-name-input,
-[data-main-color=lime] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=lime] input:focus:not([readonly]),
+[data-main-color=lime] .modal .rich-textarea:focus,
+[data-main-color=lime] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=lime] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=lime] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=lime] input[type="radio"].with-gap:checked+label:before {
     border-color: #CDDC39;
 }
-[data-main-color=lime] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=lime] input:focus:not([readonly]),
+[data-main-color=lime] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #CDDC39 !important;
 }
 [data-main-color=lime] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1664,6 +1806,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=amber] .fwd-message.selected,
+[data-main-color=amber] .chat-message.selected,
+[data-main-color=amber] .chat-item.active .status,
+[data-main-color=amber] .roster-left-container .roster-account-info.active,
+[data-main-color=amber] .roster-left-container .group-head.active,
+[data-main-color=amber] .roster-left-container .roster-contact.active,
+[data-main-color=amber] .add-user-group-chat .list-item.selected,
+[data-main-color=amber] .add-user-group-chat .list-item.click-selected {
+    background-color: #FFF8E1;
+}
 [data-main-color=amber] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FFD54F;
 }
@@ -1686,25 +1838,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #FFC107;
 }
-[data-main-color=amber] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=amber] .settings-background .library-wrap .image-item.active,
 [data-main-color=amber] .new-version-description,
-[data-main-color=amber] + #modals .modal-footer.extended .optional-button,
+[data-main-color=amber] .modal-footer.extended .optional-button,
 [data-main-color=amber] .btn-main,
+[data-main-color=amber] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=amber] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #FFC107 !important;
+    color: #FFC107;
 }
 [data-main-color=amber] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FFC107 !important;
 }
+[data-main-color=amber] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=amber] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=amber] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #FFC107;
+    border-color: #FFC107;
+}
 [data-main-color=amber] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=amber] .details-panel .main-info .contact-name-input,
-[data-main-color=amber] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=amber] input:focus:not([readonly]),
+[data-main-color=amber] .modal .rich-textarea:focus,
+[data-main-color=amber] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=amber] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=amber] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=amber] input[type="radio"].with-gap:checked+label:before {
     border-color: #FFC107;
 }
-[data-main-color=amber] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=amber] input:focus:not([readonly]),
+[data-main-color=amber] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #FFC107 !important;
 }
 [data-main-color=amber] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1715,6 +1877,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=orange] .fwd-message.selected,
+[data-main-color=orange] .chat-message.selected,
+[data-main-color=orange] .chat-item.active .status,
+[data-main-color=orange] .roster-left-container .roster-account-info.active,
+[data-main-color=orange] .roster-left-container .group-head.active,
+[data-main-color=orange] .roster-left-container .roster-contact.active,
+[data-main-color=orange] .add-user-group-chat .list-item.selected,
+[data-main-color=orange] .add-user-group-chat .list-item.click-selected {
+    background-color: #FFF3E0;
+}
 [data-main-color=orange] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FFB74D;
 }
@@ -1737,25 +1909,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #FF9800;
 }
-[data-main-color=orange] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=orange] .settings-background .library-wrap .image-item.active,
 [data-main-color=orange] .new-version-description,
-[data-main-color=orange] + #modals .modal-footer.extended .optional-button,
+[data-main-color=orange] .modal-footer.extended .optional-button,
 [data-main-color=orange] .btn-main,
+[data-main-color=orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=orange] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #FF9800 !important;
+    color: #FF9800;
 }
 [data-main-color=orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF9800 !important;
 }
+[data-main-color=orange] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=orange] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=orange] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #FF9800;
+    border-color: #FF9800;
+}
 [data-main-color=orange] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=orange] .details-panel .main-info .contact-name-input,
-[data-main-color=orange] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=orange] input:focus:not([readonly]),
+[data-main-color=orange] .modal .rich-textarea:focus,
+[data-main-color=orange] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=orange] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=orange] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=orange] input[type="radio"].with-gap:checked+label:before {
     border-color: #FF9800;
 }
-[data-main-color=orange] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=orange] input:focus:not([readonly]),
+[data-main-color=orange] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #FF9800 !important;
 }
 [data-main-color=orange] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1766,6 +1948,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=deep-orange] .fwd-message.selected,
+[data-main-color=deep-orange] .chat-message.selected,
+[data-main-color=deep-orange] .chat-item.active .status,
+[data-main-color=deep-orange] .roster-left-container .roster-account-info.active,
+[data-main-color=deep-orange] .roster-left-container .group-head.active,
+[data-main-color=deep-orange] .roster-left-container .roster-contact.active,
+[data-main-color=deep-orange] .add-user-group-chat .list-item.selected,
+[data-main-color=deep-orange] .add-user-group-chat .list-item.click-selected {
+    background-color: #FBE9E7;
+}
 [data-main-color=deep-orange] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FF8A65;
 }
@@ -1788,25 +1980,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #FF5722;
 }
-[data-main-color=deep-orange] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=deep-orange] .settings-background .library-wrap .image-item.active,
 [data-main-color=deep-orange] .new-version-description,
-[data-main-color=deep-orange] + #modals .modal-footer.extended .optional-button,
+[data-main-color=deep-orange] .modal-footer.extended .optional-button,
 [data-main-color=deep-orange] .btn-main,
+[data-main-color=deep-orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #FF5722 !important;
+    color: #FF5722;
 }
 [data-main-color=deep-orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF5722 !important;
 }
+[data-main-color=deep-orange] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=deep-orange] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=deep-orange] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #FF5722;
+    border-color: #FF5722;
+}
 [data-main-color=deep-orange] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=deep-orange] .details-panel .main-info .contact-name-input,
-[data-main-color=deep-orange] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=deep-orange] input:focus:not([readonly]),
+[data-main-color=deep-orange] .modal .rich-textarea:focus,
+[data-main-color=deep-orange] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=deep-orange] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=deep-orange] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=deep-orange] input[type="radio"].with-gap:checked+label:before {
     border-color: #FF5722;
 }
-[data-main-color=deep-orange] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=deep-orange] input:focus:not([readonly]),
+[data-main-color=deep-orange] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #FF5722 !important;
 }
 [data-main-color=deep-orange] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1817,6 +2019,16 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=brown] .fwd-message.selected,
+[data-main-color=brown] .chat-message.selected,
+[data-main-color=brown] .chat-item.active .status,
+[data-main-color=brown] .roster-left-container .roster-account-info.active,
+[data-main-color=brown] .roster-left-container .group-head.active,
+[data-main-color=brown] .roster-left-container .roster-contact.active,
+[data-main-color=brown] .add-user-group-chat .list-item.selected,
+[data-main-color=brown] .add-user-group-chat .list-item.click-selected {
+    background-color: #EFEBE9;
+}
 [data-main-color=brown] .switch label input[type=checkbox]:checked + .lever {
     background-color: #A1887F;
 }
@@ -1839,25 +2051,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #795548;
 }
-[data-main-color=brown] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=brown] .settings-background .library-wrap .image-item.active,
 [data-main-color=brown] .new-version-description,
-[data-main-color=brown] + #modals .modal-footer.extended .optional-button,
+[data-main-color=brown] .modal-footer.extended .optional-button,
 [data-main-color=brown] .btn-main,
+[data-main-color=brown] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=brown] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #795548 !important;
+    color: #795548;
 }
 [data-main-color=brown] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #795548 !important;
 }
+[data-main-color=brown] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=brown] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=brown] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #795548;
+    border-color: #795548;
+}
 [data-main-color=brown] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=brown] .details-panel .main-info .contact-name-input,
-[data-main-color=brown] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=brown] input:focus:not([readonly]),
+[data-main-color=brown] .modal .rich-textarea:focus,
+[data-main-color=brown] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=brown] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=brown] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=brown] input[type="radio"].with-gap:checked+label:before {
     border-color: #795548;
 }
-[data-main-color=brown] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=brown] input:focus:not([readonly]),
+[data-main-color=brown] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #795548 !important;
 }
 [data-main-color=brown] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1868,6 +2090,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 
+[data-main-color=blue-grey] .fwd-message.selected,
+[data-main-color=blue-grey] .chat-message.selected,
+[data-main-color=blue-grey] .chat-item.active .status,
+[data-main-color=blue-grey]  .group-chat-participant.active,
+[data-main-color=blue-grey] .roster-left-container .roster-account-info.active,
+[data-main-color=blue-grey] .roster-left-container .group-head.active,
+[data-main-color=blue-grey] .roster-left-container .roster-contact.active,
+[data-main-color=blue-grey] .add-user-group-chat .list-item.selected,
+[data-main-color=blue-grey] .add-user-group-chat .list-item.click-selected {
+    background-color: #ECEFF1;
+}
 [data-main-color=blue-grey] .switch label input[type=checkbox]:checked + .lever {
     background-color: #90A4AE;
 }
@@ -1890,25 +2123,35 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .settings-block-wrap.background input[type=range]::-ms-thumb {
     background-color: #607D8B;
 }
-[data-main-color=blue-grey] + #modals .settings-background .library-wrap .image-item.active,
+[data-main-color=blue-grey] .settings-background .library-wrap .image-item.active,
 [data-main-color=blue-grey] .new-version-description,
-[data-main-color=blue-grey] + #modals .modal-footer.extended .optional-button,
+[data-main-color=blue-grey] .modal-footer.extended .optional-button,
 [data-main-color=blue-grey] .btn-main,
+[data-main-color=blue-grey] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active .toolbar-icon {
-    color: #607D8B !important;
+    color: #607D8B;
 }
 [data-main-color=blue-grey] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #607D8B !important;
 }
+[data-main-color=blue-grey] input[type="radio"].with-gap:checked+label:after,
+[data-main-color=blue-grey] input[type=checkbox].filled-in:checked + label:after,
+[data-main-color=blue-grey] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
+    background-color: #607D8B;
+    border-color: #607D8B;
+}
 [data-main-color=blue-grey] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=blue-grey] .details-panel .main-info .contact-name-input,
-[data-main-color=blue-grey] + #modals .add-group-chat-modal .description-field .rich-textarea:focus,
+[data-main-color=blue-grey] input:focus:not([readonly]),
+[data-main-color=blue-grey] .modal .rich-textarea:focus,
+[data-main-color=blue-grey] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=blue-grey] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=blue-grey] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=blue-grey] input[type="radio"].with-gap:checked+label:before {
     border-color: #607D8B;
 }
-[data-main-color=blue-grey] + #modals .add-group-chat-modal .description-field .rich-textarea:focus {
+[data-main-color=blue-grey] input:focus:not([readonly]),
+[data-main-color=blue-grey] .modal .rich-textarea:focus {
     box-shadow: 0 1px 0 0 #607D8B !important;
 }
 [data-main-color=blue-grey] .toolbar .toolbar-item:hover .toolbar-icon {
@@ -1918,6 +2161,14 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     fill: #455A64 !important;
 }
 /* -------------------------------------------- */
+
+input[type=text].simple-input-field,
+input[type=text].simple-input-field:focus,
+input[type=text].simple-input-field:hover {
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .toolbar .border {
     position: absolute;
     width: 2px;
@@ -3639,12 +3890,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 4;
 }
 
-.roster-left-container .roster-account-info.active,
-.roster-left-container .group-head.active,
-.roster-left-container .roster-contact.active {
-    background-color: #FFEBEE;
-}
-
 .roster-left-container .roster-contact .blocked-indicator {
     position: absolute;
     top: 21px;
@@ -3953,7 +4198,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     padding: 0 !important;
 }
 
-.group-chat-properties-wrap .input-field>input {
+.group-chat-properties-wrap .input-field>input:not(:focus) {
     margin: 0;
     border-bottom: none;
 }
@@ -4009,10 +4254,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .group-chat-participant .participant-info {
     position: absolute;
     width: 70%;
-}
-
-.group-chat-participant.active {
-    background-color: #FFEBEE;
 }
 
 .group-chat-participant .member-item .role-star {
@@ -5049,10 +5290,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     border-color: #F8F8F8;
 }
 
-.chat-item.active .status {
-    border-color: #FFEBEE;
-}
-
 .chat-item .status .mdi-account-multiple {
     color: #FFF;
 }
@@ -5796,7 +6033,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .fwd-message.selected,
 .chat-message.selected {
-    background-color: #FFEBEE;
     background-image: unset !important;
     -webkit-transition: background-color 0s;
     -moz-transition: background-color 0s;
@@ -6923,7 +7159,7 @@ img.fwd-img-preview {
 }
 
 .add-group-chat-modal .description-field .rich-textarea:focus {
-    border-bottom: 1px solid !important;
+    border-bottom: 1px solid;
 }
 
 .message-form .input-message .scrollbar-cover {
@@ -9271,7 +9507,7 @@ input[type='range'].voice-message-volume:focus {
 .edit-rights .participant-details-item .buttons-wrap .btn-kick-participant,
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
 .groupchat-details-panel .main-info .buttons-wrap .btn-leave {
-    background-color: #e0e0e0;
+    background-color: #e0e0e0 !important;
     fill: #9e9e9e;
     color: #9e9e9e;
     padding: 0;
@@ -9413,11 +9649,11 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .main-info .contact-name-input {
     height: unset;
-}
-
-.details-panel .main-info .contact-name-input {
     text-align: center;
-    border-bottom: 1px dotted !important;
+    border: unset;
+    box-shadow: none !important;
+    border-bottom: 1px dotted;
+    padding: 3px 16px 2px;
 }
 
 .details-panel .main-info .contact-name:hover {
@@ -9487,7 +9723,7 @@ input[type='range'].voice-message-volume:focus {
     min-height: 33px;
     max-height: 64px;
     background-color: #f5f5f5;
-    border-bottom: none;
+    border-bottom: 1px solid transparent;
 }
 
 .edit-badge .modal-content .textarea-header {
@@ -10176,13 +10412,6 @@ input[type='range'].voice-message-volume:focus {
 
 .forward-panel-modal .chat-item .msg-counter {
     right: 30px;
-}
-
-.add-user-group-chat .list-item.selected,
-.add-user-group-chat .list-item.selected:hover,
-.add-user-group-chat .list-item.click-selected,
-.add-user-group-chat .list-item.click-selected:hover {
-    background-color: #ffebee;
 }
 
 .add-user-group-chat .list-item:hover,

@@ -87,11 +87,11 @@
 }
 
 [data-color=red] .rich-textarea:focus:not([readonly]) {
-  border-bottom: 1px solid #D32F2F !important;
-  box-shadow: 0 1px 0 0 #D32F2F !important;
+  border-bottom: 1px solid #D32F2F;
+  box-shadow: 0 1px 0 0 #D32F2F;
 }
 [data-color=red] .rich-textarea:focus:not([readonly]) + label {
-  color: #D32F2F !important;
+  color: #D32F2F;
 }
 
 /* ----------------- PINK ------------------- */

@@ -126,7 +126,7 @@ var constants = {
     GENERAL_GROUP_ID: 1,
     NON_ROSTER_GROUP_ID: 2,
 
-    ACCOUNT_COLORS: [
+    MATERIAL_COLORS: [
         "red", "green", "blue", "deep-purple", "orange", "lime",
         "pink", "purple", "indigo", "light-blue", "cyan", "teal",
         "light-green", "amber", "deep-orange", "brown", "blue-grey"
@@ -415,7 +415,8 @@ var constants = {
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
     API_SERVICE_URL: 'https://api.xabber.com/api/v2',
     USE_SOCIAL_AUTH: true,
-    REGISTER_XMPP_ACCOUNT: 'https://www.xabber.com/account/auth/signup/',
+    REGISTER_XMPP_ACCOUNT: true,
+    REGISTER_XMPP_ACCOUNT_URL: 'https://www.xabber.com/account/auth/signup/',
     CHECK_VERSION: true,
     DEFAULT_LOGIN_SCREEN: 'xmpp',
 
@@ -433,7 +434,7 @@ var constants = {
     SHORT_CLIENT_NAME: 'Xabber',
     CLIENT_LOGO: 'images/xabber-logo-96.png',
     TOOLBAR_LOGO: 'images/xabber-logo.png',
-    CONNECT_XABBER_ACCOUNT: true,
+    ENABLE_XABBER_ACCOUNT: true,
     SCREEN_ABOUT: true,
     CLIENT_URL: 'https://www.xabber.com',
     DEVELOPER_URL: 'https://redsolution.com',
