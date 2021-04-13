@@ -871,7 +871,7 @@ define("xabber-accounts", function () {
                     this.settings_left && this.settings_left.$el.attr('data-color', color);
                     if (this.settings_right) {
                         this.settings_right.$el.attr('data-color', color);
-                        this.settings_right.$('.account-color .current-color-name').text(xabber.getString(`account_color_name_${color}`));
+                        this.settings_right.$('.account-color .current-color-name').text(xabber.getString(`account_color_name_${color.replace(/-/g, "_")}`).replace(/-/g, " "));
                     }
                     this.vcard_edit.$el.attr('data-color', color);
                 },
