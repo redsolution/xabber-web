@@ -14,7 +14,7 @@
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{constants.REGISTER_XMPP_ACCOUNT_URL}}" target="_blank" class="btn-flat btn-main btn-forgot-password">{[constants.REGISTER_XMPP_ACCOUNT_TEXT || print(xabber.getString("xmpp_login__button_register_account"))]}</a>{[}]}
+            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{constants.REGISTER_XMPP_ACCOUNT_URL}}" target="_blank" class="btn-flat btn-main btn-forgot-password one-line">{[constants.REGISTER_XMPP_ACCOUNT_TEXT || print(xabber.getString("xmpp_login__button_register_account"))]}</a>{[}]}
             <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>
         </div>
         <div class="clearfix"></div>
@@ -22,7 +22,7 @@
         <div class="social-auth-wrap">
             <div class="social-header">
                 <div class="divider"></div>
-                <div class="social-header-tip">{[print(xabber.getString("tutorial_title_8"))]}</div>
+                <div class="social-header-tip one-line">{[print(xabber.getString("tutorial_title_8"))]}</div>
             </div>
             <div class="social-buttons">
                 <div class="btn-social google-color" data-provider="google">

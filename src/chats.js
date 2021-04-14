@@ -8725,7 +8725,7 @@ define("xabber-chats", function () {
     xabber.Account.addInitPlugin(function () {
         this.chat_settings = new xabber.ChatSettings({id: 'chat-settings'}, {
             account: this,
-            storage_name: xabber.getStorageName() + '-chat-settings-' + this.get('jid'),
+            storage_name: xabber.getStorageName() + this.get('jid'),
             fetch: 'after'
         });
         this.messages = new xabber.Messages(null, {account: this});

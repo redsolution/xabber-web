@@ -2547,6 +2547,7 @@ input[type=text].simple-input-field:hover {
 
 .social-auth-wrap .social-header {
     position: relative;
+    text-align: center;
     height: 36px;
     z-index: 0;
 }
@@ -2559,9 +2560,13 @@ input[type=text].simple-input-field:hover {
 }
 
 .social-auth-wrap .social-header .social-header-tip {
-    width: 82px;
-    height: 19px;
+    width: auto;
+    padding: 0 6px;
+    max-width: 100%;
     margin: auto;
+    height: 19px;
+    display: inline-block;
+    vertical-align: text-bottom;
     font-size: 13px;
     line-height: 19px;
     text-align: center;

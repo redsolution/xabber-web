@@ -22,7 +22,7 @@ define("xabber-accounts", function () {
                     auth_type: "password",
                     status: "online",
                     status_message: "",
-                    priority: 0,
+                    priority: 67,
                     auto_login_xa: true,
                     groupchat_servers_list: []
                 },

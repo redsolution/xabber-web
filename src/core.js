@@ -31,7 +31,10 @@
             this._settings = new this.Settings({id: 'settings'},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.settings = this._settings.attributes;
-            this._cache = new Backbone.ModelWithStorage({id: 'cache'},
+            let url = window.location.host + window.location.pathname.replace(/\//g, "-");
+            if (url[url.length - 1] == "-")
+                url.slice(0, url.length - 1);
+            this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
             this.cacheFavicons();
@@ -209,9 +212,9 @@
                     indexedDB.deleteDatabase(acc.cached_roster.database.name);
                 });
             }
-            let full_storage_name = constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION;
+            let full_storage_name = xabber.getStorageName();
             for (let key in window.localStorage) {
-                if (key.startsWith(full_storage_name)) {
+                if (key.startsWith(full_storage_name) || key.startsWith(constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION + '-' + this.cache.id)) {
                     window.localStorage.removeItem(key);
                 }
             }
