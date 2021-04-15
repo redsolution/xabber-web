@@ -5698,7 +5698,6 @@ define("xabber-chats", function () {
         bindAccount: function (account) {
             this.account = account;
             this.$('.input-group-chat-domain').addClass('hidden');
-            this.$el.attr('data-color', this.account.settings.get('color'));
             this.$('.account-field .dropdown-button .account-item-wrap')
                     .replaceWith(this.renderAccountItem(account));
             let all_servers = this.account.get('groupchat_servers_list');

@@ -1008,7 +1008,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=red] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=red] .details-panel .main-info .contact-name-input,
-[data-main-color=red] input:focus:not([readonly]),
+[data-main-color=red] input:focus:not([readonly]):not([type=range]),
 [data-main-color=red] .modal .rich-textarea:focus,
 [data-main-color=red] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=red] .message-form .rich-textarea-wrap.file-drop,
@@ -1016,9 +1016,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] input[type="radio"].with-gap:checked+label:before {
     border-color: #F44336;
 }
-[data-main-color=red] input:focus:not([readonly]),
+[data-main-color=red] input:focus:not([readonly]):not([type=range]),
 [data-main-color=red] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #F44336 !important;
+    box-shadow: 0 1px 0 0 #F44336;
 }
 [data-main-color=red] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #D32F2F !important;
@@ -1082,7 +1082,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=pink] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=pink] .details-panel .main-info .contact-name-input,
-[data-main-color=pink] input:focus:not([readonly]),
+[data-main-color=pink] input:focus:not([readonly]):not([type=range]),
 [data-main-color=pink] .modal .rich-textarea:focus,
 [data-main-color=pink] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=pink] .message-form .rich-textarea-wrap.file-drop,
@@ -1090,9 +1090,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] input[type="radio"].with-gap:checked+label:before {
     border-color: #E91E63;
 }
-[data-main-color=pink] input:focus:not([readonly]),
+[data-main-color=pink] input:focus:not([readonly]):not([type=range]),
 [data-main-color=pink] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #E91E63 !important;
+    box-shadow: 0 1px 0 0 #E91E63;
 }
 [data-main-color=pink] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #C2185B !important;
@@ -1156,7 +1156,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=purple] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=purple] .details-panel .main-info .contact-name-input,
-[data-main-color=purple] input:focus:not([readonly]),
+[data-main-color=purple] input:focus:not([readonly]):not([type=range]),
 [data-main-color=purple] .modal .rich-textarea:focus,
 [data-main-color=purple] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=purple] .message-form .rich-textarea-wrap.file-drop,
@@ -1164,9 +1164,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] input[type="radio"].with-gap:checked+label:before {
     border-color: #9C27B0;
 }
-[data-main-color=purple] input:focus:not([readonly]),
+[data-main-color=purple] input:focus:not([readonly]):not([type=range]),
 [data-main-color=purple] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #9C27B0 !important;
+    box-shadow: 0 1px 0 0 #9C27B0;
 }
 [data-main-color=purple] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #7B1FA2 !important;
@@ -1228,7 +1228,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=deep-purple] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=deep-purple] .details-panel .main-info .contact-name-input,
-[data-main-color=deep-purple] input:focus:not([readonly]),
+[data-main-color=deep-purple] input:focus:not([readonly]):not([type=range]),
 [data-main-color=deep-purple] .modal .rich-textarea:focus,
 [data-main-color=deep-purple] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=deep-purple] .message-form .rich-textarea-wrap.file-drop,
@@ -1236,9 +1236,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] input[type="radio"].with-gap:checked+label:before {
     border-color: #673AB7;
 }
-[data-main-color=deep-purple] input:focus:not([readonly]),
+[data-main-color=deep-purple] input:focus:not([readonly]):not([type=range]),
 [data-main-color=deep-purple] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #673AB7 !important;
+    box-shadow: 0 1px 0 0 #673AB7;
 }
 [data-main-color=deep-purple] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #512DA8 !important;
@@ -1301,7 +1301,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=indigo] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=indigo] .details-panel .main-info .contact-name-input,
-[data-main-color=indigo] input:focus:not([readonly]),
+[data-main-color=indigo] input:focus:not([readonly]):not([type=range]),
 [data-main-color=indigo] .modal .rich-textarea:focus,
 [data-main-color=indigo] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=indigo] .message-form .rich-textarea-wrap.file-drop,
@@ -1309,9 +1309,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] input[type="radio"].with-gap:checked+label:before {
     border-color: #673AB7;
 }
-[data-main-color=indigo] input:focus:not([readonly]),
+[data-main-color=indigo] input:focus:not([readonly]):not([type=range]),
 [data-main-color=indigo] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #673AB7 !important;
+    box-shadow: 0 1px 0 0 #673AB7;
 }
 [data-main-color=indigo] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #303F9F !important;
@@ -1374,7 +1374,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=blue] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=blue] .details-panel .main-info .contact-name-input,
-[data-main-color=blue] input:focus:not([readonly]),
+[data-main-color=blue] input:focus:not([readonly]):not([type=range]),
 [data-main-color=blue] .modal .rich-textarea:focus,
 [data-main-color=blue] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=blue] .message-form .rich-textarea-wrap.file-drop,
@@ -1382,9 +1382,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] input[type="radio"].with-gap:checked+label:before {
     border-color: #2196F3;
 }
-[data-main-color=blue] input:focus:not([readonly]),
+[data-main-color=blue] input:focus:not([readonly]):not([type=range]),
 [data-main-color=blue] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #2196F3 !important;
+    box-shadow: 0 1px 0 0 #2196F3;
 }
 [data-main-color=blue] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #1976D2 !important;
@@ -1447,7 +1447,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=light-blue] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=light-blue] .details-panel .main-info .contact-name-input,
-[data-main-color=light-blue] input:focus:not([readonly]),
+[data-main-color=light-blue] input:focus:not([readonly]):not([type=range]),
 [data-main-color=light-blue] .modal .rich-textarea:focus,
 [data-main-color=light-blue] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=light-blue] .message-form .rich-textarea-wrap.file-drop,
@@ -1455,9 +1455,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] input[type="radio"].with-gap:checked+label:before {
     border-color: #03A9F4;
 }
-[data-main-color=light-blue] input:focus:not([readonly]),
+[data-main-color=light-blue] input:focus:not([readonly]):not([type=range]),
 [data-main-color=light-blue] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #03A9F4 !important;
+    box-shadow: 0 1px 0 0 #03A9F4;
 }
 [data-main-color=light-blue] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #0288D1 !important;
@@ -1520,7 +1520,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=cyan] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=cyan] .details-panel .main-info .contact-name-input,
-[data-main-color=cyan] input:focus:not([readonly]),
+[data-main-color=cyan] input:focus:not([readonly]):not([type=range]),
 [data-main-color=cyan] .modal .rich-textarea:focus,
 [data-main-color=cyan] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=cyan] .message-form .rich-textarea-wrap.file-drop,
@@ -1528,9 +1528,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] input[type="radio"].with-gap:checked+label:before {
     border-color: #00BCD4;
 }
-[data-main-color=cyan] input:focus:not([readonly]),
+[data-main-color=cyan] input:focus:not([readonly]):not([type=range]),
 [data-main-color=cyan] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #00BCD4 !important;
+    box-shadow: 0 1px 0 0 #00BCD4;
 }
 [data-main-color=cyan] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #0097A7 !important;
@@ -1593,7 +1593,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=teal] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=teal] .details-panel .main-info .contact-name-input,
-[data-main-color=teal] input:focus:not([readonly]),
+[data-main-color=teal] input:focus:not([readonly]):not([type=range]),
 [data-main-color=teal] .modal .rich-textarea:focus,
 [data-main-color=teal] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=teal] .message-form .rich-textarea-wrap.file-drop,
@@ -1601,9 +1601,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] input[type="radio"].with-gap:checked+label:before {
     border-color: #009688;
 }
-[data-main-color=teal] input:focus:not([readonly]),
+[data-main-color=teal] input:focus:not([readonly]):not([type=range]),
 [data-main-color=teal] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #009688 !important;
+    box-shadow: 0 1px 0 0 #009688;
 }
 [data-main-color=teal] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #00796B !important;
@@ -1666,7 +1666,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=green] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=green] .details-panel .main-info .contact-name-input,
-[data-main-color=green] input:focus:not([readonly]),
+[data-main-color=green] input:focus:not([readonly]):not([type=range]),
 [data-main-color=green] .modal .rich-textarea:focus,
 [data-main-color=green] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=green] .message-form .rich-textarea-wrap.file-drop,
@@ -1674,9 +1674,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] input[type="radio"].with-gap:checked+label:before {
     border-color: #4CAF50;
 }
-[data-main-color=green] input:focus:not([readonly]),
+[data-main-color=green] input:focus:not([readonly]):not([type=range]),
 [data-main-color=green] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #4CAF50 !important;
+    box-shadow: 0 1px 0 0 #4CAF50;
 }
 [data-main-color=green] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #388E3C !important;
@@ -1739,7 +1739,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=light-green] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=light-green] .details-panel .main-info .contact-name-input,
-[data-main-color=light-green] input:focus:not([readonly]),
+[data-main-color=light-green] input:focus:not([readonly]):not([type=range]),
 [data-main-color=light-green] .modal .rich-textarea:focus,
 [data-main-color=light-green] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=light-green] .message-form .rich-textarea-wrap.file-drop,
@@ -1747,9 +1747,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] input[type="radio"].with-gap:checked+label:before {
     border-color: #8BC34A;
 }
-[data-main-color=light-green] input:focus:not([readonly]),
+[data-main-color=light-green] input:focus:not([readonly]):not([type=range]),
 [data-main-color=light-green] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #8BC34A !important;
+    box-shadow: 0 1px 0 0 #8BC34A;
 }
 [data-main-color=light-green] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #689F38 !important;
@@ -1812,7 +1812,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=lime] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=lime] .details-panel .main-info .contact-name-input,
-[data-main-color=lime] input:focus:not([readonly]),
+[data-main-color=lime] input:focus:not([readonly]):not([type=range]),
 [data-main-color=lime] .modal .rich-textarea:focus,
 [data-main-color=lime] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=lime] .message-form .rich-textarea-wrap.file-drop,
@@ -1820,9 +1820,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] input[type="radio"].with-gap:checked+label:before {
     border-color: #CDDC39;
 }
-[data-main-color=lime] input:focus:not([readonly]),
+[data-main-color=lime] input:focus:not([readonly]):not([type=range]),
 [data-main-color=lime] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #CDDC39 !important;
+    box-shadow: 0 1px 0 0 #CDDC39;
 }
 [data-main-color=lime] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #AFB42B !important;
@@ -1885,7 +1885,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=amber] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=amber] .details-panel .main-info .contact-name-input,
-[data-main-color=amber] input:focus:not([readonly]),
+[data-main-color=amber] input:focus:not([readonly]):not([type=range]),
 [data-main-color=amber] .modal .rich-textarea:focus,
 [data-main-color=amber] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=amber] .message-form .rich-textarea-wrap.file-drop,
@@ -1893,9 +1893,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] input[type="radio"].with-gap:checked+label:before {
     border-color: #FFC107;
 }
-[data-main-color=amber] input:focus:not([readonly]),
+[data-main-color=amber] input:focus:not([readonly]):not([type=range]),
 [data-main-color=amber] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #FFC107 !important;
+    box-shadow: 0 1px 0 0 #FFC107;
 }
 [data-main-color=amber] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #FFA000 !important;
@@ -1958,7 +1958,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=orange] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=orange] .details-panel .main-info .contact-name-input,
-[data-main-color=orange] input:focus:not([readonly]),
+[data-main-color=orange] input:focus:not([readonly]):not([type=range]),
 [data-main-color=orange] .modal .rich-textarea:focus,
 [data-main-color=orange] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=orange] .message-form .rich-textarea-wrap.file-drop,
@@ -1966,9 +1966,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] input[type="radio"].with-gap:checked+label:before {
     border-color: #FF9800;
 }
-[data-main-color=orange] input:focus:not([readonly]),
+[data-main-color=orange] input:focus:not([readonly]):not([type=range]),
 [data-main-color=orange] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #FF9800 !important;
+    box-shadow: 0 1px 0 0 #FF9800;
 }
 [data-main-color=orange] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #F57C00 !important;
@@ -2031,7 +2031,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=deep-orange] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=deep-orange] .details-panel .main-info .contact-name-input,
-[data-main-color=deep-orange] input:focus:not([readonly]),
+[data-main-color=deep-orange] input:focus:not([readonly]):not([type=range]),
 [data-main-color=deep-orange] .modal .rich-textarea:focus,
 [data-main-color=deep-orange] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=deep-orange] .message-form .rich-textarea-wrap.file-drop,
@@ -2039,9 +2039,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] input[type="radio"].with-gap:checked+label:before {
     border-color: #FF5722;
 }
-[data-main-color=deep-orange] input:focus:not([readonly]),
+[data-main-color=deep-orange] input:focus:not([readonly]):not([type=range]),
 [data-main-color=deep-orange] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #FF5722 !important;
+    box-shadow: 0 1px 0 0 #FF5722;
 }
 [data-main-color=deep-orange] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #E64A19 !important;
@@ -2104,7 +2104,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=brown] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=brown] .details-panel .main-info .contact-name-input,
-[data-main-color=brown] input:focus:not([readonly]),
+[data-main-color=brown] input:focus:not([readonly]):not([type=range]),
 [data-main-color=brown] .modal .rich-textarea:focus,
 [data-main-color=brown] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=brown] .message-form .rich-textarea-wrap.file-drop,
@@ -2112,9 +2112,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] input[type="radio"].with-gap:checked+label:before {
     border-color: #795548;
 }
-[data-main-color=brown] input:focus:not([readonly]),
+[data-main-color=brown] input:focus:not([readonly]):not([type=range]),
 [data-main-color=brown] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #795548 !important;
+    box-shadow: 0 1px 0 0 #795548;
 }
 [data-main-color=brown] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #5D4037 !important;
@@ -2178,7 +2178,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 [data-main-color=blue-grey] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=blue-grey] .details-panel .main-info .contact-name-input,
-[data-main-color=blue-grey] input:focus:not([readonly]),
+[data-main-color=blue-grey] input:focus:not([readonly]):not([type=range]),
 [data-main-color=blue-grey] .modal .rich-textarea:focus,
 [data-main-color=blue-grey] .group-chat-properties-wrap .description-field .rich-textarea:focus,
 [data-main-color=blue-grey] .message-form .rich-textarea-wrap.file-drop,
@@ -2186,9 +2186,9 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] input[type="radio"].with-gap:checked+label:before {
     border-color: #607D8B;
 }
-[data-main-color=blue-grey] input:focus:not([readonly]),
+[data-main-color=blue-grey] input:focus:not([readonly]):not([type=range]),
 [data-main-color=blue-grey] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #607D8B !important;
+    box-shadow: 0 1px 0 0 #607D8B;
 }
 [data-main-color=blue-grey] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #455A64 !important;
@@ -5504,7 +5504,7 @@ input[type=text].simple-input-field:hover {
 .mention-item .msg-counter,
 .chat-item .msg-counter {
     position: absolute;
-    right: 16px;
+    right: 8px;
     bottom: 10px;
     padding: 0 4px;
     min-width: 14px;
@@ -5515,11 +5515,6 @@ input[type=text].simple-input-field:hover {
     line-height: 14px;
     text-align: center;
     background-color: #388E3C;
-    -webkit-transform: translateX(50%);
-    -moz-transform: translateX(50%);
-    -ms-transform: translateX(50%);
-    -o-transform: translateX(50%);
-    transform: translateX(50%);
 }
 
 .mention-item .msg-counter {
@@ -7199,10 +7194,6 @@ img.fwd-img-preview {
     z-index: 0;
 }
 
-.add-group-chat-modal .description-field .rich-textarea:focus {
-    border-bottom: 1px solid;
-}
-
 .message-form .input-message .scrollbar-cover {
     position: absolute;
     top: 0;
@@ -7485,6 +7476,11 @@ input[type=range].voice-message-volume::-ms-thumb {
     [data-main-color=blue-grey] .settings-block-wrap.background input[type=range]::-webkit-slider-thumb {
         background-color: #607D8B;
     }
+}
+
+.settings-panel .background input[type=range] {
+    overflow: visible;
+    -webkit-appearance: visible;
 }
 
 input[type="range"]::-moz-range-progress {
