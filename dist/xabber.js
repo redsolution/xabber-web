@@ -15655,7 +15655,7 @@ return jQuery;
 });
 
 //! moment.js
-//! version : 2.27.0
+//! version : 2.29.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
 //! license : MIT
 //! momentjs.com
@@ -18196,8 +18196,7 @@ return jQuery;
     hooks.createFromInputFallback = deprecate(
         'value provided is not in a recognized RFC2822 or ISO format. moment construction falls back to js Date(), ' +
             'which is not reliable across all browsers and versions. Non RFC2822/ISO date formats are ' +
-            'discouraged and will be removed in an upcoming major release. Please refer to ' +
-            'http://momentjs.com/guides/#/warnings/js-date/ for more info.',
+            'discouraged. Please refer to http://momentjs.com/guides/#/warnings/js-date/ for more info.',
         function (config) {
             config._d = new Date(config._i + (config._useUTC ? ' UTC' : ''));
         }
@@ -19382,7 +19381,10 @@ return jQuery;
     function calendar$1(time, formats) {
         // Support for single parameter, formats only overload to the calendar function
         if (arguments.length === 1) {
-            if (isMomentInput(arguments[0])) {
+            if (!arguments[0]) {
+                time = undefined;
+                formats = undefined;
+            } else if (isMomentInput(arguments[0])) {
                 time = arguments[0];
                 formats = undefined;
             } else if (isCalendarSpec(arguments[0])) {
@@ -20060,7 +20062,7 @@ return jQuery;
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].name;
@@ -20080,7 +20082,7 @@ return jQuery;
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].narrow;
@@ -20100,7 +20102,7 @@ return jQuery;
             eras = this.localeData().eras();
         for (i = 0, l = eras.length; i < l; ++i) {
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (eras[i].since <= val && val <= eras[i].until) {
                 return eras[i].abbr;
@@ -20123,7 +20125,7 @@ return jQuery;
             dir = eras[i].since <= eras[i].until ? +1 : -1;
 
             // truncate time
-            val = this.startOf('day').valueOf();
+            val = this.clone().startOf('day').valueOf();
 
             if (
                 (eras[i].since <= val && val <= eras[i].until) ||
@@ -21274,7 +21276,7 @@ return jQuery;
 
     //! moment.js
 
-    hooks.version = '2.27.0';
+    hooks.version = '2.29.1';
 
     setHookCallback(createLocal);
 
@@ -23722,7 +23724,7 @@ return WaveSurfer;
 
 /* global btoa */
 (function (root) {
-  var base64
+  let base64
 
   // This function's sole purpose is to help us ignore lone surrogates so that
   // malformed strings don't throw in the browser while being processed
@@ -23734,7 +23736,7 @@ return WaveSurfer;
 
     // This is a coherence check. `code` should never be `NaN`.
     /* istanbul ignore if */
-    if (Number.isNaN(code)) {
+    if (isNaN(code)) {
       throw new RangeError('Index ' + i + ' out of range for string "' + str + '"; please open an issue at https://github.com/Trott/slug/issues/new')
     }
     if (code < 0xD800 || code > 0xDFFF) {
@@ -23773,25 +23775,83 @@ return WaveSurfer;
     throw new Error('String "' + str + '" reaches code believed to be unreachable; please open an issue at https://github.com/Trott/slug/issues/new')
   }
 
-  if (typeof window === 'undefined') {
-    base64 = function (input) {
-      return Buffer.from(input).toString('base64')
+  if (typeof window !== 'undefined') {
+    if (window.btoa) {
+      base64 = function (input) {
+        return btoa(unescape(encodeURIComponent(input)))
+      }
+    } else {
+      // Polyfill for environments that don't have btoa or Buffer class (notably, React Native).
+      // Based on https://github.com/davidchambers/Base64.js/blob/a121f75bb10c8dd5d557886c4b1069b31258d230/base64.js
+      base64 = function (input) {
+        const str = unescape(encodeURIComponent(input + ''))
+        let output = ''
+        for (
+          let block, charCode, idx = 0, map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+          str.charAt(idx | 0) || (map = '=', idx % 1);
+          output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+        ) {
+          charCode = str.charCodeAt(idx += 3 / 4)
+          // TODO: The if condition may be guaranteed to be false. Verify and
+          // remove or otherwise write a test to cover it.
+          /* istanbul ignore if */
+          if (charCode > 0xFF) {
+            throw new Error("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.")
+          }
+          block = block << 8 | charCode
+        }
+        return output
+      }
     }
   } else {
     base64 = function (input) {
-      return btoa(unescape(encodeURIComponent(input)))
+      return Buffer.from(input).toString('base64')
     }
   }
 
+  // IE11 doesn't have Object.assign(), hence this MDN-supplied polyfill.
+  /* istanbul ignore if */
+  if (typeof Object.assign !== 'function') {
+    // Must be writable: true, enumerable: false, configurable: true
+    Object.defineProperty(Object, 'assign', {
+      value: function assign (target, varArgs) { // .length of function is 2
+        'use strict'
+        if (target === null || target === undefined) {
+          throw new TypeError('Cannot convert undefined or null to object')
+        }
+
+        const to = Object(target)
+
+        for (let index = 1; index < arguments.length; index++) {
+          const nextSource = arguments[index]
+
+          if (nextSource !== null && nextSource !== undefined) {
+            // eslint-disable-next-line no-var
+            for (var nextKey in nextSource) {
+              // Avoid bugs when hasOwnProperty is shadowed
+              if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                to[nextKey] = nextSource[nextKey]
+              }
+            }
+          }
+        }
+        return to
+      },
+      writable: true,
+      configurable: true
+    })
+  }
+
   function slug (string, opts) {
-    var result = slugify(string, opts)
+    let result = slugify(string, opts)
     // If output is an empty string, try slug for base64 of string.
     if (result === '') {
       // Get rid of lone surrogates.
       let input = ''
-      for (let i = 0, chr; i < string.length; i++) {
-        [chr, i] = getWholeCharAndI(string, i)
-        input += chr
+      for (let i = 0; i < string.length; i++) {
+        const charAndI = getWholeCharAndI(string, i)
+        i = charAndI[1]
+        input += charAndI[0]
       }
       result = slugify(base64(input), opts)
     }
@@ -23801,6 +23861,8 @@ return WaveSurfer;
   const locales = {
     // http://www.eki.ee/wgrs/rom1_bg.pdf
     bg: { Й: 'Y', й: 'y', X: 'H', x: 'h', Ц: 'Ts', ц: 'ts', Щ: 'Sht', щ: 'sht', Ъ: 'A', ъ: 'a', Ь: 'Y', ь: 'y' },
+    // Need a reference URL for German, although this is pretty well-known.
+    de: { Ä: 'AE', ä: 'ae', Ö: 'OE', ö: 'oe', Ü: 'UE', ü: 'ue' },
     // Need a reference URL for Serbian.
     sr: { đ: 'dj', Đ: 'DJ' }
   }
@@ -23810,36 +23872,44 @@ return WaveSurfer;
       throw new Error('slug() requires a string argument, received ' + typeof string)
     }
     if (typeof opts === 'string') { opts = { replacement: opts } }
-    opts = opts || {}
+    opts = opts ? Object.assign({}, opts) : {}
     opts.mode = opts.mode || slug.defaults.mode
-    var defaults = slug.defaults.modes[opts.mode]
-    var keys = ['replacement', 'multicharmap', 'charmap', 'remove', 'lower']
+    const defaults = slug.defaults.modes[opts.mode]
+    const keys = ['replacement', 'multicharmap', 'charmap', 'remove', 'lower']
     for (let key, i = 0, l = keys.length; i < l; i++) {
       key = keys[i]
       opts[key] = (key in opts) ? opts[key] : defaults[key]
     }
     const localeMap = locales[opts.locale] || {}
 
-    var lengths = []
+    let lengths = []
     // "let" instead of "const" in next line is for IE11 compatibilty
     for (let key in opts.multicharmap) { // eslint-disable-line prefer-const
       if (!Object.prototype.hasOwnProperty.call(opts.multicharmap, key)) { continue }
 
-      var len = key.length
+      const len = key.length
       if (lengths.indexOf(len) === -1) { lengths.push(len) }
     }
 
-    var result = ''
+    // We want to match the longest string if there are multiple matches, so
+    // sort lengths in descending order.
+    lengths = lengths.sort(function (a, b) { return b - a })
+
+    let result = ''
     for (let char, i = 0, l = string.length; i < l; i++) {
       char = string[i]
-      if (!lengths.some(function (len) {
-        var str = string.substr(i, len)
+      let matchedMultichar = false
+      for (let j = 0; j < lengths.length; j++) {
+        const len = lengths[j]
+        const str = string.substr(i, len)
         if (opts.multicharmap[str]) {
           i += len - 1
           char = opts.multicharmap[str]
-          return true
-        } else return false
-      })) {
+          matchedMultichar = true
+          break
+        }
+      }
+      if (!matchedMultichar) {
         if (localeMap[char]) {
           char = localeMap[char]
         } else if (opts.charmap[char]) {
@@ -23864,15 +23934,7 @@ return WaveSurfer;
     return result
   }
 
-  slug.defaults = {
-    mode: 'pretty'
-  }
-
   const initialMulticharmap = {
-    '<3': 'love',
-    '&&': 'and',
-    '||': 'or',
-    'w/': 'with',
     // multibyte devanagari characters (hindi, sanskrit, etc.)
     फ़: 'Fi',
     ग़: 'Ghi',
@@ -23881,9 +23943,32 @@ return WaveSurfer;
     ड़: 'ugDha',
     ढ़: 'ugDhha',
     य़: 'Yi',
-    ज़: 'Za'
+    ज़: 'Za',
+    // hebrew
+    // Refs: http://www.eki.ee/wgrs/rom1_he.pdf
+    // Refs: https://en.wikipedia.org/wiki/Niqqud
+    בִי: 'i',
+    בֵ: 'e',
+    בֵי: 'e',
+    בֶ: 'e',
+    בַ: 'a',
+    בָ: 'a',
+    בֹ: 'o',
+    וֹ: 'o',
+    בֻ: 'u',
+    וּ: 'u',
+    בּ: 'b',
+    כּ: 'k',
+    ךּ: 'k',
+    פּ: 'p',
+    שׁ: 'sh',
+    שׂ: 's',
+    בְ: 'e',
+    חֱ: 'e',
+    חֲ: 'a',
+    חֳ: 'o',
+    בִ: 'i'
   }
-  slug.multicharmap = slug.defaults.multicharmap = Object.assign({}, initialMulticharmap)
 
   // https://github.com/django/django/blob/master/django/contrib/admin/static/admin/js/urlify.js
   const initialCharmap = {
@@ -23913,6 +23998,7 @@ return WaveSurfer;
     Ö: 'O',
     Ő: 'O',
     Ø: 'O',
+    Ō: 'O',
     Ù: 'U',
     Ú: 'U',
     Û: 'U',
@@ -23946,6 +24032,9 @@ return WaveSurfer;
     ö: 'o',
     ő: 'o',
     ø: 'o',
+    ō: 'o',
+    Œ: 'OE',
+    œ: 'oe',
     ù: 'u',
     ú: 'u',
     û: 'u',
@@ -24170,6 +24259,7 @@ return WaveSurfer;
     Ū: 'U',
     // arabic
     أ: 'a',
+    إ: 'i',
     ب: 'b',
     ت: 't',
     ث: 'th',
@@ -24197,6 +24287,8 @@ return WaveSurfer;
     ه: 'h',
     و: 'o',
     ي: 'y',
+    ء: 'aa',
+    ة: 'a',
     // farsi
     آ: 'a',
     ا: 'a',
@@ -24458,89 +24550,67 @@ return WaveSurfer;
     ხ: 'kh',
     ჯ: 'j',
     ჰ: 'h',
-    // currency
-    '€': 'euro',
-    '₢': 'cruzeiro',
-    '₣': 'french franc',
-    '£': 'pound',
-    '₤': 'lira',
-    '₥': 'mill',
-    '₦': 'naira',
-    '₧': 'peseta',
-    '₨': 'rupee',
-    '₩': 'won',
-    '₪': 'new shequel',
-    '₫': 'dong',
-    '₭': 'kip',
-    '₮': 'tugrik',
-    '₯': 'drachma',
-    '₰': 'penny',
-    '₱': 'peso',
-    '₲': 'guarani',
-    '₳': 'austral',
-    '₴': 'hryvnia',
-    '₵': 'cedi',
-    '¢': 'cent',
-    '¥': 'yen',
-    元: 'yuan',
-    円: 'yen',
-    '﷼': 'rial',
-    '₠': 'ecu',
-    '¤': 'currency',
-    '฿': 'baht',
-    $: 'dollar',
-    '₹': 'indian rupee',
-    '₽': 'russian ruble',
-    '₿': 'bitcoin',
-    '₸': 'kazakhstani tenge',
-    // symbols
-    '©': 'c',
-    œ: 'oe',
-    Œ: 'OE',
-    '∑': 'sum',
-    '®': 'r',
-    '∂': 'd',
-    ƒ: 'f',
-    '™': 'tm',
-    '℠': 'sm',
-    '…': '...',
-    '˚': 'o',
-    º: 'o',
-    ª: 'a',
-    '∆': 'delta',
-    '∞': 'infinity',
-    '♥': 'love',
-    '&': 'and',
-    '|': 'or',
-    '<': 'less',
-    '>': 'greater'
+    // hebrew
+    ב: 'v',
+    גּ: 'g',
+    ג: 'g',
+    ד: 'd',
+    דּ: 'd',
+    ה: 'h',
+    ו: 'v',
+    ז: 'z',
+    ח: 'h',
+    ט: 't',
+    י: 'y',
+    כ: 'kh',
+    ך: 'kh',
+    ל: 'l',
+    מ: 'm',
+    ם: 'm',
+    נ: 'n',
+    ן: 'n',
+    ס: 's',
+    פ: 'f',
+    ף: 'f',
+    ץ: 'ts',
+    צ: 'ts',
+    ק: 'k',
+    ר: 'r',
+    תּ: 't',
+    ת: 't'
   }
-  slug.charmap = slug.defaults.charmap = Object.assign({}, initialCharmap)
+
+  slug.charmap = Object.assign({}, initialCharmap)
+  slug.multicharmap = Object.assign({}, initialMulticharmap)
+  slug.defaults = {
+    charmap: slug.charmap,
+    mode: 'pretty',
+    modes: {
+      rfc3986: {
+        replacement: '-',
+        remove: null,
+        lower: true,
+        charmap: slug.charmap,
+        multicharmap: slug.multicharmap
+      },
+      pretty: {
+        replacement: '-',
+        remove: null,
+        lower: true,
+        charmap: slug.charmap,
+        multicharmap: slug.multicharmap
+      }
+    },
+    multicharmap: slug.multicharmap
+  }
 
   slug.reset = function () {
     slug.defaults.modes.rfc3986.charmap = slug.defaults.modes.pretty.charmap = slug.charmap = slug.defaults.charmap = Object.assign({}, initialCharmap)
-    slug.defaults.modes.rfc3986.multiCharmap = slug.defaults.modes.pretty.multiCharmap = slug.multicharmap = slug.defaults.multicharmap = Object.assign({}, initialMulticharmap)
+    slug.defaults.modes.rfc3986.multicharmap = slug.defaults.modes.pretty.multicharmap = slug.multicharmap = slug.defaults.multicharmap = Object.assign({}, initialMulticharmap)
   }
 
   slug.extend = function (customMap) {
     Object.assign(slug.charmap, customMap)
-  }
-
-  slug.defaults.modes = {
-    rfc3986: {
-      replacement: '-',
-      remove: null,
-      lower: true,
-      charmap: slug.defaults.charmap,
-      multicharmap: slug.defaults.multicharmap
-    },
-    pretty: {
-      replacement: '-',
-      remove: null,
-      lower: true,
-      charmap: slug.defaults.charmap,
-      multicharmap: slug.defaults.multicharmap
-    }
   }
 
   /* global define */
@@ -43879,7 +43949,7 @@ if (typeof define === "function") {
 }
 ;
 /**
- * @license text 2.0.15 Copyright jQuery Foundation and other contributors.
+ * @license text 2.0.16 Copyright jQuery Foundation and other contributors.
  * Released under MIT license, http://github.com/requirejs/text/LICENSE
  */
 /*jslint regexp: true */
@@ -43920,7 +43990,7 @@ define('text',['module'], function (module) {
     }
 
     text = {
-        version: '2.0.15',
+        version: '2.0.16',
 
         strip: function (content) {
             //Strips <?xml ...?> declarations so that external SVG and XML
@@ -44096,6 +44166,10 @@ define('text',['module'], function (module) {
                 req([nonStripName], function (content) {
                     text.finishLoad(parsed.moduleName + '.' + parsed.ext,
                                     parsed.strip, content, onLoad);
+                }, function (err) {
+                    if (onLoad.error) {
+                        onLoad.error(err);
+                    }
                 });
             }
         },
@@ -46276,7 +46350,7 @@ define('xabber-utils',[
 });
 
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.2.0","version_description":"Implemented OMEMO. Optimized client rendering. Improved group chats, client synchronization. Added new ones configurations"}'
+'{"version_number":"2.3.0","version_description":"Implemented translations. Implemented Appearance settings. Implemented Saved messages. Added different configurations. Improved client rendering."}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
