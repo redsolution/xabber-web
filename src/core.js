@@ -327,8 +327,8 @@
                 (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
                 this.trigger("update_main_color");
 
+                window.xabber = this;
                 if (constants.DEBUG) {
-                    window.xabber = this;
                     _.extend(window, env);
                 }
 
