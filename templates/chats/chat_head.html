@@ -1,76 +1,76 @@
-    <div class="circle-avatar"/>
-    <div class="contact-status hide-offline"/>
-    <div class="chat-icon hidden"></div>
-    <div class="contact-info">
-        <div class="contact-name-wrap one-line">
-            <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>
-            <p class="contact-name one-line"></p>
-        </div>
-        <p class="contact-status-message one-line"></p>
+<div class="circle-avatar"/>
+<div class="contact-status hide-offline"/>
+<div class="chat-icon hidden"></div>
+<div class="contact-info">
+    <div class="contact-name-wrap one-line">
+        <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>
+        <p class="contact-name one-line"></p>
     </div>
-    <div class="chat-tools-wrap">
-        <div class="chat-tool btn-show-fingerprints">
-            <i class="mdi mdi-lock mdi-24px"></i>
-        </div>
-        <div class="chat-tool btn-jingle-message">
-            <i class="mdi mdi-phone mdi-24px"></i>
-        </div>
-        <div class="chat-tool btn-set-status">
-            <svg class="mdi mdi-24px" viewBox="0 0 24 24">
-                <g stroke="none" stroke-width="1" fill="none">
-                    <rect x="0" y="0" width="24" height="24"/>
-                    <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>
-                </g>
-            </svg>
-        </div>
-        <div class="chat-tool btn-search-messages">
-            <i class="search-icon mdi mdi-24px mdi-magnify"></i>
-        </div>
-        <div class="chat-tool btn-archive-chat">
-            <i class="mdi mdi-24px mdi-package-down"></i>
-        </div>
-        <div class="chat-tool btn-notifications">
-            <i class="mdi muted-icon mdi-22px mdi-bell"></i>
-        </div>
-        <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">
-            <i class="mdi mdi-24px mdi-dots-vertical"></i>
-        </div>
-        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
-            <li class="btn-contact-details">
-                <span class="one-line">Contact info</span>
-            </li>
-            <li class="btn-call-attention">
-                <span class="one-line">Call attention</span>
-            </li>
-            <!--<li class="btn-export-history">
-                <span class="one-line">Export history</span>
-            </li>-->
-            <li class="btn-clear-history">
-                <span class="one-line">Clear history</span>
-            </li>
-            <li class="btn-start-encryption">
-                <span class="one-line">Start encrypted chat</span>
-            </li>
-            <li class="btn-open-encrypted-chat">
-                <span class="one-line">Open encrypted chat</span>
-            </li>
-            <li class="btn-open-regular-chat">
-                <span class="one-line">Open regular chat</span>
-            </li>
-            <li class="btn-invite-users">
-                <span class="one-line">Invite users</span>
-            </li>
-            <li class="btn-delete-chat">
-                <span class="one-line">Delete chat</span>
-            </li>
-            <li class="btn-delete-contact">
-                <span class="one-line">Delete contact</span>
-            </li>
-            <li class="btn-block-contact">
-                <span class="one-line">Block contact</span>
-            </li>
-            <li class="btn-unblock-contact">
-                <span class="one-line">Unblock contact</span>
-            </li>
-        </ul>
+    <p class="contact-status-message one-line"></p>
+</div>
+<div class="chat-tools-wrap">
+    <div class="chat-tool btn-show-fingerprints">
+        <i class="mdi mdi-lock mdi-24px"></i>
     </div>
+    <div class="chat-tool btn-jingle-message">
+        <i class="mdi mdi-phone mdi-24px"></i>
+    </div>
+    <div class="chat-tool btn-set-status">
+        <svg class="mdi mdi-24px" viewBox="0 0 24 24">
+            <g stroke="none" stroke-width="1" fill="none">
+                <rect x="0" y="0" width="24" height="24"/>
+                <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>
+            </g>
+        </svg>
+    </div>
+    <div class="chat-tool btn-search-messages">
+        <i class="search-icon mdi mdi-24px mdi-magnify"></i>
+    </div>
+    <div class="chat-tool btn-archive-chat">
+        <i class="mdi mdi-24px mdi-package-down"></i>
+    </div>
+    <div class="chat-tool btn-notifications">
+        <i class="mdi muted-icon mdi-22px mdi-bell"></i>
+    </div>
+    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">
+        <i class="mdi mdi-24px mdi-dots-vertical"></i>
+    </div>
+    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
+        <li class="btn-contact-details">
+            <span class="one-line">{[print(xabber.getString("contact_viewer"))]}</span>
+        </li>
+        <li class="btn-call-attention">
+            <span class="one-line">{[print(xabber.getString("call_attention"))]}</span>
+        </li>
+        <!--<li class="btn-export-history">
+            <span class="one-line">{[print(xabber.getString("export_chat"))]}</span>
+        </li>-->
+        <li class="btn-clear-history">
+            <span class="one-line">{[print(xabber.getString("clear_history"))]}</span>
+        </li>
+        <li class="btn-start-encryption">
+            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_start_encrypted_chat"))]}</span>
+        </li>
+        <li class="btn-open-encrypted-chat">
+            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>
+        </li>
+        <li class="btn-open-regular-chat">
+            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>
+        </li>
+        <li class="btn-invite-users">
+            <span class="one-line">{[print(xabber.getString("groupchat_invite_users"))]}</span>
+        </li>
+        <li class="btn-delete-chat">
+            <span class="one-line">{[print(xabber.getString("delete_chat"))]}</span>
+        </li>
+        <li class="btn-delete-contact">
+            <span class="one-line">{[print(xabber.getString("chat_settings__button_delete_contact"))]}</span>
+        </li>
+        <li class="btn-block-contact">
+            <span class="one-line">{[print(xabber.getString("contact_block"))]}</span>
+        </li>
+        <li class="btn-unblock-contact">
+            <span class="one-line">{[print(xabber.getString("chat_settings__button_unblock_contact"))]}</span>
+        </li>
+    </ul>
+</div>

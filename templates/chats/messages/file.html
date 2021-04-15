@@ -4,6 +4,6 @@
         <div class="file-info one-line">
             <span class="file-name">{{name}}</span>{[ if (is_audio && duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span>
         </div>
-        <a href="{{sources[0]}}" class="file-link-download">Download</a>
+        <a href="{{sources[0]}}" class="file-link-download">{[print(xabber.getString("action_download"))]}</a>
     </div>
 </div>

@@ -1,0 +1,1 @@
+typeof define === "function" && define(() => { return {"account_compression":"Comprime","account_host":"Hospes","account_password":"Signum","confirm_password":"Signum confirma","account_port":"Porta","account_priority":"Prioritas"};});

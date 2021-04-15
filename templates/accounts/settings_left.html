@@ -35,49 +35,49 @@
         <div class="settings-tabs-wrap">
             <div class="settings-tab" data-block-name="connection">
                 <i class="mdi mdi-24px mdi-settings"></i>
-                <div class="settings-block-name one-line">Connection settings</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_connection_settings"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="tokens">
                 <i class="mdi mdi-24px mdi-key"></i>
-                <div class="settings-block-name one-line">Active sessions</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_active_sessions"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="synchronization">
                 <i class="mdi mdi-24px mdi-sync"></i>
-                <div class="settings-block-name one-line">Synchronization</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_sync"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="color-scheme">
                 <i class="mdi mdi-24px mdi-palette"></i>
-                <div class="settings-block-name one-line">Color scheme</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_color_scheme"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="xmpp-resources">
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>
-                <div class="settings-block-name one-line">XMPP Resources</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_xmpp_resources"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="vcard">
                 <i class="mdi mdi-24px mdi-account-card-details"></i>
-                <div class="settings-block-name one-line">vCard</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_vcard"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="omemo-info">
                 <i class="mdi mdi-24px mdi-fingerprint"></i>
-                <div class="settings-block-name one-line">OMEMO</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("omemo__settings__menu_item"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="server-info">
                 <i class="mdi mdi-24px mdi-information"></i>
-                <div class="settings-block-name one-line">Server information</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="blocklist-info">
                 <i class="mdi mdi-24px mdi-block-helper"></i>
-                <div class="settings-block-name one-line">Blocked contacts</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("blocked_contacts"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="groups-info">
-                <i class="mdi mdi-24px mdi-account-multiple"></i>
-                <div class="settings-block-name one-line">Circles</div>
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>
             </div>
         </div>
         <div class="settings-tabs-bottom-wrap ground-color-900">
             <div class="settings-tab delete-account">
                 <i class="mdi mdi-24px mdi-logout-variant"></i>
-                <div class="settings-block-name">Quit account</div>
+                <div class="settings-block-name">{[print(xabber.getString("settings_account__button_quit_account"))]}</div>
             </div>
         </div>
     </div>

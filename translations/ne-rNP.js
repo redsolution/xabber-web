@@ -1,0 +1,1 @@
+typeof define === "function" && define(() => { return {};});

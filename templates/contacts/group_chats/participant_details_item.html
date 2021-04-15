@@ -4,12 +4,12 @@
         <i class="mdi mdi-24px mdi-dots-vertical"></i>
     </div>
     <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">
-        <li class="btn-block-participant"><span class="one-line">Block</span></li>
+        <li class="btn-block-participant"><span class="one-line">{[print(xabber.getString("groupchat_block"))]}</span></li>
     </ul>
     {[}]}
     <div class="circle-avatar">
         {[if (subscription !== null) {]}
-        <input title="Change avatar" type="file">
+        <input title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file">
             <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
                 <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
             </svg>
@@ -35,35 +35,35 @@
             <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
             {[if (jid) {]}<p title="{{jid}}" class="jid selectable-text one-line">{{jid}}</p>{[}]}
             {[ if (is_myself) {]}
-            <div class="my-flag one-line text-color-red-700">this is you</div>
+            <div class="my-flag one-line text-color-red-700">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
             {[}]}
-            {[if (subscription === null) {]}<p class="role selectable-text one-line">{[if (blocked) {]}Blocked{[}else{]}Not a member{[}]}</p>{[}]}
+            {[if (subscription === null) {]}<p class="role selectable-text one-line">{[if (blocked) { print(xabber.getString("groupchat_blocked")); }else{print(xabber.getString("settings_group_member__placeholder_not_a_member"));}]}</p>{[}]}
         </div>
     <div class="buttons-wrap">
         {[if (incognito_chat) {]}
         <div class="button-wrap non-active btn-chat-wrap">
             <i class="mdi mdi-24px mdi-incognito btn-chat"></i>
-            <div class="btn-name">Private chat</div>
+            <div class="btn-name">{[print(xabber.getString("groupchat_private_chat"))]}</div>
         </div>
         {[} else {]}
         <div class="button-wrap non-active btn-chat-wrap">
             <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
-            <div class="btn-name">Direct chat</div>
+            <div class="btn-name">{[print(xabber.getString("groupchat_direct_chat"))]}</div>
         </div>
         {[}]}
         <div class="button-wrap btn-participant-messages-wrap">
             <i class="mdi mdi-24px mdi-view-list btn-participant-messages"></i>
-            <div class="btn-name">Messages</div>
+            <div class="btn-name">{[print(xabber.getString("groupchat_member_messages"))]}</div>
         </div>
         <div class="button-wrap btn-set-badge-wrap">
             <svg class="btn-set-badge" viewBox="0 0 24 24">
                 <path d="M17,3H14V6H10V3H7A2,2 0 0,0 5,5V21A2,2 0 0,0 7,23H17A2,2 0 0,0 19,21V5A2,2 0 0,0 17,3M12,8A2,2 0 0,1 14,10A2,2 0 0,1 12,12A2,2 0 0,1 10,10A2,2 0 0,1 12,8M16,16H8V15C8,13.67 10.67,13 12,13C13.33,13 16,13.67 16,15V16M13,5H11V1H13V5M16,19H8V18H16V19M12,21H8V20H12V21Z" />
             </svg>
-            <div class="btn-name">Set badge</div>
+            <div class="btn-name">{[print(xabber.getString("groupchat_set_member_badge"))]}</div>
         </div>
         <div class="button-wrap btn-kick-participant-wrap">
             <i class="mdi mdi-24px mdi-account-remove btn-kick-participant"></i>
-            <div class="btn-name">Kick</div>
+            <div class="btn-name">{[print(xabber.getString("groupchat_kick"))]}</div>
         </div>
     </div>
 </div>

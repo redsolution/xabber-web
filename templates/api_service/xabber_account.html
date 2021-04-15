@@ -1,8 +1,6 @@
 <div class="xabber-account-content-wrap">
     <div class="account-info-wrap">
-        <div class="circle-avatar noselect">
-            <img>
-        </div>
+        <div class="circle-avatar noselect"></div>
         <div class="text-info-wrap">
             <div class="name-wrap">
                 <div class="name text-color-red-700 one-line"></div>
@@ -28,33 +26,33 @@
         </div>
     </div>
     <div class="buttons-wrap">
-        <button class="btn-flat btn-main btn-login">Log in</button>
+        <button class="btn-flat btn-main btn-login">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>
         <div class="chat-tool btn-more dropdown-button" data-activates="account-action-more">
             <i class="mdi mdi-20px mdi-dots-vertical"></i>
         </div>
         <ul id="account-action-more" class="xabber-account-menu dropdown-content noselect">
             <li class="btn-sync btn-sync-settings">
-                <span class="one-line">Synchronize</span>
+                <span class="one-line">{[print(xabber.getString("xabber_account__dialog_sync__button_sync"))]}</span>
             </li>
             <li class="btn-set-password">
-                <span class="one-line">Set password</span>
+                <span class="one-line">{[print(xabber.getString("button_set_pass"))]}</span>
             </li>
             <li class="btn-logout">
-                <span class="one-line">Quit</span>
+                <span class="one-line">{[print(xabber.getString("button_quit"))]}</span>
             </li>
         </ul>
     </div>
 </div>
-<div class="xabber-account-tip">Xabber account lets you easily sync your settings and connected XMPP accounts between various devices.</div>
+<div class="xabber-account-tip">{[print(xabber.getString("tutorial_description_6"))]}</div>
 <div class="linked-social-accounts-and-emails">
-    <div class="social-linked-header"><div class="chevron-icon"><i class="arrow mdi mdi-20px"></i></div><div class="social-linked-header-text">Linked social accounts and emails</div></div>
+    <div class="social-linked-header"><div class="chevron-icon"><i class="arrow mdi mdi-20px"></i></div><div class="social-linked-header-text">{[print(xabber.getString("title_linked_accounts"))]}</div></div>
     <div class="social-linked-wrap">
-        <div id='google' class="not-linked social-account social-linked-item-wrap google-linked"><div class="google-color social-icon"><i class="mdi mdi-24px mdi-google-plus"></i></div><div class="synced-info">Not linked</div><div class="btn-main btn-flat btn-link">link</div></div>
-        <div id='facebook' class="not-linked social-account social-linked-item-wrap facebook-linked"><div class="facebook-color social-icon"><i class="mdi mdi-24px mdi-facebook"></i></div><div class="synced-info">Not linked</div><div class="btn-main btn-flat btn-link">link</div></div>
-        <div id='twitter' class="not-linked social-account social-linked-item-wrap twitter-linked"><div class="twitter-color social-icon"><i class="mdi mdi-24px mdi-twitter"></i></div><div class="synced-info">Not linked</div><div class="btn-main btn-flat btn-link">link</div></div>
+        <div id='google' class="not-linked social-account social-linked-item-wrap google-linked"><div class="google-color social-icon"><i class="mdi mdi-24px mdi-google-plus"></i></div><div class="synced-info">{[print(xabber.getString("title_not_linked_account"))]}</div><div class="btn-main btn-flat btn-link">{[print(xabber.getString("action_connect"))]}</div></div>
+        <div id='facebook' class="not-linked social-account social-linked-item-wrap facebook-linked"><div class="facebook-color social-icon"><i class="mdi mdi-24px mdi-facebook"></i></div><div class="synced-info">{[print(xabber.getString("title_not_linked_account"))]}</div><div class="btn-main btn-flat btn-link">{[print(xabber.getString("action_connect"))]}</div></div>
+        <div id='twitter' class="not-linked social-account social-linked-item-wrap twitter-linked"><div class="twitter-color social-icon"><i class="mdi mdi-24px mdi-twitter"></i></div><div class="synced-info">{[print(xabber.getString("title_not_linked_account"))]}</div><div class="btn-main btn-flat btn-link">{[print(xabber.getString("action_connect"))]}</div></div>
         <div id='email' class="not-linked social-linked-item-wrap"><div class="email-color social-icon"><svg style="width:24px;height:24px" viewBox="0 0 24 24">
             <path fill="#FFF" d="M3,4C1.89,4 1,4.89 1,6V18A2,2 0 0,0 3,20H14.09C14.03,19.67 14,19.34 14,19A6,6 0 0,1 20,13C20.34,13 20.67,13.03 21,13.09V6C21,4.89 20.1,4 19,4H3M3,6L11,11L19,6V8L11,13L3,8V6M19,15V18H16V20H19V23H21V20H24V18H21V15H19Z" />
-        </svg></div><div class="synced-info">Link email account</div><div class="btn-main btn-flat btn-link">link</div></div>
+        </svg></div><div class="synced-info">{[print(xabber.getString("title_add_email"))]}</div><div class="btn-main btn-flat btn-link">{[print(xabber.getString("action_connect"))]}</div></div>
     </div>
     <span class="errors"></span>
 </div>

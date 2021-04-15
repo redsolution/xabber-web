@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <span>Create Group</span>
+    <span>{[print(xabber.getString("create_groupchat"))]}</span>
 </div>
 <div class="modal-content">
     <div class="row account-field">
@@ -27,7 +27,7 @@
     <div class="row name-field">
         <i class="field-icon mdi mdi-24px mdi-pencil"></i>
         <div class="input-field input-group-chat-name">
-            <input id="new_chat_name" type="text" name="chat_name" placeholder="Edit group name" required>
+            <input id="new_chat_name" type="text" name="chat_name" placeholder='{[print(xabber.getString("group_is_empty"))]}' required>
         </div>
     </div>
     <div class="row jid-field">
@@ -36,25 +36,25 @@
             <div class="select-xmpp-server">
                 <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
                 <div class="input-field input-group-chat-domain hidden">
-                    <input id="new_chat_domain" type="text" placeholder="domain" name="chat_domain">
+                    <input id="new_chat_domain" type="text" placeholder='{[print(xabber.getString("groupchat__hint_domain"))]}' name="chat_domain">
                 </div>
                 <div data-activates="select-xmpp-server" class="caret">
                     <i class="mdi mdi-20px mdi-menu-down"></i>
                 </div>
             </div>
             <div id="select-xmpp-server" class="dropdown-content noselect">
-                <div class="property-variant set-custom-domain">custom server...</div>
+                <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>
             </div>
         </div>
         <div class="input-field input-group-chat-jid">
-            <input id="new_chat_jid" type="text" placeholder="jid" name="chat_jid">
+            <input id="new_chat_jid" type="text" placeholder='{[print(xabber.getString("groupchat_xmpp_jid"))]}' name="chat_jid">
         </div>
     </div>
     <div class="row incognito-field">
         <i class="field-icon mdi mdi-24px mdi-incognito"></i>
         <div class="property-field incognito-dropdown-wrap">
-           <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">Public</div></div>
-           <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">Incognito</div></div>
+           <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">{[print(xabber.getString("groupchat_privacy_type_public"))]}</div></div>
+           <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">{[print(xabber.getString("groupchat_privacy_type_incognito"))]}</div></div>
         </div>
     </div>
     <div class="row global-field">
@@ -63,15 +63,15 @@
         </svg>
         <div class="property-field global-dropdown-wrap">
             <div class="dropdown-button" data-activates="select-global">
-                <div class="global-item-wrap property-wrap"><div data-value="none" class="property-value">Not indexed</div></div>
+                <div class="global-item-wrap property-wrap"><div data-value="none" class="property-value">{[print(xabber.getString("groupchat_index_type_none"))]}</div></div>
                 <div class="caret">
                     <i class="mdi mdi-20px mdi-menu-down"></i>
                 </div>
             </div>
             <div id="select-global" class="dropdown-content noselect">
-                <div data-value="none" class="property-variant default-value">Not indexed</div>
-                <div data-value="local" class="property-variant">Local index</div>
-                <div data-value="global" class="property-variant">Global index</div>
+                <div data-value="none" class="property-variant default-value">{[print(xabber.getString("groupchat_index_type_none"))]}</div>
+                <div data-value="local" class="property-variant">{[print(xabber.getString("groupchat_index_type_local"))]}</div>
+                <div data-value="global" class="property-variant">{[print(xabber.getString("groupchat_index_type_global"))]}</div>
             </div>
         </div>
     </div>
@@ -79,14 +79,14 @@
         <i class="field-icon mdi mdi-24px mdi-lock"></i>
         <div class="property-field membership-dropdown-wrap">
             <div class="dropdown-button" data-activates="select-membership">
-                <div class="membership-item-wrap property-wrap"><div data-value="open" class="property-value">Open membership</div></div>
+                <div class="membership-item-wrap property-wrap"><div data-value="open" class="property-value">{[print(xabber.getString("groupchat_membership_type_open"))]}</div></div>
                 <div class="caret">
                     <i class="mdi mdi-20px mdi-menu-down"></i>
                 </div>
             </div>
             <div id="select-membership" class="dropdown-content noselect">
-                <div data-value="open" class="property-variant default-value">Open membership</div>
-                <div data-value="member-only" class="property-variant">Member-only</div>
+                <div data-value="open" class="property-variant default-value">{[print(xabber.getString("groupchat_membership_type_open"))]}</div>
+                <div data-value="member-only" class="property-variant">{[print(xabber.getString("groupchat_membership_type_members_only"))]}</div>
             </div>
         </div>
     </div>
@@ -95,7 +95,7 @@
         <div class="input-field input-message">
             <div class="rich-textarea-wrap notranslate">
                 <div class="rich-textarea" tabindex="2" contenteditable=""></div>
-                <div class="placeholder">Write a description...</div>
+                <div class="placeholder">{[print(xabber.getString("groupchat_example_description"))]}</div>
             </div>
         </div>
     </div>
@@ -103,6 +103,6 @@
 </div>
 <div class="modal-footer">
     <span class="errors"></span>
-    <button class="btn-flat btn-main text-color-700 non-active btn-add">Create</button>
-    <button class="btn-flat btn-main btn-dark btn-cancel">Cancel</button>
+    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("create"))]}</button>
+    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
 </div>

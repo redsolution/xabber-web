@@ -1,11 +1,11 @@
 define("xabber-ui", function () {
   return function (xabber) {
-    var env = xabber.env,
+    let env = xabber.env,
         constants = env.constants,
         $ = env.$;
 
     xabber.once("start", function () {
-        $(window).on("keydown", function (ev) {
+        $(window).on("keydown", (ev) => {
             if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL) {
                 this.shift_pressed = null;
                 this.shiftctrl_pressed = true;
@@ -51,15 +51,15 @@ define("xabber-ui", function () {
                     }
                 }
             }
-            }.bind(this));
-        $(window).on("keyup", function (ev) {
+            });
+        $(window).on("keyup", (ev) => {
             if (!(ev.shiftKey && ev.ctrlKey))
                 this.shiftctrl_pressed = null;
             if (ev.shiftKey && !ev.ctrlKey)
                 this.shift_pressed = true;
             if (!ev.shiftKey)
                 this.shift_pressed = null;
-        }.bind(this));
+        });
 
         this.updateLayout = function (options) {
             options || (options = {});
@@ -71,7 +71,7 @@ define("xabber-ui", function () {
         };
 
         this.updateRosterLayout = function (options) {
-            var width = this.body.$el.width(),
+            let width = this.body.$el.width(),
                 is_wide = width >= constants.WIDTH_MEDIUM,
                 is_narrow = width < constants.WIDTH_NARROW,
                 is_tiny = width < constants.WIDTH_TINY,
@@ -79,7 +79,7 @@ define("xabber-ui", function () {
                 pinned = this.roster_view.data.get('pinned');
             this.roster_view.$('.collapsed-wrap').hideIf(expanded);
             this.roster_view.$('.expanded-wrap').showIf(expanded);
-            this.roster_view.$('.btn-pin').hideIf(is_narrow).text(pinned ? 'unpin' : 'pin');
+            this.roster_view.$('.btn-pin').hideIf(is_narrow).text(pinned ? xabber.getString("group_chat__pinned_message__tooltip_unpin") : xabber.getString("message_pin"));
 
             if (is_narrow && pinned) {
                 this.roster_view.data.set({expanded: false, pinned: false});
@@ -89,7 +89,7 @@ define("xabber-ui", function () {
                 this.roster_view.data.set({expanded: true, pinned: true});
                 return;
             }
-            var roster_width, panel_width, panel_margin = '', toolbar_width = 50;
+            let roster_width, panel_width, panel_margin = '', toolbar_width = 50;
 
             if (is_wide || !(is_narrow || pinned)) {
                 panel_width = 1050;
@@ -112,7 +112,7 @@ define("xabber-ui", function () {
                 roster_width = is_wide ? 48 : 44;
             }
 
-            var panel_gap = (width - panel_width) / 2,
+            let panel_gap = (width - panel_width) / 2,
                 left_gap = panel_gap - toolbar_width,
                 right_gap = panel_gap - roster_width;
             this.roster_view.$('.expanded-wrap').switchClass('solid',
@@ -161,7 +161,7 @@ define("xabber-ui", function () {
             roster: null
         });
 
-        var path_acc_settings_left = new this.ViewPath('account.settings_left'),
+        let path_acc_settings_left = new this.ViewPath('account.settings_left'),
             path_acc_settings_right = new this.ViewPath('account.settings_right'),
             path_acc_vcard_edit = new this.ViewPath('account.vcard_edit');
 
@@ -190,7 +190,7 @@ define("xabber-ui", function () {
         };
 
 
-        var path_chat_head = new this.ViewPath('chat_item.content.head'),
+        let path_chat_head = new this.ViewPath('chat_item.content.head'),
             path_chat_body = new this.ViewPath('chat_item.content'),
             path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
             path_group_invitation = new this.ViewPath('contact.invitation'),
@@ -253,9 +253,6 @@ define("xabber-ui", function () {
                     chat_bottom: path_chat_bottom
                 };
             }
-            /*if (options.right === 'enable_encryption') {
-                return { details: path_enable_view };
-            }*/
             if (options.right === 'group_invitation') {
                 return { details: path_group_invitation };
             }
@@ -279,15 +276,24 @@ define("xabber-ui", function () {
         this.body.setScreen('blank');
 
         // initial synchronization
-        this.api_account.once("settings_result", function (result) {
-            if (result === null && !this.accounts.length) {
-                this.body.setScreen('login');
-            } else if (this.body.isScreen('blank')) {
-                this.body.setScreen('all-chats');
-            }
-        }, this);
+        if (this.api_account) {
+            this.api_account.once("settings_result", function (result) {
+                if (result === null && !this.accounts.length) {
+                    this.body.setScreen('login');
+                } else if (this.body.isScreen('blank')) {
+                    this.body.setScreen('all-chats');
+                }
+            }, this);
 
-        this.api_account.ready.then(this.api_account.start.bind(this.api_account));
+            this.api_account.ready.then(this.api_account.start.bind(this.api_account));
+        } else {
+            if (!this.accounts.length)
+                this.body.setScreen('login');
+            else if (this.body.isScreen('blank'))
+                this.body.setScreen('all-chats');
+            xabber.trigger("bind_xmpp_accounts");
+        }
+
     }, xabber);
 
     return xabber;

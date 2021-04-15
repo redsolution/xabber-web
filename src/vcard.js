@@ -1,6 +1,6 @@
 define("xabber-vcard", function () {
   return function (xabber) {
-    var env = xabber.env,
+    let env = xabber.env,
         constants = env.constants,
         templates = env.templates.vcard,
         $ = env.$,
@@ -11,7 +11,7 @@ define("xabber-vcard", function () {
         $build = env.$build,
         utils = env.utils;
 
-    var xmlToObject = function ($vcard) {
+    let xmlToObject = function ($vcard) {
         let vcard = {
             nickname: $vcard.find('NICKNAME').text().trim(),
             fullname: $vcard.find('FN').text().trim(),
@@ -74,8 +74,8 @@ define("xabber-vcard", function () {
         });
 
         $vcard.find('EMAIL').each(function () {
-            var $this = $(this);
-            var email = $this.find('USERID').text().trim();
+            let $this = $(this);
+            let email = $this.find('USERID').text().trim();
             if (!email) {
                 return;
             }
@@ -89,8 +89,8 @@ define("xabber-vcard", function () {
         });
 
         $vcard.find('ADR').each(function () {
-            var $this = $(this);
-            var address = {
+            let $this = $(this);
+            let address = {
                 pobox: $this.find('POBOX').text().trim(),
                 extadd: $this.find('EXTADR').text().trim(),
                 street: $this.find('STREET').text().trim(),
@@ -111,8 +111,8 @@ define("xabber-vcard", function () {
         return vcard;
     };
 
-    var objectToXml = function (vcard) {
-        var $vcard = $build("vCard", {xmlns: Strophe.NS.VCARD});
+    let objectToXml = function (vcard) {
+        let $vcard = $build("vCard", {xmlns: Strophe.NS.VCARD});
         vcard.nickname && $vcard.c("NICKNAME").t(vcard.nickname).up();
         vcard.fullname && $vcard.c("FN").t(vcard.fullname).up();
         if (vcard.first_name || vcard.last_name || vcard.middle_name) {
@@ -177,10 +177,10 @@ define("xabber-vcard", function () {
         },
 
         get: function(jid, callback, errback) {
-            var iq = $iq({type: 'get', to: jid}).c('vCard', {xmlns: Strophe.NS.VCARD});
+            let iq = $iq({type: 'get', to: jid}).c('vCard', {xmlns: Strophe.NS.VCARD});
             this._connection.sendIQ(iq, function (res) {
                 if (!callback) { return; }
-                var vcard = xmlToObject($(res).find('vCard[xmlns='+Strophe.NS.VCARD+']'));
+                let vcard = xmlToObject($(res).find('vCard[xmlns='+Strophe.NS.VCARD+']'));
                 vcard.jabber_id || (vcard.jabber_id = jid);
                 return callback(vcard);
             }, errback);
@@ -188,14 +188,14 @@ define("xabber-vcard", function () {
 
         set: function(jid, vcard, callback, errback) {
             vcard.jabber_id || (vcard.jabber_id = jid);
-            var iq = $iq({type: 'set', to: jid}).cnode(objectToXml(vcard));
+            let iq = $iq({type: 'set', to: jid}).cnode(objectToXml(vcard));
             this._connection.sendIQ(iq, callback, errback);
         }
     });
 
     utils.vcard = {
         getBlank: function (jid) {
-            var vcard = xmlToObject($('<div/>'));
+            let vcard = xmlToObject($('<div/>'));
             vcard.jabber_id = jid;
             return vcard;
         }
@@ -211,13 +211,13 @@ define("xabber-vcard", function () {
         },
 
         render: function () {
-            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : 'Contact details');
+            this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : xabber.getString("vcard_screen__header"));
             this.data.set('refresh', false);
             this.update();
         },
 
         update: function () {
-            var $info, vcard = this.model.get('vcard');
+            let $info, vcard = this.model.get('vcard');
 
             $info = this.$('.jid-info-wrap');
             $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').text(vcard.jabber_id);
@@ -253,7 +253,7 @@ define("xabber-vcard", function () {
             $info.find('.description').showIf(vcard.description).find('.value').text(vcard.description);
             $info.showIf(vcard.description);
 
-            var $addr_info = this.$('.address-info-wrap'),
+            let $addr_info = this.$('.address-info-wrap'),
                 address = _.clone(vcard.address),
                 show_addr_block = false;
             $addr_info.find('.info').addClass('hidden');
@@ -266,7 +266,7 @@ define("xabber-vcard", function () {
                 $info.find('.region').showIf(addr.region).text(addr.region);
                 $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
                 $info.find('.country').showIf(addr.country).text(addr.country);
-                var show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
+                let show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
                              addr.region || addr.pcode || addr.country);
                 show && (show_addr_block = true);
                 $info.showIf(show);
@@ -274,7 +274,7 @@ define("xabber-vcard", function () {
             $addr_info.showIf(show_addr_block);
 
             $info = this.$('.phone-info-wrap');
-            var phone = vcard.phone;
+            let phone = vcard.phone;
             if (phone) {
                 $info.find('.phone-work').showIf(phone.work).find('.value').text(phone.work);
                 $info.find('.phone-home').showIf(phone.home).find('.value').text(phone.home);
@@ -284,7 +284,7 @@ define("xabber-vcard", function () {
             $info.showIf(phone && (phone.work || phone.home || phone.mobile || phone.default));
 
             $info = this.$('.email-info-wrap');
-            var email = vcard.email;
+            let email = vcard.email;
             if (email) {
                 $info.find('.email-work').showIf(email.work).find('.value').text(email.work);
                 $info.find('.email-home').showIf(email.home).find('.value').text(email.home);
@@ -298,13 +298,13 @@ define("xabber-vcard", function () {
         onClickIcon: function (ev) {
             let $target_info = $(ev.target).closest('.info-wrap'),
                 $target_value = $target_info.find('.value'), copied_text = "";
-            $target_value.each(function (idx, item) {
+            $target_value.each((idx, item) => {
                 let $item = $(item),
                     value_text = $item.text();
                 value_text && (copied_text != "") && (copied_text += '\n');
                 value_text && (copied_text += value_text);
-                copied_text && utils.copyTextToClipboard(copied_text, 'Copied in clipboard', 'ERROR: Not copied in clipboard');
-            }.bind(this));
+                copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
+            });
         },
 
         updateRefreshButton: function () {
@@ -315,9 +315,9 @@ define("xabber-vcard", function () {
         refresh: function () {
             if (!this.data.get('refresh')) {
                 this.data.set('refresh', true);
-                this.model.getVCard(function () {
+                this.model.getVCard(() => {
                     this.data.set('refresh', false);
-                }.bind(this));
+                });
             }
         }
     });
@@ -336,7 +336,7 @@ define("xabber-vcard", function () {
         },
 
         _initialize: function () {
-            var $input = this.$('.datepicker').pickadate({
+            let $input = this.$('.datepicker').pickadate({
                 selectMonths: true,
                 selectYears: 100,
                 autoOk: false,
@@ -380,7 +380,7 @@ define("xabber-vcard", function () {
         },
 
         setData: function () {
-            var vcard = this.model.get('vcard');
+            let vcard = this.model.get('vcard');
 
             this.$('.nickname input').val(vcard.nickname);
             this.$('.fullname input').val(vcard.fullname);
@@ -406,7 +406,7 @@ define("xabber-vcard", function () {
             this.$('.email-work input').val(vcard.email.work);
             this.$('.email-home input').val(vcard.email.home);
 
-            var addr = vcard.address.work || {},
+            let addr = vcard.address.work || {},
                 $info = this.$('.address-work-wrap');
             $info.find('.pobox input').val(addr.pobox);
             $info.find('.extadd input').val(addr.extadd);
@@ -428,7 +428,7 @@ define("xabber-vcard", function () {
         },
 
         getData: function () {
-            var vcard = utils.vcard.getBlank(this.model.get('jid'));
+            let vcard = utils.vcard.getBlank(this.model.get('jid'));
 
             vcard.nickname = this.$('.nickname input').val();
             vcard.fullname = this.$('.fullname input').val();
@@ -455,7 +455,7 @@ define("xabber-vcard", function () {
             vcard.email.home = this.$('.email-home input').val();
 
             vcard.address.work = {};
-            var addr = vcard.address.work,
+            let addr = vcard.address.work,
                 $info = this.$('.address-work-wrap');
             addr.pobox = $info.find('.pobox input').val();
             addr.extadd = $info.find('.extadd input').val();
@@ -479,7 +479,7 @@ define("xabber-vcard", function () {
         },
 
         updateSaveButton: function () {
-            this.$('.btn-vcard-save').text(this.data.get('saving') ? 'Saving...' : 'Save');
+            this.$('.btn-vcard-save').text(this.data.get('saving') ? xabber.getString("saving") : xabber.getString("vcard_edit__button_save"));
         },
 
         save: function () {
@@ -488,12 +488,12 @@ define("xabber-vcard", function () {
             }
             this.data.set('saving', true);
             this.model.setVCard(this.getData(),
-                function () {
+                () => {
                     this.model.getVCard();
                     this.data.set('saving', false);
-                }.bind(this),
+                },
                 function () {
-                    utils.dialogs.error('Could not save vCard.');
+                    utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
                     this.data.set('saving', false);
                 }
             );

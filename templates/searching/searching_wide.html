@@ -2,7 +2,7 @@
     <div class="search-form">
         <div class="account-indicator ground-color-500"></div>
         <i class="search-icon mdi mdi-20px mdi-magnify"></i>
-        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder="Search by domain">
+        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("searching__placeholder_search_by_domain"))]}'>
         <i class="close-search-icon mdi mdi-20px mdi-close"></i>
     </div>
     <div class="searching-properties-field">
@@ -12,7 +12,7 @@
     </div>
     <ul id="select-searching-properties" class="selectable-text">
         <div class="account-property">
-            <p class="property-name">Account</p>
+            <p class="property-name">{[print(xabber.getString("searching__search_panel__label_account"))]}</p>
             <div class="account-field">
                 <div class="multiple-acc">
                     <div class="account-dropdown-wrap">
@@ -36,18 +36,18 @@
             </div>
         </div>
         <div class="title-property">
-            <p class="property-name">Title</p>
+            <p class="property-name">{[print(xabber.getString("searching__search_panel__label_title"))]}</p>
             <div class="input-field">
                 <input id="searching_property_title" type="text" name="title">
             </div>
         </div>
         <div class="sorting-property">
-            <p class="property-name">Sort by</p>
+            <p class="property-name">{[print(xabber.getString("searching__search_panel__label_sort_by"))]}</p>
             <div class="input-field">
                 <input id="searching_property_sort_by" type="text" name="title">
             </div>
         </div>
-        <button class="btn-search btn btn-main-filled ground-color-700">Search</button>
+        <button class="btn-search btn btn-main-filled ground-color-700">{[print(xabber.getString("search"))]}</button>
     </ul>
 </div>
 <div class="searching-result-wrap">

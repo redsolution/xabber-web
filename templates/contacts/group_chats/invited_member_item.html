@@ -3,9 +3,9 @@
         <div class="circle-avatar"/>
         <p title="{{jid}}" class="one-line">{{jid}}</p>
         {[if (status == 'invitations') {]}
-        <div title="Revoke invitation" class="revoke-invitation">
+        <div title='{[print(xabber.getString("groupchat_revoke"))]}' class="revoke-invitation">
             {[}else{]}
-            <div title="Unblock user" class="unblock-user">
+            <div title='{[print(xabber.getString("groupchat_unblock"))]}' class="unblock-user">
                 {[}]}
                 <i class="mdi mdi-20px mdi-close"></i>
             </div>

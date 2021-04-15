@@ -1,88 +1,62 @@
-    <div class="left-column noselect">
-        <div class="main-info-wrap xabber-info-wrap">
-            <div class="picture-wrap">
-                <img class="logo" src="images/xabber-logo-96.png"/>
-            </div>
-            <div class="name">Xabber for Web</div>
-            <div class="version"></div>
+<div class="left-column noselect">
+    <div class="main-info-wrap xabber-info-wrap">
+        <div class="picture-wrap">
+            <img class="logo" src="{{CLIENT_LOGO}}"/>
         </div>
+        <div class="name">{{CLIENT_NAME}}</div>
+        <div class="version"></div>
+    </div>
+</div>
+</div>
+
+<div class="right-column noselect">
+    <div class="settings-panel-head">
+        <span>{[print(xabber.getString("category_about"))]}</span>
     </div>
 
-    <div class="right-column noselect">
-        <div class="settings-panel-head">
-            <span>About</span>
-        </div>
-
-        <div class="panel-content-wrap">
-            <div class="panel-content">
-                <div class="settings-block-wrap about">
-                    <div class="block-content">
-                        Xabber is an open source XMPP messenger for Android, iOS and Web platforms. It is build around open standards, interoperability, design and great user experience. Versions of Xabber for every platform are built to provide a continuous chat experience between them.
-                    </div>
-                    <div class="block-content">
-                        You will find more information on our official website <a href="https://www.xabber.com" target="_blank">https://www.xabber.com</a>
-                    </div>
-                    <div class="block-header">
-                        <span class="block-name">XMPP protocol</span>
-                    </div>
-                    <div class="block-content">
-                        Extensible Messaging and Presence Protocol (XMPP) is a communications protocol for message-oriented middleware based on XML (Extensible Markup Language). It enables the near-real-time exchange of structured yet extensible data between any two or more network entities. The protocol was originally named Jabber, and was developed by the Jabber open-source community in 1999 for near real-time instant messaging (IM),presence information, and contact list maintenance.
-                    </div>
-
-                    <div class="block-header">
-                        <span class="block-name">XMPP Extension Protocols</span>
-                    </div>
-                    <div class="block-content">
-                        XMPP is highly extensible, via extensions known as XEPs (XMPP Extension Protocol). Xabber supports a number of popular XEPs that are essential to providing great chat experience for our users.
-                    </div>
-
-                    <div class="block-header">
-                        <span class="block-name">Developers</span>
-                    </div>
-                    <div class="block-content">
-                        Xabber for Android was originally developed by <a href="http://redsolution.com" target="_blank">Redsolution</a> — an international software and services company currently based in Estonia. Since then, a number of individuals joined Xabber as developers, testers and translators.
-                    </div>
-                    <div class="block-content">
-                        Our goal is to create a stable, reliable, interoperable and user friendly ecosystem for instant messaging that does not rely on proprietary services and data silos. We welcome anyone who believes in open standards and free information interchange to take part in moving Xabber forward.
-                    </div>
-                    <div class="block-content">
-                        Follow us on Twitter and Github.
-                    </div>
-                    <div class="block-content flex-content">
-                        <img class="logo" src="images/redsolution-logo.png"/>
-                        <a href="https://twitter.com/Xabber_XMPP" target="_blank"><div class="btn-social twitter-color">
-                            <i class="mdi mdi-28px mdi-twitter"></i>
-                        </div></a>
-                        <a href="https://github.com/redsolution/xabber-web" target="_blank"><img class="btn-social github-logo" src="images/ic_github.png"/></a>
-                    </div>
-
-
-                    <div class="block-header">
-                        <span class="block-name">Translators</span>
-                    </div>
-                    <div class="block-content">
-                        Xabber is available in multiple languages thanks to many fine people from all over the world. We have created a special page on our website to acknowledge their efforts.
-                    </div>
-                    <div class="block-content">
-                        You may join their ranks and help us improve translation quality by contributing your translations to <a href="https://crowdin.com/project/xabber" target="_blank">Xabber project</a>
-                    </div>
-
-                    <div class="block-header">
-                        <span class="block-name">License</span>
-                    </div>
-                    <div class="block-content">
-                        Xabber for Web source code is licensed under GNU AGPL v.3 license and is available on <a href="https://github.com/redsolution/xabber-web" target="_blank">GitHub</a>
-                    </div>
-                    <div class="block-content">
-                        Graphical images are licensed under Creative Commons Attribution Share-Alike (CC BY-SA) license.
-                    </div>
-                    <div class="block-content">
-                        Xabber & Redsolution logo are property of <a href="https://redsolution.com" target="_blank">Redsolution, OÜ</a>
-                    </div>
-                    <div class="block-content">
-                        View Xabber for Web <a href="https://github.com/redsolution/xabber-web/blob/master/LICENSE" target="_blank">license file</a> for more information.
-                    </div>
+    <div class="panel-content-wrap">
+        <div class="panel-content">
+            <div class="settings-block-wrap about">
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__preamble_1", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__preamble_2", [`<a href="${CLIENT_URL}" target="_blank">${CLIENT_URL}</a>`]))]}</div>
+                <div class="block-header">
+                    <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_1__header"))]}</span>
                 </div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_1__text"))]}</div>
+
+                <div class="block-header">
+                    <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_2__header"))]}</span>
+                </div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_2__text", [constants.SHORT_CLIENT_NAME]))]}</div>
+
+                <div class="block-header">
+                    <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_3__header"))]}</span>
+                </div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_1", [constants.CLIENT_NAME, `<a href="${DEVELOPER_URL}" target="_blank">${xabber.getString("client_developer_company_name")}</a>`, constants.SHORT_CLIENT_NAME]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_2", [constants.SHORT_CLIENT_NAME]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_3"))]}</div>
+                <div class="block-content flex-content">
+                    <img class="logo" src="images/redsolution-logo.png"/>
+                    <a href="https://twitter.com/Xabber_XMPP" target="_blank"><div class="btn-social twitter-color">
+                        <i class="mdi mdi-28px mdi-twitter"></i>
+                    </div></a>
+                    <a href="${CLIENT_GITHUB_URL}" target="_blank"><img class="btn-social github-logo" src="images/ic_github.png"/></a>
+                </div>
+
+                <div class="block-header">
+                    <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_4__header"))]}</span>
+                </div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_4__text_1", [constants.SHORT_CLIENT_NAME]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_4__text_2", [`<a href="${PROJECT_CROWDIN_URL}" target="_blank">${xabber.getString("web_client__screen_about__block_4__text_2__link__text", [constants.SHORT_CLIENT_NAME])}</a>`]))]}</div>
+
+                <div class="block-header">
+                    <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_5__header"))]}</span>
+                </div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_5__text_1", [constants.CLIENT_NAME, `<a href="${CLIENT_GITHUB_URL}" target="_blank">${xabber.getString("web_client__screen_about__block_5__text_1__link__text")}</a>`]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_5__text_2"))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_5__text_3", [constants.SHORT_CLIENT_NAME, xabber.getString("client_developer_company_name"), `<a href="${DEVELOPER_URL}" target="_blank">${xabber.getString("client_developer_company_full_name")}</a>`]))]}</div>
+                <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_5__text_4", [constants.CLIENT_NAME, `<a href="${CLIENT_LICENSE_GITHUB_URL}" target="_blank">${xabber.getString("web_client__screen_about__block_5__text_4__link__text")}</a>`]))]}</div>
             </div>
         </div>
     </div>
+</div>

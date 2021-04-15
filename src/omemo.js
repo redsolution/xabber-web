@@ -1,6 +1,6 @@
 define("xabber-omemo", function () {
     return function (xabber) {
-        var env = xabber.env,
+        let env = xabber.env,
             constants = env.constants,
             utils = env.utils,
             $ = env.$,
@@ -175,7 +175,7 @@ define("xabber-omemo", function () {
                     let contact = this.account.contacts.get(this.jid);
                     name = contact ? contact.get('name') : this.jid;
                 }
-                this.$('.header').text(`${name} fingerprints`);
+                this.$('.header').text(xabber.getString('omemo__dialog_fingerprints__header', [name]));
                 this.data.set('visible', true);
                 this.show();
                 this.$('div.fingerprints-content').html(env.templates.contacts.preloader());
@@ -203,25 +203,25 @@ define("xabber-omemo", function () {
 
             render: function () {
                 this.$el.openModal({
-                    complete: function () {
+                    complete: () => {
                         this.$el.detach();
                         this.data.set('visible', false);
-                    }.bind(this)
+                    }
                 });
             },
 
             editLabel: function () {
                 this.$('.set-label').removeClass('hidden');
                 this.$('.set-label').focus();
-                let saveLabel = function (ev) {
+                let saveLabel = (ev) => {
                     let label = ev.target.value.trim();
                     this.saveLabel(label);
-                }.bind(this);
+                };
                 this.$('.set-label')[0].onblur = saveLabel;
-                this.$('input.set-label')[0].onkeydown = function (ev) {
+                this.$('input.set-label')[0].onkeydown = (ev) => {
                     if (ev.keyCode == constants.KEY_ENTER)
                         saveLabel(ev);
-                }.bind(this);
+                };
             },
 
             saveLabel: function (label) {
@@ -229,9 +229,9 @@ define("xabber-omemo", function () {
                 if (label == this.account.settings.get('device_label_text'))
                     return;
                 this.account.settings.save('device_label_text', label);
-                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, function () {
+                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, () => {
                     this.updateOwnFingerprint();
-                }.bind(this));
+                });
             },
 
             updateFingerprints: async function (devices) {
@@ -241,7 +241,7 @@ define("xabber-omemo", function () {
                     $container = this.$('div.fingerprints-content');
                 dfd.done((f_count) => {
                     if (!f_count)
-                        $container.html($('<div class="empty-table">No fingerprints yet</div>'));
+                        $container.html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
                     else
                         this.$('.dropdown-button').dropdown({
                             inDuration: 100,
@@ -252,10 +252,10 @@ define("xabber-omemo", function () {
                             alignment: 'left'
                         });
                     this.jid == this.account.get('jid') && f_count++;
-                    this.$('.additional-info').text(this.jid + ', ' + f_count + (f_count > 1 ? ' devices' : ' device'));
+                    this.$('.additional-info').text(xabber.getQuantityString("omemo__dialog_fingerprints__text_devices_count", f_count, [this.jid, f_count]));
                     $container.find('.preloader-wrapper').detach();
                 });
-                for (var device_id in devices) {
+                for (let device_id in devices) {
                     if (device_id == this.omemo.get('device_id')) {
                         counter++;
                         if (devices_count == counter)
@@ -275,7 +275,7 @@ define("xabber-omemo", function () {
                             dfd.resolve($container.find('div.row').length);
                     }
                     else {
-                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
@@ -291,11 +291,11 @@ define("xabber-omemo", function () {
                             counter++;
                             if (devices_count == counter)
                                 dfd.resolve($container.find('div.row').length);
-                        }.bind(this), function () {
+                        }, () => {
                             counter++;
                             if (devices_count == counter)
                                 dfd.resolve($container.find('div.row').length);
-                        }.bind(this));
+                        });
                     }
                 }
             },
@@ -334,12 +334,12 @@ define("xabber-omemo", function () {
             },
 
             close: function () {
-                var deferred = new $.Deferred();
-                this.$el.closeModal({ complete: function () {
+                let deferred = new $.Deferred();
+                this.$el.closeModal({ complete: () => {
                         this.$el.detach();
                         this.data.set('visible', false);
                         deferred.resolve();
-                    }.bind(this)});
+                    }});
                 return deferred.promise();
             },
 
@@ -349,7 +349,7 @@ define("xabber-omemo", function () {
                     is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
-                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text('trust');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text(xabber.getString('omemo__dialog_fingerprints__button_trust'));
                 this.omemo.updateFingerprints(this.jid, device_id, fingerprint, true);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'trusted') {
@@ -368,7 +368,7 @@ define("xabber-omemo", function () {
                     is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
                     device_id = Number($target.find('div.device-id').text());
                 $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
-                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text('ignore');
+                $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text(xabber.getString('omemo__dialog_fingerprints__button_error'));
                 this.omemo.updateFingerprints(this.jid, device_id, fingerprint, false);
                 let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
                 if (device && is_trusted != 'ignore') {
@@ -395,20 +395,20 @@ define("xabber-omemo", function () {
             deleteDevice: function (ev) {
                 let $target = $(ev.target).closest('div.row'),
                     device_id = Number($target.find('div.device-id').text());
-                utils.dialogs.ask("Delete device", `Do you really want to delete device ${device_id}?`, null, { ok_button_text: 'delete'}).done(function (result) {
+                utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done((result) => {
                     if (result) {
                         $target.detach();
                         delete this.model.own_devices[device_id];
                         let conn = this.account.connection;
                         if (conn && conn.omemo) {
                             delete conn.omemo.devices[device_id];
-                            conn.omemo.publishDevice(null, null, function () {
+                            conn.omemo.publishDevice(null, null, () => {
                                 $target.detach();
-                            }.bind(this));
+                            });
                             conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
                         }
                     }
-                }.bind(this));
+                });
             },
         });
 
@@ -608,9 +608,7 @@ define("xabber-omemo", function () {
                 ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.sendOptOut({
                     to: this.jid,
                     reason: reason
-                }, function () {
-
-                }.bind(this));
+                }, () => {});
             },
 
             getBundle: async function () {
@@ -618,7 +616,7 @@ define("xabber-omemo", function () {
                     this._pending_bundle = true;
                     this._dfd_bundle = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, function (iq) {
+                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, (iq) => {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 $spk = $bundle.find('spk'),
@@ -641,13 +639,13 @@ define("xabber-omemo", function () {
                                 this._dfd_bundle.resolve({pk, spk, ik});
                                 resolve({pk, spk, ik});
                             }
-                        }.bind(this), function () {
+                        }, () => {
                             this.set('ik', null);
                             this.preKeys = [];
                             this._dfd_bundle.reject();
                             this._pending_bundle = false;
                             reject();
-                        }.bind(this));
+                        });
                     });
                 } else {
                     return new Promise((resolve, reject) => {
@@ -836,12 +834,12 @@ define("xabber-omemo", function () {
                         let conn = this.account.connection;
                         if (conn) {
                             if (conn.omemo) {
-                                conn.omemo.getDevicesNode(null, function (cb) {
+                                conn.omemo.getDevicesNode(null, (cb) => {
                                     conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
                                     this._pending_own_devices = false;
                                     this._dfd_own_devices.resolve();
                                     resolve();
-                                }.bind(this), function () {
+                                }, function () {
                                     this._pending_own_devices = false;
                                     this._dfd_own_devices.resolve();
                                     resolve();
@@ -907,15 +905,15 @@ define("xabber-omemo", function () {
                         let device = omemo.devices[device_id];
                         if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                             let label = this.account.settings.get('device_label_text');
-                            omemo.publishDevice(device_id, label, function () {
+                            omemo.publishDevice(device_id, label, () => {
                                 this.account.trigger('device_published');
-                            }.bind(this));
+                            });
                         }
                         else
                             this.account.trigger('device_published');
                     }
                     else
-                        omemo.getDevicesNode(null, function (cb) {
+                        omemo.getDevicesNode(null, (cb) => {
                             this.account.connection.omemo.devices = omemo.parseUserDevices($(cb));
                             for (let dev_id in this.account.connection.omemo.devices) {
                                 if (!this.own_devices[dev_id])
@@ -924,13 +922,13 @@ define("xabber-omemo", function () {
                             let device = omemo.devices[device_id];
                             if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                                 let label = this.account.settings.get('device_label_text');
-                                omemo.publishDevice(device_id, label, function () {
+                                omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
-                                }.bind(this));
+                                });
                             }
                             else
                                 this.account.trigger('device_published');
-                        }.bind(this));
+                        });
                 }
             },
 
@@ -953,10 +951,10 @@ define("xabber-omemo", function () {
 
             registerMessageHandler: function () {
                 this.account.connection.deleteHandler(this._msg_handler);
-                this._msg_handler = this.account.connection.addHandler(function (message) {
+                this._msg_handler = this.account.connection.addHandler((message) => {
                     this.receiveMessage(message);
                     return true;
-                }.bind(this), null, 'message', null, null, null, {'encrypted': true});
+                }, null, 'message', null, null, null, {'encrypted': true});
             },
 
             encrypt: function (contact, message) {
@@ -965,9 +963,9 @@ define("xabber-omemo", function () {
                     origin_id = $msg.children('origin-id').attr('id'),
                     plaintext = Strophe.serialize($msg.children('body')[0]) || "";
 
-                $msg.children('reference').each(function (i, ref) {
+                $msg.children('reference').each((i, ref) => {
                     plaintext += Strophe.serialize(ref);
-                }.bind(this));
+                });
 
                 origin_id && this.cached_messages.putMessage(contact, origin_id, plaintext);
 
@@ -1028,7 +1026,7 @@ define("xabber-omemo", function () {
             },
 
             receiveHeadlineMessage: function (message) {
-                var $message = $(message),
+                let $message = $(message),
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                     node = $message.find('items').attr('node');
                 if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
@@ -1040,12 +1038,6 @@ define("xabber-omemo", function () {
                             this.account.connection.omemo.devices = devices;
                             let device_id = this.get('device_id'),
                                 device = this.account.connection.omemo.devices[device_id];
-                            /*if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
-                                let label = this.account.settings.get('device_label_text');
-                                (this.account.background_connection || this.account.connection).omemo.publishDevice(device_id, label, () => {
-                                    this.account.trigger('device_published');
-                                });
-                            }*/
                             if (has_changes) {
                                 this.account.trigger("devices_updated");
                             }
@@ -1481,7 +1473,7 @@ define("xabber-omemo", function () {
                     return;
                 let conn_omemo = ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo,
                     prekeys = [];
-                pks.forEach(function (pk) {
+                pks.forEach((pk) => {
                     let id = pk.keyId,
                         pubKey = utils.ArrayBuffertoBase64(pk.keyPair.pubKey),
                         privKey = utils.ArrayBuffertoBase64(pk.keyPair.privKey),
@@ -1490,7 +1482,7 @@ define("xabber-omemo", function () {
                         prekeys.push({id: id, key: pubKey});
                         this.prekeys.put({id, key});
                     }
-                }.bind(this));
+                });
                 conn_omemo.configNode(() => {
                     conn_omemo.publishBundle({
                         spk: {id: spk.keyId, key: utils.ArrayBuffertoBase64(spk.keyPair.pubKey)},
@@ -1519,7 +1511,7 @@ define("xabber-omemo", function () {
                 if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
                     let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
                         last_id = _.sortBy(xabber.accounts.connected[0].omemo.bundle.preKeys, 'keyId').last().keyId;
-                    for (var i = ++last_id; last_id + missing_keys; i++)
+                    for (let i = ++last_id; last_id + missing_keys; i++)
                         await this.bundle.generatePreKey(i);
                     this.account.omemo.publishBundle();
                 }
@@ -1556,15 +1548,14 @@ define("xabber-omemo", function () {
                     this.set('resend_bundle', true);
                     return;
                 }
-                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, function () {
+                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, () => {
                         this.publish(spk, ik.pubKey, pks);
-                    }.bind(this),
-                    function (err) {
+                    }, (err) => {
                         if (($(err).find('error').attr('code') == 404))
-                            ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.createBundleNode(function () {
+                            ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.createBundleNode(() => {
                                 this.publish(spk, ik.pubKey, pks);
-                            }.bind(this));
-                    }.bind(this));
+                            });
+                    });
             },
 
             onOwnDevicesUpdated: async function () {
@@ -1705,7 +1696,7 @@ define("xabber-omemo", function () {
                 if (!(identityKey instanceof ArrayBuffer)) {
                     throw new Error("Expected identityKey to be an ArrayBuffer");
                 }
-                var trusted = this.get('identityKey' + identifier);
+                let trusted = this.get('identityKey' + identifier);
                 if (trusted === undefined) {
                     return Promise.resolve(true);
                 }
@@ -1722,9 +1713,9 @@ define("xabber-omemo", function () {
                 if (identifier === null || identifier === undefined)
                     throw new Error("Tried to put identity key for undefined/null key");
 
-                var address = new SignalProtocolAddress.fromString(identifier);
+                let address = new SignalProtocolAddress.fromString(identifier);
 
-                var existing = this.get('identityKey' + address.getName());
+                let existing = this.get('identityKey' + address.getName());
                 this.put('identityKey' + address.getName(), identityKey);
 
                 if (existing && libsignal.toString(identityKey) !== libsignal.toString(existing)) {
@@ -1737,7 +1728,7 @@ define("xabber-omemo", function () {
 
             /* Returns a prekeypair object or undefined */
             loadPreKey: function (keyId) {
-                var res = this.get('25519KeypreKey' + keyId);
+                let res = this.get('25519KeypreKey' + keyId);
                 if (res !== undefined) {
                     res = {pubKey: res.pubKey, privKey: res.privKey};
                 }
@@ -1755,7 +1746,7 @@ define("xabber-omemo", function () {
 
             /* Returns a signed keypair object or undefined */
             loadSignedPreKey: function (keyId) {
-                var res = this.get('25519KeysignedKey' + keyId);
+                let res = this.get('25519KeysignedKey' + keyId);
                 if (res !== undefined) {
                     res = {pubKey: res.pubKey, privKey: res.privKey};
                 }
@@ -1789,7 +1780,7 @@ define("xabber-omemo", function () {
 
             getAllSessions: function (identifier) {
                 let sessions = [];
-                for (var id in this.store) {
+                for (let id in this.store) {
                     if (id.startsWith('session' + identifier)) {
                         sessions.push({id: id, session: this.store[id]});
                     }
@@ -1798,7 +1789,7 @@ define("xabber-omemo", function () {
             },
 
             removeAllSessions: function (identifier) {
-                for (var id in this.store) {
+                for (let id in this.store) {
                     if (id.startsWith('session' + identifier)) {
                         delete this.store[id];
                     }
@@ -1852,9 +1843,9 @@ define("xabber-omemo", function () {
                     storage_name: xabber.getStorageName() + '-omemo-settings-' + this.account.get('jid'),
                     fetch: 'before'
                 });
-                setTimeout(function () {
+                setTimeout(() => {
                     this.account.omemo.onConnected();
-                }.bind(this), 2000);
+                }, 2000);
             },
 
             disableOmemo: function () {

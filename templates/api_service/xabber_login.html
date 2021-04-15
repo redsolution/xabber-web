@@ -1,35 +1,35 @@
 <div class="login-panel">
     <div class="login-panel-head noselect">
-        <img src="images/xabber-logo.png" class="client-logo">
-        <span class="client-name">Xabber</span>
+        <img src="{{CLIENT_LOGO}}" class="client-logo">
+        <span class="client-name">{{SHORT_CLIENT_NAME}}</span>
     </div>
     <div class="login-panel-form xmpp-login-form noselect">
         <div class="btn-escape">
             <i class="mdi mdi-24px mdi-close"></i>
         </div>
-        <div class="login-form-header">Email Login</div>
+        <div class="login-form-header">{[print(xabber.getString("dialog_add_xabber_account__header"))]}</div>
         <div class="input-field email-name">
             <input id="username" type="text" name="username">
-            <label for="username">Email</label>
+            <label for="username">{[print(xabber.getString("email_hint"))]}</label>
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field">
             <input id="password" type="password" name="password">
-            <label for="password">Password</label>
+            <label for="password">{[print(xabber.getString("hint_pass"))]}</label>
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">Forgot password?</a>
-            <button class="btn btn-flat btn-main-filled btn-log-in">Log In</button>
+            <a href="{{XABBER_ACCOUNT_URL}}/auth/forgot-password/" target="_blank" class="btn-flat btn-main btn-forgot-password">{[print(xabber.getString("forgot_pass"))]}</a>
+            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>
         </div>
         <div class="social-auth-wrap"><div class="social-header">
             <div class="divider"></div>
-            <div class="social-header-tip">New Account</div>
+            <div class="social-header-tip">{[print(xabber.getString("xabber_login__new_account"))]}</div>
         </div></div>
         <div class="registration-footer">
             <div class="registration-tip-wrap">
-                <span class="registration-tip">No XMPP account?</span>
-                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/?source=Xabber Web" target="_blank" class="btn-flat btn-main btn-registration">Registration</a>
+                <span class="registration-tip">{[print(xabber.getString("xabber_account__login__text_no_xmpp_acc"))]}</span>
+                <a href="{{XABBER_ACCOUNT_URL}}/auth/signup/?source=Xabber Web" target="_blank" class="btn-flat btn-main btn-registration">{[print(xabber.getString("dialog_add_xabber_account__button_registration"))]}</a>
             </div>
         </div>
         <div class="clearfix"></div>

@@ -1,15 +1,15 @@
 <div class="modal-header noselect">
     <div class="panel-header">
-        <span class="header">Forward message</span>
+        <span class="header">{[print(xabber.getString("dialog_forward_message__header"))]}</span>
     </div>
 </div>
 <div class="modal-content noselect">
     <div class="chats-search-form search-form">
         <i class="search-icon mdi mdi-20px mdi-magnify"></i>
-        <input type="text" class="search-input simple-input-field" placeholder="Search">
+        <input type="text" class="search-input simple-input-field" placeholder='{[print(xabber.getString("search"))]}'>
         <i class="close-search-icon mdi mdi-20px mdi-close"></i>
     </div>
     <div class="chat-list-wrap">
     </div>
-    <div class="error hidden">No matches</div>
+    <div class="error hidden">{[print(xabber.getString("placeholder_no_matches"))]}</div>
 </div>

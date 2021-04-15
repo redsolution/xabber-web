@@ -1,23 +1,20 @@
-    <div class="panel-content-wrap noselect">
-        <div class="main-info">
-            <div class="circle-avatar"><img></div>
-            <div class="text-info">
-                <div class="name-wrap one-line"></div>
-                <div class="jid one-line"></div>
-            </div>
+<div class="panel-content-wrap noselect">
+    <div class="main-info">
+        <div class="circle-avatar"></div>
+        <div class="text-info">
+            <div class="name-wrap one-line"></div>
+            <div class="jid one-line"></div>
         </div>
+    </div>
 
-        <div class="panel-content">
-            <div class="msg-wrap"><p class="msg-text"></p></div>
-            <div class="panel-footer noselect">
-                <div class="buttons-wrap">
-                    <button class="btn-accept btn-flat btn-main">Accept</button>
-                    <button class="btn-join btn-flat btn-main hidden">Join</button>
-                    <button class="btn-decline btn-flat btn-main">Decline</button>
-                    <button class="btn-decline-all btn-flat btn-main">Decline all</button>
-                    <button class="btn-block btn-flat btn-main">Block</button>
-                    <button class="btn-chat btn-flat btn-main hidden">Chat</button>
-                </div>
+    <div class="panel-content">
+        <div class="msg-wrap"><p class="msg-text"></p></div>
+        <div class="panel-footer noselect">
+            <div class="buttons-wrap">
+                <button class="btn-join btn-flat btn-main">{[print(xabber.getString("groupchat_join"))]}</button>
+                <button class="btn-decline btn-flat btn-main">{[print(xabber.getString("groupchat_decline"))]}</button>
+                <button class="btn-block btn-flat btn-main">{[print(xabber.getString("groupchat_block"))]}</button>
             </div>
         </div>
     </div>
+</div>

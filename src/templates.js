@@ -75,7 +75,6 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/right_expire_variants.html",
     "text!templates/contacts/group_chats/pinned_message.html",
     "text!templates/contacts/group_chats/participant_details_item.html",
-    "text!templates/contacts/group_chats/participant_placeholder.html",
     "text!templates/contacts/group_chats/participants.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
     "text!templates/contacts/group_chats/private_participant_details.html",
@@ -109,7 +108,6 @@ define("xabber-templates", [
     "text!templates/chats/messages/template-for-5.html",
     "text!templates/chats/messages/template-for-6.html",
     "text!templates/chats/messages/saved_main.html",
-    "text!templates/chats/archive_placeholder.html",
     "text!templates/chats/group_chats/pinned_message_panel.html",
     "text!templates/chats/group_chats/add_group_chat.html",
     "text!templates/chats/group_chats/invitation_panel_view.html",
@@ -141,7 +139,9 @@ define("xabber-templates", [
     "text!templates/svg/xabber-offline.html",
     "text!templates/svg/xabber-online.html",
     "text!templates/svg/saved-messages.html",
-    "text!templates/svg/palette.html"
+    "text!templates/svg/palette.html",
+    "text!templates/svg/circles.html",
+    "text!templates/svg/translate.html"
 ], function (_, $) {
 
     _.templateSettings = {
@@ -149,23 +149,23 @@ define("xabber-templates", [
         interpolate : /\{\{([\s\S]+?)\}\}/g
     };
 
-    var templates = {};
+    let templates = {};
 
-    var insertSvg = function (html) {
-        var $html = $('<div/>').html(html);
+    let insertSvg = function (html) {
+        let $html = $('<div/>').html(html);
         $html.find('.mdi-svg-template').each(function () {
-            var $el = $(this);
-            var svg_name = $el.data('svgname');
+            let $el = $(this),
+                svg_name = $el.data('svgname');
             $el.removeClass('mdi-svg-template').addClass('mdi-'+svg_name)
                 .attr('data-svgname', null);
             $el.html(templates.svg[svg_name]());
-        })
+        });
         return $html.html();
     };
 
-    var _addTemplate = function (name, options) {
+    let _addTemplate = function (name, options) {
         options || (options = {});
-        var path = name.split('.'),
+        let path = name.split('.'),
             tpl = _.template(require('text!templates/'+path.join('/')+'.html')),
             tpl_name = path.pop(),
             res = templates;
@@ -182,11 +182,11 @@ define("xabber-templates", [
         }
     };
 
-    var addTemplate = function (name) {
+    let addTemplate = function (name) {
         _addTemplate(name, {is_svg: false});
     };
 
-    var addSvgTemplate = function (name) {
+    let addSvgTemplate = function (name) {
         _addTemplate(name, {is_svg: true});
     };
 
@@ -263,7 +263,6 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
     addTemplate('contacts.group_chats.participant_details_item');
-    addTemplate('contacts.group_chats.participant_placeholder');
     addTemplate('contacts.group_chats.participants');
     addTemplate('contacts.group_chats.badge_edit_view');
     addTemplate('contacts.group_chats.private_participant_details');
@@ -297,7 +296,6 @@ define("xabber-templates", [
     addTemplate('chats.messages.template-for-5');
     addTemplate('chats.messages.template-for-6');
     addTemplate('chats.messages.saved_main');
-    addTemplate('chats.archive_placeholder');
     addTemplate('chats.group_chats.pinned_message_panel');
     addTemplate('chats.group_chats.add_group_chat');
     addTemplate('chats.group_chats.invitation_panel_view');
@@ -331,6 +329,8 @@ define("xabber-templates", [
     addSvgTemplate('svg.xabber-online');
     addSvgTemplate('svg.saved-messages');
     addSvgTemplate('svg.palette');
+    addSvgTemplate('svg.circles');
+    addSvgTemplate('svg.translate');
 
     return templates;
 });

@@ -2,7 +2,7 @@
     <div class="main-info">
         <div class="avatar-wrap">
             <div class="circle-avatar">
-                <input title="Change avatar" type="file"/>
+                <input title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
                 <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
                     <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
                 </svg>
@@ -30,34 +30,34 @@
             <i class="mdi mdi-24px mdi-dots-vertical"></i>
         </div>
         <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">
-            <li class="btn-qr-code"><span class="one-line">Show QR-code</span></li>
-            <li class="btn-edit-settings"><span class="one-line">Settings</span></li>
-            <li class="btn-default-restrictions"><span class="one-line">Default restrictions</span></li>
-            <li class="btn-delete-group"><span class="one-line">Delete group</span></li>
+            <li class="btn-qr-code"><span class="one-line">{[print(xabber.getString("contact_settings__button_show_qr_code"))]}</span></li>
+            <li class="btn-edit-settings"><span class="one-line">{[print(xabber.getString("groupchat_settings"))]}</span></li>
+            <li class="btn-default-restrictions"><span class="one-line">{[print(xabber.getString("groupchat_default_restrictions"))]}</span></li>
+            <li class="btn-delete-group"><span class="one-line">{[print(xabber.getString("group_settings__button_delete_group"))]}</span></li>
         </ul>
         <div class="btn-escape">
             <i class="mdi mdi-24px mdi-close"></i>
-            <span class="btn-text">Esc</span>
+            <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>
         </div>
         <div class="buttons-wrap">
             <div class="button-wrap btn-chat-wrap">
                 <i class="mdi mdi-24px mdi-message-text btn-chat"></i>
-                <div class="btn-name">Chat</div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_chat"))]}</div>
             </div>
             <div class="button-wrap btn-invite-wrap">
                 <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>
-                <div class="btn-name">Invite</div>
+                <div class="btn-name">{[print(xabber.getString("groupchat_bar_invite"))]}</div>
             </div>
             <div class="button-wrap btn-mute-wrap">
                 <i class="mdi mdi-24px mdi-bell btn-mute"></i>
-                <div class="btn-name">Notifications</div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>
             </div>
             <div class="button-wrap btn-leave-wrap">
                 <div class="btn-leave"><svg viewBox="0 0 24 24">
                     <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />
                 </svg>
                 </div>
-                <div class="btn-name">Leave</div>
+                <div class="btn-name">{[print(xabber.getString("groupchat_bar_leave"))]}</div>
             </div>
         </div>
     </div>
@@ -73,9 +73,9 @@
         </div>
         <div class="bottom-block">
             <ul class="tabs">
-                <li data-value="participants" class="list-variant tab"><a class="text-color-700">Members</a></li>
-                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">Invitations</a></li>
-                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">Blocked</a></li>
+                <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>
+                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("groupchat_invitations"))]}</a></li>
+                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__block_list__header"))]}</a></li>
             </ul>
             <div class="block-wrap participants-wrap"></div>
         </div>

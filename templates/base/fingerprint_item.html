@@ -1,11 +1,11 @@
 <div class="row">
-    <div title="Device ID: {{id}}&#10;Label: {[if (label) {]}{{label}}{[}else{]}none{[}]}&#10;Device ID is a unique identifier for your contact's device. You maintain separate encryption session with each device." class="device-wrap">
+    <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap">
         {[if (edit_setting) {]}
         <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}
         {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}
         <div class="device-id one-line">{{id}}</div>
-        {[if (!label) {]}<div class="device-id-label">device ID</div>{[}]}
-        {[if (edit_setting) {]}<div class="set-label-label hidden">set label</div>{[}]}
+        {[if (!label) {]}<div class="device-id-label">{[print(xabber.getString("omemo__dialog_fingerprints__label_device_id"))]}</div>{[}]}
+        {[if (edit_setting) {]}<div class="set-label-label hidden">{[print(xabber.getString("omemo__dialog_fingerprints__label_set_label"))]}</div>{[}]}
     </div>
     <div class="fingerprint-wrap">
     <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
@@ -15,14 +15,14 @@
         {[if (trust !== null) {]}
         <div class="dropdown-button" data-activates="select-status-{{id}}">
             <div class="trust-item-wrap btn-main btn-flat">
-                <div data-value="{{trust}}">{{trust}}</div>
+                <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_${trust}`))]}</div>
             </div>
         </div>
         <div id="select-status-{{id}}" class="dropdown-content noselect">
-            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">Ignore</div>
-            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">Trust</div>
+            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>
+            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>
             {[if (delete_button){]}
-            <div class="btn-main btn-flat btn-delete text-color-red-500">Delete</div>
+            <div class="btn-main btn-flat btn-delete text-color-red-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_delete"))]}</div>
             {[}]}
         </div>
         {[}]}
