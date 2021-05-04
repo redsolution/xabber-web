@@ -5519,7 +5519,7 @@ define("xabber-chats", function () {
                     if (this.account.fast_connection && ($message.attr('from') === this.account.fast_connection.jid))
                         return;
                     return this.receiveChatMessage($message[0], _.extend(options, {
-                        carbon_copied: true
+                        carbon_copied: true, carbon_direction: $carbons[0].tagName
                     }));
                 }
                 let forwarded_msgs = [];
@@ -5585,7 +5585,7 @@ define("xabber-chats", function () {
                     contact.pushInRoster();
             }
 
-            if (chat.contact.get('group_chat') && options.carbon_copied && !$message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`).length)
+            if (chat.contact.get('group_chat') && options.carbon_direction === 'sent' && !$message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`).length)
                 return;
 
             return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
