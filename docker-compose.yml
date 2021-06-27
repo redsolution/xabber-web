@@ -1,0 +1,24 @@
+version: '3.4'
+services:
+  xabber:
+    build: ./
+    ports:
+      - 3080:80
+      - 3081:8080 # HOST:CONTAINER
+    restart: always
+    environment:
+      CONNECTION_URL: "'ws://localhost:3081/websocket'"
+      LOG_LEVEL: "'WARN'"
+      
+      # ALL VALUES SHOULD BE QUOTED, STRINGS DOUBLE QUOTED
+      # because first quotes will be dropped at run time in ENTRYPOINT
+
+      # DEBUG 
+      # XABBER_ACCOUNT_URL 
+      # API_SERVICE_URL 
+      # USE_SOCIAL_AUTH 
+      # DEFAULT_LOGIN_SCREEN 
+      # STORAGE_NAME_ENDING 
+      # TURN_SERVERS_LIST 
+      # DISABLE_LOOKUP_WS 
+      # REGISTER_XMPP_ACCOUNT
