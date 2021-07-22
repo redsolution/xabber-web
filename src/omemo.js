@@ -783,7 +783,7 @@ define("xabber-omemo", function () {
                 sessions: {},
                 fingerprints: {},
                 prekeys: {},
-                retract_version: null,
+                retract_version: 0,
                 used_prekeys: {},
                 own_used_prekeys: {},
                 device_id: ""
@@ -890,6 +890,7 @@ define("xabber-omemo", function () {
             },
 
             cacheRetractVersion: function (version) {
+                console.log('version ' + version)
                 this.save('retract_version', version);
             },
 
