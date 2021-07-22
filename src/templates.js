@@ -89,6 +89,7 @@ define("xabber-templates", [
     "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_bottom.html",
+    "text!templates/chats/location_popup.html",
     "text!templates/chats/subscription_buttons.html",
     "text!templates/chats/forward_panel.html",
     "text!templates/chats/chat_placeholder.html",
@@ -98,6 +99,7 @@ define("xabber-templates", [
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
     "text!templates/chats/messages/file.html",
+    "text!templates/chats/messages/location.html",
     "text!templates/chats/messages/audio_file.html",
     "text!templates/chats/messages/audio_file_waveform.html",
     "text!templates/chats/messages/auth_request.html",
@@ -277,6 +279,7 @@ define("xabber-templates", [
     addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_bottom');
+    addTemplate('chats.location_popup');
     addTemplate('chats.subscription_buttons');
     addTemplate('chats.forward_panel');
     addTemplate('chats.chat_placeholder');
@@ -286,6 +289,7 @@ define("xabber-templates", [
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
     addTemplate('chats.messages.file');
+    addTemplate('chats.messages.location');
     addTemplate('chats.messages.audio_file');
     addTemplate('chats.messages.audio_file_waveform');
     addTemplate('chats.messages.auth_request');

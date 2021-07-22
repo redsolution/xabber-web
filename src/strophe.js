@@ -239,6 +239,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
         Strophe.addNamespace('REWRITE', 'https://xabber.com/protocol/rewrite');
         Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/references');
+        Strophe.addNamespace('GEOLOC', 'http://jabber.org/protocol/geoloc');
         Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
         Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-messages');
         Strophe.addNamespace('FILES', 'https://xabber.com/protocol/files');

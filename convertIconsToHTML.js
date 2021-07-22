@@ -16,7 +16,13 @@ let badges_names = [
         'palette',
         'saved-messages',
         'translate',
-        'circles'
+        'circles',
+        'crosshairs-gps',
+        'crosshairs-question',
+        'crosshairs',
+        'map-marker-outline',
+        'map-marker',
+        'minus',
     ],
     fs = require('fs');
 badges_names.forEach((name) => {

@@ -163,7 +163,7 @@ input[type=checkbox].filled-in:checked + label:after {
     display: none;
     position: absolute;
     bottom: -40px;
-    left: 64px;
+    left: 88px;
     border: none !important;
     z-index: 100;
 }
@@ -994,9 +994,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .modal-footer.extended .optional-button,
 [data-main-color=red] .btn-main,
 [data-main-color=red] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=red] .chat-location .ol-control a,
+[data-main-color=red] .chat-location .ol-control.ol-send button,
 [data-main-color=red] .toolbar .toolbar-item.active .toolbar-icon {
     color: #F44336;
 }
+[data-main-color=red] .ol-popup-content svg circle,
+[data-main-color=red] .ol-popup-content path,
 [data-main-color=red] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #F44336;
 }
@@ -1068,9 +1072,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .modal-footer.extended .optional-button,
 [data-main-color=pink] .btn-main,
 [data-main-color=pink] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=pink] .chat-location .ol-control a,
+[data-main-color=pink] .chat-location .ol-control.ol-send button,
 [data-main-color=pink] .toolbar .toolbar-item.active .toolbar-icon {
     color: #E91E63;
 }
+[data-main-color=pink] .ol-popup-content svg circle,
+[data-main-color=pink] .ol-popup-content path,
 [data-main-color=pink] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #E91E63 !important;
 }
@@ -1142,9 +1150,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .modal-footer.extended .optional-button,
 [data-main-color=purple] .btn-main,
 [data-main-color=purple] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=purple] .chat-location .ol-control a,
+[data-main-color=purple] .chat-location .ol-control.ol-send button,
 [data-main-color=purple] .toolbar .toolbar-item.active .toolbar-icon {
     color: #9C27B0;
 }
+[data-main-color=purple] .ol-popup-content svg circle,
+[data-main-color=purple] .ol-popup-content path,
 [data-main-color=purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #9C27B0 !important;
 }
@@ -1214,9 +1226,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .modal-footer.extended .optional-button,
 [data-main-color=deep-purple] .btn-main,
 [data-main-color=deep-purple] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=deep-purple] .chat-location .ol-control a,
+[data-main-color=deep-purple] .chat-location .ol-control.ol-send button,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active .toolbar-icon {
     color: #673AB7;
 }
+[data-main-color=deep-purple] .ol-popup-content svg circle,
+[data-main-color=deep-purple] .ol-popup-content path,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #673AB7 !important;
 }
@@ -1287,9 +1303,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .modal-footer.extended .optional-button,
 [data-main-color=indigo] .btn-main,
 [data-main-color=indigo] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=indigo] .chat-location .ol-control a,
+[data-main-color=indigo] .chat-location .ol-control.ol-send button,
 [data-main-color=indigo] .toolbar .toolbar-item.active .toolbar-icon {
     color: #3F51B5;
 }
+[data-main-color=indigo] .ol-popup-content svg circle,
+[data-main-color=indigo] .ol-popup-content path,
 [data-main-color=indigo] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #3F51B5 !important;
 }
@@ -1360,9 +1380,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .modal-footer.extended .optional-button,
 [data-main-color=blue] .btn-main,
 [data-main-color=blue] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=blue] .chat-location .ol-control a,
+[data-main-color=blue] .chat-location .ol-control.ol-send button,
 [data-main-color=blue] .toolbar .toolbar-item.active .toolbar-icon {
     color: #2196F3;
 }
+[data-main-color=blue] .ol-popup-content svg circle,
+[data-main-color=blue] .ol-popup-content path,
 [data-main-color=blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #2196F3 !important;
 }
@@ -1433,9 +1457,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .modal-footer.extended .optional-button,
 [data-main-color=light-blue] .btn-main,
 [data-main-color=light-blue] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=light-blue] .chat-location .ol-control a,
+[data-main-color=light-blue] .chat-location .ol-control.ol-send button,
 [data-main-color=light-blue] .toolbar .toolbar-item.active .toolbar-icon {
     color: #03A9F4;
 }
+[data-main-color=light-blue] .ol-popup-content svg circle,
+[data-main-color=light-blue] .ol-popup-content path,
 [data-main-color=light-blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #03A9F4 !important;
 }
@@ -1506,9 +1534,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .modal-footer.extended .optional-button,
 [data-main-color=cyan] .btn-main,
 [data-main-color=cyan] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=cyan] .chat-location .ol-control a,
+[data-main-color=cyan] .chat-location .ol-control.ol-send button,
 [data-main-color=cyan] .toolbar .toolbar-item.active .toolbar-icon {
     color: #00BCD4;
 }
+[data-main-color=cyan] .ol-popup-content svg circle,
+[data-main-color=cyan] .ol-popup-content path,
 [data-main-color=cyan] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #00BCD4 !important;
 }
@@ -1579,9 +1611,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .modal-footer.extended .optional-button,
 [data-main-color=teal] .btn-main,
 [data-main-color=teal] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=teal] .chat-location .ol-control a,
+[data-main-color=teal] .chat-location .ol-control.ol-send button,
 [data-main-color=teal] .toolbar .toolbar-item.active .toolbar-icon {
     color: #009688;
 }
+[data-main-color=teal] .ol-popup-content svg circle,
+[data-main-color=teal] .ol-popup-content path,
 [data-main-color=teal] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #009688 !important;
 }
@@ -1652,9 +1688,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .modal-footer.extended .optional-button,
 [data-main-color=green] .btn-main,
 [data-main-color=green] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=green] .chat-location .ol-control a,
+[data-main-color=green] .chat-location .ol-control.ol-send button,
 [data-main-color=green] .toolbar .toolbar-item.active .toolbar-icon {
     color: #4CAF50;
 }
+[data-main-color=green] .ol-popup-content svg circle,
+[data-main-color=green] .ol-popup-content path,
 [data-main-color=green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #4CAF50 !important;
 }
@@ -1725,9 +1765,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .modal-footer.extended .optional-button,
 [data-main-color=light-green] .btn-main,
 [data-main-color=light-green] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=light-green] .chat-location .ol-control a,
+[data-main-color=light-green] .chat-location .ol-control.ol-send button,
 [data-main-color=light-green] .toolbar .toolbar-item.active .toolbar-icon {
     color: #8BC34A;
 }
+[data-main-color=light-green] .ol-popup-content svg circle,
+[data-main-color=light-green] .ol-popup-content path,
 [data-main-color=light-green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #8BC34A !important;
 }
@@ -1798,9 +1842,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .modal-footer.extended .optional-button,
 [data-main-color=lime] .btn-main,
 [data-main-color=lime] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=lime] .chat-location .ol-control a,
+[data-main-color=lime] .chat-location .ol-control.ol-send button,
 [data-main-color=lime] .toolbar .toolbar-item.active .toolbar-icon {
     color: #CDDC39;
 }
+[data-main-color=lime] .ol-popup-content svg circle,
+[data-main-color=lime] .ol-popup-content path,
 [data-main-color=lime] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #CDDC39 !important;
 }
@@ -1871,9 +1919,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .modal-footer.extended .optional-button,
 [data-main-color=amber] .btn-main,
 [data-main-color=amber] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=amber] .chat-location .ol-control a,
+[data-main-color=amber] .chat-location .ol-control.ol-send button,
 [data-main-color=amber] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FFC107;
 }
+[data-main-color=amber] .ol-popup-content svg circle,
+[data-main-color=amber] .ol-popup-content path,
 [data-main-color=amber] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FFC107 !important;
 }
@@ -1944,9 +1996,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .modal-footer.extended .optional-button,
 [data-main-color=orange] .btn-main,
 [data-main-color=orange] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=orange] .chat-location .ol-control a,
+[data-main-color=orange] .chat-location .ol-control.ol-send button,
 [data-main-color=orange] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FF9800;
 }
+[data-main-color=orange] .ol-popup-content svg circle,
+[data-main-color=orange] .ol-popup-content path,
 [data-main-color=orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF9800 !important;
 }
@@ -2017,9 +2073,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .modal-footer.extended .optional-button,
 [data-main-color=deep-orange] .btn-main,
 [data-main-color=deep-orange] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=deep-orange] .chat-location .ol-control a,
+[data-main-color=deep-orange] .chat-location .ol-control.ol-send button,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FF5722;
 }
+[data-main-color=deep-orange] .ol-popup-content svg circle,
+[data-main-color=deep-orange] .ol-popup-content path,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF5722 !important;
 }
@@ -2090,9 +2150,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .modal-footer.extended .optional-button,
 [data-main-color=brown] .btn-main,
 [data-main-color=brown] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=brown] .chat-location .ol-control a,
+[data-main-color=brown] .chat-location .ol-control.ol-send button,
 [data-main-color=brown] .toolbar .toolbar-item.active .toolbar-icon {
     color: #795548;
 }
+[data-main-color=brown] .ol-popup-content svg circle,
+[data-main-color=brown] .ol-popup-content path,
 [data-main-color=brown] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #795548 !important;
 }
@@ -2164,9 +2228,13 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .modal-footer.extended .optional-button,
 [data-main-color=blue-grey] .btn-main,
 [data-main-color=blue-grey] input:focus:not([readonly]):not([type=checkbox]) + label,
+[data-main-color=blue-grey] .chat-location .ol-control a,
+[data-main-color=blue-grey] .chat-location .ol-control.ol-send button,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active .toolbar-icon {
     color: #607D8B;
 }
+[data-main-color=blue-grey] .ol-popup-content svg circle,
+[data-main-color=blue-grey] .ol-popup-content path,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #607D8B !important;
 }
@@ -6794,11 +6862,12 @@ img.fwd-img-preview {
     content: "\F156";
 }
 
-.mdi-link-variant[data-image='false'] {
+.mdi-link-variant[data-image='false'].mdi-link-variant[data-location='false'] {
     display: none;
 }
 
-.mdi-link-variant[data-image='true']:before {
+.mdi-link-variant[data-image='true']:before,
+.mdi-link-variant[data-location='true']:before {
     content: "\F339";
 }
 
@@ -7276,6 +7345,7 @@ img.fwd-img-preview {
 
 .input-toolbar .set-encryption,
 .input-toolbar .format-text,
+.input-toolbar .attach-location,
 .input-toolbar .attach-file {
     position: relative;
     cursor: pointer;
@@ -10316,6 +10386,374 @@ input[type='range'].voice-message-volume:focus {
     margin: 0;
 }
 
+/* ------------------ CHAT LOCATION -------------------- */
+
+.main-modal.chat-location {
+    width: 800px;
+    top: 10% !important;
+}
+.main-modal.chat-location .modal-header {
+    width: 100%;
+    height: 41px;
+    padding: 10px 24px;
+}
+.chat-location .modal-content{
+    padding: 0;
+    max-height: 490px;
+}
+.chat-location .form-group {
+    display: none;
+}
+.chat-location .ol-control.nominatim {
+    width: 40%;
+    background-color: #f5f5f5;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 30%);
+    left: 16px;
+    top: 12px;
+    max-height: 350px;
+    overflow: hidden;
+}
+.chat-location .nominatim .search {
+    height: 40px;
+    margin-left: 5%;
+    width: 90%;
+    margin-bottom: 0;
+    border: 0;
+}
+.chat-location .nominatim .search::placeholder {
+    color: #9E9E9E;
+}
+.chat-location .nominatim .search:focus {
+    box-shadow: none !important;
+}
+.chat-location .ol-collapsed ul{
+    display: none;
+}
+.chat-location .nominatim ul{
+    font-size: 11px;
+}
+.chat-location .nominatim ul.history {
+    display: none;
+}
+.chat-location .nominatim ul li{
+    padding: 7px 5%;
+    border-top: 1px solid;
+    border-color: #EEEEEE;
+    cursor: pointer;
+}
+.chat-location .nominatim ul li:hover{
+    background-color: #f0f0f0;
+}
+.chat-location .nominatim ul li i{
+    display: none;
+}
+.chat-location .nominatim ul li img{
+    display: none;
+}
+.chat-location .nominatim ul li.copy{
+    display: none;
+}
+.chat-location ul img{
+    height: 13px;
+}
+.chat-location .ol-control.nominatim button{
+    display: none !important;
+}
+.chat-location .ol-zoom {
+    top: 4em;
+    right: .5em;
+}
+.chat-location .geoposition {
+    top: 1em;
+    right: .5em;
+}
+.chat-location .ol-rotate.ol-hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+.chat-location .ol-attribution.ol-uncollapsible {
+    bottom: 4px;
+    right: 8px;
+    border-radius: 4px 0 0;
+}
+.chat-location .ol-control {
+    position: absolute;
+    border-radius: 4px;
+    padding: 2px;
+}
+.chat-location .ol-attribution {
+    text-align: right;
+    bottom: .5em;
+    right: .5em;
+    max-width: calc(100% - 1.3em);
+}
+.chat-location .ol-attribution button, .ol-attribution ul {
+    display: inline-block;
+}
+.chat-location .ol-attribution ul {
+    margin: 0;
+    padding: 0 .5em;
+    color: #000;
+    text-shadow: 0 0 2px #fff;
+}
+.chat-location .ol-attribution li {
+    display: inline;
+    list-style: none;
+    color: #9E9E9E
+}
+.chat-location .ol-control button {
+    display: block;
+    background-color: #f5f5f5;
+    margin: 1px;
+    padding: 0;
+    color: #9E9E9E;
+    font-size: 21px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    height: 30px;
+    width: 30px;
+    line-height: .4em;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 30%);
+}
+.chat-location .ol-control.ol-zoom button {
+    margin: 0 1px;
+}
+.chat-location .ol-control.ol-zoom button.ol-zoom-in {
+    border-radius: 4px 4px 0 0;
+}
+.chat-location .ol-control.ol-zoom button.ol-zoom-out {
+    border-radius: 0 0 4px 4px;
+}
+.chat-location .ol-control.ol-attribution button {
+    height: 22px;
+    width: 22px;
+}
+.chat-location .ol-control.ol-attribution span {
+    font-size: 18px;
+}
+.chat-location .ol-attribution button, .ol-attribution ul {
+    display: inline-block;
+}
+.chat-location .ol-control button:hover {
+    text-decoration: none;
+    background-color: #eeeeee;
+}
+.chat-location .ol-control.ol-search > button:before {
+    content: "";
+    position: absolute;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: .7em;
+    height: .7em;
+    background-color: transparent;
+    border: .12em solid currentColor;
+    border-radius: 100%;
+    top: .35em;
+    left: .35em;
+}
+.chat-location .ol-control.ol-search > button:after {
+    content: "";
+    position: absolute;
+    top: 1.1em;
+    left: .95em;
+    width: .45em;
+    height: .15em;
+    background-color: currentColor;
+    border-radius: .05em;
+    transform: rotate(45deg);
+    box-shadow: -0.18em 0 0 -0.03em;
+}
+.chat-location .ol-control.ol-send{
+    bottom: 2em;
+    left: 30%;
+    width: 40%;
+    box-shadow: 0px 1px 4px rgb(0 0 0 / 30%);
+    background-color: #f5f5f5;
+    display: none;
+}
+.chat-location .ol-control.ol-send .ol-send-address{
+    position: relative;
+    left: 5%;
+    top: 15%;
+    margin-top: 10px;
+    max-width: 80%;
+    font-size: 14px;
+    line-height: 14px;
+}
+.chat-location .ol-control.ol-send .ol-send-text{
+    position: relative;
+    left: 5%;
+    bottom: -20%;
+    max-width: 80%;
+    font-size: 12px;
+    line-height: 12px;
+    color: #999;
+    margin: 10px 0;
+}
+.chat-location .ol-control.ol-send button{
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 30%;
+    right: 5%;
+    font-size: 30px;
+    background: none;
+    box-shadow: none;
+}
+.chat-location .ol-popup.placemark {
+    color: #c00;
+    margin: -.65em 0;
+    transform: translate(0, -1.3em);
+}
+.chat-location .ol-popup.anim {
+    visibility: hidden;
+}
+.chat-location .ol-popup.anim.visible {
+    visibility: visible;
+}
+.chat-location .ol-popup {
+    font-size: 0.9em;
+    user-select: none;
+}
+.chat-location .ol-popup.anim.ol-popup-bottom.ol-popup-center > div {
+    transform-origin: 50% 100%;
+}
+.chat-location .ol-popup.anim.visible > div {
+  visibility: visible;
+  -webkit-transform: none;
+          transform: none;
+  -webkit-animation: ol-popup_bounce 0.4s ease 1;
+          animation: ol-popup_bounce 0.4s ease 1;
+}
+
+@-webkit-keyframes ol-popup_bounce {
+  from { -webkit-transform: scale(0); transform: scale(0); }
+  50%  { -webkit-transform: scale(1.1); transform: scale(1.1) }
+  80%  { -webkit-transform: scale(0.95); transform: scale(0.95) }
+  to   { -webkit-transform: scale(1); transform: scale(1); }
+}
+
+@keyframes ol-popup_bounce {
+  from { -webkit-transform: scale(0); transform: scale(0); }
+  50%  { -webkit-transform: scale(1.1); transform: scale(1.1) }
+  80%  { -webkit-transform: scale(0.95); transform: scale(0.95) }
+  to   { -webkit-transform: scale(1); transform: scale(1); }
+}
+.chat-location .ol-popup.placemark > div {
+    position: relative;
+    font-size: 15px;
+    background-color: #fff;
+    border: 0;
+    box-shadow: inset 0 0 0 0.45em;
+    min-width: unset;
+    box-sizing: border-box;
+}
+.chat-location .ol-popup .closeBox {
+    background-color: rgba(0, 60, 136, 0.5);
+    color: #fff;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    float: right;
+    font-size: 0.9em;
+    font-weight: 700;
+    width: 1.4em;
+    height: 1.4em;
+    margin: 5px 5px 0 0;
+    padding: 0;
+    position: relative;
+    display: none;
+}
+.chat-location .ol-popup.placemark .anchor {
+    margin: 0;
+}
+.chat-location .ol-popup-center .anchor {
+    left: 50%;
+    margin-left: 0!important;
+}
+.chat-location .ol-popup-bottom .anchor {
+    bottom: 0;
+}
+.chat-location .ol-popup .anchor {
+    display: block;
+    width: 0px;
+    height: 0px;
+    background: red;
+    position: absolute;
+    margin: -11px 22px;
+    pointer-events: none;
+}
+.chat-location .ol-popup.placemark .anchor:before {
+    content: "";
+    margin: -.5em -.5em;
+    background: transparent;
+    width: 1em;
+    height: .5em;
+    border-radius: 50%;
+    -webkit-box-shadow: 0 1em 0.5em rgb(0 0 0 / 50%);
+    box-shadow: 0 1em 0.5em rgb(0 0 0 / 50%);
+}
+.chat-location .ol-popup .anchor:after, .ol-popup .anchor:before {
+    position: absolute;
+}
+.chat-location .ol-popup.placemark .anchor:after {
+    content: "";
+    border-color: currentColor transparent;
+    border-style: solid;
+    border-width: 1em .7em 0;
+    margin: -.75em -.7em;
+    bottom: 0;
+}
+.chat-location .ol-popup .anchor:after, .ol-popup .anchor:before {
+    position: absolute;
+}
+.chat-location .ol-popup.placemark .ol-popup-content {
+    overflow: hidden;
+    cursor: default;
+    text-align: center;
+    padding: .25em 0;
+    position: absolute;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    line-height: 1em;
+    pointer-events: none;
+}
+.chat-location .ol-popup .ol-popup-content {
+    overflow: hidden;
+    cursor: default;
+    padding: 0.25em 0.5em;
+}
+.chat-location .ol-popup .ol-popup-content:after {
+    clear: both;
+    content: "";
+    display: block;
+    font-size: 0;
+    height: 0;
+}
+.chat-location .btn-main:disabled:hover {
+    background-color: transparent;
+}
+.chat-location .btn-main:disabled:hover {
+    background-color: transparent;
+}
+.chat-location .btn-main:disabled{
+    opacity: 0.3;
+}
+.chat-message .chat-msg-location-content .ol-overlaycontainer-stopevent {
+    display: none;
+}
+.chat-message .chat-msg-location-content {
+    max-width:350px;
+}
+.chat-message .chat-msg-location-content img{
+    border: 1px solid #E0E0E0;
+}
+.fwd-message.with-author .chat-msg-location-content {
+    margin-top:20px;
+}
 /* ------------------ RECENT CHATS MODAL ------------------ */
 
 .chats-list-wrap,

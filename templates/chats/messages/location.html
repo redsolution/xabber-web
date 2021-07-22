@@ -1,0 +1,68 @@
+    <div id="{{id}}" class="text-color-700" style="width:350px; height:300px;pointer-events: none;" data-type='map'><img id="img_{{ id }}" ></div>
+
+
+    <script type="text/javascript">
+    let map{{id}} = new ol.Map
+        ({	target: '{{id}}',
+        	view: new ol.View
+            ({	zoom: 15,
+                center: ol.proj.transform([{{lon}}, {{lat}}], 'EPSG:4326', 'EPSG:3857')
+            }),
+            interactions: ol.interaction.defaults({
+                altShiftDragRotate:false,
+                doubleClickZoom:false,
+                keyboard:false,
+                mouseWheelZoom:false,
+                shiftDragZoom:false,
+                dragPan:false,
+                pinchRotate:false,
+                pinchZoom:false
+            }),
+            layers: [ new ol.layer.Tile({ source: new ol.source.OSM() }) ],
+        });
+
+    map{{id}}.once('rendercomplete', function(event) {
+        const mapCanvas = document.createElement('canvas');
+        const size = map{{id}}.getSize();
+        mapCanvas.width = size[0];
+        mapCanvas.height = size[1];
+        const mapContext = mapCanvas.getContext('2d');
+        Array.prototype.forEach.call(
+          document.querySelectorAll('#{{id}} .ol-layer canvas'),
+          function (canvas) {
+            if (canvas.width > 0) {
+              const opacity = canvas.parentNode.style.opacity;
+              mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+              const transform = canvas.style.transform;
+              // Get the transform parameters from the style's transform matrix
+              const matrix = transform
+                .match(/^matrix\(([^\(]*)\)$/)[1]
+                .split(',')
+                .map(Number);
+              // Apply the transform to the export map context
+              CanvasRenderingContext2D.prototype.setTransform.apply(
+                mapContext,
+                matrix
+              );
+              path = new Path2D('M 18 17.25 C 15.9289 17.25 14.25 15.5711 14.25 13.5 C 14.25 12.5054 14.6451 11.5516 15.3483 10.8483 C 16.0516 10.1451 17.0054 9.75 18 9.75 C 20.0711 9.75 21.75 11.4289 21.75 13.5 C 21.75 14.4946 21.3549 15.4484 20.6517 16.1517 C 19.9484 16.8549 18.9946 17.25 18 17.25 M 18 3 C 12.201 3 7.5 7.701 7.5 13.5 C 7.5 21.375 18 33 18 33 C 18 33 28.5 21.375 28.5 13.5 C 28.5 7.701 23.799 3 18 3 Z');
+              mapContext.fillStyle = getComputedStyle(document.querySelector('#{{id}}')).color;
+              mapContext.drawImage(canvas, 0, 0);
+              mapContext.translate(157, 117);
+
+              mapContext.fill(path);
+            }
+          }
+        );
+        if (navigator.msSaveBlob) {
+          // link download attribute does not work on MS browsers
+          navigator.msSaveBlob(mapCanvas.msToBlob(), 'map.png');
+        } else {
+          var img = document.getElementById('img_{{ id }}');
+          dataURL = mapCanvas.toDataURL('image/png');
+          map{{id}}.setTarget(null)
+          map{{id}} = null;
+          img.src= dataURL
+        }
+    });
+    </script>
+</div>
