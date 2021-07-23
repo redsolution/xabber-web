@@ -3582,8 +3582,8 @@ define("xabber-chats", function () {
                         template_for_location_content = $(templates.messages.location(copied_attrs));
                         $message.find('.chat-msg-location-content').attr('lon', copied_attrs.lon);
                         $message.find('.chat-msg-location-content').attr('lat', copied_attrs.lat);
-                        this.locationOnload($message);
                         $message.find('.chat-msg-location-content').append(template_for_location_content);
+                        this.locationOnload($message);
                     });
                 }
             }
@@ -7244,7 +7244,6 @@ define("xabber-chats", function () {
             this.view = options.content;
             this.model = this.view.model;
             this.account = this.view.account;
-            this.contact = this.model.contact;
 
         },
 
@@ -7301,7 +7300,7 @@ define("xabber-chats", function () {
                 }).c('lat').t(lat).up().c('lon').t(lon).up().up().up();
                 stanza.c('body').t(body).up();
                 if (this.model.get('encrypted') && this.account.omemo) {
-                    this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
+                    this.account.omemo.encrypt(this.model.contact, stanza).then((msg) => {
                         if (msg) {
                             stanza = msg.message;
                             message.set('trusted', msg.is_trusted);

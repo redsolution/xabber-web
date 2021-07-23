@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.9","version_description":"Geolocation copy button, geoloc last message and pinned message fixes and visuals. Added and updated translation strings"}'
+'{"version_number":"2.3.10","version_description":"Fixed expanded message geolocation popup"}'
 )});
