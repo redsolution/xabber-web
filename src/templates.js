@@ -143,7 +143,14 @@ define("xabber-templates", [
     "text!templates/svg/saved-messages.html",
     "text!templates/svg/palette.html",
     "text!templates/svg/circles.html",
-    "text!templates/svg/translate.html"
+    "text!templates/svg/translate.html",
+    "text!templates/svg/crosshairs-gps.html",
+    "text!templates/svg/crosshairs-question.html",
+    "text!templates/svg/crosshairs.html",
+    "text!templates/svg/map-marker-outline.html",
+    "text!templates/svg/map-marker.html",
+    "text!templates/svg/minus.html"
+
 ], function (_, $) {
 
     _.templateSettings = {
@@ -335,6 +342,12 @@ define("xabber-templates", [
     addSvgTemplate('svg.palette');
     addSvgTemplate('svg.circles');
     addSvgTemplate('svg.translate');
+    addSvgTemplate('svg.crosshairs-gps');
+    addSvgTemplate('svg.crosshairs-question');
+    addSvgTemplate('svg.crosshairs');
+    addSvgTemplate('svg.map-marker-outline');
+    addSvgTemplate('svg.map-marker');
+    addSvgTemplate('svg.minus');
 
     return templates;
 });

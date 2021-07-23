@@ -342,11 +342,12 @@ define("xabber-mentions", function () {
                     forwarded_message = msg.get('forwarded_message'),
                     msg_files = msg.get('files') || [],
                     msg_images = msg.get('images') || [],
+                    msg_locations = msg.get('locations') || [],
                     msg_text = (forwarded_message) ? (msg.get('message') || xabber.getString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText();
                 this.model.set({timestamp: timestamp});
-                if (msg_files.length || msg_images.length) {
+                if (msg_files.length || msg_images.length || msg_locations.length) {
                     let $colored_span = $('<span class="text-color-500"/>');
-                    if (msg_files.length && msg_images.length)
+                    if (msg_files.length && msg_images.length && msg_locations.length)
                         msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                     else {
                         if (msg_files.length > 0) {
@@ -358,6 +359,9 @@ define("xabber-mentions", function () {
                             let total_size = 0;
                             msg_images.forEach((f) => {total_size+=Number(f.size)});
                             msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__images", msg_images.length) + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
+                        }
+                        if (msg_locations.length > 0) {
+                            msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__locations", msg_locations.length));
                         }
                     }
                     this.$('.last-msg').text("").append(msg_text);

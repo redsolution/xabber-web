@@ -1728,20 +1728,22 @@ define("xabber-chats", function () {
             let msg_time = msg.get('time'),
                 timestamp = msg.get('timestamp'), msg_from = "",
                 forwarded_message = msg.get('forwarded_message'),
-                msg_files = msg.get('files') || [], msg_images = msg.get('images') || [],
+                msg_files = msg.get('files') || [],
+                msg_images = msg.get('images') || [],
+                msg_locations = msg.get('locations') || [],
                 msg_text = forwarded_message ? (msg.get('message') || xabber.getQuantityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
                 msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact && this.contact.my_info && this.contact.my_info.attributes || {};
             this.model.set({timestamp: timestamp});
             if (this.model.get('group_chat'))
                 msg_from = msg_user_info.nickname || msg_user_info.jid || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid')) || "";
             msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
-            if (msg_files.length || msg_images.length) {
+            if (msg_files.length || msg_images.length || msg_locations.length) {
                 let $colored_span = $('<span class="text-color-500"/>');
                 if (msg.get('type') === 'file_upload') {
                     msg_images = msg_files.filter(f => f.type && utils.isImageType(f.type));
                     msg_files = msg_files.filter(f => !(f.type && utils.isImageType(f.type)));
                 }
-                if (msg_files.length && msg_images.length)
+                if (msg_files.length && msg_images.length && msg_locations.length)
                     msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                 else {
                     if (msg_files.length == 1 && (msg_files[0].is_audio || msg_files[0].voice))
@@ -1755,6 +1757,9 @@ define("xabber-chats", function () {
                         let total_size = 0;
                         msg_images.forEach((f) => {total_size+=Number(f.size)});
                         msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__images", msg_images.length) + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
+                    }
+                    if (msg_locations.length > 0) {
+                        msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__locations", msg_locations.length));
                     }
                 }
                 this.$('.last-msg').html("").append(msg_from).append(msg_text);
@@ -1906,6 +1911,10 @@ define("xabber-chats", function () {
               this.chat_content.onClickLink(ev);
           },
 
+          onClickLocationLink:function (ev) {
+              this.chat_content.onClickLocationLink(ev);
+          },
+
           onScroll: function () {
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
               this._prev_scrolltop = this._scrolltop || 0;
@@ -1965,6 +1974,7 @@ define("xabber-chats", function () {
               'click .chat-message': 'onClickMessage',
               'click .chat-msg-location-content': 'onClickLocation',
               'click .mdi-link-variant': 'onClickLink',
+              'click .msg-copy-location' : 'onClickLocationLink',
               "keyup .messages-search-form": "keyupSearch"
           },
 
@@ -2092,6 +2102,7 @@ define("xabber-chats", function () {
               'click .chat-message': 'onClickMessage',
               'click .chat-msg-location-content': 'onClickLocation',
               'click .mdi-link-variant': 'onClickLink',
+              'click .msg-copy-location' : 'onClickLocationLink',
               "click .btn-cancel-searching": "openChat",
               "keyup .messages-search-form": "keyupSearch"
           },
@@ -2165,6 +2176,7 @@ define("xabber-chats", function () {
               'click .chat-message': 'onClickMessage',
               'click .chat-msg-location-content': 'onClickLocation',
               'click .mdi-link-variant': 'onClickLink',
+              'click .msg-copy-location' : 'onClickLocationLink',
               'click .btn-cancel-selection' : 'openChat',
               'click .btn-retract-messages' : 'retractMessages',
               "keyup .messages-search-form": "keyupSearch"
@@ -2353,6 +2365,7 @@ define("xabber-chats", function () {
             'click .chat-message': 'onClickMessage',
             'click .chat-msg-location-content': 'onClickLocation',
             'click .mdi-link-variant' : 'onClickLink',
+            'click .msg-copy-location' : 'onClickLocationLink',
             'click .pinned-message' : 'showPinnedMessage',
             "keyup .messages-search-form": "keyupSearch",
             "click .btn-cancel-searching": "cancelSearch",
@@ -2869,8 +2882,9 @@ define("xabber-chats", function () {
         },
 
         locationOnload: function ($message) {
-            let $copy_link_icon = $message.find('.mdi-link-variant');
-            $copy_link_icon.attr({
+            let $copy_location_div = $message.find('.msg-copy-location-content');
+            $copy_location_div.html(env.templates.svg['map-marker-outline']());
+            $copy_location_div.attr({
                 'data-location': 'true'
             });
         },
@@ -3568,6 +3582,7 @@ define("xabber-chats", function () {
                         template_for_location_content = $(templates.messages.location(copied_attrs));
                         $message.find('.chat-msg-location-content').attr('lon', copied_attrs.lon);
                         $message.find('.chat-msg-location-content').attr('lat', copied_attrs.lat);
+                        this.locationOnload($message);
                         $message.find('.chat-msg-location-content').append(template_for_location_content);
                     });
                 }
@@ -4633,13 +4648,11 @@ define("xabber-chats", function () {
             }
             let files = msg.get('files'),
                 images = msg.get('images'),
-                locations = msg.get('locations'),
                 fwd_messages = [],
                 files_links = '';
             if (msg.get('forwarded_message')) {
                 msg.get('forwarded_message').forEach((message) => {
                     message.get('images') && fwd_messages.push(message.get('images'));
-                    message.get('locations') && fwd_messages.push(message.get('locations'));
                 });
             }
             $(files).each(function(idx, file) {
@@ -4652,23 +4665,45 @@ define("xabber-chats", function () {
                     files_links += '\n';
                 files_links += image.sources[0];
             });
-            $(locations).each(function(idx, location) {
-                files_links += 'geo:' + location.lat + ',' + location.lon;
-            });
             $(fwd_messages).each(function (idx, message) {
-                $(message).each(function (i, object) {
+                $(message).each(function (i, file) {
                     if (files_links != "")
                         files_links += '\n';
-                    if (object.lat && object.lon)
-                    {
-                        files_links += 'geo:' + object.lat + ',' + object.lon;
-                    }
-                    else {
-                        files_links += object.sources[0];
-                    }
+                    files_links += file.sources[0];
                 });
             });
             utils.copyTextToClipboard(files_links, xabber.getString("toast_link_copied"), xabber.getString("toast__not_copied_in_clipboard"));
+        },
+
+
+        onClickLocationLink: function (ev) {
+            ev.preventDefault()
+            let $elem = $(ev.target),
+                $message = $elem.closest('.chat-message'),
+                msg = this.model.messages.get($message.data('uniqueid'));
+            if (!msg) {
+                msg = this.account.participant_messages.get($message.data('uniqueid'));
+            }
+            let locations = msg.get('locations'),
+                fwd_messages = [],
+                location_links = '';
+            if (msg.get('forwarded_message')) {
+                msg.get('forwarded_message').forEach((message) => {
+                    message.get('locations') && fwd_messages.push(message.get('locations'));
+                });
+            }
+            $(locations).each(function(idx, location) {
+                location_links += 'geo:' + location.lat + ',' + location.lon;
+            });
+            $(fwd_messages).each(function (idx, message) {
+                $(message).each(function (i, object) {
+                    if (location_links != "")
+                        location_links += '\n';
+                    location_links += 'geo:' + object.lat + ',' + object.lon;
+                });
+            });
+
+            utils.copyTextToClipboard(location_links, xabber.getString("toast_location_copied"), xabber.getString("toast__not_copied_in_clipboard"));
         },
 
         showParticipantProperties: function (participant_id, options) {
@@ -4719,7 +4754,7 @@ define("xabber-chats", function () {
             if ($elem.hasClass('msg-delivering-state')) {
                 return;
             }
-            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
+            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('msg-copy-location-content') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
                 let $msg = $elem.closest('.chat-message'), msg,
                     $fwd_message = $elem.parents('.fwd-message').first(),
                     is_forwarded = $fwd_message.length > 0,
@@ -6327,14 +6362,15 @@ define("xabber-chats", function () {
                   forwarded_message = msg.get('forwarded_message'),
                   msg_files = msg.get('files') || [],
                   msg_images = msg.get('images') || [],
+                  msg_locations = msg.get('locations') || [],
                   msg_text = (forwarded_message) ? (msg.get('message') || xabber.getQuantityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
                   msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes || {}, msg_from = "";
               this.model.set({timestamp: timestamp});
               if (this.model.get('group_chat'))
                   msg_from = msg_user_info.nickname || msg_user_info.jid || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid')) || "";
-              if (msg_files.length || msg_images.length) {
+              if (msg_files.length || msg_images.length || msg_locations.length) {
                   let $colored_span = $('<span class="text-color-500"/>');
-                  if (msg_files.length && msg_images.length)
+                  if (msg_files.length && msg_images.length && msg_locations.length)
                       msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                   else {
                       if (msg_files.length == 1 && (msg_files[0].is_audio || msg_files[0].voice))
@@ -6348,6 +6384,9 @@ define("xabber-chats", function () {
                           let total_size = 0;
                           msg_images.forEach((f) => {total_size+=Number(f.size)});
                           msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__images", msg_images.length) + (total_size > 0 ? `, ${utils.pretty_size(total_size)}` : ""));
+                      }
+                      if (msg_locations.length > 0) {
+                          msg_text = $colored_span.text(xabber.getQuantityString("recent_chat__last_message__locations", msg_locations.length));
                       }
                   }
                   this.$('.last-msg').html("").append(msg_from).append(msg_text);
@@ -8407,14 +8446,14 @@ define("xabber-chats", function () {
                     }
                     else {
                         msg_text = (msg.get('message') || msg.get('original_message')).emojify();
-                        let fwd_images = msg.get('images'), fwd_files = msg.get('files');
+                        let fwd_images = msg.get('images'), fwd_files = msg.get('files');fwd_locations = msg.get('locations');
                         if ((fwd_images) && (fwd_files)) {
                             msg_text = msg.get('images').length + msg.get('files').length + ' attachments';
                         }
                         else {
                             if (fwd_images) {
                                 if (fwd_images.length > 1) {
-                                    msg_text = xabber.getString("recent_chat__last_message__images", [fwd_images.length]);
+                                    msg_text = xabber.getString("recent_chat__last_message__images_plural_1", [fwd_images.length]);
                                 }
                                 else {
                                     image_preview = _.clone(msg.get('images')[0]);
@@ -8423,11 +8462,19 @@ define("xabber-chats", function () {
                             }
                             if (fwd_files) {
                                 if (msg.get('files').length > 1) {
-                                    msg_text =  xabber.getString("recent_chat__last_message__files", [msg.get('files').length]);
+                                    msg_text =  xabber.getString("recent_chat__last_message__files_plural_1", [msg.get('files').length]);
                                 }
                                 else {
                                     let filesize = msg.get('files')[0].size;
                                     msg_text = filesize ? msg.get('files')[0].name + ",   " + filesize : msg.get('files')[0].name;
+                                }
+                            }
+                            if (fwd_locations) {
+                                if (msg.get('locations').length > 1) {
+                                    msg_text =  xabber.getString("recent_chat__last_message__locations_plural_1", [msg.get('locations').length]);
+                                }
+                                else {
+                                    msg_text = xabber.getString("recent_chat__last_message__locations_plural_0");
                                 }
                             }
                         }

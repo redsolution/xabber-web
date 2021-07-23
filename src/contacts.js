@@ -643,6 +643,7 @@ define("xabber-contacts", function () {
                 else {
                     let images = message.get('images'),
                         files = message.get('files'),
+                        locations = message.get('locations'),
                         fwd_message = message.get('forwarded_message'),
                         fwd_msg_author = null,
                         msg_text = _.escape(message.get('message'));
@@ -658,15 +659,21 @@ define("xabber-contacts", function () {
                     }
                     if (images) {
                         if (images.length == 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("image_message")}: </span>` + images[0].name;
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images_plural_0")}: </span>` + images[0].name;
                         if (images.length > 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images", [images.length])}</span>`;
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images_plural_1", [images.length])}</span>`;
                     }
                     if (files) {
                         if (files.length == 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("file_message")}: </span>` + files[0].name + ' (' + files[0].size + ')';
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files_plural_0")}: </span>` + files[0].name + ' (' + files[0].size + ')';
                         if (files.length > 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files", [files.length])}</span>`;
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files_plural_1", [files.length])}</span>`;
+                    }
+                    if (locations) {
+                        if (locations.length == 1)
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__locations_plural_0")}</span>`;
+                        if (locations.length > 1)
+                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__locations_plural_1", [locations.length])}</span>`;
                     }
 
                     let user_info = message.get('user_info') || {},

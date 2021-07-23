@@ -6807,12 +6807,35 @@ img.fwd-img-preview {
     border-radius: 50px;
 }
 
-.msg-copy-link {
+.msg-copy-link,
+.msg-copy-location {
     position: absolute;
     left: 28%;
     top: 28px;
 }
-
+.msg-copy-location .msg-copy-location-content {
+    position: absolute;
+    fill: #696969;
+    width: 30px;
+    height: 30px;
+    border-radius: 50px;
+}
+.msg-copy-location svg {
+    display: block;
+    margin: 0 auto;
+    height: 30px;
+    align-self: center;
+    pointer-events: none;
+}
+.msg-copy-location svg path {
+    fill: #696969;
+}
+.msg-copy-location .msg-copy-location-content:hover {
+    background-color: rgba(0,0,0,0.4);
+}
+.msg-copy-location .msg-copy-location-content:hover svg path{
+    fill: rgb(255,255,255);
+}
 .chat-message .mdi-link-variant:hover {
     background-color: rgba(0,0,0,0.4);
     color: rgb(255,255,255);
@@ -6861,13 +6884,12 @@ img.fwd-img-preview {
 .msg-delivering-state[data-state=error]:before {
     content: "\F156";
 }
-
-.mdi-link-variant[data-image='false'].mdi-link-variant[data-location='false'] {
+.mdi-link-variant[data-image='false'],
+.msg-copy-location div[data-location='false'] {
     display: none;
 }
 
-.mdi-link-variant[data-image='true']:before,
-.mdi-link-variant[data-location='true']:before {
+.mdi-link-variant[data-image='true']:before,{
     content: "\F339";
 }
 
