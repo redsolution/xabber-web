@@ -42,11 +42,6 @@
                 overlays: [placemark, placemark_my_location]
             });
 
-            if (popup_coordinates) {
-                placemark.show(ol.proj.transform(popup_coordinates, 'EPSG:4326', 'EPSG:3857'));
-
-            }
-
             var getCurrentPositionControl = function (e) {
                 navigator.geolocation.getCurrentPosition(success, error, options);
             };
@@ -76,7 +71,13 @@
             button_geoposition.addEventListener('click', getCurrentPositionControl, false);
 
             var custom_element_position = document.createElement('div');
-            custom_element_position.className = 'geoposition ol-control ol-unselectable';
+
+            if (popup_coordinates) {
+                custom_element_position.className = 'geoposition placemark-exist ol-control ol-unselectable';
+            }
+            else {
+                custom_element_position.className = 'geoposition ol-control ol-unselectable';
+            }
             custom_element_position.appendChild(button_geoposition);
 
             geoposition = new ol.control.Control({
@@ -86,6 +87,35 @@
             });
 
             map.addControl(geoposition);
+
+            if (popup_coordinates) {
+                placemark.show(ol.proj.transform(popup_coordinates, 'EPSG:4326', 'EPSG:3857'));
+                $('.ol-zoom.ol-unselectable.ol-control').addClass('placemark-exist');
+                var getPlacemarkPositionControl = function (e) {
+                    map.getView().setCenter(ol.proj.transform(popup_coordinates, 'EPSG:4326', 'EPSG:3857'));
+                    map.getView().setZoom(15);
+
+                };
+
+                var button_placemark_position = document.createElement('button');
+                button_placemark_position.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>';
+
+
+                button_placemark_position.addEventListener('click', getPlacemarkPositionControl, false);
+
+                var custom_element_placemark_position = document.createElement('div');
+                custom_element_placemark_position.className = 'placemark-position ol-control ol-unselectable';
+                custom_element_placemark_position.appendChild(button_placemark_position);
+
+                placemark_position = new ol.control.Control({
+                    className: 'myControl',
+                    element: custom_element_placemark_position,
+                    target: document.getElementById("myCustomControl")
+                });
+
+                map.addControl(placemark_position);
+
+            }
 
             if (!popup_coordinates) {
 
@@ -196,7 +226,7 @@
                         $('#send_address').text(final_text);
                     }
                     else {
-                        $('#send_address').text('Location');
+                        $('#send_address').text(xabber.getString("location_fragment__address_error__title"));
                     }
                 }
 

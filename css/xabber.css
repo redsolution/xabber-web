@@ -5430,6 +5430,7 @@ input[type=text].simple-input-field:hover {
 .chat-item .chat-icon svg,
 .chat-head-wrap .chat-icon svg {
     position: absolute;
+    pointer-events: none;
     top: -1px;
     left: -1px;
 }
@@ -10486,6 +10487,18 @@ input[type='range'].voice-message-volume:focus {
     right: .5em;
 }
 .chat-location .geoposition {
+    top: 1em;
+    right: .5em;
+}
+.chat-location .ol-zoom.placemark-exist {
+    top: 7em;
+    right: .5em;
+}
+.chat-location .geoposition.placemark-exist {
+    top: 4em;
+    right: .5em;
+}
+.chat-location .placemark-position {
     top: 1em;
     right: .5em;
 }

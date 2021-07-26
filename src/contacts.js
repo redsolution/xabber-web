@@ -651,31 +651,34 @@ define("xabber-contacts", function () {
                         let user_info = fwd_message[0].get('user_info') || {};
                         if (msg_text) {
                         } else if (fwd_message.length > 1)
-                            msg_text = xabber.getString("forwarded_messages_count_plural", [fwd_message.length]);
+                            msg_text = xabber.getQuantityString("forwarded_messages_count", fwd_message.length);
                         else {
-                            msg_text = fwd_message[0].get('message') || fwd_message[0].get('forwarded_message') && xabber.getString("forwarded_messages_count_plural", [fwd_message[0].get('forwarded_message').length]);
+                            msg_text = fwd_message[0].get('message') || fwd_message[0].get('forwarded_message') && xabber.getString("forwarded_messages_count_plural_0", [fwd_message[0].get('forwarded_message').length]);
                             fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
-                    if (images) {
-                        if (images.length == 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images_plural_0")}: </span>` + images[0].name;
-                        if (images.length > 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images_plural_1", [images.length])}</span>`;
-                    }
-                    if (files) {
-                        if (files.length == 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files_plural_0")}: </span>` + files[0].name + ' (' + files[0].size + ')';
-                        if (files.length > 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files_plural_1", [files.length])}</span>`;
+                    if (images.length && files.length)
+                        msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__attachments", [images.length + files.length])}</span>`;
+                    else {
+                        if (images) {
+                            if (images.length == 1)
+                                msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__images_plural_0")}: </span>` + images[0].name;
+                            if (images.length > 1)
+                                msg_text = `<span class=text-color-500>${xabber.getQuantityString("recent_chat__last_message__images", images.length)}</span>`;
+                        }
+                        if (files) {
+                            if (files.length == 1)
+                                msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__files_plural_0")}: </span>` + files[0].name + ' (' + files[0].size + ')';
+                            if (files.length > 1)
+                                msg_text = `<span class=text-color-500>${xabber.getQuantityString("recent_chat__last_message__files", files.length)}</span>`;
+                        }
                     }
                     if (locations) {
                         if (locations.length == 1)
                             msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__locations_plural_0")}</span>`;
                         if (locations.length > 1)
-                            msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__locations_plural_1", [locations.length])}</span>`;
+                            msg_text = `<span class=text-color-500>${xabber.getQuantityString("recent_chat__last_message__locations", locations.length)}</span>`;
                     }
-
                     let user_info = message.get('user_info') || {},
                         chat_content = this.account.chats.get(this.hash_id).item_view.content,
                         is_scrolled = chat_content.isScrolledToBottom(),

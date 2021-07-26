@@ -347,7 +347,7 @@ define("xabber-mentions", function () {
                 this.model.set({timestamp: timestamp});
                 if (msg_files.length || msg_images.length || msg_locations.length) {
                     let $colored_span = $('<span class="text-color-500"/>');
-                    if (msg_files.length && msg_images.length && msg_locations.length)
+                    if (msg_files.length && msg_images.length)
                         msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
                     else {
                         if (msg_files.length > 0) {
