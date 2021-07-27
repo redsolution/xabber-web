@@ -5014,8 +5014,8 @@ define("xabber-chats", function () {
                 else {
                     $(ev.target).attr('title', xabber.getString("location_fragment__address_error__title"));
                 }
+                $(ev.target).removeClass('no-title')
             })
-            $(ev.target).removeClass('no-title')
         },
 
         retrySendMessage: function (ev) {

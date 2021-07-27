@@ -39055,10 +39055,10 @@ define('text!templates/chats/chat_placeholder.html',[],function () { return '<di
 define('text!templates/chats/message_item.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="circle-avatar"></div>\n<div class="chat-icon hidden"></div>\n<div class="recent-chat-info">\n    <div class="chat-title-wrap">\n        <p class="chat-title one-line"></p>\n        <p class="last-msg-date"></p>\n    </div>\n    <p class="last-msg one-line"></p>\n</div>\n';});
 
 
-define('text!templates/chats/messages/main.html',[],function () { return '<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role.toLowerCase() != \'member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n        <div class="chat-msg-location-content no-title"></div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <div class="edited-info one-line hidden"></div>\n        {[ if (is_sender) { ]}\n            <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n            <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div></div>\n        {[ } ]}\n        <div class="msg-copy-link" title=\'{[print(xabber.getString("action_copy_link"))]}\'><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n        <div class="msg-copy-location"  title=\'{[print(xabber.getString("action_copy_location"))]}\'><div class="msg-copy-location-content" data-location="false"></div></div>\n    </div>\n</div>\n';});
+define('text!templates/chats/messages/main.html',[],function () { return '<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">\n    <div class="left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n\n    <div class="msg-wrap">\n        <div class="chat-msg-author-wrap">\n            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if (role && (role.toLowerCase() != \'member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n        <div class="chat-msg-location-content no-title" title="{[print(xabber.getString(\'location_fragment__address_error__title\'))]}"></div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n        <div class="edited-info one-line hidden"></div>\n        {[ if (is_sender) { ]}\n            <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>\n            <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div></div>\n        {[ } ]}\n        <div class="msg-copy-link" title=\'{[print(xabber.getString("action_copy_link"))]}\'><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>\n        <div class="msg-copy-location"  title=\'{[print(xabber.getString("action_copy_location"))]}\'><div class="msg-copy-location-content" data-location="false"></div></div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/chats/messages/forwarded.html',[],function () { return '<div class="fwd-message" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-from-id="{{from_id}}" data-from="{{from_jid}}">\n    <div class="fwd-left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n    <div class="msg-wrap">\n        <div class="fwd-msg-author-wrap">\n            <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if ((role)&&(role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n            <div class="msg-time selectable-text one-line" title="{{time}}">{{short_time}}</div>\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n        <div class="chat-msg-location-content no-title"></div>\n    </div>\n</div>\n';});
+define('text!templates/chats/messages/forwarded.html',[],function () { return '<div class="fwd-message" data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-from-id="{{from_id}}" data-from="{{from_jid}}">\n    <div class="fwd-left-side noselect">\n        <div class="circle-avatar"></div>\n    </div>\n    <div class="msg-wrap">\n        <div class="fwd-msg-author-wrap">\n            <div class="fwd-msg-author text-color-700 one-line">{{username}}</div>\n            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>\n            {[ } if ((role)&&(role != \'Member\')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}\n            <div class="msg-time selectable-text one-line" title="{{time}}">{{short_time}}</div>\n        </div>\n        <div class="fwd-msgs-block"></div>\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n        <div class="chat-msg-media-content"></div>\n        <div class="chat-msg-location-content no-title" title="{[print(xabber.getString(\'location_fragment__address_error__title\'))]}"></div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/chats/messages/system.html',[],function () { return '<div class="chat-message system"  data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="msg-wrap">\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n    </div>\n</div>\n';});
@@ -40093,11 +40093,11 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
             },
 
             warning: function (text, dialog_options) {
-                return this.common(getString("dialog_warning__header"), text, {ok_button: true}, dialog_options);
+                return this.common(getString("warning"), text, {ok_button: true}, dialog_options);
             },
 
             error: function (text, dialog_options) {
-                return this.common(getString("dialog_error__header"), text, {ok_button: true}, dialog_options);
+                return this.common(getString("xabber_account__login__dialog_error__header"), text, {ok_button: true}, dialog_options);
             },
 
             ask: function (header, text, dialog_options, buttons) {
@@ -40868,7 +40868,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":39,"az":2,"be":19,"bg":36,"bs":0,"ca":36,"cs":100,"cy":0,"da":0,"de":61,"el":41,"es-ES":49,"es-latin":10,"et":0,"fa":6,"fi":13,"fil":20,"fr":28,"ga-IE":0,"he":30,"hi":0,"hr":0,"hu":20,"hy-AM":12,"id":64,"is":0,"it":99,"ja":28,"ka":0,"kmr":0,"ko":1,"ku":4,"ky":7,"la-LA":0,"lb":0,"lt":5,"me":0,"mk":0,"mn":0,"mr":0,"ms":9,"nb":30,"ne-NP":0,"nl":28,"no":0,"oc":18,"pa-IN":0,"pl":89,"pt-BR":93,"pt-PT":20,"qya-AA":0,"ro":23,"ru":78,"sco":0,"si-LK":0,"sk":28,"sl":39,"sq":4,"sr":18,"sr-Cyrl-ME":0,"sv-SE":53,"sw":1,"ta":2,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":51,"uk":39,"uz":0,"vi":18,"yo":0,"zh-CN":40,"zh-TW":15,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.11","version_description":"Fixed strings in forwarded and attachments, New string for location in popup, Location name on location hover, Center map on placemark button"}'
+'{"version_number":"2.3.12","version_description":"Location hover title default string, fixed error and warning strings, fixed pinned message rendering"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -50267,7 +50267,7 @@ define("xabber-contacts", [],function () {
                             fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
-                    if (images.length && files.length)
+                    if (images && files)
                         msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__attachments", [images.length + files.length])}</span>`;
                     else {
                         if (images) {
@@ -59742,8 +59742,8 @@ define("xabber-chats", [],function () {
                 else {
                     $(ev.target).attr('title', xabber.getString("location_fragment__address_error__title"));
                 }
+                $(ev.target).removeClass('no-title')
             })
-            $(ev.target).removeClass('no-title')
         },
 
         retrySendMessage: function (ev) {

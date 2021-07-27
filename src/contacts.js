@@ -657,7 +657,7 @@ define("xabber-contacts", function () {
                             fwd_msg_author = user_info.nickname || fwd_message[0].get('from_jid') || user_info.id;
                         }
                     }
-                    if (images.length && files.length)
+                    if (images && files)
                         msg_text = `<span class=text-color-500>${xabber.getString("recent_chat__last_message__attachments", [images.length + files.length])}</span>`;
                     else {
                         if (images) {
