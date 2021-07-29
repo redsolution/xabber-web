@@ -4994,8 +4994,10 @@ define("xabber-chats", function () {
             ev.preventDefault();
             let lon = $(ev.target).attr('lon')
                 lat = $(ev.target).attr('lat')
+                location_name = $(ev.target).attr('title')
             if (lon && lat){
                 window.popup_coordinates = [lon, lat]
+                window.location_name = location_name
                 new xabber.ChatLocationView({content: this}).show(ev);
             }
         },
@@ -5007,7 +5009,6 @@ define("xabber-chats", function () {
             fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat).then(function(response) {
                 return response.json();
             }).then(function(json) {
-                console.log(json)
                 if (!json.error) {
                     $(ev.target).attr('title', json.display_name);
                 }
@@ -5085,8 +5086,10 @@ define("xabber-chats", function () {
             ev.preventDefault();
             let lon = $(ev.target).attr('lon')
                 lat = $(ev.target).attr('lat')
+                location_name = $(ev.target).attr('title')
             if (lon && lat){
                 window.popup_coordinates = [lon, lat]
+                window.location_name = location_name
                 new xabber.ChatLocationView({content: this}).show(ev);
             }
         },
@@ -7266,6 +7269,7 @@ define("xabber-chats", function () {
         events: {
             "click .btn-cancel": "close",
             "click .btn-apply": "sendLocation",
+            "click #map canvas": "closeLocationName",
             "click .nominatim.ol-search input": "initializeScrollbar",
             "focusout .nominatim.ol-search input": "destroyScrollbar",
         },
@@ -7342,6 +7346,10 @@ define("xabber-chats", function () {
                 }
             }
             this.close();
+        },
+
+        closeLocationName: function (e) {
+            $('.ol-location').hide()
         },
 
         onHide: function () {
@@ -8144,6 +8152,7 @@ define("xabber-chats", function () {
 
         showLocationPopup: function (ev) {
             window.popup_coordinates = undefined
+            window.location_name = undefined
             new xabber.ChatLocationView({content: this}).show(ev);
         },
 
