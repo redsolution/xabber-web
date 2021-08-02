@@ -40866,9 +40866,9 @@ define('xabber-utils',[
     return utils;
 });
 
-let client_translation_progress = {"en":100,"ar":39,"az":2,"be":19,"bg":36,"bs":0,"ca":36,"cs":100,"cy":0,"da":0,"de":61,"el":41,"es-ES":49,"es-latin":10,"et":0,"fa":6,"fi":13,"fil":20,"fr":28,"ga-IE":0,"he":30,"hi":0,"hr":0,"hu":20,"hy-AM":12,"id":64,"is":0,"it":99,"ja":28,"ka":0,"kmr":0,"ko":1,"ku":4,"ky":7,"la-LA":0,"lb":0,"lt":5,"me":0,"mk":0,"mn":0,"mr":0,"ms":9,"nb":30,"ne-NP":0,"nl":28,"no":0,"oc":18,"pa-IN":0,"pl":89,"pt-BR":93,"pt-PT":20,"qya-AA":0,"ro":23,"ru":78,"sco":0,"si-LK":0,"sk":28,"sl":39,"sq":4,"sr":18,"sr-Cyrl-ME":0,"sv-SE":53,"sw":1,"ta":2,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":51,"uk":39,"uz":0,"vi":18,"yo":0,"zh-CN":40,"zh-TW":15,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
+let client_translation_progress = {"en":100,"ar":39,"az":2,"be":19,"bg":36,"bs":0,"ca":36,"cs":100,"cy":0,"da":0,"de":61,"el":41,"es-ES":48,"es-latin":10,"et":0,"fa":6,"fi":13,"fil":20,"fr":28,"ga-IE":0,"he":30,"hi":0,"hr":0,"hu":20,"hy-AM":12,"id":64,"is":0,"it":99,"ja":28,"ka":0,"kmr":0,"ko":1,"ku":3,"ky":7,"la-LA":0,"lb":0,"lt":5,"me":0,"mk":0,"mn":0,"mr":0,"ms":9,"nb":30,"ne-NP":0,"nl":28,"no":0,"oc":18,"pa-IN":0,"pl":89,"pt-BR":93,"pt-PT":20,"qya-AA":0,"ro":23,"ru":78,"sco":0,"si-LK":0,"sk":28,"sl":39,"sq":4,"sr":18,"sr-Cyrl-ME":0,"sv-SE":53,"sw":1,"ta":2,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":51,"uk":39,"uz":0,"vi":18,"yo":0,"zh-CN":40,"zh-TW":15,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.13","version_description":"Added location name in chat location popup"}'
+'{"version_number":"2.3.4","version_description":"Added string, updated strings, fixed last message for forward of non group chats"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -56514,7 +56514,7 @@ define("xabber-chats", [],function () {
                             let first_forwarded_msg = forwarded_message[0];
                             if (first_forwarded_msg.get('message')) {
                                 let fist_msg_user_info = first_forwarded_msg.get('user_info') || {};
-                                msg_from = fist_msg_user_info.nickname || fist_msg_user_info.jid || "";
+                                msg_from = fist_msg_user_info.nickname || fist_msg_user_info.jid || first_forwarded_msg.get('from_jid') || "";
                                 msg_text = first_forwarded_msg.get('message');
                                 this.$('.last-msg').text(msg_text);
                                 msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
@@ -58084,8 +58084,8 @@ define("xabber-chats", [],function () {
                     checked: false,
                     text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
                 }]);
-                utils.dialogs.ask(xabber.getString("delete_messages__header"), xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")]),
-                    dialog_options, {ok_button_text: xabber.getString("delete")}).done((res) => {
+                utils.dialogs.ask(xabber.getString("clear_history"), xabber.getString("clear_chat_history_dialog_message"),
+                    dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
@@ -58101,8 +58101,8 @@ define("xabber-chats", [],function () {
                 });
             }
             else {
-                utils.dialogs.ask(xabber.getString("delete_messages__header"), `${xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")])}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
-                    dialog_options, {ok_button_text: xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((res) => {
+                utils.dialogs.ask(xabber.getString("clear_history"), `${xabber.getString("clear_chat_history_dialog_message")}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
+                    dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
@@ -61928,7 +61928,7 @@ define("xabber-chats", [],function () {
             }
             else {
                 let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
-                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")]) +
+                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("clear_chat_history_dialog_message") +
                 (rewrite_support ? "" : `\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')}`), null, { ok_button_text: rewrite_support? xabber.getString("delete") : xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((result) => {
                     if (result) {
                         if (rewrite_support) {
