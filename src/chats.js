@@ -1771,7 +1771,7 @@ define("xabber-chats", function () {
                             let first_forwarded_msg = forwarded_message[0];
                             if (first_forwarded_msg.get('message')) {
                                 let fist_msg_user_info = first_forwarded_msg.get('user_info') || {};
-                                msg_from = fist_msg_user_info.nickname || fist_msg_user_info.jid || "";
+                                msg_from = fist_msg_user_info.nickname || fist_msg_user_info.jid || first_forwarded_msg.get('from_jid') || "";
                                 msg_text = first_forwarded_msg.get('message');
                                 this.$('.last-msg').text(msg_text);
                                 msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
@@ -2378,6 +2378,7 @@ define("xabber-chats", function () {
             if (this.contact) {
                 this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
                 this.contact.on("change:blocked", this.updateBlockedState, this);
+                this.contact.on("change:subscription", this.onSubscriptionChange, this);
                 this.contact.on("change:group_chat", this.updateGroupChat, this);
                 this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
                 this.account.contacts.on("change:name", this.updateName, this);
@@ -2387,7 +2388,6 @@ define("xabber-chats", function () {
             this.account.dfd_presence.done(() => {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             });
-            this.updateGroupChat();
             return this;
         },
 
@@ -2434,6 +2434,13 @@ define("xabber-chats", function () {
         updateGroupChat: function () {
             this._loading_history = false;
             this.model.set('history_loaded', false);
+        },
+
+        onSubscriptionChange: function () {
+            let subscription = this.contact.get('subscription');
+            if (subscription === 'both'&& this.contact.get('group_chat')){
+                this.loadPreviousHistory();
+            }
         },
 
         cancelSearch: function () {
@@ -2802,7 +2809,7 @@ define("xabber-chats", function () {
         },
 
         loadPreviousHistory: function () {
-            if (!xabber.settings.load_history) {
+            if (!xabber.settings.load_history || !this.contact.get('subscription') || this.contact.get('subscription') !== 'both' && this.contact.get('group_chat')) {
                 return;
             }
             this.getMessageArchive({

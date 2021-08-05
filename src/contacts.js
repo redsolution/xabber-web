@@ -4958,9 +4958,9 @@ define("xabber-contacts", function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
+                    contact.set('subscription_preapproved', true);
+                    contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, () => {
-                        contact.set('subscription_preapproved', true);
-                        contact.pres('subscribed');
                         contact.pres('subscribe');
                         contact.trigger('presence', contact, 'subscribe_from');
                         contact.trigger("open_chat", contact);
