@@ -2344,6 +2344,7 @@ define("xabber-chats", function () {
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
             "click .btn-retry-send-message": "retrySendMessage",
+            "click .btn-delete-message": "removeFileErrorMessage",
             "click .encryption-warning": "openDevicesWindow"
         },
 
@@ -3288,7 +3289,9 @@ define("xabber-chats", function () {
                 message = this.model.messages.get($message.data('uniqueid'));
             }
             message && message.destroy();
-            this.removeMessageFromDOM($message_in_chat);
+            if ($message_in_chat) {
+                this.removeMessageFromDOM($message_in_chat);
+            }
             if ($message && ($message !== $message_in_chat))
                 this.removeMessageFromDOM($message);
         },
@@ -4252,7 +4255,8 @@ define("xabber-chats", function () {
                     },
                     function (err) {
                         let error_text = $(err).find('error text').text();
-                        self.onFileNotUploaded(message, $message, error_text);
+                            error_type = $(err).find('error').attr('type');
+                        self.onFileNotUploaded(message, $message, error_text, 'xmpp');
                     }
                 );
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
@@ -4288,7 +4292,7 @@ define("xabber-chats", function () {
                                 self.onFileUploaded(message, $message);
                             }
                         } else {
-                            self.onFileNotUploaded(message, $message, this.responseText);
+                            self.onFileNotUploaded(message, $message, this.responseText, 'http');
                         }
                     };
                     if ($message.data('cancel')) {
@@ -4441,16 +4445,21 @@ define("xabber-chats", function () {
             return $('<div class="img-content"/>')[0];
         },
 
-        onFileNotUploaded: function (message, $message, error_text) {
+        onFileNotUploaded: function (message, $message, error_text, type, error_type) {
             let error_message = error_text ? xabber.getString("file_upload__error", [error_text]) : xabber.getString("file_upload__error_default");
             message.set('state', constants.MSG_ERROR);
             $message.find('.cancel-upload').hide();
-            $message.find('.repeat-upload').show();
+            if (type == 'http' || error_type == 'wait'){
+                $message.find('.repeat-upload').show();
+                $message.find('.repeat-upload').click(() => {
+                    this.startUploadFile(message, $message);
+                });
+            }
+            else {
+                $message.find('.btn-retry-send-message').hide();
+            }
             $message.find('.status').text(error_message).show();
             $message.find('.progress').hide();
-            $message.find('.repeat-upload').click(() => {
-                this.startUploadFile(message, $message);
-            });
         },
 
         sendChatState: function (state, type) {
@@ -4660,7 +4669,7 @@ define("xabber-chats", function () {
             if ($elem.hasClass('msg-delivering-state')) {
                 return;
             }
-            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
+            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('btn-delete-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
                 let $msg = $elem.closest('.chat-message'), msg,
                     $fwd_message = $elem.parents('.fwd-message').first(),
                     is_forwarded = $fwd_message.length > 0,
@@ -4890,6 +4899,12 @@ define("xabber-chats", function () {
             }
             else
                 this.sendMessage(msg);
+            ev.preventDefault();
+        },
+
+        removeFileErrorMessage: function (ev) {
+            let $msg = $(ev.target).closest('.chat-message');
+            this.removeMessage($msg);
             ev.preventDefault();
         }
     });

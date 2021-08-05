@@ -6625,7 +6625,7 @@ img.fwd-img-preview {
     padding: 8px;
 }
 
-.chat-message .retry-send-message:hover {
+.chat-message .retry-send-message div:hover {
     background-color: #EEEEEE;
 }
 
