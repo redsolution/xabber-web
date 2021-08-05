@@ -49925,12 +49925,15 @@ define("xabber-contacts", [],function () {
             },
 
             removeFromRoster: function (callback, errback) {
-                let iq = $iq({type: 'set'})
-                    .c('query', {xmlns: Strophe.NS.ROSTER})
-                    .c('item', {jid: this.get('jid'), subscription: "remove"});
-                this.account.cached_roster.removeFromRoster(this.get('jid'));
-                this.account.sendIQ(iq, callback, errback);
-                this.set('known', false);
+                if (!this.get('removed')){
+                    let iq = $iq({type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.ROSTER})
+                        .c('item', {jid: this.get('jid'), subscription: "remove"});
+                    this.account.cached_roster.removeFromRoster(this.get('jid'));
+                    this.account.sendIQ(iq, callback, errback);
+                    this.set('known', false);
+                    this.set('removed', true);
+                }
                 return this;
             },
 

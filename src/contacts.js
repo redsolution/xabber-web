@@ -315,12 +315,15 @@ define("xabber-contacts", function () {
             },
 
             removeFromRoster: function (callback, errback) {
-                let iq = $iq({type: 'set'})
-                    .c('query', {xmlns: Strophe.NS.ROSTER})
-                    .c('item', {jid: this.get('jid'), subscription: "remove"});
-                this.account.cached_roster.removeFromRoster(this.get('jid'));
-                this.account.sendIQ(iq, callback, errback);
-                this.set('known', false);
+                if (!this.get('removed')){
+                    let iq = $iq({type: 'set'})
+                        .c('query', {xmlns: Strophe.NS.ROSTER})
+                        .c('item', {jid: this.get('jid'), subscription: "remove"});
+                    this.account.cached_roster.removeFromRoster(this.get('jid'));
+                    this.account.sendIQ(iq, callback, errback);
+                    this.set('known', false);
+                    this.set('removed', true);
+                }
                 return this;
             },
 
@@ -3235,8 +3238,16 @@ define("xabber-contacts", function () {
             },
 
             render: function () {
+                this.model.set('visible', true);
                 this.updateAvatar();
                 this.updateName();
+            },
+
+            hide: function () {
+                this.trigger('before_hide', this);
+                this.data.set('visible', false);
+                this.model.set('visible', false);
+                this.onHide.apply(this, arguments);
             },
 
             update: function () {
@@ -4957,9 +4968,9 @@ define("xabber-contacts", function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
+                    contact.set('subscription_preapproved', true);
+                    contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, () => {
-                        contact.set('subscription_preapproved', true);
-                        contact.pres('subscribed');
                         contact.pres('subscribe');
                         contact.trigger('presence', contact, 'subscribe_from');
                         contact.trigger("open_chat", contact);

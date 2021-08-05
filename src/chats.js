@@ -2383,6 +2383,7 @@ define("xabber-chats", function () {
             "click .btn-cancel-searching": "cancelSearch",
             "click .back-to-bottom": "backToBottom",
             "click .btn-retry-send-message": "retrySendMessage",
+            "click .btn-delete-message": "removeFileErrorMessage",
             "click .encryption-warning": "openDevicesWindow"
         },
 
@@ -2417,6 +2418,7 @@ define("xabber-chats", function () {
             if (this.contact) {
                 this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
                 this.contact.on("change:blocked", this.updateBlockedState, this);
+                this.contact.on("change:subscription", this.onSubscriptionChange, this);
                 this.contact.on("change:group_chat", this.updateGroupChat, this);
                 this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
                 this.account.contacts.on("change:name", this.updateName, this);
@@ -2426,7 +2428,6 @@ define("xabber-chats", function () {
             this.account.dfd_presence.done(() => {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             });
-            this.updateGroupChat();
             return this;
         },
 
@@ -2473,6 +2474,13 @@ define("xabber-chats", function () {
         updateGroupChat: function () {
             this._loading_history = false;
             this.model.set('history_loaded', false);
+        },
+
+        onSubscriptionChange: function () {
+            let subscription = this.contact.get('subscription');
+            if (subscription === 'both'&& this.contact.get('group_chat')){
+                this.loadPreviousHistory();
+            }
         },
 
         cancelSearch: function () {
@@ -2841,7 +2849,7 @@ define("xabber-chats", function () {
         },
 
         loadPreviousHistory: function () {
-            if (!xabber.settings.load_history) {
+            if (!xabber.settings.load_history || !this.contact.get('subscription') || this.contact.get('subscription') !== 'both' && this.contact.get('group_chat')) {
                 return;
             }
             this.getMessageArchive({
@@ -3328,7 +3336,9 @@ define("xabber-chats", function () {
                 message = this.model.messages.get($message.data('uniqueid'));
             }
             message && message.destroy();
-            this.removeMessageFromDOM($message_in_chat);
+            if ($message_in_chat) {
+                this.removeMessageFromDOM($message_in_chat);
+            }
             if ($message && ($message !== $message_in_chat))
                 this.removeMessageFromDOM($message);
         },
@@ -3348,7 +3358,8 @@ define("xabber-chats", function () {
         },
 
         clearHistory: function () {
-            let dialog_options = [];
+            let dialog_options = [],
+                dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
                 (this.contact && !this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
@@ -3356,7 +3367,7 @@ define("xabber-chats", function () {
                     checked: false,
                     text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
                 }]);
-                utils.dialogs.ask(xabber.getString("clear_history"), xabber.getString("clear_chat_history_dialog_message"),
+                utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
                     dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
@@ -3373,7 +3384,7 @@ define("xabber-chats", function () {
                 });
             }
             else {
-                utils.dialogs.ask(xabber.getString("clear_history"), `${xabber.getString("clear_chat_history_dialog_message")}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
+                utils.dialogs.ask(xabber.getString("clear_history"), `${dialog_message}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
                     dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
@@ -4326,7 +4337,8 @@ define("xabber-chats", function () {
                     },
                     function (err) {
                         let error_text = $(err).find('error text').text();
-                        self.onFileNotUploaded(message, $message, error_text);
+                            error_type = $(err).find('error').attr('type');
+                        self.onFileNotUploaded(message, $message, error_text, 'xmpp');
                     }
                 );
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
@@ -4362,7 +4374,7 @@ define("xabber-chats", function () {
                                 self.onFileUploaded(message, $message);
                             }
                         } else {
-                            self.onFileNotUploaded(message, $message, this.responseText);
+                            self.onFileNotUploaded(message, $message, this.responseText, 'http');
                         }
                     };
                     if ($message.data('cancel')) {
@@ -4515,16 +4527,21 @@ define("xabber-chats", function () {
             return $('<div class="img-content"/>')[0];
         },
 
-        onFileNotUploaded: function (message, $message, error_text) {
+        onFileNotUploaded: function (message, $message, error_text, type, error_type) {
             let error_message = error_text ? xabber.getString("file_upload__error", [error_text]) : xabber.getString("file_upload__error_default");
             message.set('state', constants.MSG_ERROR);
             $message.find('.cancel-upload').hide();
-            $message.find('.repeat-upload').show();
+            if (type == 'http' || error_type == 'wait'){
+                $message.find('.repeat-upload').show();
+                $message.find('.repeat-upload').click(() => {
+                    this.startUploadFile(message, $message);
+                });
+            }
+            else {
+                $message.find('.btn-retry-send-message').hide();
+            }
             $message.find('.status').text(error_message).show();
             $message.find('.progress').hide();
-            $message.find('.repeat-upload').click(() => {
-                this.startUploadFile(message, $message);
-            });
         },
 
         sendChatState: function (state, type) {
@@ -4765,7 +4782,7 @@ define("xabber-chats", function () {
             if ($elem.hasClass('msg-delivering-state')) {
                 return;
             }
-            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('msg-copy-location-content') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
+            if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('msg-copy-location-content') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('btn-delete-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
                 let $msg = $elem.closest('.chat-message'), msg,
                     $fwd_message = $elem.parents('.fwd-message').first(),
                     is_forwarded = $fwd_message.length > 0,
@@ -5028,6 +5045,12 @@ define("xabber-chats", function () {
             }
             else
                 this.sendMessage(msg);
+            ev.preventDefault();
+        },
+
+        removeFileErrorMessage: function (ev) {
+            let $msg = $(ev.target).closest('.chat-message');
+            this.removeMessage($msg);
             ev.preventDefault();
         }
     });
@@ -7200,7 +7223,7 @@ define("xabber-chats", function () {
             }
             else {
                 let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
-                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("clear_chat_history_dialog_message") +
+                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("delete_chat_dialog_message") +
                 (rewrite_support ? "" : `\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')}`), null, { ok_button_text: rewrite_support? xabber.getString("delete") : xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((result) => {
                     if (result) {
                         if (rewrite_support) {
@@ -8177,7 +8200,7 @@ define("xabber-chats", function () {
         initAudio: function() {
             navigator.getUserMedia = (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia);
             if (navigator.getUserMedia) {
-                let constraints = { audio: true },
+                let constraints = { audio: true, channelCount: 1 },
                     chunks = [],
                     $mic = this.$('.send-area .attach-voice-message'),
                     onSuccess = (stream) => {
