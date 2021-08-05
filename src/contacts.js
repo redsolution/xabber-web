@@ -3228,8 +3228,16 @@ define("xabber-contacts", function () {
             },
 
             render: function () {
+                this.model.set('visible', true);
                 this.updateAvatar();
                 this.updateName();
+            },
+
+            hide: function () {
+                this.trigger('before_hide', this);
+                this.data.set('visible', false);
+                this.model.set('visible', false);
+                this.onHide.apply(this, arguments);
             },
 
             update: function () {

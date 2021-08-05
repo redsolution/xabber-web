@@ -7897,7 +7897,7 @@ define("xabber-chats", function () {
         initAudio: function() {
             navigator.getUserMedia = (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia);
             if (navigator.getUserMedia) {
-                let constraints = { audio: true },
+                let constraints = { audio: true, channelCount: 1 },
                     chunks = [],
                     $mic = this.$('.send-area .attach-voice-message'),
                     onSuccess = (stream) => {

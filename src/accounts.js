@@ -973,6 +973,7 @@ define("xabber-accounts", function () {
                             contact = !saved && this.contacts.mergeContact(chat_jid),
                             chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact);
                         contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
