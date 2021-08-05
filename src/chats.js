@@ -3308,7 +3308,8 @@ define("xabber-chats", function () {
         },
 
         clearHistory: function () {
-            let dialog_options = [];
+            let dialog_options = [],
+                dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
                 (this.contact && !this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
@@ -3316,8 +3317,8 @@ define("xabber-chats", function () {
                     checked: false,
                     text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
                 }]);
-                utils.dialogs.ask(xabber.getString("delete_messages__header"), xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")]),
-                    dialog_options, {ok_button_text: xabber.getString("delete")}).done((res) => {
+                utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
+                    dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
@@ -3333,8 +3334,8 @@ define("xabber-chats", function () {
                 });
             }
             else {
-                utils.dialogs.ask(xabber.getString("delete_messages__header"), `${xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")])}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
-                    dialog_options, {ok_button_text: xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((res) => {
+                utils.dialogs.ask(xabber.getString("clear_history"), `${dialog_message}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')})`,
+                    dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
@@ -7045,7 +7046,7 @@ define("xabber-chats", function () {
             }
             else {
                 let rewrite_support = this.account.server_features.get(Strophe.NS.REWRITE);
-                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("clear_chat_history_dialog_message", [this.model.get("jid")]) +
+                utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("delete_chat_dialog_message") +
                 (rewrite_support ? "" : `\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')}`), null, { ok_button_text: rewrite_support? xabber.getString("delete") : xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((result) => {
                     if (result) {
                         if (rewrite_support) {
@@ -8213,12 +8214,12 @@ define("xabber-chats", function () {
                         msg_text = (msg.get('message') || msg.get('original_message')).emojify();
                         let fwd_images = msg.get('images'), fwd_files = msg.get('files');
                         if ((fwd_images) && (fwd_files)) {
-                            msg_text = msg.get('images').length + msg.get('files').length + ' attachments';
+                            msg_text = fwd_images.length + fwd_files.length + ' attachments';
                         }
                         else {
                             if (fwd_images) {
                                 if (fwd_images.length > 1) {
-                                    msg_text = xabber.getString("recent_chat__last_message__images", [fwd_images.length]);
+                                    msg_text =xabber.getQuantityString("recent_chat__last_message__images", fwd_images.length);
                                 }
                                 else {
                                     image_preview = _.clone(msg.get('images')[0]);
@@ -8226,12 +8227,12 @@ define("xabber-chats", function () {
                                 }
                             }
                             if (fwd_files) {
-                                if (msg.get('files').length > 1) {
-                                    msg_text =  xabber.getString("recent_chat__last_message__files", [msg.get('files').length]);
+                                if (fwd_files.length > 1) {
+                                    msg_text = xabber.getQuantityString("recent_chat__last_message__files", fwd_files.length);
                                 }
                                 else {
-                                    let filesize = msg.get('files')[0].size;
-                                    msg_text = filesize ? msg.get('files')[0].name + ",   " + filesize : msg.get('files')[0].name;
+                                    let filesize = fwd_files[0].size;
+                                    msg_text = filesize ? fwd_files[0].name + ",   " + filesize : fwd_files[0].name;
                                 }
                             }
                         }
