@@ -2440,6 +2440,7 @@ define("xabber-chats", function () {
         onSubscriptionChange: function () {
             let subscription = this.contact.get('subscription');
             if (subscription === 'both'&& this.contact.get('group_chat')){
+                this.updateGroupChat();
                 this.loadPreviousHistory();
             }
         },
@@ -2810,7 +2811,7 @@ define("xabber-chats", function () {
         },
 
         loadPreviousHistory: function () {
-            if (!xabber.settings.load_history || !this.contact.get('subscription') || this.contact.get('subscription') !== 'both' && this.contact.get('group_chat')) {
+            if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
                 return;
             }
             this.getMessageArchive({
