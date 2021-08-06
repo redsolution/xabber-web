@@ -2811,8 +2811,10 @@ define("xabber-chats", function () {
         },
 
         loadPreviousHistory: function () {
-            if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
-                return;
+            if (this.contact) {
+                if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
+                    return;
+                }
             }
             this.getMessageArchive({
                     fast: true,
