@@ -925,6 +925,8 @@ define("xabber-accounts", function () {
                         this.connFeedback(xabber.getString("settings_account__label_state_disconnecting"));
                         this.sendPresence('offline');
                         this.connection.disconnect();
+                        if (this.fast_conn_manager) this.fast_connection.disconnect();
+                        if (this.background_conn_manager) this.background_connection.disconnect();
                     } else {
                         this.onDisconnected();
                     }
