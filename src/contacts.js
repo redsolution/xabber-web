@@ -4221,7 +4221,6 @@ define("xabber-contacts", function () {
                     contact.trigger('remove_invite');
                 }
                 if (subscription === 'remove') {
-                    !contact.get('group_chat') && contact.trigger('roster_push', contact, "remove");
                     contact.set({
                         in_roster: false,
                         known: false,
