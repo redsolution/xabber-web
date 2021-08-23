@@ -1445,6 +1445,7 @@ define("xabber-chats", function () {
 
         onRosterPush: function (type) {
             let jid = this.get('jid');
+            // not used
             if (type === 'remove')
                 this.messages.createSystemMessage({
                     from_jid: jid,
