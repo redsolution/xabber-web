@@ -969,8 +969,8 @@ define("xabber-accounts", function () {
                     let $synced_iq = $(iq),
                         $conversation = $synced_iq.find('conversation'),
                         chat_jid = $conversation.attr('jid'),
-                        is_deleted = $conversation.children('deleted').length;
-                    if (is_deleted) {
+                        is_deleted = $conversation.attr('status');
+                    if (is_deleted  === 'deleted') {
                         let saved = chat_jid === this.get('jid'),
                             contact = !saved && this.contacts.mergeContact(chat_jid),
                             chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact);

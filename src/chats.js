@@ -925,6 +925,7 @@ define("xabber-chats", function () {
 
         initialize: function (attrs, options) {
             this.contact = options.contact;
+            this.sync_created = options.sync_created;
             this.account = this.contact ? this.contact.account : options.account;
             let jid = this.contact ? this.contact.get('jid') : attrs.jid;
             this.set({
@@ -1229,6 +1230,7 @@ define("xabber-chats", function () {
                 if (this.get('saved'))
                     return;
                 let view = xabber.chats_view.child(this.contact.hash_id);
+                view.content = new xabber.ChatContentView({chat_item: view});
                 if (view && view.content)
                     view.content.receiveNoTextMessage($message, carbon_copied);
                 return;
@@ -1554,8 +1556,10 @@ define("xabber-chats", function () {
         _initialize: function () {
             this.account = this.model.account;
             this.contact = this.model.contact;
+            this.message_counter = 0;
             this.$el.attr('data-id', this.model.id);
-            this.content = new xabber.ChatContentView({chat_item: this});
+            if (!this.model.sync_created)
+                this.content = new xabber.ChatContentView({chat_item: this});
             this.updateName();
             this.updateStatus();
             this.updateCounter();
@@ -1572,7 +1576,9 @@ define("xabber-chats", function () {
             this.model.on("change:const_unread", this.updateCounter, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
+            this.model.messages.on("add", this.updateChatCard, this);
             this.model.messages.on("destroy", this.onMessageRemoved, this);
+            this.model.messages.on("change:state", this.onChangedMessageState, this);
             if (this.contact) {
                 this.contact.on("change:name", this.updateName, this);
                 this.contact.on("change:status", this.updateStatus, this);
@@ -1592,6 +1598,47 @@ define("xabber-chats", function () {
             this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
             this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
             this.account.settings.on("change:color", this.updateColorScheme, this);
+        },
+
+        updateChatCard: function (msg) {
+            if (this.content){
+                return;
+            }
+            if (this.message_counter == 0 ){
+                this.message_counter++;
+                return
+            }
+            this.content = new xabber.ChatContentView({ chat_item: this, new_message: msg });
+            this.content.onChangedReadState(msg)
+            this.updateLastMessage(msg);
+            return;
+        },
+
+        onChangedMessageState: function (message) {
+            if (message.get('state') === constants.MSG_DISPLAYED && this.model.get('last_displayed_id') < message.get('stanza_id')) {
+                this.model.set('last_displayed_id', message.get('stanza_id'));
+                this.model.set('last_delivered_id', message.get('stanza_id'));
+            } else if (message.get('state') === constants.MSG_DELIVERED && this.model.get('last_delivered_id') < message.get('stanza_id')) {
+                this.model.set('last_delivered_id', message.get('stanza_id'));
+            }
+            if (this.content) {
+                let $message = this.content.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
+                    $elem = $message.find('.msg-delivering-state');
+                $elem.attr({
+                    'data-state': message.getState(),
+                    'title': message.getVerboseState()
+                });
+                ($elem.attr('data-state') === constants.MSG_STATE[constants.MSG_ERROR]) && $elem.dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                });
+            }
+            if (message === this.model.last_message) {
+                this.updateLastMessage();
+            }
         },
 
         updateName: function () {
@@ -1687,9 +1734,6 @@ define("xabber-chats", function () {
         updateColorScheme: function () {
             let color = this.account.settings.get('color');
             this.$el.attr('data-color', color);
-            this.content.$el.attr('data-color', color);
-            this.content.head.$el.attr('data-color', color);
-            this.content.bottom.$el.attr('data-color', color);
         },
 
         onMessageRemoved: function (msg) {
@@ -1817,6 +1861,9 @@ define("xabber-chats", function () {
         },
 
         open: function (options) {
+            if (!this.content){
+                this.content = new xabber.ChatContentView({chat_item: this});
+            }
             options || (options = {clear_search: false});
             xabber.chats_view.openChat(this, options);
             this.content.bottom.click_counter = 0;
@@ -2402,6 +2449,12 @@ define("xabber-chats", function () {
             this.$pinned_message = this.$('.pinned-message');
             this.$search_form = this.$('.search-form-header');
             this.$el.attr('data-id', this.model.id);
+            this.updateContentColorScheme();
+            if (this.model.sync_created && this.model.last_message){
+                this.onMessage(this.model.last_message);
+                if (options.new_message)
+                    this.onMessage(options.new_message);
+            }
             this._scrolltop = this.getScrollTop();
             let wheel_ev = this.defineMouseWheelEvent();
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
@@ -2411,7 +2464,6 @@ define("xabber-chats", function () {
             this.model.on("load_last_history", this.loadLastHistory, this);
             this.model.on("get_missed_history", this.requestMissedMessages, this);
             this.model.messages.on("add", this.onMessage, this);
-            this.model.messages.on("change:state", this.onChangedMessageState, this);
             this.model.messages.on("change:is_unread", this.onChangedReadState, this);
             this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
             this.model.messages.on("change:trusted", this.onTrustedChanged, this);
@@ -2426,6 +2478,7 @@ define("xabber-chats", function () {
                 this.account.contacts.on("change:image", this.updateAvatar, this);
             }
             this.account.on("change", this.updateMyInfo, this);
+            this.account.settings.on("change:color", this.updateContentColorScheme, this);
             this.account.dfd_presence.done(() => {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             });
@@ -2463,6 +2516,13 @@ define("xabber-chats", function () {
             if (_.has(changed, 'name')) this.updateMyName();
             if (_.has(changed, 'status')) this.updateMyStatus();
             if (_.has(changed, 'image')) this.updateMyAvatar();
+        },
+
+        updateContentColorScheme: function () {
+            let color = this.account.settings.get('color');
+            this.$el.attr('data-color', color);
+            this.head.$el.attr('data-color', color);
+            this.bottom.$el.attr('data-color', color);
         },
 
           onTrustedChanged: function (message) {
@@ -4574,31 +4634,6 @@ define("xabber-chats", function () {
             }
         },
 
-        onChangedMessageState: function (message) {
-            if (message.get('state') === constants.MSG_DISPLAYED && this.model.get('last_displayed_id') < message.get('stanza_id')) {
-                this.model.set('last_displayed_id', message.get('stanza_id'));
-                this.model.set('last_delivered_id', message.get('stanza_id'));
-            } else if (message.get('state') === constants.MSG_DELIVERED && this.model.get('last_delivered_id') < message.get('stanza_id')) {
-                this.model.set('last_delivered_id', message.get('stanza_id'));
-            }
-            let $message = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
-                $elem = $message.find('.msg-delivering-state');
-            $elem.attr({
-                'data-state': message.getState(),
-                'title': message.getVerboseState()
-            });
-            ($elem.attr('data-state') === constants.MSG_STATE[constants.MSG_ERROR]) && $elem.dropdown({
-                inDuration: 100,
-                outDuration: 100,
-                constrainWidth: false,
-                hover: false,
-                alignment: 'left'
-            });
-            if (message === this.model.last_message) {
-                this.chat_item.updateLastMessage();
-            }
-        },
-
         onChangedMessageTimestamp: function (message) {
             let $message = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
                 $next_msg = $message.next(),
@@ -5268,7 +5303,7 @@ define("xabber-chats", function () {
             return chat;
         },
 
-        getChat: function (contact, identifier) {
+        getChat: function (contact, identifier, sync_created) {
             let attrs = null,
                 id = identifier && `${contact.hash_id}:${identifier}`,
                 chat = id ? this.get(id) : this.get(contact.hash_id);
@@ -5277,7 +5312,7 @@ define("xabber-chats", function () {
             if (identifier === 'encrypted')
                 attrs.type = identifier;
             if (!chat) {
-                chat = xabber.chats.create(attrs, {contact: contact});
+                chat = xabber.chats.create(attrs, {contact: contact, sync_created: sync_created});
                 this.add(chat);
                 contact.set('known', true);
             }

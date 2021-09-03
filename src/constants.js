@@ -84,6 +84,8 @@ var constants = {
 
     JINGLE_WAITING_TIME: 60,
 
+    SYNCHRONIZATION_RSM_MAX: 200,
+
     TURN_SERVERS_LIST: [
         {
             url: 'turn:numb.viagenie.ca',
