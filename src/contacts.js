@@ -4165,12 +4165,14 @@ define("xabber-contacts", function () {
                     }
                     unread_msgs_count && (options.is_unread = true);
                     options.delay = message.children('time');
+                    if (encrypted && this.account.omemo)
+                        unread_msgs_count && unread_msgs_count--;
                     message.length && (msg = this.account.chats.receiveChatMessage(message, options));
                     chat.set('const_unread', unread_msgs_count);
                     if (msg) {
                         if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
-                        if(!message.find('invite').length) {
+                        if(!(message.find('invite').length || encrypted && this.account.omemo)) {
                             if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
                                 msg.set('state', constants.MSG_DISPLAYED);
                             else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)
