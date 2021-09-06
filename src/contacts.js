@@ -4126,7 +4126,7 @@ define("xabber-contacts", function () {
                         unread_msgs_count = Number($unread_messages.attr('count')) || 0,
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
-                    if (message.find('invite').length) {
+                    if (message.find('invite').length || encrypted && this.account.omemo) {
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     }
                     if ($item.attr('status') === 'deleted') {

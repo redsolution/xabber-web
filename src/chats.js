@@ -6084,7 +6084,7 @@ define("xabber-chats", function () {
             let wheel_ev = this.defineMouseWheelEvent();
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-            this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
+            // this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
             xabber.on("update_layout", this.onWindowResized, this);
@@ -6130,9 +6130,9 @@ define("xabber-chats", function () {
             this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.active.unread').length);
         },
 
-        onWindowResized: function (options) {
-            options.size_changed && this.onScroll();
-        },
+        // onWindowResized: function (options) {
+        //     options.size_changed && this.onScroll();
+        // },
 
         defineMouseWheelEvent: function () {
             if (!_.isUndefined(window.onwheel)) {
@@ -6145,8 +6145,8 @@ define("xabber-chats", function () {
         },
 
         onMouseWheel: function (ev) {
-            if (ev.originalEvent.deltaY > 0)
-                this.onScroll();
+            // if (ev.originalEvent.deltaY > 0)
+            //     this.onScroll();
         },
 
         hideChatsFeedback: function () {
@@ -6156,23 +6156,23 @@ define("xabber-chats", function () {
             this._load_chats_timeout = null;
         },
 
-        onScroll: function () {
-            if (this.getScrollBottom() < 12 && !this._load_chats_timeout && this.isVisible()) {
-                this._load_chats_timeout = setTimeout(() => {
-                    this.hideChatsFeedback();
-                }, 5000);
-                let accounts = xabber.accounts.connected.filter(account => !account.roster.conversations_loaded && account.connection && account.connection.do_synchronization);
-                if (accounts.length) {
-                    this.$('.load-chats-feedback').text(xabber.getString("placeholder_loading")).removeClass('hidden');
-                    this.updateScrollBar();
-                }
-                accounts.forEach((account) => {
-                    let options = {max: xabber.settings.mam_messages_limit};
-                    account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
-                    account.roster.syncFromServer(options);
-                });
-            }
-        },
+        // onScroll: function () {
+        //     if (this.getScrollBottom() < 12 && !this._load_chats_timeout && this.isVisible()) {
+        //         this._load_chats_timeout = setTimeout(() => {
+        //             this.hideChatsFeedback();
+        //         }, 5000);
+        //         let accounts = xabber.accounts.connected.filter(account => !account.roster.conversations_loaded && account.connection && account.connection.do_synchronization);
+        //         if (accounts.length) {
+        //             this.$('.load-chats-feedback').text(xabber.getString("placeholder_loading")).removeClass('hidden');
+        //             this.updateScrollBar();
+        //         }
+        //         accounts.forEach((account) => {
+        //             let options = {max: xabber.settings.mam_messages_limit};
+        //             account.roster.last_chat_msg_id && (options.after = account.roster.last_chat_msg_id);
+        //             account.roster.syncFromServer(options);
+        //         });
+        //     }
+        // },
 
         updateLeftIndicator: function (accounts) {
             this.$el.attr('data-indicator', accounts.connected.length > 1);
