@@ -1230,7 +1230,8 @@ define("xabber-chats", function () {
                 if (this.get('saved'))
                     return;
                 let view = xabber.chats_view.child(this.contact.hash_id);
-                view.content = new xabber.ChatContentView({chat_item: view});
+                if (!view.content)
+                    view.content = new xabber.ChatContentView({chat_item: view});
                 if (view && view.content)
                     view.content.receiveNoTextMessage($message, carbon_copied);
                 return;
