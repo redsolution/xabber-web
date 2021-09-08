@@ -6254,7 +6254,7 @@ define("xabber-chats", function () {
                 }
                 if (selection.hasClass('roster-contact')) {
                     view = xabber.accounts.get(selection.data('account')).chats.getChat(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')));
-                    view && (view = view.item_view);
+                    view && (view = view.item_view);//34
                     view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                     selection.addClass('active');
                 }
@@ -6269,6 +6269,8 @@ define("xabber-chats", function () {
         },
 
         openChat: function (view, options) {
+            if (!view.content)
+                view.content = new xabber.ChatContentView({chat_item: view});
             options = options || {};
             this.$('.list-item.active').removeClass('active');
             view.updateActiveStatus();
