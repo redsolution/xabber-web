@@ -14,6 +14,8 @@ let badges_names = [
     ],
     material_icons = [
         'palette',
+        'pinned',
+        'pinned-circle-small',
         'saved-messages',
         'translate',
         'circles',

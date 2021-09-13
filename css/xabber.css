@@ -3941,6 +3941,14 @@ input[type=text].simple-input-field:hover {
     float: left;
 }
 
+.pinned-icon {
+    height: 16px;
+}
+
+.pinned-icon path {
+    fill: rgba(117, 117, 117, .9);
+}
+
 .muted-icon {
     margin: 1px 5px 0;
     color: rgba(117, 117, 117, .9);
@@ -5771,7 +5779,8 @@ input[type=text].simple-input-field:hover {
     fill: #616161;
 }
 
-.chat-tools-wrap .btn-set-status.chat-tool:hover path {
+.chat-tools-wrap .btn-set-status.chat-tool:hover path,
+.chat-tools-wrap .btn-chat-pin.chat-tool:hover path {
     fill: #616161;
 }
 

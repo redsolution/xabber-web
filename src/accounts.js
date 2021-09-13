@@ -969,8 +969,10 @@ define("xabber-accounts", function () {
                     let $synced_iq = $(iq),
                         $conversation = $synced_iq.find('conversation'),
                         chat_jid = $conversation.attr('jid'),
-                        is_deleted = $conversation.attr('status');
-                    if (is_deleted  === 'deleted') {
+                        status = $conversation.attr('status'),
+                        pinned = $conversation.attr('pinned'),
+                        muted = $conversation.attr('mute');
+                    if (status  === 'deleted') {
                         let saved = chat_jid === this.get('jid'),
                             contact = !saved && this.contacts.mergeContact(chat_jid),
                             chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact);
@@ -980,6 +982,36 @@ define("xabber-accounts", function () {
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                    }
+                    if (status  === 'archived') {
+                        let contact = this.contacts.mergeContact(chat_jid),
+                            chat = this.chats.getChat(contact);
+                        if (chat.item_view.content) {
+                            chat.item_view.content.head.archiveChat(undefined, true);
+                            xabber.body.setScreen('all-chats', { right: undefined });
+                        }
+                        chat.set('archived', true)
+
+                    }
+                    if (status  === 'active') {
+                        let contact = this.contacts.mergeContact(chat_jid),
+                            chat = this.chats.getChat(contact);
+                        if (chat.item_view.content) {
+                            chat.item_view.content.head.archiveChat(undefined, true);
+                        }
+                        chat.set('archived', false)
+                    }
+                    if (pinned || pinned === '0') {
+                        console.log('pinned =', pinned)
+                        let contact = this.contacts.mergeContact(chat_jid),
+                            chat = this.chats.getChat(contact);
+                        chat.set('pinned', pinned)
+                    }
+                    if (muted || muted === '0') {
+                        console.log('mute =', muted)
+                        let contact = this.contacts.mergeContact(chat_jid),
+                            chat = this.chats.getChat(contact);
+                        chat.set('muted', muted)
                     }
                     return true;
                 },

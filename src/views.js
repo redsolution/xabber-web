@@ -1032,7 +1032,7 @@ define("xabber-views", function () {
             let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
             xabber.accounts.each((account) => {
                 account.chats.each((chat) => {
-                    if (chat.contact && !chat.contact.get('muted')) {
+                    if (chat.contact && !chat.get('muted')) {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
@@ -3117,7 +3117,7 @@ define("xabber-views", function () {
             let count_msg = 0;
             xabber.accounts.each((account) => {
                 account.chats.each((chat) => {
-                    if (chat.contact && !chat.contact.get('muted'))
+                    if (chat.contact && !chat.get('muted'))
                         count_msg += chat.get('unread') + chat.get('const_unread');
                 });
             });

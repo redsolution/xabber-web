@@ -974,13 +974,14 @@ define("xabber-contacts", function () {
             },
 
             __initialize: function () {
+                this.chat = this.account.chats.getChat(this.model);
                 this.updateDisplayStatus();
                 this.updateBlockedState();
                 this.updateMutedState();
                 this.updateGroupChat();
                 this.model.on("change:display", this.updateDisplayStatus, this);
                 this.model.on("change:blocked", this.updateBlockedState, this);
-                this.model.on("change:muted", this.updateMutedState, this);
+                this.chat.on("change:muted", this.updateMutedState, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
             },
 
@@ -991,9 +992,8 @@ define("xabber-contacts", function () {
             updateBlockedState: function () {
                 this.$el.switchClass('blocked', this.model.get('blocked'));
             },
-
             updateMutedState: function () {
-                this.$('.muted-icon').showIf(this.model.get('muted'));
+                this.$('.muted-icon').showIf(this.chat.get('muted'));
             },
 
             clickOnItem: function () {
@@ -1204,8 +1204,9 @@ define("xabber-contacts", function () {
             },
 
             updateNotifications: function () {
-                this.$('.btn-mute').switchClass('mdi-bell-off', this.model.get('muted'));
-                this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
+                let chat = this.account.chats.getChat(this.model);
+                this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
+                this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
             },
 
             showQRCode: function () {
@@ -1306,10 +1307,9 @@ define("xabber-contacts", function () {
 
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
-                    return;
-                let muted = !this.model.get('muted');
-                this.model.set('muted', muted);
-                this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
+                    return
+                let chat = this.account.chats.getChat(this.model);
+                chat.muteChat();
             },
 
             addContact: function () {
@@ -1435,14 +1435,14 @@ define("xabber-contacts", function () {
             changeNotifications: function (ev) {
                 if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
                     return;
-                let muted = !this.model.get('muted');
-                this.model.set('muted', muted);
-                this.account.chat_settings.updateMutedList(this.model.get('jid'), muted);
+                let chat = this.account.chats.getChat(this.model);
+                chat.muteChat();
             },
 
             updateNotifications: function () {
-                this.$('.btn-mute').switchClass('mdi-bell-off', this.model.get('muted'));
-                this.$('.btn-mute').switchClass('mdi-bell', !this.model.get('muted'));
+                let chat = this.account.chats.getChat(this.model);
+                this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
+                this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
             },
 
             showQRCode: function () {
@@ -4129,13 +4129,29 @@ define("xabber-contacts", function () {
                     if (!chat.item_view.content && (message.find('invite').length || encrypted && this.account.omemo)) {
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     }
+                    if ($item.attr('pinned') || $item.attr('pinned') === '0'){
+                        chat.set('pinned', $item.attr('pinned'));
+                    }
+                    if (!saved) {
+                        if ($item.attr('mute') || $item.attr('mute') === '0') {
+                            chat.set('muted', $item.attr('mute'));
+                        }
+                        else{
+                            chat.set('muted', false);
+                        }
+                    }
+                    if ($item.attr('status') === 'archived')
+                        chat.set('archived', true);
+                    else if ($item.attr('status') === 'active' && !saved)
+                        chat.set('archived', false);
                     if ($item.attr('status') === 'deleted') {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
-                    } else if (encrypted && this.account.omemo) {
+                    }
+                    if (encrypted && this.account.omemo) {
                         chat.set('timestamp', chat_timestamp);
                         chat.set('opened', true);
                         chat.item_view.updateEncryptedChat();
@@ -4152,6 +4168,7 @@ define("xabber-contacts", function () {
                     chat.set('last_delivered_id', last_delivered_msg);
                     chat.set('last_displayed_id', last_displayed_msg);
                     chat.set('last_read_msg', last_read_msg);
+                    chat.set('sync_type', type);
                     if (!message.length) {
                         chat.set('timestamp', chat_timestamp);
                         chat.item_view.updateEmptyChat();
