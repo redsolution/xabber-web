@@ -1602,6 +1602,7 @@ define("xabber-chats", function () {
             this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("change:const_unread", this.updateCounter, this);
             this.model.on("change:pinned", this.updatePinned, this);
+            this.model.on("change:archived", this.updateArchivedState, this);
             this.model.on("change:muted", this.updateMutedState, this);
             this.model.on("open", this.open, this);
             this.model.on("remove_opened_chat", this.onClosed, this);
@@ -1616,7 +1617,6 @@ define("xabber-chats", function () {
                 this.contact.on("change:incognito_chat", this.updateIcon, this);
                 this.contact.on("change:image", this.updateAvatar, this);
                 this.contact.on("change:blocked", this.onBlocked, this);
-                this.contact.on("change:archived", this.updateArchivedState, this);
                 this.contact.on("change:group_chat", this.updateGroupChats, this);
                 this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
                 this.contact.on("remove_invite", this.removeInvite, this);
@@ -7245,30 +7245,6 @@ define("xabber-chats", function () {
         },
 
         archiveChat: function (ev, no_iq) {
-            if (ev) {
-                if ($(ev.target).hasClass('mdi-package-down') || $(ev.target).hasClass('mdi-package-up')) {
-                    let archived_chat = this.model.item_view.$el,
-                        next_chat_item = archived_chat,
-                        next_chat = null,
-                        next_contact;
-                    while ((next_chat == null) && (next_chat_item.length > 0)) {
-                        next_chat_item = next_chat_item.next();
-                        if (next_chat_item) {
-                            if (!next_chat_item.hasClass('hidden')) {
-                                let next_chat_id = next_chat_item.attr('data-id');
-                                next_chat = this.account.chats.get(next_chat_id);
-                            }
-                        }
-                    }
-                    if (next_chat != null) {
-                        next_contact = next_chat.contact;
-                        if (next_contact)
-                            next_contact.trigger("open_chat", next_contact);
-                        else
-                            next_chat.item_view && next_chat.item_view.open();
-                    }
-                }
-            }
             let archived = !this.model.get('archived'),
                 is_archived = archived ? true : false;
             if (!no_iq) {

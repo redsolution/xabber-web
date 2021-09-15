@@ -971,11 +971,12 @@ define("xabber-accounts", function () {
                         chat_jid = $conversation.attr('jid'),
                         status = $conversation.attr('status'),
                         pinned = $conversation.attr('pinned'),
-                        muted = $conversation.attr('mute');
+                        muted = $conversation.attr('mute'),
+                        identifier = $conversation.attr('type') === Strophe.NS.SYNCHRONIZATION_OMEMO ? 'encrypted' : '';
                     if (status  === 'deleted') {
                         let saved = chat_jid === this.get('jid'),
                             contact = !saved && this.contacts.mergeContact(chat_jid),
-                            chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact);
+                            chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact, identifier);
                         contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
@@ -985,7 +986,7 @@ define("xabber-accounts", function () {
                     }
                     if (status  === 'archived') {
                         let contact = this.contacts.mergeContact(chat_jid),
-                            chat = this.chats.getChat(contact);
+                            chat = this.chats.getChat(contact, identifier);
                         if (chat.item_view.content) {
                             chat.item_view.content.head.archiveChat(undefined, true);
                             xabber.body.setScreen('all-chats', { right: undefined });
@@ -995,7 +996,7 @@ define("xabber-accounts", function () {
                     }
                     if (status  === 'active') {
                         let contact = this.contacts.mergeContact(chat_jid),
-                            chat = this.chats.getChat(contact);
+                            chat = this.chats.getChat(contact, identifier);
                         if (chat.item_view.content) {
                             chat.item_view.content.head.archiveChat(undefined, true);
                         }
@@ -1004,13 +1005,13 @@ define("xabber-accounts", function () {
                     if (pinned || pinned === '0') {
                         console.log('pinned =', pinned)
                         let contact = this.contacts.mergeContact(chat_jid),
-                            chat = this.chats.getChat(contact);
+                            chat = this.chats.getChat(contact, identifier);
                         chat.set('pinned', pinned)
                     }
                     if (muted || muted === '0') {
                         console.log('mute =', muted)
                         let contact = this.contacts.mergeContact(chat_jid),
-                            chat = this.chats.getChat(contact);
+                            chat = this.chats.getChat(contact, identifier);
                         chat.set('muted', muted)
                     }
                     return true;
