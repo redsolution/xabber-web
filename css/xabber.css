@@ -5018,6 +5018,17 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
 }
 
+.pinned-chat-list .chat-item{
+    background-color: #f5f5f5;
+
+}
+
+.pinned-chat-list .chat-item .chat-icon,
+.pinned-chat-list .chat-item .status{
+    border-color: #f5f5f5;
+
+}
+
 .mention-info-wrap:hover,
 .chat-item:hover,
 .omemo-item:hover,
@@ -5399,7 +5410,7 @@ input[type=text].simple-input-field:hover {
     left: 38px;
     width: 12px;
     height: 12px;
-    border: 1px solid #FFF;
+    border: 1.125px solid #FFF;
     border-radius: 50%;
 }
 
@@ -5428,7 +5439,7 @@ input[type=text].simple-input-field:hover {
     padding: 1px;
     /*box-sizing: content-box;*/
     left: 35px;
-    border: 1px solid #FFF;
+    border: 1.125px solid #FFF;
     width: 16px !important;
     height: 16px !important;
     /*background-color: white;*/
@@ -5536,12 +5547,23 @@ input[type=text].simple-input-field:hover {
 .message-item .last-msg,
 .mention-item .last-msg,
 .chat-item .last-msg {
-    width: calc(100% - 20px);
+    width: calc(100% - 35px);
     height: 16px;
     font-size: 11px;
     font-weight: 300;
     color: #757575;
     line-height: 16px;
+}
+
+.message-item .chat-states,
+.mention-item .chat-states,
+.chat-item .chat-states {
+    display: flex;
+    position: absolute;
+    right: 8px;
+    bottom: 10px;
+    flex-direction: row;
+    justify-content: flex-end;
 }
 
 .message-item .last-msg-date,
@@ -5556,9 +5578,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-item .msg-delivering-state {
-    position: absolute;
-    right: 10px;
-    bottom: 12px;
+    margin-top: 3px;
     color: #388E3C;
 }
 
@@ -5581,8 +5601,8 @@ input[type=text].simple-input-field:hover {
 .mention-item .msg-counter,
 .chat-item .msg-counter {
     position: absolute;
-    right: 8px;
-    bottom: 10px;
+    right: 2px;
+    bottom: 0px;
     padding: 0 4px;
     min-width: 14px;
     height: 14px;

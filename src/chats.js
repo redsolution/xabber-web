@@ -1637,7 +1637,6 @@ define("xabber-chats", function () {
                 return
             }
             this.content = new xabber.ChatContentView({ chat_item: this, new_message: msg });
-            this.content.onChangedReadState(msg)
             this.updateLastMessage(msg);
             return;
         },
@@ -2492,8 +2491,10 @@ define("xabber-chats", function () {
             this.updateContentColorScheme();
             if (this.model.sync_created && this.model.last_message){
                 this.onMessage(this.model.last_message);
-                if (options.new_message)
+                if (options.new_message){
                     this.onMessage(options.new_message);
+                    this.onChangedReadState(options.new_message);
+                }
             }
             this._scrolltop = this.getScrollTop();
             let wheel_ev = this.defineMouseWheelEvent();
@@ -2707,6 +2708,11 @@ define("xabber-chats", function () {
                     msg.set('is_unread', false);
                 }
             });
+            if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
+                let msg = this.model.last_message;
+                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+                msg.set('is_unread', false);
+            }
         },
 
         onMouseWheel: function (ev) {
@@ -6268,7 +6274,7 @@ define("xabber-chats", function () {
         replaceChatItem: function (item, chats, pinned_chats) {
             let view = this.child(item.id);
             if (view && item.get('pinned') && item.get('pinned') !== '0' && pinned_chats ){
-                pinned_chats = pinned_chats.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') < b.get('pinned')) ? 1 : -1)
+                pinned_chats = pinned_chats.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 let index = pinned_chats.indexOf(item);
                 if (index === 0) {
                     this.$('.pinned-chat-list').prepend(view.$el);
@@ -6371,10 +6377,12 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 is_unread = xabber.toolbar_view.$('.active.unread').length,
-                group_chats = [];
-            if (is_unread)
+                group_chats = [],
+                group_chats_pinned = [];
+            if (is_unread) {
                 group_chats = chats.filter(chat => chat.contact && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 group_chats_pinned = chats.filter(chat => chat.contact && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+            }
             if (!group_chats.length && !group_chats_pinned.length) {
                 group_chats = chats.filter(chat => !chat.get('saved') && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 group_chats_pinned = chats.filter(chat => !chat.get('saved') && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
@@ -6385,7 +6393,7 @@ define("xabber-chats", function () {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (group_chats_pinned) {
-                group_chats_pinned = group_chats_pinned.sort((a, b) => (a.get('pinned') < b.get('pinned')) ? 1 : -1)
+                group_chats_pinned = group_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 group_chats_pinned.forEach((chat) => {
                     let index = group_chats_pinned.indexOf(chat);
                     if (index === 0) {
@@ -6401,10 +6409,12 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 is_unread = xabber.toolbar_view.$('.active.unread').length,
-                private_chats = [];
-            if (is_unread)
+                private_chats = [],
+                private_chats_pinned = [];
+            if (is_unread) {
                 private_chats = chats.filter(chat => chat.contact && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 private_chats_pinned = chats.filter(chat => chat.contact && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+            }
             if (!private_chats.length && !private_chats_pinned.length) {
                 private_chats = chats.filter(chat => !chat.get('saved') && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 private_chats_pinned = chats.filter(chat => !chat.get('saved') && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
@@ -6415,7 +6425,7 @@ define("xabber-chats", function () {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (private_chats_pinned) {
-                private_chats_pinned = private_chats_pinned.sort((a, b) => (a.get('pinned') < b.get('pinned')) ? 1 : -1)
+                private_chats_pinned = private_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 private_chats_pinned.forEach((chat) => {
                     let index = private_chats_pinned.indexOf(chat);
                     if (index === 0) {
@@ -6431,14 +6441,14 @@ define("xabber-chats", function () {
             xabber.body.setScreen('all-chats');
             this.$('.chat-item').detach();
             let chats = this.model,
-                account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
+                account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
                 account_chats_pinned = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned'));
             this.$(`.omemo-item:not([data-id="${account.get('jid')}"])`).addClass('hidden');
             account_chats.forEach((chat) => {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (account_chats_pinned) {
-                account_chats_pinned = account_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') < b.get('pinned')) ? 1 : -1)
+                account_chats_pinned = account_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 account_chats_pinned.forEach((chat) => {
                     let index = account_chats_pinned.indexOf(chat);
                     if (index === 0) {
@@ -6463,10 +6473,12 @@ define("xabber-chats", function () {
             this.$('.chat-item').detach();
             let chats = this.model,
                 is_unread = xabber.toolbar_view.$('.active.unread').length,
-                all_chats = [];
-            if (is_unread)
+                all_chats = [],
+                all_chats_pinned = [];
+            if (is_unread) {
                 all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+            }
             if (!all_chats.length && !all_chats_pinned.length) {
                 all_chats = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
                 all_chats_pinned = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
@@ -6477,7 +6489,7 @@ define("xabber-chats", function () {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (all_chats_pinned) {
-                all_chats_pinned = all_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') < b.get('pinned')) ? 1 : -1)
+                all_chats_pinned = all_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 all_chats_pinned.forEach((chat) => {
                     let index = all_chats_pinned.indexOf(chat);
                     if (index === 0) {
