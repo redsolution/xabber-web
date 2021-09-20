@@ -3943,15 +3943,16 @@ input[type=text].simple-input-field:hover {
 
 .pinned-icon {
     height: 24px;
+    margin-left: 2px;
 }
 
 .pinned-icon path {
-    fill: rgba(117, 117, 117, .9);
+    fill: #9E9E9E;
 }
 
 .muted-icon {
     margin: 1px 5px 0;
-    color: rgba(117, 117, 117, .9);
+    color: #BDBDBD;
 }
 
 .muted-icon polygon {
@@ -5020,7 +5021,7 @@ input[type=text].simple-input-field:hover {
 .chat-item {
     position: relative;
     height: 72px;
-    padding: 13px 16px 14px 82px;
+    padding: 13px 8px 14px 82px;
     cursor: pointer;
 }
 
@@ -5408,8 +5409,8 @@ input[type=text].simple-input-field:hover {
 .chat-item.saved-chat .circle-avatar svg {
     width: 24px;
     height: 24px;
-    top: 8px;
-    left: 8px;
+    top: 12px;
+    left: 12px;
     fill: #FFF;
     position: absolute;
 }
@@ -5523,7 +5524,7 @@ input[type=text].simple-input-field:hover {
     margin: 0 auto 0 0;
 }
 .chat-item .chat-title {
-    font-size: 20px;
+    font-size: 18px;
     line-height: 22px;
     color: #212121;
     margin: 0 auto 0 0;
@@ -5596,7 +5597,7 @@ input[type=text].simple-input-field:hover {
     line-height: 16px;
 }
 .chat-item .last-msg {
-    width: calc(100% - 35px);
+    width: calc(100% - 40px);
     font-size: 13px;
     font-weight: 300;
     color: #757575;
@@ -5617,8 +5618,9 @@ input[type=text].simple-input-field:hover {
 .chat-item .chat-states {
     display: flex;
     position: absolute;
-    right: 15px;
+    right: 5px;
     bottom: 12px;
+    height: 24px;
     flex-direction: row;
     justify-content: flex-end;
 }
@@ -5672,12 +5674,12 @@ input[type=text].simple-input-field:hover {
 
 .chat-item .msg-counter {
     position: absolute;
-    right: 2px;
-    bottom: 2px;
-    padding: 5px 4px;
-    min-width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    right: 3px;
+    bottom: 3px;
+    padding: 3px 5px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 10px;
     color: #FFFFFF !important;
     font-size: 12px;
     line-height: 12px;
@@ -6990,7 +6992,7 @@ img.fwd-img-preview {
     display: none;
 }
 
-.mdi-link-variant[data-image='true']:before,{
+.mdi-link-variant[data-image='true']:before{
     content: "\F339";
 }
 
