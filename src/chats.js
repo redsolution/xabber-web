@@ -1919,7 +1919,7 @@ define("xabber-chats", function () {
                 if (item.get('invite')) {
                     let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: this.account.get('jid')})
                         .c('retract-message', {
-                            id: this.contact.get('group_chat') && item.get('contact_stanza_id') || item.get('stanza_id'),
+                            id: item.get('stanza_id'),
                             xmlns: Strophe.NS.REWRITE,
                             symmetric: false,
                             by: this.account.get('jid')
@@ -5701,7 +5701,7 @@ define("xabber-chats", function () {
                 from_bare_jid = options.from_bare_jid;
                 $message.children('stanza-id').each((idx, stanza_id) => {
                 stanza_id = $(stanza_id);
-                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length) {
+                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !$message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length) {
                     if (stanza_id.attr('by') === from_bare_jid) {
                         $stanza_id = stanza_id;
                         $contact_stanza_id = stanza_id;

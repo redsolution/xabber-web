@@ -75,7 +75,8 @@ define("xabber-contacts", function () {
                     status_text = xabber.getString("action_contact_blocked");
                 else if (this.get('group_chat')) {
                     if (this.get('group_info')) {
-                        status_text += xabber.getQuantityString("contact_groupchat_status_member", this.get('group_info').members_num);
+                        if (this.get('group_info').members_num)
+                            status_text += xabber.getQuantityString("contact_groupchat_status_member", this.get('group_info').members_num);
                         if (this.get('group_info').online_members_num > 0)
                             status_text += xabber.getString("contact_groupchat_status_online", [this.get('group_info').online_members_num || 0]);
                     } else if (!subscription)
@@ -4124,9 +4125,27 @@ define("xabber-contacts", function () {
                         last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
                         last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
                         unread_msgs_count = Number($unread_messages.attr('count')) || 0,
+                        is_invite =  message.find('invite').length,
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-                        msg, options = {synced_msg: true, stanza_id: (is_group_chat ? message.children('stanza-id[by="' + jid + '"]') : message.children('stanza-id[by="' + this.account.get('jid') + '"]')).attr('id')};
-                    if (!chat.item_view.content && (message.find('invite').length || encrypted && this.account.omemo)) {
+                        msg, options = {synced_msg: true,};
+                    if (is_invite) {
+                        if (contact.get('subscription') === 'both' || contact.get('subscription') === 'to') {
+                            contact.set('invitation', false);
+                            contact.trigger('remove_invite');
+                        }
+                        else {
+                            this.account.cached_roster.getAllFromRoster((roster_items) => {
+                                let cached_contacts = roster_items.filter(item => item.jid === jid),
+                                    cached_contact = cached_contacts[0];
+                                if (cached_contact && (cached_contact.subscription === 'both' || cached_contact.subscription === 'to')){
+                                    cached_contact = this.contacts.mergeContact(cached_contact);
+                                    cached_contact.set('invitation', false);
+                                    cached_contact.trigger('remove_invite');
+                                }
+                            });
+                        }
+                    }
+                    if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     }
                     if ($item.attr('pinned') || $item.attr('pinned') === '0'){
@@ -4189,7 +4208,7 @@ define("xabber-contacts", function () {
                     if (msg) {
                         if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
-                        if(!(message.find('invite').length || encrypted && this.account.omemo)) {
+                        if(!(is_invite || encrypted && this.account.omemo)) {
                             if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
                                 msg.set('state', constants.MSG_DISPLAYED);
                             else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)

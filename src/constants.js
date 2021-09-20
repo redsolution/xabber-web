@@ -84,7 +84,7 @@ var constants = {
 
     JINGLE_WAITING_TIME: 60,
 
-    SYNCHRONIZATION_RSM_MAX: 200,
+    SYNCHRONIZATION_RSM_MAX: 25,
 
     TURN_SERVERS_LIST: [
         {

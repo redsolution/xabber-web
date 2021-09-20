@@ -219,7 +219,6 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('AUTH_TOKENS', 'https://xabber.com/protocol/auth-tokens');
         Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
         Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protocol/synchronization#chat');
-        Strophe.addNamespace('SYNCHRONIZATION_GROUP', 'https://xabber.com/protocol/groups');
         Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');
         Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:1');
         Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
@@ -236,6 +235,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('MEDIA', 'urn:xmpp:media-element');
         Strophe.addNamespace('LAST', 'jabber:iq:last');
         Strophe.addNamespace('GROUP_CHAT', 'https://xabber.com/protocol/groups');
+        Strophe.addNamespace('GROUP_CHAT_INVITE', 'https://xabber.com/protocol/groups#invite');
         Strophe.addNamespace('WEBCHAT', 'https://xabber.com/protocol/webchat');
         Strophe.addNamespace('INDEX', 'https://xabber.com/protocol/index');
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
