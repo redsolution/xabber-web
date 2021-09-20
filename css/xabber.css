@@ -3943,7 +3943,6 @@ input[type=text].simple-input-field:hover {
 
 .pinned-icon {
     height: 24px;
-    margin-left: 2px;
 }
 
 .pinned-icon path {
@@ -5638,6 +5637,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-item .msg-delivering-state {
     margin-top: 3px;
+    margin-right: 2px;
     color: #388E3C;
 }
 
