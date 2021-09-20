@@ -3952,6 +3952,7 @@ input[type=text].simple-input-field:hover {
 .muted-icon {
     margin: 1px 5px 0;
     color: #BDBDBD;
+    margin-right: auto;
 }
 
 .muted-icon polygon {
@@ -5526,7 +5527,7 @@ input[type=text].simple-input-field:hover {
     font-size: 18px;
     line-height: 22px;
     color: #212121;
-    margin: 0 auto 0 0;
+    margin: 0;
 }
 
 .message-item.encrypted .chat-title,

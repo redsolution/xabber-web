@@ -236,6 +236,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('LAST', 'jabber:iq:last');
         Strophe.addNamespace('GROUP_CHAT', 'https://xabber.com/protocol/groups');
         Strophe.addNamespace('GROUP_CHAT_INVITE', 'https://xabber.com/protocol/groups#invite');
+        Strophe.addNamespace('GROUP_CHAT_INVITE_HTTP', 'http://xabber.com/protocol/groups#invite');
         Strophe.addNamespace('WEBCHAT', 'https://xabber.com/protocol/webchat');
         Strophe.addNamespace('INDEX', 'https://xabber.com/protocol/index');
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
