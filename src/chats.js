@@ -1716,10 +1716,6 @@ define("xabber-chats", function () {
         },
 
         updatePinned: function () {
-            if (!this.contact){
-                this.$('.pinned-icon').hide()
-                return;
-            }
             let is_pinned = this.model.get('pinned');
             this.$('.pinned-icon').showIf(is_pinned && is_pinned !== '0');
             if (is_pinned)
@@ -6274,7 +6270,7 @@ define("xabber-chats", function () {
         replaceChatItem: function (item, chats, pinned_chats) {
             let view = this.child(item.id);
             if (view && item.get('pinned') && item.get('pinned') !== '0' && pinned_chats ){
-                pinned_chats = pinned_chats.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
+                pinned_chats = pinned_chats.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 let index = pinned_chats.indexOf(item);
                 if (index === 0) {
                     this.$('.pinned-chat-list').prepend(view.$el);
@@ -6300,11 +6296,11 @@ define("xabber-chats", function () {
                 return;
             if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
                 return;
-            active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned')));
-            active_toolbar.hasClass('chats') && (view.model.get('saved') || !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned')));
-            active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => chat.get('saved') || !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned')));
+            active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
+            active_toolbar.hasClass('chats') && (view.model.get('saved') || !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
+            active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => chat.get('saved') || !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned')));
             active_toolbar.hasClass('archive-chats') && (view.model.get('saved') || view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.get('archived')));
-            active_toolbar.hasClass('account-item') && (view.model.get('saved') || (view.account.get('jid') === active_toolbar.attr('data-jid'))) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned')));
+            active_toolbar.hasClass('account-item') && (view.model.get('saved') || (view.account.get('jid') === active_toolbar.attr('data-jid'))) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
         },
 
         onEnterPressed: function (selection) {
@@ -6441,14 +6437,14 @@ define("xabber-chats", function () {
             xabber.body.setScreen('all-chats');
             this.$('.chat-item').detach();
             let chats = this.model,
-                account_chats = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
-                account_chats_pinned = chats.filter(chat => (chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+                account_chats = chats.filter(chat => ((chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
+                account_chats_pinned = chats.filter(chat => ((chat.account.get('jid') === account.get('jid')) && (chat.get('saved') || chat.get('timestamp') && !chat.get('archived'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
             this.$(`.omemo-item:not([data-id="${account.get('jid')}"])`).addClass('hidden');
             account_chats.forEach((chat) => {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (account_chats_pinned) {
-                account_chats_pinned = account_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
+                account_chats_pinned = account_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 account_chats_pinned.forEach((chat) => {
                     let index = account_chats_pinned.indexOf(chat);
                     if (index === 0) {
@@ -6480,8 +6476,8 @@ define("xabber-chats", function () {
                 all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && (chat.get('unread') || chat.get('const_unread')) && chat.get('pinned') !== '0' && chat.get('pinned'));
             }
             if (!all_chats.length && !all_chats_pinned.length) {
-                all_chats = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
-                all_chats_pinned = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
+                all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
+                all_chats_pinned = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned'));
                 xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
                 this.onUpdatedScreen();
             }
@@ -6489,7 +6485,7 @@ define("xabber-chats", function () {
                 this.$('.chat-list').append(chat.item_view.$el);
             });
             if (all_chats_pinned) {
-                all_chats_pinned = all_chats_pinned.filter(e => !e.get('saved')).sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
+                all_chats_pinned = all_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
                 all_chats_pinned.forEach((chat) => {
                     let index = all_chats_pinned.indexOf(chat);
                     if (index === 0) {
@@ -7010,6 +7006,7 @@ define("xabber-chats", function () {
           events: {
               "click .contact-name": "showSettings",
               "click .circle-avatar": "showSettings",
+              "click .btn-chat-pin": "pinSavedChat",
               "click .btn-delete-chat": "deleteChat",
               "click .btn-search-messages": "renderSearchPanel"
           },
@@ -7079,6 +7076,22 @@ define("xabber-chats", function () {
                       this.model.set('timestamp', 0);
                   }
               });
+          },
+
+          pinSavedChat: function () {
+              let pinned = this.model.get('pinned'),
+                  is_pinned = pinned && pinned !== '0' ? true : false,
+                  pinned_value = is_pinned ? '0' : + new Date(),
+                  conversation_options = {
+                      jid: this.account.get('jid'),
+                      pinned: pinned_value,
+                      type: this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model)
+                  },
+                  iq = $iq({type: 'set', to: this.account.get('jid')})
+                      .c('query', {xmlns: Strophe.NS.SYNCHRONIZATION})
+                      .c('conversation', conversation_options);
+              this.account.sendIQ(iq);
+              this.model.set('pinned', pinned_value);
           },
 
           renderSearchPanel: function () {

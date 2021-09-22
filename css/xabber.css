@@ -5638,7 +5638,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-item .msg-delivering-state {
     margin-top: 3px;
-    margin-right: 2px;
+    margin-right: 3px;
     color: #388E3C;
 }
 
