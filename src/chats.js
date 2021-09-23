@@ -2819,7 +2819,7 @@ define("xabber-chats", function () {
                     .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                     .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                     .c('value').t(Strophe.NS.MAM).up().up();
-            if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+            if (this.account.server_features.get(Strophe.NS.ARCHIVE) && this.model.get('encrypted'))    {
                 iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
                     .c('value').t(this.model.get('encrypted')).up().up();
             }
@@ -6640,7 +6640,7 @@ define("xabber-chats", function () {
             this.account = account;
             this.$('.chat-list-wrap').html("");
             this.saved_chat = false;
-            xabber.chats_view.$('.chat-list .chat-item').each((idx, item) => {
+            xabber.chats_view.$('.chat-list-wrap .chat-item').each((idx, item) => {
                 let id = $(item).data('id'),
                     chat = this.account.chats.get(id);
                 if (chat) {

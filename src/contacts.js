@@ -5155,6 +5155,9 @@ define("xabber-contacts", function () {
                     !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
                     this.roster.syncFromServer(options);
                 }
+                else {
+                    this.roster.getRoster();
+                }
                 this.blocklist.getFromServer();
             }, this);
         });
