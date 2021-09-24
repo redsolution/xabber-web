@@ -18,7 +18,7 @@
             audio: false,
             video: false,
             client_id: uuid().substring(0, 8),
-            client_name: 'Xabber for Web ' + env.version_number
+            client_name: 'Xabber for Web'
         },
 
         initialize: function () {

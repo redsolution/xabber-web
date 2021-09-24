@@ -8752,7 +8752,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 4px 0;
 }
 
-.account-settings-panel .token-wrap .device {
+.account-settings-panel .token-wrap .client {
     font-weight: 500;
 }
 
@@ -9924,7 +9924,7 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel .btn-revoke-token {
     position: absolute;
-    bottom: 8px;
+    bottom: 24px;
     right: 36px;
     height: 24px;
     color: #9E9E9E;
