@@ -5011,6 +5011,7 @@ input[type=text].simple-input-field:hover {
     position: relative;
 }
 
+.chat-item,
 .message-item {
     position: relative;
     height: 56px;
@@ -5018,7 +5019,7 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
 }
 
-.chat-item {
+.chat-list-wrap.left-panel-list-wrap .chat-item {
     position: relative;
     height: 72px;
     padding: 13px 8px 14px 82px;
@@ -5384,7 +5385,7 @@ input[type=text].simple-input-field:hover {
     background-image: url(../images/loading.png);
     background-size: 50%;
 }
-.chat-item .circle-avatar {
+.chat-list-wrap.left-panel-list-wrap .chat-item .circle-avatar {
     position: absolute;
     left: 16px;
     top: 12px;
@@ -5403,10 +5404,19 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-item.saved-chat .circle-avatar {
-    background-image: none;
+    background-image: none !important;
 }
 
 .chat-item.saved-chat .circle-avatar svg {
+    width: 24px;
+    height: 24px;
+    top: 8px;
+    left: 8px;
+    fill: #FFF;
+    position: absolute;
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item.saved-chat .circle-avatar svg {
     width: 24px;
     height: 24px;
     top: 12px;
@@ -5421,6 +5431,7 @@ input[type=text].simple-input-field:hover {
     margin: 0;
 }
 
+.chat-item .status,
 .chat-head-wrap .contact-status {
     position: absolute;
     top: 36px;
@@ -5431,9 +5442,9 @@ input[type=text].simple-input-field:hover {
     border-radius: 50%;
 }
 
-.chat-item .status{
+.chat-list-wrap.left-panel-list-wrap .chat-item .status{
     position: absolute;
-    bottom: 14px;
+    top: 46px;
     left: 52px;
     width: 12px;
     height: 12px;
@@ -5456,6 +5467,7 @@ input[type=text].simple-input-field:hover {
     height: 18px;
 }
 
+.chat-item .chat-icon,
 .message-item .chat-icon,
 .chat-head-wrap .chat-icon {
     position: absolute;
@@ -5471,10 +5483,10 @@ input[type=text].simple-input-field:hover {
     /*background-color: white;*/
 }
 
-.chat-item .chat-icon {
+.chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon {
     position: absolute;
     border-radius: 50%;
-    bottom: 14px;
+    top: 42px;
     left: 50px;
     margin: 0;
     padding: 1px;
@@ -5516,14 +5528,15 @@ input[type=text].simple-input-field:hover {
     width: 100%;
 }
 
+.chat-item .chat-title,
 .message-item .chat-title,
 .mention-item .chat-title{
     font-size: 16px;
     line-height: 17px;
     color: #212121;
-    margin: 0 auto 0 0;
+    margin: 0;
 }
-.chat-item .chat-title {
+.chat-list-wrap.left-panel-list-wrap .chat-item .chat-title {
     font-size: 18px;
     line-height: 22px;
     color: #212121;
@@ -5587,16 +5600,18 @@ input[type=text].simple-input-field:hover {
     color: #757575 !important;
 }
 
+.chat-item .last-msg,
 .message-item .last-msg,
 .mention-item .last-msg{
-    width: calc(100% - 20px);
+    width: calc(100% - 40px);
     height: 16px;
     font-size: 11px;
     font-weight: 300;
     color: #757575;
     line-height: 16px;
 }
-.chat-item .last-msg {
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .last-msg {
     width: calc(100% - 40px);
     font-size: 13px;
     font-weight: 300;
@@ -5605,6 +5620,7 @@ input[type=text].simple-input-field:hover {
     line-height: 16px;
 }
 
+.chat-item .chat-states,
 .message-item .chat-states,
 .mention-item .chat-states{
     display: flex;
@@ -5615,7 +5631,12 @@ input[type=text].simple-input-field:hover {
     justify-content: flex-end;
 }
 
-.chat-item .chat-states {
+.forward-panel-modal .chat-item .chat-states{
+    right: 19px;
+    bottom: 5px;
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .chat-states {
     display: flex;
     position: absolute;
     right: 5px;
@@ -5658,6 +5679,7 @@ input[type=text].simple-input-field:hover {
     display: none !important;
 }
 
+.chat-item .msg-counter,
 .mention-item .msg-counter{
     position: absolute;
     right: 2px;
@@ -5673,7 +5695,7 @@ input[type=text].simple-input-field:hover {
     background-color: #388E3C;
 }
 
-.chat-item .msg-counter {
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;
     bottom: 3px;

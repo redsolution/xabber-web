@@ -6313,7 +6313,7 @@ define("xabber-chats", function () {
                 }
                 if (selection.hasClass('roster-contact')) {
                     view = xabber.accounts.get(selection.data('account')).chats.getChat(xabber.accounts.get(selection.data('account')).contacts.get(selection.data('jid')));
-                    view && (view = view.item_view);//34
+                    view && (view = view.item_view);
                     view && xabber.chats_view.openChat(view, {clear_search: false, screen: xabber.body.screen.get('name')});
                     selection.addClass('active');
                 }
@@ -6750,8 +6750,11 @@ define("xabber-chats", function () {
                     chat_item.content.onSubmit("", [message]);
                 });
             }
-            else
+            else {
+                if (!chat_item.content)
+                    chat_item.content = new xabber.ChatContentView({chat_item: chat_item});
                 chat_item.content.bottom.setForwardedMessages(this.messages);
+            }
             this.messages = [];
             this.close().done(() => {
                 chat_item.open({clear_search: true});
@@ -6862,14 +6865,13 @@ define("xabber-chats", function () {
         },
 
         sendInvite: function (contact_jid, callback, errback) {
-            let is_member_only = this.contact.get('group_info').model === 'member-only',
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
+            let iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                     .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                     .c('jid').t(contact_jid).up()
-                    .c('send').t(is_member_only).up()
+                    .c('send').t('false').up()
                     .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]));
             this.account.sendIQ(iq, () => {
-                !is_member_only && this.sendInviteMessage(contact_jid);
+                this.sendInviteMessage(contact_jid);
                 this.close();
                 callback && callback();
             }, (iq) => {
