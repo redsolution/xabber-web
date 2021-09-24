@@ -5847,8 +5847,6 @@ define("xabber-chats", function () {
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();
-                if (!contact.get('in_roster'))
-                    contact.pushInRoster();
             }
 
             if (chat.contact.get('group_chat') && options.carbon_direction === 'sent' && !$message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`).length)

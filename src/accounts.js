@@ -583,13 +583,12 @@ define("xabber-accounts", function () {
                     this.sendIQ(iq, (tokens) => {
                         $(tokens).find('field').each((idx, token) => {
                             let $token = $(token),
-                                client = $token.find('client').text(),
                                 device = $token.find('device').text(),
                                 token_uid = $token.find('token-uid').text(),
                                 expire = Number($token.find('expire').text())*1000,
                                 last_auth = Number($token.find('last-auth').text())*1000,
                                 ip_address = $token.find('ip').text();
-                            tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
+                            tokens_list.push({device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                         });
                         this.x_tokens_list = tokens_list;
                         this.settings_right && this.settings_right.updateXTokens();

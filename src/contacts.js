@@ -4204,7 +4204,9 @@ define("xabber-contacts", function () {
                     if (encrypted && this.account.omemo)
                         unread_msgs_count && unread_msgs_count--;
                     message.length && (msg = this.account.chats.receiveChatMessage(message, options));
-                    chat.set('const_unread', unread_msgs_count);
+                    if (!(encrypted && !this.account.omemo)){
+                        chat.set('const_unread', unread_msgs_count);
+                    }
                     if (msg) {
                         if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
@@ -4225,6 +4227,8 @@ define("xabber-contacts", function () {
                 if (!request_with_stamp)
                     this.account.chats.getSavedChat();
                 this.account.set('last_sync', sync_timestamp);
+                if (!this.account.get('first_sync'))
+                    this.account.set('first_sync', sync_timestamp);
                 if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
                     if (!synchronization_with_stamp) {
                         this.getRoster();
@@ -4258,7 +4262,7 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, (iq) => {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
-                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
+                    this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
                     this.account.dfd_presence.resolve();
                 });
             },
