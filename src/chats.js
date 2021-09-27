@@ -1558,7 +1558,6 @@ define("xabber-chats", function () {
 
         deleteFromSynchronization: function (callback, errback) {
             let conversation_options = {jid: this.get('jid'), status: 'deleted', type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this) };
-            this.get('encrypted') && (conversation_options.type = 'encrypted');
             let iq = $iq({type: 'set', to: this.account.get('jid')})
                 .c('query', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', conversation_options);
@@ -9272,7 +9271,7 @@ define("xabber-chats", function () {
             if (this.connection && !this.connection.handlers.find(h => !h.ns && !h.options.encrypted && h.name === 'message')) {
                 let last_msg_timestamp = this.last_msg_timestamp;
                 this.chats.registerMessageHandler();
-                this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000});
+                this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000}, false, true);
             }
             return true;
         });
