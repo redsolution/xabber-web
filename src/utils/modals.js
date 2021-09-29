@@ -202,11 +202,12 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
             },
 
             ask: function (header, text, dialog_options, buttons) {
-                var ok_text;
+                var ok_text, cancel_text;
                 if (buttons) {
                     ok_text = buttons.ok_button_text;
+                    cancel_text = buttons.cancel_button_text;
                 }
-                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true}, dialog_options);
+                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: {text: cancel_text}}, dialog_options);
             },
 
             ask_extended: function (header, text, dialog_options, buttons) {

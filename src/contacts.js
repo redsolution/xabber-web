@@ -1215,9 +1215,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { ok_button_text: xabber.getString("dialog_show_qr_code__button_copy")}).done((result) => {
-                    if (result)
-                        qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button: '123 ', ok_button_text: ' '}).done((result) => {
                 });
             },
 
@@ -1451,9 +1449,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { ok_button_text: xabber.getString("dialog_show_qr_code__button_copy")}).done((result) => {
-                    if (result)
-                        qrcode.domElement.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}).done((result) => {
                 });
             },
 
@@ -1930,6 +1926,7 @@ define("xabber-contacts", function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
                 this.participants.on("participants_updated", this.onParticipantsUpdated, this);
+                this.model.on("change:status_updated", this.updateParticipantsList, this);//34
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
@@ -1964,6 +1961,13 @@ define("xabber-contacts", function () {
                 }, () => {
                     this.$el.removeClass('request-waiting');
                 });
+            },
+
+            updateParticipantsList: function () {
+                this.$el.find('.members-list-wrap tbody').html('');
+                this.updateParticipants();
+                if (!this.model.all_rights)
+                    this.model.getAllRights();
             },
 
             onParticipantsUpdated: function () {
@@ -4220,6 +4224,10 @@ define("xabber-contacts", function () {
                             chat.item_view.updateLastMessage(msg);
                         }
                         chat.set('first_archive_id', msg.get('stanza_id'));
+                    }
+                    if (contact){
+                        contact.updateAvatar();
+                        contact.updateName();
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
                 });

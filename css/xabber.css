@@ -6354,7 +6354,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .fixed-day-indicator {
-    background-color: rgba(255, 255, 255, .5);
+    background-color: rgba(255, 255, 255, .9);
     display: inline-block;
     padding: 4px 16px;
     border-radius: 50px;
