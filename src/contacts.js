@@ -573,6 +573,8 @@ define("xabber-contacts", function () {
                 if ($group_chat.find('pinned-message').length) {
                     if (prev_pinned_message != pinned_message) {
                         if (chat)
+                            if (!chat.item_view.content)
+                                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                             pinned_msg_elem = chat.item_view.content.$pinned_message;
                         if (pinned_msg_elem) {
                             if (pinned_message) {
