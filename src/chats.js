@@ -4821,12 +4821,10 @@ define("xabber-chats", function () {
             if (!participant) {
                 this.contact.getBlockedParticipants((response) => {
                     _.extend(options, {present: null, subscription: null});
-                    if ($(response).find(`query user:has(${participant_id})`).length)
+                    if ($(response).find(`query user:contains(${participant_id})`).length)
                         options.blocked = true;
                     else
                         options.blocked = false;
-                    if (!options.blocked && !this.contact.participants.get(participant_id))
-                        return;
                     participant = new xabber.Participant(options, {contact: this.contact});
                     participant_properties_panel.open(participant, {});
                 });

@@ -201,13 +201,13 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 return this.common(getString("xabber_account__login__dialog_error__header"), text, {ok_button: true}, dialog_options);
             },
 
-            ask: function (header, text, dialog_options, buttons) {
+            ask: function (header, text, dialog_options, buttons, flag) {
                 var ok_text, cancel_text;
                 if (buttons) {
                     ok_text = buttons.ok_button_text;
                     cancel_text = buttons.cancel_button_text;
                 }
-                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: {text: cancel_text}}, dialog_options);
+                return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: {text: cancel_text}}, dialog_options, flag);
             },
 
             ask_extended: function (header, text, dialog_options, buttons) {
