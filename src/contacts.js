@@ -392,6 +392,7 @@ define("xabber-contacts", function () {
 
             blockWithDialog: function () {
                 let is_group = this.get('group_chat'),
+                    contact = this,
                     header = is_group ? xabber.getString("block_group__header") : xabber.getString("contact_block"),
                     buttons = { ok_button_text: xabber.getString("contact_bar_block")},
                     msg_text = xabber.getString("block_contact_confirm_short", [this.get('name').bold()]);
@@ -402,15 +403,15 @@ define("xabber-contacts", function () {
                 utils.dialogs.ask(header, msg_text, null, buttons).done(function (result) {
                     if (result) {
                        if (!is_group) {
-                            let chat = this.account.chats.getChat(this);
+                            let chat = contact.account.chats.getChat(contact);
                             if (result === 'block & delete') {
-                                this.removeFromRoster();
+                                contact.removeFromRoster();
                                 chat.retractAllMessages(false);
                                 chat.deleteFromSynchronization();
                                 chat.set('active', false);
                             }
                         }
-                        this.blockRequest();
+                        contact.blockRequest();
                         xabber.trigger("clear_search");
                         if (!is_group)
                             xabber.body.setScreen('all-chats', {right: undefined});
@@ -1928,7 +1929,7 @@ define("xabber-contacts", function () {
                 this.account = this.model.account;
                 this.participants = this.model.participants;
                 this.participants.on("participants_updated", this.onParticipantsUpdated, this);
-                this.model.on("change:status_updated", this.updateParticipantsList, this);//34
+                this.model.on("change:status_updated", this.updateParticipantsList, this);
                 this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
             },
 
@@ -2187,6 +2188,7 @@ define("xabber-contacts", function () {
                 attrs.subscription = attrs.subscription === null ? null : 'both';
                 attrs.badge = _.escape(attrs.badge);
                 attrs.is_myself = attrs.jid === this.account.get('jid');
+                attrs.is_blocked_contact = this.account.blocklist.isBlocked(attrs.jid);
                 attrs.incognito_chat = (this.contact.get('group_info') && this.contact.get('group_info').privacy === 'incognito') ? true : false;
                 let $member_info_view;
                 if (this.contact.get('private_chat')) {

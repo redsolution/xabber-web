@@ -37,6 +37,9 @@
             {[ if (is_myself) {]}
             <div class="my-flag one-line text-color-red-700">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
             {[}]}
+            {[ if (is_blocked_contact) {]}
+            <div class="my-flag one-line text-color-red-700">{[print(xabber.getString("action_contact_blocked"))]}</div>
+            {[}]}
             {[if (subscription === null) {]}<p class="role selectable-text one-line">{[if (blocked) { print(xabber.getString("groupchat_blocked")); }else{print(xabber.getString("settings_group_member__placeholder_not_a_member"));}]}</p>{[}]}
         </div>
     <div class="buttons-wrap">
