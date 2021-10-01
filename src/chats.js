@@ -7142,11 +7142,12 @@ define("xabber-chats", function () {
             this.updateEncrypted();
             this.updateAvatar();
             this.updateNotifications();
-            this.updateArchiveButton();
+            this.updateArchived();
             this.model.on("change:encrypted", this.updateEncrypted, this);
             this.model.on("close_chat", this.closeChat, this);
             this.model.on("pinned", this.pinChat, this);
             this.model.on("change:muted", this.updateNotifications, this);
+            this.model.on("change:archived", this.updateArchived, this);
             this.contact.on("change", this.onContactChanged, this);
             this.contact.on("archive_chat", this.archiveChat, this);
             this.contact.on("change:name", this.updateName, this);
@@ -7266,6 +7267,21 @@ define("xabber-chats", function () {
             });
         },
 
+
+        updateArchived: function () {
+            let archived = !this.model.get('archived'),
+                is_archived = archived ? true : false;
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', !is_archived);
+            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', is_archived);
+            if (this.model.item_view && archived){
+                !this.model.messages.length && this.model.item_view.updateLastMessage();
+                this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
+                if (this.model.get('active')) {
+                    xabber.chats_view.updateScreenAllChats();
+                }
+            }
+        },
+
         archiveChat: function (ev, no_iq) {
             let archived = !this.model.get('archived'),
                 is_archived = archived ? true : false;
@@ -7282,10 +7298,6 @@ define("xabber-chats", function () {
                 this.account.sendIQ(iq);
                 this.model.set('archived', archived);
             }
-            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', is_archived);
-            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', !is_archived);
-            !this.model.messages.length && this.model.item_view.updateLastMessage();
-            this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
         },
 
         pinChat: function () {
@@ -7340,14 +7352,6 @@ define("xabber-chats", function () {
                 xabber.toolbar_view.showChatsByAccount();
                 return;
             }
-        },
-
-        updateArchiveButton: function () {
-            let archived = this.model.get('archived'),
-                is_archived = archived ? true : false;
-            this.model.set('archived', archived);
-            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-up', is_archived);
-            this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', !is_archived);
         },
 
         updateGroupChatHead: function () {
