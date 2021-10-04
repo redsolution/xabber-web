@@ -581,6 +581,7 @@ define("xabber-views", function () {
                   });
               });
               this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children().length);
+              this.$('.pinned-chat-list').switchClass('hidden', query);
               this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contacts-list').children().length);
               this.$('.messages-list-wrap').addClass('hidden').find('.messages-list').html("");
               if (query.length >= 2) {
@@ -682,6 +683,7 @@ define("xabber-views", function () {
               this._loading_messages = false;
               this.$(this.main_container).removeClass('hidden');
               this.$('.chats-list-wrap').addClass('hidden');
+              this.$('.pinned-chat-list').removeClass('hidden');
               this.$('.contacts-list-wrap').addClass('hidden');
               this.$('.messages-list-wrap').addClass('hidden');
           }

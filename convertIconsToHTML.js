@@ -26,6 +26,9 @@ let badges_names = [
         'map-marker',
         'minus',
     ],
+    circle_icons = [,
+        'task'
+    ],
     fs = require('fs');
 badges_names.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/icon/${name}.svg`, 'utf-8');
@@ -33,5 +36,9 @@ badges_names.forEach((name) => {
 });
 material_icons.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/icon/material/${name}.svg`, 'utf-8');
+    fs.writeFileSync(`./templates/svg/${name}.html`, svg);
+});
+circle_icons.forEach((name) => {
+    let svg = fs.readFileSync(`../xabber-icons/badge/circle/${name}.svg`, 'utf-8');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });

@@ -5485,15 +5485,8 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon {
-    position: absolute;
-    border-radius: 50%;
     top: 42px;
     left: 50px;
-    margin: 0;
-    padding: 1px;
-    border: 1.125px solid #FFF;
-    width: 16px !important;
-    height: 16px !important;
 }
 
 .message-item .chat-icon svg,

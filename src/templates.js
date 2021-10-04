@@ -131,6 +131,7 @@ define("xabber-templates", [
     "text!templates/svg/group-incognito.html",
     "text!templates/svg/group-invite.html",
     "text!templates/svg/group-public.html",
+    "text!templates/svg/task.html",
     "text!templates/svg/group-private.html",
     "text!templates/svg/channel.html",
     "text!templates/svg/rss.html",
@@ -329,6 +330,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.group-incognito');
     addSvgTemplate('svg.group-invite');
     addSvgTemplate('svg.group-public');
+    addSvgTemplate('svg.task');
     addSvgTemplate('svg.group-private');
     addSvgTemplate('svg.channel');
     addSvgTemplate('svg.rss');

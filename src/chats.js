@@ -2691,8 +2691,6 @@ define("xabber-chats", function () {
 
         readMessages: function (timestamp) {
             let unread_messages = _.clone(this.model.messages_unread.models);
-            if (this.contact && this.contact.get('invitation'))
-                return;
             if (unread_messages.length) {
                 let msg = unread_messages[unread_messages.length - 1];
                 this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
@@ -6053,7 +6051,7 @@ define("xabber-chats", function () {
             this.account.sendIQ(iq, (iq) => {
                     let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
                         contact = this.account.contacts.mergeContact(group_jid);
-                    contact.set('group_chat', true);
+                    contact.set('group_chat', true);//34
                     contact.set('subscription_preapproved', true);
                     contact.pres('subscribed');
                     contact.pushInRoster(null, () => {

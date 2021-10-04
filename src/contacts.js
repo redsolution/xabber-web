@@ -110,6 +110,8 @@ define("xabber-contacts", function () {
                 if (this.get('invitation'))
                     return 'group-invite';
                 if (this.get('group_chat')) {
+                    if (this.get('jid').includes('redmine_issue_'))
+                        return 'task';
                     if (this.get('private_chat'))
                         return 'group-private';
                     if (this.get('incognito_chat'))
