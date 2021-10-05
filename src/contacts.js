@@ -4101,10 +4101,6 @@ define("xabber-contacts", function () {
                     retract_version = $(iq).find('query conversation[type="chat"]').first().children(`metadata[node="${Strophe.NS.REWRITE}"]`).children('retract').attr('version');
                 if (!request_with_stamp)
                     last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
-                if (!$(iq).find('conversation').length && !xabber.accounts.connected.find(account => !account.roster.conversations_loaded)) {
-                    xabber.chats_view.$('.load-chats-feedback').text(xabber.getString("synchronization__text_all_chats_loaded"));
-                    return;
-                }
                 if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
                     this.account.getAllMessageRetractions(true);
                 if (request_with_stamp) {
