@@ -8371,19 +8371,22 @@ define("xabber-chats", function () {
                 $elem.removeClass('recording');
             else {
                 $elem.addClass('recording ground-color-50');
-                this.initAudio();
+                if (!this.model.get('recording_voice_message'))
+                    this.initAudio();
             }
         },
 
         initAudio: function() {
             navigator.getUserMedia = (navigator.getUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia);
             if (navigator.getUserMedia) {
+                this.model.set('recording_voice_message', true)
                 let constraints = { audio: true, channelCount: 1 },
                     chunks = [],
                     $mic = this.$('.send-area .attach-voice-message'),
                     onSuccess = (stream) => {
                     if (!$mic.is(":hover")) {
                         $mic.removeClass('recording ground-color-50');
+                        this.model.set('recording_voice_message', false)
                         return;
                     }
                     let mediaRecorder = new MediaRecorder(stream),
@@ -8420,6 +8423,7 @@ define("xabber-chats", function () {
                                         mediaRecorder.stop();
                                         $mic.removeClass('recording ground-color-50');
                                         $bottom_panel.removeClass('voice-message-recording');
+                                        this.model.set('recording_voice_message', false)
                                         clearInterval(timerId);
                                     }
                                 }, 200),
