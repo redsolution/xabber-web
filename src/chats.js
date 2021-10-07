@@ -5630,6 +5630,8 @@ define("xabber-chats", function () {
             if ($message.find('retract-message').length) {
                 let is_encrypted = $message.find('retract-message').attr('type') == 'encrypted';
                 !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
+                if ($message.find('retract-message').attr('conversation') === this.account.get('jid'))
+                    chat = this.getSavedChat();
                 if (!chat)
                     return;
                 let $retracted_msg = $message.find('retract-message'),
@@ -5817,7 +5819,7 @@ define("xabber-chats", function () {
             options.replaced && (contact_jid = $message.children('replace').attr('conversation'));
 
             if (contact_jid === this.account.get('jid')) {
-                if (!options.carbon_copied) {
+                if (options.carbon_copied && options.carbon_direction === 'sent' || !options.carbon_copied) {
                     let chat = this.getSavedChat(),
                         stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
                     return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
