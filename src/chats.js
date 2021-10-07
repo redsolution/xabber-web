@@ -5836,8 +5836,32 @@ define("xabber-chats", function () {
                 if (!contact)
                     return;
                 let participant_version = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).attr('version');
-                if (participant_version && contact.participants && contact.participants.version < participant_version)
+                if (participant_version && contact.participants && contact.participants.version < participant_version){
+                    if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && chat.contact.get('pinned_message')){
+                        $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').each((idx, x_elem) => {
+                            let $user = $(x_elem).children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).first();
+                            if ($user.length) {
+                                let user_id = $user.attr('id'),
+                                    user_jid = $user.children('jid').text();
+                                if (chat.contact.get('pinned_message').get('from_jid') === user_jid) {
+                                    let pinned_message = chat.contact.get('pinned_message'),
+                                        user_info = {
+                                            id: user_id,
+                                            jid: user_jid,
+                                            nickname: $user.children('nickname').text() || user_jid || user_id,
+                                            role: $user.children('role').text(),
+                                            avatar: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('id'),
+                                            avatar_url: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('url'),
+                                            badge: $user.children('badge').text()
+                                        };
+                                    pinned_message.set('user_info', user_info);
+                                    chat.contact.set('pinned_message', pinned_message);
+                                }
+                            }
+                        });
+                    }
                     contact.trigger('update_participants');
+                }
             }
 
             if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {

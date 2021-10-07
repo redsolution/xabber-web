@@ -3058,6 +3058,9 @@ define("xabber-contacts", function () {
             updateParticipants: function () {
                 this.participantsRequest({version: this.version}, () => {
                     this.trigger("participants_updated");
+                    chat = this.account.chats.getChat(this.contact);
+                    if (chat.item_view && chat.item_view.content)
+                        chat.item_view.content.updatePinnedMessage()
                 });
             },
 
