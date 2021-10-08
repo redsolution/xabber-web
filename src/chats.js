@@ -5694,7 +5694,7 @@ define("xabber-chats", function () {
                 from_bare_jid = options.from_bare_jid;
                 $message.children('stanza-id').each((idx, stanza_id) => {
                 stanza_id = $(stanza_id);
-                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE_HTTP}"]`).length && $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
+                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE_HTTP}"]`).length || $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
                     if (stanza_id.attr('by') === from_bare_jid) {
                         $stanza_id = stanza_id;
                         $contact_stanza_id = stanza_id;
@@ -6077,7 +6077,7 @@ define("xabber-chats", function () {
             this.account.sendIQ(iq, (iq) => {
                     let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
                         contact = this.account.contacts.mergeContact(group_jid);
-                    contact.set('group_chat', true);//34
+                    contact.set('group_chat', true);
                     contact.set('subscription_preapproved', true);
                     contact.pres('subscribed');
                     contact.pushInRoster(null, () => {
