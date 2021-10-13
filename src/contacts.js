@@ -4212,16 +4212,16 @@ define("xabber-contacts", function () {
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
-                    this.account.cached_roster.getFromRoster(jid, (cached_info) => {
-                        if (cached_info){
-                            let cached_contact = this.contacts.mergeContact(cached_info);
-                            cached_contact.set('cache_synced', true);
-                            if (is_invite && (cached_contact.get('subscription') === 'both' || cached_contact.get('subscription') === 'to')) {
-                                cached_contact.set('invitation', false);
-                                cached_contact.trigger('remove_invite');
-                            }
-                        }
-                    });
+                    // this.account.cached_roster.getFromRoster(jid, (cached_info) => {
+                    //     if (cached_info){
+                    //         let cached_contact = this.contacts.mergeContact(cached_info);
+                    //         cached_contact.set('cache_synced', true);
+                    //         if (is_invite && (cached_contact.get('subscription') === 'both' || cached_contact.get('subscription') === 'to')) {
+                    //             cached_contact.set('invitation', false);
+                    //             cached_contact.trigger('remove_invite');
+                    //         }
+                    //     }
+                    // });
                 });
                 xabber.chats_view.hideChatsFeedback();
                 if (!request_with_stamp)
@@ -4247,9 +4247,9 @@ define("xabber-contacts", function () {
             getRoster: function () {
                 let request_ver = this.roster_version;
                 this.account.cached_roster.getAllFromRoster((roster_items) => {
-                    $(roster_items).each((idx, roster_item) => {
-                        this.contacts.mergeContact(roster_item);
-                    });
+                    // $(roster_items).each((idx, roster_item) => {
+                    //     this.contacts.mergeContact(roster_item);
+                    // });
                     if (!roster_items.length && request_ver != 0) {
                         this.roster_version = 0;
                     }
@@ -5154,15 +5154,20 @@ define("xabber-contacts", function () {
                     contact.resources.reset();
                     contact.resetStatus();
                 });
-                if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
-                    let options = {};
-                    !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
-                    this.roster.syncFromServer(options, false, true);
-                }
-                else {
-                    this.roster.getRoster();
-                }
-                this.blocklist.getFromServer();
+                this.cached_roster.getAllFromRoster((roster_items) => {
+                    $(roster_items).each((idx, roster_item) => {
+                        this.contacts.mergeContact(roster_item);
+                    });
+                    if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
+                        let options = {};
+                        !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
+                        this.roster.syncFromServer(options, false, true);
+                    }
+                    else {
+                        this.roster.getRoster();
+                    }
+                    this.blocklist.getFromServer();
+                });
             }, this);
         });
 

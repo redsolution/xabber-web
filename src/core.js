@@ -301,6 +301,7 @@
                     'CONNECTION_URL',
                     'PERSONAL_AREA_URL',
                     'LOG_LEVEL',
+                    'SYNCHRONIZATION_RSM_MAX',
                     'DEBUG',
                     'XABBER_ACCOUNT_URL',
                     'REGISTER_XMPP_ACCOUNT',
@@ -331,6 +332,8 @@
                 if (constants.DEBUG) {
                     _.extend(window, env);
                 }
+                if (config.SYNCHRONIZATION_RSM_MAX)
+                    constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
 
                 if (config.CLIENT_NAME && !config.SHORT_CLIENT_NAME)
                     constants.SHORT_CLIENT_NAME = config.CLIENT_NAME;
