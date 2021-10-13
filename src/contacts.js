@@ -980,14 +980,12 @@ define("xabber-contacts", function () {
             },
 
             __initialize: function () {
-                this.chat = this.account.chats.getChat(this.model);
                 this.updateDisplayStatus();
                 this.updateBlockedState();
                 this.updateMutedState();
                 this.updateGroupChat();
                 this.model.on("change:display", this.updateDisplayStatus, this);
                 this.model.on("change:blocked", this.updateBlockedState, this);
-                this.chat.on("change:muted", this.updateMutedState, this);
                 this.model.on("change:group_chat", this.updateGroupChat, this);
             },
 
@@ -999,7 +997,7 @@ define("xabber-contacts", function () {
                 this.$el.switchClass('blocked', this.model.get('blocked'));
             },
             updateMutedState: function () {
-                this.$('.muted-icon').showIf(this.chat.get('muted'));
+                this.$('.muted-icon').hide();
             },
 
             clickOnItem: function () {
@@ -1162,7 +1160,7 @@ define("xabber-contacts", function () {
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
                 if (_.has(changed, 'status_updated')) this.updateStatus();
-                if (_.has(changed, 'muted')) this.updateNotifications();
+                // if (_.has(changed, 'muted')) this.updateNotifications();
                 if (_.has(changed, 'subscription')) this.updateSubscriptions();
                 if (_.has(changed, 'subscription_request_in')) this.updateSubscriptions();
                 if (_.has(changed, 'blocked')) this.updateStatusMsg();
@@ -1209,11 +1207,11 @@ define("xabber-contacts", function () {
                     subscription !== 'both' && subscription !== 'to');
             },
 
-            updateNotifications: function () {
-                let chat = this.account.chats.getChat(this.model);
-                this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
-                this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
-            },
+            // updateNotifications: function () {
+            //     let chat = this.account.chats.getChat(this.model);
+            //     this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
+            //     this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
+            // },
 
             showQRCode: function () {
                 let qrcode = new VanillaQR({
@@ -1401,7 +1399,7 @@ define("xabber-contacts", function () {
                 let changed = this.model.changed;
                 if (_.has(changed, 'name')) this.updateName();
                 if (_.has(changed, 'image')) this.updateAvatar();
-                if (_.has(changed, 'muted')) this.updateNotifications();
+                // if (_.has(changed, 'muted')) this.updateNotifications();
                 if (_.has(changed, 'status_updated') || _.has(changed, 'status_message')) this.updateStatus();
             },
 
@@ -1443,11 +1441,11 @@ define("xabber-contacts", function () {
                 chat.muteChat();
             },
 
-            updateNotifications: function () {
-                let chat = this.account.chats.getChat(this.model);
-                this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
-                this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
-            },
+            // updateNotifications: function () {
+            //     let chat = this.account.chats.getChat(this.model);
+            //     this.$('.btn-mute').switchClass('mdi-bell-off', chat.get('muted'));
+            //     this.$('.btn-mute').switchClass('mdi-bell', !chat.get('muted'));
+            // },
 
             showQRCode: function () {
                 let qrcode = new VanillaQR({
@@ -4137,23 +4135,6 @@ define("xabber-contacts", function () {
                         is_invite =  message.find('invite').length,
                         msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
                         msg, options = {synced_msg: true,};
-                    if (is_invite) {
-                        if (contact.get('subscription') === 'both' || contact.get('subscription') === 'to') {
-                            contact.set('invitation', false);
-                            contact.trigger('remove_invite');
-                        }
-                        else {
-                            this.account.cached_roster.getAllFromRoster((roster_items) => {
-                                let cached_contacts = roster_items.filter(item => item.jid === jid),
-                                    cached_contact = cached_contacts[0];
-                                if (cached_contact && (cached_contact.subscription === 'both' || cached_contact.subscription === 'to')){
-                                    cached_contact = this.contacts.mergeContact(cached_contact);
-                                    cached_contact.set('invitation', false);
-                                    cached_contact.trigger('remove_invite');
-                                }
-                            });
-                        }
-                    }
                     if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     }
@@ -4230,11 +4211,17 @@ define("xabber-contacts", function () {
                         }
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
-                    if (contact){
-                        contact.updateAvatar();
-                        contact.updateName();
-                    }
                     xabber.toolbar_view.recountAllMessageCounter();
+                    this.account.cached_roster.getFromRoster(jid, (cached_info) => {
+                        if (cached_info){
+                            let cached_contact = this.contacts.mergeContact(cached_info);
+                            cached_contact.set('cache_synced', true);
+                            if (is_invite && (cached_contact.get('subscription') === 'both' || cached_contact.get('subscription') === 'to')) {
+                                cached_contact.set('invitation', false);
+                                cached_contact.trigger('remove_invite');
+                            }
+                        }
+                    });
                 });
                 xabber.chats_view.hideChatsFeedback();
                 if (!request_with_stamp)
