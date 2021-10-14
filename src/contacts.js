@@ -314,6 +314,7 @@ define("xabber-contacts", function () {
                 });
                 this.account.sendIQ(iq, callback, errback);
                 this.set('known', true);
+                this.set('removed', false);
                 return this;
             },
 
@@ -1292,6 +1293,8 @@ define("xabber-contacts", function () {
                 }
                 this.openChat();
                 let chat = this.account.chats.getChat(this.model);
+                if (!chat.item_view.content)
+                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                 chat.item_view.content.initJingleMessage();
             },
 
@@ -3057,8 +3060,11 @@ define("xabber-contacts", function () {
                 this.participantsRequest({version: this.version}, () => {
                     this.trigger("participants_updated");
                     chat = this.account.chats.getChat(this.contact);
-                    if (chat.item_view && chat.item_view.content)
+                    if (chat.item_view) {
+                        if (!chat.item_view.content)
+                            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                         chat.item_view.content.updatePinnedMessage()
+                    }
                 });
             },
 
@@ -4089,11 +4095,11 @@ define("xabber-contacts", function () {
                 delete(options.stamp);
                 let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
                 this.account.sendFast(iq, (response) => {
-                    this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync);
+                    this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync);
                 });
             },
 
-            onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync) {
+            onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync) {
                 let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
                     sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
                 this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
@@ -4198,7 +4204,7 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', unread_msgs_count);
                     }
                     if (msg) {
-                        if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
+                        if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && !is_last_sync && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
                         if(!(is_invite || encrypted && this.account.omemo)) {
                             if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
@@ -4262,7 +4268,7 @@ define("xabber-contacts", function () {
                 this.account.sendIQ(iq, (iq) => {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
-                    this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
+                    this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
                     this.account.dfd_presence.resolve();
                 });
             },

@@ -5622,6 +5622,8 @@ define("xabber-chats", function () {
                     if (contact.get('pinned_message'))
                         if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) {
                             contact.get('pinned_message').set('message', msg_item.get('message'));
+                            if (!chat.item_view.content)
+                                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                             chat.item_view.content.updatePinnedMessage();
                         }
                     chat && chat.item_view.updateLastMessage(chat.last_message);
@@ -5640,6 +5642,8 @@ define("xabber-chats", function () {
                     msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
                 if (msg_item) {
                     msg_item.set('is_unread', false);
+                    if (!chat.item_view.content)
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     chat.item_view.content.removeMessage(msg_item);
                     chat.item_view.updateLastMessage(chat.last_message);
                 }
@@ -5657,6 +5661,8 @@ define("xabber-chats", function () {
                 if (msg_item)
                     $(msg_item).each((idx, item) => {
                         item.set('is_unread', false);
+                        if (!chat.item_view.content)
+                            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                         chat.item_view.content.removeMessage(item);
                     });
                 chat.item_view.updateLastMessage(chat.last_message);
@@ -5667,6 +5673,8 @@ define("xabber-chats", function () {
                     return;
                 let all_messages = chat.messages.models;
                 $(all_messages).each((idx, item) => {
+                    if (!chat.item_view.content)
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     chat.item_view.content.removeMessage(item);
                 });
                 chat.item_view.updateLastMessage();
