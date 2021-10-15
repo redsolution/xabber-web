@@ -423,9 +423,10 @@ define("xabber-contacts", function () {
             },
 
             unblockWithDialog: function () {
+                let contact = this;
                 utils.dialogs.ask(xabber.getString("chat_settings__button_unblock_contact"), xabber.getString("unblock_contact_confirm_short", [this.get('name')]), null, { ok_button_text: xabber.getString("contact_bar_unblock")}).done(function (result) {
                     if (result) {
-                        this.unblock();
+                        contact.unblock();
                         xabber.trigger("clear_search");
                     }
                 });

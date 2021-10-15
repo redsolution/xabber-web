@@ -979,6 +979,7 @@ define("xabber-accounts", function () {
                     if (status  === 'deleted') {
                         contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        this.chat_settings.updateGroupChatsList(contact.get('jid'), false);
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         xabber.toolbar_view.recountAllMessageCounter();
