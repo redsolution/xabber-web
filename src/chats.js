@@ -152,6 +152,7 @@ define("xabber-chats", function () {
             };
 
             $delay.length && (attrs.time = $delay.attr('stamp'));
+            options.synced_msg && (attrs.synced_from_server = true);
             body && (attrs.message = body);
 
             let contact = this.account.contacts.mergeContact({jid: Strophe.getBareJidFromJid(from_jid), group_chat: true}),
