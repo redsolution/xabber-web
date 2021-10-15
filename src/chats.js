@@ -152,7 +152,7 @@ define("xabber-chats", function () {
             };
 
             $delay.length && (attrs.time = $delay.attr('stamp'));
-            options.synced_msg && (attrs.synced_from_server = true);
+            options.synced_msg && (attrs.synced_invitation_from_server = true);
             body && (attrs.message = body);
 
             let contact = this.account.contacts.mergeContact({jid: Strophe.getBareJidFromJid(from_jid), group_chat: true}),
@@ -3158,7 +3158,7 @@ define("xabber-chats", function () {
                     if (!xabber.get('focused')) {
                         if (this.model.get('saved') || this.model.get('muted'))
                             message.set('muted', true);
-                        else
+                        else if (!message.get('synced_invitation_from_server'))
                             this.notifyMessage(message);
                     }
                     this.model.setMessagesDisplayed(message.get('timestamp'));
