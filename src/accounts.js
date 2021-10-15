@@ -1002,9 +1002,10 @@ define("xabber-accounts", function () {
                     if (pinned || pinned === '0') {
                         chat.set('pinned', pinned)
                     }
-                    if (muted || muted === '0' || muted === '') {
+                    if (muted || muted === '0')
                         chat.set('muted', muted)
-                    }
+                    else if (!muted)
+                        chat.set('muted', '')
                     return true;
                 },
 
