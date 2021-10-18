@@ -966,46 +966,7 @@ define("xabber-accounts", function () {
                 },
 
                 onSyncedIQ: function (iq) {
-                    let $synced_iq = $(iq),
-                        $conversation = $synced_iq.find('conversation'),
-                        chat_jid = $conversation.attr('jid'),
-                        status = $conversation.attr('status'),
-                        pinned = $conversation.attr('pinned'),
-                        muted = $conversation.attr('mute'),
-                        identifier = $conversation.attr('type') === Strophe.NS.SYNCHRONIZATION_OMEMO ? 'encrypted' : '',
-                        saved = chat_jid === this.get('jid'),
-                        contact = !saved && this.contacts.mergeContact(chat_jid),
-                        chat = saved ? this.chats.getSavedChat() : this.chats.getChat(contact, identifier);
-                    if (status  === 'deleted') {
-                        contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        this.chat_settings.updateGroupChatsList(contact.get('jid'), false);
-                        chat.set('opened', false);
-                        chat.set('const_unread', 0);
-                        xabber.toolbar_view.recountAllMessageCounter();
-                        xabber.chats_view.clearSearch();
-                    }
-                    if (status  === 'archived') {
-                        if (chat.item_view.content) {
-                            chat.item_view.content.head.archiveChat(undefined, true);
-                            xabber.body.setScreen('all-chats', { right: undefined });
-                        }
-                        chat.set('archived', true)
-
-                    }
-                    if (status  === 'active') {
-                        if (chat.item_view.content) {
-                            chat.item_view.content.head.archiveChat(undefined, true);
-                        }
-                        chat.set('archived', false)
-                    }
-                    if (pinned || pinned === '0') {
-                        chat.set('pinned', pinned)
-                    }
-                    if (muted || muted === '0')
-                        chat.set('muted', muted)
-                    else if (!muted)
-                        chat.set('muted', '')
+                    this.roster.syncConversations(iq);
                     return true;
                 },
 

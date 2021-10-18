@@ -4100,23 +4100,7 @@ define("xabber-contacts", function () {
                 });
             },
 
-            onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync) {
-                let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
-                    sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
-                this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
-                let last_chat_msg_id = $(iq).find('set last'),
-                    encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-                    retract_version = $(iq).find('query conversation[type="chat"]').first().children(`metadata[node="${Strophe.NS.REWRITE}"]`).children('retract').attr('version');
-                if (!request_with_stamp)
-                    last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
-                if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
-                    this.account.getAllMessageRetractions(true);
-                if (request_with_stamp) {
-                    if (this.account.retraction_version < retract_version)
-                        this.account.getAllMessageRetractions();
-                } else {
-                    this.account.retraction_version = retract_version;
-                }
+            syncConversations: function (iq, request_with_stamp, is_last_sync) {
                 $(iq).find('conversation').each((idx, item) => {
                     let $item = $(item),
                         jid = $item.attr('jid'), saved = false;
@@ -4167,8 +4151,10 @@ define("xabber-contacts", function () {
                         chat.set('archived', false);
                     if ($item.attr('status') === 'deleted') {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
+                        this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
                     }
@@ -4205,7 +4191,7 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', unread_msgs_count);
                     }
                     if (msg) {
-                        if ($unread_messages.attr('count') > 0 && !msg.isSenderMe() && !is_last_sync && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
+                        if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !is_last_sync && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
                         if(!(is_invite || encrypted && this.account.omemo)) {
                             if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
@@ -4219,17 +4205,27 @@ define("xabber-contacts", function () {
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
-                    // this.account.cached_roster.getFromRoster(jid, (cached_info) => {
-                    //     if (cached_info){
-                    //         let cached_contact = this.contacts.mergeContact(cached_info);
-                    //         cached_contact.set('cache_synced', true);
-                    //         if (is_invite && (cached_contact.get('subscription') === 'both' || cached_contact.get('subscription') === 'to')) {
-                    //             cached_contact.set('invitation', false);
-                    //             cached_contact.trigger('remove_invite');
-                    //         }
-                    //     }
-                    // });
                 });
+            },
+
+            onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync) {
+                let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
+                    sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
+                this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
+                let last_chat_msg_id = $(iq).find('set last'),
+                    encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
+                    retract_version = $(iq).find('query conversation[type="chat"]').first().children(`metadata[node="${Strophe.NS.REWRITE}"]`).children('retract').attr('version');
+                if (!request_with_stamp)
+                    last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
+                if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
+                    this.account.getAllMessageRetractions(true);
+                if (request_with_stamp) {
+                    if (this.account.retraction_version < retract_version)
+                        this.account.getAllMessageRetractions();
+                } else {
+                    this.account.retraction_version = retract_version;
+                }
+                this.syncConversations(iq, request_with_stamp, is_last_sync);
                 xabber.chats_view.hideChatsFeedback();
                 if (!request_with_stamp)
                     this.account.chats.getSavedChat();
