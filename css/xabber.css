@@ -4550,7 +4550,8 @@ input[type=text].simple-input-field:hover {
     background-color: rgba(198, 40, 40, .6);
 }
 
-.jingle-message-view[data-state=busy] {
+.jingle-message-view[data-state=busy],
+.jingle-message-view[data-state=device_busy] {
     background-color: rgba(239, 108, 0, .6);
 }
 
