@@ -1280,7 +1280,7 @@ define("xabber-views", function () {
         },
 
         onDestroy: function () {
-            this.updateStatusText(xabber.getString(this.model.get('status') == 'busy' ? "dialog_jingle_message__status_busy" : "dialog_jingle_message__status_disconnected"));
+            this.updateStatusText(xabber.getString(this.model.get('status') == 'device_busy' ? "dialog_jingle_message__status_device_busy" : this.model.get('status') == 'busy' ? "dialog_jingle_message__status_busy" : "dialog_jingle_message__status_disconnected"));
             setTimeout(() => {
                 this.close();
                 this.$el.detach();
