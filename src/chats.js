@@ -1111,8 +1111,6 @@ define("xabber-chats", function () {
                 $jingle_msg_reject = $message.children(`reject[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
             if ($jingle_msg_propose.length) {
                 if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
-                    if (xabber.current_voip_call)
-                        this.sendReject({to: Strophe.getBareJidFromJid($message.attr('to')), session_id: $jingle_msg_propose.attr('id'), reason: 'device_busy'});
                     return;
                 }
                 if (options.is_archived || options.synced_msg)
