@@ -47,7 +47,8 @@ define("xabber-strophe", function () {
 
         Strophe.SASLXTOKEN.prototype.onChallenge = function (connection) {
             let auth_str = String.fromCharCode(0) + connection.authcid +
-                String.fromCharCode(0) + connection.pass;
+                String.fromCharCode(0) + connection.pass + String.fromCharCode(0) + connection.x_token.counter;
+            this._connection.x_token.counter++;
             return utf16to8(auth_str);
         };
 
