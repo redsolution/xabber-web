@@ -336,7 +336,7 @@ define("xabber-accounts", function () {
                     if (!password)
                         return;
                     if (!this.background_conn_manager) {
-                        this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
+                        this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.background_connection = this.background_conn_manager.connection;
                     } else
                         this.background_connection.disconnect();
@@ -351,7 +351,7 @@ define("xabber-accounts", function () {
                     if (!password)
                         return;
                     if (!this.fast_conn_manager) {
-                        this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
+                        this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.fast_connection = this.fast_conn_manager.connection;
                     } else
                         this.fast_connection.disconnect();
