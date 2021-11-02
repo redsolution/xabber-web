@@ -4716,8 +4716,9 @@ define("xabber-chats", function () {
         },
 
         onChangedReadState: function (message) {
-            let is_unread = message.get('is_unread');
-            if (is_unread) {
+            let is_unread = message.get('is_unread'),
+                is_synced = message.get('synced_from_server');
+            if (is_unread && !is_synced) {
                 this.model.messages_unread.add(message);
                 this.model.recountUnread();
             } else {

@@ -4191,7 +4191,7 @@ define("xabber-contacts", function () {
                         chat.set('const_unread', unread_msgs_count);
                     }
                     if (msg) {
-                        if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !is_last_sync && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
+                        if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                             msg.set('is_unread', true);
                         if(!(is_invite || encrypted && this.account.omemo)) {
                             if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
