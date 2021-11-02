@@ -117,8 +117,8 @@ define("xabber-strophe", function () {
                         this.getXToken((success) => {
                             let token = $(success).find('token').text(),
                                 expires_at = $(success).find('expire').text(),
-                                token_uid = $(success).find('token-uid').text();
-                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid };
+                                token_uid = $(success).find('xtoken').attr('uid');
+                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid, counter: 0 };
                             this.pass = token;
                             this._send_auth_bind();
                         }, () => {

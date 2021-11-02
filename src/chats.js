@@ -5563,11 +5563,15 @@ define("xabber-chats", function () {
 
             let $token_revoke = $message.children(`revoke[xmlns="${Strophe.NS.AUTH_TOKENS}"]`);
             if ($token_revoke.length) {
-                $token_revoke.children('token-uid').each((idx, token) => {
+                $token_revoke.children('xtoken').each((idx, token) => {
                     let $token = $(token),
-                        token_uid = $token.text();
+                        token_uid = $token.attr('uid');
                     if (!token_uid)
                         return;
+                    if (this.account.get('x_token') && this.account.get('x_token').token_uid === token_uid) {
+                        this.account.destroy();
+                        return;
+                    }
                     if (this.account.x_tokens_list) {
                         let token = this.account.x_tokens_list.find(token => token.token_uid == token_uid),
                             token_idx = token ? this.account.x_tokens_list.indexOf(token) : -1;
@@ -5874,7 +5878,7 @@ define("xabber-chats", function () {
                 }
             }
 
-            if ($message.find('x[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
+            if ($message.find('xtoken[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();
             }
 

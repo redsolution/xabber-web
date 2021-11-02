@@ -340,9 +340,7 @@ define("xabber-accounts", function () {
                         this.background_connection = this.background_conn_manager.connection;
                     } else
                         this.background_connection.disconnect();
-                    this.background_connection.x_token = this.get('x_token');
-                    if (this.background_connection.x_token && !this.background_connection.x_token.counter)
-                        this.background_connection.x_token.counter = 0;
+                    this.background_connection.x_token = this.connection.x_token
                     this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
                 },
 
@@ -355,9 +353,7 @@ define("xabber-accounts", function () {
                         this.fast_connection = this.fast_conn_manager.connection;
                     } else
                         this.fast_connection.disconnect();
-                    this.fast_connection.x_token = this.get('x_token');
-                    if (this.fast_connection.x_token && !this.fast_connection.x_token.counter)
-                        this.fast_connection.x_token.counter = 0;
+                    this.fast_connection.x_token = this.connection.x_token
                     this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
                 },
 
@@ -438,7 +434,9 @@ define("xabber-accounts", function () {
                         this.session.set('on_token_revoked', false);
                         if (this.connection.x_token) {
                             this.save({auth_type: 'x-token', x_token: this.connection.x_token});
-                            this.conn_manager.auth_type = 'x-token';
+                            this.conn_manager.auth_type = this.background_conn_manager.auth_type = this.fast_conn_manager.auth_type = 'x-token';
+                            this.fast_connection.x_token_auth = this.background_connection.x_token_auth = true;
+                            this.fast_connection.pass = this.background_connection.pass = this.connection.pass;
                         }
                         this.session.set({connected: true, reconnected: false});
                         if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
@@ -585,15 +583,16 @@ define("xabber-accounts", function () {
                             to: this.connection.domain
                         }).c('query', {xmlns: `${Strophe.NS.AUTH_TOKENS}#items`});
                     this.sendIQ(iq, (tokens) => {
-                        $(tokens).find('field').each((idx, token) => {
+                        $(tokens).find('xtoken').each((idx, token) => {
                             let $token = $(token),
                                 client = $token.find('client').text(),
                                 device = $token.find('device').text(),
-                                token_uid = $token.find('token-uid').text(),
+                                description = $token.find('description').text(),
+                                token_uid = $token.attr('uid'),
                                 expire = Number($token.find('expire').text())*1000,
                                 last_auth = Number($token.find('last-auth').text())*1000,
                                 ip_address = $token.find('ip').text();
-                            tokens_list.push({client: client, device: device, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
+                            tokens_list.push({client: client, device: device, description: description, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                         });
                         this.x_tokens_list = tokens_list;
                         this.settings_right && this.settings_right.updateXTokens();
@@ -647,7 +646,7 @@ define("xabber-accounts", function () {
                         _.each(this._after_background_connected_plugins, (plugin) => {
                             plugin.call(this);
                         });
-                    } else if (status === Strophe.Status.AUTHFAIL) {
+                    } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
                         this.background_conn_manager = undefined;
                         this.background_connection = undefined;
                     }
@@ -658,7 +657,7 @@ define("xabber-accounts", function () {
                         _.each(this._after_fast_connected_plugins, (plugin) => {
                             plugin.call(this);
                         });
-                    } else if (status === Strophe.Status.AUTHFAIL) {
+                    } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
                         this.fast_conn_manager = undefined;
                         this.fast_connection = undefined;
                     }
@@ -887,7 +886,7 @@ define("xabber-accounts", function () {
                         to: this.connection.domain
                     }).c('revoke', {xmlns:Strophe.NS.AUTH_TOKENS});
                     for (let token_num = 0; token_num < token_uid.length; token_num++)
-                        iq.c('token-uid').t(token_uid[token_num]).up();
+                        iq.c('xtoken', {uid: token_uid[token_num]}).up();
                     this.sendIQ(iq, () => {
                         callback && callback();
                     });
@@ -939,6 +938,11 @@ define("xabber-accounts", function () {
                 onDestroy: function () {
                     this.connection.connect_callback = null;
                     this.settings.destroy();
+                    if (this.isConnected()) {
+                        this.connection.disconnect();
+                        if (this.fast_conn_manager) this.fast_connection.disconnect();
+                        if (this.background_conn_manager) this.background_connection.disconnect();
+                    }
                     this.trigger('remove_saved_chat');
                 },
 
@@ -1739,22 +1743,7 @@ define("xabber-accounts", function () {
                 }
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
                 if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                    this.$('.panel-content-wrap .tokens').removeClass('hidden');
-                    if (this.model.get('x_token') && !this.model.get('x_token').token_uid) {
-                        let iq_ask_token_uid = $iq({from: this.model.get('jid'), to: this.model.domain, type: 'get'})
-                            .c('query', {xmlns: `${Strophe.NS.AUTH_TOKENS}#items`})
-                            .c('token').t(this.model.get('x_token').token);
-                        this.model.sendIQ(iq_ask_token_uid, (iq_response) => {
-                            let $iq_response = $(iq_response),
-                                token_uid = $iq_response.find('token-uid').text(),
-                                expire = $iq_response.find('expire').text();
-                            this.model.get('x_token').token_uid = token_uid;
-                            this.model.get('x_token').expire = expire;
-                            this.renderAllXTokens();
-                        });
-                    }
-                    else
-                        this.renderAllXTokens();
+                    this.renderAllXTokens();
                 }
             },
 
@@ -1763,15 +1752,20 @@ define("xabber-accounts", function () {
                     token_uid = $target.data('token-uid');
                 this.model.revokeXToken([token_uid], () => {
                     if (this.model.get('x_token'))
-                        if (this.model.get('x_token').token_uid === token_uid)
+                        if (this.model.get('x_token').token_uid === token_uid) {
                             this.model.destroy();
+                            return;
+                        }
+                    this.model.getAllXTokens();
                 });
             },
 
             revokeAllXTokens: function () {
                 utils.dialogs.ask(xabber.getString("settings_account__dialog_terminate_sessions__header"), xabber.getString("terminate_all_sessions_title"), null, { ok_button_text: xabber.getString("button_terminate")}).done((result) => {
                     if (result && this.model.x_tokens_list)
-                        this.model.revokeAllXTokens(() => {});
+                        this.model.revokeAllXTokens(() => {
+                            this.model.getAllXTokens();
+                        });
                 });
             },
 
