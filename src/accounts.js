@@ -331,29 +331,61 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                createBackgroundConnection: function (auth_type, password) {
-                    let jid = this.get('jid');
-                    if (!password)
+                createBackgroundConnection: function () {
+                    let jid = this.get('jid'),
+                        auth_type = this.fast_conn_manager.auth_type,
+                        password;
+                    if (auth_type === 'token') {
+                        password = this.settings.get('token');
+                    } else if (auth_type === 'x-token') {
+                        if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
+                            password = this.fast_connection.x_token.token;
+                        else
+                            password = undefined;
+                    } else {
+                        password = this.getPassword();
+                    }
+                    if (!password) {
+                        let attrs = {login: true};
+                        options.token_invalidated && (attrs.token_invalidated = true);
+                        this.password_view.show(attrs);
                         return;
+                    }
                     if (!this.background_conn_manager) {
                         this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.background_connection = this.background_conn_manager.connection;
                     } else
                         this.background_connection.disconnect();
-                    this.background_connection.x_token = this.connection.x_token
+                    this.background_connection.x_token = this.fast_connection.x_token;
                     this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
                 },
 
-                createFastConnection: function (auth_type, password) {
-                    let jid = this.get('jid');
-                    if (!password)
+                createFastConnection: function () {
+                    let jid = this.get('jid'),
+                        auth_type = this.conn_manager.auth_type,
+                        password;
+                    if (auth_type === 'token') {
+                        password = this.settings.get('token');
+                    } else if (auth_type === 'x-token') {
+                        if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
+                            password = this.connection.x_token.token;
+                        else
+                            password = undefined;
+                    } else {
+                        password = this.getPassword();
+                    }
+                    if (!password) {
+                        let attrs = {login: true};
+                        options.token_invalidated && (attrs.token_invalidated = true);
+                        this.password_view.show(attrs);
                         return;
+                    }
                     if (!this.fast_conn_manager) {
                         this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.fast_connection = this.fast_conn_manager.connection;
                     } else
                         this.fast_connection.disconnect();
-                    this.fast_connection.x_token = this.connection.x_token
+                    this.fast_connection.x_token = this.connection.x_token;
                     this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
                 },
 
@@ -382,8 +414,6 @@ define("xabber-accounts", function () {
                         this.password_view.show(attrs);
                         return;
                     }
-                    this.createBackgroundConnection(auth_type, password);
-                    this.createFastConnection(auth_type, password);
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -411,8 +441,6 @@ define("xabber-accounts", function () {
                     setTimeout(() => {
                         this.connFeedback(xabber.getString("application_state_connecting"));
                         this.restoreStatus();
-                        this.createBackgroundConnection();
-                        this.createFastConnection();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                     }, timeout);
                 },
@@ -432,11 +460,10 @@ define("xabber-accounts", function () {
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
+                        this.createFastConnection();
                         if (this.connection.x_token) {
                             this.save({auth_type: 'x-token', x_token: this.connection.x_token});
-                            this.conn_manager.auth_type = this.background_conn_manager.auth_type = this.fast_conn_manager.auth_type = 'x-token';
-                            this.fast_connection.x_token_auth = this.background_connection.x_token_auth = true;
-                            this.fast_connection.pass = this.background_connection.pass = this.connection.pass;
+                            this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
                         if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
@@ -520,6 +547,7 @@ define("xabber-accounts", function () {
                     this.session.set({conn_status: status, conn_condition: condition});
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
+                        this.createFastConnection();
                         this.connection.connect_callback = this.connectionCallback.bind(this);
                         this.session.set({connected: true, reconnected: true,
                             reconnecting: false, conn_retries: 0});
@@ -643,6 +671,12 @@ define("xabber-accounts", function () {
 
                 onBackgroundConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
+                        if (this.background_connection.x_token) {
+                            this.save({x_token: this.background_connection.x_token});
+                            this.background_conn_manager.auth_type = 'x-token';
+                            this.background_connection.x_token_auth = true;
+                            this.background_connection.pass = this.fast_connection.pass;
+                        }
                         _.each(this._after_background_connected_plugins, (plugin) => {
                             plugin.call(this);
                         });
@@ -654,6 +688,13 @@ define("xabber-accounts", function () {
 
                 onFastConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
+                        this.createBackgroundConnection();
+                        if (this.fast_connection.x_token) {
+                            this.save({x_token: this.fast_connection.x_token});
+                            this.fast_conn_manager.auth_type = 'x-token';
+                            this.fast_connection.x_token_auth = true;
+                            this.fast_connection.pass = this.connection.pass;
+                        }
                         _.each(this._after_fast_connected_plugins, (plugin) => {
                             plugin.call(this);
                         });
