@@ -5570,7 +5570,7 @@ define("xabber-chats", function () {
                     if (!token_uid)
                         return;
                     if (this.account.get('x_token') && this.account.get('x_token').token_uid === token_uid) {
-                        this.account.destroy();
+                        this.account.deleteAccount();
                         return;
                     }
                     if (this.account.x_tokens_list) {

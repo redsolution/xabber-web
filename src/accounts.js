@@ -629,7 +629,7 @@ define("xabber-accounts", function () {
 
                 onTokenRevoked: function () {
                     if (xabber.api_account && xabber.api_account.get('xmpp_binding') === this.get('jid')) {
-                        xabber.trigger('quit');
+                        xabber.trigger('quit_accounts');
                         return;
                     }
                     if (!this.auth_view) {
@@ -954,7 +954,7 @@ define("xabber-accounts", function () {
                     this.session.set('delete', true);
                     this.deactivate();
                     if (xabber.api_account && xabber.api_account.get('xmpp_binding') === this.get('jid'))
-                        xabber.trigger('quit');
+                        xabber.trigger('quit_accounts');
                 },
 
                 activate: function () {
@@ -1153,6 +1153,7 @@ define("xabber-accounts", function () {
                 this.on("add destroy activate deactivate", this.onListChanged, this);
                 this.on("destroy deactivate", this.onAccountDisconnected, this);
                 xabber.on("quit", this.onQuit, this);
+                xabber.on("quit_accounts", this.onQuitAccounts, this);
                 this.settings_list.on("add_settings", this.onSettingsAdded, this);
                 xabber.api_account && xabber.api_account.on("settings_result", function (result) {
                     result && this.trigger('update_order');
@@ -1166,6 +1167,18 @@ define("xabber-accounts", function () {
                     account.deleteAccount();
                     account.password_view.closeModal();
                     utils.modals.clear_queue();
+                });
+            },
+
+            onQuitAccounts: function () {
+                xabber.api_account && xabber.api_account.revoke_token();
+                !this.models.length && xabber.body.setScreen('login');
+                _.each(_.clone(this.models), function (account) {
+                    if (account.settings.get('to_sync')) {
+                        account.deleteAccount();
+                        account.password_view.closeModal();
+                        utils.modals.clear_queue();
+                    }
                 });
             },
 
@@ -1794,7 +1807,7 @@ define("xabber-accounts", function () {
                 this.model.revokeXToken([token_uid], () => {
                     if (this.model.get('x_token'))
                         if (this.model.get('x_token').token_uid === token_uid) {
-                            this.model.destroy();
+                            this.model.deleteAccount();
                             return;
                         }
                     this.model.getAllXTokens();
