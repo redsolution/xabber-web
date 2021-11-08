@@ -339,7 +339,7 @@ define("xabber-accounts", function () {
                         password = this.settings.get('token');
                     } else if (auth_type === 'x-token') {
                         if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
-                            password = this.fast_connection.x_token.token;
+                            password = this.get('x_token').token;
                         else
                             password = undefined;
                     } else {
@@ -356,7 +356,9 @@ define("xabber-accounts", function () {
                         this.background_connection = this.background_conn_manager.connection;
                     } else
                         this.background_connection.disconnect();
-                    this.background_connection.x_token = this.fast_connection.x_token;
+                    if (auth_type === 'x-token' && this.background_connection) {
+                        this.background_connection.x_token = this.get('x_token');
+                    }
                     this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
                 },
 
@@ -368,7 +370,7 @@ define("xabber-accounts", function () {
                         password = this.settings.get('token');
                     } else if (auth_type === 'x-token') {
                         if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
-                            password = this.connection.x_token.token;
+                            password = this.get('x_token').token;
                         else
                             password = undefined;
                     } else {
@@ -385,7 +387,9 @@ define("xabber-accounts", function () {
                         this.fast_connection = this.fast_conn_manager.connection;
                     } else
                         this.fast_connection.disconnect();
-                    this.fast_connection.x_token = this.connection.x_token;
+                    if (auth_type === 'x-token' && this.fast_connection) {
+                        this.fast_connection.x_token = this.get('x_token');
+                    }
                     this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
                 },
 
@@ -460,9 +464,11 @@ define("xabber-accounts", function () {
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
-                        this.createFastConnection();
                         if (this.connection.x_token) {
                             this.save({auth_type: 'x-token', x_token: this.connection.x_token});
+                        }
+                        this.createFastConnection();
+                        if (this.connection.x_token) {
                             this.conn_manager.auth_type = 'x-token';
                         }
                         this.session.set({connected: true, reconnected: false});
@@ -688,9 +694,11 @@ define("xabber-accounts", function () {
 
                 onFastConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
-                        this.createBackgroundConnection();
                         if (this.fast_connection.x_token) {
                             this.save({x_token: this.fast_connection.x_token});
+                        }
+                        this.createBackgroundConnection();
+                        if (this.fast_connection.x_token) {
                             this.fast_conn_manager.auth_type = 'x-token';
                             this.fast_connection.x_token_auth = true;
                             this.fast_connection.pass = this.connection.pass;
@@ -772,6 +780,8 @@ define("xabber-accounts", function () {
                         if (this.session.get('no_reconnect')) {
                             this.session.set('no_reconnect', false);
                         } else {
+                            this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
+                            this.background_connection && this.background_connection.connected && this.background_connection.disconnect();
                             this.reconnect();
                         }
                     }
