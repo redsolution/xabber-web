@@ -1,0 +1,66 @@
+<div class="panel-content-wrap noselect">
+    <div class="main-info">
+        <div class="avatar-wrap">
+            <div class="circle-avatar"/>
+        </div>
+        <div class="text-info">
+            <div class="name-wrap"></div>
+        </div>
+        <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>
+        <div class="header-buttons">
+            <div class="btn-escape">
+                <i class="mdi mdi-24px mdi-close"></i>
+                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>
+            </div>
+            <div class="btn-edit">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
+            </div>
+        </div>
+        <div class="buttons-wrap">
+            <div class="button-wrap btn-voice-call-wrap">
+                <div class="contact-btn btn-voice-call"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>
+            </div>
+            <div class="button-wrap btn-search-messages">
+                <div class="contact-btn btn-search"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("search"))]}</div>
+            </div>
+            <div class="button-wrap btn-mute-wrap">
+                <div class="contact-btn btn-mute dropdown-button" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>
+
+                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">
+                    <li class="btn-unmute-dropdown">
+                        <span class="one-line">{[print(xabber.getString("unmute_chat"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="minutes15">
+                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="hours1">
+                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="hours2">
+                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="day">
+                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="forever">
+                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="button-wrap btn-block-wrap">
+                <div class="contact-btn btn-block"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_block"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-content private-chat">
+        <div class="block-wrap vcard">
+        </div>
+        <div class="block-wrap groups-block-wrap"></div>
+        <div class="block-wrap edit-block-wrap"></div>
+        <div class="block-wrap search-messages-block-wrap"></div>
+    </div>
+</div>

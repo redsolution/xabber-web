@@ -1,0 +1,18 @@
+<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">
+    <div class="left-side noselect">
+        <div class="circle-avatar"></div>
+    </div>
+
+    <div class="msg-wrap">
+        <div class="chat-msg-author-wrap">
+            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
+            {[if (badge) {]} <div class="chat-msg-author-badge one-line">{{badge}}</div>
+            {[ } if (role && (role.toLowerCase() != 'member')) {]} <div class="chat-msg-author-role ground-color-700 one-line">{{role}}</div> {[}]}
+        </div>
+        <div class="chat-msg-content chat-text-content">{{message}}</div>
+    </div>
+
+    <div class="right-side noselect">
+        <div class="msg-time selectable-text" title="{{time}}">{{msg_time}}</div>
+    </div>
+</div>

@@ -38,6 +38,7 @@ define("xabber-templates", [
 
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
+    "text!templates/vcard/vcard_right.html",
 
     "text!templates/searching/searching_wide.html",
     "text!templates/searching/searching_account_item.html",
@@ -56,12 +57,15 @@ define("xabber-templates", [
     "text!templates/contacts/contact_left_item.html",
     "text!templates/contacts/contact_blocked_item.html",
     "text!templates/contacts/contact_details.html",
+    "text!templates/contacts/contact_details_right.html",
     "text!templates/contacts/roster_settings.html",
     "text!templates/contacts/group_settings.html",
     "text!templates/contacts/groups_checkbox_list.html",
+    "text!templates/contacts/groups_list.html",
     "text!templates/contacts/add_contact_account_item.html",
     "text!templates/contacts/contact_placeholder.html",
     "text!templates/contacts/groups.html",
+    "text!templates/contacts/edit_contact.html",
     "text!templates/contacts/preloader.html",
     "text!templates/contacts/group_chats/group_chat_properties.html",
     "text!templates/contacts/group_chats/group_chat_details.html",
@@ -88,6 +92,7 @@ define("xabber-templates", [
     "text!templates/chats/chat_head.html",
     "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
+    "text!templates/chats/chat_content_contact.html",
     "text!templates/chats/chat_bottom.html",
     "text!templates/chats/location_popup.html",
     "text!templates/chats/subscription_buttons.html",
@@ -95,6 +100,7 @@ define("xabber-templates", [
     "text!templates/chats/chat_placeholder.html",
     "text!templates/chats/message_item.html",
     "text!templates/chats/messages/main.html",
+    "text!templates/chats/messages/searched.html",
     "text!templates/chats/messages/forwarded.html",
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
@@ -123,6 +129,22 @@ define("xabber-templates", [
 
     "text!templates/svg/ic-jabber.html",
     "text!templates/svg/xmpp.html",
+    "text!templates/svg/account-outline.html",
+    "text!templates/svg/status-outline.html",
+    "text!templates/svg/birthday-outline.html",
+    "text!templates/svg/job-outline.html",
+    "text!templates/svg/address-outline.html",
+    "text!templates/svg/email-outline.html",
+    "text!templates/svg/description-outline.html",
+    "text!templates/svg/call-outline.html",
+    "text!templates/svg/call.html",
+    "text!templates/svg/search.html",
+    "text!templates/svg/bell.html",
+    "text!templates/svg/bell-sleep.html",
+    "text!templates/svg/bell-off.html",
+    "text!templates/svg/cancel.html",
+    "text!templates/svg/edit.html",
+    "text!templates/svg/edit-outline.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
     "text!templates/svg/blocked.html",
@@ -237,6 +259,7 @@ define("xabber-templates", [
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');
+    addTemplate('vcard.vcard_right');
 
     addTemplate('searching.searching_wide');
     addTemplate('searching.searching_account_item');
@@ -254,12 +277,15 @@ define("xabber-templates", [
     addTemplate('contacts.contact_left_item');
     addTemplate('contacts.contact_blocked_item');
     addTemplate('contacts.contact_details');
+    addTemplate('contacts.contact_details_right');
     addTemplate('contacts.roster_settings');
     addTemplate('contacts.group_settings');
     addTemplate('contacts.groups_checkbox_list');
+    addTemplate('contacts.groups_list');
     addTemplate('contacts.add_contact_account_item');
     addTemplate('contacts.contact_placeholder');
     addTemplate('contacts.groups');
+    addTemplate('contacts.edit_contact');
     addTemplate('contacts.preloader');
     addTemplate('contacts.group_chats.group_chat_properties');
     addTemplate('contacts.group_chats.group_chat_details');
@@ -286,6 +312,7 @@ define("xabber-templates", [
     addTemplate('chats.chat_head');
     addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
+    addTemplate('chats.chat_content_contact');
     addTemplate('chats.chat_bottom');
     addTemplate('chats.location_popup');
     addTemplate('chats.subscription_buttons');
@@ -293,6 +320,7 @@ define("xabber-templates", [
     addTemplate('chats.chat_placeholder');
     addTemplate('chats.message_item');
     addTemplate('chats.messages.main');
+    addTemplate('chats.messages.searched');
     addTemplate('chats.messages.forwarded');
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
@@ -322,6 +350,22 @@ define("xabber-templates", [
 
     addSvgTemplate('svg.ic-jabber');
     addSvgTemplate('svg.xmpp');
+    addSvgTemplate('svg.account-outline');
+    addSvgTemplate('svg.status-outline');
+    addSvgTemplate('svg.birthday-outline');
+    addSvgTemplate('svg.job-outline');
+    addSvgTemplate('svg.address-outline');
+    addSvgTemplate('svg.email-outline');
+    addSvgTemplate('svg.description-outline');
+    addSvgTemplate('svg.call-outline');
+    addSvgTemplate('svg.call');
+    addSvgTemplate('svg.search');
+    addSvgTemplate('svg.bell');
+    addSvgTemplate('svg.bell-sleep');
+    addSvgTemplate('svg.bell-off');
+    addSvgTemplate('svg.cancel');
+    addSvgTemplate('svg.edit');
+    addSvgTemplate('svg.edit-outline');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
     addSvgTemplate('svg.blocked');

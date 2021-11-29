@@ -23,26 +23,22 @@
             </g>
         </svg>
     </div>
-    <div class="chat-tool btn-chat-pin">
-        <svg class="mdi mdi-24px" viewBox="0 0 24 24">
-            <svg class="mdi mdi-24px" viewBox="0 0 24 24">
-                <path id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>
-            </svg>
-        </svg>
-    </div>
     <div class="chat-tool btn-search-messages">
         <i class="search-icon mdi mdi-24px mdi-magnify"></i>
-    </div>
-    <div class="chat-tool btn-archive-chat">
-        <i class="mdi mdi-24px mdi-package-down"></i>
-    </div>
-    <div class="chat-tool btn-notifications">
-        <i class="mdi muted-icon mdi-22px mdi-bell"></i>
     </div>
     <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">
         <i class="mdi mdi-24px mdi-dots-vertical"></i>
     </div>
     <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
+        <li class="btn-chat-pin">
+            <span class="one-line"></span>
+        </li>
+        <li class="btn-archive-chat">
+            <span class="one-line"></span>
+        </li>
+        <li class="btn-notifications" data-activates="{{view.cid}}-mute-more">
+            <span class="one-line"></span>
+        </li>
         <li class="btn-contact-details">
             <span class="one-line">{[print(xabber.getString("contact_viewer"))]}</span>
         </li>
@@ -78,6 +74,26 @@
         </li>
         <li class="btn-unblock-contact">
             <span class="one-line">{[print(xabber.getString("chat_settings__button_unblock_contact"))]}</span>
+        </li>
+    </ul>
+    <ul id="{{view.cid}}-mute-more" class="contact-mute-dropdown dropdown-content noselect">
+        <li class="btn-unmute-dropdown">
+            <span class="one-line">{[print(xabber.getString("unmute_chat"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="minutes15">
+            <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="hours1">
+            <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="hours2">
+            <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="day">
+            <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="forever">
+            <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>
         </li>
     </ul>
 </div>

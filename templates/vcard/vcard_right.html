@@ -1,0 +1,284 @@
+<div class="block-header">
+    <span class="block-name"></span>
+    <div class="btn-vcard-refresh">
+        <div class="button">
+            <i class="mdi mdi-20px mdi-refresh"></i>
+        </div>
+        <div class="preloader-wrapper preloader-20px active">
+            <div class="spinner-layer">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="vcard-wrap">
+    <div class="info-wrap jid-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg></div>
+        <div class="info-hover">
+            <div class="info jabber-id">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>
+        <div class="info-hover">
+            <div class="info first-name">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_given_name"))]}</div>
+            </div>
+        </div>
+        <div class="info-hover">
+            <div class="info last-name">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+        <div class="info-hover">
+            <div class="info nickname">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap birthday-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday-outline"></svg></div>
+        <div class="info-hover">
+            <div class="info birthday">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_birth_date"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap site-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <i class="details-icon mdi mdi-24px mdi-web"></i>
+        <div class="info-hover">
+            <div class="info url">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_url"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap more">
+        <div class="show-vcard">
+            {[print(xabber.getString("contact_vcard_more"))]}
+        </div>
+    </div>
+</div>
+<div class="full-vcard-wrap">
+    <div class="full-vcard-content">
+        <div class="vcard-header block-header">
+            <div class="vcard-header-title">
+                <i title='{[print(xabber.getString("button_esc"))]}' class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
+                <span class="block-name">{[print(xabber.getString("contact_vcard_header_title"))]}</span>
+            </div>
+            <div class="main-info">
+                <div class="avatar-wrap">
+                    <div class="circle-avatar"/>
+                </div>
+                <div class="text-info">
+                    <div class="name-wrap"></div>
+                </div>
+            </div>
+        </div>
+        <div class="vcard-list">
+            <div class="info-wrap jid-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info jabber-id">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info first-name">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_given_name"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info middle-name">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_middle_name"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info last-name">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info fullname">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_full_name"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+                <div class="info-hover">
+                    <div class="info nickname">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap birthday-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info birthday">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_birth_date"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap job-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info org-name">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_organization"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info job-title">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_title"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info org-unit">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_organization_unit"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info role">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_role"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap site-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <i class="details-icon mdi mdi-24px mdi-web"></i>
+                <div class="info-hover">
+                    <div class="info url">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_url"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap description-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="description-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info description">
+                        <div class="value"></div>
+                        <div class="label">{[print(xabber.getString("vcard_decsription"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap phone-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="call-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info phone-work">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info phone-home">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info phone-mobile">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_mobile"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info phone-default">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_telephone"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap email-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="email-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info email-work">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info email-home">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_personal"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info email-default">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_email"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap address-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info address-home">
+                        <div class="pobox value one-line"></div>
+                        <div class="extadd value one-line"></div>
+                        <div class="street value one-line"></div>
+                        <div class="locality value one-line"></div>
+                        <div class="region value one-line"></div>
+                        <div class="pcode value one-line"></div>
+                        <div class="country value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info address-work">
+                        <div class="pobox value one-line"></div>
+                        <div class="extadd value one-line"></div>
+                        <div class="street value one-line"></div>
+                        <div class="locality value one-line"></div>
+                        <div class="region value one-line"></div>
+                        <div class="pcode value one-line"></div>
+                        <div class="country value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>
+                    </div>
+                </div>
+                <div class="info-hover">
+                    <div class="info address-default">
+                        <div class="extadd value one-line"></div>
+                        <div class="street value one-line"></div>
+                        <div class="locality value one-line"></div>
+                        <div class="region value one-line"></div>
+                        <div class="pcode value one-line"></div>
+                        <div class="country value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_address"))]}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

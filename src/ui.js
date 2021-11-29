@@ -73,36 +73,32 @@ define("xabber-ui", function () {
         this.updateRosterLayout = function (options) {
             let width = this.body.$el.width(),
                 is_wide = width >= constants.WIDTH_MEDIUM,
-                is_narrow = width < constants.WIDTH_NARROW,
+                is_narrow = width < constants.WIDTH_MEDIUM,
                 is_tiny = width < constants.WIDTH_TINY,
                 expanded = this.roster_view.data.get('expanded'),
                 pinned = this.roster_view.data.get('pinned');
             this.roster_view.$('.collapsed-wrap').hideIf(expanded);
             this.roster_view.$('.expanded-wrap').showIf(expanded);
-            this.roster_view.$('.btn-pin').hideIf(is_narrow).text(pinned ? xabber.getString("group_chat__pinned_message__tooltip_unpin") : xabber.getString("message_pin"));
-
+            this.roster_view.$('.btn-pin').hide();
             if (is_narrow && pinned) {
                 this.roster_view.data.set({expanded: false, pinned: false});
                 return;
             }
-            if (!is_narrow && !pinned && this.settings.roster.pinned) {
-                this.roster_view.data.set({expanded: true, pinned: true});
-                return;
-            }
-            let roster_width, panel_width, panel_margin = '', toolbar_width = 50;
-
+            let roster_width,
+                panel_width,
+                left_panel_width,
+                right_panel_width,
+                right_contact_panel_width,
+                chat_bottom_panel_width,
+                panel_margin = '',
+                toolbar_width = 50,
+                right_contact_panel_styles = {};
             if (is_wide || !(is_narrow || pinned)) {
-                panel_width = 1050;
+                panel_width = 1536;
                 roster_width = 300;
             } else if (is_narrow) {
                 panel_width = width - toolbar_width - 20 - 44;
-                if (panel_width > 1038) {
-                    panel_width = 1038;
-                    roster_width = 288;
-                } else {
-                    roster_width = 250;
-                    panel_margin = toolbar_width + 10;
-                }
+                roster_width = 250;
             } else {
                 panel_width = (width - toolbar_width - 20) * 7 / 9;
                 roster_width = (width - toolbar_width - 20) * 2 / 9;
@@ -110,6 +106,40 @@ define("xabber-ui", function () {
             }
             if (!expanded) {
                 roster_width = is_wide ? 48 : 44;
+            }
+            left_panel_width = right_contact_panel_width = 384;
+            right_panel_width = panel_width - (left_panel_width + right_contact_panel_width);
+            chat_bottom_panel_width = 768;
+            if (is_narrow){
+                right_contact_panel_width = left_panel_width = (panel_width * 0.264) < 288 ? 288 : panel_width * 0.264;
+
+            }
+            if (right_panel_width < 512 ){
+                right_panel_width = panel_width - left_panel_width;
+                right_contact_panel_styles = {
+                    position : 'absolute',
+                    right : 0,
+                    'z-index' : 499,
+                };
+                if ((right_panel_width - 384) < 128)
+                    right_contact_panel_width = right_panel_width;
+                else
+                    right_contact_panel_width = 384
+            }
+            else {
+                right_contact_panel_styles = {
+                    position : 'static',
+                    'z-index' : 0,
+                };
+
+            }
+
+            if (!this.body.screen.get('right_contact')) {
+                right_contact_panel_width = 0;
+                right_panel_width = panel_width - left_panel_width;
+            }
+            if (right_panel_width < 768) {
+                chat_bottom_panel_width = right_panel_width;
             }
 
             let panel_gap = (width - panel_width) / 2,
@@ -120,9 +150,20 @@ define("xabber-ui", function () {
             if (pinned && !panel_margin && (3 * right_gap < left_gap)) {
                 panel_margin = toolbar_width + 0.75 * (left_gap + right_gap);
             }
+            right_contact_panel_styles.width = right_contact_panel_width;
             this.main_panel.setCustomCss({
                 width: panel_width,
                 'margin-left': panel_margin
+            });
+            this.left_panel.setCustomCss({
+                width: left_panel_width,
+            });
+            this.right_panel.setCustomCss({
+                width: right_panel_width,
+            });
+            this.right_contact_panel.setCustomCss(right_contact_panel_styles);
+            this.chat_bottom.setCustomCss({
+                width: chat_bottom_panel_width,
             });
             this.roster_view.setCustomCss({width: roster_width});
         };
@@ -196,6 +237,7 @@ define("xabber-ui", function () {
             path_group_invitation = new this.ViewPath('contact.invitation'),
             path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
+            path_contact_details_right = new this.ViewPath('contact.details_view_right'),
             path_participant_messages = new this.ViewPath('model.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
@@ -205,6 +247,7 @@ define("xabber-ui", function () {
             main: {
                 left: { contacts: null },
                 right: { contact_placeholder: null },
+                right_contact: {},
                 placeholders: null
             },
             roster: null
@@ -226,6 +269,7 @@ define("xabber-ui", function () {
             main: {
                 left: { mentions: null },
                 right: { mentions_placeholder: null },
+                right_contact: {},
                 placeholders: null
             },
             roster: null
@@ -237,6 +281,7 @@ define("xabber-ui", function () {
             main: {
                 left: { chats: null },
                 right: { chat_placeholder: null },
+                right_contact: {},
                 placeholders: null
             },
             roster: null
@@ -271,6 +316,17 @@ define("xabber-ui", function () {
             if (options.right === 'enable_encryption' || options.omemo_item) {
                 return { details: path_enable_view };
             }
+        };
+
+
+        this.right_contact_panel.patchTree = function (tree, options) {
+            if (options.right_contact === undefined)
+                return;
+            if (options.right_contact === 'contact_details') {
+                return { details: path_contact_details_right };
+            }
+            if (options.details_content === 'participants')
+                return { details_content: path_details_participants };
         };
 
         this.body.setScreen('blank');

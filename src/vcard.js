@@ -213,7 +213,9 @@ define("xabber-vcard", function () {
         render: function () {
             this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : xabber.getString("vcard_screen__header"));
             this.data.set('refresh', false);
-            this.update();
+            this.model.getVCard(() => {
+                this.update();
+            });
         },
 
         update: function () {
@@ -320,6 +322,153 @@ define("xabber-vcard", function () {
                 });
             }
         }
+    });
+
+    xabber.VCardRightView = xabber.VCardView.extend({
+        template: templates.vcard_right,
+
+        __initialize: function (ev) {
+            this.ps_container = this.$('.full-vcard-content');
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+            this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+            this.model.set('vcard_hidden', true)
+        },
+
+        render: function () {
+            this.data.set('refresh', false);
+            this.update();
+            this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'))
+            if (this.parent.ps_container.length) {
+                if(!this.model.get('vcard_hidden'))
+                    this.parent.ps_container.perfectScrollbar('destroy')
+                else
+                    this.parent.ps_container.perfectScrollbar(
+                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
+                    );
+            }
+            this.model.updateName();
+            this.model.updateAvatar();
+            this.model.getVCard(() => {
+                this.update();
+            });
+        },
+
+        update: function () {
+            let $info, vcard = this.model.get('vcard');
+
+            $info = this.$('.jid-info-wrap');
+            $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').text(vcard.jabber_id);
+            $info.showIf(vcard.jabber_id);
+
+            $info = this.$('.vcard-wrap .personal-info-wrap');
+            $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
+            $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
+            $info.showIf(vcard.first_name || vcard.last_name);
+
+            $info = this.$('.full-vcard-wrap .personal-info-wrap');
+            $info.find('.fullname').showIf(vcard.fullname).find('.value').text(vcard.fullname);
+            $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
+            $info.find('.middle-name').showIf(vcard.middle_name).find('.value').text(vcard.middle_name);
+            $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
+            $info.showIf(vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
+
+            $info = this.$('.nickname-info-wrap');
+            $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
+            $info.showIf(vcard.nickname);
+
+            $info = this.$('.birthday-info-wrap');
+            $info.find('.birthday').showIf(vcard.birthday).find('.value').text(vcard.birthday);
+            $info.showIf(vcard.birthday);
+
+            $info = this.$('.job-info-wrap');
+            $info.find('.role').showIf(vcard.role).find('.value').text(vcard.role);
+            $info.find('.job-title').showIf(vcard.job_title).find('.value').text(vcard.job_title);
+            $info.find('.org-name').showIf(vcard.org.name).find('.value').text(vcard.org.name);
+            $info.find('.org-unit').showIf(vcard.org.unit).find('.value').text(vcard.org.unit);
+            $info.showIf(vcard.role || vcard.job_title || vcard.org.name || vcard.org.unit);
+
+            $info = this.$('.site-info-wrap');
+            $info.find('.url').showIf(vcard.url).find('.value').text(vcard.url).hyperlinkify();
+            $info.showIf(vcard.url);
+
+            $info = this.$('.description-info-wrap');
+            $info.find('.description').showIf(vcard.description).find('.value').text(vcard.description);
+            $info.showIf(vcard.description);
+
+            let $addr_info = this.$('.address-info-wrap'),
+                address = _.clone(vcard.address),
+                show_addr_block = false;
+            $addr_info.find('.info').addClass('hidden');
+            _.each(address, function (addr, type) {
+                $info = $addr_info.find('.address-'+type);
+                $info.find('.pobox').showIf(addr.pobox).text(addr.pobox);
+                $info.find('.extadd').showIf(addr.extadd).text(addr.extadd);
+                $info.find('.street').showIf(addr.street).text(addr.street);
+                $info.find('.locality').showIf(addr.locality).text(addr.locality);
+                $info.find('.region').showIf(addr.region).text(addr.region);
+                $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
+                $info.find('.country').showIf(addr.country).text(addr.country);
+                let show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
+                    addr.region || addr.pcode || addr.country);
+                show && (show_addr_block = true);
+                $info.showIf(show);
+            });
+            $addr_info.showIf(show_addr_block);
+
+            $info = this.$('.phone-info-wrap');
+            let phone = vcard.phone;
+            if (phone) {
+                $info.find('.phone-work').showIf(phone.work).find('.value').text(phone.work);
+                $info.find('.phone-home').showIf(phone.home).find('.value').text(phone.home);
+                $info.find('.phone-mobile').showIf(phone.mobile).find('.value').text(phone.mobile);
+                $info.find('.phone-default').showIf(phone.default).find('.value').text(phone.default);
+            }
+            $info.showIf(phone && (phone.work || phone.home || phone.mobile || phone.default));
+
+            $info = this.$('.email-info-wrap');
+            let email = vcard.email;
+            if (email) {
+                $info.find('.email-work').showIf(email.work).find('.value').text(email.work);
+                $info.find('.email-home').showIf(email.home).find('.value').text(email.home);
+                $info.find('.email-default').showIf(email.default).find('.value').text(email.default);
+            }
+            $info.showIf(email && (email.work || email.home || email.default));
+
+            this.parent.updateScrollBar();
+        },
+
+        onScroll: function () {
+            if(this.ps_container[0].scrollTop >= 170) {
+                this.$('.vcard-header-title').addClass('fixed-scroll');
+                this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,1)'});
+            }
+            else if(this.ps_container[0].scrollTop >= 40) {
+                this.$('.vcard-header-title').removeClass('fixed-scroll');
+                this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0.5)'});
+            }
+            else {
+                this.$('.vcard-header-title').removeClass('fixed-scroll');
+                this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0)'});
+            }
+
+        },
+
+        onClickIcon: function (ev) {
+            let $target_info = $(ev.target),
+                $target_value = $target_info.find('.value'), copied_text = "";
+            $target_value.each((idx, item) => {
+                let $item = $(item),
+                    value_text = $item.text();
+                value_text && (copied_text != "") && (copied_text += '\n');
+                value_text && (copied_text += value_text);
+                copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
+            });
+        },
+
     });
 
     xabber.VCardEditView = xabber.BasicView.extend({

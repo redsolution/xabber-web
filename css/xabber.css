@@ -634,6 +634,34 @@ input[type=file] {
     cursor: pointer;
 }
 
+.details-panel-right .header-buttons {
+    -webkit-transition: background-color 500ms linear;
+    -ms-transition: background-color 500ms linear;
+    transition: background-color 500ms linear;
+    position: fixed;
+    width: inherit;
+    height: 64px;
+}
+
+.details-panel-right .btn-escape {
+    left: 20px;
+    top: 20px;
+    right: unset;
+}
+
+.details-panel-right .btn-edit {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.details-panel-right .btn-edit svg,
+.details-panel-right .btn-edit svg path{
+    color: #9E9E9E;
+    fill: #9E9E9E;
+}
+
 .btn-escape i {
     display: block;
     color: #80868B;
@@ -645,6 +673,10 @@ input[type=file] {
     line-height: 14px;
     text-align: center;
     color: #E0E0E0;
+}
+
+.details-panel-right .btn-escape .btn-text {
+    display: none;
 }
 
 /* ------------ MAIN ------------ */
@@ -743,9 +775,10 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .main-wrap {
     position: relative;
-    width: 1050px;
+    width: 1536px;
     height: 100%;
     margin: 0 auto;
+    display: flex;
     box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
 }
 
@@ -758,12 +791,19 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 }
 
 .left-panel-wrap {
-    width: 28.5%;
+    flex-shrink: 0;
     overflow: hidden;
 }
 
 .right-panel-wrap {
     width: 71.5%;
+    min-width: 41.5%;
+}
+
+.right-contact-panel-wrap .container {
+    border-left: 1px solid #F5F5F5;
+    width: inherit;
+    margin-left: -1px;
 }
 
 .wide-panel-wrap {
@@ -779,6 +819,23 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 100%;
     height: 100%;
 }
+.details-panel-right{
+    position: relative;
+    width: inherit !important;
+    height: 100%;
+}
+.details-panel-right .panel-content-wrap,
+.details-panel-right .panel-content-wrap .main-info,
+.details-panel-right .panel-content-wrap .panel-content,
+.details-panel-right .panel-content-wrap .panel-content .vcard,
+.details-panel-right .panel-content-wrap .panel-content .vcard .full-vcard-wrap,
+.details-panel-right .panel-content-wrap .panel-content .vcard .full-vcard-wrap .full-vcard-content,
+.details-panel-right .panel-content-wrap .panel-content .vcard .full-vcard-wrap .full-vcard-content .vcard-header-title{
+    width: inherit !important;
+}
+.details-panel-right .panel-content-wrap .ps-scrollbar-y-rail{
+    z-index: 5;
+}
 
 .container {
     width: 100%;
@@ -791,17 +848,25 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     width: 100%;
 }
 
+.chat-head-container.panel-head {
+    box-shadow: 0 1px 1px -1px rgb(0 0 0 / 25%)
+}
+
 .chat-body-container {
     width: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
     position: absolute;
-    top: 56px;
+    top: 64px;
     bottom: 106px;
 }
 
 .chat-bottom-container {
     position: absolute;
+    transform: translate(-50%, 0);
     bottom: 0;
-    width: 100%;
+    left: 50%;
+    max-width: 100%;
     background-color: #FFF;
 }
 
@@ -820,7 +885,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .panel-head {
     position: absolute;
     width: 100%;
-    height: 56px;
+    height: 64px;
     box-shadow: 0 0 1px 0 rgba(0,0,0,0.25);
     z-index: 100;
 }
@@ -996,13 +1061,17 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=red] .chat-location .ol-control a,
 [data-main-color=red] .chat-location .ol-control.ol-send button,
+[data-main-color=red] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=red] .details-panel-right .vcard .show-vcard,
 [data-main-color=red] .toolbar .toolbar-item.active .toolbar-icon {
     color: #F44336;
 }
 [data-main-color=red] .ol-popup-content svg circle,
 [data-main-color=red] .ol-popup-content path,
+[data-main-color=red] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=red] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=red] .toolbar .toolbar-item.active svg.toolbar-icon path {
-    fill: #F44336;
+    fill: #F44336 !important;
 }
 [data-main-color=red] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=red] input[type=checkbox].filled-in:checked + label:after,
@@ -1074,11 +1143,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=pink] .chat-location .ol-control a,
 [data-main-color=pink] .chat-location .ol-control.ol-send button,
+[data-main-color=pink] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=pink] .details-panel-right .vcard .show-vcard,
 [data-main-color=pink] .toolbar .toolbar-item.active .toolbar-icon {
     color: #E91E63;
 }
 [data-main-color=pink] .ol-popup-content svg circle,
 [data-main-color=pink] .ol-popup-content path,
+[data-main-color=pink] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=pink] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=pink] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #E91E63 !important;
 }
@@ -1152,11 +1225,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=purple] .chat-location .ol-control a,
 [data-main-color=purple] .chat-location .ol-control.ol-send button,
+[data-main-color=purple] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=purple] .details-panel-right .vcard .show-vcard,
 [data-main-color=purple] .toolbar .toolbar-item.active .toolbar-icon {
     color: #9C27B0;
 }
 [data-main-color=purple] .ol-popup-content svg circle,
 [data-main-color=purple] .ol-popup-content path,
+[data-main-color=purple] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=purple] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #9C27B0 !important;
 }
@@ -1228,11 +1305,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-purple] .chat-location .ol-control a,
 [data-main-color=deep-purple] .chat-location .ol-control.ol-send button,
+[data-main-color=deep-purple] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=deep-purple] .details-panel-right .vcard .show-vcard,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active .toolbar-icon {
     color: #673AB7;
 }
 [data-main-color=deep-purple] .ol-popup-content svg circle,
 [data-main-color=deep-purple] .ol-popup-content path,
+[data-main-color=deep-purple] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=deep-purple] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #673AB7 !important;
 }
@@ -1305,11 +1386,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=indigo] .chat-location .ol-control a,
 [data-main-color=indigo] .chat-location .ol-control.ol-send button,
+[data-main-color=indigo] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=indigo] .details-panel-right .vcard .show-vcard,
 [data-main-color=indigo] .toolbar .toolbar-item.active .toolbar-icon {
     color: #3F51B5;
 }
 [data-main-color=indigo] .ol-popup-content svg circle,
 [data-main-color=indigo] .ol-popup-content path,
+[data-main-color=indigo] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=indigo] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=indigo] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #3F51B5 !important;
 }
@@ -1382,11 +1467,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue] .chat-location .ol-control a,
 [data-main-color=blue] .chat-location .ol-control.ol-send button,
+[data-main-color=blue] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=blue] .details-panel-right .vcard .show-vcard,
 [data-main-color=blue] .toolbar .toolbar-item.active .toolbar-icon {
     color: #2196F3;
 }
 [data-main-color=blue] .ol-popup-content svg circle,
 [data-main-color=blue] .ol-popup-content path,
+[data-main-color=blue] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=blue] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #2196F3 !important;
 }
@@ -1459,11 +1548,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-blue] .chat-location .ol-control a,
 [data-main-color=light-blue] .chat-location .ol-control.ol-send button,
+[data-main-color=light-blue] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=light-blue] .details-panel-right .vcard .show-vcard,
 [data-main-color=light-blue] .toolbar .toolbar-item.active .toolbar-icon {
     color: #03A9F4;
 }
 [data-main-color=light-blue] .ol-popup-content svg circle,
 [data-main-color=light-blue] .ol-popup-content path,
+[data-main-color=light-blue] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=light-blue] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=light-blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #03A9F4 !important;
 }
@@ -1536,11 +1629,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=cyan] .chat-location .ol-control a,
 [data-main-color=cyan] .chat-location .ol-control.ol-send button,
+[data-main-color=cyan] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=cyan] .details-panel-right .vcard .show-vcard,
 [data-main-color=cyan] .toolbar .toolbar-item.active .toolbar-icon {
     color: #00BCD4;
 }
 [data-main-color=cyan] .ol-popup-content svg circle,
 [data-main-color=cyan] .ol-popup-content path,
+[data-main-color=cyan] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=cyan] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=cyan] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #00BCD4 !important;
 }
@@ -1613,11 +1710,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=teal] .chat-location .ol-control a,
 [data-main-color=teal] .chat-location .ol-control.ol-send button,
+[data-main-color=teal] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=teal] .details-panel-right .vcard .show-vcard,
 [data-main-color=teal] .toolbar .toolbar-item.active .toolbar-icon {
     color: #009688;
 }
 [data-main-color=teal] .ol-popup-content svg circle,
 [data-main-color=teal] .ol-popup-content path,
+[data-main-color=teal] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=teal] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=teal] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #009688 !important;
 }
@@ -1690,11 +1791,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=green] .chat-location .ol-control a,
 [data-main-color=green] .chat-location .ol-control.ol-send button,
+[data-main-color=green] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=green] .details-panel-right .vcard .show-vcard,
 [data-main-color=green] .toolbar .toolbar-item.active .toolbar-icon {
     color: #4CAF50;
 }
 [data-main-color=green] .ol-popup-content svg circle,
 [data-main-color=green] .ol-popup-content path,
+[data-main-color=green] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=green] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #4CAF50 !important;
 }
@@ -1767,11 +1872,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-green] .chat-location .ol-control a,
 [data-main-color=light-green] .chat-location .ol-control.ol-send button,
+[data-main-color=light-green] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=light-green] .details-panel-right .vcard .show-vcard,
 [data-main-color=light-green] .toolbar .toolbar-item.active .toolbar-icon {
     color: #8BC34A;
 }
 [data-main-color=light-green] .ol-popup-content svg circle,
 [data-main-color=light-green] .ol-popup-content path,
+[data-main-color=light-green] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=light-green] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=light-green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #8BC34A !important;
 }
@@ -1844,11 +1953,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=lime] .chat-location .ol-control a,
 [data-main-color=lime] .chat-location .ol-control.ol-send button,
+[data-main-color=lime] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=lime] .details-panel-right .vcard .show-vcard,
 [data-main-color=lime] .toolbar .toolbar-item.active .toolbar-icon {
     color: #CDDC39;
 }
 [data-main-color=lime] .ol-popup-content svg circle,
 [data-main-color=lime] .ol-popup-content path,
+[data-main-color=lime] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=lime] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=lime] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #CDDC39 !important;
 }
@@ -1921,11 +2034,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=amber] .chat-location .ol-control a,
 [data-main-color=amber] .chat-location .ol-control.ol-send button,
+[data-main-color=amber] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=amber] .details-panel-right .vcard .show-vcard,
 [data-main-color=amber] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FFC107;
 }
 [data-main-color=amber] .ol-popup-content svg circle,
 [data-main-color=amber] .ol-popup-content path,
+[data-main-color=amber] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=amber] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=amber] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FFC107 !important;
 }
@@ -1998,11 +2115,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=orange] .chat-location .ol-control a,
 [data-main-color=orange] .chat-location .ol-control.ol-send button,
+[data-main-color=orange] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=orange] .details-panel-right .vcard .show-vcard,
 [data-main-color=orange] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FF9800;
 }
 [data-main-color=orange] .ol-popup-content svg circle,
 [data-main-color=orange] .ol-popup-content path,
+[data-main-color=orange] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=orange] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF9800 !important;
 }
@@ -2075,11 +2196,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-orange] .chat-location .ol-control a,
 [data-main-color=deep-orange] .chat-location .ol-control.ol-send button,
+[data-main-color=deep-orange] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=deep-orange] .details-panel-right .vcard .show-vcard,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active .toolbar-icon {
     color: #FF5722;
 }
 [data-main-color=deep-orange] .ol-popup-content svg circle,
 [data-main-color=deep-orange] .ol-popup-content path,
+[data-main-color=deep-orange] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=deep-orange] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF5722 !important;
 }
@@ -2152,11 +2277,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=brown] .chat-location .ol-control a,
 [data-main-color=brown] .chat-location .ol-control.ol-send button,
+[data-main-color=brown] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=brown] .details-panel-right .vcard .show-vcard,
 [data-main-color=brown] .toolbar .toolbar-item.active .toolbar-icon {
     color: #795548;
 }
 [data-main-color=brown] .ol-popup-content svg circle,
 [data-main-color=brown] .ol-popup-content path,
+[data-main-color=brown] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=brown] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=brown] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #795548 !important;
 }
@@ -2230,11 +2359,15 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue-grey] .chat-location .ol-control a,
 [data-main-color=blue-grey] .chat-location .ol-control.ol-send button,
+[data-main-color=blue-grey] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=blue-grey] .details-panel-right .vcard .show-vcard,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active .toolbar-icon {
     color: #607D8B;
 }
 [data-main-color=blue-grey] .ol-popup-content svg circle,
 [data-main-color=blue-grey] .ol-popup-content path,
+[data-main-color=blue-grey] .details-panel-right .main-info .buttons-wrap .contact-btn path,
+[data-main-color=blue-grey] .details-panel-right .main-info .buttons-wrap .contact-btn use,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #607D8B !important;
 }
@@ -3139,7 +3272,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .searching-main .search-form .account-indicator {
-    height: 56px
+    height: 64px
 }
 
 .searching-main .search-form input.simple-input-field {
@@ -4919,7 +5052,7 @@ input[type=text].simple-input-field:hover {
 /* -------------- RECENT CHATS PANEL ------------------ */
 
 .search-form {
-    padding: 18px 0;
+    padding: 22px 0;
     border-right: 1px solid #EEEEEE;
 }
 
@@ -4927,21 +5060,25 @@ input[type=text].simple-input-field:hover {
     display: block;
     box-sizing: border-box;
     height: 20px;
-    padding: 0 60px;
+    padding: 0 60px 0 82px;
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 20px;
-    color: #757575 !important;
+    color: #212121 !important;
     border-radius: 2px;
 }
 
+.search-form input.simple-input-field::placeholder {
+    color: #BDBDBD !important;
+}
+
 .search-form input::-webkit-input-placeholder {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 20px;
 }
 
 .search-form input::-moz-placeholder {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 20px;
 }
 
@@ -4951,9 +5088,16 @@ input[type=text].simple-input-field:hover {
     top: 18px;
     color: #9E9E9E;
 }
-
-.search-form .search-icon {
-    left: 22px;
+.search-wide.search-form .search-icon,
+.contacts-search-form.search-form .search-icon,
+.chats-search-form.search-form .search-icon {
+     top: 20px;
+     left: 26px;
+}
+.search-wide.search-form .close-search-icon,
+.contacts-search-form.search-form .close-search-icon,
+.chats-search-form.search-form .close-search-icon {
+     top: 20px;
 }
 
 .search-form .close-search-icon {
@@ -4975,7 +5119,7 @@ input[type=text].simple-input-field:hover {
 
 .left-panel-list-wrap {
     position: absolute;
-    top: 56px;
+    top: 64px;
     bottom: 0;
     width: 100% !important;
     border-right: 1px solid #F5F5F5;
@@ -5436,8 +5580,8 @@ input[type=text].simple-input-field:hover {
 .chat-item .status,
 .chat-head-wrap .contact-status {
     position: absolute;
-    top: 36px;
-    left: 38px;
+    top: 43px;
+    left: 55px;
     width: 12px;
     height: 12px;
     border: 1.125px solid #FFF;
@@ -5484,6 +5628,10 @@ input[type=text].simple-input-field:hover {
     height: 16px !important;
     /*background-color: white;*/
 }
+.chat-head-wrap .chat-icon {
+    top: 40px;
+    left: 52px;
+}
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon {
     top: 42px;
@@ -5519,7 +5667,7 @@ input[type=text].simple-input-field:hover {
     overflow: hidden;
     display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
 }
 
@@ -5645,6 +5793,7 @@ input[type=text].simple-input-field:hover {
 .mention-item .last-msg-date,
 .chat-item .last-msg-date {
     margin: 0 0 0 2px;
+    margin-left: auto;
     height: 16px;
     font-size: 9px;
     line-height: 16px;
@@ -5772,15 +5921,15 @@ input[type=text].simple-input-field:hover {
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 10px 256px 11px 64px;
+    padding: 12px 256px 11px 88px;
 }
 
 .chat-head-wrap .circle-avatar {
     position: absolute;
     top: 8px;
-    left: 12px;
-    width: 40px;
-    height: 40px;
+    left: 20px;
+    width: 48px;
+    height: 48px;
     cursor: pointer;
 }
 
@@ -5825,12 +5974,13 @@ input[type=text].simple-input-field:hover {
     float: left;
     clear: left;
     margin: 0;
+    margin-top: 1px;
     max-width: 100%;
 }
 
 .chat-head-wrap .contact-name {
     height: 21px;
-    font-size: 18px;
+    font-size: 22px;
     line-height: 21px;
     color: #212121;
     cursor: pointer;
@@ -5846,16 +5996,16 @@ input[type=text].simple-input-field:hover {
 
 .chat-head-wrap .contact-info .contact-status-message {
     height: 14px;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 14px;
     font-weight: 300;
     color: #616161;
-    margin-top: 1px;
+    margin-top: 3px;
 }
 
 .chat-tools-wrap {
     position: absolute;
-    top: 16px;
+    top: 20px;
     right: 14px;
 }
 
@@ -5877,7 +6027,8 @@ input[type=text].simple-input-field:hover {
     color: #616161;
 }
 
-.chat-tools-wrap .btn-delete-chat {
+.chat-tools-wrap .btn-delete-chat,
+.chat-tools-wrap .btn-contact-details {
     box-shadow: 0px -1px 1px 0 rgba(0,0,0,.1);
 }
 
@@ -5902,6 +6053,7 @@ input[type=text].simple-input-field:hover {
     min-width: 200px !important;
     width: auto !important;
     max-width: 272px !important;
+    overflow: hidden;
 }
 
 .xabber-account-menu {
@@ -6127,6 +6279,9 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-message {
+    max-width: 768px;
+    transform: translate(-50%, 0);
+    left: 50%;
     position: relative;
     width: 100%;
     padding: 7px 0;
@@ -6532,7 +6687,7 @@ input[type=text].simple-input-field:hover {
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    max-width: 70%;
+    max-width: 100%;
     max-height: 400px;
 }
 
@@ -7817,6 +7972,7 @@ input[type='range'].voice-message-volume:focus {
     border-radius: 50%;
 }
 
+.details-panel-right .button-wrap.non-active i,
 .details-panel .button-wrap.non-active i,
 .message-actions-panel .button-wrap.non-active .action-button,
 .edit-rights .button-wrap.non-active i,
@@ -7831,6 +7987,19 @@ input[type='range'].voice-message-volume:focus {
     background-color: #9E9E9E !important;
 }
 
+.details-panel-right .btn-block-wrap .contact-btn.btn-block svg path {
+    fill: #F44336 !important;
+}
+
+.details-panel-right .btn-block-wrap i.btn-block {
+    color: #F44336 !important;
+}
+
+.details-panel-right .btn-block-wrap .btn-name {
+    color: #F44336 !important;
+}
+
+.details-panel-right .btn-block-wrap i.btn-unblock ~ .btn-name,
 .details-panel .btn-block-wrap i.btn-unblock ~ .btn-name {
     color: #F44336 !important;
 }
@@ -8033,6 +8202,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .settings-panel .block-header .block-name,
+.details-panel-right .block-header .block-name,
 .details-panel .block-header .block-name {
     max-width: 100%;
     height: 21px;
@@ -8041,6 +8211,7 @@ input[type='range'].voice-message-volume:focus {
     color: #212121;
 }
 
+.details-panel-right .group-chat-properties-wrap .block-header .block-name,
 .details-panel .group-chat-properties-wrap .block-header .block-name {
     text-transform: capitalize;
 }
@@ -8073,6 +8244,7 @@ input[type='range'].voice-message-volume:focus {
     padding-bottom: 8px;
 }
 
+.details-panel .settings-block-wrap,
 .details-panel .settings-block-wrap {
     padding: 8px 0;
 }
@@ -9011,10 +9183,23 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 0 6px 36px;
 }
 
+.details-panel-right .connection-wrap,
+.details-panel-right .subscription-info-wrap,
+.details-panel-right .synchronization-wrap,
+.details-panel-right .color-scheme-wrap,
+.details-panel-right .resources-wrap,
+.details-panel-right .vcard-wrap,
+.details-panel-right .token-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.details-panel-right .subscription-info-wrap .input-field,
 .details-panel .subscription-info-wrap .input-field {
     margin-top: 0 !important;
 }
 
+.details-panel-right .token-wrap,
 .details-panel .token-wrap {
     margin-bottom: 6px;
     padding-right: 128px;
@@ -9029,12 +9214,23 @@ input[type='range'].voice-message-volume:focus {
     min-height: 56px;
 }
 
+.details-panel-right .capabilities-wrap,
+.details-panel-right .blocklist-wrap,
+.details-panel-right .groups-wrap {
+    position: relative;
+    width: 50%;
+    padding: 0 0 6px 38px;
+    min-height: 56px;
+}
+
+.details-panel-right .omemo-settings-wrap,
 .details-panel .omemo-settings-wrap {
     position: relative;
     width: 75%;
     padding: 0 38px 6px 38px;
 }
 
+.details-panel-right .omemo-settings-wrap .setting-wrap,
 .details-panel .omemo-settings-wrap .setting-wrap {
     display: flex;
     position: relative;
@@ -9044,8 +9240,297 @@ input[type='range'].voice-message-volume:focus {
     justify-content: space-between;
 }
 
+
 .details-panel .groups-wrap {
     width: calc(100% - 7px);
+}
+
+.details-panel-right.contact-details-panel .search-wrap {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0%;
+    background: white;
+    z-index: 1000;
+    padding: 0;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .search-messages-content-wrap{
+    height: calc(100% - 65px);
+}
+
+.details-panel-right.contact-details-panel .search-wrap .search-content{
+    position: relative;
+    height: 100%;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .block-header {
+    display: block;
+    height: 65px;
+    width: 100%;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .ps-scrollbar-y-rail{
+    top: 64px !important;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .messages-search-form {
+    margin: 11px 0px 9px 0;
+    padding: 11px 0 11px 72px;
+    width: 100%;
+    max-width: unset;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .messages-search-form .search-icon {
+    left: 65px;
+    top: 20px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .messages-search-form .search-input {
+    padding: 0;
+    font-size: 16px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .messages-search-form .search-input::placeholder {
+    padding: 0;
+    font-size: 16px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .block-header .details-icon {
+    left: 20px;
+    top: 20px !important;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .block-header .close-search-icon {
+    right: 20px;
+    top: 21px !important;
+    z-index: 1;
+    position: absolute;
+    color: #9E9E9E;
+    cursor: pointer;
+    fill: #9E9E9E;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .search-results,
+.details-panel-right.contact-details-panel .search-wrap .messages-count {
+    color: #707579;
+    padding: 11px 23px;
+    font-weight: 500;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .preloader-wrap {
+    position: relative;
+    margin-top: 100px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .preloader-wrapper {
+    height: 40px;
+    width: 40px;
+    left: 45%;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-content {
+    height: calc(100% - 52px);
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message:hover {
+    background-color: #f5f5f5;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .circle-avatar{
+    width: 32px;
+    height: 32px;
+    left: 19px;
+    top: 10px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .msg-wrap{
+    height: 100%;
+    padding: 0 0 0 72px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .chat-msg-content{
+    max-height: 40px;
+    padding-right: 100px;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .chat-msg-content .mention:hover{
+    text-decoration: none;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .chat-msg-author:hover{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.details-panel-right.contact-details-panel .search-wrap .chat-message .msg-time{
+    right: 14px;
+    top: 18px;
+    max-width: unset;
+    font-size: 12px;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0%;
+    background: white;
+    z-index: 1000;
+    padding: 0;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .full-vcard-content{
+    position: relative;
+    height: 100%;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .block-header {
+    display: block;
+    height: 304px;
+    width: 100%;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .block-header .block-name {
+    position: absolute;
+    top: 20px;
+    left: 64px;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .block-header .details-icon {
+    left: 20px;
+    top: 20px !important;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .block-header .main-info .avatar-wrap {
+    padding: 0;
+    width: unset;
+}
+
+.details-panel-right.contact-details-panel .full-vcard-wrap .vcard-list{
+    position: relative;
+    height: calc(100% - 304px);
+}
+
+.details-panel-right.contact-details-panel .groups-wrap {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0%;
+    background: white;
+    z-index: 1000;
+    padding: 0;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .block-header {
+    display: block;
+    height: 64px;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .block-header .block-name {
+    position: absolute;
+    top: 20px;
+    left: 64px;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .block-header .details-icon {
+    left: 20px;
+    top: 20px !important;
+    pointer-events: auto;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .checkbox-list {
+    padding: 12px 51px 0 19px;
+    height: calc(100% - 64px);
+    position: relative;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .checkbox-list .existing-group-field{
+    margin: 0;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .checkbox-list .new-group-field-wrap{
+    position: relative;
+    margin-top: 2px;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox{
+    margin: 0;
+}
+
+.details-panel-right.contact-details-panel .groups-wrap .checkbox-list .new-group-field-wrap .new-group-name {
+    top: -5px;
+    position: absolute;
+    margin: 0;
+    left: 34px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0%;
+    background: white;
+    z-index: 1000;
+    padding: 0;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .block-header {
+    display: block;
+    height: 64px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .block-header .block-name {
+    position: absolute;
+    top: 20px;
+    left: 64px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .block-header .details-icon {
+    left: 20px;
+    top: 20px !important;
+    pointer-events: auto;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap {
+    border-bottom: 1px solid #F5F5F5;
+    padding: 35px 24px 16px 24px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap .contact-name-wrap {
+    font-size: 16px;
+    line-height: 24px;
+    color: #424242;
+    border-bottom: 1px solid rgba(0,0,0,0.54);
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap .contact-name-wrap .contact-name {
+    padding-bottom: 4px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap .contact-name-input{
+    width: 100%;
+    border: none !important;
+    margin: 0;
+    height: unset;
+    font-size: 16px;
+    line-height: 24px;
+    padding-bottom: 4px;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap .contact-name-input:focus{
+    color: #757575;
+}
+
+.details-panel-right.contact-details-panel .edit-wrap .name-wrap .contact-name-input::placeholder{
+    color: #bdbdbd;
 }
 
 .details-panel .details-icon {
@@ -9057,6 +9542,61 @@ input[type='range'].voice-message-volume:focus {
     fill: #757575;
 }
 
+.details-panel-right .details-icon {
+    top: 18px !important;
+    position: absolute;
+    cursor: pointer;
+    pointer-events: none;
+    left: 24px;
+    color: #9E9E9E;
+    fill: #9E9E9E;
+}
+
+.details-panel-right .details-icon path {
+    fill: #9E9E9E;
+}
+
+.details-panel-right.contact-details-panel .groups-list-wrap {
+    position: relative;
+    padding-left: 72px;
+    cursor: pointer;
+    border-bottom: 1px solid #F5F5F5;
+}
+
+.details-panel-right.contact-details-panel .groups-list-wrap:hover {
+    background-color: #f5f5f5;
+}
+
+.details-panel-right.contact-details-panel .groups-list-wrap .details-icon {
+    top: 19px !important;
+}
+
+.details-panel-right.contact-details-panel .groups {
+    display: flex;
+    padding: 19px 0 11px 0;
+    flex-wrap: wrap;
+}
+
+.details-panel-right.contact-details-panel .groups .empty-groups {
+    padding: 0 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    line-height: 24px;
+    font-size: 14px;
+    letter-spacing: 0.15px;
+}
+
+.details-panel-right.contact-details-panel .groups .group {
+    background-color: #EEEEEE;
+    padding: 0 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    line-height: 24px;
+    font-size: 14px;
+    letter-spacing: 0.15px;
+}
 .contact-details-panel .chat-icon,
 .groupchat-details-panel .chat-icon {
     position: absolute;
@@ -9445,6 +9985,61 @@ input[type='range'].voice-message-volume:focus {
     border-radius: 50%;
 }
 
+/* --------------- RESOURCE INFO RIGHT ------------------ */
+
+.details-panel-right .resource-wrap {
+    position: relative;
+    padding: 0 0 6px 36px;
+}
+
+.details-panel-right .resource-wrap table {
+    table-layout: auto;
+    width: auto !important;
+}
+
+.details-panel-right .resource-wrap table td,
+.details-panel-right .resource-wrap table tr {
+    padding: 0;
+}
+
+.details-panel-right .resource-wrap .info {
+    height: 22px;
+}
+
+.details-panel-right .resource-wrap .info td > * {
+    display: inline-flex;
+}
+
+.details-panel-right .resource-wrap .info .label {
+    min-width: 56px;
+    max-width: 72px;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 300;
+    color: #9E9E9E;
+}
+
+.details-panel-right .resource-wrap .info .value {
+    font-size: 12px;
+    line-height: 14px;
+    padding-left: 4px;
+    max-width: 240px;
+    color: #9E9E9E;
+}
+
+.details-panel-right .resource-wrap .info .status-message {
+    font-size: 14px;
+    line-height: 16px;
+    color: #616161;
+}
+
+.details-panel-right .resource-wrap .status-info .status {
+    margin: auto 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
 
 /* ------------------- VCARD INFO ---------------------- */
 
@@ -9459,6 +10054,22 @@ input[type='range'].voice-message-volume:focus {
 .groupchat-details-panel .vcard .info-wrap,
 .contact-details-panel .vcard .info-wrap {
     margin: 0;
+}
+
+.details-panel-right.contact-details-panel .vcard .info-wrap .info-hover:hover {
+    background-color: #F8F8F8;
+    cursor: pointer;
+}
+
+.details-panel-right.contact-details-panel .vcard .info-wrap:first-child,
+.details-panel-right.contact-details-panel .vcard .info-wrap.more{
+    border-top: none;
+}
+.details-panel-right.contact-details-panel .vcard .info-wrap.more {
+    border-bottom: 1px solid #F5F5F5;
+}
+.details-panel-right.contact-details-panel .vcard .info-wrap.personal-info-wrap {
+    padding-bottom: 0;
 }
 
 .vcard .details-icon {
@@ -9476,12 +10087,55 @@ input[type='range'].voice-message-volume:focus {
                                   not supported by any browser */
 }
 
+.details-panel-right.contact-details-panel .vcard .info {
+    padding: 15px 0 14px 0;
+    border-bottom: 1px solid #F5F5F5;
+    margin-left: 72px;
+    width: calc(100% - 72px);
+}
+
+.details-panel-right.contact-details-panel .vcard .info-hover {
+    width: 100%;
+}
+.details-panel-right.contact-details-panel .vcard .show-vcard {
+    padding: 6px 0 6px 72px;
+    cursor: pointer;
+    color: #757575;
+    text-underline-offset: 2px;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+}
+
+.details-panel-right.contact-details-panel .vcard .info-wrap {
+    border-top: 1px solid #F5F5F5;
+    padding: 0
+}
+.details-panel-right.contact-details-panel .vcard .info-hover:last-child .info {
+    border-bottom: none;
+}
+
 .vcard .info .value {
     max-width: 100%;
     height: 16px;
     font-size: 14px;
     line-height: 16px;
     color: #616161;
+}
+
+.details-panel-right .vcard .info .value {
+    font-size: 16px;
+    height:17px;
+    line-height: 16px;
+    pointer-events: none;
+    color: #000000;
+}
+
+.details-panel-right .vcard .info .label {
+    pointer-events: none;
+}
+
+.details-panel-right .vcard .info.address-home .value {
+    margin-bottom: 4px;
 }
 
 .vcard .info.description .value {
@@ -9669,17 +10323,71 @@ input[type='range'].voice-message-volume:focus {
     height: 100%;
 }
 
+.details-panel-right .main-info,
 .details-panel .main-info {
     position: relative;
     width: 100%;
 }
 
+.details-panel-right .main-info,
 .details-panel .main-info {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
+.details-panel-right .vcard-header .vcard-header-title {
+    position: fixed;
+    z-index: 4;
+    top: 0;
+    height: 64px !important;
+    -webkit-transition: background-color 500ms linear;
+    -ms-transition: background-color 500ms linear;
+    transition: background-color 500ms linear;
+}
+
+.details-panel-right .vcard-header-title.fixed-scroll {
+    box-shadow: 0px 1px 1px -1px rgb(0 0 0 / 25%);
+}
+
+.details-panel-right .vcard-header.fixed-scroll .main-info {
+    display: none !important;
+}
+
+.details-panel-right .main-info.fixed-scroll {
+    position: fixed;
+    z-index: 4;
+    top: 0;
+    background: #ffffff;
+}
+
+.details-panel-right .main-info.fixed-scroll .circle-avatar{
+    display: none !important;
+}
+
+.details-panel-right .main-info.fixed-scroll .text-info{
+    display: none !important;
+}
+
+.details-panel-right .main-info.fixed-scroll .buttons-wrap{
+    margin-top: 4px;
+}
+
+.details-panel-right .main-info.fixed-scroll .block-name{
+    position: absolute;
+    top: 20px;
+    left: 64px;
+    height: 21px;
+    font-size: 18px;
+    line-height: 21px;
+    color: #212121;
+    z-index: 1;
+}
+
+.details-panel-right .main-info:not(.fixed-scroll) .block-name{
+    display: none;
+}
+.details-panel-right .btn-more,
 .details-panel .btn-more {
     position: absolute;
     top: 16px;
@@ -9688,10 +10396,12 @@ input[type='range'].voice-message-volume:focus {
     color: #80868B;
 }
 
+.details-panel-right .main-info .text-info,
 .details-panel .main-info .text-info {
     width: 100%;
 }
 
+.details-panel-right .main-info .buttons-menu-wrap,
 .details-panel .main-info .buttons-menu-wrap {
     min-width: 192px !important;
     width: auto !important;
@@ -9708,6 +10418,19 @@ input[type='range'].voice-message-volume:focus {
     align-items: center;
     padding: 8px 0;
     margin: 0 auto;
+}
+
+.details-panel-right .main-info .buttons-wrap {
+    display: flex;
+    background-color: #fafafa;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 12px;
+    width: calc(100% - 2px);
+    height: 64px;
+    justify-content: space-evenly;
+    border-top: 1px solid #F5F5F5;
+    border-bottom: 1px solid #F5F5F5;
 }
 
 .edit-rights .participant-details-item .btn-more {
@@ -9732,6 +10455,13 @@ input[type='range'].voice-message-volume:focus {
     text-align: center;
 }
 
+.details-panel-right .main-info .button-wrap {
+    min-width: 64px;
+    max-width: 96px;
+    padding-bottom: 8px;
+    text-align: center;
+}
+
 .edit-rights .participant-details-item .buttons-wrap i,
 .edit-rights .participant-details-item .buttons-wrap svg,
 .details-panel .main-info .buttons-wrap .btn-leave,
@@ -9745,6 +10475,42 @@ input[type='range'].voice-message-volume:focus {
     color: #FFF;
     fill: #FFF;
     border-radius: 50%;
+}
+
+.details-panel-right .main-info .buttons-wrap .btn-leave,
+.details-panel-right .main-info .buttons-wrap i {
+    cursor: pointer;
+    display: block;
+    width: 48px;
+    height: 42px;
+    padding: 12px;
+    margin: 0 auto;
+    color: #FFF;
+    fill: #FFF;
+    border-radius: 50%;
+}
+.details-panel-right .main-info .buttons-wrap .contact-btn {
+    cursor: pointer;
+    display: block;
+    width: 48px;
+    height: 42px;
+    padding: 12px;
+    margin: 0 auto;
+    color: #FFF;
+    fill: #FFF;
+    border-radius: 50%;
+}
+.details-panel-right .main-info .buttons-wrap .contact-btn svg {
+    width: 24px;
+    height: 24px;
+}
+.details-panel-right .main-info .buttons-wrap .contact-mute-dropdown {
+    width: 176px !important;
+    margin-top: 69px;
+}
+.details-panel-right .main-info.fixed-scroll .buttons-wrap .contact-mute-dropdown {
+    margin-top: 0 !important;
+    top: 128px !important;
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
@@ -9775,6 +10541,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-name,
+.details-panel-right .buttons-wrap .btn-name,
 .details-panel .buttons-wrap .btn-name {
     height: 14px;
     width: 100%;
@@ -9805,21 +10572,25 @@ input[type='range'].voice-message-volume:focus {
 
 .omemo-enable-view .main-info .circle-avatar,
 .invitation-view .main-info .circle-avatar,
+.details-panel-right .main-info .avatar-wrap,
 .details-panel .main-info .avatar-wrap {
     margin: 48px 0 12px 0 !important;
     position: relative;
 }
 
+.details-panel-right .main-info .circle-avatar,
 .details-panel .main-info .circle-avatar {
     margin: 0 auto;
     width: 192px;
     height: 192px;
 }
 
+.omemo-enable-view.details-panel-right .main-info .circle-avatar,
 .omemo-enable-view.details-panel .main-info .circle-avatar {
     border: 3px dashed;
 }
 
+.omemo-enable-view.details-panel-right .main-info .circle-avatar .avatar,
 .omemo-enable-view.details-panel .main-info .circle-avatar .avatar {
     width: 182px;
     height: 182px;
@@ -9832,6 +10603,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 2px auto;
 }
 
+.details-panel-right .main-info .status,
 .details-panel .main-info .status {
     position: absolute;
     bottom: 12px;
@@ -9842,12 +10614,14 @@ input[type='range'].voice-message-volume:focus {
     border: 2px solid #FFFFFF;
 }
 
+.details-panel-right .main-info .contact-name-wrap,
 .details-panel .main-info .contact-name-wrap {
     height: 36px;
     width: 100%;
     position: relative;
 }
 
+.details-panel-right .main-info .contact-name,
 .details-panel .main-info .contact-name {
     display: inline-flex;
 }
@@ -9856,6 +10630,7 @@ input[type='range'].voice-message-volume:focus {
     display: none;
 }
 
+.details-panel-right .main-info .contact-name-wrap .btn-rename,
 .details-panel .main-info .contact-name-wrap .btn-rename {
     font-size: 14px;
     color: #9e9e9e;
@@ -9867,12 +10642,17 @@ input[type='range'].voice-message-volume:focus {
     padding: 14px 16px 8px;
 }
 
+.details-panel-right .main-info .contact-name-wrap .btn-rename:hover span,
 .details-panel .main-info .contact-name-wrap .btn-rename:hover span {
     border-bottom: 1px solid #BDBDBD;
 }
 
 .details-panel .main-info .btn-rename:hover,
 .details-panel .main-info .contact-name:hover + .btn-rename {
+    display: inline-flex;
+}
+
+.details-panel-right .main-info .btn-rename:hover{
     display: inline-flex;
 }
 
@@ -9892,11 +10672,32 @@ input[type='range'].voice-message-volume:focus {
     border: 1px solid transparent;
 }
 
+.details-panel-right .main-info .contact-name,
+.details-panel-right .main-info .contact-name-input,
+.details-panel-right .main-info .name-wrap {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    font-size: 30px;
+    line-height: 32px;
+    color: #212121;
+    padding: 2px 16px;
+    text-align: center;
+    overflow: hidden;
+    border: 1px solid transparent;
+}
+.details-panel-right .main-info .contact-name-input{
+    border: none !important;
+}
+
+.details-panel-right .main-info .name-wrap,
 .details-panel .main-info .name-wrap {
     display: flex;
     justify-content: center;
 }
 
+.details-panel-right .main-info .contact-name-input,
 .details-panel .main-info .contact-name-input {
     height: unset;
     text-align: center;
@@ -9925,6 +10726,18 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
+.details-panel-right .main-info .contact-jid  {
+    clear: both;
+    text-align: center;
+    max-width: 100%;
+    height: 20px;
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 20px;
+    color: #616161;
+}
+
 .groupchat-details-panel .panel-content,
 .contact-details-panel .panel-content {
     width: 100%;
@@ -9932,6 +10745,13 @@ input[type='range'].voice-message-volume:focus {
     overflow: hidden;
 }
 
+.details-panel-right .groupchat-details-panel .panel-content,
+.details-panel-right .contact-details-panel .panel-content {
+    border: 1px solid #F5F5F5;
+    border-left: none;
+}
+
+.details-panel-right .btn-main,
 .details-panel .btn-main,
 .settings-panel .btn-main {
     font-size: 14px;
@@ -9939,6 +10759,7 @@ input[type='range'].voice-message-volume:focus {
     font-weight: 500;
 }
 
+.details-panel-right .btn-revoke-token,
 .details-panel .btn-revoke-token {
     position: absolute;
     bottom: 24px;
@@ -9948,6 +10769,7 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 
+.details-panel-right .btn-revoke-all-tokens,
 .details-panel .btn-revoke-all-tokens {
     cursor: pointer;
     margin: 0 8px;
@@ -10057,6 +10879,10 @@ input[type='range'].voice-message-volume:focus {
     padding: 8px 24px 11px;
 }
 
+.details-panel-right .block-header {
+    display: none;
+}
+
 .groupchat-details-panel .block-header {
     width: 100%;
     height: 40px;
@@ -10083,6 +10909,7 @@ input[type='range'].voice-message-volume:focus {
     color: #9E9E9E;
 }
 
+.right-panel-wrap .details-panel-right .msg-wrap,
 .right-panel-wrap .details-panel .msg-wrap {
     position: relative;
     margin: 0 auto;
@@ -10091,6 +10918,7 @@ input[type='range'].voice-message-volume:focus {
     display: inline-block;
 }
 
+.right-panel-wrap .details-panel-right .msg-wrap .msg-text,
 .right-panel-wrap .details-panel .msg-wrap .msg-text {
     color: #616161;
     font-style: italic;
@@ -10098,6 +10926,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 24px auto 0 auto;
 }
 
+.right-panel-wrap .details-panel-right .msg-wrap .msg-text .msg-header,
 .right-panel-wrap .details-panel .msg-wrap .msg-text .msg-header {
     margin: 0 0 8px 0;
     font-weight: 600;
@@ -10918,6 +11747,9 @@ input[type='range'].voice-message-volume:focus {
 }
 .fwd-message.with-author .chat-msg-location-content {
     margin-top:20px;
+}
+.fwd-message.with-author .chat-msg-location-content:empty {
+    margin: 0;
 }
 /* ------------------ RECENT CHATS MODAL ------------------ */
 

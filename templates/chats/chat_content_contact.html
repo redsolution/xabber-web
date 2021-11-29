@@ -1,0 +1,35 @@
+<div class="search-wrap">
+    <div class="search-content">
+        <div class="search-form-header block-header">
+            <i class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
+            <div class="messages-search-form search-form ">
+                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("chat__search_messages_panel__placeholder"))]}' autofocus>
+            </div>
+            <i class="close-search-icon mdi mdi-24px mdi-close"></i>
+        </div>
+        <div class="search-messages-content-wrap">
+            <div class="search-results">
+                {[print(xabber.getString("nothing_was_searched"))]}
+            </div>
+            <div class="preloader-wrap">
+                <div class="preloader-wrapper preloader-20px active">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="messages-count">
+            </div>
+            <div class="chat-content">
+            </div>
+        </div>
+    </div>
+</div>

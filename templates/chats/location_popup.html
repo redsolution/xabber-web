@@ -221,7 +221,6 @@
                 });
 
                 function reverseGeocode(json) {
-                    console.log(json);
                     if (!json[0].error) {
                         let house_number = json[0].address.house_number ? ' ' + json[0].address.house_number : '',
                             road = json[0].address.road ? json[0].address.road + house_number + ', ' : '',

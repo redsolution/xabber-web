@@ -845,6 +845,8 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
+            options = options || {};
+            $(window).unbind("keydown.contact_panel");
             xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
             $('body').switchClass('xabber-login', name === 'login');
             $('body').switchClass('on-xabber-login', name !== 'login');
@@ -852,6 +854,13 @@ define("xabber-views", function () {
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;
             }
+            if ((attrs && attrs.right && attrs.right === 'group_invitation') || (name === 'settings' || name ==='account_settings'))
+                new_attrs.right_contact = null;
+            else {
+                new_attrs.right_contact = xabber.body.screen.get('right_contact');
+            }
+            if (!attrs && xabber.body.screen.get('right'))
+                new_attrs.right = xabber.body.screen.get('right');
             this.screen.set(_.extend(new_attrs, attrs), options);
         },
 
@@ -988,7 +997,9 @@ define("xabber-views", function () {
         showChatsByAccount: function (account) {
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
-            xabber.body.setScreen('all-chats', {right: null});
+            xabber.body.setScreen('all-chats', {right: null}, {
+                right_contact_save: true
+            });
             xabber.trigger('show_account_chats', [account]);
         },
 
@@ -1034,7 +1045,7 @@ define("xabber-views", function () {
             let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
             xabber.accounts.each((account) => {
                 account.chats.each((chat) => {
-                    if (chat.contact && !chat.get('muted')) {
+                    if (chat.contact && !chat.isMuted()) {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
@@ -3119,7 +3130,7 @@ define("xabber-views", function () {
             let count_msg = 0;
             xabber.accounts.each((account) => {
                 account.chats.each((chat) => {
-                    if (chat.contact && !chat.get('muted'))
+                    if (chat.contact && !chat.isMuted())
                         count_msg += chat.get('unread') + chat.get('const_unread');
                 });
             });
@@ -3231,6 +3242,8 @@ define("xabber-views", function () {
             'left', this.NodeView, {classlist: 'panel-wrap left-panel-wrap'});
         this.right_panel = this.main_panel.addChild(
             'right', this.NodeView, {classlist: 'panel-wrap right-panel-wrap'});
+        this.right_contact_panel = this.main_panel.addChild(
+            'right_contact', this.NodeView, {classlist: 'panel-wrap right-contact-panel-wrap'});
         this.wide_panel = this.main_panel.addChild(
             'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
         this.placeholders_wrap = this.main_panel.addChild('placeholders', this.NodeView, {classlist: 'wide-placeholders-wrap'});
