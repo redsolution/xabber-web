@@ -483,6 +483,63 @@ define([
             return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
         },
 
+        generateHOTPKey: async function(secret, counter) {
+            let Crypto = window.crypto.subtle;
+            let counterArray = this.padCounter(counter);
+
+            let key = await Crypto.importKey(
+                'raw',
+                secret,
+                { name: 'HMAC', hash: { name: 'SHA-1' } },
+                false,
+                ['sign']
+            );
+
+            let HS = await Crypto.sign('HMAC', key, counterArray);
+
+            return HS;
+        },
+
+        padCounter: function(counter) {
+            let buffer = new ArrayBuffer(8);
+            let bView = new DataView(buffer);
+
+            let byteString = '0'.repeat(64); // 8 bytes
+            let bCounter = (byteString + counter.toString(2)).slice(-64);
+
+            for (let byte = 0; byte < 64; byte += 8) {
+                let byteValue = parseInt(bCounter.slice(byte, byte + 8), 2);
+                bView.setUint8(byte / 8, byteValue);
+            }
+
+            return buffer;
+        },
+
+        DT: function(HS) {
+            let offset = HS[19] & 0b1111;
+            let P = ((HS[offset] & 0x7f) << 24) | (HS[offset + 1] << 16) | (HS[offset + 2] << 8) | HS[offset + 3]
+            let pString = P.toString(2);
+
+            return pString;
+        },
+
+        truncate: function(uKey) {
+            let Sbits = this.DT(uKey);
+            let Snum = parseInt(Sbits, 2);
+
+            return Snum;
+        },
+
+        generateHOTP: async function(secret, counter) {
+            let key = await this.generateHOTPKey(secret, counter);
+            let uKey = new Uint8Array(key);
+
+            let Snum = this.truncate(uKey);
+            let padded = ('000000' + (Snum % (10 ** 8))).slice(-8);
+
+            return padded;
+        },
+
         AES: {
             ALGO_NAME: 'AES-GCM',
 

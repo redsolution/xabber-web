@@ -103,8 +103,17 @@
                     </div>
                 </div>
             </div>
-            <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+            <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
                 <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>
+                <div class="info-hover">
+                    <div class="info nickname">
+                        <div class="value one-line"></div>
+                        <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname"></svg></div>
                 <div class="info-hover">
                     <div class="info first-name">
                         <div class="value one-line"></div>
@@ -127,15 +136,6 @@
                     <div class="info fullname">
                         <div class="value one-line"></div>
                         <div class="label">{[print(xabber.getString("vcard_full_name"))]}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-                <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
-                <div class="info-hover">
-                    <div class="info nickname">
-                        <div class="value one-line"></div>
-                        <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
                     </div>
                 </div>
             </div>

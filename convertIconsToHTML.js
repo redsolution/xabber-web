@@ -41,6 +41,7 @@ let badges_names = [
         'cancel',
         'edit',
         'edit-outline',
+        'fullname',
     ],
     circle_icons = [,
         'task'

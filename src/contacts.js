@@ -1505,7 +1505,7 @@ define("xabber-contacts", function () {
 
 
             keydownHandler: function (ev) {
-                if (ev.keyCode === constants.KEY_ESCAPE) {
+                if (!$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE) {
                     this.model.showDetailsRight('all-chats');
                     $(window).unbind("keydown.contact_panel");
                 }

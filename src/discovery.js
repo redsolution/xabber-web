@@ -121,7 +121,7 @@ define("xabber-discovery", function () {
                     'var': namespace,
                     from: from
                 });
-                if (namespace === Strophe.NS.AUTH_TOKENS)
+                if (namespace === Strophe.NS.AUTH_DEVICES)
                     self.account.getAllXTokens();
             });
         },

@@ -291,22 +291,22 @@ define("xabber-accounts", function () {
                     return data_form;
                 },
 
-            addDataFormToStanza: function ($stanza, data_form) {
-                $stanza.c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'});
-                data_form.title && $stanza.c('title').t(data_form.title).up();
-                data_form.instructions && $stanza.c('instructions').t(data_form.instructions).up();
-                data_form.fields.forEach((field) => {
-                    let field_attrs = _.clone(field);
-                    delete field_attrs.values;
-                    delete field_attrs.options;
-                    $stanza.c('field', field_attrs);
-                    field.values && field.values.forEach((value) => {
-                        $stanza.c('value').t(value).up();
+                addDataFormToStanza: function ($stanza, data_form) {
+                    $stanza.c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'});
+                    data_form.title && $stanza.c('title').t(data_form.title).up();
+                    data_form.instructions && $stanza.c('instructions').t(data_form.instructions).up();
+                    data_form.fields.forEach((field) => {
+                        let field_attrs = _.clone(field);
+                        delete field_attrs.values;
+                        delete field_attrs.options;
+                        $stanza.c('field', field_attrs);
+                        field.values && field.values.forEach((value) => {
+                            $stanza.c('value').t(value).up();
+                        });
+                        $stanza.up();
                     });
-                    $stanza.up();
-                });
-                return $stanza;
-            },
+                    return $stanza;
+                },
 
                 sendPres: function (stanza) {
                     if (this.connection.authenticated) {
@@ -442,6 +442,8 @@ define("xabber-accounts", function () {
                         conn_feedback:  xabber.getString("application_state_reconnect_after_some_seconds", [timeout/1000]),
                         auth_failed: false
                     });
+                    if (this.get('x_token'))
+                        this.connection.x_token = this.get('x_token');
                     setTimeout(() => {
                         this.connFeedback(xabber.getString("application_state_connecting"));
                         this.restoreStatus();
@@ -615,14 +617,14 @@ define("xabber-accounts", function () {
                             from: this.get('jid'),
                             type: 'get',
                             to: this.connection.domain
-                        }).c('query', {xmlns: `${Strophe.NS.AUTH_TOKENS}#items`});
+                        }).c('query', {xmlns: `${Strophe.NS.AUTH_DEVICES}#items`});
                     this.sendIQ(iq, (tokens) => {
-                        $(tokens).find('xtoken').each((idx, token) => {
+                        $(tokens).find('device').each((idx, token) => {
                             let $token = $(token),
                                 client = $token.find('client').text(),
-                                device = $token.find('device').text(),
+                                device = $token.find('info').text(),
                                 description = $token.find('description').text(),
-                                token_uid = $token.attr('uid'),
+                                token_uid = $token.attr('id'),
                                 expire = Number($token.find('expire').text())*1000,
                                 last_auth = Number($token.find('last-auth').text())*1000,
                                 ip_address = $token.find('ip').text();
@@ -651,7 +653,7 @@ define("xabber-accounts", function () {
                     this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_token_invalidated_short"));
-                    this.connect({token_invalidated: true});
+                    // this.connect({token_invalidated: true});
                 },
 
                 onChangedConnected: function () {
@@ -893,6 +895,8 @@ define("xabber-accounts", function () {
                         }
                         stanza.c('status').t(status_message).up();
                         stanza.c('priority').t(this.get('priority')).up();
+                        if(this.get('x_token'))
+                            stanza.c('device', {xmlns: Strophe.NS.AUTH_DEVICES, id: this.get('x_token').token_uid}).up();
                     }
                     stanza.cnode(this.connection.caps.createCapsNode({
                         node: 'https://www.xabber.com/'
@@ -935,9 +939,9 @@ define("xabber-accounts", function () {
                         from: this.get('jid'),
                         type: 'set',
                         to: this.connection.domain
-                    }).c('revoke', {xmlns:Strophe.NS.AUTH_TOKENS});
+                    }).c('revoke', {xmlns:Strophe.NS.AUTH_DEVICES});
                     for (let token_num = 0; token_num < token_uid.length; token_num++)
-                        iq.c('xtoken', {uid: token_uid[token_num]}).up();
+                        iq.c('device', {id: token_uid[token_num]}).up();
                     this.sendIQ(iq, () => {
                         callback && callback();
                     });
@@ -948,7 +952,7 @@ define("xabber-accounts", function () {
                         from: this.get('jid'),
                         type: 'set',
                         to: this.connection.domain
-                    }).c('revoke-all', {xmlns:Strophe.NS.AUTH_TOKENS});
+                    }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
                     this.sendIQ(iq, (success) => {
                             callback & callback(success);
                         },
@@ -1105,10 +1109,10 @@ define("xabber-accounts", function () {
                         status = $presence.find('show').text() || 'online',
                         status_message = $presence.find('status').text();
                     _.isNaN(priority) && (priority = 0);
-                    let $vcard_update = $presence.find(`x[xmlns="${Strophe.NS.VCARD_UPDATE}"]`);
+                    let $vcard_update = $presence.find(`x[xmlns="${Strophe.NS.VCAD_UPDATE}"]`);
                     if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                         this.save('photo_hash', $vcard_update.find('photo').text());
-                    if (resource && resource !== this.resource) {
+                    if (resource) {
                         let resource_obj = this.resources.get(resource);
                         if (type === 'unavailable') {
                             if (resource_obj) { resource_obj.destroy(); }
@@ -1119,6 +1123,10 @@ define("xabber-accounts", function () {
                                 status: status,
                                 status_message: status_message
                             };
+                            let $device = $presence.find(`device[xmlns="${Strophe.NS.AUTH_DEVICES}"]`);
+                            if ($device && this.x_tokens_list && $device.attr('id')) {
+                                attrs.token_uid = $device.attr('id')
+                            }
                             if (!resource_obj)
                                 resource_obj = this.resources.create(attrs);
                             else
@@ -1594,7 +1602,7 @@ define("xabber-accounts", function () {
             updateBlocks: function () {
                 let connected = this.model.isConnected();
                 this.$('.main-info-wrap').switchClass('disconnected', !connected);
-                this.$('.settings-tab[data-block-name="xmpp-resources"]').showIf(connected);
+                // this.$('.settings-tab[data-block-name="xmpp-resources"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="blocklist"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="groups-info"]').showIf(connected);
@@ -1693,6 +1701,8 @@ define("xabber-accounts", function () {
                 "change .setting-use-omemo input": "setEnabledOmemo",
                 "click .btn-change-password": "showPasswordView",
                 "click .btn-reconnect": "reconnect",
+                "click": "hideResources",
+                "click .last-auth.resource": "showResources",
                 "change .sync-account": "changeSyncSetting",
                 "click .btn-delete-settings": "deleteSettings",
                 "click .color-values .color-value": "changeColor",
@@ -1703,8 +1713,8 @@ define("xabber-accounts", function () {
             },
 
             _initialize: function () {
-                this.resources_view = this.addChild('resources', xabber.AccountResourcesView,
-                    {model: this.model.resources, el: this.$('.xmpp-resources')[0]});
+                // this.resources_view = this.addChild('resources', xabber.AccountResourcesView,
+                //     {model: this.model.resources, el: this.$('.xmpp-resources')[0]});
                 this.vcard_view = this.addChild('vcard', xabber.AccountVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.$('.account-name .value').text(this.model.get('jid'));
@@ -1713,6 +1723,9 @@ define("xabber-accounts", function () {
                 this.showConnectionStatus();
                 this.updateSynchronizationBlock();
 
+                this.model.resources.on("change", this.updateXTokens, this);
+                this.model.resources.on("add", this.updateXTokens, this);
+                this.model.resources.on("destroy", this.updateXTokens, this);
                 this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
                 this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
                 this.model.settings.on("change:to_sync", this.updateSyncOption, this);
@@ -1758,7 +1771,7 @@ define("xabber-accounts", function () {
 
             updateView: function () {
                 let connected = this.model.isConnected();
-                this.$('.xmpp-resources').showIf(connected);
+                // this.$('.xmpp-resources').showIf(connected);
                 this.$('.server-info').showIf(connected);
                 this.$('.blocklist').showIf(connected);
                 this.$('.groups-info').showIf(connected);
@@ -1772,10 +1785,22 @@ define("xabber-accounts", function () {
                 this.updateDelSettingsButton();
             },
 
+            showResources: function (ev) {
+                this.$(`.token-resource-wrap`).hideIf(true)
+                let resource_id = $(ev.target).attr('data-resource-id');
+                this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
+            },
+
+            hideResources: function (ev) {
+                if (!($(ev.target).hasClass('last-auth') && $(ev.target).hasClass('resource') || $(ev.target).closest(".token-resource-wrap").length > 0))
+                    this.$(`.token-resource-wrap`).hideIf(true)
+            },
+
             renderAllXTokens: function () {
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {//34
                     let pretty_token = {
+                        resource_obj: undefined,
                         client: token.client,
                         device: token.device,
                         token_uid: token.token_uid,
@@ -1783,6 +1808,9 @@ define("xabber-accounts", function () {
                         last_auth: pretty_datetime(token.last_auth),
                         expire: pretty_datetime(token.expire)
                     };
+                    let resource_obj = this.model.resources.findWhere({ token_uid: token.token_uid });
+                    if (resource_obj)
+                        pretty_token.resource_obj = resource_obj.toJSON();
                     if (this.model.get('x_token')) {
                         if (this.model.get('x_token').token_uid == token.token_uid) {
                             let $cur_token_html = $(templates.current_token_item(pretty_token));

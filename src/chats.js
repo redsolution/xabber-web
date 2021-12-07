@@ -5818,6 +5818,8 @@ define("xabber-chats", function () {
                         delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
                     if (!msg)
                         return;
+                    if (!msg.get('stanza_id') && msg.get('locations'))
+                        msg.set({'stanza_id': stanza_id})
                     msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                     let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
                     if (pending_message) {
@@ -5833,11 +5835,11 @@ define("xabber-chats", function () {
                 return this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
             }
 
-            let $token_revoke = $message.children(`revoke[xmlns="${Strophe.NS.AUTH_TOKENS}"]`);
+            let $token_revoke = $message.children(`revoke[xmlns="${Strophe.NS.AUTH_DEVICES}"]`);
             if ($token_revoke.length) {
-                $token_revoke.children('xtoken').each((idx, token) => {
+                $token_revoke.children('device').each((idx, token) => {
                     let $token = $(token),
-                        token_uid = $token.attr('uid');
+                        token_uid = $token.attr('id');
                     if (!token_uid)
                         return;
                     if (this.account.get('x_token') && this.account.get('x_token').token_uid === token_uid) {
@@ -6150,7 +6152,7 @@ define("xabber-chats", function () {
                 }
             }
 
-            if ($message.find('xtoken[xmlns="' + Strophe.NS.AUTH_TOKENS + '"]').length && !options.is_archived) {
+            if ($message.find('device[xmlns="' + Strophe.NS.AUTH_DEVICES + '"]').length && !options.is_archived) {
                 this.account.getAllXTokens();
             }
 
@@ -7851,21 +7853,21 @@ define("xabber-chats", function () {
 
         sendLocation: function (e) {
             if (this.$('#output').val()) {
-                let body = this.$('#output').val()
+                let body = this.$('#output').val(),
                     legacy_body = '',
                     start_idx = legacy_body.length,
-                    end_idx = (body + legacy_body).length;
-                    lat = this.$('#lat').val()
-                    lon = this.$('#lon').val()
+                    end_idx = (body + legacy_body).length,
+                    lat = this.$('#lat').val(),
+                    lon = this.$('#lon').val(),
                     locations = [{
                             lat: lat,
                             lon: lon
-                        }]
+                        }],
                     mutable_content = [{
                         start: start_idx,
                         end: end_idx,
                         type: 'geolocation'
-                        }]
+                        }],
                     attrs = {
                         from_jid: this.account.get('jid'),
                         locations: locations,
@@ -7873,7 +7875,7 @@ define("xabber-chats", function () {
                         message: this.$('#output').val(),
                         begin: start_idx,
                         end: end_idx
-                    };
+                    },
                     message = this.model.messages.create(attrs),
                     msg_id = message.get('msgid'),
                     stanza = $msg({

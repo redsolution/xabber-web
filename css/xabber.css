@@ -8981,6 +8981,10 @@ input[type='range'].voice-message-volume:focus {
     margin: 0;
 }
 
+.account-settings-panel .token-wrap .last-auth.resource {
+    cursor: pointer;;
+}
+
 .account-settings-panel .synchronization-wrap {
     padding-bottom: 6px;
 }
@@ -9979,6 +9983,66 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel .resource-wrap .status-info .status {
+    margin: auto 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* --------------- RESOURCE TOKENT INFO ------------------ */
+
+.token-wrap .token-resource-wrap {
+    position: absolute;
+    right: 36px;
+    top: 20px;
+    width: 200px;
+    z-index: 1;
+    background: #FFFFFF;
+    border: 1px solid rgb(0 0 0 / 25%);
+}
+
+.token-wrap .token-resource-wrap table {
+    table-layout: auto;
+    width: auto !important;
+}
+
+.token-wrap .token-resource-wrap table td,
+.token-wrap .token-resource-wrap table tr {
+    padding: 0;
+}
+
+.token-wrap .token-resource-wrap .info {
+    height: 22px;
+}
+
+.token-wrap .token-resource-wrap .info td > * {
+    display: inline-flex;
+}
+
+.token-wrap .token-resource-wrap .info .label {
+    min-width: 56px;
+    max-width: 72px;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 300;
+    color: #9E9E9E;
+}
+
+.token-wrap .token-resource-wrap .info .value {
+    font-size: 12px;
+    line-height: 14px;
+    padding-left: 4px;
+    max-width: 240px;
+    color: #9E9E9E;
+}
+
+.token-wrap .token-resource-wrap .info .status-message {
+    font-size: 14px;
+    line-height: 16px;
+    color: #616161;
+}
+
+.token-wrap .token-resource-wrap .status-info .status {
     margin: auto 7px;
     width: 8px;
     height: 8px;

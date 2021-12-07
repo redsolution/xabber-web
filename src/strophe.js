@@ -3,6 +3,7 @@ define("xabber-strophe", function () {
         let env = xabber.env,
             uuid = env.uuid,
             $iq = env.$iq,
+            utils = env.utils,
             Strophe = env.Strophe,
             constants = env.constants;
 
@@ -38,17 +39,16 @@ define("xabber-strophe", function () {
             return out;
         };
 
-        Strophe.SASLXTOKEN = function() {};
-        Strophe.SASLXTOKEN.prototype = new Strophe.SASLMechanism("X-TOKEN", true, 100);
+        Strophe.SASLHOTP = function() {};
+        Strophe.SASLHOTP.prototype = new Strophe.SASLMechanism("HOTP", true, 100);
 
-        Strophe.SASLXTOKEN.prototype.test = function (connection) {
+        Strophe.SASLHOTP.prototype.test = function (connection) {
             return true;
         };
 
-        Strophe.SASLXTOKEN.prototype.onChallenge = function (connection) {
+        Strophe.SASLHOTP.prototype.onChallenge = function (connection) {
             let auth_str = String.fromCharCode(0) + connection.authcid +
-                String.fromCharCode(0) + connection.pass + String.fromCharCode(0) + connection.x_token.counter;
-            this._connection.x_token.counter++;
+                String.fromCharCode(0) + connection.hotp_pass;
             return utf16to8(auth_str);
         };
 
@@ -68,8 +68,15 @@ define("xabber-strophe", function () {
                         Strophe.SASLPlain,
                         Strophe.SASLSHA1]);
                 } else if (this.auth_type === 'x-token') {
-                    this.connection.registerSASLMechanism(Strophe.SASLXTOKEN);
+                    this.connection.registerSASLMechanism(Strophe.SASLHOTP);
                     delete this.connection._sasl_data["server-signature"];
+                    utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.x_token.counter).then((pass) => {
+                        this.connection.x_token.counter++;
+                        this.connection.hotp_pass = pass;
+                    }).then(() => {
+                        this.connection.connect(jid, password, callback)
+                    });
+                    return;
                 } else {
                     this.connection.registerSASLMechanisms([Strophe.SASLXOAuth2]);
                     delete this.connection._sasl_data["server-signature"];
@@ -78,9 +85,18 @@ define("xabber-strophe", function () {
             },
 
             reconnect: function (callback) {
-                if (this.auth_type === 'x-token' && !this.connection.mechanisms["X-TOKEN"]) {
-                    this.connection.registerSASLMechanism(Strophe.SASLXTOKEN);
+                if (this.auth_type === 'x-token' && !this.connection.mechanisms["HOTP"]) {
+                    this.connection.registerSASLMechanism(Strophe.SASLHOTP);
                     delete this.connection._sasl_data["server-signature"];
+                }
+                else if (this.auth_type === 'x-token') {
+                    utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.x_token.counter).then((pass) => {
+                        this.connection.x_token.counter++;
+                        this.connection.hotp_pass = pass;
+                    }).then(() => {
+                        this.connection.connect(this.connection.jid, this.connection.pass, callback)
+                    });
+                    return;
                 }
                 this.connection.connect(this.connection.jid, this.connection.pass, callback);
             }
@@ -100,7 +116,7 @@ define("xabber-strophe", function () {
                         this.do_session = true;
                     }
 
-                    if ((child.nodeName === 'x-token') && child.namespaceURI === Strophe.NS.AUTH_TOKENS && this.options['x-token']) {
+                    if ((child.nodeName === 'devices') && child.namespaceURI === Strophe.NS.AUTH_DEVICES && this.options['x-token']) {
                         this.x_token_auth = true;
                     }
 
@@ -115,10 +131,10 @@ define("xabber-strophe", function () {
                 } else {
                     if (this.x_token_auth && (!this.x_token || (parseInt(this.x_token.expire)*1000 < env.moment.now()))) {
                         this.getXToken((success) => {
-                            let token = $(success).find('token').text(),
+                            let token = $(success).find('secret').text(),
                                 expires_at = $(success).find('expire').text(),
-                                token_uid = $(success).find('xtoken').attr('uid');
-                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid, counter: 0 };
+                                token_uid = $(success).find('device').attr('id');
+                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid, counter: 1 };
                             this.pass = token;
                             this._send_auth_bind();
                         }, () => {
@@ -154,9 +170,9 @@ define("xabber-strophe", function () {
                     type: 'set',
                     to: this.domain,
                     id: uniq_id
-                }).c('issue', { xmlns: Strophe.NS.AUTH_TOKENS})
+                }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES}).c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('device').t(`PC, ${window.navigator.platform}, ${env.utils.getBrowser()}`);
+                    .c('info').t(`PC, ${window.navigator.platform}, ${env.utils.getBrowser()}`);
 
                 handler = function (stanza) {
                     let iqtype = stanza.getAttribute('type');
@@ -176,7 +192,7 @@ define("xabber-strophe", function () {
                     }
                 };
 
-                this._addSysHandler(handler.bind(this), Strophe.NS.AUTH_TOKENS, 'iq', 'result' , uniq_id);
+                this._addSysHandler(handler.bind(this), Strophe.NS.AUTH_DEVICES, 'iq', 'result' , uniq_id);
 
                 this.send(iq.tree());
             }
@@ -218,6 +234,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extended-chatstates');
         Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
         Strophe.addNamespace('AUTH_TOKENS', 'https://xabber.com/protocol/auth-tokens');
+        Strophe.addNamespace('AUTH_DEVICES', 'https://xabber.com/protocol/devices');
         Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
         Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protocol/synchronization#chat');
         Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');

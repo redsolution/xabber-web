@@ -145,6 +145,7 @@ define("xabber-templates", [
     "text!templates/svg/cancel.html",
     "text!templates/svg/edit.html",
     "text!templates/svg/edit-outline.html",
+    "text!templates/svg/fullname.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
     "text!templates/svg/blocked.html",
@@ -366,6 +367,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
+    addSvgTemplate('svg.fullname');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
     addSvgTemplate('svg.blocked');

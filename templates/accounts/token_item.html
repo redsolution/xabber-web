@@ -2,6 +2,29 @@
     <div class="client one-line">{{client}}</div>
     <div class="device one-line">{{device}}</div>
     <div class="ip-address">{{ip}}</div>
+    {[ if (resource_obj) {]}
+    <div class="last-auth resource" {[ if (resource_obj) {]}data-resource-id="{{resource_obj.resource}}"{[}]}>{[print(xabber.getString("account_state_connected"))]}</div>
+        <table class="token-resource-wrap hidden" {[ if (resource_obj) {]}data-resource-id="{{resource_obj.resource}}"{[}]}>
+            <tbody>
+            <tr class="info status-info">
+                <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>
+                <td>
+                    <div class="value status-message one-line">{{resource_obj.status}}</div>
+                    <div class="status" data-status="{{resource_obj.status}}"></div>
+                </td>
+            </tr>
+            <tr class="info resource-info">
+                <td class="label">{[print(xabber.getString("account_resource"))]}:</td>
+                <td class="value resource one-line">{{resource_obj.resource}}</td>
+            </tr>
+            <tr class="info priority-info">
+                <td class="label">{[print(xabber.getString("account_priority"))]}:</td>
+                <td class="value priority">{{resource_obj.priority}}</td>
+            </tr>
+            </tbody>
+        </table>
+    {[} else {]}
     <div class="last-auth">{{last_auth}}</div>
+    {[}]}
     <i class="btn-revoke-token mdi mdi-24px mdi-close"></i>
 </div>
