@@ -4710,6 +4710,8 @@ define("xabber-contacts", function () {
                         unread_msgs_count && unread_msgs_count--;
                     message.length && (msg = this.account.chats.receiveChatMessage(message, options));
                     if (!(encrypted && !this.account.omemo)){
+                        chat.messages_unread.reset();
+                        chat.set('unread', 0);
                         chat.set('const_unread', unread_msgs_count);
                     }
                     if (msg) {
