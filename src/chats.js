@@ -3607,9 +3607,20 @@ define("xabber-chats", function () {
             else
                 return;
             $message.replaceWith($new_message)
+            $message = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
             this.updateMessageInChat($message[0]);
             this.initPopup($message);
             this.bottom.showChatNotification();
+
+            if (item.get('data_form')) {
+                let data_form = utils.render_data_form(item.get('data_form'));
+                $message.find('.chat-msg-content').append(data_form);
+            }
+            let short_datetime = utils.pretty_short_datetime(item.get('last_replace_time')),
+                datetime = moment(item.get('last_replace_time')).format('D MMMM, YYYY HH:mm:ss'),
+                new_title = `${pretty_datetime(item.get('time'))} ${xabber.getString("edited", [moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime])}`;
+            $message.find('.msg-time').prop('title', new_title);
+            $message.find('.edited-info').removeClass('hidden').text(xabber.getString("chat_screen__message__label_edited")).prop('title', new_title);
         },
 
         removeMessage: function (item) {
@@ -5857,10 +5868,10 @@ define("xabber-chats", function () {
                     participant_msg_item = participant_messages.find(msg => msg.get('stanza_id') == stanza_id);
                 this.receiveChatMessage($message, {replaced: true});
                 if (participant_msg_item) {
-                    participant_msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                    participant_msg_item.set('last_replace_time', $message.find('replaced').last().attr('stamp'));
                 }
                 if (msg_item) {
-                    msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                    msg_item.set('last_replace_time', $message.find('replaced').last().attr('stamp'));
                     if (contact.get('pinned_message'))
                         if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) {
                             contact.get('pinned_message').set('message', msg_item.get('message'));
