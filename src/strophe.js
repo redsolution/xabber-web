@@ -172,7 +172,7 @@ define("xabber-strophe", function () {
                     id: uniq_id
                 }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES}).c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
                     .c('client').t(xabber.get('client_name')).up()
-                    .c('info').t(`PC, ${window.navigator.platform}, ${env.utils.getBrowser()}`);
+                    .c('info').t(`PC, ${window.navigator.userAgentData.platform}, ${env.utils.getBrowser()}`);
 
                 handler = function (stanza) {
                     let iqtype = stanza.getAttribute('type');
