@@ -90,12 +90,17 @@ define("xabber-strophe", function () {
                     delete this.connection._sasl_data["server-signature"];
                 }
                 else if (this.auth_type === 'x-token') {
-                    utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.x_token.counter).then((pass) => {
-                        this.connection.x_token.counter++;
-                        this.connection.hotp_pass = pass;
-                    }).then(() => {
+                    if (!this.connection.hotp_pass_reconnection) {
+                        utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.x_token.counter).then((pass) => {
+                            this.connection.x_token.counter++;
+                            this.connection.hotp_pass = pass;
+                            this.connection.hotp_pass_reconnection = true;
+                        }).then(() => {
+                            this.connection.connect(this.connection.jid, this.connection.pass, callback)
+                        });
+                    }
+                    else
                         this.connection.connect(this.connection.jid, this.connection.pass, callback)
-                    });
                     return;
                 }
                 this.connection.connect(this.connection.jid, this.connection.pass, callback);

@@ -555,6 +555,7 @@ define("xabber-accounts", function () {
                     this.session.set({conn_status: status, conn_condition: condition});
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
+                        this.connection.hotp_pass_reconnection = false;
                         this.createFastConnection();
                         this.connection.connect_callback = this.connectionCallback.bind(this);
                         this.session.set({connected: true, reconnected: true,
@@ -649,7 +650,7 @@ define("xabber-accounts", function () {
                         connected: false,
                         no_reconnect: true
                     });
-                    this.set({auth_type: 'password', password: null, x_token: null});
+                    this.save({auth_type: 'password', password: null, x_token: null});
                     this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_token_invalidated_short"));
@@ -801,29 +802,31 @@ define("xabber-accounts", function () {
                 getVCard: function (callback) {
                     let jid = this.get('jid'),
                         is_callback = _.isFunction(callback);
-                    ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
-                        (vcard) => {
-                            let attrs = {
-                                vcard: vcard,
-                                vcard_updated: moment.now()
-                            };
-                            attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
-                            if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
-                                if (vcard.photo.image) {
-                                    attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
-                                    attrs.image = vcard.photo.image;
+                    if (this.connection && this.connection.connected) {
+                        ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
+                            (vcard) => {
+                                let attrs = {
+                                    vcard: vcard,
+                                    vcard_updated: moment.now()
+                                };
+                                attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
+                                if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
+                                    if (vcard.photo.image) {
+                                        attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
+                                        attrs.image = vcard.photo.image;
+                                    }
+                                    else
+                                        attrs.image = Images.getDefaultAvatar(attrs.name);
+                                    this.cached_image = Images.getCachedImage(attrs.image);
                                 }
-                                else
-                                    attrs.image = Images.getDefaultAvatar(attrs.name);
-                                this.cached_image = Images.getCachedImage(attrs.image);
+                                this.save(attrs);
+                                is_callback && callback(vcard);
+                            },
+                            function () {
+                                is_callback && callback(null);
                             }
-                            this.save(attrs);
-                            is_callback && callback(vcard);
-                        },
-                        function () {
-                            is_callback && callback(null);
-                        }
-                    );
+                        );
+                    }
                 },
 
                 setVCard: function (data, callback, errback) {
@@ -1190,7 +1193,6 @@ define("xabber-accounts", function () {
 
             onQuitAccounts: function () {
                 xabber.api_account && xabber.api_account.revoke_token();
-                !this.models.length && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     if (account.settings.get('to_sync')) {
                         account.deleteAccount();
@@ -1198,6 +1200,7 @@ define("xabber-accounts", function () {
                         utils.modals.clear_queue();
                     }
                 });
+                !this.models.length && xabber.body.setScreen('login');
             },
 
             getEnabledList: function () {
