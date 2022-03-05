@@ -1,0 +1,129 @@
+<div class="participant-details-item {[if (subscription === null) {]}unsubscribed{[}]}" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
+    <div class="block-header">
+        <i class="details-icon btn-back parent-btn mdi mdi-24px mdi-arrow-right"></i>
+        <i class="details-icon btn-back-name child-btn mdi mdi-24px mdi-arrow-right hidden"></i>
+        <span class="block-name"></span>
+        <span class="block-name second-text"></span>
+        <button class="btn-save-user-rights non-active fade-out btn-flat btn-main">{[print(xabber.getString("groupchat_save_member_settings"))]}</button>
+        {[if (subscription !== null) {]}
+        <div class="btn-edit-participant">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
+        </div>
+        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">
+            <li class="btn-block-participant"><span class="one-line">{[print(xabber.getString("groupchat_block"))]}</span></li>
+        </ul>
+        {[}]}
+    </div>
+    <div class="circle-avatar">
+        {[if (subscription !== null) {]}
+            <div class="preloader-wrap">
+                <div class="preloader-wrapper preloader-16px visible">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {[}]}
+    </div>
+        <div class="participant-info">
+            {[if (subscription !== null) {]}<div class="participant-edit-nickname hidden"></div>{[}]}
+            <div class="participant-edit-badge hidden"></div>
+            <div class="participant-info-text">
+                <div class="nickname">
+                    {{nickname}} <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
+                </div>
+                {[ if (is_myself) {]}
+                <div class="my-flag one-line">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
+                {[}]}
+
+            </div>
+        </div>
+    <div class="buttons-wrap">
+        {[if (incognito_chat) {]}
+        <div class="button-wrap non-active btn-chat-wrap">
+            <i class="mdi contact-btn text-color-500 mdi-24px mdi-incognito btn-chat-participant"></i>
+            <div class="btn-name">{[print(xabber.getString("groupchat_private_chat"))]}</div>
+        </div>
+        {[} else {]}
+        <div class="button-wrap non-active btn-chat-wrap">
+            <i class="mdi contact-btn text-color-500 mdi-24px mdi-message-text btn-chat-participant"></i>
+            <div class="btn-name">{[print(xabber.getString("groupchat_direct_chat"))]}</div>
+        </div>
+        {[}]}
+        <div class="button-wrap btn-participant-messages-wrap">
+            <i class="mdi contact-btn text-color-500 mdi-24px mdi-view-list btn-participant-messages"></i>
+            <div class="btn-name">{[print(xabber.getString("groupchat_member_messages"))]}</div>
+        </div>
+        <div class="button-wrap non-active btn-set-visibility-wrap">
+            <i title="Feature not yet implemented" class="mdi contact-btn text-color-500 mdi-24px mdi-eye btn-set-visibility"></i>
+            <div class="btn-name">{[print(xabber.getString("groupchat_set_member_visibility_visible"))]}</div>
+        </div>
+        <div class="button-wrap btn-kick-participant-wrap">
+            <i class="mdi contact-btn mdi-24px mdi-account-remove text-color-500 btn-kick-participant"></i>
+            <div class="btn-name text-color-500">{[print(xabber.getString("groupchat_kick"))]}</div>
+        </div>
+    </div>
+    <div class="vcard-wrap vcard">
+        {[if (jid) {]}
+        <div class="info-wrap jid-info-wrap" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="id-outline"></svg></div>
+            <div class="info-hover">
+                <div class="info jabber-id">
+                    <div class="value one-line">{{jid}}</div>
+                    <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>
+                </div>
+            </div>
+        </div>
+        {[}]}
+        {[if (role === 'owner' || role === 'admin') {]}
+        <div class="info-wrap role-info-wrap">
+            <div class="details-icon-wrap">
+                {[if (role === 'owner') {]}
+                    <i class="details-icon mdi mdi-24px mdi-star"></i>
+                {[}else if (role === 'admin') {]}
+                    <i class="details-icon mdi mdi-24px mdi-star-outline"></i>
+                {[}]}
+            </div>
+            <div>
+                <div class="info jabber-id">
+                    <div class="value one-line">
+                        <span>
+                            {[if (role === 'owner') {]}
+                                {[print(xabber.getString("groupchat_role_owner"))]}
+                            {[}else if (role === 'admin') {]}
+                                {[print(xabber.getString("groupchat_role_admin"))]}
+                            {[}]}
+                        </span>
+                    </div>
+                    <div class="label">{[print(xabber.getString("groupchat_role"))]}</div>
+                </div>
+            </div>
+        </div>
+        {[}]}
+        <div class="info-wrap present-info-wrap">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" {[if (blocked) {]}data-svgname="cancel"{[}else if (!present) {]}data-svgname="status-outline"{[} else {]}data-svgname="clock-outline"{[}]}></svg></div>
+            <div>
+                <div class="info jabber-id">
+                    <div class="value one-line">
+                        <span>
+                            {[if (blocked) {]}
+                                {[print(xabber.getString("groupchat_blocked"))]}
+                            {[}else if (!present) {]}
+                                {[print(xabber.getString("group_settings__members__status_online"))]}
+                            {[} else {]}{{pretty_present}}{[}]}
+                        </span>
+                    </div>
+                    <div class="label">{[if (!present) {]}{[print(xabber.getString("groupchat_status"))]}{[} else {]}{[print(xabber.getString("group_settings__members__label_last_seen"))]}{[}]}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

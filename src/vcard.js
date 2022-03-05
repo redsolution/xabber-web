@@ -334,6 +334,9 @@ define("xabber-vcard", function () {
                     _.extend(this.ps_settings || {}, xabber.ps_settings)
                 );
             }
+            this.resources_view = this.addChild('resources',
+                xabber.ContactResourcesRightView, {model: this.model.resources,
+                    el: this.$('.resources-block-wrap')[0]});
             this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
             this.model.set('vcard_hidden', true)
         },

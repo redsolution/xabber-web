@@ -214,7 +214,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 var ok_text, optional_button;
                 if (buttons) {
                     ok_text = buttons.ok_button_text;
-                    optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button}] : false;
+                    optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button_text}] : false;
                 }
                 return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true, optional_buttons: optional_button}, dialog_options, 'extended');
             },

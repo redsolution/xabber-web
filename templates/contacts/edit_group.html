@@ -1,0 +1,181 @@
+
+<div class="edit-wrap">
+    <div class="edit-save-preloader preloader-wrap">
+        <div class="preloader-wrapper preloader-17px visible">
+            <div class="spinner-layer">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edit-header main-edit-header block-header">
+        <i class="details-icon btn-back mdi mdi-24px mdi-arrow-right"></i>
+        <span class="block-name"></span>
+        <div class="btn-edit">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
+        </div>
+    </div>
+    <div class="edit-group vcard">
+        <div class="info-wrap description-info-wrap">
+            <div class="details-icon-wrap">
+                <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="description-outline"></svg>
+            </div>
+            <div class="info-hover">
+                <div class="info description">
+                    <div class="edit-group-name value"></div>
+                    <div class="edit-group-description value"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="description-edit-wrap hidden">
+        <div class="edit-header property-header description-header block-header">
+            <i class="details-icon btn-property-back btn-back mdi mdi-24px mdi-arrow-right"></i>
+            <span class="block-name">{[print(xabber.getString("groupchat_properties"))]}</span>
+            <span class="block-name second-text fade-out"></span>
+            <button class="btn-save btn-flat text-color-500 btn-main fade-out">{[print(xabber.getString("save"))]}</button>
+        </div>
+        <div class="main-info">
+            <div class="avatar-wrap">
+                <div class="circle-avatar">
+                    <input title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                    <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                        <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                    </svg>
+                    <div class="preloader-wrap">
+                        <div class="preloader-wrapper preloader-32px visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="set-groupchat-avatar-text">{[print(xabber.getString("groupchat_set_avatar"))]}</div>
+            </div>
+        </div>
+        <div class="edit-group">
+            <div class="edit-group-name-wrap"></div>
+            <div class="edit-group-description-wrap"></div>
+        </div>
+    </div>
+    <div class="edit-properties">
+        <div class="group-property membership-property">
+            <div class="details-icon-wrap" ><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="membership-outline"></svg></div>
+            <div class="group-property-text">
+                {[print(xabber.getString("groupchat_membership"))]}
+                <span></span>
+            </div>
+            <div class="details-icon-wrap"><svg class="details-icon-right mdi mdi-28px mdi-svg-template" data-svgname="chevron-right-variant"></svg></div>
+        </div>
+        <div class="group-property index-property">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="index"></svg></div>
+            <div class="group-property-text">
+                {[print(xabber.getString("groupchat_index"))]}
+                <span></span>
+            </div>
+            <div class="details-icon-wrap"><svg class="details-icon-right mdi mdi-28px mdi-svg-template" data-svgname="chevron-right-variant"></svg></div>
+        </div>
+        <div class="edit-button btn-default-restrictions">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg></div>
+            <div class="edit-button-text">
+                <span class="one-line">{[print(xabber.getString("groupchat_default_restrictions"))]}</span>
+                <span class="edit-button-value"></span>
+            </div>
+            <div class="details-icon-wrap"><svg class="details-icon-right mdi mdi-28px mdi-svg-template" data-svgname="chevron-right-variant"></svg></div>
+        </div>
+    </div>
+    <div class="membership-property-edit-wrap hidden">
+        <div class="edit-header property-header block-header">
+            <i class="details-icon btn-property-back btn-back mdi mdi-24px mdi-arrow-right"></i>
+            <span class="block-name">{[print(xabber.getString("groupchat_membership"))]}</span>
+            <span class="block-name second-text fade-out"></span>
+            <button class="btn-save btn-flat text-color-500 btn-main fade-out">{[print(xabber.getString("save"))]}</button>
+        </div>
+        <div class="property-wrap membership-field">
+            <div class="property-radio">
+                <input id="open" name="membership-property-input" type="radio" class="with-gap" required="">
+                <label class="property-label" for="open">{[print(xabber.getString("groupchat_membership_type_open"))]}</label>
+            </div>
+            <div class="property-radio">
+                <input id="member-only" name="membership-property-input" type="radio" class="with-gap" required="">
+                <label class="property-label" for="member-only">{[print(xabber.getString("groupchat_membership_type_members_only"))]}</label>
+            </div>
+        </div>
+        <div class="property-description">{[print(xabber.getString("groupchat_membership_description"))]}</div>
+    </div>
+    <div class="index-property-edit-wrap hidden">
+        <div class="edit-header property-header block-header">
+            <i class="details-icon btn-property-back btn-back mdi mdi-24px mdi-arrow-right"></i>
+            <span class="block-name">{[print(xabber.getString("groupchat_index"))]}</span>
+            <span class="block-name second-text fade-out"></span>
+            <button class="btn-save btn-flat text-color-500 btn-main fade-out">{[print(xabber.getString("save"))]}</button>
+        </div>
+        <div class="property-wrap index-field">
+            <div class="property-radio">
+                <input id="none" name="index-property-input" type="radio" class="with-gap" required="">
+                <label class="property-label" for="none">{[print(xabber.getString("groupchat_index_type_none"))]}</label>
+            </div>
+            <div class="property-radio">
+                <input id="local" name="index-property-input" type="radio" class="with-gap" required="">
+                <label class="property-label" for="local">{[print(xabber.getString("groupchat_index_type_local"))]}</label>
+            </div>
+            <div class="property-radio">
+                <input id="global" name="index-property-input" type="radio" class="with-gap" required="">
+                <label class="property-label" for="global">{[print(xabber.getString("groupchat_index_type_global"))]}</label>
+            </div>
+        </div>
+        <div class="property-description">{[print(xabber.getString("groupchat_index_description"))]}</div>
+    </div>
+    <div class="bottom-block edit-bottom-block">
+        <div class="edit-pictured-buttons">
+            <div data-value="invitations" class="list-variant invitations-variant">
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="invite-outline"></svg></div>
+                <div class="variant-text">{[print(xabber.getString("groupchat_invitations"))]}<span class="counted"></span></div>
+                <div class="details-icon-wrap"><svg class="details-icon-right mdi mdi-28px mdi-svg-template" data-svgname="chevron-right-variant"></svg></div>
+            </div>
+            <div data-value="blocked" class="list-variant blocked-variant">
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>
+                <div class="variant-text">{[print(xabber.getString("group_settings__block_list__header"))]}<span class="counted"></span></div>
+                <div class="details-icon-wrap"><svg class="details-icon-right mdi mdi-28px mdi-svg-template" data-svgname="chevron-right-variant"></svg></div>
+            </div>
+        </div>
+        <i class="details-icon participants-edit-back btn-back-panel mdi mdi-24px mdi-arrow-right"></i>
+        <span class="block-name-panel"></span>
+        <span class="block-name-panel second-text fade-out">{[print(xabber.getString("groupchat_selected"))]} <span></span></span>
+        <div class="btn-add-block">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="blocked-add"></svg>
+        </div>
+        <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>
+        <button class="btn-remove-selected btn-flat btn-main fade-out">{[print(xabber.getString("groupchat_revoke"))]}</button>
+        <div class="block-wrap participants-edit-wrap"></div>
+    </div>
+    <div class="edit-buttons">
+        <div class="edit-button btn-clear-history-chat">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="history"></svg></div>
+            <div class="edit-button-text">
+                <span class="one-line">{[print(xabber.getString("clear_history"))]}</span>
+            </div>
+        </div>
+        <div class="edit-button btn-delete-group">
+            <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-delete text-color-500"></i></div>
+            <div class="edit-button-text">
+                <span class="text-color-500 one-line">{[print(xabber.getString("group_settings__button_delete_group"))]}</span>
+            </div>
+        </div>
+    </div>
+</div>

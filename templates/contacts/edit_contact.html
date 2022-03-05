@@ -1,10 +1,46 @@
 
 <div class="edit-wrap">
     <div class="edit-header block-header">
-        <i title='{[print(xabber.getString("button_esc"))]}' class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
+        <i class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
         <span class="block-name">{[print(xabber.getString("edit_vcard"))]}</span>
     </div>
     <div class="edit-contact">
         <div class="name-wrap"></div>
+    </div>
+    <div class="subscription-statuses">
+        <div class="status-out dropdown-button" data-activates="{{view.cid}}-status-out"></div>
+        <ul id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
+            <li class="btn-request hidden">
+                <span class="one-line">Request subscription</span>
+            </li>
+            <li class="btn-cancel-request hidden">
+                <span class="one-line">Cancel subscription request</span>
+            </li>
+            <li class="btn-cancel-subscription-out hidden">
+                <span class="one-line">Cancel subscription</span>
+            </li>
+            <li class="btn-cancel-all">
+                <span class="one-line">Cancel</span>
+            </li>
+        </ul>
+        <div class="status-in dropdown-button" data-activates="{{view.cid}}-status-in"></div>
+        <ul id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
+            <li class="btn-allow hidden">
+                <span class="one-line">Allow subscription</span>
+            </li>
+            <li class="btn-allow-request hidden">
+                <span class="one-line">Allow subscription</span>
+            </li>
+            <li class="btn-disallow-request hidden">
+                <span class="one-line">Decline</span>
+            </li>
+            <li class="btn-cancel-subscription-in hidden">
+                <span class="one-line">Cancel subscription</span>
+            </li>
+            <li class="btn-cancel-all">
+                <span class="one-line">Cancel</span>
+            </li>
+        </ul>
+        <div class="status-description"></div>
     </div>
 </div>

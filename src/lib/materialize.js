@@ -793,6 +793,7 @@ if ($) {
           }
         });
       }
+    $modal.find('.dialog-options-wrap input:visible').focus();
 
 
     }

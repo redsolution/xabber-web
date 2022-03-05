@@ -286,7 +286,7 @@ define("xabber-views", function () {
                 ev.preventDefault();
                 return this.onEnterPressed($selection);
             }
-            if (ev.keyCode === constants.KEY_ESCAPE) {
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 ev.preventDefault();
                 if ($(ev.target).val())
                     return this.clearSearch();
@@ -378,6 +378,19 @@ define("xabber-views", function () {
     });
 
       xabber.SearchPanelView = xabber.SearchView.extend({
+          events: {
+              "keydown .search-input": "keyUpOnSearch",
+              "focusout .search-input": "clearSearchSelection",
+              "click .close-search-icon": "clearSearch",
+              "click .list-item": "onClickItem",
+              "click .btn-search-messages": "updateSearchWithMessages"
+          },
+
+          updateSearchWithMessages: function (ev) {
+              this.search_messages = true;
+              this.updateSearch();
+          },
+
           keyUpOnSearch: function (ev) {
               ev.stopPropagation();
               if ($(ev.target).val()) {
@@ -398,7 +411,7 @@ define("xabber-views", function () {
                   ev.preventDefault();
                   return this.onEnterPressed($selection);
               }
-              if (ev.keyCode === constants.KEY_ESCAPE) {
+              if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                   ev.preventDefault();
                   if ($(ev.target).val())
                       return this.clearSearch();
@@ -467,7 +480,10 @@ define("xabber-views", function () {
                   ev.preventDefault();
                   return this.onEnterPressed($selection);
               }
-              if (ev.keyCode === constants.KEY_ESCAPE) {
+              else if (ev.keyCode === constants.KEY_ENTER){
+                  this.search_messages = true;
+              }
+              if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                   ev.preventDefault();
                   if ($(ev.target).val())
                       return this.clearSearch();
@@ -584,17 +600,22 @@ define("xabber-views", function () {
               this.$('.pinned-chat-list').switchClass('hidden', query);
               this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contacts-list').children().length);
               this.$('.messages-list-wrap').addClass('hidden').find('.messages-list').html("");
-              if (query.length >= 2) {
-                  this.keyup_timeout = setTimeout(() => {
-                      this.queryid = uuid();
-                      this.searchMessages(query, {query_id: this.queryid});
-                  }, 1000);
+              if (query.length >= 2 && this.search_messages) {
+                  this.search_messages = false;
+                  this.queryid = uuid();
+                  this.searchMessages(query, {query_id: this.queryid});
+              }
+              else if (query.length >= 2 && !this.search_messages){
+                  this.$('.btn-search-messages').showIf(query);
               }
           },
 
           searchMessages: function (query, options) {
               this._loading_messages = true;
               this._messages_loaded = false;
+              this.$('.messages-list-wrap').showIf(query);
+              this.$('.btn-search-messages').hideIf(query);
+              this.$('.messages-list-wrap .messages-list').html(env.templates.contacts.preloader());
               options = options || {};
               !options.max && (options.max = xabber.settings.mam_messages_limit);
               !options.before && (options.before = "");
@@ -604,6 +625,7 @@ define("xabber-views", function () {
                   account.searched_msgs_loaded = false;
                   options.account = account;
                   this.MAMRequest(query, options, (messages) => {
+                      this.$('.messages-list-wrap .messages-list').html('');
                       if (!this.query_text)
                           return;
                       _.each(messages, (message) => {
@@ -737,7 +759,7 @@ define("xabber-views", function () {
             let value = this.getValue();
             if (ev.keyCode === constants.KEY_ENTER) {
                 this.changeValue();
-            } else if (ev.keyCode === constants.KEY_ESCAPE) {
+            } else if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 this.$input.removeClass('changed').val(value);
                 this.data.set('input_mode', false);
             }
@@ -859,7 +881,8 @@ define("xabber-views", function () {
             else {
                 new_attrs.right_contact = xabber.body.screen.get('right_contact');
             }
-            if (!attrs && xabber.body.screen.get('right'))
+            if ((!attrs && xabber.body.screen.get('right'))
+                || (attrs && !attrs.right && attrs.right !== null && xabber.body.screen.get('right')))
                 new_attrs.right = xabber.body.screen.get('right');
             this.screen.set(_.extend(new_attrs, attrs), options);
         },
@@ -968,14 +991,15 @@ define("xabber-views", function () {
             let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.all-chats').addClass('active').switchClass('unread', is_active);
-            xabber.body.setScreen('all-chats', {right: null});
+            xabber.body.setScreen('all-chats',);
+            xabber.trigger('show_all_chats');
         },
 
         showChats: function (ev) {
             let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.chats').addClass('active').switchClass('unread', is_active);
-            xabber.body.setScreen('all-chats', {right: null});
+            xabber.body.setScreen('all-chats',);
             xabber.trigger('show_chats');
         },
 
@@ -983,21 +1007,21 @@ define("xabber-views", function () {
             let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.group-chats').addClass('active').switchClass('unread', is_active);
-            xabber.body.setScreen('all-chats', {right: null});
+            xabber.body.setScreen('all-chats',);
             xabber.trigger('show_group_chats');
         },
 
         showArchive: function () {
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.archive-chats').addClass('active');
-            xabber.body.setScreen('all-chats', {right: null});
+            xabber.body.setScreen('all-chats',);
             xabber.trigger('show_archive_chats');
         },
 
         showChatsByAccount: function (account) {
             this.$('.toolbar-item').removeClass('active unread')
                 .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
-            xabber.body.setScreen('all-chats', {right: null}, {
+            xabber.body.setScreen('all-chats', {
                 right_contact_save: true
             });
             xabber.trigger('show_account_chats', [account]);
@@ -1008,7 +1032,7 @@ define("xabber-views", function () {
         },
 
         showContacts: function () {
-            xabber.body.setScreen('contacts');
+            xabber.body.setScreen('contacts', {right_contact: null});
         },
 
         showMentions: function () {

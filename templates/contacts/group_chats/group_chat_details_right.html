@@ -1,0 +1,101 @@
+<div class="panel-background-clickable"></div>
+<div class="panel-content-wrap noselect">
+    <div class="main-info">
+        <div class="avatar-wrap">
+            <div class="circle-avatar">
+                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-info">
+            <div class="name-wrap"></div>
+        </div>
+        <div class="header-buttons">
+            <div class="btn-escape">
+                <i class="mdi mdi-24px mdi-close"></i>
+                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>
+            </div>
+            <span class="block-name">{[print(xabber.getString("groupchat_group"))]}</span>
+            <span class="block-name second-text"></span>
+            <div class="btn-qr-code">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>
+            </div>
+            <div class="btn-edit">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg>
+            </div>
+            <div class="group-edit-preloader">
+            </div>
+        </div>
+        <div class="buttons-wrap">
+            <div class="button-wrap btn-invite-wrap">
+                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite text-color-500"></i>
+                <div class="btn-name">{[print(xabber.getString("groupchat_bar_invite"))]}</div>
+            </div>
+            <div class="button-wrap btn-search-messages">
+                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("search"))]}</div>
+            </div>
+            <div class="button-wrap btn-mute-wrap">
+                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>
+                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>
+
+                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">
+                    <li class="btn-mute-dropdown" data-mute="minutes15">
+                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="hours1">
+                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="hours2">
+                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="day">
+                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>
+                    </li>
+                    <li class="btn-mute-dropdown" data-mute="forever">
+                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="button-wrap btn-leave-wrap">
+                <div class="contact-btn btn-leave fill-color-500">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />
+                    </svg>
+                </div>
+                <div class="btn-name text-color-500">{[print(xabber.getString("groupchat_bar_leave"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-content">
+        <div class="block-wrap group-chat-properties-wrap vcard"></div>
+        <div class="block-wrap status-block-wrap"></div>
+        <div class="block-wrap edit-block-wrap"></div>
+        <div class="block-wrap restrictions-block-wrap"></div>
+        <div class="block-wrap groups-block-wrap"></div>
+        <div class="block-wrap search-messages-block-wrap"></div>
+        <div class="block-wrap participant-view-wrap"></div>
+        <div class="bottom-block">
+            <ul class="tabs not-edit">
+                <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>
+                <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>
+                <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>
+                <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>
+                <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>
+            </ul>
+            <div class="block-wrap participants-wrap"></div>
+        </div>
+    </div>
+</div>

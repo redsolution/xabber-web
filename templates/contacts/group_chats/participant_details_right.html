@@ -1,0 +1,49 @@
+<div class="participant-details-wrap">
+    <div class="participant-details-info-wrap">
+    </div>
+    <div class="bottom-block participant-bottom-block">
+        <ul class="tabs participant-tabs">
+            <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>
+            <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>
+            <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>
+            <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>
+        </ul>
+        <div class="block-wrap participants-details-media-wrap"></div>
+    </div>
+    <div class="participant-details-edit-wrap edit-wrap">
+        <div class="main-info">
+            <div class="avatar-wrap">
+                <div class="circle-avatar">
+                    <input title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                    <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                        <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                    </svg>
+                    <div class="preloader-wrap">
+                        <div class="preloader-wrapper preloader-32px visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="set-groupchat-avatar-text">{[print(xabber.getString("groupchat_set_avatar"))]}</div>
+            </div>
+        </div>
+        <div class="participant-details-edit-inputs">
+            <div class="edit-participant-name-wrap">
+            </div>
+            <div class="edit-participant-badge-wrap">
+            </div>
+        </div>
+        <div class="rights-wrap">
+        </div>
+    </div>
+</div>

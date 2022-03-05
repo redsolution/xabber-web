@@ -1988,7 +1988,7 @@ define("xabber-chats", function () {
                   this.model.searchMessages(query, (messages) => {
                   });
               }
-              if (ev.keyCode === constants.KEY_ESCAPE) {
+              if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                   this.chat_content.head.renderSearchPanel();
               }
           },
@@ -2422,7 +2422,8 @@ define("xabber-chats", function () {
                               });
                           }
                           else {
-                              this.emptyChat()
+                              this.emptyChat();
+                              this.$('.close-search-icon').hideIf(false);
                               this.$('.search-results').hideIf(false);
                           }
 
@@ -2940,7 +2941,7 @@ define("xabber-chats", function () {
                 let query = this.$search_form.find('input').val();
                 this.model.searchMessages(query, (messages) => {});
             }
-            if (ev.keyCode === constants.KEY_ESCAPE) {
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 this.head.renderSearchPanel();
             }
         },
@@ -5086,8 +5087,7 @@ define("xabber-chats", function () {
 
         showParticipantProperties: function (participant_id, options) {
             options = options || {};
-            let participant = this.contact.participants.get(participant_id),
-                participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
+            let participant = this.contact.participants.get(participant_id);
             if (!participant) {
                 this.contact.getBlockedParticipants((response) => {
                     _.extend(options, {present: null, subscription: null});
@@ -5096,14 +5096,16 @@ define("xabber-chats", function () {
                     else
                         options.blocked = false;
                     participant = new xabber.Participant(options, {contact: this.contact});
-                    participant_properties_panel.open(participant, {});
+                    this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                    this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
                 });
                 return;
             }
             (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
             this.contact.participants.participantsRequest({id: participant_id}, (response) => {
                 let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
-                participant_properties_panel.open(participant, data_form);
+                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                this.contact.details_view_right.participants.participant_properties_panel.open(participant, data_form);
             });
         },
 
@@ -6661,8 +6663,14 @@ define("xabber-chats", function () {
                             view.model.set('displayed_sent', true);
                         }
                 }
-                if (xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' ))
-                    view.contact.showDetailsRight('all-chats', {right_saved: true});
+                if (xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' )) {
+                    if (view.model.get('saved'))
+                        xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
+                    else if(xabber.right_contact_panel_saveable)
+                        view.contact.showDetailsRight('all-chats', {right_saved: true});
+                    else
+                        view.contact.showDetailsRight('all-chats', {right_saved: false});
+                }
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
                     clear_search: options.clear_search,
@@ -6932,8 +6940,12 @@ define("xabber-chats", function () {
               this.$el.addClass('active');
               xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
               xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', model: chat });
-              if (xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context')
-                  chat.contact.showDetailsRight('all-chats', {right_saved: true});
+              if (xabber.right_contact_panel_saveable && xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context') {
+                  if (xabber.right_contact_panel_saveable)
+                      chat.contact.showDetailsRight('all-chats', {right_saved: true});
+                  else
+                      chat.contact.showDetailsRight('all-chats', {right_saved: false});
+              }
               this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true});
           }
       });
@@ -7424,6 +7436,8 @@ define("xabber-chats", function () {
         avatar_size: constants.AVATAR_SIZES.CHAT_HEAD,
 
         events: {
+            "click .chat-head-wrap": "showContactDetailsRight",
+            "click .chat-head-details": "showContactDetailsRight",
             "click .contact-name": "showContactDetailsRight",
             "click .circle-avatar": "showContactDetailsRight",
             "click .btn-contact-details": "showContactDetails",
@@ -7547,6 +7561,7 @@ define("xabber-chats", function () {
             let is_group_chat = this.contact.get('group_chat');
             this.$('.btn-invite-users').showIf(is_group_chat && !this.contact.get('private_chat') && this.contact.get('subscription') == 'both');
             this.$('.btn-call-attention').hideIf(is_group_chat || this.model.get('encrypted'));
+            this.$('.btn-clear-history').hideIf(is_group_chat);
             this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
             this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
@@ -8371,7 +8386,7 @@ define("xabber-chats", function () {
 
         keyDown: function (ev) {
             let $rich_textarea = this.$('.input-message .rich-textarea');
-            if (ev.keyCode === constants.KEY_ESCAPE ||
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact') ||
                     ev.keyCode === constants.KEY_BACKSPACE ||
                     ev.keyCode === constants.KEY_DELETE) {
                 return;
@@ -8529,12 +8544,13 @@ define("xabber-chats", function () {
 
         showAccountSettings: function () {
             if (this.contact.get('group_chat')) {
-                let participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.contact});
                 if (this.contact.my_info && this.contact.my_rights) {
-                    participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                    this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                    this.contact.details_view_right.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                 } else
                     this.contact.getMyInfo(() => {
-                        participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
+                        this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                        this.contact.details_view_right.participants.participant_properties_panel.open(this.contact.my_info, this.contact.my_rights);
                     });
             } else {
                 this.account.showSettings();
@@ -8561,7 +8577,7 @@ define("xabber-chats", function () {
                 this.displayMicrophone();
             else
                 this.displaySend();
-            if (ev.keyCode === constants.KEY_ESCAPE) {
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 ev.preventDefault();
                 this.unsetForwardedMessages();
             } else {
@@ -9702,6 +9718,10 @@ define("xabber-chats", function () {
 
         this.on("show_chats", function () {
             this.chats_view.showChats();
+        }, this);
+
+        this.on("show_all_chats", function () {
+            this.chats_view.showAllChats();
         }, this);
 
         this.on("show_account_chats", function (ev, account) {
