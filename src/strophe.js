@@ -70,8 +70,8 @@ define("xabber-strophe", function () {
                 } else if (this.auth_type === 'x-token') {
                     this.connection.registerSASLMechanism(Strophe.SASLHOTP);
                     delete this.connection._sasl_data["server-signature"];
-                    utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.x_token.counter).then((pass) => {
-                        this.connection.x_token.counter++;
+                    utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.counter).then((pass) => {
+                        this.connection.counter++;
                         this.connection.hotp_pass = pass;
                     }).then(() => {
                         this.connection.connect(jid, password, callback)
@@ -85,22 +85,17 @@ define("xabber-strophe", function () {
             },
 
             reconnect: function (callback) {
-                if (this.auth_type === 'x-token' && !this.connection.mechanisms["HOTP"]) {
-                    this.connection.registerSASLMechanism(Strophe.SASLHOTP);
-                    delete this.connection._sasl_data["server-signature"];
-                }
-                else if (this.auth_type === 'x-token') {
-                    if (!this.connection.hotp_pass_reconnection) {
-                        utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.x_token.counter).then((pass) => {
-                            this.connection.x_token.counter++;
-                            this.connection.hotp_pass = pass;
-                            this.connection.hotp_pass_reconnection = true;
-                        }).then(() => {
-                            this.connection.connect(this.connection.jid, this.connection.pass, callback)
-                        });
+                if (this.auth_type === 'x-token') {
+                    if (!this.connection.mechanisms["HOTP"]) {
+                        this.connection.registerSASLMechanism(Strophe.SASLHOTP);
+                        delete this.connection._sasl_data["server-signature"];
                     }
-                    else
+                    utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
+                        this.connection.counter++;
+                        this.connection.hotp_pass = pass;
+                    }).then(() => {
                         this.connection.connect(this.connection.jid, this.connection.pass, callback)
+                    });
                     return;
                 }
                 this.connection.connect(this.connection.jid, this.connection.pass, callback);
@@ -139,8 +134,13 @@ define("xabber-strophe", function () {
                             let token = $(success).find('secret').text(),
                                 expires_at = $(success).find('expire').text(),
                                 token_uid = $(success).find('device').attr('id');
-                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid, counter: 1 };
+                            this.x_token = {token: token, expire: expires_at, token_uid: token_uid,};
+                            this.counter = 1;
                             this.pass = token;
+                            if (this.account)
+                                this.account.save({
+                                    hotp_counter: this.counter,
+                                });
                             this._send_auth_bind();
                         }, () => {
                             this._send_auth_bind();
@@ -148,6 +148,11 @@ define("xabber-strophe", function () {
                     }
                     else {
                         this._send_auth_bind();
+                        if (this.account && this.x_token_auth) {
+                            this.account.save({
+                                hotp_counter: this.counter,
+                            });
+                        }
                     }
                 }
                 return false;

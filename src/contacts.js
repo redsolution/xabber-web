@@ -577,10 +577,11 @@ define("xabber-contacts", function () {
                 let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
                 if ($group_chat.find('pinned-message').length) {
                     if (prev_pinned_message != pinned_message) {
-                        if (chat)
-                            if (!chat.item_view.content)
+                        if (chat) {
+                            if (chat.item_view && !chat.item_view.content)
                                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                             pinned_msg_elem = chat.item_view.content.$pinned_message;
+                        }
                         if (pinned_msg_elem) {
                             if (pinned_message) {
                                 this.getMessageByStanzaId(pinned_message, ($message) => {
@@ -3300,7 +3301,7 @@ define("xabber-contacts", function () {
                             let $current_restriction = this.$('.right-item.restriction-default-' + attrs.name);
                             $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
                                 .removeClass('default-value')
-                                .text(attrs.expires);
+                                .text(field.options.find(x => x.value === attrs.expires).label);
                         }
                     }
                 });
@@ -4723,8 +4724,10 @@ define("xabber-contacts", function () {
                             else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)
                                 msg.set('state', constants.MSG_DELIVERED);
                             this.account.messages.add(msg);
-                            chat.last_message = msg;
-                            chat.item_view.updateLastMessage(msg);
+                            if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
+                                chat.last_message = msg;
+                                chat.item_view.updateLastMessage(msg);
+                            }
                         }
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }

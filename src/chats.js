@@ -2613,6 +2613,7 @@ define("xabber-chats", function () {
               }
               let subscription = this.contact.get('subscription'),
                   in_request = this.contact.get('subscription_request_in'),
+                  in_roster = this.contact.get('in_roster'),
                   out_request = this.contact.get('subscription_request_out');
               this.$('.button').removeClass('hidden');
               this.$('.subscription-info').text("");
@@ -2622,7 +2623,7 @@ define("xabber-chats", function () {
               else if (subscription === 'to' && in_request || (!subscription && in_request && out_request)) {
                   this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_incoming"));
                   this.$('.button:not(.btn-allow)').addClass('hidden');
-              } else if (!out_request && !in_request && (subscription === 'from' || _.isNull(subscription))) {
+              } else if (!out_request && !in_roster && !in_request && (subscription === 'from' || _.isNull(subscription))) {
                   this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_outgoing"));
                   this.$('.button:not(.btn-subscribe)').addClass('hidden');
               } else if (subscription === undefined || !subscription && in_request) {
@@ -3736,8 +3737,8 @@ define("xabber-chats", function () {
                 $msg_element.removeClass('playing');
             });
 
-            this.$('.voice-message-volume')[0].onchange = () => {
-                aud.setVolume(this.$('.voice-message-volume').val()/100);
+            $elem.find('.voice-message-volume')[0].onchange = () => {
+                aud.setVolume($elem.find('.voice-message-volume').val()/100);
             };
             return aud;
         },
@@ -5102,7 +5103,7 @@ define("xabber-chats", function () {
                 } else
                     xabber.openWindow($elem.attr('href'));
             }
-            if ($elem.hasClass('msg-delivering-state')) {
+            if ($elem.hasClass('msg-delivering-state') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
                 return;
             }
             if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('msg-copy-location-content') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('btn-delete-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
