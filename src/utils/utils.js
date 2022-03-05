@@ -354,6 +354,23 @@ define([
             return markup_body.join("").trim();
         },
 
+        getOS: function() {
+            let platform = window.navigator.platform,
+                macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+                windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+                os = null;
+
+            if (macosPlatforms.indexOf(platform) !== -1) {
+                os = 'Mac OS';
+            } else if (windowsPlatforms.indexOf(platform) !== -1) {
+                os = 'Windows';
+            } else if (!os && /Linux/.test(platform)) {
+                os = 'Linux';
+            }
+
+            return os;
+        },
+
         render_data_form: function (data_form) {
             let $data_form = $('<div class="data-form"/>');
             data_form.fields.forEach(function (field) {
