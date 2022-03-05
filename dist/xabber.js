@@ -41217,7 +41217,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":36,"az":3,"be":17,"bg":76,"bs":0,"ca":33,"cs":99,"cy":0,"da":0,"de":65,"el":38,"es-ES":45,"es-latin":9,"et":0,"fa":6,"fi":12,"fil":19,"fr":36,"ga-IE":0,"he":27,"hi":0,"hr":0,"hu":19,"hy-AM":11,"id":87,"is":0,"it":94,"ja":26,"ka":0,"kmr":0,"ko":1,"ku":3,"ky":7,"la-LA":0,"lb":0,"lt":5,"me":0,"mk":0,"mn":0,"mr":0,"ms":8,"nb":27,"ne-NP":0,"nl":26,"no":0,"oc":17,"pa-IN":0,"pl":83,"pt-BR":92,"pt-PT":19,"qya-AA":0,"ro":21,"ru":72,"sat":2,"sco":0,"si-LK":49,"sk":26,"sl":36,"sq":4,"sr":17,"sr-Cyrl-ME":0,"sv-SE":49,"sw":1,"ta":2,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":86,"uk":36,"uz":0,"vi":17,"yo":0,"zh-CN":37,"zh-TW":14,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.6","version_description":"Token fix,\n redesign,\n fixes"}'
+'{"version_number":"2.3.2.6","version_description":"Token fix, redesign, fixes"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -49099,7 +49099,7 @@ define("xabber-accounts", [],function () {
 
             renderAllXTokens: function () {
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {//34
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
                     let pretty_token = {
                         resource_obj: undefined,
                         client: token.client,
@@ -52251,7 +52251,7 @@ define("xabber-contacts", [],function () {
             changeList: function (ev) {
                 let $target = $(ev.target).closest('.list-variant'),
                     list_name = $target.data('value');
-                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);//35
+                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
                 this.ps_container.animate(
                     {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-110},
                     200,
@@ -54604,7 +54604,7 @@ define("xabber-contacts", [],function () {
             }
         });
 
-        xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({//34
+        xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             className: 'modal dialog-modal edit-rights',
             template: templates.group_chats.participant_details_right,
             member_details_avatar_size: constants.AVATAR_SIZES.PARTICIPANT_DETAILS_ITEM,
@@ -54802,7 +54802,7 @@ define("xabber-contacts", [],function () {
             changeList: function (ev) {
                 let $target = $(ev.target).closest('.list-variant'),
                     list_name = $target.data('value');
-                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);//35
+                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
                 this.updateList(list_name);
             },
 
@@ -54838,7 +54838,7 @@ define("xabber-contacts", [],function () {
                     return;
             },
 
-            changeName: function (value) {//35
+            changeName: function (value) {
                 this.updateSaveButton()
             },
 
@@ -54946,7 +54946,7 @@ define("xabber-contacts", [],function () {
                 !$(ev.target).hasClass('non-active') && this.render(this.participant);
             },
 
-            getMessages: function (options) {//37
+            getMessages: function (options) {
                 let chat = this.account.chats.getChat(this.contact);
                 chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
                 chat.messages_view.messagesRequest(options, () => {
@@ -57577,7 +57577,7 @@ define("xabber-contacts", [],function () {
                 }
             },
 
-            changeName: function (value) {//35
+            changeName: function (value) {
                 if (this.data_form && value){
                     let data_form_index = this.data_form.fields.findIndex(x => x.var == 'name')
                     if (!this.original_data_form_values.name)
@@ -57634,7 +57634,7 @@ define("xabber-contacts", [],function () {
             },
 
 
-            saveChanges: function() {//34
+            saveChanges: function() {
                 if (this.$('.btn-save').hasClass('fade-out'))
                     return;
                 this.$('.btn-save').addClass('fade-out')
@@ -60475,8 +60475,6 @@ define("xabber-chats", [],function () {
             this.retraction_version = 0;
             if (this.contact) {
                 this.set('group_chat', this.contact.get('group_chat'));
-                // this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
-                // this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
                 this.contact.on("destroy", this.onContactDestroyed, this);
                 this.contact.on("change:group_chat", this.onChangedContact, this);
             } else {
@@ -65940,7 +65938,6 @@ define("xabber-chats", [],function () {
             let wheel_ev = this.defineMouseWheelEvent();
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-            // this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
             xabber.on("update_layout", this.onWindowResized, this);

@@ -1930,7 +1930,7 @@ define("xabber-contacts", function () {
             changeList: function (ev) {
                 let $target = $(ev.target).closest('.list-variant'),
                     list_name = $target.data('value');
-                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);//35
+                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
                 this.ps_container.animate(
                     {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-110},
                     200,
@@ -4283,7 +4283,7 @@ define("xabber-contacts", function () {
             }
         });
 
-        xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({//34
+        xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             className: 'modal dialog-modal edit-rights',
             template: templates.group_chats.participant_details_right,
             member_details_avatar_size: constants.AVATAR_SIZES.PARTICIPANT_DETAILS_ITEM,
@@ -4481,7 +4481,7 @@ define("xabber-contacts", function () {
             changeList: function (ev) {
                 let $target = $(ev.target).closest('.list-variant'),
                     list_name = $target.data('value');
-                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);//35
+                this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
                 this.updateList(list_name);
             },
 
@@ -4517,7 +4517,7 @@ define("xabber-contacts", function () {
                     return;
             },
 
-            changeName: function (value) {//35
+            changeName: function (value) {
                 this.updateSaveButton()
             },
 
@@ -4625,7 +4625,7 @@ define("xabber-contacts", function () {
                 !$(ev.target).hasClass('non-active') && this.render(this.participant);
             },
 
-            getMessages: function (options) {//37
+            getMessages: function (options) {
                 let chat = this.account.chats.getChat(this.contact);
                 chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
                 chat.messages_view.messagesRequest(options, () => {
@@ -7256,7 +7256,7 @@ define("xabber-contacts", function () {
                 }
             },
 
-            changeName: function (value) {//35
+            changeName: function (value) {
                 if (this.data_form && value){
                     let data_form_index = this.data_form.fields.findIndex(x => x.var == 'name')
                     if (!this.original_data_form_values.name)
@@ -7313,7 +7313,7 @@ define("xabber-contacts", function () {
             },
 
 
-            saveChanges: function() {//34
+            saveChanges: function() {
                 if (this.$('.btn-save').hasClass('fade-out'))
                     return;
                 this.$('.btn-save').addClass('fade-out')
