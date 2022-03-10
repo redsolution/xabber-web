@@ -9020,6 +9020,8 @@ define("xabber-contacts", function () {
                     groups = this.group_data.get('selected'),
                     contact, error_text,
                     regexp = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                if (jid)
+                    jid = jid.toLowerCase()
                 jid = Strophe.getBareJidFromJid(jid);
                 if (!jid) {
                     error_text = xabber.getString("dialog_add_contact__error__text_input_username");
