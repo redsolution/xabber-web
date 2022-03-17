@@ -1202,24 +1202,53 @@ define("xabber-contacts", function () {
         });
 
         xabber.ContactResourcesRightView = xabber.ResourcesView.extend({
+            className: 'modal main-modal resource-modal',
+
+            _initialize: function () {
+                this.model.on("add", this.onResourceAdded, this);
+                this.model.on("remove", this.onResourceRemoved, this);
+                this.model.on("reset", this.onReset, this);
+                this.model.on("change:priority", this.onPriorityChanged, this);
+            },
+
+            renderByInit: function () {
+                this.model.each((resource) => {
+                    this.onResourceAdded(resource);
+                });
+            },
+
+            open: function () {
+                if (this.model.length) {
+                    this.$el.openModal({
+                        ready: () => {
+                            this.$el.html('<svg class="details-icon mdi mdi-24px "></svg><div class="resources-wrap"></div>')
+                            this.$el.find('.details-icon').html(env.templates.svg['ic-jabber']())
+                            this.renderByInit();
+                        },
+                        // complete: () => {
+                        //     this.$el.detach();
+                        //     this.data.set('visible', false);
+                        // }
+                    });
+                }
+            },
+
             onResourceAdded: function (resource) {
+                this.model.requestInfo(resource);
                 this.addChild(resource.get('resource'),
                     xabber.ResourceRightView, {model: resource});
                 this.updatePosition(resource);
                 this.$el.removeClass('hidden');
-                this.parent.updateScrollBar();
             },
 
             onResourceRemoved: function (resource) {
                 this.removeChild(resource.get('resource'));
                 this.$el.showIf(this.model.length);
-                this.parent.updateScrollBar();
             },
 
             onReset: function () {
                 this.removeChildren();
                 this.$el.addClass('hidden');
-                this.parent.updateScrollBar();
             },
 
             updatePosition: function (resource) {
@@ -1428,7 +1457,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -1803,7 +1832,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -2117,7 +2146,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -2562,7 +2591,7 @@ define("xabber-contacts", function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -6101,6 +6130,7 @@ define("xabber-contacts", function () {
             field_name: 'contact-name',
             placeholder: "",
             model_field: 'name',
+            template: templates.group_chats.group_name_input_widget,
 
             setValue: function (value) {
                 if (name === "") {

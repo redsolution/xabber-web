@@ -7416,6 +7416,7 @@ define("xabber-chats", function () {
             "click .chat-head-details": "showContactDetailsRight",
             "click .contact-name": "showContactDetailsRight",
             "click .circle-avatar": "showContactDetailsRight",
+            "click .contact-status-message.resource-hover": "showContactResources",
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
             "click .btn-invite-users": "inviteUsers",
@@ -7443,6 +7444,7 @@ define("xabber-chats", function () {
             this.contact = this.content.contact;
             this.model = this.content.model;
             this.account = this.model.account;
+            this.resources_view = new xabber.ContactResourcesRightView({model: this.contact.resources});
             this.updateName();
             this.updateStatus();
             this.updateEncrypted();
@@ -7487,6 +7489,8 @@ define("xabber-chats", function () {
             this.$('.chat-head-menu').hide();
             this.updateStatusMsg();
             this.updateGroupChatHead();
+            if (!this.contact.get('group_chat'))
+                this.$('.contact-status-message').addClass('resource-hover')
             return this;
         },
 
@@ -7558,6 +7562,10 @@ define("xabber-chats", function () {
 
         showContactDetailsRight: function () {
             this.contact.showDetailsRight('all-chats');
+        },
+
+        showContactResources: function () {
+            this.resources_view.open();
         },
 
         updatePinned: function () {

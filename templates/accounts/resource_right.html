@@ -1,13 +1,23 @@
-<div class="info-wrap resource-info-wrap" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-    <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg></div>
-    <div class="info-hover">
-        <div class="info">
-            <div class="status-message value one-line"></div>
+<table>
+    <tbody>
+    <tr class="info status-info">
+        <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>
+        <td>
+            <div class="value status-message one-line"></div>
             <div class="status"></div>
-            <div class="client value one-line"></div>
-            <div class="resource value one-line"></div>
-            <div class="priority value one-line"></div>
-            <div class="label">{[print(xabber.getString("account_resource"))]}</div>
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+    <tr class="info client-info">
+        <td class="label">{[print(xabber.getString("settings_account__label_client"))]}:</td>
+        <td class="value client one-line"></td>
+    </tr>
+    <tr class="info resource-info">
+        <td class="label">{[print(xabber.getString("account_resource"))]}:</td>
+        <td class="value resource one-line"></td>
+    </tr>
+    <tr class="info priority-info">
+        <td class="label">{[print(xabber.getString("account_priority"))]}:</td>
+        <td class="value priority"></td>
+    </tr>
+    </tbody>
+</table>

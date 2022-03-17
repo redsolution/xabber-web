@@ -386,6 +386,10 @@ button.btn-float-left {
     line-height: 18px;
 }
 
+.main-modal.resource-modal {
+    width: 33%;
+}
+
 .main-modal {
     top: 100px !important;
     width: 400px;
@@ -6020,7 +6024,7 @@ input[type=text].simple-input-field:hover {
     right: 144px;
     top: 0;
     cursor: pointer;
-    z-index: 1;
+    z-index: -1;
 }
 
 .saved-chat.chat-head-wrap .circle-avatar svg {
@@ -6091,6 +6095,11 @@ input[type=text].simple-input-field:hover {
     font-weight: 300;
     color: #616161;
     margin-top: 3px;
+}
+
+.chat-head-wrap .contact-info .contact-status-message.resource-hover:hover {
+    cursor: pointer;
+    font-weight: 500;
 }
 
 .chat-tools-wrap {
@@ -9280,6 +9289,37 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 
+.resource-modal .details-icon{
+    top: 20px!important;
+    position: absolute;
+    cursor: pointer;
+    pointer-events: none;
+    left: 24px;
+    color: #9e9e9e;
+    fill: #9e9e9e;
+}
+
+.resource-modal .resources-wrap{
+    padding: 15px 16px 14px 72px;
+
+}
+
+.resource-modal .resources-wrap .resource-wrap{
+    margin-bottom: 16px;
+
+}
+
+.resource-modal .resources-wrap td.label{
+    color: #9e9e9e;
+    width: 100px;
+    min-width: unset;
+}
+
+.resource-modal .resources-wrap td{
+    padding: 8px 0 0 0;
+    max-width: 100px;
+}
+
 .details-panel .connection-wrap,
 .details-panel .subscription-info-wrap,
 .details-panel .synchronization-wrap,
@@ -9851,14 +9891,13 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .name-wrap {
     border-bottom: 1px solid #F5F5F5;
-    padding: 35px 24px 16px 24px;
+    padding: 12px 16px;
 }
 
 .details-panel-right .edit-wrap .name-wrap .contact-name-wrap {
     font-size: 16px;
     line-height: 24px;
     color: #424242;
-    border-bottom: 1px solid rgba(0,0,0,0.54);
 }
 
 .details-panel-right .edit-wrap .name-wrap .contact-name-wrap .contact-name {
@@ -9868,25 +9907,6 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .name-wrap .contact-name-wrap .contact-name.name-is-default {
     color: #bdbdbd
-}
-
-.details-panel-right .edit-wrap .name-wrap .contact-name-input{
-    width: 100%;
-    border: none !important;
-    color: #757575;
-    margin: 0;
-    height: unset;
-    font-size: 16px;
-    line-height: 24px;
-    padding-bottom: 4px;
-}
-
-.details-panel-right .edit-wrap .name-wrap .contact-name-input:focus{
-    color: #757575;
-}
-
-.details-panel-right .edit-wrap .name-wrap .contact-name-input::placeholder{
-    color: #bdbdbd;
 }
 
 .details-panel-right .edit-wrap .subscription-statuses{
@@ -9967,6 +9987,7 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .participant-name-wrap .participant-name-input,
 .details-panel-right .edit-wrap .participant-badge-wrap .participant-badge-input,
+.details-panel-right .edit-wrap .contact-name-wrap .contact-name-input,
 .details-panel-right .edit-wrap .group-name-wrap .group-name-input {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     padding: 0 12px;
@@ -9976,6 +9997,11 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 !important;
     color: #212529;
     box-shadow: none;
+}
+.details-panel-right .edit-wrap .contact-name-wrap .contact-name-input {
+    width: calc(100% - 16px) !important;
+    padding: 0px 8px !important;
+
 }
 
 .details-panel-right .new-group-field-wrap .new-group-name input {
@@ -12258,18 +12284,30 @@ input[type='range'].voice-message-volume:focus {
     padding: 18px 24px;
 }
 
+.dialog-modal .modal-header .close-modal{
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    color: #757575;
+}
+
+.dialog-modal .modal-header .close-modal:hover{
+    color: #bdbdbd;
+    cursor:pointer;
+}
+
 .dialog-modal .img-from-clipboard {
     max-width: 380px;
     max-height: 380px;
 }
 
 .dialog-modal .container-for-img {
-    margin: 20px auto;
+    margin: 0px auto 20px;
     width: max-content;
 }
 
 .dialog-modal .container-for-img canvas {
-    margin: 48px auto 16px;
+    margin: 0px auto 16px;
 }
 
 .dialog-modal .container-for-img .dialog-bottom-text {
