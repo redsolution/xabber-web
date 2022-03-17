@@ -3137,6 +3137,14 @@ define("xabber-chats", function () {
                             );
                             if (loaded_message) counter++;
                         });
+                        if (options.previous_history && !this.model.get('displayed_sent') && this.model.messages.length) {
+                            let last_msg = this.model.messages.models[this.model.messages.length - 1];
+                            if (last_msg)
+                                if (!last_msg.isSenderMe() && this.model.get('active') && this.model.get('display')) {
+                                    this.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                                    this.model.set('displayed_sent', true);
+                                }
+                        }
                         if ((counter === 0) && options.last_history && !this.model.get('history_loaded')) {
                             this.getMessageArchive(_.extend(query, {
                                 max: xabber.settings.mam_messages_limit,
@@ -7413,6 +7421,7 @@ define("xabber-chats", function () {
             "click .chat-head-details": "showContactDetailsRight",
             "click .contact-name": "showContactDetailsRight",
             "click .circle-avatar": "showContactDetailsRight",
+            "click .contact-status-message.resource-hover": "showContactResources",
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
             "click .btn-invite-users": "inviteUsers",
@@ -7440,6 +7449,7 @@ define("xabber-chats", function () {
             this.contact = this.content.contact;
             this.model = this.content.model;
             this.account = this.model.account;
+            this.resources_view = new xabber.ContactResourcesRightView({model: this.contact.resources});
             this.updateName();
             this.updateStatus();
             this.updateEncrypted();
@@ -7484,6 +7494,8 @@ define("xabber-chats", function () {
             this.$('.chat-head-menu').hide();
             this.updateStatusMsg();
             this.updateGroupChatHead();
+            if (!this.contact.get('group_chat'))
+                this.$('.contact-status-message').addClass('resource-hover')
             return this;
         },
 
@@ -7555,6 +7567,10 @@ define("xabber-chats", function () {
 
         showContactDetailsRight: function () {
             this.contact.showDetailsRight('all-chats');
+        },
+
+        showContactResources: function () {
+            this.resources_view.open();
         },
 
         updatePinned: function () {

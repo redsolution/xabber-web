@@ -487,6 +487,7 @@ define("xabber-accounts", function () {
                             this.save({
                                 auth_type: 'x-token',
                                 x_token: this.connection.x_token,
+                                hotp_counter: this.connection.counter,
                             });
                         }
                         this.createFastConnection();
@@ -579,6 +580,7 @@ define("xabber-accounts", function () {
                             this.save({
                                 auth_type: 'x-token',
                                 x_token: this.connection.x_token,
+                                hotp_counter: this.connection.counter,
                             });
                         }
                         this.createFastConnection();
@@ -748,13 +750,14 @@ define("xabber-accounts", function () {
                         if (this.background_connection.x_token) {
                             this.save({
                                 x_token: this.background_connection.x_token,
+                                hotp_counter: this.background_connection.counter,
                             });
                             this.background_conn_manager.auth_type = 'x-token';
                             this.background_connection.x_token_auth = true;
                             if (this.fast_connection && this.fast_connection.pass)
                                 this.background_connection.pass = this.fast_connection.pass;
-                            else if (this.connection.pass && this.connection.pass)
-                                this.fast_connection.pass = this.connection.pass;
+                            else if (this.connection && this.connection.pass)
+                                this.background_connection.pass = this.connection.pass;
                         }
                         _.each(this._after_background_connected_plugins, (plugin) => {
                             plugin.call(this);
@@ -770,6 +773,7 @@ define("xabber-accounts", function () {
                         if (this.fast_connection.x_token) {
                             this.save({
                                 x_token: this.fast_connection.x_token,
+                                hotp_counter: this.fast_connection.counter,
                             });
                             this.fast_conn_manager.auth_type = 'x-token';
                             this.fast_connection.x_token_auth = true;
