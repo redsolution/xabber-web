@@ -3137,6 +3137,14 @@ define("xabber-chats", function () {
                             );
                             if (loaded_message) counter++;
                         });
+                        if (options.previous_history && !this.model.get('displayed_sent') && this.model.messages.length) {
+                            let last_msg = this.model.messages.models[this.model.messages.length - 1];
+                            if (last_msg)
+                                if (!last_msg.isSenderMe() && this.model.get('active') && this.model.get('display')) {
+                                    this.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                                    this.model.set('displayed_sent', true);
+                                }
+                        }
                         if ((counter === 0) && options.last_history && !this.model.get('history_loaded')) {
                             this.getMessageArchive(_.extend(query, {
                                 max: xabber.settings.mam_messages_limit,
