@@ -89,6 +89,8 @@ define("xabber-strophe", function () {
                         this.connection.registerSASLMechanism(Strophe.SASLHOTP);
                         delete this.connection._sasl_data["server-signature"];
                     }
+                    if (this.connection.account && this.connection.account.get('hotp_counter'))
+                        this.connection.counter = this.connection.account.get('hotp_counter');
                     utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
                         this.connection.hotp_pass = pass;
                     }).then(() => {
