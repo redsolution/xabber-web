@@ -1,0 +1,47 @@
+<div class="participant-details-item" data-id="{{id}}" data-jid="{{jid}}" data-role="{{role}}">
+    <div class="block-header">
+        <i class="details-icon btn-back parent-btn mdi mdi-24px mdi-arrow-right"></i>
+        <i class="details-icon btn-back-name child-btn mdi mdi-24px mdi-arrow-right hidden"></i>
+        <span class="block-name"></span>
+        <span class="block-name second-text"></span>
+        <button class="btn-save-user-rights non-active fade-out btn-flat btn-main">{[print(xabber.getString("groupchat_save_member_settings"))]}</button>
+        {[if (subscription !== null) {]}
+        <div class="btn-edit-participant">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
+        </div>
+        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{id}}-buttons-wrap">
+            <li class="btn-block-participant"><span class="one-line">{[print(xabber.getString("groupchat_block"))]}</span></li>
+        </ul>
+        {[}]}
+    </div>
+    <div class="circle-avatar">
+        <div class="preloader-wrap">
+            <div class="preloader-wrapper preloader-16px visible">
+                <div class="spinner-layer">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="gap-patch">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="participant-info">
+        {[if (subscription !== null) {]}<div class="participant-edit-nickname hidden"></div>{[}]}
+        <div class="participant-edit-badge hidden"></div>
+        <div class="participant-info-text">
+            <div class="nickname">
+                {{nickname}} <div class="badge one-line {[if (!badge) {]}hidden{[}]}">{{badge}}</div>
+            </div>
+            {[ if (is_myself) {]}
+            <div class="my-flag one-line text-color-red-700">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
+            {[}]}
+
+        </div>
+    </div>
+</div>

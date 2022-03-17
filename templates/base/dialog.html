@@ -16,7 +16,7 @@
     </div>
     <div class="modal-footer {{flag}}">
         {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}
-        <button class="optional-button btn-flat btn-main btn-dark" data-option="{{button.value}}">{{button.name}}</button>
+        <button class="optional-button btn-flat btn-main" data-option="{{button.value}}">{{button.name}}</button>
         {[ } ]}
         {[ if (ok_button) { ]}
         <button class="ok-button btn-flat btn-main" data-option=true>{{ok_button.text}}</button>

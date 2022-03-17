@@ -1,0 +1,41 @@
+<tr class="participant-wrap" data-id="{{id}}" data-jid="{{jid}}">
+    <td class="list-item group-chat-participant">
+        <div class="member-item">
+            <div class="circle-avatar"/>
+            <div class="participant-info">
+            <div class="top-line">
+                <div title="{{nickname}}" class="nickname one-line">{{nickname}}</div>
+                {[if (badge) {]}<div class="badge one-line">{{badge}}</div>{[}]}
+            </div>
+                <div class="bottom-line">
+                    {[ if (is_me) {]}
+                    <div class="online-status text-color-700">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
+                    {[}else if (!present) {]}<span class="online-status text-color-green-700">{[print(xabber.getString("group_settings__members__status_online"))]}</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}
+                </div>
+            </div>
+            {[if (role === 'owner' || role === 'admin') {]}
+            <div class="participant-buttons-wrap">
+                <div class="participant-role">
+                    {[if (role === 'owner') {]}
+                        <i class="mdi participant-role-image mdi-24px mdi-star"></i>
+                    {[}else if (role === 'admin') {]}
+                        <i class="mdi participant-role-image mdi-24px mdi-star-outline"></i>
+                    {[}]}
+                </div>
+            </div>
+            {[} else if (!is_me) {]}
+                <div class="buttons-wrap">
+                    <div title='{[print(xabber.getString("groupchat_edit_member"))]}' class="btn-edit-member">
+                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
+                    </div>
+                    <!--<div title='{[print(xabber.getString("mute_chat"))]}' class="btn-mute">-->
+                        <!--<i class="mdi mdi-24px mdi-microphone-off"></i>-->
+                    <!--</div>-->
+                    <div title='{[print(xabber.getString("groupchat_kick"))]}' class="btn-kick">
+                        <i class="mdi mdi-24px mdi-account-remove"></i>
+                    </div>
+                </div>
+            {[}]}
+        </div>
+    </td>
+</tr>

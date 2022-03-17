@@ -158,6 +158,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         $('<div class="dialog-bottom-text"/>').html(dialog_options.bottom_text).appendTo(dialog.$modal.find('.container-for-img'));
                 }
 
+                if (dialog_options.escape_button) {
+                    dialog.$modal.find('.modal-header').append('<i class="close-modal mdi mdi-close mdi-24px"></i>');
+                }
+
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {
                     dialog.$modal.find('.dialog-options-wrap').html($('<input type="text" placeholder="' + dialog_options.input_placeholder_value + '" id="user_value"/>').val(dialog_options.input_value));
                 }
@@ -190,6 +194,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                     }
                 });
 
+                dialog.$modal.find('.modal-header .close-modal').click(function () {
+                        dialog.close({complete_data: false});
+                });
+
                 return dialog.open();
             },
 
@@ -214,7 +222,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                 var ok_text, optional_button;
                 if (buttons) {
                     ok_text = buttons.ok_button_text;
-                    optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button}] : false;
+                    optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button_text}] : false;
                 }
                 return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true, optional_buttons: optional_button}, dialog_options, 'extended');
             },

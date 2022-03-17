@@ -1000,6 +1000,7 @@ define("xabber-accounts", function () {
 
                 deleteAccount: function (show_settings) {
                     this.show_settings_after_delete = show_settings;
+                    xabber.body.setScreen('all_chats', {right_contact: ''});
                     if (this.get('x_token'))
                         this.revokeXToken([this.get('x_token').token_uid]);
                     this.session.set('delete', true);
@@ -1471,6 +1472,26 @@ define("xabber-accounts", function () {
             }
         });
 
+        xabber.ResourceRightView = xabber.BasicView.extend({
+            className: 'resource-wrap',
+            template: templates.resource_right,
+
+            _initialize: function (options) {
+                this.update();
+                this.model.on("change", this.update, this);
+            },
+
+            update: function () {
+                let attrs = this.model.attributes;
+                this.$('.status').attr('data-status', attrs.status);
+                this.$('.status-message').text(attrs.status_message || xabber.getString(attrs.status));
+                this.$('.client').text(attrs.client || xabber.getString("please_wait"));
+                this.$('.resource').text(attrs.resource);
+                this.$('.priority').text(attrs.priority);
+                return this;
+            }
+        });
+
         xabber.Resources = Backbone.Collection.extend({
             model: xabber.Resource,
             comparator: function (r1, r2) {
@@ -1480,13 +1501,15 @@ define("xabber-accounts", function () {
 
             requestInfo: function (resource, callback) {
                 let jid = this.jid + '/' + resource.get('resource');
-                this.connection.disco.info(jid, null, (iq) => {
-                    let $identity = $(iq).find('identity[category=client]');
-                    if ($identity.length)
-                        resource.set('client', $identity.attr('name'));
-                    this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
-                    callback && callback();
-                });
+                if (this.connection && this.connection.connected) {
+                    this.connection.disco.info(jid, null, (iq) => {
+                        let $identity = $(iq).find('identity[category=client]');
+                        if ($identity.length)
+                            resource.set('client', $identity.attr('name'));
+                        this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
+                        callback && callback();
+                    });
+                }
             },
 
             isFeatureSupported: function (stanza, ns) {
@@ -1835,7 +1858,7 @@ define("xabber-accounts", function () {
 
             renderAllXTokens: function () {
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {//34
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
                     let pretty_token = {
                         resource_obj: undefined,
                         client: token.client,

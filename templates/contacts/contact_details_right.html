@@ -1,3 +1,4 @@
+<div class="panel-background-clickable"></div>
 <div class="panel-content-wrap noselect">
     <div class="main-info">
         <div class="avatar-wrap">
@@ -6,11 +7,15 @@
         <div class="text-info">
             <div class="name-wrap"></div>
         </div>
-        <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>
         <div class="header-buttons">
             <div class="btn-escape">
                 <i class="mdi mdi-24px mdi-close"></i>
                 <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>
+            </div>
+            <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>
+            <span class="block-name second-text"></span>
+            <div class="btn-qr-code">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>
             </div>
             <div class="btn-edit">
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
@@ -18,15 +23,15 @@
         </div>
         <div class="buttons-wrap">
             <div class="button-wrap btn-voice-call-wrap">
-                <div class="contact-btn btn-voice-call"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>
+                <div class="contact-btn btn-voice-call  fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>
                 <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>
             </div>
             <div class="button-wrap btn-search-messages">
-                <div class="contact-btn btn-search"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>
+                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>
                 <div class="btn-name">{[print(xabber.getString("search"))]}</div>
             </div>
             <div class="button-wrap btn-mute-wrap">
-                <div class="contact-btn btn-mute dropdown-button" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>
+                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>
                 <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>
 
                 <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">
@@ -51,8 +56,8 @@
                 </ul>
             </div>
             <div class="button-wrap btn-block-wrap">
-                <div class="contact-btn btn-block"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>
-                <div class="btn-name">{[print(xabber.getString("contact_bar_block"))]}</div>
+                <div class="contact-btn btn-block fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>
+                <div class="btn-name text-color-500">{[print(xabber.getString("contact_bar_block"))]}</div>
             </div>
         </div>
     </div>
@@ -62,5 +67,14 @@
         <div class="block-wrap groups-block-wrap"></div>
         <div class="block-wrap edit-block-wrap"></div>
         <div class="block-wrap search-messages-block-wrap"></div>
+        <div class="bottom-block">
+            <ul class="tabs">
+                <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>
+                <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>
+                <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>
+                <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>
+            </ul>
+            <div class="block-wrap participants-wrap"></div>
+        </div>
     </div>
 </div>

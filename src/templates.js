@@ -31,6 +31,7 @@ define("xabber-templates", [
     "text!templates/accounts/settings_right.html",
     "text!templates/accounts/existing_groupchat_item.html",
     "text!templates/accounts/resource.html",
+    "text!templates/accounts/resource_right.html",
     "text!templates/accounts/global_settings_item.html",
     "text!templates/accounts/change_status.html",
     "text!templates/accounts/token_item.html",
@@ -66,25 +67,41 @@ define("xabber-templates", [
     "text!templates/contacts/contact_placeholder.html",
     "text!templates/contacts/groups.html",
     "text!templates/contacts/edit_contact.html",
+    "text!templates/contacts/edit_group.html",
     "text!templates/contacts/preloader.html",
     "text!templates/contacts/group_chats/group_chat_properties.html",
+    "text!templates/contacts/group_chats/group_chat_properties_right.html",
     "text!templates/contacts/group_chats/group_chat_details.html",
+    "text!templates/contacts/group_chats/group_chat_details_right.html",
     "text!templates/contacts/group_chats/invitation.html",
     "text!templates/contacts/group_chats/group_chat_properties_edit.html",
     "text!templates/contacts/group_chats/default_restrictions.html",
+    "text!templates/contacts/group_chats/default_restrictions_right.html",
     "text!templates/contacts/group_chats/group_member_item.html",
+    "text!templates/contacts/group_chats/group_member_item_right.html",
+    "text!templates/contacts/group_chats/description_input_widget.html",
+    "text!templates/contacts/group_chats/group_name_input_widget.html",
+    "text!templates/contacts/group_chats/participant_badge_input_widget.html",
     "text!templates/contacts/group_chats/invited_member_item.html",
+    "text!templates/contacts/group_chats/add_blocked_participant_form.html",
+    "text!templates/contacts/group_chats/participant_details_right.html",
     "text!templates/contacts/group_chats/participant_rights.html",
     "text!templates/contacts/group_chats/restriction_item.html",
     "text!templates/contacts/group_chats/right_expire_variants.html",
     "text!templates/contacts/group_chats/pinned_message.html",
     "text!templates/contacts/group_chats/participant_details_item.html",
+    "text!templates/contacts/group_chats/participant_details_item_right.html",
     "text!templates/contacts/group_chats/participants.html",
+    "text!templates/contacts/group_chats/participants_right_panel.html",
     "text!templates/contacts/group_chats/badge_edit_view.html",
     "text!templates/contacts/group_chats/private_participant_details.html",
+    "text!templates/contacts/group_chats/private_participant_details_item_right.html",
     "text!templates/contacts/group_chats/set_status.html",
     "text!templates/contacts/group_chats/status_item.html",
     "text!templates/contacts/group_chats/group_status.html",
+    "text!templates/contacts/group_chats/group_status_right.html",
+    "text!templates/contacts/group_chats/media_item.html",
+    "text!templates/contacts/group_chats/file_item.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
@@ -130,6 +147,16 @@ define("xabber-templates", [
     "text!templates/svg/ic-jabber.html",
     "text!templates/svg/xmpp.html",
     "text!templates/svg/account-outline.html",
+    "text!templates/svg/qrcode.html",
+    "text!templates/svg/id-outline.html",
+    "text!templates/svg/clock-outline.html",
+    "text!templates/svg/index.html",
+    "text!templates/svg/restrictions-outline.html",
+    "text!templates/svg/history.html",
+    "text!templates/svg/chevron-down.html",
+    "text!templates/svg/membership-outline.html",
+    "text!templates/svg/invite-outline.html",
+    "text!templates/svg/chevron-right-variant.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
     "text!templates/svg/job-outline.html",
@@ -145,7 +172,10 @@ define("xabber-templates", [
     "text!templates/svg/cancel.html",
     "text!templates/svg/edit.html",
     "text!templates/svg/edit-outline.html",
+    "text!templates/svg/blocked-add.html",
+    "text!templates/svg/information-outline.html",
     "text!templates/svg/fullname.html",
+    "text!templates/svg/fullname-outline.html",
     "text!templates/svg/ic-at.html",
     "text!templates/svg/ic-searching.html",
     "text!templates/svg/blocked.html",
@@ -253,6 +283,7 @@ define("xabber-templates", [
     addTemplate('accounts.settings_right');
     addTemplate('accounts.existing_groupchat_item');
     addTemplate('accounts.resource');
+    addTemplate('accounts.resource_right');
     addTemplate('accounts.global_settings_item');
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item');
@@ -287,25 +318,41 @@ define("xabber-templates", [
     addTemplate('contacts.contact_placeholder');
     addTemplate('contacts.groups');
     addTemplate('contacts.edit_contact');
+    addTemplate('contacts.edit_group');
     addTemplate('contacts.preloader');
     addTemplate('contacts.group_chats.group_chat_properties');
+    addTemplate('contacts.group_chats.group_chat_properties_right');
     addTemplate('contacts.group_chats.group_chat_details');
+    addTemplate('contacts.group_chats.group_chat_details_right');
     addTemplate('contacts.group_chats.invitation');
     addTemplate('contacts.group_chats.group_chat_properties_edit');
     addTemplate('contacts.group_chats.default_restrictions');
+    addTemplate('contacts.group_chats.default_restrictions_right');
     addTemplate('contacts.group_chats.group_member_item');
+    addTemplate('contacts.group_chats.group_member_item_right');
+    addTemplate('contacts.group_chats.description_input_widget');
+    addTemplate('contacts.group_chats.group_name_input_widget');
+    addTemplate('contacts.group_chats.participant_badge_input_widget');
     addTemplate('contacts.group_chats.invited_member_item');
+    addTemplate('contacts.group_chats.add_blocked_participant_form');
+    addTemplate('contacts.group_chats.participant_details_right');
     addTemplate('contacts.group_chats.participant_rights');
     addTemplate('contacts.group_chats.restriction_item');
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
+    addTemplate('contacts.group_chats.participant_details_item_right');
     addTemplate('contacts.group_chats.participant_details_item');
     addTemplate('contacts.group_chats.participants');
+    addTemplate('contacts.group_chats.participants_right_panel');
     addTemplate('contacts.group_chats.badge_edit_view');
     addTemplate('contacts.group_chats.private_participant_details');
+    addTemplate('contacts.group_chats.private_participant_details_item_right');
     addTemplate('contacts.group_chats.set_status');
     addTemplate('contacts.group_chats.status_item');
     addTemplate('contacts.group_chats.group_status');
+    addTemplate('contacts.group_chats.group_status_right');
+    addTemplate('contacts.group_chats.media_item');
+    addTemplate('contacts.group_chats.file_item');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');
@@ -352,6 +399,17 @@ define("xabber-templates", [
     addSvgTemplate('svg.ic-jabber');
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.account-outline');
+    addSvgTemplate('svg.qrcode');
+    addSvgTemplate('svg.id-outline');
+    addSvgTemplate('svg.clock-outline');
+    addSvgTemplate('svg.index');
+    addSvgTemplate('svg.restrictions-outline');
+    addSvgTemplate('svg.history');
+    addSvgTemplate('svg.chevron-down');
+    addSvgTemplate('svg.membership-outline');
+    addSvgTemplate('svg.invite-outline');
+    addSvgTemplate('svg.chevron-right-variant');
+    addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');
     addSvgTemplate('svg.job-outline');
@@ -367,7 +425,10 @@ define("xabber-templates", [
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
+    addSvgTemplate('svg.blocked-add');
+    addSvgTemplate('svg.information-outline');
     addSvgTemplate('svg.fullname');
+    addSvgTemplate('svg.fullname-outline');
     addSvgTemplate('svg.ic-at');
     addSvgTemplate('svg.ic-searching');
     addSvgTemplate('svg.blocked');

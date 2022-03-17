@@ -21,7 +21,7 @@
 </div>
 <div class="vcard-wrap">
     <div class="info-wrap jid-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg></div>
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="id-outline"></svg></div>
         <div class="info-hover">
             <div class="info jabber-id">
                 <div class="value one-line"></div>
@@ -29,8 +29,17 @@
             </div>
         </div>
     </div>
-    <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+    <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
         <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>
+        <div class="info-hover">
+            <div class="info nickname">
+                <div class="value one-line"></div>
+                <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
+            </div>
+        </div>
+    </div>
+    <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname-outline"></svg></div>
         <div class="info-hover">
             <div class="info first-name">
                 <div class="value one-line"></div>
@@ -41,15 +50,6 @@
             <div class="info last-name">
                 <div class="value one-line"></div>
                 <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>
-            </div>
-        </div>
-    </div>
-    <div class="info-wrap nickname-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
-        <div class="info-hover">
-            <div class="info nickname">
-                <div class="value one-line"></div>
-                <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>
             </div>
         </div>
     </div>
@@ -81,7 +81,7 @@
     <div class="full-vcard-content">
         <div class="vcard-header block-header">
             <div class="vcard-header-title">
-                <i title='{[print(xabber.getString("button_esc"))]}' class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
+                <i class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>
                 <span class="block-name">{[print(xabber.getString("contact_vcard_header_title"))]}</span>
             </div>
             <div class="main-info">
@@ -95,7 +95,7 @@
         </div>
         <div class="vcard-list">
             <div class="info-wrap jid-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg></div>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="id-outline"></svg></div>
                 <div class="info-hover">
                     <div class="info jabber-id">
                         <div class="value one-line"></div>
@@ -113,7 +113,7 @@
                 </div>
             </div>
             <div class="info-wrap personal-info-wrap hidden" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
-                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname"></svg></div>
+                <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname-outline"></svg></div>
                 <div class="info-hover">
                     <div class="info first-name">
                         <div class="value one-line"></div>
@@ -277,6 +277,10 @@
                         <div class="country value one-line"></div>
                         <div class="label">{[print(xabber.getString("vcard_address"))]}</div>
                     </div>
+                </div>
+            </div>
+            <div class="resources-block-wrap hidden">
+                <div class="resources-wrap">
                 </div>
             </div>
         </div>

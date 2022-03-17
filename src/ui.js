@@ -15,7 +15,7 @@ define("xabber-ui", function () {
                 ev.preventDefault();
             }
             let attrs = xabber.body.screen.attributes;
-            if (ev.keyCode === constants.KEY_ESCAPE) {
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 if (xabber.body.$el.siblings('#modals').children('.open').length)
                     return;
                 if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
@@ -44,7 +44,8 @@ define("xabber-ui", function () {
                                 attrs.chat_item.model.trigger('reply_selected_messages');
                                 break;
                             case constants.KEY_ESCAPE:
-                                attrs.chat_item.model.trigger('reset_selected_messages');
+                                if (!xabber.body.screen.get('right_contact'))
+                                    attrs.chat_item.model.trigger('reset_selected_messages');
                                 break;
                         }
                         ev.preventDefault();
@@ -116,23 +117,31 @@ define("xabber-ui", function () {
             }
             if (right_panel_width < 512 ){
                 right_panel_width = panel_width - left_panel_width;
+                this.right_contact_panel_saveable = false;
                 right_contact_panel_styles = {
                     position : 'absolute',
                     right : 0,
                     'z-index' : 499,
                 };
-                if ((right_panel_width - 384) < 128)
+                if ((right_panel_width - 384) < 128) {
                     right_contact_panel_width = right_panel_width;
-                else
+                    this.right_contact_panel.$el.removeClass('background-click')
+                }
+                else {
                     right_contact_panel_width = 384
+                    this.right_contact_panel.$el.addClass('background-click')
+                }
             }
             else {
+                this.right_contact_panel_saveable = true;
                 right_contact_panel_styles = {
                     position : 'static',
                     'z-index' : 0,
                 };
+                this.right_contact_panel.$el.removeClass('background-click')
 
             }
+            this.right_contact_panel_width = right_contact_panel_width;
 
             if (!this.body.screen.get('right_contact')) {
                 right_contact_panel_width = 0;
