@@ -38860,7 +38860,7 @@ define('text!templates/api_service/sync_settings.html',[],function () { return '
 define('text!templates/api_service/sync_settings_account_item.html',[],function () { return '<div class="account-wrap" data-jid="{{jid}}">\n    <div class="account-info-wrap">\n        <i class="sync-icon mdi mdi-24px" data-mdiclass=""></i>\n        <div class="text-info-wrap">\n            <div class="name text-color-grey-900 one-line">{{jid}}</div>\n            <div class="sync-tip text-color-grey-500 one-line"></div>\n        </div>\n    </div>\n    <div class="input-field checkbox-field sync-one-wrap no-padding">\n        <input type="checkbox" class="filled-in sync-one" id="{{view.cid}}_sync_{{jid}}"/>\n        <label for="{{view.cid}}_sync_{{jid}}"></label>\n    </div>\n</div>\n';});
 
 
-define('text!templates/accounts/xmpp_login.html',[],function () { return '    <div class="login-panel-head noselect">\n        <img src="{{CLIENT_LOGO}}" class="client-logo">\n        <span class="client-name">{{SHORT_CLIENT_NAME}}</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="input-field">\n            <input id="jid" type="text" name="jid">\n            <label for="jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">{[print(xabber.getString("hint_pass"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{constants.REGISTER_XMPP_ACCOUNT_URL}}" target="_blank" class="btn-flat btn-main btn-forgot-password one-line">{[constants.REGISTER_XMPP_ACCOUNT_TEXT || print(xabber.getString("xmpp_login__button_register_account"))]}</a>{[}]}\n            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>\n        </div>\n        <div class="clearfix"></div>\n        {[if (constants.USE_SOCIAL_AUTH){]}\n        <div class="social-auth-wrap">\n            <div class="social-header">\n                <div class="divider"></div>\n                <div class="social-header-tip one-line">{[print(xabber.getString("tutorial_title_8"))]}</div>\n            </div>\n            <div class="social-buttons">\n                <div class="btn-social google-color" data-provider="google">\n                    <i class="mdi mdi-28px mdi-google-plus"></i>\n                </div>\n                <div class="btn-social facebook-color" data-provider="facebook">\n                    <i class="mdi mdi-28px mdi-facebook"></i>\n                </div>\n                <div class="btn-social twitter-color" data-provider="twitter">\n                    <i class="mdi mdi-28px mdi-twitter"></i>\n                </div>\n                <div class="btn-social xabber-color" data-provider="email">\n                    <i class="mdi mdi-28px mdi-at"></i>\n                </div>\n            </div>\n        </div>\n        {[}]}\n    </div>';});
+define('text!templates/accounts/xmpp_login.html',[],function () { return '    <div class="login-panel-head noselect">\n        <img src="{{CLIENT_LOGO}}" class="client-logo">\n        <span class="client-name">{{SHORT_CLIENT_NAME}}</span>\n    </div>\n    <div class="login-panel-form xmpp-login-form noselect">\n        <div class="input-field">\n            <input id="jid" type="text" name="jid">\n            <label for="jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="password" type="password" name="password">\n            <label for="password">{[print(xabber.getString("hint_pass"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field buttons-wrap">\n            <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_register_form"))]}</div>\n            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>\n        </div>\n        <div class="clearfix"></div>\n    </div>\n    <div class="login-panel-form register-form noselect hidden">\n        <div class="login-form-header">{[print(xabber.getString("xmpp_login__header_registration"))]}</div>\n        <div class="input-field">\n            <input id="register_jid" type="text" name="register_jid">\n            <label for="register_jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        <div class="input-field">\n            <input id="register_password" type="password" name="register_password">\n            <label for="register_password">{[print(xabber.getString("hint_pass"))]}</label>\n            <span class="errors fixed one-line"></span>\n        </div>\n        {[if (xabber.url_params && xabber.url_params.rkey){]}\n            <div class="login-form-header">{[print(xabber.getString("xmpp_login__registration_via_link"))]}</div>\n        {[}]}\n        <div class="input-field buttons-wrap">\n            <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_login_form"))]}</div>\n            <button class="btn btn-flat btn-main-filled btn-register">{[print(xabber.getString("xmpp_login__button_register"))]}</button>\n        </div>\n        <div class="clearfix"></div>\n    </div>';});
 
 
 define('text!templates/accounts/add_account.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("account_add"))]}</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid">\n                <label for="jid">{[print(xabber.getString("account_user_name"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">{[print(xabber.getString("account_password"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n        <div class="sync-option">\n            <input type="checkbox" class="filled-in" id="{{view.cid}}_sync_acc"/>\n            <label for="{{view.cid}}_sync_acc">{[print(xabber.getString("sync_with_xabber_account"))]}</label>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">{[print(xabber.getString("add"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>\n';});
@@ -38869,22 +38869,25 @@ define('text!templates/accounts/add_account.html',[],function () { return '<div 
 define('text!templates/accounts/change_password.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("settings_account__dialog_change_password__header"))]}</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid" readonly>\n                <label for="jid">{[print(xabber.getString("account_user_name"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">{[print(xabber.getString("account_password"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-change">{[print(xabber.getString("set"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>\n';});
 
 
+define('text!templates/accounts/change_account_password.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("button_change_pass"))]}</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="old_password" type="password" name="old_password">\n                <label for="old_password">{[print(xabber.getString("hint_old_pass"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">{[print(xabber.getString("hint_pass"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password_confirm" type="password" name="password_confirm">\n                <label for="password">{[print(xabber.getString("hint_confirm_pass"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-change">{[print(xabber.getString("change"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>\n';});
+
+
 define('text!templates/accounts/toolbar_item.html',[],function () { return '<div class="border"/>\n<div class="dropdown-button circle-avatar border-color ground-color-700 noselect"/>\n<div class="status"/>\n<i class="auth-failed mdi mdi-16px mdi-close"></i>\n<div class="account-actions-panel">\n    <div class="filter-chats">\n        <i class="mdi mdi-filter mdi-20px"></i>\n        <div class="text">{[print(xabber.getString("account__toolbar_item__button_filter_chats"))]}</div>\n    </div>\n</div>';});
 
 
 define('text!templates/accounts/settings_left.html',[],function () { return '    <div class="left-column ground-color-900 noselect">\n        <div class="main-info-wrap account-main-info-wrap">\n            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->\n            <div class="picture-wrap">\n                <div class="avatar-wrap">\n                    <div class="circle-avatar">\n                        <img/>\n                        <input type="file"/>\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        </div>\n                    </div>\n                    <div class="status"></div>\n                </div>\n            </div>\n            <div class="name-wrap">\n                <div class="name"></div>\n            </div>\n            <div class="status-wrap"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab" data-block-name="connection">\n                <i class="mdi mdi-24px mdi-settings"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_connection_settings"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="tokens">\n                <i class="mdi mdi-24px mdi-key"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_active_sessions"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="synchronization">\n                <i class="mdi mdi-24px mdi-sync"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_sync"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="color-scheme">\n                <i class="mdi mdi-24px mdi-palette"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_color_scheme"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="vcard">\n                <i class="mdi mdi-24px mdi-account-card-details"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_vcard"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="omemo-info">\n                <i class="mdi mdi-24px mdi-fingerprint"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("omemo__settings__menu_item"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="server-info">\n                <i class="mdi mdi-24px mdi-information"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="blocklist-info">\n                <i class="mdi mdi-24px mdi-block-helper"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("blocked_contacts"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="groups-info">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>\n            </div>\n        </div>\n        <div class="settings-tabs-bottom-wrap ground-color-900">\n            <div class="settings-tab delete-account">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">{[print(xabber.getString("settings_account__button_quit_account"))]}</div>\n            </div>\n        </div>\n    </div>\n';});
 
 
-define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span>{[print(xabber.getString("account_editor"))]}</span>\n        <div class="field enabled-state switch normal">\n            <label class="field-value">\n                <input type="checkbox">\n                <span class="lever"></span>\n            </label>\n        </div>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div class="settings-block-wrap connection">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_connection_settings"))]}</span>\n                </div>\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="buttons-wrap">\n                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_set_pass"))]}</button>\n                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("settings_account__button_reconnect"))]}</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap tokens">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_active_sessions"))]}</span>\n                </div>\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap synchronization">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_sync"))]}</span>\n                </div>\n                <div class="synchronization-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label sync-status"></div>\n                        </div>\n                    </div>\n                    <div class="xabber-account-features-wrap">\n                        <div class="sync-enable-wrap">\n                            <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>\n                            <label for="{{view.cid}}_sync_account">{[print(xabber.getString("account_sync_enable_summary"))]}</label>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("delete_settings_button"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap color-scheme">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_color_scheme"))]}</span>\n                </div>\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="current-color-name text-color-700"></div>\n                        <div class="dropdown-button" data-activates="select-color-{{view.cid}}">\n                            <i class="mdi mdi-24px mdi-menu-down"></i>\n                        </div>\n                        <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">\n                            <li class="color-value" data-value="red">\n                                <div class="color-name text-color-red-700">{[print(xabber.getString("account_color_name_red"))]}</div>\n                                <div class="color-pattern ground-color-red-700"></div>\n                            </li>\n                            <li class="color-value" data-value="pink">\n                                <div class="color-name text-color-pink-700">{[print(xabber.getString("account_color_name_pink"))]}</div>\n                                <div class="color-pattern ground-color-pink-700"></div>\n                            </li>\n                            <li class="color-value" data-value="purple">\n                                <div class="color-name text-color-purple-700">{[print(xabber.getString("account_color_name_purple"))]}</div>\n                                <div class="color-pattern ground-color-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-purple">\n                                <div class="color-name text-color-deep-purple-700">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-deep-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="indigo">\n                                <div class="color-name text-color-indigo-700">{[print(xabber.getString("account_color_name_indigo"))]}</div>\n                                <div class="color-pattern ground-color-indigo-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue">\n                                <div class="color-name text-color-blue-700">{[print(xabber.getString("account_color_name_blue"))]}</div>\n                                <div class="color-pattern ground-color-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-blue">\n                                <div class="color-name text-color-light-blue-700">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-light-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="cyan">\n                                <div class="color-name text-color-cyan-700">{[print(xabber.getString("account_color_name_cyan"))]}</div>\n                                <div class="color-pattern ground-color-cyan-700"></div>\n                            </li>\n                            <li class="color-value" data-value="teal">\n                                <div class="color-name text-color-teal-700">{[print(xabber.getString("account_color_name_teal"))]}</div>\n                                <div class="color-pattern ground-color-teal-700"></div>\n                            </li>\n                            <li class="color-value" data-value="green">\n                                <div class="color-name text-color-green-700">{[print(xabber.getString("account_color_name_green"))]}</div>\n                                <div class="color-pattern ground-color-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-green">\n                                <div class="color-name text-color-light-green-700">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-light-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="lime">\n                                <div class="color-name text-color-lime-700">{[print(xabber.getString("account_color_name_lime"))]}</div>\n                                <div class="color-pattern ground-color-lime-700"></div>\n                            </li>\n                            <li class="color-value" data-value="amber">\n                                <div class="color-name text-color-amber-700">{[print(xabber.getString("account_color_name_amber"))]}</div>\n                                <div class="color-pattern ground-color-amber-700"></div>\n                            </li>\n                            <li class="color-value" data-value="orange">\n                                <div class="color-name text-color-orange-700">{[print(xabber.getString("account_color_name_orange"))]}</div>\n                                <div class="color-pattern ground-color-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-orange">\n                                <div class="color-name text-color-deep-orange-700">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-deep-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="brown">\n                                <div class="color-name text-color-brown-700">{[print(xabber.getString("account_color_name_brown"))]}</div>\n                                <div class="color-pattern ground-color-brown-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue-grey">\n                                <div class="color-name text-color-blue-grey-700">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-blue-grey-700"></div>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap vcard">\n            </div>\n\n            <div class="settings-block-wrap omemo-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("omemo__settings__section_header"))]}</span>\n                </div>\n                <div class="omemo-settings-wrap">\n                    <div class="settings">\n                        <div class="setting-wrap omemo-enable">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_enable_encryption"))]}</span>\n                            <div class="field setting-use-omemo switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap send-chat-states">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_send_typing_notifications"))]}</span>\n                            <div class="field setting-send-chat-states switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap manage-devices">\n                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>\n                        </div>\n                        <div class="setting-wrap purge-keys">\n                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap server-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_server_info_description"))]}</span>\n                </div>\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap blocklist-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("blocked_contacts"))]}</span>\n                </div>\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>\n                        <div class="blocked-domains-wrap hidden">\n                            <div class="blocked-item domains-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_domain"))]}</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-domains blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-invitations-wrap hidden">\n                            <div class="blocked-item invitations-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_group_invitations"))]}</div>\n                                <div class="blocked-item-description">{[print(xabber.getString("blocked_group_invitations_summary_full"))]}</div>\n                            </div>\n                            <div class="blocked-invitations blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-contacts-wrap hidden">\n                            <div class="blocked-item contacts-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_contacts"))]}</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-contacts blocked-list hidden"/>\n                        </div>\n                        <button class="btn-block btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap groups-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("settings_account__section_header_circles"))]}</span>\n                </div>\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span>{[print(xabber.getString("account_editor"))]}</span>\n        <div class="field enabled-state switch normal">\n            <label class="field-value">\n                <input type="checkbox">\n                <span class="lever"></span>\n            </label>\n        </div>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div class="settings-block-wrap connection">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_connection_settings"))]}</span>\n                </div>\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="buttons-wrap">\n                        <button class="btn-change-password-account btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_change_pass"))]}</button>\n                        <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_set_pass"))]}</button>\n                        <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("settings_account__button_reconnect"))]}</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap tokens">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_active_sessions"))]}</span>\n                </div>\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap synchronization">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_sync"))]}</span>\n                </div>\n                <div class="synchronization-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon sync-status-icon mdi mdi-24px" data-mdiclass=""></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label sync-status"></div>\n                        </div>\n                    </div>\n                    <div class="xabber-account-features-wrap">\n                        <div class="sync-enable-wrap">\n                            <input type="checkbox" class="filled-in sync-account" id="{{view.cid}}_sync_account"/>\n                            <label for="{{view.cid}}_sync_account">{[print(xabber.getString("account_sync_enable_summary"))]}</label>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-delete-settings btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("delete_settings_button"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap color-scheme">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_color_scheme"))]}</span>\n                </div>\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="current-color-name text-color-700"></div>\n                        <div class="dropdown-button" data-activates="select-color-{{view.cid}}">\n                            <i class="mdi mdi-24px mdi-menu-down"></i>\n                        </div>\n                        <ul id="select-color-{{view.cid}}" class="color-values dropdown-content noselect">\n                            <li class="color-value" data-value="red">\n                                <div class="color-name text-color-red-700">{[print(xabber.getString("account_color_name_red"))]}</div>\n                                <div class="color-pattern ground-color-red-700"></div>\n                            </li>\n                            <li class="color-value" data-value="pink">\n                                <div class="color-name text-color-pink-700">{[print(xabber.getString("account_color_name_pink"))]}</div>\n                                <div class="color-pattern ground-color-pink-700"></div>\n                            </li>\n                            <li class="color-value" data-value="purple">\n                                <div class="color-name text-color-purple-700">{[print(xabber.getString("account_color_name_purple"))]}</div>\n                                <div class="color-pattern ground-color-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-purple">\n                                <div class="color-name text-color-deep-purple-700">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-deep-purple-700"></div>\n                            </li>\n                            <li class="color-value" data-value="indigo">\n                                <div class="color-name text-color-indigo-700">{[print(xabber.getString("account_color_name_indigo"))]}</div>\n                                <div class="color-pattern ground-color-indigo-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue">\n                                <div class="color-name text-color-blue-700">{[print(xabber.getString("account_color_name_blue"))]}</div>\n                                <div class="color-pattern ground-color-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-blue">\n                                <div class="color-name text-color-light-blue-700">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-light-blue-700"></div>\n                            </li>\n                            <li class="color-value" data-value="cyan">\n                                <div class="color-name text-color-cyan-700">{[print(xabber.getString("account_color_name_cyan"))]}</div>\n                                <div class="color-pattern ground-color-cyan-700"></div>\n                            </li>\n                            <li class="color-value" data-value="teal">\n                                <div class="color-name text-color-teal-700">{[print(xabber.getString("account_color_name_teal"))]}</div>\n                                <div class="color-pattern ground-color-teal-700"></div>\n                            </li>\n                            <li class="color-value" data-value="green">\n                                <div class="color-name text-color-green-700">{[print(xabber.getString("account_color_name_green"))]}</div>\n                                <div class="color-pattern ground-color-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="light-green">\n                                <div class="color-name text-color-light-green-700">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-light-green-700"></div>\n                            </li>\n                            <li class="color-value" data-value="lime">\n                                <div class="color-name text-color-lime-700">{[print(xabber.getString("account_color_name_lime"))]}</div>\n                                <div class="color-pattern ground-color-lime-700"></div>\n                            </li>\n                            <li class="color-value" data-value="amber">\n                                <div class="color-name text-color-amber-700">{[print(xabber.getString("account_color_name_amber"))]}</div>\n                                <div class="color-pattern ground-color-amber-700"></div>\n                            </li>\n                            <li class="color-value" data-value="orange">\n                                <div class="color-name text-color-orange-700">{[print(xabber.getString("account_color_name_orange"))]}</div>\n                                <div class="color-pattern ground-color-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="deep-orange">\n                                <div class="color-name text-color-deep-orange-700">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-deep-orange-700"></div>\n                            </li>\n                            <li class="color-value" data-value="brown">\n                                <div class="color-name text-color-brown-700">{[print(xabber.getString("account_color_name_brown"))]}</div>\n                                <div class="color-pattern ground-color-brown-700"></div>\n                            </li>\n                            <li class="color-value" data-value="blue-grey">\n                                <div class="color-name text-color-blue-grey-700">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</div>\n                                <div class="color-pattern ground-color-blue-grey-700"></div>\n                            </li>\n                        </ul>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap vcard">\n            </div>\n\n            <div class="settings-block-wrap omemo-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("omemo__settings__section_header"))]}</span>\n                </div>\n                <div class="omemo-settings-wrap">\n                    <div class="settings">\n                        <div class="setting-wrap omemo-enable">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_enable_encryption"))]}</span>\n                            <div class="field setting-use-omemo switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap send-chat-states">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_send_typing_notifications"))]}</span>\n                            <div class="field setting-send-chat-states switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap manage-devices">\n                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>\n                        </div>\n                        <div class="setting-wrap purge-keys">\n                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap server-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("account_server_info_description"))]}</span>\n                </div>\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap blocklist-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("blocked_contacts"))]}</span>\n                </div>\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>\n                        <div class="blocked-domains-wrap hidden">\n                            <div class="blocked-item domains-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_domain"))]}</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-domains blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-invitations-wrap hidden">\n                            <div class="blocked-item invitations-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_group_invitations"))]}</div>\n                                <div class="blocked-item-description">{[print(xabber.getString("blocked_group_invitations_summary_full"))]}</div>\n                            </div>\n                            <div class="blocked-invitations blocked-list hidden"/>\n                        </div>\n                        <div class="blocked-contacts-wrap hidden">\n                            <div class="blocked-item contacts-item">\n                                <i class="toggle-items arrow mdi mdi-20px mdi-chevron-right"></i>\n                                <div class="blocked-item-header one-line">{[print(xabber.getString("blocked_contacts"))]}</div>\n                                <div class="blocked-item-description one-line"/>\n                            </div>\n                            <div class="blocked-contacts blocked-list hidden"/>\n                        </div>\n                        <button class="btn-block btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>\n                    </div>\n                </div>\n            </div>\n\n            <div class="settings-block-wrap groups-info">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("settings_account__section_header_circles"))]}</span>\n                </div>\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/accounts/existing_groupchat_item.html',[],function () { return '<div class="existing-chat-wrap" data-name="{{name}}" data-jid="{{jid}}">\n    <div class="circle-avatar">\n        <img>\n    </div>\n    <div class="existing-chat-item">\n        <div class="name one-line">{{name}}</div>\n        <div class="jid one-line">{{jid}}</div>\n    </div>\n    <button class="btn-join-existing-chat btn-flat btn-dark btn-main">join</button>\n</div>';});
 
 
-define('text!templates/accounts/resource.html',[],function () { return '<svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n<table>\n    <tbody>\n    <tr class="info status-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>\n        <td>\n            <div class="value status-message one-line"></div>\n            <div class="status"></div>\n        </td>\n    </tr>\n    <tr class="info client-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_client"))]}:</td>\n        <td class="value client one-line"></td>\n    </tr>\n    <tr class="info resource-info">\n        <td class="label">{[print(xabber.getString("account_resource"))]}:</td>\n        <td class="value resource one-line"></td>\n    </tr>\n    <tr class="info priority-info">\n        <td class="label">{[print(xabber.getString("account_priority"))]}:</td>\n        <td class="value priority"></td>\n    </tr>\n    </tbody>\n</table>';});
+define('text!templates/accounts/resource.html',[],function () { return '<svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg>\n<table>\n    <tbody>\n    <tr class="info status-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>\n        <td>\n            <div class="value status-message"></div>\n            <div class="status"></div>\n        </td>\n    </tr>\n    <tr class="info client-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_client"))]}:</td>\n        <td class="value client"></td>\n    </tr>\n    <tr class="info resource-info">\n        <td class="label">{[print(xabber.getString("account_resource"))]}:</td>\n        <td class="value resource"></td>\n    </tr>\n    <tr class="info priority-info">\n        <td class="label">{[print(xabber.getString("account_priority"))]}:</td>\n        <td class="value priority"></td>\n    </tr>\n    </tbody>\n</table>';});
 
 
-define('text!templates/accounts/resource_right.html',[],function () { return '<div class="info-wrap resource-info-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'>\n    <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="ic-jabber"></svg></div>\n    <div class="info-hover">\n        <div class="info">\n            <div class="status-message value one-line"></div>\n            <div class="status"></div>\n            <div class="client value one-line"></div>\n            <div class="resource value one-line"></div>\n            <div class="priority value one-line"></div>\n            <div class="label">{[print(xabber.getString("account_resource"))]}</div>\n        </div>\n    </div>\n</div>';});
+define('text!templates/accounts/resource_right.html',[],function () { return '<table>\n    <tbody>\n    <tr class="info status-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>\n        <td>\n            <div class="value status-message one-line"></div>\n            <div class="status"></div>\n        </td>\n    </tr>\n    <tr class="info client-info">\n        <td class="label">{[print(xabber.getString("settings_account__label_client"))]}:</td>\n        <td class="value client one-line"></td>\n    </tr>\n    <tr class="info resource-info">\n        <td class="label">{[print(xabber.getString("account_resource"))]}:</td>\n        <td class="value resource one-line"></td>\n    </tr>\n    <tr class="info priority-info">\n        <td class="label">{[print(xabber.getString("account_priority"))]}:</td>\n        <td class="value priority"></td>\n    </tr>\n    </tbody>\n</table>';});
 
 
 define('text!templates/accounts/global_settings_item.html',[],function () { return '<div class="move-account-to-this droppable"></div>\n<div class="account-info-wrap">\n    <i class="drag-item drag-handle mdi mdi-28px mdi-drag-vertical"></i>\n    <div class="circle-avatar noselect">\n        <img>\n    </div>\n    <div class="text-info-wrap">\n        <div class="jid-wrap">\n            <div class="jid text-color-700 one-line"></div>\n        </div>\n        <div class="conn-status one-line"></div>\n    </div>\n</div>\n<div class="sync-marker-wrap hidden">\n    <i class="sync-marker mdi mdi-20px mdi-cloud-check"></i>\n</div>\n<div class="field clickable-field enabled-state switch normal">\n    <label class="field-value">\n        <input type="checkbox">\n        <span class="lever"></span>\n    </label>\n</div>\n';});
@@ -39409,6 +39412,7 @@ define("xabber-templates", [
     "text!templates/accounts/xmpp_login.html",
     "text!templates/accounts/add_account.html",
     "text!templates/accounts/change_password.html",
+    "text!templates/accounts/change_account_password.html",
     "text!templates/accounts/toolbar_item.html",
     "text!templates/accounts/settings_left.html",
     "text!templates/accounts/settings_right.html",
@@ -39661,6 +39665,7 @@ define("xabber-templates", [
     addTemplate('accounts.xmpp_login');
     addTemplate('accounts.add_account');
     addTemplate('accounts.change_password');
+    addTemplate('accounts.change_account_password');
     addTemplate('accounts.toolbar_item');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');
@@ -40331,6 +40336,10 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
                         $('<div class="dialog-bottom-text"/>').html(dialog_options.bottom_text).appendTo(dialog.$modal.find('.container-for-img'));
                 }
 
+                if (dialog_options.escape_button) {
+                    dialog.$modal.find('.modal-header').append('<i class="close-modal mdi mdi-close mdi-24px"></i>');
+                }
+
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {
                     dialog.$modal.find('.dialog-options-wrap').html($('<input type="text" placeholder="' + dialog_options.input_placeholder_value + '" id="user_value"/>').val(dialog_options.input_value));
                 }
@@ -40361,6 +40370,10 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
                         else
                             dialog.close({complete_data: option});
                     }
+                });
+
+                dialog.$modal.find('.modal-header .close-modal').click(function () {
+                        dialog.close({complete_data: false});
                 });
 
                 return dialog.open();
@@ -41217,7 +41230,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":36,"az":3,"be":17,"bg":76,"bs":0,"ca":33,"cs":99,"cy":0,"da":0,"de":65,"el":38,"es-ES":45,"es-latin":9,"et":0,"fa":6,"fi":12,"fil":19,"fr":36,"ga-IE":0,"he":27,"hi":0,"hr":0,"hu":19,"hy-AM":11,"id":87,"is":0,"it":94,"ja":26,"ka":0,"kmr":0,"ko":1,"ku":3,"ky":7,"la-LA":0,"lb":0,"lt":5,"me":0,"mk":0,"mn":0,"mr":0,"ms":8,"nb":27,"ne-NP":0,"nl":26,"no":0,"oc":17,"pa-IN":0,"pl":83,"pt-BR":92,"pt-PT":19,"qya-AA":0,"ro":21,"ru":72,"sat":2,"sco":0,"si-LK":49,"sk":26,"sl":36,"sq":4,"sr":17,"sr-Cyrl-ME":0,"sv-SE":49,"sw":1,"ta":2,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":86,"uk":36,"uz":0,"vi":17,"yo":0,"zh-CN":37,"zh-TW":14,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.7","version_description":"Add contact jid lowercase fix"}'
+'{"version_number":"2.3.2.8","version_description":"Registration testing"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -46320,6 +46333,336 @@ define("xabber-strophe", [],function () {
             }
         };
 
+        Strophe.addConnectionPlugin('register', {
+            _connection: null,
+
+            //The plugin must have the init function.
+            init: function(conn) {
+                this._connection = conn;
+
+                // compute free emun index number
+                let i = 0;
+                Object.keys(Strophe.Status).forEach(function (key) {
+                    i = Math.max(i, Strophe.Status[key]);
+                });
+
+                /* extend name space
+                 *  NS.REGISTER - In-Band Registration
+                 *              from XEP 77.
+                 */
+                Strophe.addNamespace('REGISTER', 'jabber:iq:register');
+                Strophe.Status.REGIFAIL        = i + 1;
+                Strophe.Status.REGISTER        = i + 2;
+                Strophe.Status.REGISTERED      = i + 3;
+                Strophe.Status.CONFLICT        = i + 4;
+                Strophe.Status.NOTACCEPTABLE   = i + 5;
+
+                if (conn.disco) {
+                    if(conn.disco.addFeature)
+                        conn.disco.addFeature(Strophe.NS.REGISTER);
+                    if(conn.disco.addNode)
+                        conn.disco.addNode(Strophe.NS.REGISTER, {items:[]});
+                }
+
+                // hooking strophe's connection.reset
+                var self = this, reset = conn.reset.bind(conn);
+                conn.reset = function () {
+                    reset();
+                    self.instructions = "";
+                    self.fields = {};
+                    self.registered = false;
+                };
+
+                // hooking strophe's _connect_cb
+                var connect_cb = conn._connect_cb.bind(conn);
+                conn._connect_cb = function (req, callback, raw) {
+                    if (!self._registering) {
+                        if (self.processed_features) {
+                            // exchange Input hooks to not print the stream:features twice
+                            var xmlInput = conn.xmlInput;
+                            conn.xmlInput = Strophe.Connection.prototype.xmlInput;
+                            var rawInput = conn.rawInput;
+                            conn.rawInput = Strophe.Connection.prototype.rawInput;
+                            connect_cb(req, callback, raw);
+                            conn.xmlInput = xmlInput;
+                            conn.rawInput = rawInput;
+                            delete self.processed_features;
+                        } else {
+                            connect_cb(req, callback, raw);
+                        }
+                    } else {
+                        // Save this request in case we want to authenticate later
+                        self._connect_cb_data = {req: req,
+                            raw: raw};
+                        if(self._register_cb(req, callback, raw)) {
+                            // remember that we already processed stream:features
+                            self.processed_features = true;
+                            delete self._registering;
+                        }
+                    }
+                };
+
+                // hooking strophe`s authenticate
+                var auth_old = conn.authenticate.bind(conn);
+                conn.authenticate = function(matched) {
+                    if (typeof matched === "undefined") {
+                        var conn = this._connection;
+
+                        if (!this.fields.username || !this.domain || !this.fields.password) {
+                            Strophe.info("Register a JID first!");
+                            return;
+                        }
+
+                        var jid = this.fields.username + "@" + this.domain;
+
+                        conn.jid = jid;
+                        conn.authzid = Strophe.getBareJidFromJid(conn.jid);
+                        conn.authcid = Strophe.getNodeFromJid(conn.jid);
+                        conn.pass = this.fields.password;
+
+                        var req = this._connect_cb_data.req;
+                        var callback = conn.connect_callback;
+                        var raw = this._connect_cb_data.raw;
+                        conn._connect_cb(req, callback, raw);
+                    } else {
+                        auth_old(matched);
+                    }
+                }.bind(this);
+
+            },
+
+            /** Function: connect
+             *  Starts the registration process.
+             *
+             *  As the registration process proceeds, the user supplied callback will
+             *  be triggered multiple times with status updates.  The callback
+             *  should take two arguments - the status code and the error condition.
+             *
+             *  The status code will be one of the values in the Strophe.Status
+             *  constants.  The error condition will be one of the conditions
+             *  defined in RFC 3920 or the condition 'strophe-parsererror'.
+             *
+             *  Please see XEP 77 for a more detailed explanation of the optional
+             *  parameters below.
+             *
+             *  Parameters:
+             *    (String) domain - The xmpp server's Domain.  This will be the server,
+             *      which will be contacted to register a new JID.
+             *      The server has to provide and allow In-Band Registration (XEP-0077).
+             *    (Function) callback The connect callback function.
+             *    (Integer) wait - The optional HTTPBIND wait value.  This is the
+             *      time the server will wait before returning an empty result for
+             *      a request.  The default setting of 60 seconds is recommended.
+             *      Other settings will require tweaks to the Strophe.TIMEOUT value.
+             *    (Integer) hold - The optional HTTPBIND hold value.  This is the
+             *      number of connections the server will hold at one time.  This
+             *      should almost always be set to 1 (the default).
+             */
+            connect: function(domain, callback, wait, hold, route) {
+                var conn = this._connection;
+                this.domain = Strophe.getDomainFromJid(domain);
+                this.instructions = "";
+                this.fields = {};
+                this.registered = false;
+
+                this._registering = true;
+
+                conn.connect(this.domain, "", callback, wait, hold, route);
+            },
+
+            connect_change_password: function(jid, password, callback, wait, hold, route) {
+                var conn = this._connection;
+                this.domain = Strophe.getDomainFromJid(jid);
+                this.instructions = "";
+                this.fields = {};
+                conn.registerSASLMechanisms([Strophe.SASLAnonymous,
+                    Strophe.SASLExternal,
+                    Strophe.SASLMD5,
+                    Strophe.SASLPlain,
+                    Strophe.SASLSHA1]);
+
+                conn.connect(jid, password, callback, wait, hold, route);
+            },
+
+            /** PrivateFunction: _register_cb
+             *  _Private_ handler for initial registration request.
+             *
+             *  This handler is used to process the initial registration request
+             *  response from the BOSH server. It is used to set up a bosh session
+             *  and requesting registration fields from host.
+             *
+             *  Parameters:
+             *    (Strophe.Request) req - The current request.
+             */
+            _register_cb: function (req, _callback, raw) {
+                var conn = this._connection;
+
+                Strophe.info("_register_cb was called");
+                conn.connected = true;
+
+                var bodyWrap = conn._proto._reqToData(req);
+                if (!bodyWrap) { return; }
+
+                if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
+                    if (bodyWrap.nodeName === conn._proto.strip && bodyWrap.childNodes.length) {
+                        conn.xmlInput(bodyWrap.childNodes[0]);
+                    } else {
+                        conn.xmlInput(bodyWrap);
+                    }
+                }
+                if (conn.rawInput !== Strophe.Connection.prototype.rawInput) {
+                    if (raw) {
+                        conn.rawInput(raw);
+                    } else {
+                        conn.rawInput(Strophe.serialize(bodyWrap));
+                    }
+                }
+
+                var conncheck = conn._proto._connect_cb(bodyWrap);
+                if (conncheck === Strophe.Status.CONNFAIL) {
+                    return false;
+                }
+
+                // Check for the stream:features tag
+                var register = bodyWrap.getElementsByTagName("register");
+                var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+                if (register.length === 0 && mechanisms.length === 0) {
+                    conn._proto._no_auth_received(_callback);
+                    return false;
+                }
+
+                if (register.length === 0) {
+                    conn._changeConnectStatus(Strophe.Status.REGIFAIL, null);
+                    return true;
+                }
+
+                // send a get request for registration, to get all required data fields
+                conn._addSysHandler(this._get_register_cb.bind(this),
+                    null, "iq", null, null);
+                conn.send($iq({type: "get", id: uuid(), to: this.domain }).c("query",
+                    {xmlns: Strophe.NS.REGISTER}).tree());
+
+                return true;
+            },
+
+            /** PrivateFunction: _get_register_cb
+             *  _Private_ handler for Registration Fields Request.
+             *
+             *  Parameters:
+             *    (XMLElement) elem - The query stanza.
+             *
+             *  Returns:
+             *    false to remove SHOULD contain the registration information currentlSHOULD contain the registration information currentlSHOULD contain the registration information currentlthe handler.
+             */
+            _get_register_cb: function (stanza) {
+                var i, query, field, conn = this._connection;
+                query = stanza.getElementsByTagName("query");
+
+                if (query.length !== 1) {
+                    conn._changeConnectStatus(Strophe.Status.REGIFAIL, "unknown");
+                    return false;
+                }
+                query = query[0];
+                // get required fields
+                for (i = 0; i < query.childNodes.length; i++) {
+                    field = query.childNodes[i];
+                    if (field.tagName.toLowerCase() === 'instructions') {
+                        // this is a special element
+                        // it provides info about given data fields in a textual way.
+                        conn.register.instructions = Strophe.getText(field);
+                        continue;
+                    } else if (field.tagName.toLowerCase() === 'x') {
+                        // ignore x for now
+                        continue;
+                    }
+                    conn.register.fields[field.tagName.toLowerCase()] = Strophe.getText(field);
+                }
+                conn._changeConnectStatus(Strophe.Status.REGISTER, null);
+                return false;
+            },
+
+            /** Function: submit
+             *  Submits Registration data.
+             *
+             *  As the registration process proceeds, the user supplied callback will
+             *  be triggered with status code Strophe.Status.REGISTER. At this point
+             *  the user should fill all required fields in connection.register.fields
+             *  and invoke this function to procceed in the registration process.
+             */
+            submit: function () {
+                var i, name, query, fields, conn = this._connection;
+                query = $iq({type: "set", id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER});
+
+                // set required fields
+                fields = Object.keys(this.fields);
+                for (i = 0; i < fields.length; i++) {
+                    name = fields[i];
+                    query.c(name).t(this.fields[name]).up();
+                }
+
+                // providing required information
+                conn._addSysHandler(this._submit_cb.bind(this),
+                    null, "iq", null, null);
+                conn.send(query);
+            },
+
+            /** PrivateFunction: _submit_cb
+             *  _Private_ handler for submitted registration information.
+             *
+             *  Parameters:
+             *    (XMLElement) elem - The query stanza.
+             *
+             *  Returns:
+             *    false to remove the handler.
+             */
+            _submit_cb: function (stanza) {
+                var i, query, field, error = null, conn = this._connection;
+
+                query = stanza.getElementsByTagName("query");
+                if (query.length > 0) {
+                    query = query[0];
+                    // update fields
+                    for (i = 0; i < query.childNodes.length; i++) {
+                        field = query.childNodes[i];
+                        if (field.tagName.toLowerCase() === 'instructions') {
+                            // this is a special element
+                            // it provides info about given data fields in a textual way
+                            this.instructions = Strophe.getText(field);
+                            continue;
+                        }
+                        this.fields[field.tagName.toLowerCase()] = Strophe.getText(field);
+                    }
+                }
+
+                if (stanza.getAttribute("type") === "error") {
+                    error = stanza.getElementsByTagName("error");
+                    if (error.length !== 1) {
+                        conn._changeConnectStatus(Strophe.Status.REGIFAIL, "unknown");
+                        return false;
+                    }
+
+                    Strophe.info("Registration failed.");
+
+                    // this is either 'conflict' or 'not-acceptable'
+                    error = error[0].firstChild.tagName.toLowerCase();
+                    if (error === 'conflict') {
+                        conn._changeConnectStatus(Strophe.Status.CONFLICT, error);
+                    } else if (error === 'not-acceptable') {
+                        conn._changeConnectStatus(Strophe.Status.NOTACCEPTABLE, error);
+                    } else {
+                        conn._changeConnectStatus(Strophe.Status.REGIFAIL, error);
+                    }
+                } else {
+                    Strophe.info("Registration successful.");
+
+                    conn._changeConnectStatus(Strophe.Status.REGISTERED, null);
+                }
+
+                return false;
+            }
+        });
+
+
         let utf16to8 = function (str) {
             let i, c;
             let out = "";
@@ -46404,6 +46747,48 @@ define("xabber-strophe", [],function () {
         };
 
         _.extend(Strophe.Connection.prototype, {
+
+            _attemptSASLAuth: function (mechanisms) {
+                mechanisms = this.sortMechanismsByPriority(mechanisms || []);
+                let i = 0, mechanism_found = false;
+                for (i = 0; i < mechanisms.length; ++i) {
+                    if (!mechanisms[i].prototype.test(this)) {
+                        continue;
+                    }
+                    this._sasl_success_handler = this._addSysHandler(
+                        this._sasl_success_cb.bind(this), null,
+                        "success", null, null);
+                    this._sasl_failure_handler = this._addSysHandler(
+                        this._sasl_failure_cb.bind(this), null,
+                        "failure", null, null);
+                    this._sasl_challenge_handler = this._addSysHandler(
+                        this._sasl_challenge_cb.bind(this), null,
+                        "challenge", null, null);
+
+                    this._sasl_mechanism = new mechanisms[i]();
+                    this._sasl_mechanism.onStart(this);
+
+                    let request_auth_exchange = $build("auth", {
+                        xmlns: Strophe.NS.SASL,
+                        mechanism: this._sasl_mechanism.name
+                    });
+                    if (this._sasl_mechanism.isClientFirst) {
+                        let response = this._sasl_mechanism.onChallenge(this, null);
+                        request_auth_exchange.t(btoa(response));
+                    }
+                    this.send(request_auth_exchange.tree());
+                    mechanism_found = true;
+                    if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.name === "HOTP") {
+                        this.counter++
+                        this.account.save({
+                            hotp_counter: this.counter,
+                        });
+                    }
+                    break;
+                }
+                return mechanism_found;
+            },
+
             _sasl_auth1_cb: function (elem) {
                 this.features = elem;
                 let i, child;
@@ -46438,22 +46823,18 @@ define("xabber-strophe", [],function () {
                             this.x_token = {token: token, expire: expires_at, token_uid: token_uid,};
                             this.counter = 1;
                             this.pass = token;
-                            if (this.account)
+                            this._send_auth_bind();
+                            if (this.account) {
                                 this.account.save({
                                     hotp_counter: this.counter,
                                 });
-                            this._send_auth_bind();
+                            }
                         }, () => {
                             this._send_auth_bind();
                         });
                     }
                     else {
                         this._send_auth_bind();
-                        if (this.account && this.x_token_auth) {
-                            this.account.save({
-                                hotp_counter: this.counter,
-                            });
-                        }
                     }
                 }
                 return false;
@@ -46917,9 +47298,6 @@ define("xabber-vcard", [],function () {
                     _.extend(this.ps_settings || {}, xabber.ps_settings)
                 );
             }
-            this.resources_view = this.addChild('resources',
-                xabber.ContactResourcesRightView, {model: this.model.resources,
-                    el: this.$('.resources-block-wrap')[0]});
             this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
             this.model.set('vcard_hidden', true)
         },
@@ -47329,6 +47707,7 @@ define("xabber-accounts", [],function () {
                     this.dfd_presence = new $.Deferred();
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
+                    this.account_password_view = new xabber.ChangeAccountPasswordView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
                     this.updateColorScheme();
                     this.settings.on("change:color", this.updateColorScheme, this);
@@ -47731,6 +48110,7 @@ define("xabber-accounts", [],function () {
                             this.save({
                                 auth_type: 'x-token',
                                 x_token: this.connection.x_token,
+                                hotp_counter: this.connection.counter,
                             });
                         }
                         this.createFastConnection();
@@ -47823,6 +48203,7 @@ define("xabber-accounts", [],function () {
                             this.save({
                                 auth_type: 'x-token',
                                 x_token: this.connection.x_token,
+                                hotp_counter: this.connection.counter,
                             });
                         }
                         this.createFastConnection();
@@ -47844,6 +48225,46 @@ define("xabber-accounts", [],function () {
                         } else {
                             this.connFeedback(xabber.getString("connection__error__connection_lost"));
                         }
+                    }
+                },
+
+                registerCallback: function (status, condition) {
+                    if (status === Strophe.Status.REGISTER) {
+                        this.connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
+                        this.connection.register.fields.password = this.getPassword();
+                        if (xabber.url_params && xabber.url_params.rkey) {
+                            this.connection.register.fields.key = xabber.url_params.rkey;
+                        }
+                        this.connection.register.submit();
+                    } else if (status === Strophe.Status.REGISTERED) {
+                        this.auth_view.successRegistrationFeedback();
+                    } else if (status === Strophe.Status.CONFLICT) {
+                        this.auth_view.errorRegistrationFeedback({jid: xabber.getString("label_xmpp_id")});
+                    } else if (status === Strophe.Status.NOTACCEPTABLE) {
+                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_not_filled")});
+                    } else if (status === Strophe.Status.REGIFAIL) {
+                        condition = condition ? ': ' + condition : '';
+                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_failed") + condition});
+                    }
+                },
+
+                changePasswordCallback: function (status, condition) {
+                    if (status === Strophe.Status.REGISTERED) {
+                        this.account_password_view.successFeedback();
+                    } else if (status === Strophe.Status.CONFLICT
+                        || status === Strophe.Status.NOTACCEPTABLE
+                        || status === Strophe.Status.REGIFAIL) {
+                        condition = condition ? ': ' + condition : '';
+                        this.account_password_view.errorFeedback({password: xabber.getString("password_changed_fail") + condition});
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.account_password_view.errorFeedback({old_password: xabber.getString("AUTHENTICATION_FAILED")});
+                    } else if (status === Strophe.Status.CONNECTED) {
+                        this.change_password_connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
+                        this.change_password_connection.register.fields.password = this.account_password_view.$password_input.val();
+                        this.change_password_connection.register.submit();
+                    } else if (status === Strophe.Status.DISCONNECTED) {
+                        this.change_password_connection_manager = undefined;
+                        this.change_password_connection = undefined;
                     }
                 },
 
@@ -47952,13 +48373,14 @@ define("xabber-accounts", [],function () {
                         if (this.background_connection.x_token) {
                             this.save({
                                 x_token: this.background_connection.x_token,
+                                hotp_counter: this.background_connection.counter,
                             });
                             this.background_conn_manager.auth_type = 'x-token';
                             this.background_connection.x_token_auth = true;
                             if (this.fast_connection && this.fast_connection.pass)
                                 this.background_connection.pass = this.fast_connection.pass;
-                            else if (this.connection.pass && this.connection.pass)
-                                this.fast_connection.pass = this.connection.pass;
+                            else if (this.connection && this.connection.pass)
+                                this.background_connection.pass = this.connection.pass;
                         }
                         _.each(this._after_background_connected_plugins, (plugin) => {
                             plugin.call(this);
@@ -47974,6 +48396,7 @@ define("xabber-accounts", [],function () {
                         if (this.fast_connection.x_token) {
                             this.save({
                                 x_token: this.fast_connection.x_token,
+                                hotp_counter: this.fast_connection.counter,
                             });
                             this.fast_conn_manager.auth_type = 'x-token';
                             this.fast_connection.x_token_auth = true;
@@ -48270,8 +48693,10 @@ define("xabber-accounts", [],function () {
                 },
 
                 onDestroy: function () {
-                    this.connection.connect_callback = null;
-                    this.settings.destroy();
+                    if (this.connection && !this.connection.register._registering)
+                        this.connection.connect_callback = null;
+                    if (this.settings)
+                        this.settings.destroy();
                     if (this.isConnected()) {
                         this.connection.disconnect();
                         if (this.fast_conn_manager) this.fast_connection.disconnect();
@@ -49001,6 +49426,7 @@ define("xabber-accounts", [],function () {
                 "change .setting-send-chat-states input": "setTypingNotification",
                 "change .setting-use-omemo input": "setEnabledOmemo",
                 "click .btn-change-password": "showPasswordView",
+                "click .btn-change-password-account": "showChangeAccountPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "click": "hideResources",
                 "click .last-auth.resource": "showResources",
@@ -49046,7 +49472,8 @@ define("xabber-accounts", [],function () {
                 this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
-                this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -49298,6 +49725,10 @@ define("xabber-accounts", [],function () {
 
             showPasswordView: function () {
                 this.model.password_view.show();
+            },
+
+            showChangeAccountPasswordView: function () {
+                this.model.account_password_view.show();
             },
 
             reconnect: function () {
@@ -49744,6 +50175,104 @@ define("xabber-accounts", [],function () {
             }
         });
 
+        xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
+            className: 'modal main-modal change-password-modal',
+            template: templates.change_account_password,
+
+            events: {
+                "click .btn-change": "submit",
+                "click .btn-cancel": "close",
+                "keyup input[name=old_password]": "keyUp",
+                "keyup input[name=password]": "keyUp"
+            },
+
+            _initialize: function () {
+                this.account = this.model
+                this.$old_password_input = this.$('input[name=old_password]');
+                this.$password_input = this.$('input[name=password]');
+                this.$password_confirm_input = this.$('input[name=password_confirm]');
+                xabber.on("quit", this.onQuit, this);
+                return this;
+            },
+
+            render: function (options) {
+                options || (options = {});
+                this.$el.openModal({
+                    use_queue: true,
+                    ready: this.onRender.bind(this),
+                    complete: this.close.bind(this)
+                });
+            },
+
+            onRender: function () {
+                Materialize.updateTextFields();
+                this.authFeedback({});
+                this.$password_input.val('').focus();
+                this.$password_confirm_input.val('').focus();
+                this.$old_password_input.val('').focus();
+            },
+
+            keyUp: function (ev) {
+                ev.keyCode === constants.KEY_ENTER && this.submit();
+            },
+
+            submit: function () {
+                this.authFeedback({});
+                let jid = this.account.get('jid'),
+                    old_password = this.$old_password_input.val(),
+                    password = this.$password_input.val(),
+                    password_confirm = this.$password_confirm_input.val();
+                if (!old_password)
+                    return this.errorFeedback({old_password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                if (!password)
+                    return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                if (password != password_confirm)
+                    return this.errorFeedback({password_confirm: xabber.getString("settings_account__alert_passwords_do_not_match")});
+                old_password = old_password.trim();
+                password = password.trim();
+                this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
+                if (!this.account.change_password_connection_manager) {
+                    this.account.change_password_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
+                    this.account.change_password_connection = this.account.change_password_connection_manager.connection;
+                    this.account.change_password_connection.account = this.account;
+                    this.account.change_password_connection.register.connect_change_password(jid, old_password, this.account.changePasswordCallback.bind(this.account))
+                }
+            },
+
+            authFeedback: function (options) {
+                this.$password_input.switchClass('invalid', options.password)
+                    .siblings('span.errors').text(options.password || '');
+                this.$old_password_input.switchClass('invalid', options.old_password)
+                    .siblings('span.errors').text(options.old_password || '');
+                this.$password_confirm_input.switchClass('invalid', options.password_confirm)
+                    .siblings('span.errors').text(options.password_confirm || '');
+            },
+
+            errorFeedback: function (options) {
+                if (this.account.change_password_connection)
+                    this.account.change_password_connection.disconnect()
+                this.authFeedback(options);
+            },
+
+            successFeedback: function () {
+                if (this.account.change_password_connection)
+                    this.account.change_password_connection.disconnect()
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            onHide: function () {
+                this.$el.detach();
+            },
+
+            onQuit: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            close: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+        });
+
         xabber.AuthView = xabber.BasicView.extend({
             _initialize: function () {
                 this.$jid_input = this.$('input[name=jid]');
@@ -49780,23 +50309,38 @@ define("xabber-accounts", [],function () {
                 let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (!jid) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("account_auth__error__text_input_username")});
+                    }
                     return this.errorFeedback({jid: xabber.getString("account_auth__error__text_input_username")});
                 }
                 jid = jid.trim();
                 if (!password)  {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                    }
                     return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
                 }
                 password = password.trim();
                 let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("account_auth__error__text_wrong_username")});
+                    }
                     return this.errorFeedback({jid: xabber.getString("account_auth__error__text_wrong_username")});
                 }
                 jid = Strophe.getBareJidFromJid(jid).toLowerCase();
                 let account = xabber.accounts.get(jid);
                 if (account) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("settings_account__alert_account_exists")});
+                    }
                     this.errorFeedback({jid: xabber.getString("settings_account__alert_account_exists")});
                 } else {
-                    this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
+                    if (this.data.get('registration'))
+                        this.authFeedback({password: xabber.getString("account_registration__feedback__text_registration")});
+                    else
+                        this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
                     this.getWebsocketURL(jid, (response) => {
                         this.account = xabber.accounts.create({
                             jid: jid,
@@ -49804,7 +50348,12 @@ define("xabber-accounts", [],function () {
                             password: utils.utoa(password),
                             is_new: true
                         }, {auth_view: this});
-                        this.account.trigger('start');
+
+                        if (this.data.get('registration')) {
+                            this.account.connection.register.connect(jid, this.account.registerCallback.bind(this.account))
+                        }
+                        else
+                            this.account.trigger('start');
                     });
                 }
             },
@@ -49870,7 +50419,10 @@ define("xabber-accounts", [],function () {
 
             events: {
                 "click .login-type": "changeLoginType",
-                "click .btn-log-in": "submit",
+                "click .btn-log-in": "login",
+                "click .btn-register-form": "openRegisterForm",
+                "click .btn-login-form": "closeRegisterForm",
+                "click .btn-register": "register",
                 "click .btn-social": "socialAuth",
                 "click .btn-cancel": "cancel",
                 "keyup input[name=password]": "keyUp"
@@ -49878,6 +50430,35 @@ define("xabber-accounts", [],function () {
 
             changeLoginType: function () {
                 xabber.body.setScreen('login', {'login_screen': 'xabber'});
+            },
+
+            register: function () {
+                if (this.data.get('registration')) {
+                    this.cancel();
+                    return;
+                }
+                this.data.set('registration', true);
+                this.$jid_input = this.$('input[name=register_jid]');
+                this.$password_input = this.$('input[name=register_password]');
+                this.$jid_input.prop('disabled', true);
+                this.$password_input.prop('disabled', true);
+                this.submit();
+            },
+
+            login: function () {
+                this.$jid_input = this.$('input[name=jid]');
+                this.$password_input = this.$('input[name=password]');
+                this.submit();
+            },
+
+            openRegisterForm: function () {
+                this.$('.register-form').hideIf(false);
+                this.$('.xmpp-login-form').hideIf(true);
+            },
+
+            closeRegisterForm: function () {
+                this.$('.register-form').hideIf(true);
+                this.$('.xmpp-login-form').hideIf(false);
             },
 
             updateButtons: function () {
@@ -49890,7 +50471,24 @@ define("xabber-accounts", [],function () {
                 account.auth_view = null;
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
-            }
+            },
+
+            errorRegistrationFeedback: function (options) {
+                this.authFeedback(options);
+                this.data.set('registration', false);
+                this.data.set('authentication', false);
+                this.$jid_input.prop('disabled', false);
+                this.$password_input.prop('disabled', false);
+                this.account.destroy();
+            },
+
+            successRegistrationFeedback: function () {
+                this.data.set('registration', false);
+                this.data.set('authentication', false);
+                this.$jid_input.prop('disabled', false);
+                this.$password_input.prop('disabled', false)
+                this.account.trigger('start');
+            },
         });
 
 
@@ -51523,24 +52121,53 @@ define("xabber-contacts", [],function () {
         });
 
         xabber.ContactResourcesRightView = xabber.ResourcesView.extend({
+            className: 'modal main-modal resource-modal',
+
+            _initialize: function () {
+                this.model.on("add", this.onResourceAdded, this);
+                this.model.on("remove", this.onResourceRemoved, this);
+                this.model.on("reset", this.onReset, this);
+                this.model.on("change:priority", this.onPriorityChanged, this);
+            },
+
+            renderByInit: function () {
+                this.model.each((resource) => {
+                    this.onResourceAdded(resource);
+                });
+            },
+
+            open: function () {
+                if (this.model.length) {
+                    this.$el.openModal({
+                        ready: () => {
+                            this.$el.html('<svg class="details-icon mdi mdi-24px "></svg><div class="resources-wrap"></div>')
+                            this.$el.find('.details-icon').html(env.templates.svg['ic-jabber']())
+                            this.renderByInit();
+                        },
+                        // complete: () => {
+                        //     this.$el.detach();
+                        //     this.data.set('visible', false);
+                        // }
+                    });
+                }
+            },
+
             onResourceAdded: function (resource) {
+                this.model.requestInfo(resource);
                 this.addChild(resource.get('resource'),
                     xabber.ResourceRightView, {model: resource});
                 this.updatePosition(resource);
                 this.$el.removeClass('hidden');
-                this.parent.updateScrollBar();
             },
 
             onResourceRemoved: function (resource) {
                 this.removeChild(resource.get('resource'));
                 this.$el.showIf(this.model.length);
-                this.parent.updateScrollBar();
             },
 
             onReset: function () {
                 this.removeChildren();
                 this.$el.addClass('hidden');
-                this.parent.updateScrollBar();
             },
 
             updatePosition: function (resource) {
@@ -51749,7 +52376,7 @@ define("xabber-contacts", [],function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -52124,7 +52751,7 @@ define("xabber-contacts", [],function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -52438,7 +53065,7 @@ define("xabber-contacts", [],function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -52883,7 +53510,7 @@ define("xabber-contacts", [],function () {
                     url: 'xmpp:' + this.model.get('jid'),
                     noBorder: true
                 });
-                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+                utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
                 });
             },
 
@@ -56422,6 +57049,7 @@ define("xabber-contacts", [],function () {
             field_name: 'contact-name',
             placeholder: "",
             model_field: 'name',
+            template: templates.group_chats.group_name_input_widget,
 
             setValue: function (value) {
                 if (name === "") {
@@ -62666,6 +63294,14 @@ define("xabber-chats", [],function () {
                             );
                             if (loaded_message) counter++;
                         });
+                        if (options.previous_history && !this.model.get('displayed_sent') && this.model.messages.length) {
+                            let last_msg = this.model.messages.models[this.model.messages.length - 1];
+                            if (last_msg)
+                                if (!last_msg.isSenderMe() && this.model.get('active') && this.model.get('display')) {
+                                    this.model.sendMarker(last_msg.get('msgid'), 'displayed', last_msg.get('stanza_id'), last_msg.get('contact_stanza_id'));
+                                    this.model.set('displayed_sent', true);
+                                }
+                        }
                         if ((counter === 0) && options.last_history && !this.model.get('history_loaded')) {
                             this.getMessageArchive(_.extend(query, {
                                 max: xabber.settings.mam_messages_limit,
@@ -66942,6 +67578,7 @@ define("xabber-chats", [],function () {
             "click .chat-head-details": "showContactDetailsRight",
             "click .contact-name": "showContactDetailsRight",
             "click .circle-avatar": "showContactDetailsRight",
+            "click .contact-status-message.resource-hover": "showContactResources",
             "click .btn-contact-details": "showContactDetails",
             "click .btn-clear-history": "clearHistory",
             "click .btn-invite-users": "inviteUsers",
@@ -66969,6 +67606,7 @@ define("xabber-chats", [],function () {
             this.contact = this.content.contact;
             this.model = this.content.model;
             this.account = this.model.account;
+            this.resources_view = new xabber.ContactResourcesRightView({model: this.contact.resources});
             this.updateName();
             this.updateStatus();
             this.updateEncrypted();
@@ -67013,6 +67651,8 @@ define("xabber-chats", [],function () {
             this.$('.chat-head-menu').hide();
             this.updateStatusMsg();
             this.updateGroupChatHead();
+            if (!this.contact.get('group_chat'))
+                this.$('.contact-status-message').addClass('resource-hover')
             return this;
         },
 
@@ -67084,6 +67724,10 @@ define("xabber-chats", [],function () {
 
         showContactDetailsRight: function () {
             this.contact.showDetailsRight('all-chats');
+        },
+
+        showContactResources: function () {
+            this.resources_view.open();
         },
 
         updatePinned: function () {
