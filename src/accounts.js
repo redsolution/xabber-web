@@ -1854,7 +1854,7 @@ define("xabber-accounts", function () {
 
             renderAllXTokens: function () {
                 this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {//34
+                $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
                     let pretty_token = {
                         resource_obj: undefined,
                         client: token.client,

@@ -4366,6 +4366,10 @@ input[type=text].simple-input-field:hover {
     padding: 10px 0;
 }
 
+.add-contact-modal .input-field input#new_contact_username {
+    text-transform: lowercase;
+}
+
 /* ----------------- ADD GROUP CHAT VIEW ------------------------ */
 
 .add-group-chat-modal {

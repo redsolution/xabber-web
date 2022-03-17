@@ -948,8 +948,6 @@ define("xabber-chats", function () {
             this.retraction_version = 0;
             if (this.contact) {
                 this.set('group_chat', this.contact.get('group_chat'));
-                // this.contact.set('muted', _.contains(this.account.chat_settings.get('muted'), jid));
-                // this.contact.set('archived', _.contains(this.account.chat_settings.get('archived'), jid));
                 this.contact.on("destroy", this.onContactDestroyed, this);
                 this.contact.on("change:group_chat", this.onChangedContact, this);
             } else {
@@ -5335,12 +5333,12 @@ define("xabber-chats", function () {
 
         onClickLocation: function (ev) {
             ev.preventDefault();
-            let lon = $(ev.target).attr('lon')
-                lat = $(ev.target).attr('lat')
-                location_name = $(ev.target).attr('title')
+            let lon = $(ev.target).attr('lon'),
+                lat = $(ev.target).attr('lat'),
+                location_name = $(ev.target).attr('title');
             if (lon && lat){
-                window.popup_coordinates = [lon, lat]
-                window.location_name = location_name
+                window.popup_coordinates = [lon, lat];
+                window.location_name = location_name;
                 new xabber.ChatLocationView({content: this}).show(ev);
             }
         },
@@ -5433,12 +5431,12 @@ define("xabber-chats", function () {
         },
         onClickExpandedMessageLocation: function (ev) {
             ev.preventDefault();
-            let lon = $(ev.target).attr('lon')
-                lat = $(ev.target).attr('lat')
-                location_name = $(ev.target).attr('title')
+            let lon = $(ev.target).attr('lon'),
+                lat = $(ev.target).attr('lat'),
+                location_name = $(ev.target).attr('title');
             if (lon && lat){
-                window.popup_coordinates = [lon, lat]
-                window.location_name = location_name
+                window.popup_coordinates = [lon, lat];
+                window.location_name = location_name;
                 new xabber.ChatLocationView({content: this}).show(ev);
             }
         },
@@ -6413,7 +6411,6 @@ define("xabber-chats", function () {
             let wheel_ev = this.defineMouseWheelEvent();
             this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
             this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-            // this.ps_container.on("ps-scroll-down", this.onScroll.bind(this));
             this.$('.read-all-button').click(this.readAllMessages.bind(this));
             xabber.on("update_screen", this.onUpdatedScreen, this);
             xabber.on("update_layout", this.onWindowResized, this);
@@ -8715,8 +8712,8 @@ define("xabber-chats", function () {
         },
 
         showLocationPopup: function (ev) {
-            window.popup_coordinates = undefined
-            window.location_name = undefined
+            window.popup_coordinates = undefined;
+            window.location_name = undefined;
             new xabber.ChatLocationView({content: this}).show(ev);
         },
 
