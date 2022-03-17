@@ -458,8 +458,6 @@ define("xabber-accounts", function () {
                     });
                     if (this.get('x_token'))
                         this.connection.x_token = this.get('x_token');
-                    if (this.get('hotp_counter'))
-                        this.connection.counter = this.get('hotp_counter');
                     this.connection.account = this;
                     setTimeout(() => {
                         this.connFeedback(xabber.getString("application_state_connecting"));
