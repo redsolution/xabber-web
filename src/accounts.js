@@ -84,6 +84,7 @@ define("xabber-accounts", function () {
                     this.dfd_presence = new $.Deferred();
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
+                    this.account_password_view = new xabber.ChangeAccountPasswordView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
                     this.updateColorScheme();
                     this.settings.on("change:color", this.updateColorScheme, this);
@@ -602,6 +603,46 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                registerCallback: function (status, condition) {
+                    if (status === Strophe.Status.REGISTER) {
+                        this.connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
+                        this.connection.register.fields.password = this.getPassword();
+                        if (xabber.url_params && xabber.url_params.rkey) {
+                            this.connection.register.fields.key = xabber.url_params.rkey;
+                        }
+                        this.connection.register.submit();
+                    } else if (status === Strophe.Status.REGISTERED) {
+                        this.auth_view.successRegistrationFeedback();
+                    } else if (status === Strophe.Status.CONFLICT) {
+                        this.auth_view.errorRegistrationFeedback({jid: xabber.getString("label_xmpp_id")});
+                    } else if (status === Strophe.Status.NOTACCEPTABLE) {
+                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_not_filled")});
+                    } else if (status === Strophe.Status.REGIFAIL) {
+                        condition = condition ? ': ' + condition : '';
+                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_failed") + condition});
+                    }
+                },
+
+                changePasswordCallback: function (status, condition) {
+                    if (status === Strophe.Status.REGISTERED) {
+                        this.account_password_view.successFeedback();
+                    } else if (status === Strophe.Status.CONFLICT
+                        || status === Strophe.Status.NOTACCEPTABLE
+                        || status === Strophe.Status.REGIFAIL) {
+                        condition = condition ? ': ' + condition : '';
+                        this.account_password_view.errorFeedback({password: xabber.getString("password_changed_fail") + condition});
+                    } else if (status === Strophe.Status.AUTHFAIL) {
+                        this.account_password_view.errorFeedback({old_password: xabber.getString("AUTHENTICATION_FAILED")});
+                    } else if (status === Strophe.Status.CONNECTED) {
+                        this.change_password_connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
+                        this.change_password_connection.register.fields.password = this.account_password_view.$password_input.val();
+                        this.change_password_connection.register.submit();
+                    } else if (status === Strophe.Status.DISCONNECTED) {
+                        this.change_password_connection_manager = undefined;
+                        this.change_password_connection = undefined;
+                    }
+                },
+
                 loginCallback: function (status, condition) {
                     if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
@@ -1025,8 +1066,10 @@ define("xabber-accounts", function () {
                 },
 
                 onDestroy: function () {
-                    this.connection.connect_callback = null;
-                    this.settings.destroy();
+                    if (this.connection && !this.connection.register._registering)
+                        this.connection.connect_callback = null;
+                    if (this.settings)
+                        this.settings.destroy();
                     if (this.isConnected()) {
                         this.connection.disconnect();
                         if (this.fast_conn_manager) this.fast_connection.disconnect();
@@ -1756,6 +1799,7 @@ define("xabber-accounts", function () {
                 "change .setting-send-chat-states input": "setTypingNotification",
                 "change .setting-use-omemo input": "setEnabledOmemo",
                 "click .btn-change-password": "showPasswordView",
+                "click .btn-change-password-account": "showChangeAccountPasswordView",
                 "click .btn-reconnect": "reconnect",
                 "click": "hideResources",
                 "click .last-auth.resource": "showResources",
@@ -1801,7 +1845,8 @@ define("xabber-accounts", function () {
                 this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
-                this.$('.connection-wrap .buttons-wrap').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -2053,6 +2098,10 @@ define("xabber-accounts", function () {
 
             showPasswordView: function () {
                 this.model.password_view.show();
+            },
+
+            showChangeAccountPasswordView: function () {
+                this.model.account_password_view.show();
             },
 
             reconnect: function () {
@@ -2499,6 +2548,104 @@ define("xabber-accounts", function () {
             }
         });
 
+        xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
+            className: 'modal main-modal change-password-modal',
+            template: templates.change_account_password,
+
+            events: {
+                "click .btn-change": "submit",
+                "click .btn-cancel": "close",
+                "keyup input[name=old_password]": "keyUp",
+                "keyup input[name=password]": "keyUp"
+            },
+
+            _initialize: function () {
+                this.account = this.model
+                this.$old_password_input = this.$('input[name=old_password]');
+                this.$password_input = this.$('input[name=password]');
+                this.$password_confirm_input = this.$('input[name=password_confirm]');
+                xabber.on("quit", this.onQuit, this);
+                return this;
+            },
+
+            render: function (options) {
+                options || (options = {});
+                this.$el.openModal({
+                    use_queue: true,
+                    ready: this.onRender.bind(this),
+                    complete: this.close.bind(this)
+                });
+            },
+
+            onRender: function () {
+                Materialize.updateTextFields();
+                this.authFeedback({});
+                this.$password_input.val('').focus();
+                this.$password_confirm_input.val('').focus();
+                this.$old_password_input.val('').focus();
+            },
+
+            keyUp: function (ev) {
+                ev.keyCode === constants.KEY_ENTER && this.submit();
+            },
+
+            submit: function () {
+                this.authFeedback({});
+                let jid = this.account.get('jid'),
+                    old_password = this.$old_password_input.val(),
+                    password = this.$password_input.val(),
+                    password_confirm = this.$password_confirm_input.val();
+                if (!old_password)
+                    return this.errorFeedback({old_password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                if (!password)
+                    return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                if (password != password_confirm)
+                    return this.errorFeedback({password_confirm: xabber.getString("settings_account__alert_passwords_do_not_match")});
+                old_password = old_password.trim();
+                password = password.trim();
+                this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
+                if (!this.account.change_password_connection_manager) {
+                    this.account.change_password_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
+                    this.account.change_password_connection = this.account.change_password_connection_manager.connection;
+                    this.account.change_password_connection.account = this.account;
+                    this.account.change_password_connection.register.connect_change_password(jid, old_password, this.account.changePasswordCallback.bind(this.account))
+                }
+            },
+
+            authFeedback: function (options) {
+                this.$password_input.switchClass('invalid', options.password)
+                    .siblings('span.errors').text(options.password || '');
+                this.$old_password_input.switchClass('invalid', options.old_password)
+                    .siblings('span.errors').text(options.old_password || '');
+                this.$password_confirm_input.switchClass('invalid', options.password_confirm)
+                    .siblings('span.errors').text(options.password_confirm || '');
+            },
+
+            errorFeedback: function (options) {
+                if (this.account.change_password_connection)
+                    this.account.change_password_connection.disconnect()
+                this.authFeedback(options);
+            },
+
+            successFeedback: function () {
+                if (this.account.change_password_connection)
+                    this.account.change_password_connection.disconnect()
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            onHide: function () {
+                this.$el.detach();
+            },
+
+            onQuit: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            close: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+        });
+
         xabber.AuthView = xabber.BasicView.extend({
             _initialize: function () {
                 this.$jid_input = this.$('input[name=jid]');
@@ -2535,23 +2682,38 @@ define("xabber-accounts", function () {
                 let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (!jid) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("account_auth__error__text_input_username")});
+                    }
                     return this.errorFeedback({jid: xabber.getString("account_auth__error__text_input_username")});
                 }
                 jid = jid.trim();
                 if (!password)  {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
+                    }
                     return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
                 }
                 password = password.trim();
                 let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("account_auth__error__text_wrong_username")});
+                    }
                     return this.errorFeedback({jid: xabber.getString("account_auth__error__text_wrong_username")});
                 }
                 jid = Strophe.getBareJidFromJid(jid).toLowerCase();
                 let account = xabber.accounts.get(jid);
                 if (account) {
+                    if (this.data.get('registration')) {
+                        return this.errorRegistrationFeedback({jid: xabber.getString("settings_account__alert_account_exists")});
+                    }
                     this.errorFeedback({jid: xabber.getString("settings_account__alert_account_exists")});
                 } else {
-                    this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
+                    if (this.data.get('registration'))
+                        this.authFeedback({password: xabber.getString("account_registration__feedback__text_registration")});
+                    else
+                        this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
                     this.getWebsocketURL(jid, (response) => {
                         this.account = xabber.accounts.create({
                             jid: jid,
@@ -2559,7 +2721,12 @@ define("xabber-accounts", function () {
                             password: utils.utoa(password),
                             is_new: true
                         }, {auth_view: this});
-                        this.account.trigger('start');
+
+                        if (this.data.get('registration')) {
+                            this.account.connection.register.connect(jid, this.account.registerCallback.bind(this.account))
+                        }
+                        else
+                            this.account.trigger('start');
                     });
                 }
             },
@@ -2625,7 +2792,10 @@ define("xabber-accounts", function () {
 
             events: {
                 "click .login-type": "changeLoginType",
-                "click .btn-log-in": "submit",
+                "click .btn-log-in": "login",
+                "click .btn-register-form": "openRegisterForm",
+                "click .btn-login-form": "closeRegisterForm",
+                "click .btn-register": "register",
                 "click .btn-social": "socialAuth",
                 "click .btn-cancel": "cancel",
                 "keyup input[name=password]": "keyUp"
@@ -2633,6 +2803,35 @@ define("xabber-accounts", function () {
 
             changeLoginType: function () {
                 xabber.body.setScreen('login', {'login_screen': 'xabber'});
+            },
+
+            register: function () {
+                if (this.data.get('registration')) {
+                    this.cancel();
+                    return;
+                }
+                this.data.set('registration', true);
+                this.$jid_input = this.$('input[name=register_jid]');
+                this.$password_input = this.$('input[name=register_password]');
+                this.$jid_input.prop('disabled', true);
+                this.$password_input.prop('disabled', true);
+                this.submit();
+            },
+
+            login: function () {
+                this.$jid_input = this.$('input[name=jid]');
+                this.$password_input = this.$('input[name=password]');
+                this.submit();
+            },
+
+            openRegisterForm: function () {
+                this.$('.register-form').hideIf(false);
+                this.$('.xmpp-login-form').hideIf(true);
+            },
+
+            closeRegisterForm: function () {
+                this.$('.register-form').hideIf(true);
+                this.$('.xmpp-login-form').hideIf(false);
             },
 
             updateButtons: function () {
@@ -2645,7 +2844,24 @@ define("xabber-accounts", function () {
                 account.auth_view = null;
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
-            }
+            },
+
+            errorRegistrationFeedback: function (options) {
+                this.authFeedback(options);
+                this.data.set('registration', false);
+                this.data.set('authentication', false);
+                this.$jid_input.prop('disabled', false);
+                this.$password_input.prop('disabled', false);
+                this.account.destroy();
+            },
+
+            successRegistrationFeedback: function () {
+                this.data.set('registration', false);
+                this.data.set('authentication', false);
+                this.$jid_input.prop('disabled', false);
+                this.$password_input.prop('disabled', false)
+                this.account.trigger('start');
+            },
         });
 
 

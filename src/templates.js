@@ -26,6 +26,7 @@ define("xabber-templates", [
     "text!templates/accounts/xmpp_login.html",
     "text!templates/accounts/add_account.html",
     "text!templates/accounts/change_password.html",
+    "text!templates/accounts/change_account_password.html",
     "text!templates/accounts/toolbar_item.html",
     "text!templates/accounts/settings_left.html",
     "text!templates/accounts/settings_right.html",
@@ -278,6 +279,7 @@ define("xabber-templates", [
     addTemplate('accounts.xmpp_login');
     addTemplate('accounts.add_account');
     addTemplate('accounts.change_password');
+    addTemplate('accounts.change_account_password');
     addTemplate('accounts.toolbar_item');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');

@@ -311,6 +311,11 @@ button.btn-float-left {
     font-size: 13px;
     font-weight: bold;
 }
+.btn-login-form,
+.btn-register-form {
+    font-size: 11px !important;
+    background-color: transparent !important;
+}
 
 .close-message-panel {
     color: #9E9E9E;

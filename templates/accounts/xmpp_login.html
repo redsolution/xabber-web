@@ -14,30 +14,29 @@
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            {[if (constants.REGISTER_XMPP_ACCOUNT){]}<a href="{{constants.REGISTER_XMPP_ACCOUNT_URL}}" target="_blank" class="btn-flat btn-main btn-forgot-password one-line">{[constants.REGISTER_XMPP_ACCOUNT_TEXT || print(xabber.getString("xmpp_login__button_register_account"))]}</a>{[}]}
-            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("xabber_account__social_links__button_log_in"))]}</button>
+            <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_register_form"))]}</div>
+            <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>
         </div>
         <div class="clearfix"></div>
-        {[if (constants.USE_SOCIAL_AUTH){]}
-        <div class="social-auth-wrap">
-            <div class="social-header">
-                <div class="divider"></div>
-                <div class="social-header-tip one-line">{[print(xabber.getString("tutorial_title_8"))]}</div>
-            </div>
-            <div class="social-buttons">
-                <div class="btn-social google-color" data-provider="google">
-                    <i class="mdi mdi-28px mdi-google-plus"></i>
-                </div>
-                <div class="btn-social facebook-color" data-provider="facebook">
-                    <i class="mdi mdi-28px mdi-facebook"></i>
-                </div>
-                <div class="btn-social twitter-color" data-provider="twitter">
-                    <i class="mdi mdi-28px mdi-twitter"></i>
-                </div>
-                <div class="btn-social xabber-color" data-provider="email">
-                    <i class="mdi mdi-28px mdi-at"></i>
-                </div>
-            </div>
+    </div>
+    <div class="login-panel-form register-form noselect hidden">
+        <div class="login-form-header">{[print(xabber.getString("xmpp_login__header_registration"))]}</div>
+        <div class="input-field">
+            <input id="register_jid" type="text" name="register_jid">
+            <label for="register_jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>
+            <span class="errors fixed one-line"></span>
         </div>
+        <div class="input-field">
+            <input id="register_password" type="password" name="register_password">
+            <label for="register_password">{[print(xabber.getString("hint_pass"))]}</label>
+            <span class="errors fixed one-line"></span>
+        </div>
+        {[if (xabber.url_params && xabber.url_params.rkey){]}
+            <div class="login-form-header">{[print(xabber.getString("xmpp_login__registration_via_link"))]}</div>
         {[}]}
+        <div class="input-field buttons-wrap">
+            <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_login_form"))]}</div>
+            <button class="btn btn-flat btn-main-filled btn-register">{[print(xabber.getString("xmpp_login__button_register"))]}</button>
+        </div>
+        <div class="clearfix"></div>
     </div>
