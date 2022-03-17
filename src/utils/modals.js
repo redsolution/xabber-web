@@ -158,6 +158,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         $('<div class="dialog-bottom-text"/>').html(dialog_options.bottom_text).appendTo(dialog.$modal.find('.container-for-img'));
                 }
 
+                if (dialog_options.escape_button) {
+                    dialog.$modal.find('.modal-header').append('<i class="close-modal mdi mdi-close mdi-24px"></i>');
+                }
+
                 if (dialog_options.input_placeholder_value || dialog_options.input_value) {
                     dialog.$modal.find('.dialog-options-wrap').html($('<input type="text" placeholder="' + dialog_options.input_placeholder_value + '" id="user_value"/>').val(dialog_options.input_value));
                 }
@@ -188,6 +192,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         else
                             dialog.close({complete_data: option});
                     }
+                });
+
+                dialog.$modal.find('.modal-header .close-modal').click(function () {
+                        dialog.close({complete_data: false});
                 });
 
                 return dialog.open();
