@@ -103,6 +103,48 @@ define("xabber-strophe", function () {
         };
 
         _.extend(Strophe.Connection.prototype, {
+
+            _attemptSASLAuth: function (mechanisms) {
+                mechanisms = this.sortMechanismsByPriority(mechanisms || []);
+                let i = 0, mechanism_found = false;
+                for (i = 0; i < mechanisms.length; ++i) {
+                    if (!mechanisms[i].prototype.test(this)) {
+                        continue;
+                    }
+                    this._sasl_success_handler = this._addSysHandler(
+                        this._sasl_success_cb.bind(this), null,
+                        "success", null, null);
+                    this._sasl_failure_handler = this._addSysHandler(
+                        this._sasl_failure_cb.bind(this), null,
+                        "failure", null, null);
+                    this._sasl_challenge_handler = this._addSysHandler(
+                        this._sasl_challenge_cb.bind(this), null,
+                        "challenge", null, null);
+
+                    this._sasl_mechanism = new mechanisms[i]();
+                    this._sasl_mechanism.onStart(this);
+
+                    let request_auth_exchange = $build("auth", {
+                        xmlns: Strophe.NS.SASL,
+                        mechanism: this._sasl_mechanism.name
+                    });
+                    if (this._sasl_mechanism.isClientFirst) {
+                        let response = this._sasl_mechanism.onChallenge(this, null);
+                        request_auth_exchange.t(btoa(response));
+                    }
+                    this.send(request_auth_exchange.tree());
+                    mechanism_found = true;
+                    if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.name === "HOTP") {
+                        this.counter++
+                        this.account.save({
+                            hotp_counter: this.counter,
+                        });
+                    }
+                    break;
+                }
+                return mechanism_found;
+            },
+
             _sasl_auth1_cb: function (elem) {
                 this.features = elem;
                 let i, child;
@@ -137,22 +179,18 @@ define("xabber-strophe", function () {
                             this.x_token = {token: token, expire: expires_at, token_uid: token_uid,};
                             this.counter = 1;
                             this.pass = token;
-                            if (this.account)
+                            this._send_auth_bind();
+                            if (this.account) {
                                 this.account.save({
                                     hotp_counter: this.counter,
                                 });
-                            this._send_auth_bind();
+                            }
                         }, () => {
                             this._send_auth_bind();
                         });
                     }
                     else {
                         this._send_auth_bind();
-                        if (this.account && this.x_token_auth) {
-                            this.account.save({
-                                hotp_counter: this.counter,
-                            });
-                        }
                     }
                 }
                 return false;
