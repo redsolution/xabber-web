@@ -8198,6 +8198,10 @@ define("xabber-contacts", function () {
                     chat.set('sync_type', type);
                     if (!message.length) {
                         chat.set('timestamp', chat_timestamp);
+                        if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
+                            && !chat.item_view.content && !chat.get('group_chat')){
+                            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                        }
                         chat.item_view.updateEmptyChat();
                     }
                     if (is_group_chat) {

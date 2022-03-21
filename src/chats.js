@@ -2827,6 +2827,7 @@ define("xabber-chats", function () {
         onChangedVisibility: function () {
             if (this.isVisible()) {
                 this.model.set({display: true, active: true});
+                this.onScroll();
                 this.readMessages();
             } else {
                 this.model.set({display: false});
@@ -2951,7 +2952,7 @@ define("xabber-chats", function () {
         },
 
         onScrollY: function () {
-            if (this._scrolltop === 0) {
+            if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
                 this.$('.fixed-day-indicator-wrap').css('opacity', 1);
                 this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
                 this.showDayIndicator(this.current_day_indicator);
@@ -2970,28 +2971,56 @@ define("xabber-chats", function () {
             this._prev_scrolltop = this._scrolltop || 0;
             this._scrolltop = this.getScrollTop();
             $chatday_indicator.each((idx, indicator) => {
-                if (this._scrolltop < this._prev_scrolltop) {
-                    if ((indicator.offsetTop <= this._scrolltop) && (indicator.offsetTop >= this._scrolltop - 30)) {
-                        indicator_idx = idx;
-                        opacity_value = 0;
-                        return false;
+                if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {
+                    if (this._scrolltop < this._prev_scrolltop) {
+                        if ((indicator.offsetTop <= this._scrolltop) && (indicator.offsetTop >= this._scrolltop - 30)) {
+                            indicator_idx = idx;
+                            opacity_value = 0;
+                            return false;
+                        }
+                        if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop - 30)) {
+                            indicator_idx = idx && (idx - 1);
+                            opacity_value = 1;
+                            return false;
+                        }
                     }
-                    if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop - 30)) {
-                        indicator_idx = idx && (idx - 1);
-                        opacity_value = 1;
-                        return false;
+                    else {
+                        if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop >= this._scrolltop)) {
+                            indicator_idx = idx && (idx - 1);
+                            opacity_value = 0;
+                            return false;
+                        }
+                        if ((indicator.offsetTop >= this._scrolltop - 30) && (indicator.offsetTop <= this._scrolltop)) {
+                            indicator_idx = idx;
+                            opacity_value = 1;
+                            return false;
+                        }
                     }
                 }
-                else {
-                    if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop >= this._scrolltop)) {
-                        indicator_idx = idx && (idx - 1);
-                        opacity_value = 0;
-                        return false;
+                else if (!$(indicator).hasClass('fixed-day-indicator-wrap')) {
+                    if (this._scrolltop < this._prev_scrolltop) {
+                        if ((indicator.offsetTop >= this._scrolltop + 30) && (indicator.offsetTop <= this._scrolltop + 62)) {
+                            indicator_idx = idx;
+                            opacity_value = 0;
+                            return false;
+                        }
+                        if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop + 62)) {
+                            indicator_idx = idx;
+                            opacity_value = 1;
+                            return false;
+                        }
                     }
-                    if ((indicator.offsetTop >= this._scrolltop - 30) && (indicator.offsetTop <= this._scrolltop)) {
-                        indicator_idx = idx;
-                        opacity_value = 1;
-                        return false;
+                    else {
+                        if ((indicator.offsetTop <= this._scrolltop + 62) && (indicator.offsetTop >= this._scrolltop + 30)) {
+                            indicator_idx = idx && (idx - 1);
+                            opacity_value = 0;
+                            return false;
+                        }
+                        if ((indicator.offsetTop >= this._scrolltop - 62) && (indicator.offsetTop <= this._scrolltop + 30)) {
+                            indicator_idx = idx;
+                            opacity_value = 1;
+                            return false;
+                        }
                     }
                 }
             });
@@ -3010,6 +3039,10 @@ define("xabber-chats", function () {
                 if (indicator_idx) {
                     this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
                     this.current_day_indicator = pretty_date(parseInt($($messages[indicator_idx]).attr('data-time')));
+                }
+                else if (!this.$('.subscription-buttons-wrap').hasClass('hidden') && this._scrolltop == 0){
+                    opacity_value = 0;
+                    this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
                 }
             }
             if (this.current_day_indicator !== null) {
