@@ -1196,7 +1196,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 [data-main-color=pink] .fwd-message.selected,
 [data-main-color=pink] .chat-message.selected,
-[data-main-color=pink] .chat-item.active .status,
 [data-main-color=pink] .roster-left-container .roster-account-info.active,
 [data-main-color=pink] .roster-left-container .group-head.active,
 [data-main-color=pink] .roster-left-container .roster-contact.active,
@@ -1276,7 +1275,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 [data-main-color=purple] .fwd-message.selected,
 [data-main-color=purple] .chat-message.selected,
-[data-main-color=purple] .chat-item.active .status,
 [data-main-color=purple] .roster-left-container .roster-account-info.active,
 [data-main-color=purple] .roster-left-container .group-head.active,
 [data-main-color=purple] .roster-left-container .roster-contact.active,
