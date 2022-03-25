@@ -2916,7 +2916,7 @@ define("xabber-accounts", function () {
                         regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                     if (!regexp_local_part.test(this.$jid_input.val()))
                         return this.registerFeedback({jid: xabber.getString("account_add__alert_localpart_invalid")});
-                    else if (!regexp_domain.test(this.$domain_input.val()))
+                    else if (!(regexp_domain.test(this.$domain_input.val()) || regexp_domain.test(this.$('.xmpp-server-dropdown-wrap .property-value').text())))
                         return this.registerFeedback({domain: xabber.getString("account_add__alert_invalid_domain")});
                     else
                         this.registerFeedback({});
