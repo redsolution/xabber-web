@@ -1,8 +1,16 @@
+<div class="login-panel-intro">
     <div class="login-panel-head noselect">
         <img src="{{CLIENT_LOGO}}" class="client-logo">
         <span class="client-name">{{SHORT_CLIENT_NAME}}</span>
+        <span class="client-description">{{SHORT_CLIENT_DESCRIPTION}}</span>
     </div>
-    <div class="login-panel-form xmpp-login-form noselect">
+    <div class="login-buttons">
+        <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</div>
+        <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_sign_in"))]}</div>
+    </div>
+</div>
+    <div class="login-panel-form xmpp-login-form noselect hidden">
+        <svg class="details-icon btn-go-back-menu mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>
         <div class="input-field">
             <input id="jid" type="text" name="jid">
             <label for="jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>
@@ -14,29 +22,92 @@
             <span class="errors fixed one-line"></span>
         </div>
         <div class="input-field buttons-wrap">
-            <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_register_form"))]}</div>
             <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>
         </div>
         <div class="clearfix"></div>
     </div>
     <div class="login-panel-form register-form noselect hidden">
-        <div class="login-form-header">{[print(xabber.getString("xmpp_login__header_registration"))]}</div>
-        <div class="input-field">
-            <input id="register_jid" type="text" name="register_jid">
-            <label for="register_jid">{[print(xabber.getString("hint_xmpp_id"))]}</label>
-            <span class="errors fixed one-line"></span>
+        <svg class="details-icon btn-go-back mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>
+        <div class="login-form-header">{[print(xabber.getString("title_register_xabber_account"))]}</div>
+        <div class="login-form-skip hidden">{[print(xabber.getString("skip"))]}</div>
+        <div class="register-form-nickname">
+            <div class="register-form-step-wrap">
+                <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_nickname"))]}</div>
+                <div class="input-field-wrap">
+                    <div class="input-field">
+                        <input id="register_nickname" placeholder='{[print(xabber.getString("vcard_nick_name"))]}' type="text" name="register_nickname">
+                    </div>
+                </div>
+                <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_nickname"))]}</div>
+                <div class="register-form-step-error hidden"></div>
+            </div>
         </div>
-        <div class="input-field">
-            <input id="register_password" type="password" name="register_password">
-            <label for="register_password">{[print(xabber.getString("hint_pass"))]}</label>
-            <span class="errors fixed one-line"></span>
+        <div class="register-form-jid hidden">
+            <div class="register-form-step-wrap">
+                <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_jid"))]}</div>
+                <div class="input-field-wrap">
+                    <div class="input-field">
+                        <input id="register_jid" placeholder='{[print(xabber.getString("hint_username"))]}' type="text" name="register_jid">
+                    </div>
+                    <div class="property-field xmpp-server-dropdown-wrap">
+                        <div class="select-xmpp-server">
+                            <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
+                            <div class="input-field input-group-chat-domain hidden">
+                                <input id="new_account_domain" type="text" placeholder='{[print(xabber.getString("groupchat__hint_domain"))]}' name="register_domain">
+                            </div>
+                            <div data-activates="select-xmpp-server" class="caret">
+                                <i class="mdi mdi-20px mdi-menu-up"></i>
+                                <i class="mdi mdi-20px mdi-menu-down"></i>
+                            </div>
+                        </div>
+                        <div id="select-xmpp-server" class="dropdown-content noselect">
+                            <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_jid"))]}</div>
+                <div class="register-form-step-error hidden"></div>
+            </div>
+        </div>
+        <div class="register-form-password hidden">
+            <div class="register-form-step-wrap">
+                <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_password"))]}</div>
+                <div class="input-field-wrap">
+                    <div class="input-field">
+                        <input id="register_password" placeholder='{[print(xabber.getString("hint_pass"))]}' type="password" name="register_password">
+                    </div>
+                </div>
+                <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_password"))]}</div>
+                <div class="register-form-step-error hidden"></div>
+            </div>
+        </div>
+        <div class="register-form-picture hidden">
+            <div class="register-form-step-wrap">
+                <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_avatar"))]}</div>
+                <div class="input-field-wrap">
+                    <div class="avatar-wrap">
+                        <div class="circle-avatar">
+                            <input id="register_picture" title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                        </div>
+                        <div class="circle-icon">
+                            <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
+                                <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         {[if (xabber.url_params && xabber.url_params.rkey){]}
-            <div class="login-form-header">{[print(xabber.getString("xmpp_login__registration_via_link"))]}</div>
+            <div class="login-form-url">
+                <i class="mdi login-form-url-icon mdi-link-variant"></i>
+                <div class="login-form-url-text">
+                    {[print(xabber.getString("xmpp_login__registration_via_link"))]}
+                </div>
+            </div>
         {[}]}
         <div class="input-field buttons-wrap">
-            <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_login_form"))]}</div>
-            <button class="btn btn-flat btn-main-filled btn-register">{[print(xabber.getString("xmpp_login__button_register"))]}</button>
+            <button class="btn btn-flat btn-main-filled btn-next">{[print(xabber.getString("xaccount_next"))]}</button>
         </div>
         <div class="clearfix"></div>
     </div>

@@ -55,6 +55,7 @@ let badges_names = [
         'membership-outline',
         'invite-outline',
         'chevron-right-variant',
+        'chevron-left-variant',
     ],
     circle_icons = [,
         'task'

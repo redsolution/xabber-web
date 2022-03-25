@@ -77,13 +77,25 @@ define("xabber-strophe", function () {
                             connect_cb(req, callback, raw);
                         }
                     } else {
-                        // Save this request in case we want to authenticate later
-                        self._connect_cb_data = {req: req,
-                            raw: raw};
-                        if(self._register_cb(req, callback, raw)) {
-                            // remember that we already processed stream:features
-                            self.processed_features = true;
-                            delete self._registering;
+                        if(!self._check_user) {
+                            // Save this request in case we want to authenticate later
+                            self._connect_cb_data = {
+                                req: req,
+                                raw: raw
+                            };
+                            if (self._register_cb(req, callback, raw)) {
+                                // remember that we already processed stream:features
+                                self.processed_features = true;
+                                delete self._registering;
+                            }
+                        }
+                        else {
+                            if (self._register_cb_check_user(req, callback, raw)) {
+                                // remember that we already processed stream:features
+                                self.processed_features = true;
+                                delete self._registering;
+                            }
+
                         }
                     }
                 };
@@ -152,6 +164,20 @@ define("xabber-strophe", function () {
                 this.registered = false;
 
                 this._registering = true;
+
+                conn.connect(this.domain, "", callback, wait, hold, route);
+            },
+
+
+            connect_check_user: function(domain, callback, wait, hold, route) {
+                var conn = this._connection;
+                this.domain = Strophe.getDomainFromJid(domain);
+                this.instructions = "";
+                this.fields = {};
+                this.registered = false;
+
+                this._registering = true;
+                this._check_user = true;
 
                 conn.connect(this.domain, "", callback, wait, hold, route);
             },
@@ -227,6 +253,51 @@ define("xabber-strophe", function () {
                     null, "iq", null, null);
                 conn.send($iq({type: "get", id: uuid(), to: this.domain }).c("query",
                     {xmlns: Strophe.NS.REGISTER}).tree());
+
+                return true;
+            },
+            _register_cb_check_user: function (req, _callback, raw) {
+                var conn = this._connection;
+
+                Strophe.info("_register_cb was called");
+                conn.connected = true;
+
+                var bodyWrap = conn._proto._reqToData(req);
+                if (!bodyWrap) { return; }
+
+                if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
+                    if (bodyWrap.nodeName === conn._proto.strip && bodyWrap.childNodes.length) {
+                        conn.xmlInput(bodyWrap.childNodes[0]);
+                    } else {
+                        conn.xmlInput(bodyWrap);
+                    }
+                }
+                if (conn.rawInput !== Strophe.Connection.prototype.rawInput) {
+                    if (raw) {
+                        conn.rawInput(raw);
+                    } else {
+                        conn.rawInput(Strophe.serialize(bodyWrap));
+                    }
+                }
+
+                var conncheck = conn._proto._connect_cb(bodyWrap);
+                if (conncheck === Strophe.Status.CONNFAIL) {
+                    return false;
+                }
+
+                // Check for the stream:features tag
+                var register = bodyWrap.getElementsByTagName("register");
+                var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+                if (register.length === 0 && mechanisms.length === 0) {
+                    conn._proto._no_auth_received(_callback);
+                    return false;
+                }
+
+                if (register.length === 0) {
+                    conn._changeConnectStatus(Strophe.Status.REGIFAIL, null);
+                    return true;
+                }
+                conn._changeConnectStatus(Strophe.Status.REGISTER, null);
 
                 return true;
             },

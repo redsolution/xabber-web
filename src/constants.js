@@ -86,6 +86,8 @@ var constants = {
 
     SYNCHRONIZATION_RSM_MAX: 25,
 
+    REGISTRATION_DOMAINS: [],
+
     TURN_SERVERS_LIST: [
         {
             url: 'turn:numb.viagenie.ca',
@@ -434,6 +436,7 @@ var constants = {
     MAIN_COLOR: 'red',
     CLIENT_NAME: 'Xabber for Web',
     SHORT_CLIENT_NAME: 'Xabber',
+    SHORT_CLIENT_DESCRIPTION: 'World’s best XMPP experience',
     CLIENT_LOGO: 'images/xabber-logo-96.png',
     TOOLBAR_LOGO: 'images/xabber-logo.png',
     ENABLE_XABBER_ACCOUNT: true,

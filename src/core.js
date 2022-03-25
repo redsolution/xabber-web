@@ -334,6 +334,10 @@
                 }
                 if (config.SYNCHRONIZATION_RSM_MAX)
                     constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
+                if (config.REGISTRATION_DOMAINS)
+                    constants.REGISTRATION_DOMAINS = config.REGISTRATION_DOMAINS;
+                if (config.SHORT_CLIENT_DESCRIPTION)
+                    constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
 
                 if (config.CLIENT_NAME && !config.SHORT_CLIENT_NAME)
                     constants.SHORT_CLIENT_NAME = config.CLIENT_NAME;
