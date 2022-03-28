@@ -1121,7 +1121,7 @@ define("xabber-chats", function () {
                 $jingle_msg_propose = $message.children(`propose[xmlns="${Strophe.NS.JINGLE_MSG}"]`),
                 $jingle_msg_accept = $message.children(`accept[xmlns="${Strophe.NS.JINGLE_MSG}"]`),
                 $jingle_msg_reject = $message.children(`reject[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
-            if ($jingle_msg_propose.length) {
+            if ($jingle_msg_propose.length && !options.searched_message) {
                 if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
                     return;
                 }
@@ -2410,19 +2410,23 @@ define("xabber-chats", function () {
                           this.messagesRequest(query, timestamp, rsm, loaded_messages, (messages, rsm) => {});
                       else if (loaded_messages.length == rsm.count) {
                           if (rsm.count != 0) {
+                              let message_count = rsm.count;
                               this.emptyChat()
-                              this.$('.messages-count').hideIf(!rsm.count);
-                              this.$('.close-search-icon').hideIf(!rsm.count);
-                              this.$('.search-results').hideIf(rsm.count);
-                              this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", rsm.count));
                               // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
                               $(loaded_messages).each((idx, message) => {
-                                  let $message = $(message);
+                                  let $message = $(message),
+                                      $jingle_msg_propose = $message.find(`propose[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
+                                  if ($jingle_msg_propose.length)
+                                      message_count--;
                                   this.account.chats.receiveChatMessage($message, {
                                       searched_message: true,
                                       query: query
                                   });
                               });
+                              this.$('.messages-count').hideIf(!message_count);
+                              this.$('.close-search-icon').hideIf(!message_count);
+                              this.$('.search-results').hideIf(message_count);
+                              this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", message_count));
                           }
                           else {
                               this.emptyChat();

@@ -462,7 +462,7 @@ define("xabber-contacts", function () {
                                 this.removeFromRoster();
                                 let chat = this.account.chats.getChat(this);
                                 chat.trigger("close_chat");
-                                xabber.body.setScreen('all-chats', {right: undefined});
+                                xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                             });
                         } else {
                             this.removeFromRoster();
@@ -470,7 +470,7 @@ define("xabber-contacts", function () {
                                 let chat = this.account.chats.getChat(this);
                                 chat.retractAllMessages(false);
                                 chat.deleteFromSynchronization();
-                                xabber.body.setScreen('all-chats', {right: undefined});
+                                xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                             }
                             xabber.trigger("clear_search");
                         }
@@ -558,7 +558,7 @@ define("xabber-contacts", function () {
                     this.trigger('update_avatar');
                 }
                 let $group_chat_info = $(presence).find(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`);
-                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length && !this.get('removed')) {
                     this.set('full_jid', $presence.attr('from'));
                     if (!this.get('group_chat')) {
                         this.set('group_chat', true);
@@ -2061,6 +2061,7 @@ define("xabber-contacts", function () {
                 this.account.settings.on("change:color", this.updateColorScheme, this);
                 this.model.on("change", this.update, this);
                 this.model.on("permissions_changed", this.updateButtons, this);
+                this.model.on("change:subscription", this.updateButtons, this);
             },
 
             render: function () {
@@ -2360,6 +2361,7 @@ define("xabber-contacts", function () {
                 this.model.on("change", this.update, this);
                 this.chat.on("change:muted", this.updateNotifications, this);
                 this.model.on("permissions_changed", this.updateButtons, this);
+                this.model.on("change:subscription", this.updateButtons, this);
             },
 
             render: function () {
@@ -8175,13 +8177,18 @@ define("xabber-contacts", function () {
                         chat.set('archived', false);
                     if ($item.attr('status') === 'deleted') {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        contact && contact.details_view_right && contact.details_view_right.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        contact && contact.details_view_right && contact.details_view_right.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
                         contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        chat.get('opened') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
+                        this.account.cached_roster.removeFromRoster(contact.get('jid'));
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
+                        contact.set('removed', true);
+                        contact.set('group_chat', false);
+                        contact.set('group_info', {});
                     }
                     if ($group_metadata.length) {
                         contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
