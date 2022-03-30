@@ -6026,7 +6026,7 @@ input[type=text].simple-input-field:hover {
     right: 144px;
     top: 0;
     cursor: pointer;
-    z-index: -1;
+    z-index: 0;
 }
 
 .saved-chat.chat-head-wrap .circle-avatar svg {
@@ -6093,15 +6093,18 @@ input[type=text].simple-input-field:hover {
 .chat-head-wrap .contact-info .contact-status-message {
     height: 14px;
     font-size: 13px;
+    position: relative;
+    z-index: 1;
     line-height: 14px;
     font-weight: 300;
     color: #616161;
     margin-top: 3px;
 }
 
+.chat-head-wrap .contact-info .contact-status-message.members-hover:hover,
 .chat-head-wrap .contact-info .contact-status-message.resource-hover:hover {
     cursor: pointer;
-    font-weight: 500;
+    color: #9e9e9e;
 }
 
 .chat-tools-wrap {
@@ -10244,7 +10247,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel-right .group-chat-status-wrap:hover .group-chat-status .status-wrap .status-message{
-    color: #616161;
+    color: #757575;
 }
 
 .details-panel-right .group-chat-status-wrap .group-chat-status .status-wrap .status-message{

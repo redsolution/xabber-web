@@ -1,4 +1,4 @@
-<div class="chat-message {[if (encrypted) {]}encrypted{[}]} file-upload noselect" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} data-time="{{timestamp}}" data-from="{{from_jid}}" data-uniqueid="{{unique_id}}">
+<div class="chat-message {[if (encrypted) {]}encrypted{[}]} file-upload noselect" {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} {[if (avatar_url) {]} data-avatar-url="{{avatar_url}}" {[}]} data-time="{{timestamp}}" data-from="{{from_jid}}" data-uniqueid="{{unique_id}}">
     <div class="left-side noselect">
         <div class="circle-avatar"></div>
     </div>

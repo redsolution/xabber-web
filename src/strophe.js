@@ -135,7 +135,7 @@ define("xabber-strophe", function () {
                     this.send(request_auth_exchange.tree());
                     mechanism_found = true;
                     if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.name === "HOTP") {
-                        this.counter++
+                        this.counter++;
                         this.account.save({
                             hotp_counter: this.counter,
                         });

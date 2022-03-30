@@ -336,7 +336,8 @@ define("xabber-contacts", function () {
             },
 
             getAvatar: function (avatar, node, callback, errback) {
-                let iq_request_avatar = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid')})
+                let jid = this.get('group_chat') ? this.get('full_jid') : this.get('jid'),
+                    iq_request_avatar = $iq({from: this.account.get('jid'), type: 'get', to: jid})
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
@@ -846,7 +847,7 @@ define("xabber-contacts", function () {
                 if (!this.details_view_right)
                     this.details_view_right = (this.get('group_chat')) ? new xabber.GroupChatDetailsViewRight({model: this}) : new xabber.ContactDetailsViewRight({model: this});
                 screen || (screen = 'contacts');
-                if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'participant' && !options.right_saved) {
+                if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'members' && options.type != 'participant' && !options.right_saved) {
                     this.set('search_hidden', true)
                     xabber.body.setScreen(screen, {right_contact: '', contact: this});
                 }
@@ -857,6 +858,9 @@ define("xabber-contacts", function () {
                         if (options.type === 'search') {
                             this.details_view_right.contact_searched_messages_view.clearSearch();
                             this.details_view_right.showSearchMessages();
+                        }
+                        if (options.type === 'members') {
+                            this.details_view_right.$('.tabs:not(.participant-tabs) .list-variant[data-value="participants"]').click()
                         }
                         this.details_view_right.onScroll()
                     }
@@ -3514,15 +3518,25 @@ define("xabber-contacts", function () {
                     if (this.account.chat_settings.getHashAvatar(member.id) == member.avatar && cached_avatar)
                         $avatar.setAvatar(cached_avatar, this.member_avatar_size);
                     else {
-                        let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
-                        this.model.getAvatar(member.avatar, node, (avatar) => {
-                            this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
-                            this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                        if (member.avatar_url){
+                            this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, member.avatar_url);
+                            this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size);
                             if (this.account.get('jid') === member.jid) {
-                                this.model.my_info.set('b64_avatar', avatar);
+                                this.model.my_info.set({avatar: member.avatar, 'b64_avatar': member.avatar_url});
                                 this.model.trigger('update_my_info');
                             }
-                        });
+                        }
+                        else {
+                            let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
+                            this.model.getAvatar(member.avatar, node, (avatar) => {
+                                this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
+                                this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                                if (this.account.get('jid') === member.jid) {
+                                    this.model.my_info.set('b64_avatar', avatar);
+                                    this.model.trigger('update_my_info');
+                                }
+                            });
+                        }
                     }
                 }
             },
@@ -3749,15 +3763,25 @@ define("xabber-contacts", function () {
                     if (this.account.chat_settings.getHashAvatar(member.id) == member.avatar && cached_avatar)
                         $avatar.setAvatar(cached_avatar, this.member_avatar_size);
                     else {
-                        let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
-                        this.model.getAvatar(member.avatar, node, (avatar) => {
-                            this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
-                            this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                        if (member.avatar_url){
+                            this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, member.avatar_url);
+                            this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size);
                             if (this.account.get('jid') === member.jid) {
-                                this.model.my_info.set('b64_avatar', avatar);
+                                this.model.my_info.set({avatar: member.avatar, 'b64_avatar': member.avatar_url});
                                 this.model.trigger('update_my_info');
                             }
-                        });
+                        }
+                        else {
+                            let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
+                            this.model.getAvatar(member.avatar, node, (avatar) => {
+                                this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
+                                this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                                if (this.account.get('jid') === member.jid) {
+                                    this.model.my_info.set('b64_avatar', avatar);
+                                    this.model.trigger('update_my_info');
+                                }
+                            });
+                        }
                     }
                 }
             },
@@ -3941,10 +3965,15 @@ define("xabber-contacts", function () {
                     if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)))
                         $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
                     else {
-                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
-                        this.contact.getAvatar(member.avatar, node, (avatar) => {
-                            this.$(`.participant-details-item[data-id="${participant_id}"] .circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
-                        });
+                        if (member.get('avatar_url')){
+                            $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size);
+                        }
+                        else {
+                            let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
+                            this.contact.getAvatar(member.get('avatar'), node, (avatar) => {
+                                this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
+                            });
+                        }
                     }
                 }
                 else {
@@ -4640,10 +4669,15 @@ define("xabber-contacts", function () {
                     if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)))
                         $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
                     else {
-                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
-                        this.contact.getAvatar(member.avatar, node, (avatar) => {
-                            this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
-                        });
+                        if (member.get('avatar_url')){
+                            $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size);
+                        }
+                        else {
+                            let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
+                            this.contact.getAvatar(member.get('avatar'), node, (avatar) => {
+                                this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
+                            });
+                        }
                     }
                 }
                 else {
@@ -5675,12 +5709,20 @@ define("xabber-contacts", function () {
                             return;
                         }
                     }
-                    let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + this.get('id');
-                    this.contact.getAvatar(this.get('avatar'), node, (avatar) => {
-                        this.account.chat_settings.updateCachedAvatars(this.get('id'), this.get('avatar'), avatar);
-                        this.set('b64_avatar', avatar);
+                    if (this.get('avatar_url')){
+                        this.account.chat_settings.updateCachedAvatars(this.get('id'), this.get('avatar'), this.get('avatar_url'));
+                        this.set('b64_avatar', this.get('avatar_url'));
                         (this.get('jid') === this.account.get('jid')) && this.contact.trigger('update_my_info');
-                    });
+
+                    } else {
+                        let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + this.get('id');
+                        this.contact.getAvatar(this.get('avatar'), node, (avatar) => {
+                            this.account.chat_settings.updateCachedAvatars(this.get('id'), this.get('avatar'), avatar);
+                            this.set('b64_avatar', avatar);
+                            (this.get('jid') === this.account.get('jid')) && this.contact.trigger('update_my_info');
+                        });
+
+                    }
                 }
             },
 
@@ -5840,6 +5882,7 @@ define("xabber-contacts", function () {
                     badge = $item.find('badge').text(),
                     present = $item.find('present').text(),
                     photo = $item.find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).find('info').attr('id'),
+                    photo_url = $item.find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).find('info').attr('url'),
                     role = $item.find('role').text();
                 !nickname.trim().length && (nickname = jid || id);
 
@@ -5847,6 +5890,7 @@ define("xabber-contacts", function () {
                     jid: jid,
                     id: id,
                     avatar: photo,
+                    avatar_url: photo_url,
                     nickname: nickname,
                     badge: badge,
                     present: present,
