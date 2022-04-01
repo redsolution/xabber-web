@@ -9892,11 +9892,18 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .edit-contact {
     margin-top: 64px;
+    position: relative;
+}
+
+.details-panel-right .edit-wrap .edit-contact .details-icon {
+    top: 24px !important;
 }
 
 .details-panel-right .edit-wrap .name-wrap {
-    border-bottom: 1px solid #F5F5F5;
-    padding: 12px 16px;
+    padding: 12px 28px 16px 64px;
+}
+
+.details-panel-right .edit-wrap .edit-contact .label {
 }
 
 .details-panel-right .edit-wrap .name-wrap .contact-name-wrap {
@@ -9915,24 +9922,69 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel-right .edit-wrap .subscription-statuses{
-    margin: 24px 23px;
 }
 
-.details-panel-right .edit-wrap .subscription-statuses .status-out,
-.details-panel-right .edit-wrap .subscription-statuses .status-in{
-    box-sizing: border-box;
-    height: 32px;
-    padding-top: 3px;
-    color: #616161;
-    font-size: 13px;
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap{
+    position: relative;
+    width: 100%;
     cursor: pointer;
-    text-align: center;
-    width: 220px;
-    border: 1px solid #E0E0E0;
-    border-radius: 4px;
-    letter-spacing: 0.37px;
-    line-height: 24px;
-    margin-bottom: 16px;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .status-description.subscription-status-wrap{
+    cursor: auto;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap:hover{
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap .info{
+    padding: 15px 16px 14px 0;
+    border-top: 1px solid #F5F5F5;
+    margin-left: 72px;
+    width: calc(100% - 72px);
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .status-description.subscription-status-wrap .info{
+    border-top: none;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap:not(.status-description) .details-icon{
+    top: 12px!important;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .status-description.subscription-status-wrap .details-icon{
+    top: 12px!important;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap:first-of-type .info {
+    border-top: none;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap .info .value{
+    font-size: 16px;
+    height: 17px;
+    line-height: 16px;
+    pointer-events: none;
+    color: unset;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .status-description.subscription-status-wrap .info .value{
+    letter-spacing: .15px;
+    height: unset;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 400;
+    color: #9E9E9E;
+}
+
+.details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap .info .label{
+    height: 14px;
+    margin-top: 3px;
+    font-size: 12px;
+    line-height: 14px;
+    font-weight: 400;
+    color: #9E9E9E;
+    pointer-events: none;
 }
 
 .details-panel-right .edit-wrap .subscription-statuses .status-out.border-color-100,
@@ -9940,8 +9992,7 @@ input[type='range'].voice-message-volume:focus {
     font-weight: 500;
 }
 
-.details-panel-right .edit-wrap .property-description,
-.details-panel-right .edit-wrap .subscription-statuses .status-description{
+.details-panel-right .edit-wrap .property-description{
     color: rgba(0,0,0,0.54);
     font-family: Roboto;
     font-size: 14px;
@@ -10006,7 +10057,8 @@ input[type='range'].voice-message-volume:focus {
 .details-panel-right .edit-wrap .contact-name-wrap .contact-name-input {
     width: calc(100% - 16px) !important;
     padding: 0px 8px !important;
-
+    border: 1px solid transparent;
+    background: #F5F5F5;
 }
 
 .details-panel-right .new-group-field-wrap .new-group-name input {

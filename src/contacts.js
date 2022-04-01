@@ -1807,7 +1807,6 @@ define("xabber-contacts", function () {
                     is_server = this.model.get('server'),
                     subscription = this.model.get('subscription');
                 this.$('.btn-add').hideIf(in_roster);
-                this.$('.btn-delete').showIf(in_roster);
                 this.$('.btn-block-wrap .contact-btn').switchClass('btn-block', !is_blocked).switchClass('btn-unblock', is_blocked);
                 this.$('.btn-block-wrap .btn-name').text(is_blocked ? xabber.getString("contact_bar_unblock") : xabber.getString("contact_bar_block"));
                 this.$('.buttons-wrap .button-wrap:not(.btn-block-wrap)').switchClass('non-active', is_blocked);
@@ -6834,7 +6833,7 @@ define("xabber-contacts", function () {
                 this.updateStatuses();
             },
 
-            showEdit: function (ev) {
+            showEdit: function () {
                 this.model.set('edit_hidden', false);
                 this.parent.scrollToTop();
                 if (this.parent.ps_container.length) {
@@ -6843,35 +6842,35 @@ define("xabber-contacts", function () {
                 this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'))
             },
 
-            updateStatuses: function (ev) {
+            updateStatuses: function () {
                 let statuses = this.model.getSubscriptionStatuses();
                 if (statuses){
-                    this.$('.status-out').text(statuses.status_out).addClass(statuses.status_out_class)
-                    this.$('.status-in').text(statuses.status_in).addClass(statuses.status_in_class)
-                    this.$('.status-description').text(statuses.status_description)
+                    this.$('.status-out').addClass(statuses.status_out_class)
+                    this.$('.status-out .value').text(statuses.status_out)
+                    this.$('.status-out').showIf(statuses.status_out)
+                    this.$('.status-in').addClass(statuses.status_in_class)
+                    this.$('.status-in  .value').text(statuses.status_in)
+                    this.$('.status-in').showIf(statuses.status_in)
+                    this.$('.status-description .value').text(statuses.status_description)
+                    this.$('.status-description').showIf(statuses.status_description)
+                    this.$('.btn-delete').hideIf(!this.model.get('in_roster'));
                     if (statuses.status_out_color === 'request') {
-                        this.$('.status-out').addClass('text-color-500').addClass('request')
-                            .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
+                        this.$('.status-out').addClass('text-color-500').addClass('request').removeClass('subbed')
                     }
                     if (statuses.status_in_color === 'request') {
-                        this.$('.status-in').addClass('text-color-500').addClass('request')
-                            .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
+                        this.$('.status-in').addClass('text-color-500').addClass('request').removeClass('subbed')
                     }
                     if (statuses.status_out_color === 'subbed') {
-                        this.$('.status-out').addClass('text-color-500').addClass('border-color-100')
-                            .addClass('ground-color-50').addClass('subbed').removeClass('request')
+                        this.$('.status-out').addClass('text-color-500').addClass('subbed').removeClass('request')
                     }
                     if (statuses.status_in_color === 'subbed') {
-                        this.$('.status-in').addClass('text-color-500').addClass('border-color-100')
-                            .addClass('ground-color-50').addClass('subbed').removeClass('request')
+                        this.$('.status-in').addClass('text-color-500').addClass('subbed').removeClass('request')
                     }
                     if (statuses.status_out_color === '') {
-                        this.$('.status-out').removeClass('text-color-500').removeClass('request')
-                            .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
+                        this.$('.status-out').removeClass('text-color-500').removeClass('request').removeClass('subbed')
                     }
                     if (statuses.status_in_color === '') {
-                        this.$('.status-in').removeClass('text-color-500').removeClass('request')
-                            .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
+                        this.$('.status-in').removeClass('text-color-500').removeClass('request').removeClass('subbed')
                     }
                     this.$('.btn-request').hideIf(!(statuses.status_out_color === ''))
                     this.$('.btn-allow').hideIf(!(statuses.status_in_color === ''))

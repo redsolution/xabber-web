@@ -2347,8 +2347,6 @@ define("xabber-chats", function () {
               this.model = options.model;
               this.contact = options.contact;
               this.account = this.model.account;
-              let color = this.account.settings.get('color');
-              this.$el.attr('data-color', color);
               this.$search_form = this.$('.search-form-header');
               this.timer = null;
               this.loading_history = false;
