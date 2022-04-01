@@ -5,10 +5,16 @@
         <span class="block-name">{[print(xabber.getString("edit_vcard"))]}</span>
     </div>
     <div class="edit-contact">
+        <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>
         <div class="name-wrap"></div>
     </div>
     <div class="subscription-statuses">
-        <div class="status-out dropdown-button" data-activates="{{view.cid}}-status-out"></div>
+        <div class="status-out subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-out">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-to"></svg></div>
+            <div class="info">
+                <div class="value one-line"></div>
+            </div>
+        </div>
         <ul id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
             <li class="btn-request hidden">
                 <span class="one-line">Request subscription</span>
@@ -23,7 +29,12 @@
                 <span class="one-line">Cancel</span>
             </li>
         </ul>
-        <div class="status-in dropdown-button" data-activates="{{view.cid}}-status-in"></div>
+        <div class="status-in subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-in">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-from"></svg></div>
+            <div class="info">
+                <div class="value one-line"></div>
+            </div>
+        </div>
         <ul id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
             <li class="btn-allow hidden">
                 <span class="one-line">Allow subscription</span>
@@ -41,6 +52,19 @@
                 <span class="one-line">Cancel</span>
             </li>
         </ul>
-        <div class="status-description"></div>
+        <div class="status-description subscription-status-wrap">
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg></div>
+            <div class="info">
+                <div class="value"></div>
+            </div>
+        </div>
+    </div>
+    <div class="edit-buttons">
+        <div class="edit-button btn-delete">
+            <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-delete text-color-500"></i></div>
+            <div class="edit-button-text">
+                <span class="text-color-500 one-line">{[print(xabber.getString("contact_delete_full"))]}</span>
+            </div>
+        </div>
     </div>
 </div>

@@ -159,6 +159,8 @@ define("xabber-templates", [
     "text!templates/svg/invite-outline.html",
     "text!templates/svg/chevron-right-variant.html",
     "text!templates/svg/chevron-left-variant.html",
+    "text!templates/svg/subscription-to.html",
+    "text!templates/svg/subscription-from.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
     "text!templates/svg/job-outline.html",
@@ -413,6 +415,8 @@ define("xabber-templates", [
     addSvgTemplate('svg.invite-outline');
     addSvgTemplate('svg.chevron-right-variant');
     addSvgTemplate('svg.chevron-left-variant');
+    addSvgTemplate('svg.subscription-to');
+    addSvgTemplate('svg.subscription-from');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');
