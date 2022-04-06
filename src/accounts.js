@@ -2606,7 +2606,9 @@ define("xabber-accounts", function () {
 
             saveAvatar: function () {
                 let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
-                    file = new File([blob], "avatar");
+                    file = new File([blob], "avatar", {
+                        type: "image/png",
+                    });
                 file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
                 if (file && file.base64) {
                     if (this.registration && this.registration_view){
@@ -2683,7 +2685,9 @@ define("xabber-accounts", function () {
 
             saveAvatar: function (ev) {
                 let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
-                    file = new File([blob], "avatar");
+                    file = new File([blob], "avatar", {
+                        type: "image/png",
+                    });
                 file.base64 = blob;
                 if (file && file.base64) {
                     if (this.registration && this.registration_view){
