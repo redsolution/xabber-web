@@ -3591,7 +3591,7 @@ define("xabber-accounts", function () {
                 emoji_panel_view.open({model: this.account, registration: true, registration_view: this});
             },
 
-            openWebcamPanel: function () { Са
+            openWebcamPanel: function () {
                 let webcam_panel_view = new xabber.WebcamProfileImageView();
                 $(window.document).find('#modals').addClass('login-modals');
                 webcam_panel_view.open({model: this.account, registration: true, registration_view: this});
