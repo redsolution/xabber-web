@@ -17,16 +17,16 @@
         </div>
         <div id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
             <div class="btn-request property-variant hidden">
-                <div class="one-line">Request subscription</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_request_subscription"))]}</div>
             </div>
             <div class="btn-cancel-request property-variant hidden">
-                <div class="one-line">Cancel subscription request</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_request_subscription"))]}</div>
             </div>
             <div class="btn-cancel-subscription-out property-variant hidden">
-                <div class="one-line">Cancel subscription</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
             </div>
             <div class="btn-cancel-all property-variant">
-                <div class="one-line">Cancel</div>
+                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
             </div>
         </div>
         <div class="status-in subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-in">
@@ -37,19 +37,19 @@
         </div>
         <div id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
             <div class="btn-allow property-variant hidden">
-                <div class="one-line">Allow subscription</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_allow_subscription"))]}</div>
             </div>
             <div class="btn-allow-request property-variant hidden">
-                <div class="one-line">Allow subscription</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_allow_subscription"))]}</div>
             </div>
             <div class="btn-disallow-request property-variant hidden">
-                <div class="one-line">Decline</div>
+                <div class="one-line">{[print(xabber.getString("decline"))]}</div>
             </div>
             <div class="btn-cancel-subscription-in property-variant hidden">
-                <div class="one-line">Cancel subscription</div>
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
             </div>
             <div class="btn-cancel-all property-variant">
-                <div class="one-line">Cancel</div>
+                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
             </div>
         </div>
         <div class="status-description subscription-status-wrap">
