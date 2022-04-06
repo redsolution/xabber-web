@@ -51,6 +51,7 @@ let badges_names = [
         'index',
         'restrictions-outline',
         'history',
+        'camera-retake',
         'chevron-down',
         'membership-outline',
         'invite-outline',

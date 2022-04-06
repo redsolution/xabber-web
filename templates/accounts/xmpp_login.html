@@ -85,9 +85,20 @@
             <div class="register-form-step-wrap">
                 <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_avatar"))]}</div>
                 <div class="input-field-wrap">
-                    <div class="avatar-wrap">
+                    <div class="avatar-wrap dropdown-button" data-activates="{{view.cid}}-profile-image">
                         <div class="circle-avatar">
-                            <input id="register_picture" title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                            <input id="register_picture"  title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                            <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown dropdown-content noselect">
+                                <div class="btn-emoji-panel property-variant">
+                                    {[print(xabber.getString("account_emoji_profile_image_button"))]}
+                                </div>
+                                <div class="btn-selfie property-variant">
+                                    {[print(xabber.getString("account_webcam_profile_image_button"))]}
+                                </div>
+                                <div class="btn-choose-image property-variant">
+                                    {[print(xabber.getString("account_profile_image_button"))]}
+                                </div>
+                            </ul>
                         </div>
                         <div class="circle-icon">
                             <svg class="set-groupchat-avatar" viewBox="0 0 24 24">

@@ -55,7 +55,7 @@ define(["xabber-dependencies"], function (deps) {
         return _image_cache[image] || new CachedImage(image);
     };
 
-    var getDefaultAvatar = function (name, color) {
+    var getDefaultAvatar = function (name, color, font, width, height) {
         // generate colored avatar with first letters of username
         var canvas = document.createElement('canvas'),
             ctx = canvas.getContext('2d'),
@@ -72,15 +72,18 @@ define(["xabber-dependencies"], function (deps) {
             second_letter = (first_name.length > 1 ? first_name[1] : '');
         }
         // color_index = Math.floor(hasher(_name).charCodeAt(0) % COLORS.length);
-        canvas.width = 256;
-        canvas.height = 256;
-        ctx.rect(0, 0, 256, 256);
+        canvas.width = width || 256;
+        canvas.height = height || 256;
+        ctx.rect(0, 0, width || 256, height || 256);
         ctx.fillStyle = color || getAccountColor(name);//COLORS[color_index];
         ctx.fill();
-        ctx.font = "bold 100px sans-serif";
+        ctx.font = font || "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
-        ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
+        if (font)
+            ctx.fillText(_name, width/2 || 128, (height/2 + 30) || 160);
+        else
+            ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
         var image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
         return image;
     };

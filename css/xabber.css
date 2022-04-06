@@ -386,6 +386,12 @@ button.btn-float-left {
     margin: 4px 5px;
 }
 
+.modal .modal-footer .modal-preloader-wrap {
+    position: absolute;
+    right: 64px;
+    bottom: 21px;
+}
+
 .modal-footer .errors {
     color: #f44336;
     line-height: 18px;
@@ -808,6 +814,10 @@ body .client-body-wrap.hidden + #modals {
     z-index: -1;
 }
 
+body #modals.login-modals{
+    z-index: unset !important;
+}
+
 body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 1500;
 }
@@ -1181,6 +1191,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .login-buttons .btn-main{
     color: #E53935;
 }
+[data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #E53935;
@@ -1274,6 +1285,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .login-buttons .btn-main{
     color: #D81B60;
 }
+[data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #D81B60;
@@ -1367,6 +1379,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .login-buttons .btn-main{
     color: #8E24AA;
 }
+[data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #8E24AA;
@@ -1459,6 +1472,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .login-buttons .btn-main{
     color: #5E35B1;
 }
+[data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #5E35B1;
@@ -1552,6 +1566,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .login-buttons .btn-main{
     color: #3949AB;
 }
+[data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #3949AB;
@@ -1645,6 +1660,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .login-buttons .btn-main{
     color: #1E88E5;
 }
+[data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #1E88E5;
@@ -1738,6 +1754,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .login-buttons .btn-main{
     color: #039BE5;
 }
+[data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #039BE5;
@@ -1831,6 +1848,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .login-buttons .btn-main{
     color: #00ACC1;
 }
+[data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00ACC1;
@@ -1924,6 +1942,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .login-buttons .btn-main{
     color: #00897B;
 }
+[data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00897B;
@@ -2017,6 +2036,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .login-buttons .btn-main{
     color: #43A047;
 }
+[data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #43A047;
@@ -2110,6 +2130,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .login-buttons .btn-main{
     color: #7CB342;
 }
+[data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #7CB342;
@@ -2203,6 +2224,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .login-buttons .btn-main{
     color: #C0CA33;
 }
+[data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #C0CA33;
@@ -2296,6 +2318,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .login-buttons .btn-main{
     color: #FFB300;
 }
+[data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FFB300;
@@ -2389,6 +2412,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .login-buttons .btn-main{
     color: #FB8C00;
 }
+[data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FB8C00;
@@ -2482,6 +2506,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .login-buttons .btn-main{
     color: #F4511E;
 }
+[data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #F4511E;
@@ -2575,6 +2600,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .login-buttons .btn-main{
     color: #6D4C41;
 }
+[data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #6D4C41;
@@ -2669,6 +2695,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .login-buttons .btn-main{
     color: #546E7A;
 }
+[data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #546E7A;
@@ -3128,10 +3155,14 @@ input[type=text].simple-input-field:hover {
 }
 .register-form.login-panel-form .register-form-step-wrap .avatar-wrap {
     position: relative;
+    cursor: pointer;
 }
 .register-form.login-panel-form .register-form-step-wrap .circle-avatar {
     width: 192px;
     height: 192px;
+}
+.register-form.login-panel-form .register-form-step-wrap .circle-avatar input{
+    pointer-events: none;
 }
 .register-form.login-panel-form .register-form-step-wrap .circle-icon {
     bottom: 4px;
@@ -3196,6 +3227,7 @@ input[type=text].simple-input-field:hover {
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input{
     width: 184px !important;
 }
+.register-form.login-panel-form .register-form-picture .dropdown-content,
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content{
     position: absolute;
     top: 100%;
@@ -3215,6 +3247,7 @@ input[type=text].simple-input-field:hover {
     border: 1px solid rgba(0,0,0,.15);
     border-radius: 0.25rem;
 }
+.register-form.login-panel-form .register-form-picture .dropdown-content .property-variant,
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant{
     display: block;
     width: 100%;
@@ -3227,12 +3260,15 @@ input[type=text].simple-input-field:hover {
     background-color: transparent;
     border: 0;
 }
+.register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:focus,
+.register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:hover,
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:focus,
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:hover{
     color: #16181b;
     text-decoration: none;
     background-color: #f8f9fa;
 }
+.register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active{
     color: #fff;
     text-decoration: none;
@@ -9477,6 +9513,225 @@ input[type='range'].voice-message-volume:focus {
     height: unset;
 }
 
+/* ----------------- EMOJI IMAGE PICKER -------------------- */
+
+.main-modal.emoji-panel {
+    height: 456px;
+    min-width: 600px;
+}
+.main-modal.emoji-panel .modal-header .close-modal {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    cursor: pointer;
+}
+.main-modal.emoji-panel .emoji-profile-description {
+    font-size: 16px;
+}
+.main-modal.emoji-panel .emoji-profile-image {
+    position: absolute;
+    width: 216px;
+    height: 216px;
+    top: 144px;
+    left: 72px;
+    padding: 17px 20px;
+}
+.main-modal.emoji-panel .emoji-profile-image .avatar-wrap {
+    position: relative;
+    width: 176px;
+    height: 176px;
+    cursor: pointer;
+}
+.main-modal.emoji-panel .emoji-profile-image .circle-avatar {
+    width: 176px;
+    height: 176px;
+    background-color: #C8E6C9;
+}
+.main-modal.emoji-panel .emoji-profile-image .circle-avatar .chosen-emoji{
+    font-size: 96px;
+    line-height: 176px;
+    height: 176px;
+    width: 176px;
+    text-align: center;
+}
+.main-modal.emoji-panel .emoji-profile-image .circle-icon {
+    bottom: 4px;
+    right: 4px;
+    position: absolute;
+    width: 48px;
+    border-radius: 50%;
+    height: 48px;
+    background-color: #F7F7F7;
+    box-shadow: 0 2px 2px rgb(0 0 0 / 20%);
+}
+.main-modal.emoji-panel .emoji-profile-image .circle-icon svg {
+    width: 24px;
+    height: 24px;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+.main-modal.emoji-panel .emoji-profile-image .circle-icon svg path{
+    fill: #9E9E9E;
+}
+.main-modal.emoji-panel .emoji-profile-colors {
+    height: 216px;
+    width: 216px;
+    position: absolute;
+    padding: 12px;
+    right: 72px;
+    top: 144px;
+    display: flex;
+    flex-direction: column;
+}
+.main-modal.emoji-panel .emoji-profile-colors .colors-line{
+    display: flex;
+    flex-direction: row;
+}
+.main-modal.emoji-panel .emoji-profile-colors .colors-line .profile-image-background-color{
+    height: 40px;
+    width: 40px;
+    margin: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.main-modal.emoji-panel .emoji-profile-colors .colors-line .profile-image-background-color.chosen-background-color{
+    border: 3px solid white;
+    outline: 4px solid;
+}
+.main-modal.emoji-panel .modal-footer{
+    position: absolute;
+    bottom: 0;
+}
+.main-modal.emoji-panel .btn-save {
+}
+.main-modal.emoji-panel .btn-save.hidden-disabled{
+    pointer-events: none;
+    opacity: 0;
+}
+.main-modal.emoji-panel .btn-cancel {
+}
+.main-modal.emoji-panel .emoji-picker-wrap {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emojis-tab {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px 60px;
+    height: 344px;
+    align-content: flex-start;
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emojis-tab .emoji-picker-emoji{
+    width: 34px;
+    height: 34px;
+    margin: 8px;
+    line-height: 34px;
+    font-size: 29px;
+    text-align: center;
+    cursor: pointer;
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emojis-tab .ps-scrollbar-y-rail{
+    top: 48px !important;
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emoji-picker-tabs{
+    display: flex;
+    justify-content: center;
+    height: 56px;
+    align-items: center;
+    text-align: center;
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emoji-picker-tabs .emojis-bottom-tab-selector{
+    width: 38px;
+    height: 38px;
+    margin: 8px;
+    font-size: 20px;
+    line-height: 38px;
+    text-align: center;
+    cursor: pointer;
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+.main-modal.emoji-panel .emoji-picker-wrap .emoji-picker-tabs .emojis-bottom-tab-selector:hover{
+    background-color: #E0E0E0;
+    border-radius:50%;
+}
+
+/* ----------------- WEBCAM IMAGE PANEL -------------------- */
+
+.main-modal.webcam-panel {
+    height: 456px;
+    min-width: 600px;
+}
+.main-modal.webcam-panel .output,
+.main-modal.webcam-panel .camera {
+    left: 50%;
+    top: 88px;
+    border-radius: 50%;
+    height: 256px;
+    width: 256px;
+    position: absolute;
+    transform: translate(-50%, 0);
+    z-index: 0;
+}
+
+.main-modal.webcam-panel .camera{
+    overflow: hidden;
+}
+
+.main-modal.webcam-panel .output{
+    z-index: 1;
+}
+.main-modal.webcam-panel .output .webcam-photo,
+.main-modal.webcam-panel .camera .webcam-video {
+    margin-left: -43px;
+    height: 256px;
+    width: 342px;
+}
+
+.main-modal.webcam-panel .output .webcam-photo-wrap {
+    height: 256px;
+    width: 256px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+.main-modal.webcam-panel  .circle-icon {
+    bottom: 12px;
+    right: 12px;
+    position: absolute;
+    width: 48px;
+    border-radius: 50%;
+    height: 48px;
+    background-color: #F7F7F7;
+    cursor: pointer;
+    box-shadow: 0 2px 2px rgb(0 0 0 / 20%);
+}
+.main-modal.webcam-panel  .circle-icon.disabled {
+    pointer-events: none;
+}
+.main-modal.webcam-panel  .circle-icon svg {
+    width: 24px;
+    height: 24px;
+    left: 50%;
+    top: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+.main-modal.webcam-panel .circle-icon svg path{
+    fill: #9E9E9E;
+}
+
+.main-modal.webcam-panel .modal-footer{
+    position: absolute;
+    bottom: 0;
+}
+.main-modal.webcam-panel .btn-save.hidden-disabled{
+    pointer-events: none;
+    opacity: 0;
+}
+
 /* ----------------- MAIN COLOR PICKER -------------------- */
 
 .modal.main-color-picker {
@@ -9529,6 +9784,47 @@ input[type='range'].voice-message-volume:focus {
 .account-settings-panel .main-info-wrap .circle-avatar {
     width: 100%;
     height: 100%;
+}
+
+.account-settings-panel .main-info-wrap .circle-avatar input{
+    pointer-events: none;
+}
+
+.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content{
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 264px;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+}
+.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content .property-variant{
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+}
+.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content .property-variant:hover{
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
 }
 
 .account-settings-panel .main-info-wrap .status {

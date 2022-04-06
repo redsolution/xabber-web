@@ -33,6 +33,10 @@ define("xabber-templates", [
     "text!templates/accounts/existing_groupchat_item.html",
     "text!templates/accounts/resource.html",
     "text!templates/accounts/resource_right.html",
+    "text!templates/accounts/webcam_panel.html",
+    "text!templates/accounts/emoji_panel.html",
+    "text!templates/accounts/emoji_picker.html",
+    "text!templates/accounts/emoji_picker_tabs.html",
     "text!templates/accounts/global_settings_item.html",
     "text!templates/accounts/change_status.html",
     "text!templates/accounts/token_item.html",
@@ -155,6 +159,7 @@ define("xabber-templates", [
     "text!templates/svg/restrictions-outline.html",
     "text!templates/svg/history.html",
     "text!templates/svg/chevron-down.html",
+    "text!templates/svg/camera-retake.html",
     "text!templates/svg/membership-outline.html",
     "text!templates/svg/invite-outline.html",
     "text!templates/svg/chevron-right-variant.html",
@@ -289,6 +294,10 @@ define("xabber-templates", [
     addTemplate('accounts.existing_groupchat_item');
     addTemplate('accounts.resource');
     addTemplate('accounts.resource_right');
+    addTemplate('accounts.webcam_panel');
+    addTemplate('accounts.emoji_panel');
+    addTemplate('accounts.emoji_picker');
+    addTemplate('accounts.emoji_picker_tabs');
     addTemplate('accounts.global_settings_item');
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item');
@@ -411,6 +420,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.restrictions-outline');
     addSvgTemplate('svg.history');
     addSvgTemplate('svg.chevron-down');
+    addSvgTemplate('svg.camera-retake');
     addSvgTemplate('svg.membership-outline');
     addSvgTemplate('svg.invite-outline');
     addSvgTemplate('svg.chevron-right-variant');

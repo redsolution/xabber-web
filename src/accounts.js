@@ -1679,6 +1679,9 @@ define("xabber-accounts", function () {
 
             events: {
                 "change .main-info-wrap .circle-avatar input": "changeAvatar",
+                "click .btn-choose-image": "chooseAvatar",
+                "click .btn-emoji-panel": "openEmojiPanel",
+                "click .btn-selfie": "openWebcamPanel",
                 "click .main-info-wrap .status": "openChangeStatus",
                 "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
                 "click .settings-tab.delete-account": "deleteAccount"
@@ -1705,6 +1708,14 @@ define("xabber-accounts", function () {
                 this.$('.settings-tab[data-block-name="tokens"]').hideIf(this.model.get('auth_type') !== 'x-token');
                 this.$('.settings-tab').removeClass('active');
                 this.$(`.settings-tab[data-block-name="${options.block_name}"]`).addClass('active');
+                this.$('.circle-avatar.dropdown-button').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                });
+
                 this.updateCSS();
                 return this;
             },
@@ -1747,6 +1758,20 @@ define("xabber-accounts", function () {
                     font_size -= 2;
                 }
                 $name.css({'margin-left': (wrap_width - width) / 2});
+            },
+
+            chooseAvatar: function () {
+                this.$('.main-info-wrap .circle-avatar input').click();
+            },
+
+            openEmojiPanel: function () {
+                let emoji_panel_view = new xabber.EmojiProfileImageView();
+                emoji_panel_view.open({model: this.model});
+            },
+
+            openWebcamPanel: function () {
+                let webcam_panel_view = new xabber.WebcamProfileImageView();
+                webcam_panel_view.open({model: this.model});
             },
 
             changeAvatar: function (ev) {
@@ -2446,6 +2471,332 @@ define("xabber-accounts", function () {
             }
         });
 
+        xabber.WebcamProfileImageView = xabber.BasicView.extend({
+            className: 'modal main-modal webcam-panel',
+            template: templates.webcam_panel,
+
+            events: {
+                "click .btn-save": "saveAvatar",
+                "click .btn-cancel": "close",
+            },
+
+            open: function (options) {
+                this.account = options.model;
+                this.registration = options.registration;
+                this.registration_view = options.registration_view;
+
+                this.width = 171;
+                this.height = 128;
+                this.streaming = false;
+                this.video = null;
+                this.canvas = null;
+                this.photo = null;
+                this.startbutton = null;
+
+                this.show();
+                this.startupStream();
+            },
+
+            render: function () {
+                this.$el.openModal({
+                    complete: this.close.bind(this)
+                });
+            },
+
+            onHide: function () {
+                if (this.video && this.video.srcObject && this.video.srcObject.getTracks()){
+                    let tracks = this.video.srcObject.getTracks()
+                    tracks.forEach(function(track) {
+                        track.stop();
+                    });
+                    this.video.srcObject = null
+                }
+                $(window.document).find('#modals').removeClass('login-modals');
+                this.$el.detach();
+
+            },
+
+            close: function () {
+                this.closeModal();
+            },
+
+            closeModal: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            startupStream: function (ev) {
+                this.video = this.$('.webcam-video')[0];
+                this.canvas = this.$('#canvas')[0];
+                this.photo = this.$('.webcam-photo')[0];
+                this.startbutton = this.$('.btn-take-photo')[0];
+                navigator.mediaDevices.getUserMedia({video: true, audio: false})
+                    .then((stream) => {
+                        this.video.srcObject = stream;
+                        this.video.play();
+                    })
+                    .catch((err) => {
+                        console.log("An error occurred: " + err);
+                    });
+
+                this.video.addEventListener('canplay', (ev) => {
+                    if (!this.streaming) {
+                        if (isNaN(this.height)) {
+                            this.height = this.width / (4/3);
+                        }
+                        this.video.setAttribute('width', this.width);
+                        this.video.setAttribute('height', this.height);
+                        this.canvas.setAttribute('width', this.width);
+                        this.canvas.setAttribute('height', this.height);
+                        this.streaming = true;
+                    }
+                }, false);
+
+                this.startbutton.addEventListener('click', (ev) =>{
+                    this.takePicture();
+                    ev.preventDefault();
+                }, false);
+
+                this.$('.circle-icon')[0].addEventListener('click', (ev) =>{
+                    if ($(ev.target).closest('.circle-icon').hasClass('disabled'))
+                        return;
+                    this.clearPhoto();
+                    ev.preventDefault();
+                }, false);
+
+                this.clearPhoto();
+
+            },
+
+
+            clearPhoto: function (ev) {
+                let context = this.canvas.getContext('2d');
+                context.fillStyle = "#AAA";
+                context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                let data = this.canvas.toDataURL('image/png');
+                this.photo.setAttribute('src', data);
+                this.$('.btn-take-photo').hideIf(false)
+                this.$('.btn-save').hideIf(true)
+                this.$('.output').hideIf(true)
+            },
+
+
+            takePicture: function (ev) {
+                let context = this.canvas.getContext('2d');
+                this.$('.btn-take-photo').hideIf(true)
+                this.$('.btn-save').hideIf(false)
+                this.$('.output').hideIf(false)
+                if (this.width && this.height) {
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
+                    context.drawImage(this.video, 0, 0, this.width, this.height);
+                    context.globalCompositeOperation='destination-in';
+                    context.beginPath();
+                    context.arc(this.width/2,this.height/2,this.height/2,0,Math.PI*2);
+                    context.closePath();
+                    context.fill();
+
+                    let data = this.canvas.toDataURL('image/png');
+                    this.photo.setAttribute('src', data);
+                } else {
+                    this.clearPhoto();
+                }
+            },
+
+
+            saveAvatar: function () {
+                let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
+                    file = new File([blob], "avatar");
+                file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
+                if (file && file.base64) {
+                    if (this.registration && this.registration_view){
+                        this.registration_view.avatar = file;
+                        this.registration_view.$('.btn-next').prop('disabled', false);
+                        this.registration_view.$('.circle-avatar').addClass('changed');
+                        this.registration_view.$('.circle-avatar').setAvatar(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, ''), this.member_details_avatar_size);
+                        this.close();
+                    } else {
+                        this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+                        this.$('.btn-save').addClass('hidden-disabled');
+                        this.$('.circle-icon').addClass('disabled');
+                        this.account.pubAvatar(file, () => {
+                            this.close();
+                        }, () => {
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                        });
+                    }
+                }
+            },
+        });
+
+        xabber.EmojiProfileImageView = xabber.BasicView.extend({
+            className: 'modal main-modal emoji-panel',
+            template: templates.emoji_panel,
+
+            events: {
+                "click .profile-image-background-color": "changeColor",
+                "click .avatar-wrap": "openEmojiPicker",
+                "click .close-modal": "close",
+                "click .btn-save": "saveAvatar",
+                "click .btn-cancel": "close",
+            },
+
+            open: function (options) {
+                this.account = options.model;
+                this.registration = options.registration;
+                this.registration_view = options.registration_view;
+                this.emoji_panel_view = this.addChild('emoji_picker_panel', xabber.EmojiPickerView,{})
+                this.show();
+            },
+
+            render: function () {
+                this.$el.openModal({
+                    complete: this.close.bind(this)
+                });
+            },
+
+            onHide: function () {
+                this.$el.detach();
+                $(window.document).find('#modals').removeClass('login-modals');
+            },
+
+            close: function () {
+                this.closeModal();
+            },
+
+            closeModal: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            openEmojiPicker: function () {
+                this.emoji_panel_view.open(this);
+            },
+
+            changeColor: function (ev) {
+                let color = $(ev.target).data('value');
+                this.$('.profile-image-background-color').removeClass('chosen-background-color');
+                $(ev.target).addClass('chosen-background-color');
+                this.$('.circle-avatar').attr('class', 'circle-avatar');
+                this.$('.circle-avatar').attr('data-value', color);
+                this.$('.circle-avatar').addClass('ground-color-' + color + '-100');
+            },
+
+            saveAvatar: function (ev) {
+                let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
+                    file = new File([blob], "avatar");
+                file.base64 = blob;
+                if (file && file.base64) {
+                    if (this.registration && this.registration_view){
+                        this.registration_view.avatar = file;
+                        this.registration_view.$('.btn-next').prop('disabled', false);
+                        this.registration_view.$('.circle-avatar').addClass('changed');
+                        this.registration_view.$('.circle-avatar').setAvatar(blob, this.member_details_avatar_size);
+                        this.close();
+                    } else {
+                        this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+                        this.$('.btn-save').addClass('hidden-disabled');
+                        this.account.pubAvatar(file, () => {
+                            this.close();
+                        }, () => {
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                        });
+                    }
+                }
+            },
+        });
+
+        xabber.EmojiPickerView = xabber.BasicView.extend({
+            className: 'modal main-modal emoji-panel emoji-picker',
+            template: templates.emoji_picker,
+
+            events: {
+                "click .emojis-bottom-tab-selector": "pickEmojiTab",
+                "click .emoji-picker-emoji": "pickEmoji",
+                "click .close-modal": "close",
+            },
+
+            open: function () {
+                this.$el.openModal({
+                    complete: this.close.bind(this)
+                });
+                this.readEmojisJSON()
+                this.show();
+            },
+
+            readEmojisJSON: function () {
+                // get emojis.json file from server and parse it
+                let rawFile = new XMLHttpRequest();
+                rawFile.open("GET", "emojis.json", true);
+                rawFile.onreadystatechange = () => {
+                    if (rawFile.readyState === 4 && rawFile.status === 200) {
+                        let text, json;
+                        rawFile.onreadystatechange = null;
+                        try {
+                            text = rawFile.responseText;
+                            json = JSON.parse(text);
+                        } catch (e) {
+                            return;
+                        }
+                        this.emojis = json
+
+                        if (this.emojis.length) {
+                            this.$('.emoji-picker-wrap').html(templates.emoji_picker_tabs({
+                                emojis: this.emojis
+                            }));
+                            this.ps_container = this.$('.emojis-tab');
+                            if (this.ps_container.length) {
+                                this.ps_container.perfectScrollbar(
+                                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                                );
+                            }
+                        }
+                    }
+                };
+                rawFile.send();
+            },
+
+            render: function () {
+            },
+
+            onHide: function () {
+                this.$el.detach();
+            },
+
+            close: function () {
+                this.closeModal();
+            },
+
+            closeModal: function () {
+                this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            scrollTo: function (offset) {
+                this.ps_container.each((index) => {
+                    this.ps_container[index].scrollTop = offset;
+                });
+                this.ps_container.perfectScrollbar('update');
+            },
+
+            scrollToTop: function () {
+                this.scrollTo(0);
+            },
+
+            pickEmojiTab: function (ev) {
+                let tab = $(ev.target).data('value');
+                this.$('.emojis-bottom-tab-selector').removeClass('chosen-emoji-selector');
+                $(ev.target).addClass('chosen-emoji-selector');
+                this.$('.emojis-tab').removeClass('chosen-emoji-tab').addClass('hidden');
+                this.$(`.emojis-tab[data-value="${tab}"]`).removeClass('hidden').addClass('chosen-emoji-tab');
+                this.scrollToTop();
+            },
+
+            pickEmoji: function (ev) {
+                let emoji = $(ev.target).closest('.emoji-picker-emoji').data('value');
+                this.parent.$('.chosen-emoji').attr('data-value', emoji).text(emoji);
+                this.close();
+            },
+        });
+
         xabber.ChangePasswordView = xabber.BasicView.extend({
             className: 'modal main-modal change-password-modal',
             template: templates.change_password,
@@ -2839,6 +3190,9 @@ define("xabber-accounts", function () {
                 "keyup input[name=register_password]": "keyUpPassword",
                 "keyup input[name=password]": "keyUp",
                 "change .circle-avatar input": "changeAvatar",
+                "click .btn-choose-image": "chooseAvatar",
+                "click .btn-emoji-panel": "openEmojiPanel",
+                "click .btn-selfie": "openWebcamPanel",
                 "click .property-variant": "changePropertyValue"
             },
 
@@ -2873,6 +3227,7 @@ define("xabber-accounts", function () {
                 };
                 this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
+                this.$('.avatar-wrap.dropdown-button').dropdown(dropdown_settings);
                 this.updateOptions && this.updateOptions();
             },
 
@@ -3224,6 +3579,22 @@ define("xabber-accounts", function () {
                 $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
                 if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
+            },
+
+            chooseAvatar: function () {
+                this.$('.circle-avatar input').click();
+            },
+
+            openEmojiPanel: function () {
+                let emoji_panel_view = new xabber.EmojiProfileImageView();
+                $(window.document).find('#modals').addClass('login-modals');
+                emoji_panel_view.open({model: this.account, registration: true, registration_view: this});
+            },
+
+            openWebcamPanel: function () { Са
+                let webcam_panel_view = new xabber.WebcamProfileImageView();
+                $(window.document).find('#modals').addClass('login-modals');
+                webcam_panel_view.open({model: this.account, registration: true, registration_view: this});
             },
 
             changeAvatar: function (ev) {

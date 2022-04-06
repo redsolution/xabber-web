@@ -1,0 +1,26 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>{[print(xabber.getString("take_photo"))]}</span>
+    </div>
+    <div class="webcam-profile-image-wrap">
+        <div class="camera">
+            <video class="webcam-video">Video stream not available.</video>
+        </div>
+        <canvas id="canvas" style="display: none;">
+        </canvas>
+        <div class="output hidden">
+            <div class="webcam-photo-wrap">
+                <img class="webcam-photo" alt="The screen capture will appear in this box.">
+            </div>
+            <div class="circle-icon">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="camera-retake"></svg>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-take-photo">{[print(xabber.getString("capture"))]}</button>
+        <button class="btn-flat btn-main btn-save hidden">{[print(xabber.getString("account_webcam_profile_image_btn_save"))]}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
+        <div class="modal-preloader-wrap"></div>
+    </div>
+</div>

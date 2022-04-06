@@ -1,0 +1,17 @@
+
+{[ for (var i = 0; i < emojis.length; i++) { var tab = emojis[i] ]}
+    <div class="emojis-tab{[if (i === 0){]} chosen-emoji-tab{[} else {]} hidden{[}]}" data-value="{{tab.type}}">
+        {[ for (var y = 0; y < tab.emojis.length; y++) { var emoji = tab.emojis[y] ]}
+            <div class="emoji-picker-emoji" data-value="{{emoji[0]}}">
+                <div>{{emoji[0]}}</div>
+            </div>
+        {[ } ]}
+    </div>
+{[ } ]}
+<div class="emoji-picker-tabs">
+    {[ for (var i = 0; i < emojis.length; i++) { var tab = emojis[i] ]}
+    <div class="emojis-bottom-tab-selector{[if (i === 0){]} chosen-emoji-selector{[}]}" data-value="{{tab.type}}">
+        {{tab.emojis[0][0]}}
+    </div>
+    {[ } ]}
+</div>

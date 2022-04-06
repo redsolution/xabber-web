@@ -26,6 +26,9 @@
   color: #D32F2F !important;
 }
 
+.outline-color-red-500{
+  outline-color: #F44336 !important;
+}
 .ground-color-red-500,
 .hover-ground-color-red-500:hover,
 [data-color=red] .ground-color-500,
@@ -151,6 +154,9 @@
   color: #C2185B !important;
 }
 
+.outline-color-pink-500{
+  outline-color: #E91E63 !important;
+}
 .ground-color-pink-500,
 .hover-ground-color-pink-500:hover,
 [data-color=pink] .ground-color-500,
@@ -276,6 +282,9 @@
   color: #7B1FA2 !important;
 }
 
+.outline-color-purple-500{
+  outline-color: #9C27B0 !important;
+}
 .ground-color-purple-500,
 .hover-ground-color-purple-500:hover,
 [data-color=purple] .ground-color-500,
@@ -402,6 +411,9 @@
   color: #512DA8 !important;
 }
 
+.outline-color-deep-purple-500{
+  outline-color: #673AB7 !important;
+}
 .ground-color-deep-purple-500,
 .hover-ground-color-deep-purple-500:hover,
 [data-color=deep-purple] .ground-color-500,
@@ -527,6 +539,9 @@
   color: #303F9F !important;
 }
 
+.outline-color-indigo-500{
+  outline-color: #3F51B5 !important;
+}
 .ground-color-indigo-500,
 .hover-ground-color-indigo-500:hover,
 [data-color=indigo] .ground-color-500,
@@ -653,6 +668,9 @@
   color: #1976D2 !important;
 }
 
+.outline-color-blue-500{
+  outline-color: #2196F3 !important;
+}
 .ground-color-blue-500,
 .hover-ground-color-blue-500:hover,
 [data-color=blue] .ground-color-500,
@@ -779,6 +797,9 @@
   color: #0288D1 !important;
 }
 
+.outline-color-light-blue-500{
+  outline-color: #03A9F4 !important;
+}
 .ground-color-light-blue-500,
 .hover-ground-color-light-blue-500:hover,
 [data-color=light-blue] .ground-color-500,
@@ -904,6 +925,9 @@
   color: #0097A7 !important;
 }
 
+.outline-color-cyan-500{
+  outline-color: #00BCD4 !important;
+}
 .ground-color-cyan-500,
 .hover-ground-color-cyan-500:hover,
 [data-color=cyan] .ground-color-500,
@@ -1029,6 +1053,9 @@
   color: #00796B !important;
 }
 
+.outline-color-teal-500{
+  outline-color: #009688 !important;
+}
 .ground-color-teal-500,
 .hover-ground-color-teal-500:hover,
 [data-color=teal] .ground-color-500,
@@ -1155,6 +1182,9 @@
   color: #388E3C !important;
 }
 
+.outline-color-green-500{
+  outline-color: #4CAF50 !important;
+}
 .ground-color-green-500,
 .hover-ground-color-green-500:hover,
 [data-color=green] .ground-color-500,
@@ -1281,6 +1311,9 @@
   color: #689F38 !important;
 }
 
+.outline-color-light-green-500{
+  outline-color: #8BC34A !important;
+}
 .ground-color-light-green-500,
 .hover-ground-color-light-green-500:hover,
 [data-color=light-green] .ground-color-500,
@@ -1406,6 +1439,9 @@
   color: #AFB42B !important;
 }
 
+.outline-color-lime-500{
+  outline-color: #CDDC39 !important;
+}
 .ground-color-lime-500,
 .hover-ground-color-lime-500:hover,
 [data-color=lime] .ground-color-500,
@@ -1532,6 +1568,9 @@
   color: #FFA000 !important;
 }
 
+.outline-color-amber-500{
+  outline-color: #FFC107 !important;
+}
 .ground-color-amber-500,
 .hover-ground-color-amber-500:hover,
 [data-color=amber] .ground-color-500,
@@ -1657,6 +1696,9 @@
   color: #F57C00 !important;
 }
 
+.outline-color-orange-500{
+  outline-color: #FF9800 !important;
+}
 .ground-color-orange-500,
 .hover-ground-color-orange-500:hover,
 [data-color=orange] .ground-color-500,
@@ -1783,6 +1825,9 @@
   color: #E64A19 !important;
 }
 
+.outline-color-deep-orange-500{
+  outline-color: #FF5722 !important;
+}
 .ground-color-deep-orange-500,
 .hover-ground-color-deep-orange-500:hover,
 [data-color=deep-orange] .ground-color-500,
@@ -1908,6 +1953,9 @@
   color: #5D4037 !important;
 }
 
+.outline-color-brown-500{
+  outline-color: #795548 !important;
+}
 .ground-color-brown-500,
 .hover-ground-color-brown-500:hover,
 [data-color=brown] .ground-color-500,
@@ -2033,6 +2081,9 @@
   color: #455A64 !important;
 }
 
+.outline-color-blue-grey-500{
+  outline-color: #607D8B !important;
+}
 .ground-color-blue-grey-500,
 .hover-ground-color-blue-grey-500:hover,
 [data-color=blue-grey] .ground-color-500,
