@@ -15,43 +15,43 @@
                 <div class="value one-line"></div>
             </div>
         </div>
-        <ul id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
-            <li class="btn-request hidden">
-                <span class="one-line">Request subscription</span>
-            </li>
-            <li class="btn-cancel-request hidden">
-                <span class="one-line">Cancel subscription request</span>
-            </li>
-            <li class="btn-cancel-subscription-out hidden">
-                <span class="one-line">Cancel subscription</span>
-            </li>
-            <li class="btn-cancel-all">
-                <span class="one-line">Cancel</span>
-            </li>
-        </ul>
+        <div id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
+            <div class="btn-request property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_request_subscription"))]}</div>
+            </div>
+            <div class="btn-cancel-request property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_request_subscription"))]}</div>
+            </div>
+            <div class="btn-cancel-subscription-out property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
+            </div>
+            <div class="btn-cancel-all property-variant">
+                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
+            </div>
+        </div>
         <div class="status-in subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-in">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-from"></svg></div>
             <div class="info">
                 <div class="value one-line"></div>
             </div>
         </div>
-        <ul id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
-            <li class="btn-allow hidden">
-                <span class="one-line">Allow subscription</span>
-            </li>
-            <li class="btn-allow-request hidden">
-                <span class="one-line">Allow subscription</span>
-            </li>
-            <li class="btn-disallow-request hidden">
-                <span class="one-line">Decline</span>
-            </li>
-            <li class="btn-cancel-subscription-in hidden">
-                <span class="one-line">Cancel subscription</span>
-            </li>
-            <li class="btn-cancel-all">
-                <span class="one-line">Cancel</span>
-            </li>
-        </ul>
+        <div id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
+            <div class="btn-allow property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_allow_subscription"))]}</div>
+            </div>
+            <div class="btn-allow-request property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_allow_subscription"))]}</div>
+            </div>
+            <div class="btn-disallow-request property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("decline"))]}</div>
+            </div>
+            <div class="btn-cancel-subscription-in property-variant hidden">
+                <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
+            </div>
+            <div class="btn-cancel-all property-variant">
+                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
+            </div>
+        </div>
         <div class="status-description subscription-status-wrap">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg></div>
             <div class="info">
