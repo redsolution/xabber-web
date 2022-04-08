@@ -17,6 +17,8 @@ define("xabber-strophe", function () {
                 console.info('Strophe log: ');
                 console.info(msg);
             }
+            if (msg && msg.includes('policy-violation') && log_level === Strophe.LogLevel.ERROR)
+                utils.dialogs.error(msg);
         };
 
         let utf16to8 = function (str) {

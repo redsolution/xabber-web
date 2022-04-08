@@ -244,6 +244,13 @@ input[type=checkbox].filled-in:checked + label:after {
     text-overflow: ellipsis;
 }
 
+.dotted-underline {
+    text-underline-offset: 2px;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+}
+
 .noselect {
     -webkit-touch-callout: none;/* iOS Safari */
     -webkit-user-select: none;  /* Chrome/Safari/Opera */
@@ -927,6 +934,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .right-contact-panel-wrap.background-click .details-panel-right .panel-content-wrap{
     z-index: 499;
+    overflow: hidden;
     box-shadow: 0 16px 28px 0 rgb(0 0 0 / 22%), 0 25px 55px 0 rgb(0 0 0 / 21%);
     background: #fff;
 }
@@ -5750,7 +5758,6 @@ input[type=text].simple-input-field:hover {
 .mention-item .chat-title-wrap,
 .chat-item .chat-title-wrap {
     height: 17px;
-    overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
@@ -6070,14 +6077,14 @@ input[type=text].simple-input-field:hover {
     float: left;
     clear: left;
     margin: 0;
-    margin-top: 1px;
+    margin-top: -1px;
     max-width: 100%;
 }
 
 .chat-head-wrap .contact-name {
-    height: 21px;
+        height: 25px;
     font-size: 22px;
-    line-height: 21px;
+    line-height: 25px;
     color: #212121;
     cursor: pointer;
 }
@@ -6098,7 +6105,7 @@ input[type=text].simple-input-field:hover {
     line-height: 14px;
     font-weight: 300;
     color: #616161;
-    margin-top: 3px;
+    margin-top: 1px;
 }
 
 .chat-head-wrap .contact-info .contact-status-message.members-hover:hover,
@@ -9922,13 +9929,12 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel-right .edit-wrap .subscription-statuses .dropdown-content{
-    position: absolute;
-    top: 100%;
-    left: 0;
+    margin-top: 32px !important;
+    left: 72px !important;
     z-index: 1000;
-    display: none;
     float: left;
-    min-width: 264px;
+    width: auto !important;
+    min-width: 200px;
     padding: 0.5rem 0;
     margin: 0.125rem 0 0;
     font-size: 1rem;
@@ -10129,8 +10135,11 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .input-widget-wrap .emoticons-panel-wrap{
     top: 32px;
-    right: 32px;
+    right: -45px;
+}
 
+.details-panel-right .edit-wrap .input-widget-wrap.participant-badge-wrap .emoticons-panel-wrap{
+    right: -3px;
 }
 
 .details-panel-right .edit-wrap .group-description-wrap .group-description-input{

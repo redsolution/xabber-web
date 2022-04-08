@@ -67,6 +67,10 @@
   color: #E57373 !important;
 }
 
+[data-color=red] .text-decoration-color-300 {
+  text-decoration-color: #E57373 !important;
+}
+
 .ground-color-red-100,
 .hover-ground-color-red-100:hover,
 [data-color=red] .ground-color-100,
@@ -192,6 +196,10 @@
   color: #F06292 !important;
 }
 
+[data-color=pink] .text-decoration-color-300 {
+  text-decoration-color: #F06292 !important;
+}
+
 .ground-color-pink-100,
 .hover-ground-color-pink-100:hover,
 [data-color=pink] .ground-color-100,
@@ -315,6 +323,10 @@
 [data-color=purple] .text-color-300,
 [data-color=purple] .hover-text-color-300:hover {
   color: #BA68C8 !important;
+}
+
+[data-color=purple] .text-decoration-color-300 {
+  text-decoration-color: #BA68C8 !important;
 }
 
 .ground-color-purple-100,
@@ -443,6 +455,10 @@
   color: #9575CD !important;
 }
 
+[data-color=deep-purple] .text-decoration-color-300 {
+  text-decoration-color: #9575CD !important;
+}
+
 .ground-color-deep-purple-100,
 .hover-ground-color-deep-purple-100:hover,
 [data-color=deep-purple] .ground-color-100,
@@ -566,6 +582,10 @@
 [data-color=indigo] .text-color-300,
 [data-color=indigo] .hover-text-color-300:hover {
   color: #7986CB !important;
+}
+
+[data-color=indigo] .text-decoration-color-300 {
+  text-decoration-color: #7986CB !important;
 }
 
 .ground-color-indigo-100,
@@ -694,6 +714,10 @@
   color: #64B5F6 !important;
 }
 
+[data-color=blue] .text-decoration-color-300 {
+  text-decoration-color: #64B5F6 !important;
+}
+
 .ground-color-blue-100,
 .hover-ground-color-blue-100:hover,
 [data-color=blue] .ground-color-100,
@@ -818,6 +842,10 @@
 [data-color=light-blue] .text-color-300,
 [data-color=light-blue] .hover-text-color-300:hover {
   color: #4FC3F7 !important;
+}
+
+[data-color=light-blue] .text-decoration-color-300 {
+  text-decoration-color: #4FC3F7 !important;
 }
 
 .ground-color-light-blue-100,
@@ -945,6 +973,10 @@
   color: #4DD0E1 !important;
 }
 
+[data-color=cyan] .text-decoration-color-300 {
+  text-decoration-color: #4DD0E1 !important;
+}
+
 .ground-color-cyan-100,
 .hover-ground-color-cyan-100:hover,
 [data-color=cyan] .ground-color-100,
@@ -1068,6 +1100,10 @@
 [data-color=teal] .text-color-300,
 [data-color=teal] .hover-text-color-300:hover {
   color: #4DB6AC !important;
+}
+
+[data-color=teal] .text-decoration-color-300 {
+  text-decoration-color: #4DB6AC !important;
 }
 
 .ground-color-teal-100,
@@ -1196,6 +1232,10 @@
   color: #81C784 !important;
 }
 
+[data-color=green] .text-decoration-color-300 {
+  text-decoration-color: #81C784 !important;
+}
+
 .ground-color-green-100,
 .hover-ground-color-green-100:hover,
 [data-color=green] .ground-color-100,
@@ -1322,6 +1362,10 @@
   color: #AED581 !important;
 }
 
+[data-color=light-green] .text-decoration-color-300 {
+  text-decoration-color: #AED581 !important;
+}
+
 .ground-color-light-green-100,
 .hover-ground-color-light-green-100:hover,
 [data-color=light-green] .ground-color-100,
@@ -1445,6 +1489,10 @@
 [data-color=lime] .text-color-300,
 [data-color=lime] .hover-text-color-300:hover {
   color: #DCE775 !important;
+}
+
+[data-color=lime] .text-decoration-color-300 {
+  text-decoration-color: #DCE775 !important;
 }
 
 .ground-color-lime-100,
@@ -1573,6 +1621,10 @@
   color: #FFD54F !important;
 }
 
+[data-color=amber] .text-decoration-color-300 {
+  text-decoration-color: #FFD54F !important;
+}
+
 .ground-color-amber-100,
 .hover-ground-color-amber-100:hover,
 [data-color=amber] .ground-color-100,
@@ -1696,6 +1748,10 @@
 [data-color=orange] .text-color-300,
 [data-color=orange] .hover-text-color-300:hover {
   color: #FFB74D !important;
+}
+
+[data-color=orange] .text-decoration-color-300 {
+  text-decoration-color: #FFB74D !important;
 }
 
 .ground-color-orange-100,
@@ -1824,6 +1880,10 @@
   color: #FF8A65 !important;
 }
 
+[data-color=deep-orange] .text-decoration-color-300 {
+  text-decoration-color: #FF8A65 !important;
+}
+
 .ground-color-deep-orange-100,
 .hover-ground-color-deep-orange-100:hover,
 [data-color=deep-orange] .ground-color-100,
@@ -1949,6 +2009,10 @@
   color: #A1887F !important;
 }
 
+[data-color=brown] .text-decoration-color-300 {
+  text-decoration-color: #A1887F !important;
+}
+
 .ground-color-brown-100,
 .hover-ground-color-brown-100:hover,
 [data-color=brown] .ground-color-100,
@@ -2072,6 +2136,10 @@
 [data-color=blue-grey] .text-color-300,
 [data-color=blue-grey] .hover-text-color-300:hover {
   color: #90A4AE !important;
+}
+
+[data-color=blue-grey] .text-decoration-color-300 {
+  text-decoration-color: #90A4AE !important;
 }
 
 .ground-color-blue-grey-100,

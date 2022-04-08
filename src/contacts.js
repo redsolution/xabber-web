@@ -428,7 +428,6 @@ define("xabber-contacts", function () {
             },
 
             blockRequest: function (callback) {
-                this.pres('unsubscribed');
                 this.block(callback);
             },
 
@@ -503,7 +502,7 @@ define("xabber-contacts", function () {
                         contact.blockRequest();
                         xabber.trigger("clear_search");
                         if (!is_group)
-                            xabber.body.setScreen('all-chats', {right: undefined});
+                            xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                     }
                 });
             },
@@ -559,7 +558,7 @@ define("xabber-contacts", function () {
                     this.trigger('update_avatar');
                 }
                 let $group_chat_info = $(presence).find(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`);
-                if ($group_chat_info.length > 0 && $group_chat_info.children().length && !this.get('removed')) {
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
                     this.set('full_jid', $presence.attr('from'));
                     if (!this.get('group_chat')) {
                         this.set('group_chat', true);
@@ -597,13 +596,18 @@ define("xabber-contacts", function () {
                     if (this.get('group_chat')) {
                         this.removeFromRoster();
                         let chat = this.account.chats.getChat(this);
-                        chat.deleteFromSynchronization(() => {
+                        if (!this.get('sync_deleted')){
+                            chat.deleteFromSynchronization(() => {
+                                chat.trigger("close_chat");
+                                this.destroy();
+                            }, () => {
+                                chat.trigger("close_chat");
+                                this.destroy();
+                            });
+                        } else {
                             chat.trigger("close_chat");
                             this.destroy();
-                        }, () => {
-                            chat.trigger("close_chat");
-                            this.destroy();
-                        });
+                        }
                     }
                 } else if (type === 'unsubscribed') {
                     this.set('subscription_request_out', false);
@@ -6856,21 +6860,27 @@ define("xabber-contacts", function () {
                     this.$('.btn-delete').hideIf(!this.model.get('in_roster'));
                     if (statuses.status_out_color === 'request') {
                         this.$('.status-out').addClass('text-color-500').addClass('request').removeClass('subbed')
+                        this.$('.status-out').addClass('text-decoration-color-300')
                     }
                     if (statuses.status_in_color === 'request') {
                         this.$('.status-in').addClass('text-color-500').addClass('request').removeClass('subbed')
+                        this.$('.status-in').addClass('text-decoration-color-300')
                     }
                     if (statuses.status_out_color === 'subbed') {
                         this.$('.status-out').addClass('text-color-500').addClass('subbed').removeClass('request')
+                        this.$('.status-out').addClass('text-decoration-color-300')
                     }
                     if (statuses.status_in_color === 'subbed') {
                         this.$('.status-in').addClass('text-color-500').addClass('subbed').removeClass('request')
+                        this.$('.status-in').addClass('text-decoration-color-300')
                     }
                     if (statuses.status_out_color === '') {
                         this.$('.status-out').removeClass('text-color-500').removeClass('request').removeClass('subbed')
+                        this.$('.status-out').removeClass('text-decoration-color-300')
                     }
                     if (statuses.status_in_color === '') {
                         this.$('.status-in').removeClass('text-color-500').removeClass('request').removeClass('subbed')
+                        this.$('.status-in').removeClass('text-decoration-color-300')
                     }
                     this.$('.btn-request').hideIf(!(statuses.status_out_color === ''))
                     this.$('.btn-allow').hideIf(!(statuses.status_in_color === ''))
@@ -6891,7 +6901,6 @@ define("xabber-contacts", function () {
             },
 
             cancelSubscriptionRequest: function () {
-                this.model.saveSubscriptionUnsubscribed();
                 this.model.declineSubscription();
             },
 
@@ -6900,7 +6909,6 @@ define("xabber-contacts", function () {
             },
 
             cancelSubscriptionOut: function () {
-                this.model.saveSubscriptionUnsubscribed();
                 this.model.declineSubscription();
             },
 
@@ -8226,13 +8234,12 @@ define("xabber-contacts", function () {
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
-                        this.account.cached_roster.removeFromRoster(contact.get('jid'));
                         xabber.toolbar_view.recountAllMessageCounter();
                         xabber.chats_view.clearSearch();
-                        contact.set('removed', true);
-                        contact.set('group_chat', false);
-                        contact.set('group_info', {});
+                        contact && contact.set('sync_deleted', true);
                     }
+                    else
+                        contact && contact.set('sync_deleted', false);
                     if ($group_metadata.length) {
                         contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
                     }
