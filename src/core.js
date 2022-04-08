@@ -55,17 +55,20 @@
 
         loadTranslations: async function (lang) {
             return new Promise((resolve, reject) => {
-                !lang && (lang = this.settings.language);
-                if (lang == 'default' && this.default_translation) {
-                    lang = this.get("default_language");
-                    let translation = this.default_translation;
-                    resolve({lang, translation});
+                let language = {};
+                language.lang = lang;
+                !language.lang && (language.lang = this.settings.language);
+                if (language.lang == 'default' && this.default_translation) {
+                    language.lang = this.get("default_language");
+                    language.translation  = this.default_translation;
+                    resolve(language);
                     return;
                 }
-                require([`./translations/${lang.replace(/-/g, "-r")}.js`], (translation) => {
-                    resolve({lang, translation})
+                require([`./translations/${language.lang.replace(/-/g, "-r")}.js`], (translation) => {
+                    language.translation  = translation;
+                    resolve(language)
                 }, () => {
-                    resolve()
+                    resolve(language)
                 });
             });
         },
@@ -293,10 +296,10 @@
         },
 
         configure: function (config) {
-            this.loadTranslations(this.get('default_language')).then(({lang, translation}) => {
-                this.default_translation = translation;
-                return this.loadTranslations();}).then(({lang, translation}) => {
-                    this.setLocale(lang, translation);
+            this.loadTranslations(this.get('default_language')).then((language) => {
+                this.default_translation = language.translation ;
+                return this.loadTranslations();}).then((language) => {
+                    this.setLocale(language.lang, language.translation);
                 _.extend(constants, _.pick(config, [
                     'CONNECTION_URL',
                     'PERSONAL_AREA_URL',

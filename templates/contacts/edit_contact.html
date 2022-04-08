@@ -12,7 +12,7 @@
         <div class="status-out subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-out">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-to"></svg></div>
             <div class="info">
-                <div class="value one-line"></div>
+                <div class="value dotted-underline one-line"></div>
             </div>
         </div>
         <div id="{{view.cid}}-status-out" class="status-out-dropdown dropdown-content noselect">
@@ -25,14 +25,11 @@
             <div class="btn-cancel-subscription-out property-variant hidden">
                 <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
             </div>
-            <div class="btn-cancel-all property-variant">
-                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
-            </div>
         </div>
         <div class="status-in subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-in">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-from"></svg></div>
             <div class="info">
-                <div class="value one-line"></div>
+                <div class="value dotted-underline one-line"></div>
             </div>
         </div>
         <div id="{{view.cid}}-status-in" class="status-in-dropdown dropdown-content noselect">
@@ -48,9 +45,6 @@
             <div class="btn-cancel-subscription-in property-variant hidden">
                 <div class="one-line">{[print(xabber.getString("contact_subscription_cancel_subscription"))]}</div>
             </div>
-            <div class="btn-cancel-all property-variant">
-                <div class="one-line">{[print(xabber.getString("cancel"))]}</div>
-            </div>
         </div>
         <div class="status-description subscription-status-wrap">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg></div>
@@ -62,8 +56,8 @@
     <div class="edit-buttons">
         <div class="edit-button btn-delete">
             <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-delete text-color-500"></i></div>
-            <div class="edit-button-text">
-                <span class="text-color-500 one-line">{[print(xabber.getString("contact_delete_full"))]}</span>
+            <div class="edit-button-text ">
+                <span class="text-color-500 dotted-underline text-decoration-color-300 one-line">{[print(xabber.getString("contact_delete_full"))]}</span>
             </div>
         </div>
     </div>

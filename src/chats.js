@@ -4195,9 +4195,11 @@ define("xabber-chats", function () {
                 if (this.model.get('group_chat')) {
                     if (this.contact.my_info) {
                         image = this.contact.my_info.get('b64_avatar');
-                        if (!image)
-                            image = Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
-                        else
+                        if (!image) {
+                            if (this.account.cached_image)
+                                image = this.account.cached_image;
+                            !image && (image = Images.getDefaultAvatar(this.contact.my_info.get('nickname')));
+                        } else
                             image = Images.getCachedImage(image);
                     }
                 }
@@ -8454,6 +8456,8 @@ define("xabber-chats", function () {
                 this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 16});
                 if (!avatar && this.contact.my_info.get('avatar_url'))
                     avatar = this.contact.my_info.get('avatar_url');
+                if (!avatar && this.account.cached_image)
+                    avatar = this.account.cached_image;
                 !avatar && (avatar = Images.getDefaultAvatar(nickname));
                 this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size);
             }
@@ -8473,6 +8477,8 @@ define("xabber-chats", function () {
                         image = this.contact.my_info.get('b64_avatar');
                     if (!image && this.contact.my_info.get('avatar_url'))
                         image = this.contact.my_info.get('avatar_url');
+                    if (!image && this.account.cached_image)
+                        image = this.account.cached_image;
                 }
                 !image && (image = Images.getDefaultAvatar(this.contact.my_info && this.contact.my_info.nickname || this.account.get('jid')));
             }
