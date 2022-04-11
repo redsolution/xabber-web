@@ -8268,6 +8268,9 @@ define("xabber-contacts", function () {
                         } else
                             chat.retraction_version = msg_retraction_version;
                     }
+                    if (request_with_stamp && chat.item_view && chat.item_view.content) {
+                        chat.trigger('get_missed_history', request_with_stamp/1000);
+                    }
                     unread_msgs_count && (options.is_unread = true);
                     options.delay = message.children('time');
                     if (encrypted && this.account.omemo)
