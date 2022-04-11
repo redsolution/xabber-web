@@ -4792,8 +4792,9 @@ define("xabber-chats", function () {
                         });
                     },
                     function (err) {
-                        let error_text = $(err).find('error text').text();
+                        let error_text = $(err).find(`error text[xml\\:lang="${xabber._settings.get('language')}"]`).text(),
                             error_type = $(err).find('error').attr('type');
+                        !error_text && (error_text = $(err).find(`error text`).text());
                         self.onFileNotUploaded(message, $message, error_text, 'xmpp');
                     }
                 );
