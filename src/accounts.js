@@ -2695,6 +2695,8 @@ define("xabber-accounts", function () {
                         this.registration_view.$('.btn-next').prop('disabled', false);
                         this.registration_view.$('.circle-avatar').addClass('changed');
                         this.registration_view.$('.circle-avatar').setAvatar(blob, this.member_details_avatar_size);
+                        xabber._settings.save('main_color', this.$('.circle-avatar').attr('data-value'));
+                        xabber.trigger('update_main_color');
                         this.close();
                     } else {
                         this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
