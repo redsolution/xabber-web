@@ -566,6 +566,10 @@ define("xabber-strophe", function () {
                     }
 
                     if ((child.nodeName === 'synchronization') && (child.namespaceURI === Strophe.NS.SYNCHRONIZATION)) {
+                        this.account.server_features.create({
+                            'var': child.namespaceURI,
+                            from: this.domain
+                        });
                         this.do_synchronization = true;
                     }
                 }

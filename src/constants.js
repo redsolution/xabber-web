@@ -87,6 +87,8 @@ var constants = {
     SYNCHRONIZATION_RSM_MAX: 25,
 
     REGISTRATION_DOMAINS: [],
+    TRUSTED_DOMAINS: [],
+    RECOMMENDED_DOMAIN: '',
 
     TURN_SERVERS_LIST: [
         {
@@ -439,7 +441,7 @@ var constants = {
     SHORT_CLIENT_DESCRIPTION: 'World’s best XMPP experience',
     CLIENT_LOGO: 'images/xabber-logo-96.png',
     TOOLBAR_LOGO: 'images/xabber-logo.png',
-    ENABLE_XABBER_ACCOUNT: true,
+    ENABLE_XABBER_ACCOUNT: false,
     SCREEN_ABOUT: true,
     CLIENT_URL: 'https://www.xabber.com',
     DEVELOPER_URL: 'https://redsolution.com',

@@ -671,24 +671,38 @@ define("xabber-accounts", function () {
                 },
 
                 loginCallback: function (status, condition) {
-                    if (status === Strophe.Status.CONNECTED) {
+                    if (status === Strophe.Status.CONNECTING) {
+                        if (this.auth_view.stepped_auth){
+                            this.auth_view.resetAuthStepper()
+                        }
+                    } else if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
-                        this.auth_view.successFeedback(this);
-                        this.auth_view = null;
+                        if (this.auth_view.stepped_auth)
+                            this.auth_view.authStepperStart();
+                        else{
+                            if (constants.TRUSTED_DOMAINS.indexOf(this.connection.domain) > -1)
+                                this.auth_view.endAuth();
+                        }
+
                     } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
+                        let stepper_auth_error = false;
                         if (status === Strophe.Status.ERROR) {
                             status = xabber.getString("CONNECTION_FAILED");
                         } else if (status === Strophe.Status.CONNFAIL) {
                             status = xabber.getString("CONNECTION_FAILED");
                         } else if (status === Strophe.Status.AUTHFAIL) {
                             status = xabber.getString("AUTHENTICATION_FAILED");
+                            stepper_auth_error = true;
                         } else if (status === Strophe.Status.DISCONNECTED) {
                             status = xabber.getString("connection__error__text_disconnected");
                         } else if (status === Strophe.Status.CONNTIMEOUT) {
                             status = xabber.getString("connection__error__text_timeout_expired");
                         }
                         condition = condition ? ': ' + condition : '';
-                        this.auth_view.errorFeedback({password: status + condition});
+                        if (this.auth_view.stepped_auth)
+                            this.auth_view.authStepperError(stepper_auth_error, {password: status + condition});
+                        else
+                            this.auth_view.errorFeedback({password: status + condition});
                         this.get('is_new') && this.destroy();
                     }
                 },
@@ -1286,12 +1300,12 @@ define("xabber-accounts", function () {
 
             onQuit: function () {
                 xabber.api_account && xabber.api_account.revoke_token();
-                !this.models.length && xabber.body.setScreen('login');
                 _.each(_.clone(this.models), function (account) {
                     account.deleteAccount();
                     account.password_view.closeModal();
                     utils.modals.clear_queue();
                 });
+                !this.models.length && xabber.body.setScreen('login');
             },
 
             onQuitAccounts: function () {
@@ -3103,7 +3117,7 @@ define("xabber-accounts", function () {
                     if (this.data.get('registration'))
                         this.registerFeedback({registration_success: true, password: xabber.getString("account_registration__feedback__text_registration")});
                     else
-                        this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
+                        this.authStepperShow();
                     this.getWebsocketURL(jid, (response) => {
                         this.account = xabber.accounts.create({
                             jid: jid,
@@ -3167,6 +3181,10 @@ define("xabber-accounts", function () {
                 this.data.set('authentication', false);
             },
 
+            authStepperShow: function (){
+                this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
+            },
+
             socialAuth: function (ev) {
                 let origin = window.location.href,
                     provider = $(ev.target).closest('.btn-social').data('provider');
@@ -3182,23 +3200,24 @@ define("xabber-accounts", function () {
             template: templates.xmpp_login,
 
             events: {
-                "click .login-type": "changeLoginType",
                 "click .btn-log-in": "login",
+                "click .btn-sign-up-instead": "logoutAndRegister",
                 "click .btn-register-form": "openRegisterForm",
                 "click .btn-login-form": "openLoginForm",
                 "click .btn-register": "register",
-                "click .btn-social": "socialAuth",
                 "click .btn-cancel": "cancel",
                 "click .btn-go-back-menu": "openButtonsMenu",
                 "click .btn-go-back": "openPreviousStep",
                 "click .btn-next": "openNextStep",
                 "click .login-form-skip": "registerWithoutAvatar",
+                "click .btn-finish-log-in": "endAuth",
                 "keyup input[name=register_nickname]": "keyUpNickname",
                 "keyup input[name=register_jid]": "keyUpJid",
+                "keyup input[name=jid]": "keyUpLogin",
+                "keyup input[name=password]": "keyUpLogin",
                 "keyup input[name=register_domain]": "keyUpDomain",
                 "focusout input[name=register_domain]": "focusoutDomain",
                 "keyup input[name=register_password]": "keyUpPassword",
-                "keyup input[name=password]": "keyUp",
                 "change .circle-avatar input": "changeAvatar",
                 "click .btn-choose-image": "chooseAvatar",
                 "click .btn-emoji-panel": "openEmojiPanel",
@@ -3216,6 +3235,8 @@ define("xabber-accounts", function () {
             onRender: function () {
                 this.data.set('step', 1)
                 this.account = null;
+                this.stepped_auth = true;
+                this.stepped_auth_complete = false;
                 this.authFeedback({});
                 this.registerFeedback({});
                 Materialize.updateTextFields();
@@ -3241,10 +3262,6 @@ define("xabber-accounts", function () {
                 this.updateOptions && this.updateOptions();
             },
 
-            changeLoginType: function () {
-                xabber.body.setScreen('login', {'login_screen': 'xabber'});
-            },
-
             openButtonsMenu: function () {
                 this.data.set('step', 1)
             },
@@ -3264,16 +3281,22 @@ define("xabber-accounts", function () {
                 this.submit();
             },
 
-            keyUpNickname: function () {
+            keyUpNickname: function (ev) {
                 if(this.$nickname_input.val()){
                     this.$('.btn-next').prop('disabled', false);
                 }
                 else {
                     this.$('.btn-next').prop('disabled', true);
                 }
+                if (this.$nickname_input.val() && ev)
+                    ev.keyCode === constants.KEY_ENTER && this.openNextStep();
             },
 
-            keyUpJid: function () {
+            keyUpJid: function (ev) {
+                if (!this.$('.btn-next').prop('disabled') && ev) {
+                    ev.keyCode === constants.KEY_ENTER && this.openNextStep();
+                    return;
+                }
                 this.$('.btn-next').prop('disabled', true);
                 clearTimeout(this._check_user_timeout);
                 if(this.$jid_input.val()){
@@ -3299,7 +3322,6 @@ define("xabber-accounts", function () {
                                         this.CONNECTION_URL = response || constants.CONNECTION_URL;
                                         this.auth_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                                         this.auth_connection = this.auth_conn_manager.connection;
-                                        this.$jid_input.prop('disabled', true);
                                         this.auth_connection.register.connect_check_user(domain, this.checkUserCallback.bind(this))
                                     });
                                 }
@@ -3320,16 +3342,31 @@ define("xabber-accounts", function () {
                     this.registerFeedback({});
             },
 
-            keyUpPassword: function () {
+            keyUpPassword: function (ev) {
                 if(this.$password_input.val()){
                     this.$('.btn-next').prop('disabled', false);
                 }
                 else {
                     this.$('.btn-next').prop('disabled', true);
                 }
+                if (this.$password_input.val() && ev)
+                    ev.keyCode === constants.KEY_ENTER && this.openNextStep();
             },
 
             keyUpDomain: function () {
+            },
+
+            keyUpLogin: function (ev) {
+                if(this.$jid_input.val() && this.$password_input.val()){
+                    this.$('.btn-log-in').prop('disabled', false);
+                }
+                else {
+                    this.$('.btn-log-in').prop('disabled', true);
+                }
+                this.$('.login-step-wrap').hideIf(true);
+                this.authFeedback({});
+                if (this.$jid_input.val() && this.$password_input.val())
+                    ev.keyCode === constants.KEY_ENTER && this.login();
             },
 
             focusoutDomain: function () {
@@ -3386,22 +3423,21 @@ define("xabber-accounts", function () {
                 } else if (status === Strophe.Status.REGISTERED) {
                     this.registerFeedback({user_success: true, jid: xabber.getString("xmpp_login__registration_jid_available")});
                     this.$('.btn-next').prop('disabled', false);
-                    this.$jid_input.prop('disabled', false);
                 } else if (status === Strophe.Status.CONFLICT) {
                     this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_occupied")});
                     this.$('.btn-next').prop('disabled', true);
-                    this.$jid_input.prop('disabled', false);
+                } else if (status === Strophe.Status.CONNFAIL) {
+                    this.registerFeedback({jid: xabber.getString("CONNECTION_FAILED") + ': ' + condition});
+                    this.$('.btn-next').prop('disabled', true);
                 } else if (status === Strophe.Status.REGIFAIL) {
                     if (condition === 'not-supported'){
                         this.registerFeedback({});
                         this.$('.btn-next').prop('disabled', false);
-                        this.$jid_input.prop('disabled', false);
                     }
 
                     else {
                         this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_not_supported")});
                         this.$('.btn-next').prop('disabled', true);
-                        this.$jid_input.prop('disabled', false);
                     }
                     this._current_domain_not_supported = true
                     this.auth_connection.disconnect()
@@ -3416,7 +3452,6 @@ define("xabber-accounts", function () {
                 } else if (status === Strophe.Status.DISCONNECTED) {
                     if (this.auth_connection && this.auth_connection._no_response) {
                         this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
-                        this.$jid_input.prop('disabled', false);
                         this.$('.btn-next').prop('disabled', true);
                     }
                     this.auth_conn_manager = undefined;
@@ -3442,13 +3477,39 @@ define("xabber-accounts", function () {
 
             handleRegistrationStep: function () {
                 let step = this.data.get('step')
+                if (step === -1){
+                    this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
+                    this.$(`.server-feature .mdi`).hideIf(true);
+                    this.$(`.server-feature`).removeClass('active-feature')
+                    this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+                    this.$('.login-form-header').text(xabber.getString("signin_server_features"));
+                    this.$('.login-form-server-features .register-form-step-header').text(xabber.getString("signin_checking_features_message", [this.account.domain]));
+                    this.$('.btn-go-back-menu').hideIf(true);
+                    this.$('.login-form-jid').hideIf(true);
+                    this.$('.login-form-server-features').hideIf(false);
+                    this.$('.btn-log-in').hideIf(true);
+                    this.checkFeaturesStepper();
+                }
                 if (step === 0){
                     this.$jid_input = this.$('input[name=jid]');
                     this.$password_input = this.$('input[name=password]');
+                    this.$jid_input.val('')
+                    this.$password_input.val('')
+                    this.keyUpLogin();
+                    this.$('.login-step-wrap').hideIf(true);
+                    this.authFeedback({});
+                    this.resetAuthStepper();
+                    this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
+                    this.$('.login-form-header').text(xabber.getString("title_login_xabber_account"));
+                    this.$('.btn-go-back-menu').hideIf(false);
                     this.$('.login-panel-intro').hideIf(true);
                     this.$('.register-form').hideIf(true);
                     this.$('.xmpp-login-form').hideIf(false);
-
+                    this.$('.login-form-jid').hideIf(false);
+                    this.$('.login-form-server-features').hideIf(true);
+                    this.$('.btn-log-in').hideIf(false);
+                    this.$('.btn-finish-log-in').hideIf(true);
+                    this.$('.btn-sign-up-instead').hideIf(true);
                 }
                 else if (step === 1){
                     this.$('.login-panel-intro').hideIf(false);
@@ -3533,6 +3594,12 @@ define("xabber-accounts", function () {
                 this.successRegistrationFeedback();
             },
 
+            logoutAndRegister: function () {
+                this.account.session.set('delete', true);
+                this.account.deactivate();
+                this.openRegisterForm()
+            },
+
             openRegisterForm: function () {
                 this.data.set('step', 2)
             },
@@ -3543,8 +3610,7 @@ define("xabber-accounts", function () {
 
             updateButtons: function () {
                 let authentication = this.data.get('authentication');
-                this.$('.btn-log-in').switchClass('disabled', authentication);
-                this.$('.btn-cancel').showIf(authentication);
+                this.$('.btn-log-in').prop('disabled', authentication);
             },
 
             updateDomains: function () {
@@ -3632,19 +3698,156 @@ define("xabber-accounts", function () {
                 });
             },
 
-            successFeedback: function (account) {
-                account.auth_view = null;
+            successFeedback: function () {
+                this.data.set('step', -1)
+            },
+
+            checkFeaturesStepper: function () {
+                this.$('.server-features-error').text('');
+                let timeout_timer = 1000;
+                setTimeout(() => {
+                    if (this.account.server_features.get(Strophe.NS.MAM)){
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"]`).addClass('active-feature');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                    }
+                    else
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                    this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                    setTimeout(() => {
+                        if (this.account.server_features.get(Strophe.NS.SYNCHRONIZATION)){
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).addClass('active-feature');
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                        }
+                        else
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        setTimeout(() => {
+                            if (this.account.server_features.get(Strophe.NS.REWRITE)){
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"]`).addClass('active-feature');
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                            }
+                            else
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                            setTimeout(() => {
+                                if (this.account.server_features.get(Strophe.NS.AUTH_DEVICES)) {
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"]`).addClass('active-feature');
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                }
+                                else
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');;
+                                setTimeout(() => {
+                                    if (this.account.server_features.get(Strophe.NS.PUBSUB)){
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"]`).addClass('active-feature');
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                    }
+                                    else
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                                    setTimeout(() => {
+                                        if (this.account.server_features.get(Strophe.NS.HTTP_UPLOAD)){
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"]`).addClass('active-feature');
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                        }
+                                        else
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                                        setTimeout(() => {
+                                            if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length != 6)){
+                                                this.$('.server-features-error').text(xabber.getString('signin_not_all_features', [constants.RECOMMENDED_DOMAIN]));
+                                                this.$('.login-panel-form.xmpp-login-form .buttons-wrap').addClass('server-features-additional-button');
+                                                this.$('.btn-sign-up-instead').hideIf(false);
+                                            }
+                                            if (this.$('.server-feature.active-feature').length != 6)
+                                                this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
+                                            else
+                                                this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                            this.$('.btn-finish-log-in').hideIf(false);
+                                        }, timeout_timer);
+                                    }, timeout_timer);
+                                }, timeout_timer);
+                            }, timeout_timer);
+                        }, timeout_timer);
+                    }, timeout_timer);
+                }, timeout_timer);
+            },
+
+            endAuth: function (account) {
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
+                this.account.trigger('ready_to_get_roster');
+                this.account.auth_view = null;
             },
 
             authFeedback: function (options) {
-                this.$nickname_input.switchClass('invalid', options.nickname)
-                    .siblings('span.errors').text(options.nickname || '');
-                this.$jid_input.switchClass('invalid', options.jid)
-                    .siblings('span.errors').text(options.jid || '');
-                this.$password_input.switchClass('invalid', options.password)
-                    .siblings('span.errors').text(options.password || '');
+                this.$jid_input.switchClass('invalid', options.jid);
+                this.$('.login-form-jid .login-jid-error').text(options.jid || '').showIf(options.jid);
+                this.$password_input.switchClass('invalid', options.password);
+                this.$('.login-form-jid .login-password-error').text(options.password || '').showIf(options.password);
+                this.$('.login-form-jid .register-form-step-description').hideIf(options.password || options.jid);
+            },
+
+            resetAuthStepper: function (){
+                this.$(`.login-step .preloader-wrapper`).addClass('active').addClass('visible');
+                this.$(`.login-step .mdi`).hideIf(true);
+                this.$(`.login-step`).removeClass('active-feature')
+                this.$(`.login-step .mdi`).addClass('mdi-alert-circle').removeClass('mdi-checkbox-marked-circle')
+            },
+
+            authStepperShow: function (){
+                this.$('.login-step-wrap').hideIf(false);
+                this.$(`.login-step`).hideIf(true);
+            },
+
+            authStepperStart: function (){
+                this.$(`.login-step.connecting-step`).hideIf(false);
+                let timeout_timer = 1000;
+                setTimeout(() => {
+                    this.$(`.login-step.connecting-step`).addClass('active-feature');
+                    this.$(`.login-step.connecting-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                    this.$(`.login-step.connecting-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
+                    this.$(`.login-step.credentials-step`).hideIf(false);
+                    setTimeout(() => {
+                        this.$(`.login-step.credentials-step`).addClass('active-feature');
+                        this.$(`.login-step.credentials-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        this.$(`.login-step.credentials-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
+                        setTimeout(() => {
+                            if (constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1){
+                                this.endAuth();
+                            } else {
+                                this.stepped_auth_complete = true
+                                if (this.first_features_received)
+                                    this.successFeedback();
+                            }
+                        },timeout_timer)
+                    },timeout_timer)
+                },timeout_timer)
+            },
+
+            authStepperError: function (auth_error, options){
+                let timeout_timer = 1000;
+                this.$('.login-step-wrap').hideIf(false);
+                this.$(`.login-step.connecting-step`).hideIf(false);
+                setTimeout(() => {
+                    if (auth_error){
+                        this.$(`.login-step.connecting-step`).addClass('active-feature');
+                        this.$(`.login-step.connecting-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        this.$(`.login-step.connecting-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
+                        this.$(`.login-step.credentials-step`).hideIf(false);
+                    }
+                    else {
+                        this.$(`.login-step.connecting-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        this.$(`.login-step.connecting-step .mdi`).hideIf(false);
+                        this.errorFeedback(options);
+                        return;
+                    }
+                    setTimeout(() => {
+                        this.$(`.login-step.credentials-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        this.$(`.login-step.credentials-step .mdi`).hideIf(false);
+                        this.errorFeedback(options);
+                    },timeout_timer)
+                },timeout_timer)
             },
 
             registerFeedback: function (options) {
@@ -3692,14 +3895,18 @@ define("xabber-accounts", function () {
         });
 
 
-        xabber.AddAccountView = xabber.AuthView.extend({
+        xabber.AddAccountView = xabber.XmppLoginPanel.extend({
             className: 'modal main-modal add-account-modal',
             template: templates.add_account,
 
             events: {
-                "click .btn-add": "submit",
-                "click .btn-cancel": "close",
-                "keyup input[name=password]": "keyUp"
+                "click .login-type": "changeLoginType",
+                "click .btn-log-in": "login",
+                "click .btn-cancel": "logout",
+                "click .btn-go-back-menu": "close",
+                "click .btn-finish-log-in": "endAuth",
+                "keyup input[name=jid]": "keyUpLogin",
+                "keyup input[name=password]": "keyUpLogin",
             },
 
             render: function (options) {
@@ -3709,26 +3916,128 @@ define("xabber-accounts", function () {
                 });
             },
 
-            updateOptions: function () {
-                this.$('.sync-option').showIf(xabber.api_account && xabber.api_account.get('connected'))
-                    .find('input').prop('checked', xabber.api_account && xabber.api_account.get('sync_all'));
+            onRender: function () {
+                this.data.set('step', 0)
+                this.account = null;
+                this.stepped_auth = true;
+                this.stepped_auth_complete = false;
+                this.authFeedback({});
+                this.$jid_input = this.$('input[name=jid]');
+                this.$password_input = this.$('input[name=password]');
+                this.$jid_input.val('')
+                this.$password_input.val('')
+                this.keyUpLogin();
+                this.$('.login-step-wrap').hideIf(true);
+                this.resetAuthStepper();
+                this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
+                this.$('.modal-header').text(xabber.getString("account_add"));
+                this.$('.login-form-jid').hideIf(false);
+                this.$('.login-form-server-features').hideIf(true);
+                this.$('.btn-log-in').hideIf(false);
+                this.$('.btn-cancel').hideIf(true);
+                this.$('.btn-finish-log-in').hideIf(true);
+                Materialize.updateTextFields();
+                this.updateButtons();
+                this.updateOptions && this.updateOptions();
             },
 
-            updateButtons: function () {
-                let authentication = this.data.get('authentication');
-                this.$('.btn-add').text(authentication ? xabber.getString("stop") : xabber.getString("add"));
-            },
-
-            successFeedback: function (account) {
-                this.data.set('authentication', false);
-                if (this.$('.sync-option input').prop('checked')) {
-                    account.settings.update_timestamp();
-                    xabber.api_account && xabber.api_account.synchronize_main_settings();
-                } else {
-                    account.settings.save('to_sync', false);
+            handleRegistrationStep: function () {
+                let step = this.data.get('step')
+                if (step === -1){
+                    this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
+                    this.$(`.server-feature .mdi`).hideIf(true);
+                    this.$(`.server-feature`).removeClass('active-feature')
+                    this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+                    this.$('.modal-header').text(xabber.getString("signin_server_features"));
+                    this.$('.login-form-jid').hideIf(true);
+                    this.$('.login-form-server-features').hideIf(false);
+                    this.$('.btn-log-in').hideIf(true);
+                    this.checkFeaturesStepper();
                 }
-                xabber.body.setScreen('all-chats', {right: null});
+            },
+
+            logout: function () {
+                this.account.session.set('delete', true);
+                this.account.deactivate();
                 this.closeModal();
+            },
+
+            endAuth: function () {
+                this.data.set('authentication', false);
+                xabber.body.setScreen('all-chats', {right: null});
+                this.account.trigger('ready_to_get_roster');
+                this.account.auth_view = null;
+                this.closeModal();
+            },
+
+            checkFeaturesStepper: function () {
+                this.$('.server-features-error').text('');
+                let timeout_timer = 1000;
+                setTimeout(() => {
+                    if (this.account.server_features.get(Strophe.NS.MAM)){
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"]`).addClass('active-feature');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                    }
+                    else
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                    this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                    setTimeout(() => {
+                        if (this.account.server_features.get(Strophe.NS.SYNCHRONIZATION)){
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).addClass('active-feature');
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                        }
+                        else
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                        setTimeout(() => {
+                            if (this.account.server_features.get(Strophe.NS.REWRITE)){
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"]`).addClass('active-feature');
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                            }
+                            else
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                            setTimeout(() => {
+                                if (this.account.server_features.get(Strophe.NS.AUTH_DEVICES)) {
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"]`).addClass('active-feature');
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                }
+                                else
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');;
+                                setTimeout(() => {
+                                    if (this.account.server_features.get(Strophe.NS.PUBSUB)){
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"]`).addClass('active-feature');
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                    }
+                                    else
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                                    this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                                    setTimeout(() => {
+                                        if (this.account.server_features.get(Strophe.NS.HTTP_UPLOAD)){
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"]`).addClass('active-feature');
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
+                                        }
+                                        else
+                                            this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                                        this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
+                                        setTimeout(() => {
+                                            if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length != 6)){
+                                                this.$('.server-features-error').text(xabber.getString('signin_not_all_features', [constants.RECOMMENDED_DOMAIN]));
+                                            }
+                                            if (this.$('.server-feature.active-feature').length != 6)
+                                                this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
+                                            else
+                                                this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                            this.$('.btn-finish-log-in').hideIf(false);
+                                            this.$('.btn-cancel').hideIf(false);
+                                        }, timeout_timer);
+                                    }, timeout_timer);
+                                }, timeout_timer);
+                            }, timeout_timer);
+                        }, timeout_timer);
+                    }, timeout_timer);
+                }, timeout_timer);
             },
 
             onHide: function () {

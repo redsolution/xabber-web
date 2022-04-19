@@ -339,6 +339,10 @@
                     constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
                 if (config.REGISTRATION_DOMAINS)
                     constants.REGISTRATION_DOMAINS = config.REGISTRATION_DOMAINS;
+                if (config.TRUSTED_DOMAINS)
+                    constants.TRUSTED_DOMAINS = config.TRUSTED_DOMAINS;
+                if (config.RECOMMENDED_DOMAIN)
+                    constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
                 if (config.SHORT_CLIENT_DESCRIPTION)
                     constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
 

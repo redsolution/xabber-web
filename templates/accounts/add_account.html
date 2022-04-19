@@ -2,26 +2,213 @@
     <div class="modal-header">
         <span>{[print(xabber.getString("account_add"))]}</span>
     </div>
-    <div class="modal-content">
-        <div class="row login-form-field">
-            <div class="input-field">
-                <input id="jid" type="text" name="jid">
-                <label for="jid">{[print(xabber.getString("account_user_name"))]}</label>
-                <span class="errors fixed"></span>
-            </div>
-            <div class="input-field">
-                <input id="password" type="password" name="password">
-                <label for="password">{[print(xabber.getString("account_password"))]}</label>
-                <span class="errors fixed"></span>
+    <div class="modal-content login-panel-form">
+
+        <div class="login-form-jid">
+            <div class="login-form-step-wrap">
+                <div class="input-field-wrap">
+                    <div class="input-field">
+                        <input id="jid" placeholder='{[print(xabber.getString("hint_xmpp_id"))]}' type="text" name="jid">
+                    </div>
+                    <div class="input-field">
+                        <input id="password" placeholder='{[print(xabber.getString("hint_pass"))]}' type="password" name="password">
+                    </div>
+                </div>
+                <div class="login-form-step-error login-jid-error hidden"></div>
+                <div class="login-form-step-error login-password-error hidden"></div>
+                <div class="login-form-step-description"></div>
+                <div class="login-step-wrap hidden">
+                    <div class="login-step connecting-step">
+                        <div class="login-step-text">
+                            {[print(xabber.getString("dialog_jingle_message__status_communicating"))]}
+                        </div>
+                        <div class="preloader-wrapper preloader-17px active visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>
+                    </div>
+                    <div class="login-step credentials-step">
+                        <div class="login-step-text">
+                            {[print(xabber.getString("dialog_jingle_message__status_checking_credentials"))]}
+                        </div>
+                        <div class="preloader-wrapper preloader-17px active visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="sync-option">
-            <input type="checkbox" class="filled-in" id="{{view.cid}}_sync_acc"/>
-            <label for="{{view.cid}}_sync_acc">{[print(xabber.getString("sync_with_xabber_account"))]}</label>
+        <div class="login-form-server-features hidden">
+            <div class="register-form-step-wrap">
+                <div class="register-form-step-header"></div>
+            </div>
+            <div class="login-server-features-wrap">
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.MAM)]}" >
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_message_archive"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_message_archive_error'))]}</div>
+                </div>
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.SYNCHRONIZATION)]}">
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_synchronization"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_quick_synchronization_error'))]}</div>
+                </div>
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.REWRITE)]}">
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_message_editing"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_message_editing_error'))]}</div>
+                </div>
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.AUTH_DEVICES)]}">
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_device_management"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_tokens_error'))]}</div>
+                </div>
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.PUBSUB)]}">
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_publish_subscribe"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_pubsub_error'))]}</div>
+                </div>
+                <div class="server-feature" data-xmlns="{[print(Strophe.NS.HTTP_UPLOAD)]}">
+                    <div class="server-feature-text">
+                        {[print(xabber.getString("signin_file_upload"))]}
+                    </div>
+                    <div class="preloader-wrapper preloader-17px active visible">
+                        <div class="spinner-layer">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <i class="mdi mdi-24px mdi-alert hidden"></i>
+                    <div class="feature-error-tooltip-triangle">
+                        <div class="triangle-inside"></div>
+                    </div>
+                    <div class="feature-error-tooltip">{[print(xabber.getString('signin_file_upload_error'))]}</div>
+                </div>
+            </div>
+            <div class="server-features-error"></div>
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn-flat btn-main btn-add">{[print(xabber.getString("add"))]}</button>
-        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
+        <button disabled class="btn-flat btn-main btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>
+        <button class="btn-flat btn-main one-line hidden btn-finish-log-in"></button>
+        <button class="btn-flat btn-main btn-dark btn-cancel hidden">{[print(xabber.getString("cancel"))]}</button>
     </div>
 </div>

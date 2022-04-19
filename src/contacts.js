@@ -6946,7 +6946,6 @@ define("xabber-contacts", function () {
             // requestSubscription: function () {
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Request subscription'}).done((result) => {
             //         if (result) {
-            //             console.log('requestSubscription')
             //             this.model.askRequest();
             //         }
             //     });
@@ -6955,7 +6954,6 @@ define("xabber-contacts", function () {
             // allowSubscription: function () {
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
             //         if (result) {
-            //             console.log('allowSubscription')
             //             this.model.acceptRequest();
             //         }
             //     });
@@ -6964,7 +6962,6 @@ define("xabber-contacts", function () {
             // cancelSubscriptionRequest: function () {
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription request'}).done((result) => {
             //         if (result) {
-            //             console.log('cancelSubscriptionRequest')
             //             this.model.declineSubscription();
             //         }
             //     });
@@ -6974,14 +6971,12 @@ define("xabber-contacts", function () {
             //     //добавить 3ий вариант
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
             //         if (result) {
-            //             console.log('handleSubscriptionRequest')
             //             this.model.acceptRequest();
             //         }
             //     });
             //     // //добавить 3ий вариант
             //     // utils.dialogs.ask_extended('', '', null, { ok_button_text: 'Allow subscription', optional_button: 'decline'}).done((result) => {
             //     //     if (result) {
-            //     //         console.log('handleSubscriptionRequest')
             //     //         this.model.acceptRequest();
             //     //     }
             //     // });
@@ -6990,7 +6985,6 @@ define("xabber-contacts", function () {
             // cancelSubscriptionOut: function () {
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
             //         if (result) {
-            //             console.log('cancelSubscription')
             //             this.model.declineSubscription();
             //         }
             //     });
@@ -6999,7 +6993,6 @@ define("xabber-contacts", function () {
             // cancelSubscriptionIn: function () {
             //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
             //         if (result) {
-            //             console.log('cancelSubscriptionIn')
             //             this.model.declineSubscribe();
             //         }
             //     });

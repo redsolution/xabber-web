@@ -124,6 +124,11 @@ define("xabber-discovery", function () {
                 if (namespace === Strophe.NS.AUTH_DEVICES)
                     self.account.getAllXTokens();
             });
+            if (this.account.auth_view && !(constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1)){
+                this.account.auth_view.first_features_received = true
+                if (this.account.auth_view.stepped_auth_complete)
+                    this.account.auth_view.successFeedback();
+            }
         },
 
         onFeatureAdded: function (feature) {

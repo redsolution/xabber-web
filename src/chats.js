@@ -9753,7 +9753,8 @@ define("xabber-chats", function () {
                     chat.trigger('load_last_history');
             }
         });
-        this.trigger('ready_to_get_roster');
+        if (!(this.auth_view && this.auth_view.data.get('authentication')))
+            this.trigger('ready_to_get_roster');
 
         this.connection.deleteTimedHandler(this._get_msg_handler);
         this._get_msg_handler = this.connection.addTimedHandler(60000, () => {
