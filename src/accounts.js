@@ -361,8 +361,10 @@ define("xabber-accounts", function () {
                         this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.background_connection = this.background_conn_manager.connection;
                         this.background_connection.account = this;
-                    } else
+                    } else{
                         this.background_connection.disconnect();
+                        return this.createBackgroundConnection();
+                    }
                     if (auth_type === 'x-token' && this.background_connection) {
                         this.background_connection.x_token = this.get('x_token');
                         this.background_connection.counter = this.get('hotp_counter');
@@ -395,8 +397,10 @@ define("xabber-accounts", function () {
                         this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.fast_connection = this.fast_conn_manager.connection;
                         this.fast_connection.account = this;
-                    } else
+                    } else{
                         this.fast_connection.disconnect();
+                        return this.createFastConnection();
+                    }
                     if (auth_type === 'x-token' && this.fast_connection) {
                         this.fast_connection.x_token = this.get('x_token');
                         this.fast_connection.counter = this.get('hotp_counter');
