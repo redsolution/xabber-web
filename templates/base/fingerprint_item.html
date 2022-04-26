@@ -18,7 +18,7 @@
                 <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_${trust}`))]}</div>
             </div>
         </div>
-        <div id="select-status-{{id}}" class="dropdown-content noselect">
+        <div id="select-status-{{id}}" class="dropdown-content noselect fingerprint-dropdown">
             <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>
             <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>
             {[if (delete_button){]}

@@ -8170,6 +8170,8 @@ define("xabber-contacts", function () {
                         jid = $item.attr('jid'), saved = false;
                     if (jid === this.account.get('jid'))
                         saved = true;
+                    if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
+                        return true;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
