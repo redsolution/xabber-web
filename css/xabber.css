@@ -3218,7 +3218,8 @@ input[type=text].simple-input-field:hover {
     transform: translate(-50%, 0);
 }
 .login-panel-form .register-form-picture .register-form-step-wrap {
-    top: 96px;
+    top: 80px;
+    height: 296px;
 }
 .login-panel-form .register-form-step-wrap {
     position: absolute;
@@ -3300,6 +3301,13 @@ input[type=text].simple-input-field:hover {
 }
 .login-panel-form .register-form-picture .register-form-step-wrap .register-form-step-header {
     padding: 0 80px;
+    position: static;
+}
+.login-panel-form .register-form-picture .register-form-step-wrap .input-field-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
 .login-panel-form .register-form-password .register-form-step-wrap .register-form-step-header {
     padding: 0 60px;
@@ -8336,7 +8344,7 @@ img.fwd-img-preview {
     position: relative;
     max-width: 768px;
     left: 50%;
-    transform: translate(-50%, 0)
+    transform: translate(-50%, 0);
 }
 
 .message-input-panel .circle-avatar {
