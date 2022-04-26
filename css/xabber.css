@@ -3274,6 +3274,10 @@ input[type=text].simple-input-field:hover {
     color: inherit;
 }
 
+.fingerprints-wrap .dropdown-content.fingerprint-dropdown{
+    top: unset !important;
+}
+
 .fingerprints-wrap .dropdown-button {
     display: inline-block;
 }
@@ -7426,6 +7430,9 @@ img.fwd-img-preview {
 
 .message-input-panel {
     position: relative;
+    max-width: 768px;
+    left: 50%;
+    transform: translate(-50%, 0)
 }
 
 .message-input-panel .circle-avatar {

@@ -1042,8 +1042,6 @@ define("xabber-accounts", function () {
                 },
 
                 registerIQHandler: function () {
-                    if (!constants.ENABLE_XABBER_ACCOUNT)
-                        return;
                     this.connection.deleteHandler(this._stanza_handler);
                     this._stanza_handler = this.connection.addHandler((iq) => {
                             this.onGetIQ(iq);

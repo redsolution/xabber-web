@@ -9,7 +9,7 @@
         init = function(c) {
             this._connection = c;
             this.devices = {};
-            Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
+            Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:2");
             Strophe.addNamespace('PUBSUB_NODE_CONFIG', "http://jabber.org/protocol/pubsub#node_config");
             this._connection.disco.addFeature(Strophe.NS.OMEMO);
             this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');

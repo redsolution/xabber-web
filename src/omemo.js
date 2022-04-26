@@ -99,7 +99,6 @@ define("xabber-omemo", function () {
 
                 return {
                     keys: keys,
-                    iv: aes.iv,
                     payload: aes.payload,
                     is_trusted: is_trusted
                 };
@@ -998,7 +997,7 @@ define("xabber-omemo", function () {
                     }
                     encryptedElement.up().cnode(myKeys.tree());
 
-                    encryptedElement.up().c('iv', utils.ArrayBuffertoBase64(encryptedMessage.iv)).up().up()
+                    encryptedElement.up().up()
                         .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
 
                     $(message.tree()).find('body').remove();
@@ -1411,7 +1410,6 @@ define("xabber-omemo", function () {
             parseEncrypted: function ($encrypted) {
                 let $payload = $encrypted.children(`payload`),
                     $header = $encrypted.children('header'),
-                    iv = utils.fromBase64toArrayBuffer($header.find('iv').text()),
                     payload = utils.fromBase64toArrayBuffer($payload.text()),
                     sid = Number($header.attr('sid'));
 
@@ -1423,7 +1421,7 @@ define("xabber-omemo", function () {
                     };
                 });
 
-                return {sid, keys, iv, payload};
+                return {sid, keys, payload};
             },
 
             getPeer: function (jid) {
@@ -1457,12 +1455,10 @@ define("xabber-omemo", function () {
                     exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey);
                 if (!exportedKey)
                     return;
-                let exportedAESKey = exportedKey.slice(0, 16),
-                    authenticationTag = exportedKey.slice(16),
-                    iv = encryptedData.iv,
-                    ciphertextAndAuthenticationTag = utils.AES.arrayBufferConcat(encryptedData.payload, authenticationTag);
+                let exportedMasterKey = exportedKey.slice(0, 32),
+                    HMACData = exportedKey.slice(32);
 
-                return utils.AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);
+                return utils.AES.decrypt(exportedMasterKey, HMACData, encryptedData.payload);
             },
 
             toBase64: function (arrayBuffer) {
@@ -1542,6 +1538,8 @@ define("xabber-omemo", function () {
             },
 
             publishBundle: async function () {
+                if (!this.bundle)
+                    return;
                 let spk = this.bundle.preKeys.find(pk => pk.signature),
                     ik = await this.store.getIdentityKeyPair(),
                     pks = this.bundle.preKeys;

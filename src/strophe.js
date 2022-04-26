@@ -288,7 +288,8 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
         Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protocol/synchronization#chat');
         Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');
-        Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:1');
+        Strophe.addNamespace('SYNCHRONIZATION_OLD_OMEMO', 'urn:xmpp:omemo:1');
+        Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:2');
         Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
         Strophe.addNamespace('ARCHIVE', 'https://xabber.com/protocol/archive');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');

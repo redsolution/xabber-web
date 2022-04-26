@@ -110,7 +110,7 @@ define("xabber-ui", function () {
             }
             left_panel_width = right_contact_panel_width = 384;
             right_panel_width = panel_width - (left_panel_width + right_contact_panel_width);
-            chat_bottom_panel_width = 768;
+            chat_bottom_panel_width = '100%';
             if (is_narrow){
                 right_contact_panel_width = left_panel_width = (panel_width * 0.264) < 288 ? 288 : panel_width * 0.264;
 

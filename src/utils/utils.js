@@ -557,56 +557,121 @@ define([
             return padded;
         },
 
+        hmacSha256: async function(key, message) {
+
+            let algorithm = { name: "HMAC", hash: "SHA-256" };
+
+            let hashBuffer = await crypto.subtle.sign(
+                algorithm.name,
+                key,
+                message
+            );
+
+            return hashBuffer;
+        },
+
+        stringToArrayBuffer: function (string) {
+            let { length } = string;
+            let buffer = new Uint8Array(length);
+
+            for (let i = 0; i < length; i++) {
+                buffer[i] = string.charCodeAt(i);
+            }
+
+            return buffer;
+        },
+
         AES: {
             ALGO_NAME: 'AES-GCM',
 
             decoder: new window.TextDecoder('utf-8'),
             encoder: new window.TextEncoder('utf-8'),
 
-            decrypt: async function (exportedAESKey, iv, data) {
-                let key = await window.crypto.subtle.importKey('raw', exportedAESKey, utils.AES.ALGO_NAME, false, ['decrypt']);
+            decrypt: async function (masterKey, HMACData, payload) {
+                let masterObj = await window.crypto.subtle.importKey('raw', masterKey, {name: 'HKDF'}, false, ['deriveKey', 'deriveBits']),
+                    hkdfCtrParams = { name: 'HKDF', salt: new Uint8Array(32), info: utils.stringToArrayBuffer('OMEMO Payload'), hash: 'SHA-256'};
+
+                let key = await window.crypto.subtle.deriveBits(hkdfCtrParams, masterObj, 640);
+
+                key = new Uint8Array(key);
+
+                let encryptionKey = key.slice(0,32),
+                    authenticationKey = key.slice(32,64),
+                    iv = key.slice(64);
+
+                let algorithm = { name: "HMAC", hash: "SHA-256" };
+
+                authenticationKey = await crypto.subtle.importKey(
+                    "raw",
+                    authenticationKey,
+                    algorithm,
+                    false, ["sign", "verify"]
+                );
+
+                let generatedHMAC = await utils.hmacSha256(authenticationKey, payload);
+
+                generatedHMAC = generatedHMAC.slice(0, generatedHMAC.byteLength - 16);
+
+                if (!(utils.ArrayBuffertoBase64(HMACData) === utils.ArrayBuffertoBase64(generatedHMAC)))
+                    return;
+
+                encryptionKey = await window.crypto.subtle.importKey('raw', encryptionKey, { "name": 'AES-CBC' }, true, ['decrypt'])
+
 
                 let decryptedBuffer = await window.crypto.subtle.decrypt({
-                    name: utils.AES.ALGO_NAME,
+                    name: 'AES-CBC',
                     iv,
-                    tagLength: constants.AES_TAG_LENGTH
-                }, key, data);
+                }, encryptionKey, payload);
 
                 return utils.AES.decoder.decode(decryptedBuffer);
             },
 
             encrypt: async function (plaintext) {
-                let iv = window.crypto.getRandomValues(new Uint8Array(12)),
-                    key = await utils.AES.generateAESKey(),
-                    encrypted = await utils.AES.generateAESencryptedMessage(iv, key, plaintext);
+                let masterKey = window.crypto.getRandomValues(new Uint8Array(32)),
+                    masterObj = await window.crypto.subtle.importKey('raw', masterKey, {name: 'HKDF'}, false, ['deriveKey', 'deriveBits']),
+                    hkdfCtrParams = { name: 'HKDF', salt: new Uint8Array(32), info: utils.stringToArrayBuffer('OMEMO Payload'), hash: 'SHA-256'};
 
-                let ciphertext = encrypted.ciphertext,
-                    authenticationTag = encrypted.authenticationTag,
-                    keydata = await window.crypto.subtle.exportKey('raw', key);
+                let key = await window.crypto.subtle.deriveBits(hkdfCtrParams, masterObj, 640);
+
+                key = new Uint8Array(key);
+
+                let encryptionKey = key.slice(0,32),
+                    authenticationKey = key.slice(32,64),
+                    iv = key.slice(64);
+
+                encryptionKey = await window.crypto.subtle.importKey('raw', encryptionKey, { "name": 'AES-CBC' }, true, ['encrypt']);
+
+                let encrypted = await utils.AES.generateAESencryptedMessage(iv, encryptionKey, plaintext);
+
+                let algorithm = { name: "HMAC", hash: "SHA-256" };
+                authenticationKey = await crypto.subtle.importKey(
+                    "raw",
+                    authenticationKey,
+                    algorithm,
+                    false, ["sign", "verify"]
+                );
+
+                let payload = await utils.hmacSha256(authenticationKey, encrypted);
+
+                payload = payload.slice(0, payload.byteLength - 16);
+
+                let keydata = new Uint8Array([...masterKey, ...new Uint8Array(payload)]);
 
                 return {
-                    keydata: utils.AES.arrayBufferConcat(keydata, authenticationTag),
-                    iv,
-                    payload: ciphertext
+                    keydata: keydata.buffer,
+                    payload: encrypted,
                 }
             },
 
             generateAESencryptedMessage: async function (iv, key, plaintext) {
                 let encryptOptions = {
-                    name: utils.AES.ALGO_NAME,
+                    name: 'AES-CBC',
                     iv,
-                    tagLength: constants.AES_TAG_LENGTH
                 };
                 let encodedPlaintext = utils.AES.encoder.encode(plaintext),
-                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext),
-                    ciphertextLength = encrypted.byteLength - ((128 + 7) >> 3),
-                    ciphertext = encrypted.slice(0, ciphertextLength),
-                    authenticationTag = encrypted.slice(ciphertextLength);
+                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext);
 
-                return {
-                    ciphertext,
-                    authenticationTag
-                };
+                return encrypted;
             },
 
             arrayBufferConcat: function () {

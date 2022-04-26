@@ -207,6 +207,8 @@ define("xabber-chats", function () {
             if (options.replaced) {
                 let by_jid = $message.children('replace').attr('by'),
                     conversation = $message.children('replace').attr('conversation');
+                if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
+                    return;
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
                     this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: conversation}));
                     return;
@@ -300,13 +302,11 @@ define("xabber-chats", function () {
                             voice: type === 'voice',
                             sources: sources
                         };
-                        if (sources[0].indexOf('aesgcm') == 0) {
-                            let uri = sources[0].replace(/^aesgcm/, 'https'),
-                                iv_and_key = uri.slice(uri.length - 44 - 16),
-                                iv = utils.fromBase64toArrayBuffer(iv_and_key.slice(0, 16)),
-                                key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
-                            uri = uri.slice(0, uri.length - 44 - 16 - 1);
-                            _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                        if (sources[0].indexOf('aescbc') == 0) {
+                            let uri = sources[0].replace(/^aescbc/, 'https'),
+                                key = utils.fromBase64toArrayBuffer(uri.slice(uri.length - 64));
+                            uri = uri.slice(0, uri.length - 64 - 1);
+                            _.extend(file_attrs, {sources: [uri], key: key});
                             attrs.has_encrypted_files = true;
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
@@ -429,14 +429,16 @@ define("xabber-chats", function () {
             return message;
         },
 
-          decryptFile: async function (uri, iv, key) {
+          decryptFile: async function (uri, key) {
               return new Promise((resolve, reject) => {
                   fetch(uri).then((r) => {
                       r.blob().then((blob) => {
                           let filereader = new FileReader();
                           filereader.onloadend = () => {
-                              let arrayBuffer = filereader.result;
-                              utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
+                              let arrayBuffer = filereader.result,
+                                  exportedMasterKey = key.slice(0, 32),
+                                  HMACData = key.slice(32);
+                              utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
                                   resolve(enc_file);
                               });
                           };
@@ -3559,9 +3561,9 @@ define("xabber-chats", function () {
                   if (images.length) {
                       images.forEach((img) => {
                           let source = img.sources[0];
-                          if (!img.iv && !img.key)
+                          if (!img.key)
                               return;
-                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                          this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
@@ -3584,9 +3586,9 @@ define("xabber-chats", function () {
                           fwd_unique_id = fwd_msg.get('unique_id');
                       fwd_images.forEach((img) => {
                           let source = img.sources[0];
-                          if (!img.iv && !img.key)
+                          if (!img.key)
                               return;
-                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                          this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
@@ -4502,8 +4504,8 @@ define("xabber-chats", function () {
                     file.description && stanza.c('desc').t(file.description).up();
                     stanza.up().c('sources');
                     file.sources.forEach((u) => {
-                        if (file.iv && file.key)
-                            u = u.replace(/^(https|http)/, 'aesgcm') + '#' + utils.ArrayBuffertoBase64(file.iv) + utils.ArrayBuffertoBase64(file.key);
+                        if (file.key)
+                            u = u.replace(/^(https|http)/, 'aescbc') + '#' + utils.ArrayBuffertoBase64(file.key);
                         stanza.c('uri').t(u).up();
                     });
                     stanza.up().up().up();
@@ -4705,19 +4707,17 @@ define("xabber-chats", function () {
                     reader.onload = (e) => {
                         if (this.model.get('encrypted')) {
                             this.encryptFile(e.target.result).then((encrypted) => {
-                                let iv = encrypted.iv,
-                                    key = encrypted.keydata,
+                                let key = encrypted.keydata,
                                     new_file = new File([encrypted.payload], file.name, {type: file.type});
-                                new_file.iv = iv;
                                 new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
-                                    deferred.resolve({encrypted_file: new_file, iv: iv, key: key});
+                                    deferred.resolve({encrypted_file: new_file,key: key});
                                 } else {
                                     let image_prev = new Image();
                                     image_prev.onload = function () {
                                         let height = this.height,
                                             width = this.width;
-                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, iv: iv, key: key});
+                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, key: key});
                                     };
                                     image_prev.src = e.target.result;
                                 }
@@ -4742,12 +4742,10 @@ define("xabber-chats", function () {
                         let reader = new FileReader();
                         reader.onload = (e) => {
                             this.encryptFile(e.target.result).then((encrypted) => {
-                                let iv = encrypted.iv,
-                                    key = encrypted.keydata,
+                                let key = encrypted.keydata,
                                     encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
                                 file.voice && (encrypted_file.voice = true);
                                 file.duration && (encrypted_file.duration = file.duration);
-                                encrypted_file.iv = iv;
                                 encrypted_file.key = key;
                                 new_files.push(encrypted_file);
                                 file_counter++;
@@ -5199,8 +5197,8 @@ define("xabber-chats", function () {
                 let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                     uri = $elem.attr('href'),
                     file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                if (file && file.iv && file.key) {
-                    this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                if (file && file.key) {
+                    this.model.messages.decryptFile(uri,file.key).then((result) => {
                         if (result === null)
                             return;
                         let download = document.createElement("a");
@@ -5316,10 +5314,10 @@ define("xabber-chats", function () {
                     $audio_elem.find('.mdi-play').removeClass('no-uploaded');
                     if ($elem.closest('.chat-message').hasClass('encrypted')) {
                         let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                            uri = $elem.attr('href'),
+                            uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                             file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                        if (file && file.iv && file.key) {
-                            this.model.messages.decryptFile(f_url, file.iv, file.key).then((result) => {
+                        if (file && file.key) {
+                            this.model.messages.decryptFile(f_url, file.key).then((result) => {
                                 if (result === null)
                                     return;
                                 $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
