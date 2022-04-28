@@ -1,5 +1,4 @@
 var constants = {
-    DEBUG: false,
 
     STORAGE_NAME: 'xabber-storage',
     STORAGE_VERSION: 'v8',
