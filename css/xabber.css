@@ -1270,7 +1270,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #E53935;
 }
 [data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=red] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=red] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #E53935;
 }
@@ -1366,7 +1366,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #D81B60;
 }
 [data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=pink] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=pink] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #D81B60;
 }
@@ -1462,7 +1462,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #8E24AA;
 }
 [data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=purple] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #8E24AA;
 }
@@ -1557,7 +1557,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #5E35B1;
 }
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=deep-purple] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=deep-purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #5E35B1;
 }
@@ -1653,7 +1653,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #3949AB;
 }
 [data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=indigo] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=indigo] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #3949AB;
 }
@@ -1749,7 +1749,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #1E88E5;
 }
 [data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=blue] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #1E88E5;
 }
@@ -1845,7 +1845,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #039BE5;
 }
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=light-blue] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=light-blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #039BE5;
 }
@@ -1941,7 +1941,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00ACC1;
 }
 [data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=cyan] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=cyan] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00ACC1;
 }
@@ -2037,7 +2037,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00897B;
 }
 [data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=teal] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=teal] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00897B;
 }
@@ -2133,7 +2133,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #43A047;
 }
 [data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=green] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #43A047;
 }
@@ -2229,7 +2229,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #7CB342;
 }
 [data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=light-green] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=light-green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #7CB342;
 }
@@ -2325,7 +2325,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #C0CA33;
 }
 [data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=lime] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=lime] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #C0CA33;
 }
@@ -2421,7 +2421,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FFB300;
 }
 [data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=amber] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=amber] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FFB300;
 }
@@ -2517,7 +2517,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FB8C00;
 }
 [data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=orange] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FB8C00;
 }
@@ -2613,7 +2613,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #F4511E;
 }
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=deep-orange] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=deep-orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #F4511E;
 }
@@ -2709,7 +2709,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #6D4C41;
 }
 [data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=brown] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=brown] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #6D4C41;
 }
@@ -2806,7 +2806,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #546E7A;
 }
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=blue-grey] .register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active,
+[data-main-color=blue-grey] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #546E7A;
 }
@@ -3218,7 +3218,7 @@ input[type=text].simple-input-field:hover {
     transform: translate(-50%, 0);
 }
 .login-panel-form .register-form-picture .register-form-step-wrap {
-    top: 80px;
+    top: 64px;
     height: 296px;
 }
 .login-panel-form .register-form-step-wrap {
@@ -3333,21 +3333,24 @@ input[type=text].simple-input-field:hover {
     pointer-events: none;
 }
 .login-panel-form .register-form-step-wrap .circle-icon {
-    bottom: 4px;
-    right: 4px;
+    bottom: 12px;
+    right: 12px;
     position: absolute;
-    width: 64px;
+    width: 48px;
     border-radius: 50%;
-    height: 64px;
+    height: 48px;
 }
 .login-panel-form .register-form-step-wrap .circle-icon .set-groupchat-avatar {
-    width: 36px;
-    height: 36px;
+    width: 24px;
+    height: 24px;
     left: 50%;
     top: 50%;
     fill: white;
     position: absolute;
     transform: translate(-50%, -50%);
+}
+.login-panel-form .register-form-step-wrap .avatar-wrap:hover .circle-icon {
+    filter: brightness(1.1);
 }
 .login-panel-form .login-server-features-wrap {
     margin: 88px 80px 0;
@@ -3463,29 +3466,53 @@ input[type=text].simple-input-field:hover {
 .login-panel-form.xmpp-login-form .input-field-wrap {
     flex-direction: column;
     align-items: center;
+    width: 430px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field {
     margin-bottom: 16px;
+    width: 100%;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field:last-child {
     margin-bottom: 0;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field input{
-    width: 345px;
+    width: 395px;
+}
+.login-panel-form.xmpp-login-form .input-field-wrap .input-field input#jid{
+    width: 100%;
 }
 .login-panel-form .input-field-wrap .input-field {
     margin: 0;
 }
+.login-panel-form .input-field-wrap .input-field.input-field-jid {
+    display: flex;
+}
+.login-panel-form .input-field-wrap .input-field.input-field-jid input{
+    border-radius: 4px 0 0 4px;
+    z-index: 1000;
+}
+.login-panel-form .input-field-wrap .input-field.input-field-jid.input-field-jid-borders input{
+    border-radius: 4px;
+}
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-field.input-group-chat-domain{
+    padding: 0;
+    margin: 0;
+}
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server {
     display: flex;
     height: 100%;
     align-items: center;
     position: relative;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap{
     display: flex;
     cursor: pointer;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap .jid-at,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap .jid-at{
     background: rgb(233, 236, 239);
     border-radius: 0px;
@@ -3499,7 +3526,10 @@ input[type=text].simple-input-field:hover {
     z-index: 0;
     border-left: none;
     border-right: none;
+    margin: 0;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap .field-jid,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap .field-jid,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input{
     border: 1px solid;
@@ -3511,11 +3541,14 @@ input[type=text].simple-input-field:hover {
     width: 214px;
     font-size: 20px;
     padding: 8px 18px 10px 10px;
+    margin: 0;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input{
     width: 184px !important;
 }
 .login-panel-form .register-form-picture .dropdown-content,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content{
     position: absolute;
     top: 100%;
@@ -3536,6 +3569,7 @@ input[type=text].simple-input-field:hover {
     border-radius: 0.25rem;
 }
 .login-panel-form .register-form-picture .dropdown-content .property-variant,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant{
     display: block;
     width: 100%;
@@ -3547,9 +3581,13 @@ input[type=text].simple-input-field:hover {
     white-space: nowrap;
     background-color: transparent;
     border: 0;
+    margin: 0;
+    line-height: unset;
 }
 .login-panel-form .register-form-picture .dropdown-content .property-variant:focus,
 .login-panel-form .register-form-picture .dropdown-content .property-variant:hover,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:focus,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:hover,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:focus,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:hover{
     color: #16181b;
@@ -3557,10 +3595,12 @@ input[type=text].simple-input-field:hover {
     background-color: #f8f9fa;
 }
 .login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active{
     color: #fff;
     text-decoration: none;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret{
     position: absolute;
     cursor: pointer;
@@ -3568,12 +3608,16 @@ input[type=text].simple-input-field:hover {
     width: 20px;
     height: 20px;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret .mdi,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret .mdi{
     position: absolute;
     right: 0;
     top: -3px;
+    color: #000;
+    z-index: -1;
 }
-.register-form.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret .mdi.mdi-menu-down{
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret .mdi.mdi-menu-down,
+.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret .mdi.mdi-menu-down{
     top: 5px;
 }
 .register-form.login-panel-form .register-form-jid .input-field {
@@ -3607,11 +3651,30 @@ input[type=text].simple-input-field:hover {
     bottom: 24px;
     left: 50%;
     transform: translate(-50%, 0);
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+.login-panel-form.register-form .buttons-wrap{
+    top: 381px;
+    bottom: unset;
+}
+
+.login-panel-form .buttons-wrap {
+}
+
+.login-panel-form .buttons-wrap button {
+    min-width: 120px;
+}
+
+.login-panel-form .buttons-wrap .btn-log-in:first-child {
+    margin: 0 auto;
 }
 .login-panel-form.xmpp-login-form .buttons-wrap.server-features-additional-button{
     bottom: -64px;
     flex-direction: column;
 }
+.login-panel-form .buttons-wrap .btn-main,
 .login-panel-form .buttons-wrap .btn-main-filled{
     min-width: 280px;
     border-radius: 4px;
@@ -3637,6 +3700,20 @@ input[type=text].simple-input-field:hover {
 .login-panel-form.xmpp-login-form .buttons-wrap .btn-sign-up-instead,
 .login-panel-form.xmpp-login-form .buttons-wrap .btn-finish-log-in{
     margin-top: 16px !important;
+}
+.login-panel-form .buttons-wrap .btn-main.btn-skip,
+.login-panel-form.xmpp-login-form .buttons-wrap .btn-main.btn-finish-log-in{
+    height: 32px;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 0 !important;
+    margin-bottom: 32px;
+    text-transform: none;
+}
+.login-panel-form .buttons-wrap .btn-main:focus,
+.login-panel-form .buttons-wrap .btn-main:hover{
+    background-color: unset;
+    opacity: 1;
 }
 .login-panel-form .login-form-url{
     position: absolute;
@@ -3683,19 +3760,6 @@ input[type=text].simple-input-field:hover {
 
 .login-panel-form span.errors {
     margin: 0;
-}
-
-.login-panel-form .buttons-wrap {
-    display: flex;
-    justify-content: space-between;
-}
-
-.login-panel-form .buttons-wrap button {
-    min-width: 120px;
-}
-
-.login-panel-form .buttons-wrap .btn-log-in:first-child {
-    margin: 0 auto;
 }
 
 .login-panel-form .btn-forgot-password {

@@ -87,6 +87,7 @@ var constants = {
     SYNCHRONIZATION_RSM_MAX: 25,
 
     REGISTRATION_DOMAINS: [],
+    LOGIN_DOMAINS: [],
     TRUSTED_DOMAINS: [],
     RECOMMENDED_DOMAIN: '',
 

@@ -16,8 +16,23 @@
         <div class="register-form-step-wrap">
             <div class="register-form-step-header">{[print(xabber.getString("dialog_jingle_message__message_connect"))]}</div>
             <div class="input-field-wrap">
-                <div class="input-field">
+                <div class="input-field input-field-jid">
                     <input id="jid" placeholder='{[print(xabber.getString("hint_xmpp_id"))]}' type="text" name="jid">
+                    <div class="property-field xmpp-server-dropdown-wrap">
+                        <div class="select-auth-xmpp-server">
+                            <div data-activates="select-auth-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
+                            <div class="input-field input-group-chat-domain hidden">
+                                <input id="sign_in_domain" type="text" placeholder='{[print(xabber.getString("groupchat__hint_domain"))]}' name="sign_in_domain">
+                            </div>
+                            <div data-activates="select-auth-xmpp-server" class="caret">
+                                <i class="mdi mdi-20px mdi-menu-up"></i>
+                                <i class="mdi mdi-20px mdi-menu-down"></i>
+                            </div>
+                        </div>
+                        <div id="select-auth-xmpp-server" class="dropdown-content noselect">
+                            <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="input-field">
                     <input id="password" placeholder='{[print(xabber.getString("hint_pass"))]}' type="password" name="password">
@@ -314,6 +329,7 @@
     {[}]}
     <div class="input-field buttons-wrap">
         <button class="btn btn-flat btn-main-filled btn-next">{[print(xabber.getString("xaccount_next"))]}</button>
+        <button class="btn btn-flat btn-main btn-skip">{[print(xabber.getString("xmpp_login__registration_skip"))]}</button>
     </div>
     <div class="clearfix"></div>
 </div>

@@ -677,11 +677,10 @@ define("xabber-accounts", function () {
                         }
                     } else if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
-                        if (this.auth_view.stepped_auth)
+                        if (this.auth_view.stepped_auth && !this.auth_view.data.get('registration'))
                             this.auth_view.authStepperStart();
                         else{
-                            if (constants.TRUSTED_DOMAINS.indexOf(this.connection.domain) > -1)
-                                this.auth_view.endAuth();
+                            this.auth_view.endAuth();
                         }
 
                     } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
@@ -3080,7 +3079,15 @@ define("xabber-accounts", function () {
                 let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (this.data.get('registration')){
-                    let domain = this.$('#new_account_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text();
+                    let domain = this.$('#new_account_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-xmpp-server .property-value').text();
+                    jid = jid + '@' + domain
+                }
+                else if(
+                    (this.$('.input-field-jid .xmpp-server-dropdown-wrap').length && !this.$('.input-field-jid .xmpp-server-dropdown-wrap').hasClass('hidden')) &&
+                    (this.$('#sign_in_domain') && this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text())
+                ){
+                    let domain = this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text();
+                    console.log(domain)
                     jid = jid + '@' + domain
                 }
                 if (!jid) {
@@ -3207,12 +3214,13 @@ define("xabber-accounts", function () {
                 "click .btn-go-back-menu": "openButtonsMenu",
                 "click .btn-go-back": "openPreviousStep",
                 "click .btn-next": "openNextStep",
-                "click .login-form-skip": "registerWithoutAvatar",
+                "click .btn-skip": "registerWithoutAvatar",
                 "click .btn-finish-log-in": "endAuth",
                 "keyup input[name=register_nickname]": "keyUpNickname",
                 "keyup input[name=register_jid]": "keyUpJid",
                 "keyup input[name=jid]": "keyUpLogin",
                 "keyup input[name=password]": "keyUpLogin",
+                "keyup input[name=sign_in_domain]": "keyUpLogin",
                 "keyup input[name=register_domain]": "keyUpDomain",
                 "focusout input[name=register_domain]": "focusoutDomain",
                 "keyup input[name=register_password]": "keyUpPassword",
@@ -3220,7 +3228,8 @@ define("xabber-accounts", function () {
                 "click .btn-choose-image": "chooseAvatar",
                 "click .btn-emoji-panel": "openEmojiPanel",
                 "click .btn-selfie": "openWebcamPanel",
-                "click .property-variant": "changePropertyValue"
+                "click #select-xmpp-server .property-variant": "changePropertyValueRegistration",
+                "click #select-auth-xmpp-server .property-variant": "changePropertyValueAuth",
             },
 
             __initialize: function () {
@@ -3239,7 +3248,7 @@ define("xabber-accounts", function () {
                 this.registerFeedback({});
                 Materialize.updateTextFields();
                 this.$('.btn-go-back').hideIf(false);
-                this.$('.login-form-skip').hideIf(true)
+                this.$('.btn-skip').hideIf(true)
                 this.$nickname_input.val('');
                 this.$jid_input.val('');
                 this.$password_input.val('');
@@ -3247,6 +3256,7 @@ define("xabber-accounts", function () {
                 this.$('.circle-avatar').css({'background-color': ''});
                 this.updateButtons();
                 this.updateDomains();
+                this.updateAuthDomains();
                 let dropdown_settings = {
                     inDuration: 100,
                     outDuration: 100,
@@ -3256,6 +3266,8 @@ define("xabber-accounts", function () {
                 };
                 this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 this.$('.avatar-wrap.dropdown-button').dropdown(dropdown_settings);
                 this.updateOptions && this.updateOptions();
             },
@@ -3291,23 +3303,30 @@ define("xabber-accounts", function () {
             },
 
             keyUpJid: function (ev) {
-                if (!this.$('.btn-next').prop('disabled') && ev) {
-                    ev.keyCode === constants.KEY_ENTER && this.openNextStep();
+                clearTimeout(this._check_user_timeout);
+                if (!this.$('.btn-next').prop('disabled') && ev && ev.keyCode === constants.KEY_ENTER) {
+                    this.openNextStep();
+                    return;
+                }
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                    this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'))
+                    this.$domain_input.val(this.$jid_input.val().split('@')[1]);
+                    this.$jid_input.val(this.$jid_input.val().split('@')[0]);
+                    this.$domain_input.focus();
                     return;
                 }
                 this.$('.btn-next').prop('disabled', true);
-                clearTimeout(this._check_user_timeout);
                 if(this.$jid_input.val()){
                     let regexp_local_part = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))$/,
                         regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                     if (!regexp_local_part.test(this.$jid_input.val()))
                         return this.registerFeedback({jid: xabber.getString("account_add__alert_localpart_invalid")});
-                    else if (!(regexp_domain.test(this.$domain_input.val()) || regexp_domain.test(this.$('.xmpp-server-dropdown-wrap .property-value').text())))
+                    else if (!(regexp_domain.test(this.$domain_input.val()) || regexp_domain.test(this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text())))
                         return this.registerFeedback({domain: xabber.getString("account_add__alert_invalid_domain")});
                     else
                         this.registerFeedback({});
                     this._check_user_timeout = setTimeout(() => {
-                        let domain = this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text();
+                        let domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                         if (!(this._registration_domain === domain && this._current_domain_not_supported)){
                             this.$('.btn-next').prop('disabled', true);
                             this._registration_username = this.$jid_input.val()
@@ -3363,12 +3382,18 @@ define("xabber-accounts", function () {
                 }
                 this.$('.login-step-wrap').hideIf(true);
                 this.authFeedback({});
-                if (this.$jid_input.val() && this.$password_input.val())
+                this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@'))
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                    this.$('.input-field-jid').addClass('input-field-jid-borders')
+                }else {
+                    this.$('.input-field-jid').removeClass('input-field-jid-borders')
+                }
+                if (ev && this.$jid_input.val() && this.$password_input.val())
                     ev.keyCode === constants.KEY_ENTER && this.login();
             },
 
             focusoutDomain: function () {
-                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text()))
+                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
             },
 
@@ -3410,6 +3435,18 @@ define("xabber-accounts", function () {
             },
 
             checkUserCallback: function (status, condition) {
+                if (status === Strophe.Status.REGISTER || status === Strophe.Status.REGIFAIL) {
+                    if (!this.$('.select-xmpp-server .property-variant[data-value="' + this.auth_connection.register.domain + '"]').length) {
+                        $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                            .text(this.auth_connection.register.domain)
+                            .attr('data-value', this.auth_connection.register.domain)
+                            .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
+                    }
+                    this.$('.select-xmpp-server .input-group-chat-domain').addClass('hidden');
+                    this.$('#new_account_domain').val("");
+                    this.$('.select-xmpp-server .xmpp-server-item-wrap .property-value').text(this.auth_connection.register.domain)
+                        .removeClass('hidden').attr('data-value', this.auth_connection.register.domain);
+                }
                 if (status === Strophe.Status.REGISTER) {
                     if (this.auth_connection && this.auth_connection.connected) {
                         this._current_domain_not_supported = false
@@ -3432,7 +3469,6 @@ define("xabber-accounts", function () {
                         this.registerFeedback({});
                         this.$('.btn-next').prop('disabled', false);
                     }
-
                     else {
                         this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_not_supported")});
                         this.$('.btn-next').prop('disabled', true);
@@ -3476,6 +3512,7 @@ define("xabber-accounts", function () {
             handleRegistrationStep: function () {
                 let step = this.data.get('step')
                 if (step === -1){
+                    this.$domain_input = this.$('input[name=sign_in_domain]');
                     this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
                     this.$(`.server-feature .mdi`).hideIf(true);
                     this.$(`.server-feature`).removeClass('active-feature')
@@ -3517,8 +3554,10 @@ define("xabber-accounts", function () {
                 else if (step === 2){
                     this.$jid_input = this.$('input[name=register_jid]');
                     this.$password_input = this.$('input[name=register_password]');
+                    this.$domain_input = this.$('input[name=register_domain]');
                     this.keyUpNickname();
                     this.$('.login-form-header').text(xabber.getString("title_register_xabber_account"));
+                    this.$('.login-form-url').hideIf(false);
                     this.$('.login-panel-intro').hideIf(true);
                     this.$('.register-form').hideIf(false);
                     this.$('.xmpp-login-form').hideIf(true);
@@ -3570,8 +3609,9 @@ define("xabber-accounts", function () {
                 }
                 else if (step === 6){
                     this.$('.login-form-header').text(xabber.getString("xmpp_login__registration_header_avatar"));
+                    this.$('.login-form-url').hideIf(true);
                     this.$('.btn-go-back').hideIf(true);
-                    this.$('.login-form-skip').hideIf(false)
+                    this.$('.btn-skip').hideIf(false)
                     this.$('.register-form-nickname').hideIf(true);
                     this.$('.register-form-jid').hideIf(true);
                     this.$('.register-form-password').hideIf(true);
@@ -3620,39 +3660,81 @@ define("xabber-accounts", function () {
                         }
                     }
                 }
-                this.$('.field-jid.property-variant').remove()
+                this.$('.register-form-jid .field-jid.property-variant').remove()
                 if (all_servers.length)
-                    this.$('.xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
+                    this.$('.register-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
                 else
-                    this.setCustomDomain(this.$('.property-field.xmpp-server-dropdown-wrap .property-value'));
-                this.$('.modal-content .jid-field .set-default-domain').remove();
+                    this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'));
+                this.$('.register-form-jid .modal-content .jid-field .set-default-domain').remove();
 
                 for (let i = 0; i < all_servers.length; i++) {
-                    $('<div/>', {class: 'field-jid property-variant set-default-domain'}).text(all_servers[i]).insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
+                    $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                        .text(all_servers[i])
+                        .attr('data-value', all_servers[i])
+                        .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
                 }
             },
 
-            setCustomDomain: function ($property_value) {
-                this.$('#new_account_domain').val("");
-                $property_value.addClass('hidden').text("");
-                this.$('.input-group-chat-domain').removeClass('hidden');
+            updateAuthDomains: function () {
+                let all_servers = constants.LOGIN_DOMAINS;
+
+                this.$('.login-form-jid .field-jid.property-variant').remove()
+                if (all_servers.length)
+                    this.$('.login-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
+                else
+                    this.setCustomDomainAuth(this.$('.login-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'));
+                this.$('.login-form-jid .modal-content .jid-field .set-default-domain').remove();
+
+                for (let i = 0; i < all_servers.length; i++) {
+                    $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                        .text(all_servers[i])
+                        .attr('data-value', all_servers[i])
+                        .insertBefore(this.$('.login-form-jid .dropdown-content .set-custom-domain'));
+                }
             },
 
-            changePropertyValue: function (ev) {
+            setCustomDomainRegistration: function ($property_value) {
+                this.$('#new_account_domain').val("");
+                $property_value.addClass('hidden').text("");
+                this.$('.select-xmpp-server .input-group-chat-domain').removeClass('hidden');
+            },
+
+            setCustomDomainAuth: function ($property_value) {
+                this.$('#sign_in_domain').val("");
+                $property_value.addClass('hidden').text("");
+                this.$('.select-auth-xmpp-server .input-group-chat-domain').removeClass('hidden');
+            },
+
+            changePropertyValueRegistration: function (ev) {
                 let $property_item = $(ev.target),
                     $property_value = $property_item.closest('.property-field').find('.property-value');
                 if ($property_item.hasClass('set-custom-domain')) {
-                    this.setCustomDomain($property_value);
+                    this.setCustomDomainRegistration($property_value);
                     return;
                 }
                 else if ($property_item.hasClass('set-default-domain')) {
-                    this.$('.input-group-chat-domain').addClass('hidden');
+                    this.$('.select-xmpp-server .input-group-chat-domain').addClass('hidden');
                     this.$('#new_account_domain').val("");
                 }
                 $property_value.text($property_item.text());
                 $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
-                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text()))
+                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
+            },
+
+            changePropertyValueAuth: function (ev) {
+                let $property_item = $(ev.target),
+                    $property_value = $property_item.closest('.property-field').find('.property-value');
+                if ($property_item.hasClass('set-custom-domain')) {
+                    this.setCustomDomainAuth($property_value);
+                    return;
+                }
+                else if ($property_item.hasClass('set-default-domain')) {
+                    this.$('.select-auth-xmpp-server .input-group-chat-domain').addClass('hidden');
+                    this.$('#sign_in_domain').val("");
+                }
+                $property_value.text($property_item.text());
+                $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
             },
 
             chooseAvatar: function () {
@@ -3757,10 +3839,14 @@ define("xabber-accounts", function () {
                                                 this.$('.login-panel-form.xmpp-login-form .buttons-wrap').addClass('server-features-additional-button');
                                                 this.$('.btn-sign-up-instead').hideIf(false);
                                             }
-                                            if (this.$('.server-feature.active-feature').length != 6)
+                                            if (this.$('.server-feature.active-feature').length != 6) {
                                                 this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
-                                            else
+                                                this.$('.btn-finish-log-in').addClass('btn-main').removeClass('btn-main-filled')
+                                            }
+                                            else {
                                                 this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                                this.$('.btn-finish-log-in').removeClass('btn-main').addClass('btn-main-filled')
+                                            }
                                             this.$('.btn-finish-log-in').hideIf(false);
                                         }, timeout_timer);
                                     }, timeout_timer);
@@ -3772,6 +3858,7 @@ define("xabber-accounts", function () {
             },
 
             endAuth: function (account) {
+                this.data.set('registration', false);
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
                 this.account.trigger('ready_to_get_roster');
@@ -3884,8 +3971,6 @@ define("xabber-accounts", function () {
             },
 
             successRegistrationFeedback: function () {
-                this.data.set('registration', false);
-                this.data.set('authentication', false);
                 this.$jid_input.prop('disabled', false);
                 this.$password_input.prop('disabled', false)
                 this.account.trigger('start');
@@ -3905,6 +3990,8 @@ define("xabber-accounts", function () {
                 "click .btn-finish-log-in": "endAuth",
                 "keyup input[name=jid]": "keyUpLogin",
                 "keyup input[name=password]": "keyUpLogin",
+                "keyup input[name=sign_in_domain]": "keyUpLogin",
+                "click .property-variant": "changePropertyValueAuth"
             },
 
             render: function (options) {
@@ -3922,9 +4009,11 @@ define("xabber-accounts", function () {
                 this.authFeedback({});
                 this.$jid_input = this.$('input[name=jid]');
                 this.$password_input = this.$('input[name=password]');
+                this.$domain_input = this.$('input[name=sign_in_domain]');
                 this.$jid_input.val('')
                 this.$password_input.val('')
                 this.keyUpLogin();
+                this.updateAuthDomains();
                 this.$('.login-step-wrap').hideIf(true);
                 this.resetAuthStepper();
                 this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
@@ -3934,6 +4023,15 @@ define("xabber-accounts", function () {
                 this.$('.btn-log-in').hideIf(false);
                 this.$('.btn-cancel').hideIf(true);
                 this.$('.btn-finish-log-in').hideIf(true);
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                };
+                this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 Materialize.updateTextFields();
                 this.updateButtons();
                 this.updateOptions && this.updateOptions();
