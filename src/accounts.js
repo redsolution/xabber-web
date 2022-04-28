@@ -2922,6 +2922,12 @@ define("xabber-accounts", function () {
                 this.closeModal();
             },
 
+            endAuth: function (account) {
+                this.model.save('is_new', undefined);
+                this.successFeedback(this.model)
+                this.model.auth_view = null;
+            },
+
             onHide: function () {
                 this.$el.detach();
             },
@@ -3028,6 +3034,12 @@ define("xabber-accounts", function () {
                 if (this.account.change_password_connection)
                     this.account.change_password_connection.disconnect()
                 this.$el.closeModal({ complete: this.hide.bind(this) });
+            },
+
+            endAuth: function (account) {
+                this.account.save('is_new', undefined);
+                this.successFeedback(this.account)
+                this.account.auth_view = null;
             },
 
             onHide: function () {
@@ -3188,6 +3200,12 @@ define("xabber-accounts", function () {
 
             authStepperShow: function (){
                 this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
+            },
+
+            endAuth: function (account) {
+                this.account.save('is_new', undefined);
+                this.successFeedback(this.account)
+                this.account.auth_view = null;
             },
 
             socialAuth: function (ev) {
@@ -3858,6 +3876,7 @@ define("xabber-accounts", function () {
             },
 
             endAuth: function (account) {
+                this.account.save('is_new', undefined);
                 this.data.set('registration', false);
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
@@ -4059,6 +4078,7 @@ define("xabber-accounts", function () {
             },
 
             endAuth: function () {
+                this.account.save('is_new', undefined);
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
                 this.account.trigger('ready_to_get_roster');
