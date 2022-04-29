@@ -3092,6 +3092,8 @@ define("xabber-accounts", function () {
                     password = this.$password_input.val();
                 if (this.data.get('registration')){
                     let domain = this.$('#new_account_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-xmpp-server .property-value').text();
+                    if (!constants.REGISTRATION_CUSTOM_DOMAIN && !(constants.REGISTRATION_DOMAINS.indexOf(domain) > -1))
+                        return this.errorRegistrationFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
                     jid = jid + '@' + domain
                 }
                 else if(
@@ -3099,7 +3101,6 @@ define("xabber-accounts", function () {
                     (this.$('#sign_in_domain') && this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text())
                 ){
                     let domain = this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text();
-                    console.log(domain)
                     jid = jid + '@' + domain
                 }
                 if (!jid) {
@@ -3115,6 +3116,8 @@ define("xabber-accounts", function () {
                     }
                     return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
                 }
+                if (!this.data.get('registration') && !constants.LOGIN_CUSTOM_DOMAIN && !(constants.LOGIN_DOMAINS.indexOf(Strophe.getDomainFromJid(jid)) > -1))
+                    return this.errorFeedback({jid: xabber.getString("account_auth__error__login_custom_domain")});
                 password = password.trim();
                 let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
@@ -3336,15 +3339,18 @@ define("xabber-accounts", function () {
                 this.$('.btn-next').prop('disabled', true);
                 if(this.$jid_input.val()){
                     let regexp_local_part = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))$/,
-                        regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                        regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                        domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                     if (!regexp_local_part.test(this.$jid_input.val()))
                         return this.registerFeedback({jid: xabber.getString("account_add__alert_localpart_invalid")});
-                    else if (!(regexp_domain.test(this.$domain_input.val()) || regexp_domain.test(this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text())))
+                    else if (!(regexp_domain.test(domain)))
                         return this.registerFeedback({domain: xabber.getString("account_add__alert_invalid_domain")});
                     else
                         this.registerFeedback({});
+                    if (!constants.REGISTRATION_CUSTOM_DOMAIN && !(constants.REGISTRATION_DOMAINS.indexOf(domain) > -1))
+                        return this.registerFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
                     this._check_user_timeout = setTimeout(() => {
-                        let domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
+                        domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                         if (!(this._registration_domain === domain && this._current_domain_not_supported)){
                             this.$('.btn-next').prop('disabled', true);
                             this._registration_username = this.$jid_input.val()

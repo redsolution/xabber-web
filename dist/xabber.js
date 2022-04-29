@@ -28934,7 +28934,7 @@ Strophe.RSM.prototype = {
         init = function(c) {
             this._connection = c;
             this.devices = {};
-            Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:1");
+            Strophe.addNamespace('OMEMO', "urn:xmpp:omemo:2");
             Strophe.addNamespace('PUBSUB_NODE_CONFIG', "http://jabber.org/protocol/pubsub#node_config");
             this._connection.disco.addFeature(Strophe.NS.OMEMO);
             this._connection.disco.addFeature(Strophe.NS.OMEMO + '+notify');
@@ -37911,7 +37911,6 @@ define('xabber-dependencies',[
 });
 
 var constants = {
-    DEBUG: false,
 
     STORAGE_NAME: 'xabber-storage',
     STORAGE_VERSION: 'v8',
@@ -37999,8 +37998,11 @@ var constants = {
     SYNCHRONIZATION_RSM_MAX: 25,
 
     REGISTRATION_DOMAINS: [],
+    LOGIN_DOMAINS: [],
     TRUSTED_DOMAINS: [],
     RECOMMENDED_DOMAIN: '',
+    REGISTRATION_CUSTOM_DOMAIN: false,
+    LOGIN_CUSTOM_DOMAIN: false,
 
     TURN_SERVERS_LIST: [
         {
@@ -38814,7 +38816,7 @@ define('text!templates/base/dialog.html',[],function () { return '<div class="mo
 define('text!templates/base/fingerprints.html',[],function () { return '<div class="modal-header fingerprints-header">\n    <div class="header"></div>\n    <div class="additional-info"></div>\n</div>\n<div class="fingerprints-content">\n</div>\n<div class="fingerprints-bottom">\n    <div class="this-device-wrap">\n        <div class="this-device-header-wrap">\n            <div class="divider"></div>\n            <div class="this-device-header">{[print(xabber.getString("omemo__dialog_fingerprints__text_this_device"))]}</div>\n        </div>\n        <div class="this-device-content">\n        </div>\n    </div>\n    <div class="fingerprints-description-wrap">\n        <div class="fingerprints-description">{[print(xabber.getString("omemo__dialog_fingerprints__text_description"))]}</div>\n        <div class="link-about-encryption"><a href="{[print(xabber.getString(\'omemo__dialog_fingerprints__link_learn_more\'))]}" target="_blank">{[print(xabber.getString("omemo__dialog_fingerprints__text_learn_more"))]}</a></div>\n    </div>\n</div>';});
 
 
-define('text!templates/base/fingerprint_item.html',[],function () { return '<div class="row">\n    <div title="{[print(xabber.getString(\'omemo__dialog_fingerprints__textfield_device_id_tooltip\', [id, (label ? label : \'none\')]))]}" class="device-wrap">\n        {[if (edit_setting) {]}\n        <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}\n        {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}\n        <div class="device-id one-line">{{id}}</div>\n        {[if (!label) {]}<div class="device-id-label">{[print(xabber.getString("omemo__dialog_fingerprints__label_device_id"))]}</div>{[}]}\n        {[if (edit_setting) {]}<div class="set-label-label hidden">{[print(xabber.getString("omemo__dialog_fingerprints__label_set_label"))]}</div>{[}]}\n    </div>\n    <div class="fingerprint-wrap">\n    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>\n    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}\n    </div>\n    <div data-trust="{{trust}}" class="buttons">\n        {[if (trust !== null) {]}\n        <div class="dropdown-button" data-activates="select-status-{{id}}">\n            <div class="trust-item-wrap btn-main btn-flat">\n                <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_${trust}`))]}</div>\n            </div>\n        </div>\n        <div id="select-status-{{id}}" class="dropdown-content noselect">\n            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>\n            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>\n            {[if (delete_button){]}\n            <div class="btn-main btn-flat btn-delete text-color-red-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_delete"))]}</div>\n            {[}]}\n        </div>\n        {[}]}\n    </div>\n</div>';});
+define('text!templates/base/fingerprint_item.html',[],function () { return '<div class="row">\n    <div title="{[print(xabber.getString(\'omemo__dialog_fingerprints__textfield_device_id_tooltip\', [id, (label ? label : \'none\')]))]}" class="device-wrap">\n        {[if (edit_setting) {]}\n        <input class="hidden set-label one-line" {[if (label) {]}value="{{label}}"{[}]}>{[}]}\n        {[if (label) {]}<div class="one-line label">{{label}}</div>{[}]}\n        <div class="device-id one-line">{{id}}</div>\n        {[if (!label) {]}<div class="device-id-label">{[print(xabber.getString("omemo__dialog_fingerprints__label_device_id"))]}</div>{[}]}\n        {[if (edit_setting) {]}<div class="set-label-label hidden">{[print(xabber.getString("omemo__dialog_fingerprints__label_set_label"))]}</div>{[}]}\n    </div>\n    <div class="fingerprint-wrap">\n    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>\n    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}\n    </div>\n    <div data-trust="{{trust}}" class="buttons">\n        {[if (trust !== null) {]}\n        <div class="dropdown-button" data-activates="select-status-{{id}}">\n            <div class="trust-item-wrap btn-main btn-flat">\n                <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_${trust}`))]}</div>\n            </div>\n        </div>\n        <div id="select-status-{{id}}" class="dropdown-content noselect fingerprint-dropdown">\n            <div data-value="ignore" class="btn-main text-color-grey-500 btn-ignore btn-flat">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>\n            <div data-value="trust" class="btn-main btn-flat btn-trust text-color-green-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>\n            {[if (delete_button){]}\n            <div class="btn-main btn-flat btn-delete text-color-red-500">{[print(xabber.getString("omemo__dialog_fingerprints__button_delete"))]}</div>\n            {[}]}\n        </div>\n        {[}]}\n    </div>\n</div>';});
 
 
 define('text!templates/base/jingle_message_calling.html',[],function () { return '<i class="mdi mdi-phone btn-collapse"></i>\n<div class="call-header">\n    {[print(xabber.getString("dialog_jingle_message__header", [SHORT_CLIENT_NAME]))]}\n    <div class="calling-status"/>\n</div>\n<div class="blur-background"></div>\n<div class="contact-info">\n    <div class="name one-line"/>\n    <div class="calling-status"/>\n</div>\n<div class="video-wrap">\n    <video autoplay loop class="blank-video hidden">\n        <source src="{{BLANK_VIDEO.MP4}}">\n        <source src="{{BLANK_VIDEO.OGG}}" type="video/ogg">\n        <source src="{{BLANK_VIDEO.WEBM}}" type="video/webm">\n    </video>\n    <audio autoplay class="webrtc-remote-audio hidden"/>\n    <video autoplay muted class="webrtc-local-video collapsed hidden"/>\n    <div class="default-screen">\n        <div class="circle-avatar"/>\n        <div class="name one-line"/>\n    </div>\n</div>\n<div class="buttons-panel">\n    <div class="buttons-wrap">\n        <div class="btn-wrap" title="Collapse window"><svg class="btn-collapse mdi-24px" viewBox="0 0 24 24">\n            <path d="M19.5,3.09L15,7.59V4H13V11H20V9H16.41L20.91,4.5L19.5,3.09M4,13V15H7.59L3.09,19.5L4.5,20.91L9,16.41V20H11V13H4Z"/>\n        </svg></div>\n        <div class="btn-wrap" title="Fullscreen mode"><svg class="btn-full-screen mdi-24px" viewBox="0 0 24 24">\n            <path d="M11,21H3V13H5V17.59L17.59,5H13V3H21V11H19V6.41L6.41,19H11V21Z" />\n        </svg></div>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_mute_microphone__tooltip"))]}\' class="btn-microphone mdi mdi-24px mdi-microphone"/>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_switch_video__tooltip"))]}\' class="btn-video mdi mdi-24px mdi-video"/>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_mute__tooltip"))]}\' class="btn-volume mdi mdi-24px mdi-volume-high"/>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_share_screen__tooltip"))]}\' class="btn-share-screen mdi mdi-24px mdi-monitor"/>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_accept_call__tooltip"))]}\' class="btn-accept mdi mdi-24px mdi-phone"/>\n        <i title=\'{[print(xabber.getString("dialog_jingle_message__button_decline_call__tooltip"))]}\' class="btn-cancel mdi mdi-24px mdi-phone-hangup"/>\n    </div>\n</div>';});
@@ -38865,10 +38867,10 @@ define('text!templates/api_service/sync_settings.html',[],function () { return '
 define('text!templates/api_service/sync_settings_account_item.html',[],function () { return '<div class="account-wrap" data-jid="{{jid}}">\n    <div class="account-info-wrap">\n        <i class="sync-icon mdi mdi-24px" data-mdiclass=""></i>\n        <div class="text-info-wrap">\n            <div class="name text-color-grey-900 one-line">{{jid}}</div>\n            <div class="sync-tip text-color-grey-500 one-line"></div>\n        </div>\n    </div>\n    <div class="input-field checkbox-field sync-one-wrap no-padding">\n        <input type="checkbox" class="filled-in sync-one" id="{{view.cid}}_sync_{{jid}}"/>\n        <label for="{{view.cid}}_sync_{{jid}}"></label>\n    </div>\n</div>\n';});
 
 
-define('text!templates/accounts/xmpp_login.html',[],function () { return '<div class="login-panel-intro">\n    <div class="login-panel-head noselect">\n        <img src="{{CLIENT_LOGO}}" class="client-logo">\n        <span class="client-name">{{SHORT_CLIENT_NAME}}</span>\n        <span class="client-description">{{SHORT_CLIENT_DESCRIPTION}}</span>\n    </div>\n    <div class="login-buttons">\n        <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</div>\n        <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_sign_in"))]}</div>\n    </div>\n</div>\n<div class="login-panel-form xmpp-login-form noselect hidden">\n    <svg class="details-icon btn-go-back-menu mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>\n    <div class="login-form-header">{[print(xabber.getString("title_login_xabber_account"))]}</div>\n    <div class="login-form-jid">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("dialog_jingle_message__message_connect"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="jid" placeholder=\'{[print(xabber.getString("hint_xmpp_id"))]}\' type="text" name="jid">\n                </div>\n                <div class="input-field">\n                    <input id="password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="password">\n                </div>\n            </div>\n            <div class="register-form-step-error login-jid-error hidden"></div>\n            <div class="register-form-step-error login-password-error hidden"></div>\n            <div class="register-form-step-description"></div>\n            <div class="login-step-wrap hidden">\n                <div class="login-step connecting-step">\n                    <div class="login-step-text">\n                        {[print(xabber.getString("dialog_jingle_message__status_communicating"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                </div>\n                <div class="login-step credentials-step">\n                    <div class="login-step-text">\n                        {[print(xabber.getString("dialog_jingle_message__status_checking_credentials"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="login-form-server-features hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header"></div>\n        </div>\n        <div class="login-server-features-wrap">\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.MAM)]}" >\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_message_archive"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_archive_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.SYNCHRONIZATION)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_synchronization"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_quick_synchronization_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.REWRITE)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_message_editing"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_editing_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.AUTH_DEVICES)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_device_management"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_tokens_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.PUBSUB)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_publish_subscribe"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_pubsub_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.HTTP_UPLOAD)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_file_upload"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_file_upload_error\'))]}</div>\n            </div>\n        </div>\n        <div class="server-features-error"></div>\n    </div>\n    <div class="input-field buttons-wrap">\n        <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>\n        <button class="btn btn-flat btn-main-filled one-line hidden btn-sign-up-instead">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</button>\n        <button class="btn btn-flat btn-main-filled one-line hidden btn-finish-log-in"></button>\n    </div>\n    <div class="clearfix"></div>\n</div>\n<div class="login-panel-form register-form noselect hidden">\n    <svg class="details-icon btn-go-back mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>\n    <div class="login-form-header">{[print(xabber.getString("title_register_xabber_account"))]}</div>\n    <div class="login-form-skip hidden">{[print(xabber.getString("skip"))]}</div>\n    <div class="register-form-nickname">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_nickname"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_nickname" placeholder=\'{[print(xabber.getString("vcard_nick_name"))]}\' type="text" name="register_nickname">\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_nickname"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-jid hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_jid"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_jid" placeholder=\'{[print(xabber.getString("hint_username"))]}\' type="text" name="register_jid">\n                </div>\n                <div class="property-field xmpp-server-dropdown-wrap">\n                    <div class="select-xmpp-server">\n                        <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                        <div class="input-field input-group-chat-domain hidden">\n                            <input id="new_account_domain" type="text" placeholder=\'{[print(xabber.getString("groupchat__hint_domain"))]}\' name="register_domain">\n                        </div>\n                        <div data-activates="select-xmpp-server" class="caret">\n                            <i class="mdi mdi-20px mdi-menu-up"></i>\n                            <i class="mdi mdi-20px mdi-menu-down"></i>\n                        </div>\n                    </div>\n                    <div id="select-xmpp-server" class="dropdown-content noselect">\n                        <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>\n                    </div>\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_jid"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-password hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_password"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="register_password">\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_password"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-picture hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_avatar"))]}</div>\n            <div class="input-field-wrap">\n                <div class="avatar-wrap dropdown-button" data-activates="{{view.cid}}-profile-image">\n                    <div class="circle-avatar">\n                        <input id="register_picture"  title=\'{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}\' type="file"/>\n                        <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown dropdown-content noselect">\n                            <div class="btn-emoji-panel property-variant">\n                                {[print(xabber.getString("account_emoji_profile_image_button"))]}\n                            </div>\n                            <div class="btn-selfie property-variant">\n                                {[print(xabber.getString("account_webcam_profile_image_button"))]}\n                            </div>\n                            <div class="btn-choose-image property-variant">\n                                {[print(xabber.getString("account_profile_image_button"))]}\n                            </div>\n                        </ul>\n                    </div>\n                    <div class="circle-icon">\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    {[if (xabber.url_params && xabber.url_params.rkey){]}\n        <div class="login-form-url">\n            <i class="mdi login-form-url-icon mdi-link-variant"></i>\n            <div class="login-form-url-text">\n                {[print(xabber.getString("xmpp_login__registration_via_link"))]}\n            </div>\n        </div>\n    {[}]}\n    <div class="input-field buttons-wrap">\n        <button class="btn btn-flat btn-main-filled btn-next">{[print(xabber.getString("xaccount_next"))]}</button>\n    </div>\n    <div class="clearfix"></div>\n</div>';});
+define('text!templates/accounts/xmpp_login.html',[],function () { return '<div class="login-panel-intro">\n    <div class="login-panel-head noselect">\n        <img src="{{CLIENT_LOGO}}" class="client-logo">\n        <span class="client-name">{{SHORT_CLIENT_NAME}}</span>\n        <span class="client-description">{{SHORT_CLIENT_DESCRIPTION}}</span>\n    </div>\n    <div class="login-buttons">\n        <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</div>\n        <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_sign_in"))]}</div>\n    </div>\n</div>\n<div class="login-panel-form xmpp-login-form noselect hidden">\n    <svg class="details-icon btn-go-back-menu mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>\n    <div class="login-form-header">{[print(xabber.getString("title_login_xabber_account"))]}</div>\n    <div class="login-form-jid">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("dialog_jingle_message__message_connect"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field input-field-jid">\n                    <input id="jid" placeholder=\'{[print(xabber.getString("hint_xmpp_id"))]}\' type="text" name="jid">\n                    <div class="property-field xmpp-server-dropdown-wrap">\n                        <div class="select-auth-xmpp-server">\n                            <div data-activates="select-auth-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                            <div class="input-field input-group-chat-domain hidden">\n                                <input id="sign_in_domain" type="text" placeholder=\'{[print(xabber.getString("groupchat__hint_domain"))]}\' name="sign_in_domain">\n                            </div>\n                            <div data-activates="select-auth-xmpp-server" class="caret">\n                                <i class="mdi mdi-20px mdi-menu-up"></i>\n                                <i class="mdi mdi-20px mdi-menu-down"></i>\n                            </div>\n                        </div>\n                        <div id="select-auth-xmpp-server" class="dropdown-content noselect">\n                            <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>\n                        </div>\n                    </div>\n                </div>\n                <div class="input-field">\n                    <input id="password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="password">\n                </div>\n            </div>\n            <div class="register-form-step-error login-jid-error hidden"></div>\n            <div class="register-form-step-error login-password-error hidden"></div>\n            <div class="register-form-step-description"></div>\n            <div class="login-step-wrap hidden">\n                <div class="login-step connecting-step">\n                    <div class="login-step-text">\n                        {[print(xabber.getString("dialog_jingle_message__status_communicating"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                </div>\n                <div class="login-step credentials-step">\n                    <div class="login-step-text">\n                        {[print(xabber.getString("dialog_jingle_message__status_checking_credentials"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                </div>\n            </div>\n        </div>\n    </div>\n    <div class="login-form-server-features hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header"></div>\n        </div>\n        <div class="login-server-features-wrap">\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.MAM)]}" >\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_message_archive"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_archive_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.SYNCHRONIZATION)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_synchronization"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_quick_synchronization_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.REWRITE)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_message_editing"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_editing_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.AUTH_DEVICES)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_device_management"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_tokens_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.PUBSUB)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_publish_subscribe"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_pubsub_error\'))]}</div>\n            </div>\n            <div class="server-feature" data-xmlns="{[print(Strophe.NS.HTTP_UPLOAD)]}">\n                <div class="server-feature-text">\n                    {[print(xabber.getString("signin_file_upload"))]}\n                </div>\n                <div class="preloader-wrapper preloader-17px active visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                <i class="mdi mdi-24px mdi-alert hidden"></i>\n                <div class="feature-error-tooltip-triangle">\n                    <div class="triangle-inside"></div>\n                </div>\n                <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_file_upload_error\'))]}</div>\n            </div>\n        </div>\n        <div class="server-features-error"></div>\n    </div>\n    <div class="input-field buttons-wrap">\n        <button class="btn btn-flat btn-main-filled btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>\n        <button class="btn btn-flat btn-main-filled one-line hidden btn-sign-up-instead">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</button>\n        <button class="btn btn-flat btn-main-filled one-line hidden btn-finish-log-in"></button>\n    </div>\n    <div class="clearfix"></div>\n</div>\n<div class="login-panel-form register-form noselect hidden">\n    <svg class="details-icon btn-go-back mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>\n    <div class="login-form-header">{[print(xabber.getString("title_register_xabber_account"))]}</div>\n    <div class="login-form-skip hidden">{[print(xabber.getString("skip"))]}</div>\n    <div class="register-form-nickname">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_nickname"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_nickname" placeholder=\'{[print(xabber.getString("vcard_nick_name"))]}\' type="text" name="register_nickname">\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_nickname"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-jid hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_jid"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_jid" placeholder=\'{[print(xabber.getString("hint_username"))]}\' type="text" name="register_jid">\n                </div>\n                <div class="property-field xmpp-server-dropdown-wrap">\n                    <div class="select-xmpp-server">\n                        <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                        <div class="input-field input-group-chat-domain hidden">\n                            <input id="new_account_domain" type="text" placeholder=\'{[print(xabber.getString("groupchat__hint_domain"))]}\' name="register_domain">\n                        </div>\n                        <div data-activates="select-xmpp-server" class="caret">\n                            <i class="mdi mdi-20px mdi-menu-up"></i>\n                            <i class="mdi mdi-20px mdi-menu-down"></i>\n                        </div>\n                    </div>\n                    <div id="select-xmpp-server" class="dropdown-content noselect">\n                        <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>\n                    </div>\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_jid"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-password hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_password"))]}</div>\n            <div class="input-field-wrap">\n                <div class="input-field">\n                    <input id="register_password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="register_password">\n                </div>\n            </div>\n            <div class="register-form-step-description">{[print(xabber.getString("xmpp_login__registration_description_password"))]}</div>\n            <div class="register-form-step-error hidden"></div>\n        </div>\n    </div>\n    <div class="register-form-picture hidden">\n        <div class="register-form-step-wrap">\n            <div class="register-form-step-header">{[print(xabber.getString("xmpp_login__registration_title_avatar"))]}</div>\n            <div class="input-field-wrap">\n                <div class="avatar-wrap dropdown-button" data-activates="{{view.cid}}-profile-image">\n                    <div class="circle-avatar">\n                        <input id="register_picture"  title=\'{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}\' type="file"/>\n                        <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown dropdown-content noselect">\n                            <div class="btn-emoji-panel property-variant">\n                                {[print(xabber.getString("account_emoji_profile_image_button"))]}\n                            </div>\n                            <div class="btn-selfie property-variant">\n                                {[print(xabber.getString("account_webcam_profile_image_button"))]}\n                            </div>\n                            <div class="btn-choose-image property-variant">\n                                {[print(xabber.getString("account_profile_image_button"))]}\n                            </div>\n                        </ul>\n                    </div>\n                    <div class="circle-icon">\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n    {[if (xabber.url_params && xabber.url_params.rkey){]}\n        <div class="login-form-url">\n            <i class="mdi login-form-url-icon mdi-link-variant"></i>\n            <div class="login-form-url-text">\n                {[print(xabber.getString("xmpp_login__registration_via_link"))]}\n            </div>\n        </div>\n    {[}]}\n    <div class="input-field buttons-wrap">\n        <button class="btn btn-flat btn-main-filled btn-next">{[print(xabber.getString("xaccount_next"))]}</button>\n        <button class="btn btn-flat btn-main btn-skip">{[print(xabber.getString("xmpp_login__registration_skip"))]}</button>\n    </div>\n    <div class="clearfix"></div>\n</div>';});
 
 
-define('text!templates/accounts/add_account.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("account_add"))]}</span>\n    </div>\n    <div class="modal-content login-panel-form">\n\n        <div class="login-form-jid">\n            <div class="login-form-step-wrap">\n                <div class="input-field-wrap">\n                    <div class="input-field">\n                        <input id="jid" placeholder=\'{[print(xabber.getString("hint_xmpp_id"))]}\' type="text" name="jid">\n                    </div>\n                    <div class="input-field">\n                        <input id="password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="password">\n                    </div>\n                </div>\n                <div class="login-form-step-error login-jid-error hidden"></div>\n                <div class="login-form-step-error login-password-error hidden"></div>\n                <div class="login-form-step-description"></div>\n                <div class="login-step-wrap hidden">\n                    <div class="login-step connecting-step">\n                        <div class="login-step-text">\n                            {[print(xabber.getString("dialog_jingle_message__status_communicating"))]}\n                        </div>\n                        <div class="preloader-wrapper preloader-17px active visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                    </div>\n                    <div class="login-step credentials-step">\n                        <div class="login-step-text">\n                            {[print(xabber.getString("dialog_jingle_message__status_checking_credentials"))]}\n                        </div>\n                        <div class="preloader-wrapper preloader-17px active visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="login-form-server-features hidden">\n            <div class="register-form-step-wrap">\n                <div class="register-form-step-header"></div>\n            </div>\n            <div class="login-server-features-wrap">\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.MAM)]}" >\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_message_archive"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_archive_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.SYNCHRONIZATION)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_synchronization"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_quick_synchronization_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.REWRITE)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_message_editing"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_editing_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.AUTH_DEVICES)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_device_management"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_tokens_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.PUBSUB)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_publish_subscribe"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_pubsub_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.HTTP_UPLOAD)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_file_upload"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_file_upload_error\'))]}</div>\n                </div>\n            </div>\n            <div class="server-features-error"></div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button disabled class="btn-flat btn-main btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>\n        <button class="btn-flat btn-main one-line hidden btn-finish-log-in"></button>\n        <button class="btn-flat btn-main btn-dark btn-cancel hidden">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>';});
+define('text!templates/accounts/add_account.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("account_add"))]}</span>\n    </div>\n    <div class="modal-content login-panel-form">\n\n        <div class="login-form-jid">\n            <div class="login-form-step-wrap">\n                <div class="input-field-wrap">\n                    <div class="input-field input-field-jid">\n                        <input id="jid" placeholder=\'{[print(xabber.getString("hint_xmpp_id"))]}\' type="text" name="jid">\n                        <div class="property-field xmpp-server-dropdown-wrap">\n                            <div class="select-auth-xmpp-server">\n                                <div data-activates="select-auth-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>\n                                <div class="input-field input-group-chat-domain hidden">\n                                    <input id="sign_in_domain" type="text" placeholder=\'{[print(xabber.getString("groupchat__hint_domain"))]}\' name="sign_in_domain">\n                                </div>\n                                <div data-activates="select-auth-xmpp-server" class="caret">\n                                    <i class="mdi mdi-20px mdi-menu-up"></i>\n                                    <i class="mdi mdi-20px mdi-menu-down"></i>\n                                </div>\n                            </div>\n                            <div id="select-auth-xmpp-server" class="dropdown-content noselect">\n                                <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>\n                            </div>\n                        </div>\n                    </div>\n                    <div class="input-field">\n                        <input id="password" placeholder=\'{[print(xabber.getString("hint_pass"))]}\' type="password" name="password">\n                    </div>\n                </div>\n                <div class="login-form-step-error login-jid-error hidden"></div>\n                <div class="login-form-step-error login-password-error hidden"></div>\n                <div class="login-form-step-description"></div>\n                <div class="login-step-wrap hidden">\n                    <div class="login-step connecting-step">\n                        <div class="login-step-text">\n                            {[print(xabber.getString("dialog_jingle_message__status_communicating"))]}\n                        </div>\n                        <div class="preloader-wrapper preloader-17px active visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                    </div>\n                    <div class="login-step credentials-step">\n                        <div class="login-step-text">\n                            {[print(xabber.getString("dialog_jingle_message__status_checking_credentials"))]}\n                        </div>\n                        <div class="preloader-wrapper preloader-17px active visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        <i class="mdi mdi-24px mdi-alert-circle hidden"></i>\n                    </div>\n                </div>\n            </div>\n        </div>\n        <div class="login-form-server-features hidden">\n            <div class="register-form-step-wrap">\n                <div class="register-form-step-header"></div>\n            </div>\n            <div class="login-server-features-wrap">\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.MAM)]}" >\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_message_archive"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_archive_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.SYNCHRONIZATION)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_synchronization"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_quick_synchronization_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.REWRITE)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_message_editing"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_message_editing_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.AUTH_DEVICES)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_device_management"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_tokens_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.PUBSUB)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_publish_subscribe"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_pubsub_error\'))]}</div>\n                </div>\n                <div class="server-feature" data-xmlns="{[print(Strophe.NS.HTTP_UPLOAD)]}">\n                    <div class="server-feature-text">\n                        {[print(xabber.getString("signin_file_upload"))]}\n                    </div>\n                    <div class="preloader-wrapper preloader-17px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    <i class="mdi mdi-24px mdi-alert hidden"></i>\n                    <div class="feature-error-tooltip-triangle">\n                        <div class="triangle-inside"></div>\n                    </div>\n                    <div class="feature-error-tooltip">{[print(xabber.getString(\'signin_file_upload_error\'))]}</div>\n                </div>\n            </div>\n            <div class="server-features-error"></div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button disabled class="btn-flat btn-main btn-log-in">{[print(xabber.getString("title_login_xabber_account"))]}</button>\n        <button class="btn-flat btn-main one-line hidden btn-finish-log-in"></button>\n        <button class="btn-flat btn-main btn-dark btn-cancel hidden">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>';});
 
 
 define('text!templates/accounts/change_password.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("settings_account__dialog_change_password__header"))]}</span>\n    </div>\n    <div class="modal-content">\n        <div class="row login-form-field">\n            <div class="input-field">\n                <input id="jid" type="text" name="jid" readonly>\n                <label for="jid">{[print(xabber.getString("account_user_name"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <input id="password" type="password" name="password">\n                <label for="password">{[print(xabber.getString("account_password"))]}</label>\n                <span class="errors fixed"></span>\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-change">{[print(xabber.getString("set"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    </div>\n</div>\n';});
@@ -41135,56 +41137,121 @@ define('xabber-utils',[
             return padded;
         },
 
+        hmacSha256: async function(key, message) {
+
+            let algorithm = { name: "HMAC", hash: "SHA-256" };
+
+            let hashBuffer = await crypto.subtle.sign(
+                algorithm.name,
+                key,
+                message
+            );
+
+            return hashBuffer;
+        },
+
+        stringToArrayBuffer: function (string) {
+            let { length } = string;
+            let buffer = new Uint8Array(length);
+
+            for (let i = 0; i < length; i++) {
+                buffer[i] = string.charCodeAt(i);
+            }
+
+            return buffer;
+        },
+
         AES: {
             ALGO_NAME: 'AES-GCM',
 
             decoder: new window.TextDecoder('utf-8'),
             encoder: new window.TextEncoder('utf-8'),
 
-            decrypt: async function (exportedAESKey, iv, data) {
-                let key = await window.crypto.subtle.importKey('raw', exportedAESKey, utils.AES.ALGO_NAME, false, ['decrypt']);
+            decrypt: async function (masterKey, HMACData, payload) {
+                let masterObj = await window.crypto.subtle.importKey('raw', masterKey, {name: 'HKDF'}, false, ['deriveKey', 'deriveBits']),
+                    hkdfCtrParams = { name: 'HKDF', salt: new Uint8Array(32), info: utils.stringToArrayBuffer('OMEMO Payload'), hash: 'SHA-256'};
+
+                let key = await window.crypto.subtle.deriveBits(hkdfCtrParams, masterObj, 640);
+
+                key = new Uint8Array(key);
+
+                let encryptionKey = key.slice(0,32),
+                    authenticationKey = key.slice(32,64),
+                    iv = key.slice(64);
+
+                let algorithm = { name: "HMAC", hash: "SHA-256" };
+
+                authenticationKey = await crypto.subtle.importKey(
+                    "raw",
+                    authenticationKey,
+                    algorithm,
+                    false, ["sign", "verify"]
+                );
+
+                let generatedHMAC = await utils.hmacSha256(authenticationKey, payload);
+
+                generatedHMAC = generatedHMAC.slice(0, generatedHMAC.byteLength - 16);
+
+                if (!(utils.ArrayBuffertoBase64(HMACData) === utils.ArrayBuffertoBase64(generatedHMAC)))
+                    return;
+
+                encryptionKey = await window.crypto.subtle.importKey('raw', encryptionKey, { "name": 'AES-CBC' }, true, ['decrypt'])
+
 
                 let decryptedBuffer = await window.crypto.subtle.decrypt({
-                    name: utils.AES.ALGO_NAME,
+                    name: 'AES-CBC',
                     iv,
-                    tagLength: constants.AES_TAG_LENGTH
-                }, key, data);
+                }, encryptionKey, payload);
 
                 return utils.AES.decoder.decode(decryptedBuffer);
             },
 
             encrypt: async function (plaintext) {
-                let iv = window.crypto.getRandomValues(new Uint8Array(12)),
-                    key = await utils.AES.generateAESKey(),
-                    encrypted = await utils.AES.generateAESencryptedMessage(iv, key, plaintext);
+                let masterKey = window.crypto.getRandomValues(new Uint8Array(32)),
+                    masterObj = await window.crypto.subtle.importKey('raw', masterKey, {name: 'HKDF'}, false, ['deriveKey', 'deriveBits']),
+                    hkdfCtrParams = { name: 'HKDF', salt: new Uint8Array(32), info: utils.stringToArrayBuffer('OMEMO Payload'), hash: 'SHA-256'};
 
-                let ciphertext = encrypted.ciphertext,
-                    authenticationTag = encrypted.authenticationTag,
-                    keydata = await window.crypto.subtle.exportKey('raw', key);
+                let key = await window.crypto.subtle.deriveBits(hkdfCtrParams, masterObj, 640);
+
+                key = new Uint8Array(key);
+
+                let encryptionKey = key.slice(0,32),
+                    authenticationKey = key.slice(32,64),
+                    iv = key.slice(64);
+
+                encryptionKey = await window.crypto.subtle.importKey('raw', encryptionKey, { "name": 'AES-CBC' }, true, ['encrypt']);
+
+                let encrypted = await utils.AES.generateAESencryptedMessage(iv, encryptionKey, plaintext);
+
+                let algorithm = { name: "HMAC", hash: "SHA-256" };
+                authenticationKey = await crypto.subtle.importKey(
+                    "raw",
+                    authenticationKey,
+                    algorithm,
+                    false, ["sign", "verify"]
+                );
+
+                let payload = await utils.hmacSha256(authenticationKey, encrypted);
+
+                payload = payload.slice(0, payload.byteLength - 16);
+
+                let keydata = new Uint8Array([...masterKey, ...new Uint8Array(payload)]);
 
                 return {
-                    keydata: utils.AES.arrayBufferConcat(keydata, authenticationTag),
-                    iv,
-                    payload: ciphertext
+                    keydata: keydata.buffer,
+                    payload: encrypted,
                 }
             },
 
             generateAESencryptedMessage: async function (iv, key, plaintext) {
                 let encryptOptions = {
-                    name: utils.AES.ALGO_NAME,
+                    name: 'AES-CBC',
                     iv,
-                    tagLength: constants.AES_TAG_LENGTH
                 };
                 let encodedPlaintext = utils.AES.encoder.encode(plaintext),
-                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext),
-                    ciphertextLength = encrypted.byteLength - ((128 + 7) >> 3),
-                    ciphertext = encrypted.slice(0, ciphertextLength),
-                    authenticationTag = encrypted.slice(ciphertextLength);
+                    encrypted = await window.crypto.subtle.encrypt(encryptOptions, key, encodedPlaintext);
 
-                return {
-                    ciphertext,
-                    authenticationTag
-                };
+                return encrypted;
             },
 
             arrayBufferConcat: function () {
@@ -41276,9 +41343,9 @@ define('xabber-utils',[
     return utils;
 });
 
-let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":100,"cy":0,"da":0,"de":52,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":69,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
+let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.11","version_description":"Registration testing build with login form and add account changes"}'
+'{"version_number":"2.3.2.12","version_description":"Registration testing build with more constants support"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -41605,7 +41672,6 @@ define('xabber-environment',[
                     'PERSONAL_AREA_URL',
                     'LOG_LEVEL',
                     'SYNCHRONIZATION_RSM_MAX',
-                    'DEBUG',
                     'XABBER_ACCOUNT_URL',
                     'REGISTER_XMPP_ACCOUNT',
                     'REGISTER_XMPP_ACCOUNT_URL',
@@ -41632,17 +41698,21 @@ define('xabber-environment',[
                 this.trigger("update_main_color");
 
                 window.xabber = this;
-                if (constants.DEBUG) {
-                    _.extend(window, env);
-                }
+                _.extend(window, env);
                 if (config.SYNCHRONIZATION_RSM_MAX)
                     constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
                 if (config.REGISTRATION_DOMAINS)
                     constants.REGISTRATION_DOMAINS = config.REGISTRATION_DOMAINS;
+                if (config.LOGIN_DOMAINS)
+                    constants.LOGIN_DOMAINS = config.LOGIN_DOMAINS;
                 if (config.TRUSTED_DOMAINS)
                     constants.TRUSTED_DOMAINS = config.TRUSTED_DOMAINS;
                 if (config.RECOMMENDED_DOMAIN)
                     constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
+                if (config.REGISTRATION_CUSTOM_DOMAIN)
+                    constants.REGISTRATION_CUSTOM_DOMAIN = config.REGISTRATION_CUSTOM_DOMAIN;
+                if (config.LOGIN_CUSTOM_DOMAIN)
+                    constants.LOGIN_CUSTOM_DOMAIN = config.LOGIN_CUSTOM_DOMAIN;
                 if (config.SHORT_CLIENT_DESCRIPTION)
                     constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
 
@@ -47066,7 +47136,8 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
         Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protocol/synchronization#chat');
         Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');
-        Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:1');
+        Strophe.addNamespace('SYNCHRONIZATION_OLD_OMEMO', 'urn:xmpp:omemo:1');
+        Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:2');
         Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
         Strophe.addNamespace('ARCHIVE', 'https://xabber.com/protocol/archive');
         Strophe.addNamespace('MAM', 'urn:xmpp:mam:2');
@@ -48436,11 +48507,10 @@ define("xabber-accounts", [],function () {
                         }
                     } else if (status === Strophe.Status.CONNECTED) {
                         this.save('is_new', undefined);
-                        if (this.auth_view.stepped_auth)
+                        if (this.auth_view.stepped_auth && !this.auth_view.data.get('registration'))
                             this.auth_view.authStepperStart();
                         else{
-                            if (constants.TRUSTED_DOMAINS.indexOf(this.connection.domain) > -1)
-                                this.auth_view.endAuth();
+                            this.auth_view.endAuth();
                         }
 
                     } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
@@ -48881,8 +48951,6 @@ define("xabber-accounts", [],function () {
                 },
 
                 registerIQHandler: function () {
-                    if (!constants.ENABLE_XABBER_ACCOUNT)
-                        return;
                     this.connection.deleteHandler(this._stanza_handler);
                     this._stanza_handler = this.connection.addHandler((iq) => {
                             this.onGetIQ(iq);
@@ -50684,6 +50752,12 @@ define("xabber-accounts", [],function () {
                 this.closeModal();
             },
 
+            endAuth: function (account) {
+                this.model.save('is_new', undefined);
+                this.successFeedback(this.model)
+                this.model.auth_view = null;
+            },
+
             onHide: function () {
                 this.$el.detach();
             },
@@ -50792,6 +50866,12 @@ define("xabber-accounts", [],function () {
                 this.$el.closeModal({ complete: this.hide.bind(this) });
             },
 
+            endAuth: function (account) {
+                this.account.save('is_new', undefined);
+                this.successFeedback(this.account)
+                this.account.auth_view = null;
+            },
+
             onHide: function () {
                 this.$el.detach();
             },
@@ -50841,7 +50921,16 @@ define("xabber-accounts", [],function () {
                 let jid = this.$jid_input.val(),
                     password = this.$password_input.val();
                 if (this.data.get('registration')){
-                    let domain = this.$('#new_account_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text();
+                    let domain = this.$('#new_account_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-xmpp-server .property-value').text();
+                    if (!constants.REGISTRATION_CUSTOM_DOMAIN && !(constants.REGISTRATION_DOMAINS.indexOf(domain) > -1))
+                        return this.errorRegistrationFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
+                    jid = jid + '@' + domain
+                }
+                else if(
+                    (this.$('.input-field-jid .xmpp-server-dropdown-wrap').length && !this.$('.input-field-jid .xmpp-server-dropdown-wrap').hasClass('hidden')) &&
+                    (this.$('#sign_in_domain') && this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text())
+                ){
+                    let domain = this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text();
                     jid = jid + '@' + domain
                 }
                 if (!jid) {
@@ -50857,6 +50946,8 @@ define("xabber-accounts", [],function () {
                     }
                     return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
                 }
+                if (!this.data.get('registration') && !constants.LOGIN_CUSTOM_DOMAIN && !(constants.LOGIN_DOMAINS.indexOf(Strophe.getDomainFromJid(jid)) > -1))
+                    return this.errorFeedback({jid: xabber.getString("account_auth__error__login_custom_domain")});
                 password = password.trim();
                 let at_idx = jid.indexOf('@');
                 if (at_idx <= 0 || at_idx === jid.length - 1) {
@@ -50944,6 +51035,12 @@ define("xabber-accounts", [],function () {
                 this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
             },
 
+            endAuth: function (account) {
+                this.account.save('is_new', undefined);
+                this.successFeedback(this.account)
+                this.account.auth_view = null;
+            },
+
             socialAuth: function (ev) {
                 let origin = window.location.href,
                     provider = $(ev.target).closest('.btn-social').data('provider');
@@ -50968,12 +51065,13 @@ define("xabber-accounts", [],function () {
                 "click .btn-go-back-menu": "openButtonsMenu",
                 "click .btn-go-back": "openPreviousStep",
                 "click .btn-next": "openNextStep",
-                "click .login-form-skip": "registerWithoutAvatar",
+                "click .btn-skip": "registerWithoutAvatar",
                 "click .btn-finish-log-in": "endAuth",
                 "keyup input[name=register_nickname]": "keyUpNickname",
                 "keyup input[name=register_jid]": "keyUpJid",
                 "keyup input[name=jid]": "keyUpLogin",
                 "keyup input[name=password]": "keyUpLogin",
+                "keyup input[name=sign_in_domain]": "keyUpLogin",
                 "keyup input[name=register_domain]": "keyUpDomain",
                 "focusout input[name=register_domain]": "focusoutDomain",
                 "keyup input[name=register_password]": "keyUpPassword",
@@ -50981,7 +51079,8 @@ define("xabber-accounts", [],function () {
                 "click .btn-choose-image": "chooseAvatar",
                 "click .btn-emoji-panel": "openEmojiPanel",
                 "click .btn-selfie": "openWebcamPanel",
-                "click .property-variant": "changePropertyValue"
+                "click #select-xmpp-server .property-variant": "changePropertyValueRegistration",
+                "click #select-auth-xmpp-server .property-variant": "changePropertyValueAuth",
             },
 
             __initialize: function () {
@@ -51000,7 +51099,7 @@ define("xabber-accounts", [],function () {
                 this.registerFeedback({});
                 Materialize.updateTextFields();
                 this.$('.btn-go-back').hideIf(false);
-                this.$('.login-form-skip').hideIf(true)
+                this.$('.btn-skip').hideIf(true)
                 this.$nickname_input.val('');
                 this.$jid_input.val('');
                 this.$password_input.val('');
@@ -51008,6 +51107,7 @@ define("xabber-accounts", [],function () {
                 this.$('.circle-avatar').css({'background-color': ''});
                 this.updateButtons();
                 this.updateDomains();
+                this.updateAuthDomains();
                 let dropdown_settings = {
                     inDuration: 100,
                     outDuration: 100,
@@ -51017,6 +51117,8 @@ define("xabber-accounts", [],function () {
                 };
                 this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 this.$('.avatar-wrap.dropdown-button').dropdown(dropdown_settings);
                 this.updateOptions && this.updateOptions();
             },
@@ -51052,23 +51154,33 @@ define("xabber-accounts", [],function () {
             },
 
             keyUpJid: function (ev) {
-                if (!this.$('.btn-next').prop('disabled') && ev) {
-                    ev.keyCode === constants.KEY_ENTER && this.openNextStep();
+                clearTimeout(this._check_user_timeout);
+                if (!this.$('.btn-next').prop('disabled') && ev && ev.keyCode === constants.KEY_ENTER) {
+                    this.openNextStep();
+                    return;
+                }
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                    this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'))
+                    this.$domain_input.val(this.$jid_input.val().split('@')[1]);
+                    this.$jid_input.val(this.$jid_input.val().split('@')[0]);
+                    this.$domain_input.focus();
                     return;
                 }
                 this.$('.btn-next').prop('disabled', true);
-                clearTimeout(this._check_user_timeout);
                 if(this.$jid_input.val()){
                     let regexp_local_part = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))$/,
-                        regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                        regexp_domain = /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                        domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                     if (!regexp_local_part.test(this.$jid_input.val()))
                         return this.registerFeedback({jid: xabber.getString("account_add__alert_localpart_invalid")});
-                    else if (!(regexp_domain.test(this.$domain_input.val()) || regexp_domain.test(this.$('.xmpp-server-dropdown-wrap .property-value').text())))
+                    else if (!(regexp_domain.test(domain)))
                         return this.registerFeedback({domain: xabber.getString("account_add__alert_invalid_domain")});
                     else
                         this.registerFeedback({});
+                    if (!constants.REGISTRATION_CUSTOM_DOMAIN && !(constants.REGISTRATION_DOMAINS.indexOf(domain) > -1))
+                        return this.registerFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
                     this._check_user_timeout = setTimeout(() => {
-                        let domain = this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text();
+                        domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                         if (!(this._registration_domain === domain && this._current_domain_not_supported)){
                             this.$('.btn-next').prop('disabled', true);
                             this._registration_username = this.$jid_input.val()
@@ -51124,12 +51236,18 @@ define("xabber-accounts", [],function () {
                 }
                 this.$('.login-step-wrap').hideIf(true);
                 this.authFeedback({});
-                if (this.$jid_input.val() && this.$password_input.val())
+                this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@'))
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                    this.$('.input-field-jid').addClass('input-field-jid-borders')
+                }else {
+                    this.$('.input-field-jid').removeClass('input-field-jid-borders')
+                }
+                if (ev && this.$jid_input.val() && this.$password_input.val())
                     ev.keyCode === constants.KEY_ENTER && this.login();
             },
 
             focusoutDomain: function () {
-                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text()))
+                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
             },
 
@@ -51171,6 +51289,18 @@ define("xabber-accounts", [],function () {
             },
 
             checkUserCallback: function (status, condition) {
+                if (status === Strophe.Status.REGISTER || status === Strophe.Status.REGIFAIL) {
+                    if (!this.$('.select-xmpp-server .property-variant[data-value="' + this.auth_connection.register.domain + '"]').length) {
+                        $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                            .text(this.auth_connection.register.domain)
+                            .attr('data-value', this.auth_connection.register.domain)
+                            .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
+                    }
+                    this.$('.select-xmpp-server .input-group-chat-domain').addClass('hidden');
+                    this.$('#new_account_domain').val("");
+                    this.$('.select-xmpp-server .xmpp-server-item-wrap .property-value').text(this.auth_connection.register.domain)
+                        .removeClass('hidden').attr('data-value', this.auth_connection.register.domain);
+                }
                 if (status === Strophe.Status.REGISTER) {
                     if (this.auth_connection && this.auth_connection.connected) {
                         this._current_domain_not_supported = false
@@ -51193,7 +51323,6 @@ define("xabber-accounts", [],function () {
                         this.registerFeedback({});
                         this.$('.btn-next').prop('disabled', false);
                     }
-
                     else {
                         this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_not_supported")});
                         this.$('.btn-next').prop('disabled', true);
@@ -51237,6 +51366,7 @@ define("xabber-accounts", [],function () {
             handleRegistrationStep: function () {
                 let step = this.data.get('step')
                 if (step === -1){
+                    this.$domain_input = this.$('input[name=sign_in_domain]');
                     this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
                     this.$(`.server-feature .mdi`).hideIf(true);
                     this.$(`.server-feature`).removeClass('active-feature')
@@ -51278,8 +51408,10 @@ define("xabber-accounts", [],function () {
                 else if (step === 2){
                     this.$jid_input = this.$('input[name=register_jid]');
                     this.$password_input = this.$('input[name=register_password]');
+                    this.$domain_input = this.$('input[name=register_domain]');
                     this.keyUpNickname();
                     this.$('.login-form-header').text(xabber.getString("title_register_xabber_account"));
+                    this.$('.login-form-url').hideIf(false);
                     this.$('.login-panel-intro').hideIf(true);
                     this.$('.register-form').hideIf(false);
                     this.$('.xmpp-login-form').hideIf(true);
@@ -51331,8 +51463,9 @@ define("xabber-accounts", [],function () {
                 }
                 else if (step === 6){
                     this.$('.login-form-header').text(xabber.getString("xmpp_login__registration_header_avatar"));
+                    this.$('.login-form-url').hideIf(true);
                     this.$('.btn-go-back').hideIf(true);
-                    this.$('.login-form-skip').hideIf(false)
+                    this.$('.btn-skip').hideIf(false)
                     this.$('.register-form-nickname').hideIf(true);
                     this.$('.register-form-jid').hideIf(true);
                     this.$('.register-form-password').hideIf(true);
@@ -51381,39 +51514,81 @@ define("xabber-accounts", [],function () {
                         }
                     }
                 }
-                this.$('.field-jid.property-variant').remove()
+                this.$('.register-form-jid .field-jid.property-variant').remove()
                 if (all_servers.length)
-                    this.$('.xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
+                    this.$('.register-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
                 else
-                    this.setCustomDomain(this.$('.property-field.xmpp-server-dropdown-wrap .property-value'));
-                this.$('.modal-content .jid-field .set-default-domain').remove();
+                    this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'));
+                this.$('.register-form-jid .modal-content .jid-field .set-default-domain').remove();
 
                 for (let i = 0; i < all_servers.length; i++) {
-                    $('<div/>', {class: 'field-jid property-variant set-default-domain'}).text(all_servers[i]).insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
+                    $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                        .text(all_servers[i])
+                        .attr('data-value', all_servers[i])
+                        .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
                 }
             },
 
-            setCustomDomain: function ($property_value) {
-                this.$('#new_account_domain').val("");
-                $property_value.addClass('hidden').text("");
-                this.$('.input-group-chat-domain').removeClass('hidden');
+            updateAuthDomains: function () {
+                let all_servers = constants.LOGIN_DOMAINS;
+
+                this.$('.login-form-jid .field-jid.property-variant').remove()
+                if (all_servers.length)
+                    this.$('.login-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
+                else
+                    this.setCustomDomainAuth(this.$('.login-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'));
+                this.$('.login-form-jid .modal-content .jid-field .set-default-domain').remove();
+
+                for (let i = 0; i < all_servers.length; i++) {
+                    $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                        .text(all_servers[i])
+                        .attr('data-value', all_servers[i])
+                        .insertBefore(this.$('.login-form-jid .dropdown-content .set-custom-domain'));
+                }
             },
 
-            changePropertyValue: function (ev) {
+            setCustomDomainRegistration: function ($property_value) {
+                this.$('#new_account_domain').val("");
+                $property_value.addClass('hidden').text("");
+                this.$('.select-xmpp-server .input-group-chat-domain').removeClass('hidden');
+            },
+
+            setCustomDomainAuth: function ($property_value) {
+                this.$('#sign_in_domain').val("");
+                $property_value.addClass('hidden').text("");
+                this.$('.select-auth-xmpp-server .input-group-chat-domain').removeClass('hidden');
+            },
+
+            changePropertyValueRegistration: function (ev) {
                 let $property_item = $(ev.target),
                     $property_value = $property_item.closest('.property-field').find('.property-value');
                 if ($property_item.hasClass('set-custom-domain')) {
-                    this.setCustomDomain($property_value);
+                    this.setCustomDomainRegistration($property_value);
                     return;
                 }
                 else if ($property_item.hasClass('set-default-domain')) {
-                    this.$('.input-group-chat-domain').addClass('hidden');
+                    this.$('.select-xmpp-server .input-group-chat-domain').addClass('hidden');
                     this.$('#new_account_domain').val("");
                 }
                 $property_value.text($property_item.text());
                 $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
-                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.xmpp-server-dropdown-wrap .property-value').text()))
+                if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
+            },
+
+            changePropertyValueAuth: function (ev) {
+                let $property_item = $(ev.target),
+                    $property_value = $property_item.closest('.property-field').find('.property-value');
+                if ($property_item.hasClass('set-custom-domain')) {
+                    this.setCustomDomainAuth($property_value);
+                    return;
+                }
+                else if ($property_item.hasClass('set-default-domain')) {
+                    this.$('.select-auth-xmpp-server .input-group-chat-domain').addClass('hidden');
+                    this.$('#sign_in_domain').val("");
+                }
+                $property_value.text($property_item.text());
+                $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
             },
 
             chooseAvatar: function () {
@@ -51518,10 +51693,14 @@ define("xabber-accounts", [],function () {
                                                 this.$('.login-panel-form.xmpp-login-form .buttons-wrap').addClass('server-features-additional-button');
                                                 this.$('.btn-sign-up-instead').hideIf(false);
                                             }
-                                            if (this.$('.server-feature.active-feature').length != 6)
+                                            if (this.$('.server-feature.active-feature').length != 6) {
                                                 this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
-                                            else
+                                                this.$('.btn-finish-log-in').addClass('btn-main').removeClass('btn-main-filled')
+                                            }
+                                            else {
                                                 this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                                this.$('.btn-finish-log-in').removeClass('btn-main').addClass('btn-main-filled')
+                                            }
                                             this.$('.btn-finish-log-in').hideIf(false);
                                         }, timeout_timer);
                                     }, timeout_timer);
@@ -51533,6 +51712,8 @@ define("xabber-accounts", [],function () {
             },
 
             endAuth: function (account) {
+                this.account.save('is_new', undefined);
+                this.data.set('registration', false);
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
                 this.account.trigger('ready_to_get_roster');
@@ -51645,8 +51826,6 @@ define("xabber-accounts", [],function () {
             },
 
             successRegistrationFeedback: function () {
-                this.data.set('registration', false);
-                this.data.set('authentication', false);
                 this.$jid_input.prop('disabled', false);
                 this.$password_input.prop('disabled', false)
                 this.account.trigger('start');
@@ -51666,6 +51845,8 @@ define("xabber-accounts", [],function () {
                 "click .btn-finish-log-in": "endAuth",
                 "keyup input[name=jid]": "keyUpLogin",
                 "keyup input[name=password]": "keyUpLogin",
+                "keyup input[name=sign_in_domain]": "keyUpLogin",
+                "click .property-variant": "changePropertyValueAuth"
             },
 
             render: function (options) {
@@ -51683,9 +51864,11 @@ define("xabber-accounts", [],function () {
                 this.authFeedback({});
                 this.$jid_input = this.$('input[name=jid]');
                 this.$password_input = this.$('input[name=password]');
+                this.$domain_input = this.$('input[name=sign_in_domain]');
                 this.$jid_input.val('')
                 this.$password_input.val('')
                 this.keyUpLogin();
+                this.updateAuthDomains();
                 this.$('.login-step-wrap').hideIf(true);
                 this.resetAuthStepper();
                 this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
@@ -51695,6 +51878,15 @@ define("xabber-accounts", [],function () {
                 this.$('.btn-log-in').hideIf(false);
                 this.$('.btn-cancel').hideIf(true);
                 this.$('.btn-finish-log-in').hideIf(true);
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                };
+                this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
+                this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 Materialize.updateTextFields();
                 this.updateButtons();
                 this.updateOptions && this.updateOptions();
@@ -51722,6 +51914,7 @@ define("xabber-accounts", [],function () {
             },
 
             endAuth: function () {
+                this.account.save('is_new', undefined);
                 this.data.set('authentication', false);
                 xabber.body.setScreen('all-chats', {right: null});
                 this.account.trigger('ready_to_get_roster');
@@ -60362,6 +60555,8 @@ define("xabber-contacts", [],function () {
                         jid = $item.attr('jid'), saved = false;
                     if (jid === this.account.get('jid'))
                         saved = true;
+                    if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
+                        return true;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
@@ -61694,6 +61889,8 @@ define("xabber-chats", [],function () {
             if (options.replaced) {
                 let by_jid = $message.children('replace').attr('by'),
                     conversation = $message.children('replace').attr('conversation');
+                if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
+                    return;
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
                     this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: conversation}));
                     return;
@@ -61787,13 +61984,11 @@ define("xabber-chats", [],function () {
                             voice: type === 'voice',
                             sources: sources
                         };
-                        if (sources[0].indexOf('aesgcm') == 0) {
-                            let uri = sources[0].replace(/^aesgcm/, 'https'),
-                                iv_and_key = uri.slice(uri.length - 44 - 16),
-                                iv = utils.fromBase64toArrayBuffer(iv_and_key.slice(0, 16)),
-                                key = utils.fromBase64toArrayBuffer(iv_and_key.slice(16));
-                            uri = uri.slice(0, uri.length - 44 - 16 - 1);
-                            _.extend(file_attrs, {sources: [uri], iv: iv, key: key});
+                        if (sources[0].indexOf('aescbc') == 0) {
+                            let uri = sources[0].replace(/^aescbc/, 'https'),
+                                key = utils.fromBase64toArrayBuffer(uri.slice(uri.length - 64));
+                            uri = uri.slice(0, uri.length - 64 - 1);
+                            _.extend(file_attrs, {sources: [uri], key: key});
                             attrs.has_encrypted_files = true;
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
@@ -61916,14 +62111,16 @@ define("xabber-chats", [],function () {
             return message;
         },
 
-          decryptFile: async function (uri, iv, key) {
+          decryptFile: async function (uri, key) {
               return new Promise((resolve, reject) => {
                   fetch(uri).then((r) => {
                       r.blob().then((blob) => {
                           let filereader = new FileReader();
                           filereader.onloadend = () => {
-                              let arrayBuffer = filereader.result;
-                              utils.AES.decrypt(key.slice(0, 16), iv, utils.AES.arrayBufferConcat(arrayBuffer, key.slice(16))).then((enc_file) => {
+                              let arrayBuffer = filereader.result,
+                                  exportedMasterKey = key.slice(0, 32),
+                                  HMACData = key.slice(32);
+                              utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
                                   resolve(enc_file);
                               });
                           };
@@ -65046,9 +65243,9 @@ define("xabber-chats", [],function () {
                   if (images.length) {
                       images.forEach((img) => {
                           let source = img.sources[0];
-                          if (!img.iv && !img.key)
+                          if (!img.key)
                               return;
-                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                          this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
@@ -65071,9 +65268,9 @@ define("xabber-chats", [],function () {
                           fwd_unique_id = fwd_msg.get('unique_id');
                       fwd_images.forEach((img) => {
                           let source = img.sources[0];
-                          if (!img.iv && !img.key)
+                          if (!img.key)
                               return;
-                          this.model.messages.decryptFile(source, img.iv, img.key).then((result) => {
+                          this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
                               let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
@@ -65989,8 +66186,8 @@ define("xabber-chats", [],function () {
                     file.description && stanza.c('desc').t(file.description).up();
                     stanza.up().c('sources');
                     file.sources.forEach((u) => {
-                        if (file.iv && file.key)
-                            u = u.replace(/^(https|http)/, 'aesgcm') + '#' + utils.ArrayBuffertoBase64(file.iv) + utils.ArrayBuffertoBase64(file.key);
+                        if (file.key)
+                            u = u.replace(/^(https|http)/, 'aescbc') + '#' + utils.ArrayBuffertoBase64(file.key);
                         stanza.c('uri').t(u).up();
                     });
                     stanza.up().up().up();
@@ -66192,19 +66389,17 @@ define("xabber-chats", [],function () {
                     reader.onload = (e) => {
                         if (this.model.get('encrypted')) {
                             this.encryptFile(e.target.result).then((encrypted) => {
-                                let iv = encrypted.iv,
-                                    key = encrypted.keydata,
+                                let key = encrypted.keydata,
                                     new_file = new File([encrypted.payload], file.name, {type: file.type});
-                                new_file.iv = iv;
                                 new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
-                                    deferred.resolve({encrypted_file: new_file, iv: iv, key: key});
+                                    deferred.resolve({encrypted_file: new_file,key: key});
                                 } else {
                                     let image_prev = new Image();
                                     image_prev.onload = function () {
                                         let height = this.height,
                                             width = this.width;
-                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, iv: iv, key: key});
+                                        deferred.resolve({height: height, width: width, encrypted_file: new_file, key: key});
                                     };
                                     image_prev.src = e.target.result;
                                 }
@@ -66229,12 +66424,10 @@ define("xabber-chats", [],function () {
                         let reader = new FileReader();
                         reader.onload = (e) => {
                             this.encryptFile(e.target.result).then((encrypted) => {
-                                let iv = encrypted.iv,
-                                    key = encrypted.keydata,
+                                let key = encrypted.keydata,
                                     encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
                                 file.voice && (encrypted_file.voice = true);
                                 file.duration && (encrypted_file.duration = file.duration);
-                                encrypted_file.iv = iv;
                                 encrypted_file.key = key;
                                 new_files.push(encrypted_file);
                                 file_counter++;
@@ -66686,8 +66879,8 @@ define("xabber-chats", [],function () {
                 let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                     uri = $elem.attr('href'),
                     file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                if (file && file.iv && file.key) {
-                    this.model.messages.decryptFile(uri, file.iv, file.key).then((result) => {
+                if (file && file.key) {
+                    this.model.messages.decryptFile(uri,file.key).then((result) => {
                         if (result === null)
                             return;
                         let download = document.createElement("a");
@@ -66803,10 +66996,10 @@ define("xabber-chats", [],function () {
                     $audio_elem.find('.mdi-play').removeClass('no-uploaded');
                     if ($elem.closest('.chat-message').hasClass('encrypted')) {
                         let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                            uri = $elem.attr('href'),
+                            uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                             file = (msg.get('files') || []).find(f => f.sources[0] == uri);
-                        if (file && file.iv && file.key) {
-                            this.model.messages.decryptFile(f_url, file.iv, file.key).then((result) => {
+                        if (file && file.key) {
+                            this.model.messages.decryptFile(f_url, file.key).then((result) => {
                                 if (result === null)
                                     return;
                                 $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
@@ -72248,7 +72441,7 @@ define("xabber-ui", [],function () {
             }
             left_panel_width = right_contact_panel_width = 384;
             right_panel_width = panel_width - (left_panel_width + right_contact_panel_width);
-            chat_bottom_panel_width = 768;
+            chat_bottom_panel_width = '100%';
             if (is_narrow){
                 right_contact_panel_width = left_panel_width = (panel_width * 0.264) < 288 ? 288 : panel_width * 0.264;
 
@@ -72604,7 +72797,6 @@ define("xabber-omemo", [],function () {
 
                 return {
                     keys: keys,
-                    iv: aes.iv,
                     payload: aes.payload,
                     is_trusted: is_trusted
                 };
@@ -73503,7 +73695,7 @@ define("xabber-omemo", [],function () {
                     }
                     encryptedElement.up().cnode(myKeys.tree());
 
-                    encryptedElement.up().c('iv', utils.ArrayBuffertoBase64(encryptedMessage.iv)).up().up()
+                    encryptedElement.up().up()
                         .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
 
                     $(message.tree()).find('body').remove();
@@ -73916,7 +74108,6 @@ define("xabber-omemo", [],function () {
             parseEncrypted: function ($encrypted) {
                 let $payload = $encrypted.children(`payload`),
                     $header = $encrypted.children('header'),
-                    iv = utils.fromBase64toArrayBuffer($header.find('iv').text()),
                     payload = utils.fromBase64toArrayBuffer($payload.text()),
                     sid = Number($header.attr('sid'));
 
@@ -73928,7 +74119,7 @@ define("xabber-omemo", [],function () {
                     };
                 });
 
-                return {sid, keys, iv, payload};
+                return {sid, keys, payload};
             },
 
             getPeer: function (jid) {
@@ -73962,12 +74153,10 @@ define("xabber-omemo", [],function () {
                     exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey);
                 if (!exportedKey)
                     return;
-                let exportedAESKey = exportedKey.slice(0, 16),
-                    authenticationTag = exportedKey.slice(16),
-                    iv = encryptedData.iv,
-                    ciphertextAndAuthenticationTag = utils.AES.arrayBufferConcat(encryptedData.payload, authenticationTag);
+                let exportedMasterKey = exportedKey.slice(0, 32),
+                    HMACData = exportedKey.slice(32);
 
-                return utils.AES.decrypt(exportedAESKey, iv, ciphertextAndAuthenticationTag);
+                return utils.AES.decrypt(exportedMasterKey, HMACData, encryptedData.payload);
             },
 
             toBase64: function (arrayBuffer) {
@@ -74047,6 +74236,8 @@ define("xabber-omemo", [],function () {
             },
 
             publishBundle: async function () {
+                if (!this.bundle)
+                    return;
                 let spk = this.bundle.preKeys.find(pk => pk.signature),
                     ik = await this.store.getIdentityKeyPair(),
                     pks = this.bundle.preKeys;

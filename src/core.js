@@ -342,6 +342,10 @@
                     constants.TRUSTED_DOMAINS = config.TRUSTED_DOMAINS;
                 if (config.RECOMMENDED_DOMAIN)
                     constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
+                if (config.REGISTRATION_CUSTOM_DOMAIN)
+                    constants.REGISTRATION_CUSTOM_DOMAIN = config.REGISTRATION_CUSTOM_DOMAIN;
+                if (config.LOGIN_CUSTOM_DOMAIN)
+                    constants.LOGIN_CUSTOM_DOMAIN = config.LOGIN_CUSTOM_DOMAIN;
                 if (config.SHORT_CLIENT_DESCRIPTION)
                     constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
 
