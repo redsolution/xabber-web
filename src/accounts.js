@@ -2011,6 +2011,7 @@ define("xabber-accounts", function () {
             },
 
             destroyOmemo: function () {
+                this.model.omemo.destroy();
                 this.model.omemo = undefined;
             },
 
