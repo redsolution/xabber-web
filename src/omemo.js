@@ -167,6 +167,7 @@ define("xabber-omemo", function () {
             },
 
             open: function () {
+                this.omemo = this.account.omemo;
                 let name = "";
                 if (this.is_own_devices)
                     name = this.account.get('name');
@@ -790,6 +791,7 @@ define("xabber-omemo", function () {
 
             _initialize: function (attrs, options) {
                 this.on("change:device_id", this.onDeviceIdUpdated, this);
+                this.on("destroy", this.onOmemoDestroyed, this);
                 this.own_devices = {};
                 this.account = options.account;
                 this.peers = new xabber.Peers();
@@ -807,6 +809,23 @@ define("xabber-omemo", function () {
                 for (let session_id in sessions) {
                     let session = sessions[session_id];
                     session && this.store.put(session_id, session);
+                }
+            },
+
+            onOmemoDestroyed: function () {
+                if (this.own_devices && Object.keys(this.own_devices).length != 0)
+                    this.deleteOwnDevice();
+                this.account.connection.deleteHandler(this._msg_handler);
+            },
+
+            deleteOwnDevice: function () {
+                let device_id = this.get('device_id');
+                delete this.own_devices[device_id];
+                let conn = this.account.connection;
+                if (conn && conn.omemo) {
+                    delete conn.omemo.devices[device_id];
+                    conn.omemo.publishDevice(null, null, () => {});
+                    conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
                 }
             },
 
@@ -1026,6 +1045,8 @@ define("xabber-omemo", function () {
             },
 
             receiveHeadlineMessage: function (message) {
+                if (!this.account.omemo || (this.account.omemo && this.cid != this.account.omemo.cid))
+                    return;
                 let $message = $(message),
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                     node = $message.find('items').attr('node');
@@ -1848,6 +1869,7 @@ define("xabber-omemo", function () {
             },
 
             disableOmemo: function () {
+                this.account.omemo.destroy();
                 this.account.settings.save('omemo', false);
                 this.close();
             },
