@@ -305,7 +305,6 @@
                     'PERSONAL_AREA_URL',
                     'LOG_LEVEL',
                     'SYNCHRONIZATION_RSM_MAX',
-                    'DEBUG',
                     'XABBER_ACCOUNT_URL',
                     'REGISTER_XMPP_ACCOUNT',
                     'REGISTER_XMPP_ACCOUNT_URL',
@@ -332,9 +331,7 @@
                 this.trigger("update_main_color");
 
                 window.xabber = this;
-                if (constants.DEBUG) {
-                    _.extend(window, env);
-                }
+                _.extend(window, env);
                 if (config.SYNCHRONIZATION_RSM_MAX)
                     constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
 
