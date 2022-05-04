@@ -1138,7 +1138,9 @@ define("xabber-contacts", function () {
             },
 
             clickOnItem: function () {
-                this.model.showDetails();
+                let options = {};
+                (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.get('jid') === this.model.get('jid') && xabber.chats_view.active_chat.model.get('encrypted')) && (options.encrypted = true);
+                this.model.trigger("open_chat", this.model, options);
             }
         });
 
