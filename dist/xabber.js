@@ -41345,7 +41345,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.13","version_description":"Registration testing build with more constants support"}'
+'{"version_number":"2.3.2.15","version_description":"Registration testing build"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -49947,6 +49947,7 @@ define("xabber-accounts", [],function () {
             },
 
             destroyOmemo: function () {
+                this.model.omemo.destroy();
                 this.model.omemo = undefined;
             },
 
@@ -53523,7 +53524,9 @@ define("xabber-contacts", [],function () {
             },
 
             clickOnItem: function () {
-                this.model.showDetails();
+                let options = {};
+                (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.get('jid') === this.model.get('jid') && xabber.chats_view.active_chat.model.get('encrypted')) && (options.encrypted = true);
+                this.model.trigger("open_chat", this.model, options);
             }
         });
 
@@ -72865,6 +72868,7 @@ define("xabber-omemo", [],function () {
             },
 
             open: function () {
+                this.omemo = this.account.omemo;
                 let name = "";
                 if (this.is_own_devices)
                     name = this.account.get('name');
@@ -73488,6 +73492,7 @@ define("xabber-omemo", [],function () {
 
             _initialize: function (attrs, options) {
                 this.on("change:device_id", this.onDeviceIdUpdated, this);
+                this.on("destroy", this.onOmemoDestroyed, this);
                 this.own_devices = {};
                 this.account = options.account;
                 this.peers = new xabber.Peers();
@@ -73505,6 +73510,23 @@ define("xabber-omemo", [],function () {
                 for (let session_id in sessions) {
                     let session = sessions[session_id];
                     session && this.store.put(session_id, session);
+                }
+            },
+
+            onOmemoDestroyed: function () {
+                if (this.own_devices && Object.keys(this.own_devices).length != 0)
+                    this.deleteOwnDevice();
+                this.account.connection.deleteHandler(this._msg_handler);
+            },
+
+            deleteOwnDevice: function () {
+                let device_id = this.get('device_id');
+                delete this.own_devices[device_id];
+                let conn = this.account.connection;
+                if (conn && conn.omemo) {
+                    delete conn.omemo.devices[device_id];
+                    conn.omemo.publishDevice(null, null, () => {});
+                    conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
                 }
             },
 
@@ -73724,6 +73746,8 @@ define("xabber-omemo", [],function () {
             },
 
             receiveHeadlineMessage: function (message) {
+                if (!this.account.omemo || (this.account.omemo && this.cid != this.account.omemo.cid))
+                    return;
                 let $message = $(message),
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                     node = $message.find('items').attr('node');
@@ -74546,6 +74570,7 @@ define("xabber-omemo", [],function () {
             },
 
             disableOmemo: function () {
+                this.account.omemo.destroy();
                 this.account.settings.save('omemo', false);
                 this.close();
             },
