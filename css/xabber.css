@@ -3088,15 +3088,17 @@ input[type=text].simple-input-field:hover {
     background: white;
 }
 .xabber-login .login-container {
-    background: white;
     height: 100%;
 }
 
 .login-panel {
     position: relative;
+    height: 548px;
     width: 560px;
+    top: 50%;
     margin: 0 auto;
-    height: 100%;
+    background: #FFF;
+    transform: translate(0, -50%);
 }
 
 .login-panel-intro{
@@ -3104,7 +3106,9 @@ input[type=text].simple-input-field:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 357px;
+    width: 480px;
+    height: 468px;
+    padding-top: 55px;
 }
 
 .login-panel-head {
@@ -3156,7 +3160,7 @@ input[type=text].simple-input-field:hover {
 }
 .login-buttons {
     position: absolute;
-    top: 245px;
+    top: 300px;
     left: 50%;
     transform: translate(-50%, 0);
     display: flex;
