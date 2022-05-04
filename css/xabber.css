@@ -5935,7 +5935,7 @@ input[type=text].simple-input-field:hover {
     text-align: center;
     background-color: #388E3C;
 }
-
+.forward-panel-modal .chat-item .msg-counter,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;
@@ -13220,10 +13220,6 @@ input[type='range'].voice-message-volume:focus {
 
 .forward-panel-modal .chat-item.saved-chat .msg-delivering-state {
     display: none;
-}
-
-.forward-panel-modal .chat-item .msg-counter {
-    right: 30px;
 }
 
 .add-user-group-chat .list-item:hover,
