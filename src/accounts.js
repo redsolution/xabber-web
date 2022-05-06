@@ -3344,31 +3344,29 @@ define("xabber-accounts", function () {
                         return this.registerFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
                     this._check_user_timeout = setTimeout(() => {
                         domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
-                        if (!(this._registration_domain === domain && this._current_domain_not_supported)){
-                            this.$('.btn-next').prop('disabled', true);
-                            this._registration_username = this.$jid_input.val()
-                            this._registration_domain = domain
-                            if (domain) {
-                                if (this.auth_connection && this.auth_connection.domain != domain)
-                                    this.auth_connection.disconnect()
-                                if (!this.auth_connection) {
-                                    this.getWebsocketURL(domain, (response) => {
-                                        this.CONNECTION_URL = response || constants.CONNECTION_URL;
-                                        this.auth_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                                        this.auth_connection = this.auth_conn_manager.connection;
-                                        this.auth_connection.register.connect_check_user(domain, this.checkUserCallback.bind(this))
-                                    });
-                                }
-                                else if(this.auth_connection && this.auth_connection.connected) {
-                                    this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
-                                        null, "iq", null, null);
-                                    this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
-                                        {xmlns: Strophe.NS.REGISTER}).c("username").t(this._registration_username.trim()).tree());
-                                }
+                        this.$('.btn-next').prop('disabled', true);
+                        this._registration_username = this.$jid_input.val()
+                        this._registration_domain = domain
+                        if (domain) {
+                            if (this.auth_connection && this.auth_connection.domain != domain)
+                                this.auth_connection.disconnect()
+                            if (!this.auth_connection) {
+                                this.getWebsocketURL(domain, (response) => {
+                                    this.CONNECTION_URL = response || constants.CONNECTION_URL;
+                                    this.auth_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                                    this.auth_connection = this.auth_conn_manager.connection;
+                                    this.auth_connection.register.connect_check_user(domain, this.checkUserCallback.bind(this))
+                                });
                             }
-                            else {
-                                this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
+                            else if(this.auth_connection && this.auth_connection.connected) {
+                                this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
+                                    null, "iq", null, null);
+                                this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
+                                    {xmlns: Strophe.NS.REGISTER}).c("username").t(this._registration_username.trim()).tree());
                             }
+                        }
+                        else {
+                            this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
                         }
                     }, 1000);
                 }
@@ -3466,7 +3464,6 @@ define("xabber-accounts", function () {
                 }
                 if (status === Strophe.Status.REGISTER) {
                     if (this.auth_connection && this.auth_connection.connected) {
-                        this._current_domain_not_supported = false
                         this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
                             null, "iq", null, null);
                         this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
@@ -3490,7 +3487,6 @@ define("xabber-accounts", function () {
                         this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_not_supported")});
                         this.$('.btn-next').prop('disabled', true);
                     }
-                    this._current_domain_not_supported = true
                     this.auth_connection.disconnect()
                 } else if (status === Strophe.Status.CONNECTING) {
                     clearTimeout(this._check_user_connection_timeout);

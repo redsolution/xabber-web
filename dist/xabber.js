@@ -41365,7 +41365,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.20","version_description":"Disabled buttons to login and register when custom domain is disabled and no domains, changed version update modal in login to reload window"}'
+'{"version_number":"2.3.2.21","version_description":"removed username availability check skip for domains where registration is not supported, changed signin fields width"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -51201,31 +51201,29 @@ define("xabber-accounts", [],function () {
                         return this.registerFeedback({domain: xabber.getString("account_auth__error__registration_custom_domain")});
                     this._check_user_timeout = setTimeout(() => {
                         domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
-                        if (!(this._registration_domain === domain && this._current_domain_not_supported)){
-                            this.$('.btn-next').prop('disabled', true);
-                            this._registration_username = this.$jid_input.val()
-                            this._registration_domain = domain
-                            if (domain) {
-                                if (this.auth_connection && this.auth_connection.domain != domain)
-                                    this.auth_connection.disconnect()
-                                if (!this.auth_connection) {
-                                    this.getWebsocketURL(domain, (response) => {
-                                        this.CONNECTION_URL = response || constants.CONNECTION_URL;
-                                        this.auth_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                                        this.auth_connection = this.auth_conn_manager.connection;
-                                        this.auth_connection.register.connect_check_user(domain, this.checkUserCallback.bind(this))
-                                    });
-                                }
-                                else if(this.auth_connection && this.auth_connection.connected) {
-                                    this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
-                                        null, "iq", null, null);
-                                    this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
-                                        {xmlns: Strophe.NS.REGISTER}).c("username").t(this._registration_username.trim()).tree());
-                                }
+                        this.$('.btn-next').prop('disabled', true);
+                        this._registration_username = this.$jid_input.val()
+                        this._registration_domain = domain
+                        if (domain) {
+                            if (this.auth_connection && this.auth_connection.domain != domain)
+                                this.auth_connection.disconnect()
+                            if (!this.auth_connection) {
+                                this.getWebsocketURL(domain, (response) => {
+                                    this.CONNECTION_URL = response || constants.CONNECTION_URL;
+                                    this.auth_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+                                    this.auth_connection = this.auth_conn_manager.connection;
+                                    this.auth_connection.register.connect_check_user(domain, this.checkUserCallback.bind(this))
+                                });
                             }
-                            else {
-                                this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
+                            else if(this.auth_connection && this.auth_connection.connected) {
+                                this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
+                                    null, "iq", null, null);
+                                this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
+                                    {xmlns: Strophe.NS.REGISTER}).c("username").t(this._registration_username.trim()).tree());
                             }
+                        }
+                        else {
+                            this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
                         }
                     }, 1000);
                 }
@@ -51323,7 +51321,6 @@ define("xabber-accounts", [],function () {
                 }
                 if (status === Strophe.Status.REGISTER) {
                     if (this.auth_connection && this.auth_connection.connected) {
-                        this._current_domain_not_supported = false
                         this.auth_connection.register._connection._addSysHandler(this.handleRegisterStanza.bind(this.auth_connection.register),
                             null, "iq", null, null);
                         this.auth_connection.register._connection.send($iq({type: "get", id: uuid(), to: this.auth_connection.register.domain }).c("query",
@@ -51347,7 +51344,6 @@ define("xabber-accounts", [],function () {
                         this.registerFeedback({jid: xabber.getString("xmpp_login__registration_jid_not_supported")});
                         this.$('.btn-next').prop('disabled', true);
                     }
-                    this._current_domain_not_supported = true
                     this.auth_connection.disconnect()
                 } else if (status === Strophe.Status.CONNECTING) {
                     clearTimeout(this._check_user_connection_timeout);

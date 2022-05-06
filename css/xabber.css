@@ -3469,7 +3469,7 @@ input[type=text].simple-input-field:hover {
 .login-panel-form.xmpp-login-form .input-field-wrap {
     flex-direction: column;
     align-items: center;
-    width: 430px;
+    width: 480px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -3481,7 +3481,7 @@ input[type=text].simple-input-field:hover {
     margin-bottom: 0;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field input{
-    width: 395px;
+    width: 445px;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field input#jid{
     width: 100%;
