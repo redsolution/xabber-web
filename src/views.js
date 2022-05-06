@@ -964,6 +964,7 @@ define("xabber-views", function () {
                 hover: false,
                 alignment: 'left'
             });
+            this.$('.add-variant.account').hideIf(!constants.LOGIN_CUSTOM_DOMAIN && !constants.LOGIN_DOMAINS.length);
         },
 
         updateColor: function (color) {

@@ -250,6 +250,8 @@
         },
 
         throwNewVersion: function () {
+            if (this.body.screen.get('name') === 'login')
+                return window.location.reload(true);
             if (!constants.CHECK_VERSION)
                 return;
             let version_number = this.get('actual_version_number'),

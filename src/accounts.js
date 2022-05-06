@@ -3275,6 +3275,8 @@ define("xabber-accounts", function () {
                 this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 this.$('.avatar-wrap.dropdown-button').dropdown(dropdown_settings);
+                this.$('.btn-register-form').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN && !constants.REGISTRATION_DOMAINS.length);
+                this.$('.btn-login-form').hideIf(!constants.LOGIN_CUSTOM_DOMAIN && !constants.LOGIN_DOMAINS.length);
                 this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
                 this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 this.updateOptions && this.updateOptions();
