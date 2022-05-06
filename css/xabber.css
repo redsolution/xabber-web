@@ -1272,7 +1272,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=red] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #E53935;
+    background-color: #E53935 !important;
 }
 [data-main-color=red] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=red] input[type=checkbox].filled-in:checked + label:after,
@@ -1368,7 +1368,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=pink] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #D81B60;
+    background-color: #D81B60 !important;
 }
 [data-main-color=pink] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=pink] input[type=checkbox].filled-in:checked + label:after,
@@ -1464,7 +1464,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #8E24AA;
+    background-color: #8E24AA !important;
 }
 [data-main-color=purple] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=purple] input[type=checkbox].filled-in:checked + label:after,
@@ -1559,7 +1559,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #5E35B1;
+    background-color: #5E35B1 !important;
 }
 [data-main-color=deep-purple] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=deep-purple] input[type=checkbox].filled-in:checked + label:after,
@@ -1655,7 +1655,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=indigo] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #3949AB;
+    background-color: #3949AB !important;
 }
 [data-main-color=indigo] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=indigo] input[type=checkbox].filled-in:checked + label:after,
@@ -1751,7 +1751,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #1E88E5;
+    background-color: #1E88E5 !important;
 }
 [data-main-color=blue] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=blue] input[type=checkbox].filled-in:checked + label:after,
@@ -1847,7 +1847,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #039BE5;
+    background-color: #039BE5 !important;
 }
 [data-main-color=light-blue] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=light-blue] input[type=checkbox].filled-in:checked + label:after,
@@ -1943,7 +1943,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=cyan] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #00ACC1;
+    background-color: #00ACC1 !important;
 }
 [data-main-color=cyan] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=cyan] input[type=checkbox].filled-in:checked + label:after,
@@ -2039,7 +2039,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=teal] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #00897B;
+    background-color: #00897B !important;
 }
 [data-main-color=teal] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=teal] input[type=checkbox].filled-in:checked + label:after,
@@ -2135,7 +2135,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #43A047;
+    background-color: #43A047 !important;
 }
 [data-main-color=green] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=green] input[type=checkbox].filled-in:checked + label:after,
@@ -2231,7 +2231,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #7CB342;
+    background-color: #7CB342 !important;
 }
 [data-main-color=light-green] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=light-green] input[type=checkbox].filled-in:checked + label:after,
@@ -2327,7 +2327,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=lime] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #C0CA33;
+    background-color: #C0CA33 !important;
 }
 [data-main-color=lime] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=lime] input[type=checkbox].filled-in:checked + label:after,
@@ -2423,7 +2423,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=amber] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #FFB300;
+    background-color: #FFB300 !important;
 }
 [data-main-color=amber] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=amber] input[type=checkbox].filled-in:checked + label:after,
@@ -2519,7 +2519,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #FB8C00;
+    background-color: #FB8C00 !important;
 }
 [data-main-color=orange] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=orange] input[type=checkbox].filled-in:checked + label:after,
@@ -2615,7 +2615,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #F4511E;
+    background-color: #F4511E !important;
 }
 [data-main-color=deep-orange] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=deep-orange] input[type=checkbox].filled-in:checked + label:after,
@@ -2711,7 +2711,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=brown] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #6D4C41;
+    background-color: #6D4C41 !important;
 }
 [data-main-color=brown] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=brown] input[type=checkbox].filled-in:checked + label:after,
@@ -2808,7 +2808,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
-    background-color: #546E7A;
+    background-color: #546E7A !important;
 }
 [data-main-color=blue-grey] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=blue-grey] input[type=checkbox].filled-in:checked + label:after,

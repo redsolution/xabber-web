@@ -37,6 +37,7 @@ define("xabber-templates", [
     "text!templates/accounts/emoji_panel.html",
     "text!templates/accounts/emoji_picker.html",
     "text!templates/accounts/emoji_picker_tabs.html",
+    "text!templates/accounts/emojis.json",
     "text!templates/accounts/global_settings_item.html",
     "text!templates/accounts/change_status.html",
     "text!templates/accounts/token_item.html",
@@ -252,6 +253,20 @@ define("xabber-templates", [
                 return insertSvg(tpl(data));
             };
         }
+    };
+
+    let addJSONTemplate = function (name, ) {
+        let path = name.split('.'),
+            tpl = _.template(require('text!templates/'+path.join('/')+'.json')),
+            tpl_name = path.pop(),
+            res = templates;
+        _.each(path, function (attr) {
+            res[attr] || (res[attr] = {});
+            res = res[attr];
+        });
+        res[tpl_name] = function (data) {
+            return insertSvg(tpl(data));
+        };
     };
 
     let addTemplate = function (name) {
@@ -475,6 +490,8 @@ define("xabber-templates", [
     addSvgTemplate('svg.map-marker-outline');
     addSvgTemplate('svg.map-marker');
     addSvgTemplate('svg.minus');
+
+    addJSONTemplate('accounts.emojis');
 
     return templates;
 });

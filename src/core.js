@@ -407,7 +407,8 @@
         },
 
         fetchURLParams: function () {
-            let splitted_url = window.location.href.split(/[?#]/);
+            let splitted_url = window.location.href.split(/[?#]/),
+                splitted_url_anchor = window.location.href.split('#');
             this.url_params = {};
             if (splitted_url.length > 1) {
                 let idx, param, params = splitted_url[1].split('&');
@@ -419,6 +420,9 @@
                         this.url_params[param[0]] = param[1];
                     }
                 }
+            }
+            if (splitted_url_anchor.length > 1) {
+                this.url_params['anchor'] = splitted_url[1];
             }
             window.history.pushState(null, null, window.location.pathname);
         },

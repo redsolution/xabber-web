@@ -2746,35 +2746,19 @@ define("xabber-accounts", function () {
             },
 
             readEmojisJSON: function () {
-                // get emojis.json file from server and parse it
-                let rawFile = new XMLHttpRequest();
-                rawFile.open("GET", "emojis.json", true);
-                rawFile.onreadystatechange = () => {
-                    if (rawFile.readyState === 4 && rawFile.status === 200) {
-                        let text, json;
-                        rawFile.onreadystatechange = null;
-                        try {
-                            text = rawFile.responseText;
-                            json = JSON.parse(text);
-                        } catch (e) {
-                            return;
-                        }
-                        this.emojis = json
+                this.emojis = JSON.parse(templates.emojis())
 
-                        if (this.emojis.length) {
-                            this.$('.emoji-picker-wrap').html(templates.emoji_picker_tabs({
-                                emojis: this.emojis
-                            }));
-                            this.ps_container = this.$('.emojis-tab');
-                            if (this.ps_container.length) {
-                                this.ps_container.perfectScrollbar(
-                                    _.extend(this.ps_settings || {}, xabber.ps_settings)
-                                );
-                            }
-                        }
+                if (this.emojis.length) {
+                    this.$('.emoji-picker-wrap').html(templates.emoji_picker_tabs({
+                        emojis: this.emojis
+                    }));
+                    this.ps_container = this.$('.emojis-tab');
+                    if (this.ps_container.length) {
+                        this.ps_container.perfectScrollbar(
+                            _.extend(this.ps_settings || {}, xabber.ps_settings)
+                        );
                     }
-                };
-                rawFile.send();
+                }
             },
 
             render: function () {
@@ -3291,7 +3275,13 @@ define("xabber-accounts", function () {
                 this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
                 this.$('.avatar-wrap.dropdown-button').dropdown(dropdown_settings);
+                this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
+                this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 this.updateOptions && this.updateOptions();
+                if (xabber.url_params.anchor == 'signup')
+                    this.data.set('step', 2)
+                else if (xabber.url_params.anchor == 'signin')
+                    this.data.set('step', 0)
             },
 
             openButtonsMenu: function () {
@@ -3330,7 +3320,7 @@ define("xabber-accounts", function () {
                     this.openNextStep();
                     return;
                 }
-                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.REGISTRATION_CUSTOM_DOMAIN){
                     this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'))
                     this.$domain_input.val(this.$jid_input.val().split('@')[1]);
                     this.$jid_input.val(this.$jid_input.val().split('@')[0]);
@@ -3407,8 +3397,8 @@ define("xabber-accounts", function () {
                 }
                 this.$('.login-step-wrap').hideIf(true);
                 this.authFeedback({});
-                this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@'))
-                if (this.$jid_input.val() && this.$jid_input.val().includes('@')){
+                this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.LOGIN_CUSTOM_DOMAIN)
+                if (this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.LOGIN_CUSTOM_DOMAIN){
                     this.$('.input-field-jid').addClass('input-field-jid-borders')
                 }else {
                     this.$('.input-field-jid').removeClass('input-field-jid-borders')
@@ -3461,7 +3451,7 @@ define("xabber-accounts", function () {
 
             checkUserCallback: function (status, condition) {
                 if (status === Strophe.Status.REGISTER || status === Strophe.Status.REGIFAIL) {
-                    if (!this.$('.select-xmpp-server .property-variant[data-value="' + this.auth_connection.register.domain + '"]').length) {
+                    if (!this.$('.select-xmpp-server .property-variant[data-value="' + this.auth_connection.register.domain + '"]').length && constants.REGISTRATION_CUSTOM_DOMAIN) {
                         $('<div/>', {class: 'field-jid property-variant set-default-domain'})
                             .text(this.auth_connection.register.domain)
                             .attr('data-value', this.auth_connection.register.domain)
@@ -4058,6 +4048,7 @@ define("xabber-accounts", function () {
                 };
                 this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
                 this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
+                this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 Materialize.updateTextFields();
                 this.updateButtons();
                 this.updateOptions && this.updateOptions();
