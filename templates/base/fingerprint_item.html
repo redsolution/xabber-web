@@ -8,11 +8,14 @@
         {[if (edit_setting) {]}<div class="set-label-label hidden">{[print(xabber.getString("omemo__dialog_fingerprints__label_set_label"))]}</div>{[}]}
     </div>
     <div class="fingerprint-wrap">
-    <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
-    {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}
+        <div title="Device fingerprint" class="fingerprint">{{fingerprint}}</div>
+        {[if (error) {]}
+        <div class="fingerprint-error">{{error}}</div>
+        {[}]}
+        {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}
     </div>
     <div data-trust="{{trust}}" class="buttons">
-        {[if (trust !== null) {]}
+        {[if (trust !== null && !error) {]}
         <div class="dropdown-button" data-activates="select-status-{{id}}">
             <div class="trust-item-wrap btn-main btn-flat">
                 <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_${trust}`))]}</div>
