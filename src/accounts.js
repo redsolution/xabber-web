@@ -3280,7 +3280,7 @@ define("xabber-accounts", function () {
                 this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
                 this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 this.updateOptions && this.updateOptions();
-                if (xabber.url_params.anchor == 'signup')
+                if (xabber.url_params.anchor == 'signup' || xabber.url_params.rkey)
                     this.data.set('step', 2)
                 else if (xabber.url_params.anchor == 'signin')
                     this.data.set('step', 0)
