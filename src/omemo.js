@@ -385,10 +385,25 @@ define("xabber-omemo", function () {
                 options = options || {};
                 let delete_button = this.is_own_devices ? true : false,
                     edit_setting = id == this.omemo.get('device_id'),
-                    old_fingerprint = options.old_fingerprint;
-                fingerprint = fingerprint.match(/.{1,8}/g).join(" ");
+                    old_fingerprint = options.old_fingerprint,
+                    error;
+                if (fingerprint.match(/.{1,8}/g))
+                    fingerprint = fingerprint.match(/.{1,8}/g).join(" ");
+                else {
+                    fingerprint = '';
+                    error = xabber.getString("omemo__dialog_fingerprints__invalid_fingerprint");
+                    let device = this.is_own_devices ? this.account.omemo.own_devices[id] : this.model.devices[id];
+                    if (device && trust != 'ignore') {
+                        trust = 'ignore';
+                        this.omemo.updateFingerprints(this.jid, id, fingerprint, false);
+                        device.set('trusted', false);
+                        device.is_session_initiated = false;
+                        device.preKeys = null;
+                        this.account.trigger('trusting_updated');
+                    }
+                }
                 old_fingerprint && (old_fingerprint = old_fingerprint.match(/.{1,8}/g).join(" "));
-                let $row = templates.fingerprint_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint});
+                let $row = templates.fingerprint_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint, error});
                 return $row;
             },
 
