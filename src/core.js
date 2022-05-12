@@ -344,6 +344,8 @@
                     constants.TRUSTED_DOMAINS = config.TRUSTED_DOMAINS;
                 if (config.RECOMMENDED_DOMAIN)
                     constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
+                if (config.REGISTRATION_BUTTON != null)
+                    constants.REGISTRATION_BUTTON = config.REGISTRATION_BUTTON;
                 if (config.REGISTRATION_CUSTOM_DOMAIN != null)
                     constants.REGISTRATION_CUSTOM_DOMAIN = config.REGISTRATION_CUSTOM_DOMAIN;
                 if (config.LOGIN_CUSTOM_DOMAIN != null)

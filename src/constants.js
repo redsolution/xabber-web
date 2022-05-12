@@ -89,6 +89,7 @@ var constants = {
     LOGIN_DOMAINS: [],
     TRUSTED_DOMAINS: [],
     RECOMMENDED_DOMAIN: '',
+    REGISTRATION_BUTTON: true,
     REGISTRATION_CUSTOM_DOMAIN: true,
     LOGIN_CUSTOM_DOMAIN: true,
 

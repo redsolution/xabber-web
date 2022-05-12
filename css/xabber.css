@@ -3720,7 +3720,7 @@ input[type=text].simple-input-field:hover {
 }
 .login-panel-form .login-form-url{
     position: absolute;
-    top: 485px;
+    top: 470px;
     font-size: 16px;
     left: 50%;
     display: flex;
@@ -9938,7 +9938,7 @@ input[type='range'].voice-message-volume:focus {
     background-color: #F7F7F7;
     box-shadow: 0 2px 2px rgb(0 0 0 / 20%);
 }
-.main-modal.emoji-panel .emoji-profile-image .circle-icon svg {
+.main-modal.emoji-panel .emoji-profile-image .circle-icon .mdi {
     width: 24px;
     height: 24px;
     left: 50%;
