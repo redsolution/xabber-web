@@ -677,7 +677,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
         Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
-        Strophe.addNamespace('SCE', 'urn:xmpp:sce:0');
+        Strophe.addNamespace('SCE', 'urn:xmpp:sce:1');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');
         Strophe.addNamespace('JINGLE_SECURITY_STUB', 'urn:xmpp:jingle:security:stub:0');
