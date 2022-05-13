@@ -2535,7 +2535,6 @@ define("xabber-accounts", function () {
                     });
                     this.video.srcObject = null
                 }
-                $(window.document).find('#modals').removeClass('login-modals');
                 this.$el.detach();
 
             },
@@ -2683,7 +2682,6 @@ define("xabber-accounts", function () {
 
             onHide: function () {
                 this.$el.detach();
-                $(window.document).find('#modals').removeClass('login-modals');
             },
 
             close: function () {
@@ -3764,13 +3762,11 @@ define("xabber-accounts", function () {
 
             openEmojiPanel: function () {
                 let emoji_panel_view = new xabber.EmojiProfileImageView();
-                $(window.document).find('#modals').addClass('login-modals');
                 emoji_panel_view.open({model: this.account, registration: true, registration_view: this});
             },
 
             openWebcamPanel: function () {
                 let webcam_panel_view = new xabber.WebcamProfileImageView();
-                $(window.document).find('#modals').addClass('login-modals');
                 webcam_panel_view.open({model: this.account, registration: true, registration_view: this});
             },
 

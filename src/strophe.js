@@ -349,8 +349,10 @@ define("xabber-strophe", function () {
              *  and invoke this function to procceed in the registration process.
              */
             submit: function () {
+                var lang = xabber.settings.language;
+                (lang === 'default') && (lang = xabber.get('default_language'));
                 var i, name, query, fields, conn = this._connection;
-                query = $iq({type: "set", id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER});
+                query = $iq({type: "set", 'xml:lang': lang, id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER});
 
                 // set required fields
                 fields = Object.keys(this.fields);
