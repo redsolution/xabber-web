@@ -395,6 +395,9 @@ define("xabber-strophe", function () {
 
                 if (stanza.getAttribute("type") === "error") {
                     error = stanza.getElementsByTagName("error");
+                    let error_text = stanza.getElementsByTagName("text");
+                    if (error_text.length > 0)
+                        error_text = error_text[0].getInnerHTML();
                     if (error.length !== 1) {
                         conn._changeConnectStatus(Strophe.Status.REGIFAIL, "unknown");
                         return false;
@@ -405,11 +408,11 @@ define("xabber-strophe", function () {
                     // this is either 'conflict' or 'not-acceptable'
                     error = error[0].firstChild.tagName.toLowerCase();
                     if (error === 'conflict') {
-                        conn._changeConnectStatus(Strophe.Status.CONFLICT, error);
+                        conn._changeConnectStatus(Strophe.Status.CONFLICT, error, error_text);
                     } else if (error === 'not-acceptable') {
-                        conn._changeConnectStatus(Strophe.Status.NOTACCEPTABLE, error);
+                        conn._changeConnectStatus(Strophe.Status.NOTACCEPTABLE, error, error_text);
                     } else {
-                        conn._changeConnectStatus(Strophe.Status.REGIFAIL, error);
+                        conn._changeConnectStatus(Strophe.Status.REGIFAIL, error, error_text);
                     }
                 } else {
                     Strophe.info("Registration successful.");

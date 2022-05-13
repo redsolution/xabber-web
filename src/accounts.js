@@ -622,7 +622,7 @@ define("xabber-accounts", function () {
                     }
                 },
 
-                registerCallback: function (status, condition) {
+                registerCallback: function (status, condition, error_text) {
                     if (status === Strophe.Status.REGISTER) {
                         this.connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
                         this.connection.register.fields.password = this.getPassword();
@@ -640,12 +640,20 @@ define("xabber-accounts", function () {
                         this.auth_view.errorRegistrationFeedback({jid: xabber.getString("label_xmpp_id")});
                         this.auth_view.data.set('step', 3)
                     } else if (status === Strophe.Status.NOTACCEPTABLE) {
-                        condition = condition ? ': ' + condition : '';
-                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_not_filled") + condition});
+                        if (error_text)
+                            this.auth_view.errorRegistrationFeedback({password: error_text});
+                        else {
+                            condition = condition ? ': ' + condition : '';
+                            this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_not_filled") + condition});
+                        }
                         this.auth_view.data.set('step', 4)
                     } else if (status === Strophe.Status.REGIFAIL) {
-                        condition = condition ? ': ' + condition : '';
-                        this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_failed") + condition});
+                        if (error_text)
+                            this.auth_view.errorRegistrationFeedback({password: error_text});
+                        else {
+                            condition = condition ? ': ' + condition : '';
+                            this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_failed") + condition});
+                        }
                         this.auth_view.data.set('step', 4)
                     }
                 },
