@@ -995,11 +995,7 @@ define("xabber-omemo", function () {
                 let peer = this.getPeer(contact.get('jid')),
                     $msg = $(message.tree()),
                     origin_id = $msg.children('origin-id').attr('id'),
-                    plaintext = Strophe.serialize($msg.children('body')[0]) || "";
-
-                $msg.children('reference').each((i, ref) => {
-                    plaintext += Strophe.serialize(ref);
-                });
+                    plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
                 origin_id && this.cached_messages.putMessage(contact, origin_id, plaintext);
 
@@ -1034,8 +1030,7 @@ define("xabber-omemo", function () {
                     encryptedElement.up().up()
                         .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
 
-                    $(message.tree()).find('body').remove();
-                    $(message.tree()).children('reference').remove();
+                    $(message.tree()).find('envelope').remove();
 
                     message.cnode(encryptedElement.tree());
                     message.up().c('store', {
