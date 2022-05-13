@@ -971,6 +971,8 @@ define("xabber-omemo", function () {
             },
 
             generateDeviceId: function () {
+                if (this.account.get('x_token') && this.account.get('x_token').token_uid && this.account.get('x_token').token_uid.length >= 8 && Number(this.account.get('x_token').token_uid.slice(0,8)))
+                    return Number(this.account.get('x_token').token_uid.slice(0,8));
                 let min = 1,
                     max = Math.pow(2, 31) - 1,
                     rand = min + Math.random() * (max + 1 - min);
