@@ -41366,7 +41366,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.24","version_description":"added REGISTRATION_BUTTON constant"}'
+'{"version_number":"2.3.2.25","version_description":"OMEMO envelope tag update"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -47150,7 +47150,7 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('FORWARD', 'urn:xmpp:forward:0');
         Strophe.addNamespace('HASH', 'urn:xmpp:hashes:2');
         Strophe.addNamespace('HINTS', 'urn:xmpp:hints');
-        Strophe.addNamespace('SCE', 'urn:xmpp:sce:0');
+        Strophe.addNamespace('SCE', 'urn:xmpp:sce:1');
         Strophe.addNamespace('RECEIPTS', 'urn:xmpp:receipts');
         Strophe.addNamespace('JINGLE', 'urn:xmpp:jingle:1');
         Strophe.addNamespace('JINGLE_SECURITY_STUB', 'urn:xmpp:jingle:security:stub:0');
@@ -61900,7 +61900,7 @@ define("xabber-chats", [],function () {
             let $delay = options.delay || $message.children('delay'),
                 full_jid = $message.attr('from') || options.from_jid,
                 from_jid = Strophe.getBareJidFromJid(full_jid),
-                body = $message.children('body').text(),
+                body = $message.children('body').length ? $message.children('body').text() : $message.children('envelope').children('content').children('body').text(),
                 markable = $message.find('markable').length > 0,
                 archive_id = $message.children('archived').attr('id'),
                 origin_id = $message.children('origin-id').attr('id'),
@@ -61918,7 +61918,7 @@ define("xabber-chats", [],function () {
                     return;
                 }
                 $message = $message.children('replace').children('message');
-                body = $message.children('body').text();
+                body = $message.children('body').length ? $message.children('body').text() : $message.children('envelope').children('content').children('body').text();
                 let sid = $message.children('stanza-id').first().attr('id');
                 message = this.find(m => m.get('stanza_id') === sid || m.get('contact_stanza_id') === sid);
                 if (!message)
@@ -61950,8 +61950,11 @@ define("xabber-chats", [],function () {
 
             options.encrypted && _.extend(attrs, {encrypted: true});
             options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
+            let references = $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`).length ?
+                $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`) :
+                $message.children('envelope').children('content').children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`)
 
-            $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`).each((idx, reference) => {
+            references.each((idx, reference) => {
                 let $reference = $(reference),
                     type = $reference.attr('type'),
                     begin = parseInt($reference.attr('begin')),
@@ -66240,6 +66243,19 @@ define("xabber-chats", [],function () {
                 return;
             }
             if (message.get('encrypted') && this.account.omemo) {
+                stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content')
+                if ($(stanza.tree()).children('body').length) {
+                    stanza.cnode($(stanza.tree()).children('body')[0]).attrs({'xmlns': Strophe.NS.CLIENT}).up()
+                    $(stanza.tree()).children('body').detach()
+                }
+                if ($(stanza.tree()).children('reference').length) {
+                    $(stanza.tree()).children('reference').each((idx, reference) => {
+                        stanza.cnode($(stanza.tree()).children('reference')[idx]).up()
+                    });
+                    $(stanza.tree()).children('reference').detach()
+                }
+                stanza.up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up()
+                stanza.c('from', {jid: this.account.get('jid')}).up().up()
                 this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
                     if (msg) {
                         stanza = msg.message;
@@ -67859,8 +67875,9 @@ define("xabber-chats", [],function () {
                     }));
                 }
                 let forwarded_msgs = [];
-                $forwarded = $message.children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`).children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
-
+                $forwarded = $message.children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`).length ?
+                    $message.children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`).children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]') :
+                    $message.children('envelope').children('content').children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`).children('forwarded[xmlns="' + Strophe.NS.FORWARD + '"]');
                 $forwarded.each((idx, forwarded_msg) => {
                     let $forwarded_msg = $(forwarded_msg),
                         $forwarded_message = $forwarded_msg.children('message'),
@@ -69712,6 +69729,20 @@ define("xabber-chats", [],function () {
                 }).c('lat').t(lat).up().c('lon').t(lon).up().up().up();
                 stanza.c('body').t(body).up();
                 if (this.model.get('encrypted') && this.account.omemo) {
+                    stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content')
+                    if ($(stanza.tree()).children('body').length) {
+                        stanza.cnode($(stanza.tree()).children('body')[0]).attrs({'xmlns': Strophe.NS.CLIENT}).up()
+                        $(stanza.tree()).children('body').detach()
+                    }
+                    if ($(stanza.tree()).children('reference').length) {
+                        $(stanza.tree()).children('reference').each((idx, reference) => {
+                            stanza.cnode($(stanza.tree()).children('reference')[idx]).up()
+                        });
+                        $(stanza.tree()).children('reference').detach()
+                    }
+                    stanza.up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up()
+                    stanza.c('from', {jid: this.account.get('jid')}).up().up()
+                    message.set({xml: $(stanza.tree()).clone()[0]});
                     this.account.omemo.encrypt(this.model.contact, stanza).then((msg) => {
                         if (msg) {
                             stanza = msg.message;
@@ -69720,6 +69751,7 @@ define("xabber-chats", [],function () {
                         this.account.sendMsg(stanza);
                     });
                 } else {
+                    message.set({xml: $(stanza.tree()).clone()[0]});
                     this.account.sendMsg(stanza);
                 }
             }
@@ -71071,6 +71103,19 @@ define("xabber-chats", [],function () {
             this.unsetForwardedMessages();
             if (this.model.get('encrypted')) {
                 let decrypted_msg = $message.tree().innerHTML;
+                $message.c('envelope', {xmlns: Strophe.NS.SCE}).c('content')
+                if ($($message.tree()).children('body').length) {
+                    $message.cnode($($message.tree()).children('body')[0]).attrs({'xmlns': Strophe.NS.CLIENT}).up()
+                    $($message.tree()).children('body').detach()
+                }
+                if ($($message.tree()).children('reference').length) {
+                    $($message.tree()).children('reference').each((idx, reference) => {
+                        $message.cnode($($message.tree()).children('reference')[idx]).up()
+                    });
+                    $($message.tree()).children('reference').detach()
+                }
+                $message.up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up()
+                $message.c('from', {jid: this.account.get('jid')}).up().up()
                 this.account.omemo.encrypt(this.contact, $message).then((msg) => {
                     iq.cnode(msg.message.tree());
                     this.account.omemo.cached_messages.putMessage(this.contact, stanza_id, decrypted_msg);
@@ -73715,11 +73760,7 @@ define("xabber-omemo", [],function () {
                 let peer = this.getPeer(contact.get('jid')),
                     $msg = $(message.tree()),
                     origin_id = $msg.children('origin-id').attr('id'),
-                    plaintext = Strophe.serialize($msg.children('body')[0]) || "";
-
-                $msg.children('reference').each((i, ref) => {
-                    plaintext += Strophe.serialize(ref);
-                });
+                    plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
                 origin_id && this.cached_messages.putMessage(contact, origin_id, plaintext);
 
@@ -73754,8 +73795,7 @@ define("xabber-omemo", [],function () {
                     encryptedElement.up().up()
                         .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
 
-                    $(message.tree()).find('body').remove();
-                    $(message.tree()).children('reference').remove();
+                    $(message.tree()).find('envelope').remove();
 
                     message.cnode(encryptedElement.tree());
                     message.up().c('store', {
