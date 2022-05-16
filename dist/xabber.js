@@ -41366,7 +41366,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":22,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":21,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.29","version_description":"fixed omemo placeholder"}'
+'{"version_number":"2.3.2.29","version_description":"quality of life changes in registration"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -51149,6 +51149,8 @@ define("xabber-accounts", [],function () {
                 this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
                 this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 this.updateOptions && this.updateOptions();
+                this.$('#select-xmpp-server').hideIf(xabber.url_params.rkey)
+                this.$('.select-xmpp-server .caret').hideIf(xabber.url_params.rkey)
                 if (xabber.url_params.anchor == 'signup' || xabber.url_params.rkey)
                     this.data.set('step', 2)
                 else if (xabber.url_params.anchor == 'signin')
@@ -51427,6 +51429,7 @@ define("xabber-accounts", [],function () {
                     this.$('.btn-log-in').hideIf(false);
                     this.$('.btn-finish-log-in').hideIf(true);
                     this.$('.btn-sign-up-instead').hideIf(true);
+                    this.$jid_input.focus();
                 }
                 else if (step === 1){
                     this.$('.login-panel-intro').hideIf(false);
@@ -51447,7 +51450,7 @@ define("xabber-accounts", [],function () {
                     this.$('.register-form-jid').hideIf(true);
                     this.$('.register-form-password').hideIf(true);
                     this.$('.register-form-picture').hideIf(true);
-
+                    this.$nickname_input.focus();
                 }
                 else if (step === 3){
                     if (this.$nickname_input.val()) {
@@ -51457,6 +51460,7 @@ define("xabber-accounts", [],function () {
                         this.$('.register-form-password').hideIf(true);
                         this.$('.register-form-picture').hideIf(true);
                         this.keyUpJid();
+                        this.$jid_input.focus();
                         this.$password_input.val('');
                     }
                     else {
@@ -51473,6 +51477,7 @@ define("xabber-accounts", [],function () {
                         this.$('.register-form-password').hideIf(false);
                         this.$('.register-form-picture').hideIf(true);
                         this.keyUpPassword();
+                        this.$password_input.focus();
                     }
                     else {
                         this.registerFeedback({jid: xabber.getString("account_auth__error__text_input_username")});

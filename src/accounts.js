@@ -3286,6 +3286,8 @@ define("xabber-accounts", function () {
                 this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
                 this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
                 this.updateOptions && this.updateOptions();
+                this.$('#select-xmpp-server').hideIf(xabber.url_params.rkey)
+                this.$('.select-xmpp-server .caret').hideIf(xabber.url_params.rkey)
                 if (xabber.url_params.anchor == 'signup' || xabber.url_params.rkey)
                     this.data.set('step', 2)
                 else if (xabber.url_params.anchor == 'signin')
@@ -3564,6 +3566,7 @@ define("xabber-accounts", function () {
                     this.$('.btn-log-in').hideIf(false);
                     this.$('.btn-finish-log-in').hideIf(true);
                     this.$('.btn-sign-up-instead').hideIf(true);
+                    this.$jid_input.focus();
                 }
                 else if (step === 1){
                     this.$('.login-panel-intro').hideIf(false);
@@ -3584,7 +3587,7 @@ define("xabber-accounts", function () {
                     this.$('.register-form-jid').hideIf(true);
                     this.$('.register-form-password').hideIf(true);
                     this.$('.register-form-picture').hideIf(true);
-
+                    this.$nickname_input.focus();
                 }
                 else if (step === 3){
                     if (this.$nickname_input.val()) {
@@ -3594,6 +3597,7 @@ define("xabber-accounts", function () {
                         this.$('.register-form-password').hideIf(true);
                         this.$('.register-form-picture').hideIf(true);
                         this.keyUpJid();
+                        this.$jid_input.focus();
                         this.$password_input.val('');
                     }
                     else {
@@ -3610,6 +3614,7 @@ define("xabber-accounts", function () {
                         this.$('.register-form-password').hideIf(false);
                         this.$('.register-form-picture').hideIf(true);
                         this.keyUpPassword();
+                        this.$password_input.focus();
                     }
                     else {
                         this.registerFeedback({jid: xabber.getString("account_auth__error__text_input_username")});
