@@ -168,6 +168,8 @@
         },
 
         readActualVersion: function () {
+            if (!constants.CHECK_VERSION)
+                return;
             // get version.js file from server and parse it
             let rawFile = new XMLHttpRequest();
             rawFile.open("GET", "version.js?"+uuid(), true);
