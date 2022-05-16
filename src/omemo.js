@@ -1835,7 +1835,7 @@ define("xabber-omemo", function () {
 
             events: {
                 'click .btn-enable': 'enableOmemo',
-                'click .btn-escape': 'disableOmemo'
+                'click .btn-escape': 'closeOmemoPlaceholder'
             },
 
             _initialize: function (options) {
@@ -1847,6 +1847,7 @@ define("xabber-omemo", function () {
                 xabber.on("update_screen", this.onUpdatedScreen, this);
                 this.account.session.on("change:connected", this.updateConnected, this);
                 this.account.settings.on("change:color", this.updateColorScheme, this);
+                this.account.settings.on("change:omemo", this.onOmemoChange, this);
             },
 
             updateColorScheme: function () {
@@ -1880,10 +1881,14 @@ define("xabber-omemo", function () {
                 }, 2000);
             },
 
-            disableOmemo: function () {
-                this.account.omemo.destroy();
+            closeOmemoPlaceholder: function () {
                 this.account.settings.save('omemo', false);
                 this.close();
+            },
+
+            onOmemoChange: function () {
+                if (this.account.settings.get('omemo'))
+                    this.close();
             },
 
             close: function () {
