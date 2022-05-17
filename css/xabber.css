@@ -1265,6 +1265,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #F44336 !important;
 }
+[data-main-color=red] .add-contact-modal .rich-textarea:focus,
+[data-main-color=red] .add-contact-modal .input-field input:focus,
 [data-main-color=red] .login-panel-form .input-field input:focus{
     border-color: #F44336 !important;
     box-shadow: 0px 0px 0px 0.25rem #FFCDD2 !important;
@@ -1274,6 +1276,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #E53935;
 }
 [data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=red] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=red] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #E53935 !important;
@@ -1361,6 +1364,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #E91E63 !important;
 }
+[data-main-color=pink] .add-contact-modal .rich-textarea:focus,
+[data-main-color=pink] .add-contact-modal .input-field input:focus,
 [data-main-color=pink] .login-panel-form .input-field input:focus{
     border-color: #E91E63 !important;
     box-shadow: 0px 0px 0px 0.25rem #F8BBD0 !important;
@@ -1370,6 +1375,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #D81B60;
 }
 [data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=pink] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=pink] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #D81B60 !important;
@@ -1457,6 +1463,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #9C27B0 !important;
 }
+[data-main-color=purple] .add-contact-modal .rich-textarea:focus,
+[data-main-color=purple] .add-contact-modal .input-field input:focus,
 [data-main-color=purple] .login-panel-form .input-field input:focus{
     border-color: #9C27B0 !important;
     box-shadow: 0px 0px 0px 0.25rem #E1BEE7 !important;
@@ -1466,6 +1474,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #8E24AA;
 }
 [data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=purple] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #8E24AA !important;
@@ -1552,6 +1561,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #673AB7 !important;
 }
+[data-main-color=deep-purple] .add-contact-modal .rich-textarea:focus,
+[data-main-color=deep-purple] .add-contact-modal .input-field input:focus,
 [data-main-color=deep-purple] .login-panel-form .input-field input:focus{
     border-color: #673AB7 !important;
     box-shadow: 0px 0px 0px 0.25rem #D1C4E9 !important;
@@ -1561,6 +1572,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #5E35B1;
 }
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=deep-purple] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #5E35B1 !important;
@@ -1648,6 +1660,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #3F51B5 !important;
 }
+[data-main-color=indigo] .add-contact-modal .rich-textarea:focus,
+[data-main-color=indigo] .add-contact-modal .input-field input:focus,
 [data-main-color=indigo] .login-panel-form .input-field input:focus{
     border-color: #3F51B5 !important;
     box-shadow: 0px 0px 0px 0.25rem #C5CAE9 !important;
@@ -1657,6 +1671,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #3949AB;
 }
 [data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=indigo] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=indigo] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #3949AB !important;
@@ -1744,6 +1759,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #2196F3 !important;
 }
+[data-main-color=blue] .add-contact-modal .rich-textarea:focus,
+[data-main-color=blue] .add-contact-modal .input-field input:focus,
 [data-main-color=blue] .login-panel-form .input-field input:focus{
     border-color: #2196F3 !important;
     box-shadow: 0px 0px 0px 0.25rem #BBDEFB !important;
@@ -1753,6 +1770,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #1E88E5;
 }
 [data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=blue] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #1E88E5 !important;
@@ -1840,6 +1858,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #03A9F4 !important;
 }
+[data-main-color=light-blue] .add-contact-modal .rich-textarea:focus,
+[data-main-color=light-blue] .add-contact-modal .input-field input:focus,
 [data-main-color=light-blue] .login-panel-form .input-field input:focus{
     border-color: #03A9F4 !important;
     box-shadow: 0px 0px 0px 0.25rem #B3E5FC !important;
@@ -1849,6 +1869,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #039BE5;
 }
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=light-blue] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #039BE5 !important;
@@ -1936,6 +1957,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #00BCD4 !important;
 }
+[data-main-color=cyan] .add-contact-modal .rich-textarea:focus,
+[data-main-color=cyan] .add-contact-modal .input-field input:focus,
 [data-main-color=cyan] .login-panel-form .input-field input:focus{
     border-color: #00BCD4 !important;
     box-shadow: 0px 0px 0px 0.25rem #B2EBF2 !important;
@@ -1945,6 +1968,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00ACC1;
 }
 [data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=cyan] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=cyan] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00ACC1 !important;
@@ -2032,6 +2056,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #009688 !important;
 }
+[data-main-color=teal] .add-contact-modal .rich-textarea:focus,
+[data-main-color=teal] .add-contact-modal .input-field input:focus,
 [data-main-color=teal] .login-panel-form .input-field input:focus{
     border-color: #009688 !important;
     box-shadow: 0px 0px 0px 0.25rem #B2DFDB !important;
@@ -2041,6 +2067,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00897B;
 }
 [data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=teal] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=teal] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00897B !important;
@@ -2128,6 +2155,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #4CAF50 !important;
 }
+[data-main-color=green] .add-contact-modal .rich-textarea:focus,
+[data-main-color=green] .add-contact-modal .input-field input:focus,
 [data-main-color=green] .login-panel-form .input-field input:focus{
     border-color: #4CAF50 !important;
     box-shadow: 0px 0px 0px 0.25rem #C8E6C9 !important;
@@ -2137,6 +2166,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #43A047;
 }
 [data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=green] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #43A047 !important;
@@ -2224,6 +2254,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #8BC34A !important;
 }
+[data-main-color=light-green] .add-contact-modal .rich-textarea:focus,
+[data-main-color=light-green] .add-contact-modal .input-field input:focus,
 [data-main-color=light-green] .login-panel-form .input-field input:focus{
     border-color: #8BC34A !important;
     box-shadow: 0px 0px 0px 0.25rem #DCEDC8 !important;
@@ -2233,6 +2265,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #7CB342;
 }
 [data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=light-green] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=light-green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #7CB342 !important;
@@ -2320,6 +2353,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #CDDC39 !important;
 }
+[data-main-color=lime] .add-contact-modal .rich-textarea:focus,
+[data-main-color=lime] .add-contact-modal .input-field input:focus,
 [data-main-color=lime] .login-panel-form .input-field input:focus{
     border-color: #CDDC39 !important;
     box-shadow: 0px 0px 0px 0.25rem #F0F4C3 !important;
@@ -2329,6 +2364,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #C0CA33;
 }
 [data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=lime] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=lime] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #C0CA33 !important;
@@ -2416,6 +2452,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FFC107 !important;
 }
+[data-main-color=amber] .add-contact-modal .rich-textarea:focus,
+[data-main-color=amber] .add-contact-modal .input-field input:focus,
 [data-main-color=amber] .login-panel-form .input-field input:focus{
     border-color: #FFC107 !important;
     box-shadow: 0px 0px 0px 0.25rem #FFECB3 !important;
@@ -2425,6 +2463,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FFB300;
 }
 [data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=amber] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=amber] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FFB300 !important;
@@ -2512,6 +2551,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF9800 !important;
 }
+[data-main-color=orange] .add-contact-modal .rich-textarea:focus,
+[data-main-color=orange] .add-contact-modal .input-field input:focus,
 [data-main-color=orange] .login-panel-form .input-field input:focus{
     border-color: #FF9800 !important;
     box-shadow: 0px 0px 0px 0.25rem #FFE0B2 !important;
@@ -2521,6 +2562,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FB8C00;
 }
 [data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=orange] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FB8C00 !important;
@@ -2608,6 +2650,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #FF5722 !important;
 }
+[data-main-color=deep-orange] .add-contact-modal .rich-textarea:focus,
+[data-main-color=deep-orange] .add-contact-modal .input-field input:focus,
 [data-main-color=deep-orange] .login-panel-form .input-field input:focus{
     border-color: #FF5722 !important;
     box-shadow: 0px 0px 0px 0.25rem #FFCCBC !important;
@@ -2617,6 +2661,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #F4511E;
 }
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=deep-orange] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #F4511E !important;
@@ -2704,6 +2749,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #795548 !important;
 }
+[data-main-color=brown] .add-contact-modal .rich-textarea:focus,
+[data-main-color=brown] .add-contact-modal .input-field input:focus,
 [data-main-color=brown] .login-panel-form .input-field input:focus{
     border-color: #795548 !important;
     box-shadow: 0px 0px 0px 0.25rem #D7CCC8 !important;
@@ -2713,6 +2760,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #6D4C41;
 }
 [data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=brown] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=brown] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #6D4C41 !important;
@@ -2801,6 +2849,8 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .toolbar .toolbar-item.active svg.toolbar-icon path {
     fill: #607D8B !important;
 }
+[data-main-color=blue-grey] .add-contact-modal .rich-textarea:focus,
+[data-main-color=blue-grey] .add-contact-modal .input-field input:focus,
 [data-main-color=blue-grey] .login-panel-form .input-field input:focus{
     border-color: #607D8B !important;
     box-shadow: 0px 0px 0px 0.25rem #CFD8DC !important;
@@ -2810,6 +2860,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #546E7A;
 }
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
+[data-main-color=blue-grey] .add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #546E7A !important;
@@ -3503,10 +3554,12 @@ input[type=text].simple-input-field:hover {
 .login-panel-form .input-field-wrap .input-field.input-field-jid.input-field-jid-borders input{
     border-radius: 4px;
 }
+.add-group-chat-modal .input-field.input-group-chat-domain,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-field.input-group-chat-domain{
     padding: 0;
     margin: 0;
 }
+.add-group-chat-modal .property-field .select-xmpp-server,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server {
     display: flex;
@@ -3514,11 +3567,16 @@ input[type=text].simple-input-field:hover {
     align-items: center;
     position: relative;
 }
+.add-group-chat-modal .property-field .xmpp-server-item-wrap,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap{
     display: flex;
     cursor: pointer;
 }
+.add-group-chat-modal .property-field .xmpp-server-item-wrap{
+    padding: 0 !important;
+}
+.add-group-chat-modal .property-field .jid-at,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap .jid-at,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap .jid-at{
     background: rgb(233, 236, 239);
@@ -3535,6 +3593,12 @@ input[type=text].simple-input-field:hover {
     border-right: none;
     margin: 0;
 }
+.add-group-chat-modal .property-field .xmpp-server-item-wrap .field-jid,
+.add-group-chat-modal .property-field .jid-at{
+    height: 3rem !important;
+    font-size: 1rem !important;
+}
+.add-group-chat-modal .property-field .xmpp-server-item-wrap .field-jid,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap .field-jid,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap .field-jid,
@@ -3550,10 +3614,19 @@ input[type=text].simple-input-field:hover {
     padding: 8px 18px 10px 10px;
     margin: 0;
 }
+.add-group-chat-modal .property-field .xmpp-server-item-wrap .field-jid{
+    line-height: calc(3rem - 18px);
+    width: 160px;
+}
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input{
     width: 184px !important;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .input-group-chat-domain input#new_chat_domain{
+    border-radius: 0 4px 4px 0;
+    width: 142px !important;
+}
+.add-group-chat-modal .property-field .select-xmpp-server .dropdown-content,
 .login-panel-form .register-form-picture .dropdown-content,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content{
@@ -3575,6 +3648,7 @@ input[type=text].simple-input-field:hover {
     border: 1px solid rgba(0,0,0,.15);
     border-radius: 0.25rem;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant,
 .login-panel-form .register-form-picture .dropdown-content .property-variant,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant{
@@ -3591,6 +3665,8 @@ input[type=text].simple-input-field:hover {
     margin: 0;
     line-height: unset;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:focus,
+.add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:hover,
 .login-panel-form .register-form-picture .dropdown-content .property-variant:focus,
 .login-panel-form .register-form-picture .dropdown-content .property-variant:hover,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:focus,
@@ -3601,12 +3677,14 @@ input[type=text].simple-input-field:hover {
     text-decoration: none;
     background-color: #f8f9fa;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .dropdown-content .property-variant:active,
 .login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active{
     color: #fff;
     text-decoration: none;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .caret,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret{
     position: absolute;
@@ -3614,7 +3692,12 @@ input[type=text].simple-input-field:hover {
     right: 2px;
     width: 20px;
     height: 20px;
+    z-index: 1;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .caret{
+    height: 24px;
+}
+.add-group-chat-modal .property-field .select-xmpp-server .caret .mdi,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret .mdi,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret .mdi{
     position: absolute;
@@ -3623,6 +3706,7 @@ input[type=text].simple-input-field:hover {
     color: #000;
     z-index: -1;
 }
+.add-group-chat-modal .property-field .select-xmpp-server .caret .mdi.mdi-menu-down,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .caret .mdi.mdi-menu-down,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .caret .mdi.mdi-menu-down{
     top: 5px;
@@ -3648,6 +3732,7 @@ input[type=text].simple-input-field:hover {
     border-radius: 4px 0px 0px 4px;
     width: 181px;
 }
+.add-contact-modal .input-field input.invalid,
 .login-panel-form .input-field input.invalid{
     border: 1px solid rgb(220, 53, 69);
     box-shadow: 0px 0px 0px 3px rgba(220, 53, 69, 0.5);
@@ -5342,8 +5427,40 @@ input[type=text].simple-input-field:hover {
     padding: 10px 0;
 }
 
+.add-contact-modal .input-field input:not(#new-group-name){
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    background: rgb(255, 255, 255);
+    border-radius: 0.25rem;
+    border: 1px solid;
+    border-color: rgb(206, 212, 218);
+    color: #212529;
+    height: calc(3rem - 2px);
+    padding: 0 8px!important;
+    width: calc(100% - 16px) !important;
+}
+
+.add-contact-modal .input-field.new-group-name{
+    top: -17px;
+    position: absolute !important;
+    margin: 0 !important;
+    padding: 11px 0 6px 0 !important;
+    left: 34px;
+    width: calc(100% - 40px)!important;
+}
+
+.add-contact-modal .input-field input#new-group-name{
+    line-height: 14px;
+    box-shadow: none !important;
+    border: none !important;
+    font-size: 14px;
+}
+
 .add-contact-modal .input-field input#new_contact_username {
     text-transform: lowercase;
+}
+
+.add-contact-modal .input-field input#new_contact_username::placeholder {
+    text-transform: none;
 }
 
 /* ----------------- ADD GROUP CHAT VIEW ------------------------ */
@@ -5365,10 +5482,6 @@ input[type=text].simple-input-field:hover {
     float: right;
 }
 
-.add-group-chat-modal .xmpp-server-dropdown-wrap {
-    width: 50%;
-}
-
 .add-group-chat-modal .account-item-wrap,
 .add-group-chat-modal .property-field .property-wrap,
 .add-group-chat-modal .property-field .property-variant {
@@ -5384,8 +5497,7 @@ input[type=text].simple-input-field:hover {
     fill: #757575;
 }
 
-.add-group-chat-modal .property-field .dropdown-button .caret,
-.add-group-chat-modal .property-field .select-xmpp-server .caret {
+.add-group-chat-modal .property-field .dropdown-button .caret{
     width: 40px;
     height: 100%;
     padding: 15px 10px;
@@ -5417,7 +5529,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .add-group-chat-modal .row {
-    height: 54px;
+    height: 56px;
     padding: 0px;
 }
 
@@ -5437,8 +5549,7 @@ input[type=text].simple-input-field:hover {
 
 .add-group-chat-modal .account-item-wrap .name,
 .add-group-chat-modal .property-field .property-value,
-.add-group-chat-modal .property-field .property-variant,
-.add-group-chat-modal .property-field .jid-at {
+.add-group-chat-modal .property-field .property-variant{
     font-size: 14px;
     line-height: 16px;
     color: #616161;
@@ -5447,15 +5558,6 @@ input[type=text].simple-input-field:hover {
 .add-group-chat-modal .property-field .property-variant {
     cursor: pointer;
     color: #616161;
-}
-
-.add-group-chat-modal .property-field .xmpp-server-item-wrap {
-    padding: 19px 10px 19px 4px;
-    max-width: calc(100% - 40px);
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
 }
 
 .add-group-chat-modal .property-field .property-variant:hover {
@@ -5500,13 +5602,16 @@ input[type=text].simple-input-field:hover {
 }
 
 .add-group-chat-modal .input-field.input-group-chat-jid {
-    width: calc(100% - 254px);
-    padding: 10px 8px 0 10px !important;
+    padding: 10px 44px 0 12px !important;
+    display: flex;
+}
+
+.add-group-chat-modal .input-field.input-group-chat-jid #new_chat_jid{
+    border-radius: 4px 0 0 4px;
 }
 
 .add-group-chat-modal .input-field.input-group-chat-domain {
-    padding: 10px 2px 0 2px !important;
-    width: calc(100% - 64px);
+    padding: 0 !important;
 }
 
 .input-field .field-jid {
@@ -6019,6 +6124,7 @@ input[type=text].simple-input-field:hover {
 
 .groups.checkbox-list .new-group-field-wrap {
     position: relative;
+    margin-top: 3px;
 }
 
 .groups.checkbox-list .new-group-checkbox {
@@ -6028,7 +6134,6 @@ input[type=text].simple-input-field:hover {
 }
 
 .groups.checkbox-list .new-group-checkbox label {
-    padding-left: 9999px;
 }
 
 .groups.checkbox-list .new-group-name {
@@ -8654,7 +8759,9 @@ img.fwd-img-preview {
 .message-form .rich-textarea-wrap.file-drop ~ .insert-emoticon {
     display: none !important;
 }
-
+.add-group-chat-modal .description-field .rich-textarea-wrap{
+    position:relative;
+}
 .message-form .rich-textarea-wrap .rich-textarea,
 .add-group-chat-modal .description-field .rich-textarea-wrap .rich-textarea {
     position: relative;
@@ -8672,8 +8779,16 @@ img.fwd-img-preview {
 }
 
 .add-group-chat-modal .description-field .rich-textarea-wrap .rich-textarea {
-    max-height: 60px;
-    padding-right: 4px;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    width: 100%!important;
+    border-radius: 0.25rem;
+    padding: 8px 12px 0 12px;
+    border: 1px solid #eee;
+    min-height: 128px;
+    color: #212529;
+    margin: 0!important;
+    font-size: 1rem;
+    outline: 0;
 }
 
 .message-form .rich-textarea-wrap .placeholder,
@@ -8683,6 +8798,11 @@ img.fwd-img-preview {
     font-size: 13px;
     color: #9E9E9E;
     z-index: 0;
+}
+.add-group-chat-modal .description-field .rich-textarea-wrap .placeholder {
+    font-size: 1rem;
+    padding: 8px 12px 0 12px;
+    width: 100%;
 }
 
 .message-form .input-message .scrollbar-cover {

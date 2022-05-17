@@ -6372,8 +6372,11 @@ define("xabber-chats", function () {
             this.$('.account-field .dropdown-button .account-item-wrap')
                     .replaceWith(this.renderAccountItem(account));
             let all_servers = this.account.get('groupchat_servers_list');
-            if (all_servers.length)
+            if (all_servers.length){
                 this.$('.xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
+                this.$('.select-xmpp-server .caret').removeClass('hidden')
+                this.$('.xmpp-server-item-wrap .property-value').removeClass('hidden')
+            }
             else
                 this.setCustomDomain(this.$('.property-field.xmpp-server-dropdown-wrap .property-value'));
             this.$('.modal-content .jid-field .set-default-domain').remove();
@@ -6395,7 +6398,8 @@ define("xabber-chats", function () {
 
         setCustomDomain: function ($property_value) {
             this.$('#new_chat_domain').val("");
-            $property_value.text("");
+            this.$('.select-xmpp-server .caret').addClass('hidden');
+            $property_value.addClass('hidden').text("");
             this.$('.input-group-chat-domain').removeClass('hidden');
         },
 
@@ -6411,7 +6415,8 @@ define("xabber-chats", function () {
                 this.$('#new_chat_domain').val("");
             }
             $property_value.text($property_item.text());
-            $property_value.attr('data-value', $property_item.attr('data-value'));
+            $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
+            this.$('.select-xmpp-server .caret').removeClass('hidden')
         },
 
         close: function () {

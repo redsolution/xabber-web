@@ -3720,12 +3720,14 @@ define("xabber-accounts", function () {
             setCustomDomainRegistration: function ($property_value) {
                 this.$('#new_account_domain').val("");
                 $property_value.addClass('hidden').text("");
+                this.$('.select-xmpp-server .caret').addClass('hidden');
                 this.$('.select-xmpp-server .input-group-chat-domain').removeClass('hidden');
             },
 
             setCustomDomainAuth: function ($property_value) {
                 this.$('#sign_in_domain').val("");
                 $property_value.addClass('hidden').text("");
+                this.$('.select-auth-xmpp-server .caret').addClass('hidden');
                 this.$('.select-auth-xmpp-server .input-group-chat-domain').removeClass('hidden');
             },
 
@@ -3742,6 +3744,7 @@ define("xabber-accounts", function () {
                 }
                 $property_value.text($property_item.text());
                 $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
+                this.$('.select-xmpp-server .caret').removeClass('hidden');
                 if(this.$jid_input.val() && (this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text()))
                     this.keyUpJid();
             },
@@ -3759,6 +3762,7 @@ define("xabber-accounts", function () {
                 }
                 $property_value.text($property_item.text());
                 $property_value.removeClass('hidden').attr('data-value', $property_item.attr('data-value'));
+                this.$('.select-auth-xmpp-server .caret').removeClass('hidden');
             },
 
             chooseAvatar: function () {

@@ -9061,12 +9061,14 @@ define("xabber-contacts", function () {
 
             checkNewGroup: function (ev) {
                 let name = $(ev.target).val(),
-                    $checkbox = this.$('.new-group-checkbox');
-                $checkbox.showIf(name && !_.contains(this.group_data.get('groups'), name));
+                    $checkbox = this.$('.new-group-checkbox #new_group_checkbox');
+                $checkbox.prop('disabled', !(name && !_.contains(this.group_data.get('groups'), name)));
             },
 
             addNewGroup: function (ev) {
                 ev.preventDefault();
+                if (this.$('.new-group-checkbox #new_group_checkbox').prop('disabled'))
+                    return;
                 let $input = this.$('.new-group-name input'),
                     name = $input.val(),
                     groups = _.clone(this.group_data.get('groups')),

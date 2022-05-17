@@ -27,13 +27,11 @@
         </div>
         <div class="row name-field">
             <div class="input-field">
-                <input id="new_contact_username" type="text" name="username">
-                <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>
+                <input id="new_contact_username" type="text" placeholder='{[print(xabber.getString("dialog_add_contact__label_jid"))]}' name="username">
                 <span class="errors fixed"></span>
             </div>
             <div class="input-field">
-                <input id="new_contact_name" type="text" name="contact_name" required>
-                <label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>
+                <input id="new_contact_name" type="text" placeholder='{[print(xabber.getString("contact_user"))]}' name="contact_name" required>
             </div>
             <span class="add-contact-feedback red-text"></span>
         </div>

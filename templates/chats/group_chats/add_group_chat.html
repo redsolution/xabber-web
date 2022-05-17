@@ -32,22 +32,23 @@
     </div>
     <div class="row jid-field">
         <svg class="field-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>
-        <div class="property-field xmpp-server-dropdown-wrap">
-            <div class="select-xmpp-server">
-                <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
-                <div class="input-field input-group-chat-domain hidden">
-                    <input id="new_chat_domain" type="text" placeholder='{[print(xabber.getString("groupchat__hint_domain"))]}' name="chat_domain">
-                </div>
-                <div data-activates="select-xmpp-server" class="caret">
-                    <i class="mdi mdi-20px mdi-menu-down"></i>
-                </div>
-            </div>
-            <div id="select-xmpp-server" class="dropdown-content noselect">
-                <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>
-            </div>
-        </div>
         <div class="input-field input-group-chat-jid">
             <input id="new_chat_jid" type="text" placeholder='{[print(xabber.getString("groupchat_xmpp_jid"))]}' name="chat_jid">
+            <div class="property-field xmpp-server-dropdown-wrap">
+                <div class="select-xmpp-server">
+                    <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
+                    <div class="input-field input-group-chat-domain hidden">
+                        <input id="new_chat_domain" type="text" placeholder='{[print(xabber.getString("groupchat__hint_domain"))]}' name="chat_domain">
+                    </div>
+                    <div data-activates="select-xmpp-server" class="caret">
+                        <i class="mdi mdi-20px mdi-menu-up"></i>
+                        <i class="mdi mdi-20px mdi-menu-down"></i>
+                    </div>
+                </div>
+                <div id="select-xmpp-server" class="dropdown-content noselect">
+                    <div class="property-variant set-custom-domain">{[print(xabber.getString("groupchat_custom_server"))]}</div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row incognito-field">
