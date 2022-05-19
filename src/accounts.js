@@ -3533,7 +3533,6 @@ define("xabber-accounts", function () {
             handleRegistrationStep: function () {
                 let step = this.data.get('step')
                 if (step === -1){
-                    this.$domain_input = this.$('input[name=sign_in_domain]');
                     this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
                     this.$(`.server-feature .mdi`).hideIf(true);
                     this.$(`.server-feature`).removeClass('active-feature')
@@ -3549,6 +3548,8 @@ define("xabber-accounts", function () {
                 if (step === 0){
                     this.$jid_input = this.$('input[name=jid]');
                     this.$password_input = this.$('input[name=password]');
+                    this.$domain_input = this.$('input[name=sign_in_domain]');
+                    this.$domain_input.val('')
                     this.$jid_input.val('')
                     this.$password_input.val('')
                     this.keyUpLogin();

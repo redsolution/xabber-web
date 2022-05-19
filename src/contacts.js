@@ -2661,19 +2661,20 @@ define("xabber-contacts", function () {
             changeList: function (ev) {
                 let $target = $(ev.target).closest('.list-variant'),
                     list_name = $target.data('value');
-                this.$('.tabs').animate({scrollLeft: $target.position().left- 80 }, 400);
-                this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop()-110},
-                    400,
-                    () => {
-                        this.onScroll();
-                        this.ps_container.animate(
-                            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop()-110},
-                            0,
-                        );
-                    });
-                if (list_name != 'blocked' && list_name != 'invitations')
+                if (list_name != 'blocked' && list_name != 'invitations') {
                     this.$('.main-info .header-buttons .block-name.second-text').text($target.text())
+                    this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
+                    this.ps_container.animate(
+                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 110},
+                        400,
+                        () => {
+                            this.onScroll();
+                            this.ps_container.animate(
+                                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 110},
+                                0,
+                            );
+                        });
+                }
                 this.updateList(list_name);
             },
 
@@ -8952,13 +8953,13 @@ define("xabber-contacts", function () {
             avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
             events: {
-                "click .account-field .dropdown-content": "selectAccount",
+                "click .dropdown-content#select-account-for-add-contact": "selectAccount",
                 "click .existing-group-field label": "editGroup",
                 "change .new-group-name input": "checkNewGroup",
                 "keyup .new-group-name input": "checkNewGroup",
                 "keyup .name-field #new_contact_username": "checkJid",
                 "focusout .name-field #new_contact_username": "focusoutInputField",
-                "click .new-group-checkbox": "addNewGroup",
+                "focusout .new-group-name #new-group-name": "addNewGroup",
                 "click .btn-add": "addContact",
                 "click .btn-cancel": "close"
             },
@@ -8980,17 +8981,18 @@ define("xabber-contacts", function () {
                     .removeClass('invalid');
                 this.$('.single-acc').showIf(accounts.length === 1);
                 this.$('.multiple-acc').hideIf(accounts.length === 1);
-                this.$('.account-field .dropdown-content').empty();
+                this.$('.account-dropdown-wrap .dropdown-content').empty();
                 _.each(accounts, (account) => {
-                    this.$('.account-field .dropdown-content').append(
+                    this.$('.account-dropdown-wrap .dropdown-content').append(
                         this.renderAccountItem(account));
                 });
+                this.$('.account-dropdown-wrap').hideIf(accounts.length < 2)
                 this.bindAccount(accounts[0]);
                 this.$('span.errors').text('');
                 this.$el.openModal({
                     ready: () => {
                         Materialize.updateTextFields();
-                        this.$('.account-field .dropdown-button').dropdown({
+                        this.$('.account-dropdown-wrap').dropdown({
                             inDuration: 100,
                             outDuration: 100,
                             constrainWidth: false,
@@ -9005,13 +9007,13 @@ define("xabber-contacts", function () {
 
             bindAccount: function (account) {
                 this.account = account;
-                this.$('.account-field .dropdown-button .account-item-wrap')
+                this.$('.account-dropdown-wrap .dropdown-button .account-item-wrap')
                     .replaceWith(this.renderAccountItem(account));
                 this.renderGroupsForAccount(account);
             },
 
             renderAccountItem: function (account) {
-                let $item = $(templates.add_contact_account_item({jid: account.get('jid')}));
+                let $item = $(templates.add_contact_account_item({jid: account.get('jid'), name: account.get('name')}));
                 $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
                 return $item;
             },
@@ -9063,10 +9065,12 @@ define("xabber-contacts", function () {
                 let name = $(ev.target).val(),
                     $checkbox = this.$('.new-group-checkbox #new_group_checkbox');
                 $checkbox.prop('disabled', !(name && !_.contains(this.group_data.get('groups'), name)));
+                if (ev.keyCode === constants.KEY_ENTER)
+                    this.addNewGroup();
             },
 
             addNewGroup: function (ev) {
-                ev.preventDefault();
+                ev && ev.preventDefault();
                 if (this.$('.new-group-checkbox #new_group_checkbox').prop('disabled'))
                     return;
                 let $input = this.$('.new-group-name input'),

@@ -6298,7 +6298,7 @@ define("xabber-chats", function () {
         ps_settings: {theme: 'item-list'},
 
         events: {
-            "click .account-field .dropdown-content": "selectAccount",
+            "click .dropdown-content#select-account-for-creating-groupchat": "selectAccount",
             "click .btn-add": "addGroupChat",
             "keyup .input-group-chat-name input": "updateGroupJid",
             "keyup .rich-textarea": "showPlaceholder",
@@ -6317,11 +6317,12 @@ define("xabber-chats", function () {
             let accounts = options.account ? [options.account] : xabber.accounts.connected;
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
-            this.$('.account-field .dropdown-content').empty();
+            this.$('.account-dropdown-wrap .dropdown-content').empty();
             _.each(accounts, (account) => {
-                this.$('.account-field .dropdown-content').append(
+                this.$('.account-dropdown-wrap .dropdown-content').append(
                         this.renderAccountItem(account));
             });
+            this.$('.account-dropdown-wrap').hideIf(accounts.length < 2)
             this.bindAccount(accounts[0]);
             this.$('.btn-cancel').text(this.is_login ? xabber.getString("skip") : xabber.getString("cancel"));
             this.$el.openModal({
@@ -6334,7 +6335,7 @@ define("xabber-chats", function () {
                         alignment: 'left'
                     };
                     Materialize.updateTextFields();
-                    this.$('.account-field .dropdown-button').dropdown(dropdown_settings);
+                    this.$('.account-dropdown-wrap').dropdown(dropdown_settings);
                     this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
@@ -6369,7 +6370,7 @@ define("xabber-chats", function () {
         bindAccount: function (account) {
             this.account = account;
             this.$('.input-group-chat-domain').addClass('hidden');
-            this.$('.account-field .dropdown-button .account-item-wrap')
+            this.$('.account-dropdown-wrap .dropdown-button .account-item-wrap')
                     .replaceWith(this.renderAccountItem(account));
             let all_servers = this.account.get('groupchat_servers_list');
             if (all_servers.length){
@@ -6386,7 +6387,8 @@ define("xabber-chats", function () {
         },
 
         renderAccountItem: function (account) {
-            let $item = $(templates.add_chat_account_item({jid: account.get('jid')}));
+            let $item = $(templates.add_chat_account_item({jid: account.get('jid'), name: account.get('name')}));
+            $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
             return $item;
         },
 
@@ -6454,9 +6456,9 @@ define("xabber-chats", function () {
                 chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
                 privacy = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
-                searchable = this.$('.global-field .property-value').attr('data-value'),
+                searchable = this.$('input[name="group_index"]:checked').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
-                model = this.$('.membership-field .property-value').attr('data-value'),
+                model = this.$('input[name="group_membership"]:checked').attr('data-value'),
                 iq = $iq({from: my_jid, type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                     .c('name').t(name).up()
                     .c('privacy').t(privacy).up()

@@ -1,36 +1,27 @@
 <div class="modal-content-wrap">
     <div class="modal-header">
         <span>{[print(xabber.getString("dialog_add_contact__header"))]}</span>
-    </div>
-    <div class="modal-content">
-        <div class="row account-field">
-            <div class="field-header">{[print(xabber.getString("contact_account"))]}</div>
-            <div class="multiple-acc">
-                <div class="account-dropdown-wrap">
-                    <div class="dropdown-button" data-activates="select-account-for-add-contact">
-                        <div class="account-item-wrap">
-                        </div>
-                        <div class="caret">
-                            <i class="mdi mdi-20px mdi-menu-down"></i>
-                        </div>
-                    </div>
-                    <div id="select-account-for-add-contact" class="dropdown-content noselect">
+        <div class="account-dropdown-wrap" data-activates="select-account-for-add-contact">
+            <div class="dropdown-button">
+                <div class="account-item-wrap">
+                    <div class="circle-avatar noselect">
+                        <img>
                     </div>
                 </div>
             </div>
-            <div class="single-acc">
-                <div class="dropdown-button">
-                    <div class="account-item-wrap">
-                    </div>
-                </div>
+            <div id="select-account-for-add-contact" class="dropdown-content noselect">
             </div>
         </div>
+    </div>
+    <div class="modal-content">
         <div class="row name-field">
             <div class="input-field">
+                <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>
                 <input id="new_contact_username" type="text" placeholder='{[print(xabber.getString("dialog_add_contact__label_jid"))]}' name="username">
                 <span class="errors fixed"></span>
             </div>
             <div class="input-field">
+                <label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>
                 <input id="new_contact_name" type="text" placeholder='{[print(xabber.getString("contact_user"))]}' name="contact_name" required>
             </div>
             <span class="add-contact-feedback red-text"></span>
