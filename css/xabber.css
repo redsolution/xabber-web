@@ -3804,7 +3804,7 @@ input[type=text].simple-input-field:hover {
 }
 .add-contact-modal .input-field input.invalid,
 .login-panel-form .input-field input.invalid{
-    border: 1px solid rgb(220, 53, 69);
+    border: 1px solid rgb(220, 53, 69) !important;
     box-shadow: 0px 0px 0px 3px rgba(220, 53, 69, 0.5);
 }
 .login-panel-form .buttons-wrap{
@@ -5409,7 +5409,7 @@ input[type=text].simple-input-field:hover {
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
 .add-contact-modal.main-modal .modal-content {
-    min-height: 320px;
+    min-height: 400px;
 }
 .add-contact-modal .row {
     margin: 0;
@@ -5594,7 +5594,7 @@ input[type=text].simple-input-field:hover {
 .details-panel-right .groups-block-wrap .groups-wrap{
     position: absolute;
     top: 100%;
-    right: 0;
+    right: 8px;
     width: calc(100% - 72px);
     min-height: 100px;
     border: 1px solid #f5f5f5;
@@ -5699,8 +5699,11 @@ input[type=text].simple-input-field:hover {
     max-height: 700px;
 }
 
-.add-group-chat-modal .modal-footer .errors {
-    line-height: 36px;
+.add-group-chat-modal .errors {
+    position: absolute;
+    bottom: -8px;
+    line-height: 18px;
+    color: #f44336;
 }
 
 .add-group-chat-modal .account-field .single-acc,
@@ -5794,6 +5797,9 @@ input[type=text].simple-input-field:hover {
 
 .add-group-chat-modal .row {
     padding: 0px;
+}
+.add-group-chat-modal .row.jid-field {
+    padding-bottom: 16px;
 }
 
 .add-group-chat-modal .row.group-radio-fields {

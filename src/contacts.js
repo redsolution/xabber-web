@@ -9045,6 +9045,7 @@ define("xabber-contacts", function () {
                             hover: false,
                             alignment: 'left'
                         });
+                        this.$('input[name="username"]').focus();
                     },
                     complete: this.close.bind(this)
                 });

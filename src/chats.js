@@ -6339,6 +6339,7 @@ define("xabber-chats", function () {
                     this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
                     this.$('.property-field .select-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
+                    this.$('input[name="chat_name"]').focus();
                 },
                 complete: this.close.bind(this)
             });
@@ -6359,6 +6360,7 @@ define("xabber-chats", function () {
             this.$('.btn-add').addClass('non-active');
             this.showPlaceholder();
             this.$('span.errors').text('').addClass('hidden');
+            this.$('input').removeClass('invalid');
             let $global_wrap = this.$('.global-dropdown-wrap'),
                 default_global_value = $global_wrap.find('.dropdown-content .default-value');
             $global_wrap.find('.global-item-wrap .property-value').attr('data-value', default_global_value.attr('data-value')).text(default_global_value.text());
@@ -6487,7 +6489,8 @@ define("xabber-chats", function () {
                         }
                     });
                 }, () => {
-                    this.$('.modal-footer .errors').removeClass('hidden').text(xabber.getString("groupchat_jid_already_exists"));
+                    this.$('span.errors').removeClass('hidden').text(xabber.getString("groupchat_jid_already_exists"));
+                    this.$('input[name="chat_jid"]').addClass('invalid');
                 });
         },
 
@@ -6498,11 +6501,13 @@ define("xabber-chats", function () {
             }
             let xmpp_server = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 input_value = this.$('input[name=chat_jid]').val();
-            if (this.$('input[name=chat_name]').val() == "")
-                this.$('.modal-footer .errors').text(xabber.getString("group_is_empty")).removeClass('hidden');
-            else {
+            if (this.$('input[name=chat_name]').val() == "") {
+                this.$('span.errors').text(xabber.getString("group_is_empty")).removeClass('hidden');
+                this.$('input[name="chat_name"]').addClass('invalid');
+            } else {
                 if ((input_value == "")||((input_value.search(/[А-яЁё]/) == -1)&&(input_value.search(/\s/) == -1)&&(input_value != ""))) {
-                    this.$('.modal-footer .errors').text('').addClass('hidden');
+                    this.$('span.errors').text('').addClass('hidden');
+                    this.$('input').removeClass('invalid');
                     let iq = $iq({type: 'get', to: xmpp_server}).c('query', {xmlns: Strophe.NS.DISCO_INFO}),
                         group_chats_support;
                     this.account.sendIQ(iq, (iq) => {
@@ -6512,12 +6517,19 @@ define("xabber-chats", function () {
                         });
                         if (group_chats_support)
                             this.createGroupChat();
-                    }, () => {
-                        this.$('.modal-footer .errors').removeClass('hidden').text(`${xabber.getString("account_add__alert_invalid_domain")}`); // !!!!!!!!!!!!!!!!!! :::::
+                        else {
+                            this.$('span.errors').removeClass('hidden').text(`${xabber.getString("groupchat_add__alert_server_does_not_support")}`);
+                            this.$('input[name="chat_domain"]').addClass('invalid');
+                        }
+                    }, (response) => {
+                        console.log(response)
+                        this.$('span.errors').removeClass('hidden').text(`${xabber.getString("groupchat_add__alert_invalid_domain")}`); // !!!!!!!!!!!!!!!!!! :::::
+                        this.$('input[name="chat_domain"]').addClass('invalid');
                     });
                 }
                 else {
-                    this.$('.modal-footer .errors').removeClass('hidden').text(`${xabber.getString("account_add__alert_localpart_invalid")}`);
+                    this.$('span.errors').removeClass('hidden').text(`${xabber.getString("groupchat_add__alert_localpart_invalid")}`);
+                    this.$('input[name="chat_jid"]').addClass('invalid');
                 }
             }
         }
