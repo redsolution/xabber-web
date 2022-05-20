@@ -938,7 +938,7 @@ define("xabber-omemo", function () {
                     if (Object.keys(omemo.devices).length) {
                         let device = omemo.devices[device_id];
                         if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
-                            let label = this.account.settings.get('device_label_text');
+                            let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
                             omemo.publishDevice(device_id, label, () => {
                                 this.account.trigger('device_published');
                             });
@@ -955,7 +955,7 @@ define("xabber-omemo", function () {
                             }
                             let device = omemo.devices[device_id];
                             if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
-                                let label = this.account.settings.get('device_label_text');
+                                let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
                                 omemo.publishDevice(device_id, label, () => {
                                     this.account.trigger('device_published');
                                 });
