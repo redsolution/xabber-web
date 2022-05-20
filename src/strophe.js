@@ -399,7 +399,7 @@ define("xabber-strophe", function () {
                     error = stanza.getElementsByTagName("error");
                     let error_text = stanza.getElementsByTagName("text");
                     if (error_text.length > 0)
-                        error_text = error_text[0].getInnerHTML();
+                        error_text = error_text[0].innerHTML;
                     if (error.length !== 1) {
                         conn._changeConnectStatus(Strophe.Status.REGIFAIL, "unknown");
                         return false;
