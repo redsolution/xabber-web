@@ -68,6 +68,8 @@ define("xabber-templates", [
     "text!templates/contacts/roster_settings.html",
     "text!templates/contacts/group_settings.html",
     "text!templates/contacts/groups_checkbox_list.html",
+    "text!templates/contacts/groups_checkbox_list_contact.html",
+    "text!templates/contacts/groups_new_group.html",
     "text!templates/contacts/groups_list.html",
     "text!templates/contacts/add_contact_account_item.html",
     "text!templates/contacts/contact_placeholder.html",
@@ -342,6 +344,8 @@ define("xabber-templates", [
     addTemplate('contacts.roster_settings');
     addTemplate('contacts.group_settings');
     addTemplate('contacts.groups_checkbox_list');
+    addTemplate('contacts.groups_checkbox_list_contact');
+    addTemplate('contacts.groups_new_group');
     addTemplate('contacts.groups_list');
     addTemplate('contacts.add_contact_account_item');
     addTemplate('contacts.contact_placeholder');

@@ -1667,8 +1667,6 @@ define("xabber-contacts", function () {
             updateChilds: function () {
                 if (!this.model.get('vcard_hidden'))
                     this.vcard_view.hideVCard();
-                if (!this.model.get('groups_hidden'))
-                    this.edit_groups_view.hideGroups();
                 if (!this.model.get('edit_hidden'))
                     this.contact_edit_view.hideEdit();
             },
@@ -6678,30 +6676,42 @@ define("xabber-contacts", function () {
         xabber.ContactEditGroupsView = xabber.BasicView.extend({
             template: templates.groups,
             events: {
+                'click .group': 'removeGroup',
                 'click .existing-group-field label': 'editGroup',
                 'change .new-group-name input': 'checkNewGroup',
                 'keyup .new-group-name input': 'checkNewGroup',
                 'click .new-group-checkbox': 'addNewGroup',
                 "keyup #new-group-name": "keyupAddNewGroup",
-                'click .groups-list-wrap': 'showGroups',
-                'click .btn-back': 'hideGroups'
+                "focusin #new-group-name": "focusinAddNewGroup",
+                "focusout #new-group-name": "focusoutAddNewGroup",
+                "keydown #new-group-name": "keydownAddNewGroup",
             },
 
             _initialize: function (options) {
                 this.account = this.parent.account;
                 this.model = this.parent.model;
                 this.model.set('groups_hidden', true)
-                this.model.on("change:in_roster update_groups", this.render, this);
+                this.model.on("change:in_roster update_groups", this.onUpdate, this);
             },
 
-            render: function () {
+            render: function (view, arguments) {
                 this.$el.html(this.template());
                 if (this.model.get('in_roster')) {
                     let groups = _.clone(this.model.get('groups')),
                         all_groups = _.map(this.account.groups.notSpecial(), function (group) {
                             let name = group.get('name');
                             return {name: name, checked: _.contains(groups, name), id: uuid()};
-                        });
+                        }),
+                        all_groups_unchecked = all_groups.filter(function(group) {
+                            if (group.checked)
+                                return false;
+                            return true;
+                        }).length;
+                    if (all_groups_unchecked)
+                        this.$('.groups-wrap').removeClass('empty-groups-wrap')
+                    else
+                        this.$('.groups-wrap').addClass('empty-groups-wrap')
+
                     this.$('.checkbox-list').html(templates.groups_checkbox_list({
                         groups: all_groups
                     })).appendTo(this.$('.groups-wrap'));
@@ -6712,28 +6722,59 @@ define("xabber-contacts", function () {
                         );
                     }
                     this.scrollToTop();
-                    this.$('.groups-wrap').hideIf(this.model.get('groups_hidden'));
-                    if (this.parent.ps_container.length) {
-                        if(!this.model.get('groups_hidden'))
-                            this.parent.ps_container.perfectScrollbar('destroy')
-                        else
-                            this.parent.ps_container.perfectScrollbar(
-                                _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                            );
-                    }
                     if (groups.length)
                         this.$('.groups').html(templates.groups_list({
                             groups: all_groups
                         })).appendTo(this.$('.groups-wrap-list'));
                     else
                         this.$('.groups').html('<div class="empty-groups">'+ xabber.getString("contact_circles_empty") + '</div>')
+                    this.$('.groups').append(templates.groups_new_group());
 
                 }
                 this.$el.showIf(this.model.get('in_roster'));
+                if (arguments && arguments.on_add)
+                    this.$('.groups-wrap').hideIf(false)
+                else
+                    this.$('.groups-wrap').hideIf(true)
                 this.parent.updateScrollBar();
             },
 
+            onUpdate: function (ev) {
+                if (this._update_template){
+                    this.render(this, {on_add: true});
+                    this.$('.new-group-name input').addClass('visible');
+                    this.$('.new-group-name input').focus();
+                }
+                else{
+                    this.render();
+                    this.$('.new-group-name input').addClass('visible');
+                }
+
+            },
+
+            removeGroup: function (ev) {
+                let $target = $(ev.target).closest('.group'),
+                    group_name = $target.attr('data-groupname'),
+                    groups = _.clone(this.model.get('groups')),
+                    idx = groups.indexOf(group_name);
+                if (idx >= 0) {
+                    groups.splice(idx, 1);
+                }
+                this._update_template = false
+                this.model.pushInRoster({groups: groups});
+            },
+
+            removeLastGroup: function (ev) {
+                let groups = _.clone(this.model.get('groups'));
+                if (groups.length) {
+                    groups.pop();
+                    this._update_template = true
+                    this.model.pushInRoster({groups: groups});
+                }
+            },
+
             editGroup: function (ev) {
+                clearTimeout(this._hide_timeout)
                 let $target = $(ev.target),
                     $input = $target.siblings('input'),
                     checked = !$input.prop('checked'),
@@ -6746,6 +6787,7 @@ define("xabber-contacts", function () {
                 } else if (idx >= 0) {
                     groups.splice(idx, 1);
                 }
+                this._update_template = true
                 this.model.pushInRoster({groups: groups});
             },
 
@@ -6755,33 +6797,37 @@ define("xabber-contacts", function () {
                 $checkbox.showIf(name && !this.account.groups.get(name));
             },
 
-            showGroups: function (ev) {
-                this.model.set('groups_hidden', false);
-                this.parent.scrollToTop();
-                this.$('.groups-wrap').hideIf(this.model.get('groups_hidden'))
-                if (this.parent.ps_container.length) {
-                        this.parent.ps_container.perfectScrollbar('destroy')
-                }
-            },
-
-            hideGroups: function (ev) {
-                this.model.set('groups_hidden', true);
-                if (this.parent.ps_container.length) {
-                        this.parent.ps_container.perfectScrollbar(
-                            _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                        );
-                };
-                this.scrollToTop();
-                this.parent.onScroll();
-                this.$('.groups-wrap').hideIf(this.model.get('groups_hidden'))
-            },
-
             keyupAddNewGroup: function (ev) {
                 let $input = this.$('.new-group-name input'),
                     name = $input.val();
                 if (ev.keyCode === constants.KEY_ENTER && name) {
                     this.addNewGroup();
                 }
+            },
+
+            keydownAddNewGroup: function (ev) {
+                let $input = this.$('.new-group-name input'),
+                    name = $input.val();
+                if (ev.keyCode === constants.KEY_BACKSPACE && !name) {
+                    this.removeLastGroup();
+                }
+            },
+
+            focusinAddNewGroup: function (ev) {
+                clearTimeout(this._hide_timeout)
+                this.$('.groups-wrap').hideIf(false)
+                this.$('.empty-groups').hideIf(true)
+            },
+
+            focusoutAddNewGroup: function (ev) {
+                this.$('.empty-groups').hideIf(false)
+                if (this.$('.new-group-name input').val())
+                    this.addNewGroup();
+                this._hide_timeout = setTimeout(() => {
+                    this.$('.new-group-name input').removeClass('visible');
+                    this.$('.groups-wrap').hideIf(true)
+                    this.$('.new-group-name input').val('')
+                }, 100)
             },
 
             addNewGroup: function () {
@@ -9030,7 +9076,7 @@ define("xabber-contacts", function () {
 
             updateGroups: function () {
                 let selected = this.group_data.get('selected');
-                this.$('.groups').html(templates.groups_checkbox_list({
+                this.$('.groups').html(templates.groups_checkbox_list_contact({
                     groups: _.map(this.group_data.get('groups'), function (name) {
                         return { name: name, id: uuid(), checked: _.contains(selected, name) };
                     })

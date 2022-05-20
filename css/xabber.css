@@ -5563,22 +5563,71 @@ input[type=text].simple-input-field:hover {
     top: 0;
     left: 0;
 }
+.details-panel-right .groups-block-wrap{
+    position: relative;
+}
+.details-panel-right .groups-block-wrap .new-group-field-wrap{
+    width: 181px;
+    height: 32px;
+}
+.details-panel-right .groups-block-wrap .new-group-checkbox{
+    display: none;
+}
+.details-panel-right .groups-block-wrap .new-group-name{
+    margin: 0;
+    height: 32px;
+}
+.details-panel-right .groups-block-wrap .new-group-name input{
+    display: none;
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+.details-panel-right .groups-block-wrap:hover .new-group-name input,
+.details-panel-right .groups-block-wrap .new-group-name input:active,
+.details-panel-right .groups-block-wrap .new-group-name input:focus{
+    display: unset !important;
+}
+.details-panel-right .groups-block-wrap:hover .empty-groups{
+    display: none;
+}
+.details-panel-right .groups-block-wrap .groups-wrap{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: calc(100% - 72px);
+    min-height: 100px;
+    border: 1px solid #f5f5f5;
+    border-radius: 0.25rem;
+    z-index: 1;
+    background: #fafafa;
+    padding: 0 5px;
+}
+.details-panel-right .groups-block-wrap .groups-wrap.empty-groups-wrap{
+    display: none !important;
+}
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap,
 .add-contact-modal .new-group-field-wrap{
     height: 30px;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list,
 .add-contact-modal .groups.checkbox-list{
     display: flex;
     flex-wrap: wrap;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field,
 .add-contact-modal .input-field.checkbox-field{
     width: fit-content !important;
+    margin: 0;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox,
 .add-contact-modal .input-field.checkbox-field.new-group-checkbox{
     display: none;
 }
 .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
 
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label,
 .add-contact-modal .input-field.checkbox-field label{
     background-color: #e5e5e5;
     outline: 0px solid #e5e5e5;
@@ -5588,12 +5637,17 @@ input[type=text].simple-input-field:hover {
     border-radius: 0.25rem;
     transition: all .15s ease-in;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label{
+    color: unset;
+}
 .add-contact-modal .input-field.checkbox-field label:hover{
     outline: 1px solid #e5e5e5;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label:before,
 .add-contact-modal .input-field.checkbox-field label:before{
     content: none;
 }
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label:after,
 .add-contact-modal .input-field.checkbox-field label:after{
     content: none;
 }
@@ -5608,7 +5662,7 @@ input[type=text].simple-input-field:hover {
     padding: 0 8px!important;
     width: calc(100% - 16px) !important;
 }
-
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-name,
 .add-contact-modal .input-field.new-group-name{
     padding: 0 !important;
 }
@@ -11156,65 +11210,6 @@ input[type='range'].voice-message-volume:focus {
     height: calc(100% - 304px);
 }
 
-.details-panel-right .groups-block-wrap .groups-wrap {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0%;
-    background: white;
-    z-index: 1000;
-    padding: 0;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .block-header {
-    display: block;
-    height: 64px;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .block-header .block-name {
-    position: absolute;
-    top: 22px;
-    left: 72px;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .block-header .details-icon {
-    left: 20px;
-    top: 20px !important;
-    pointer-events: auto;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list {
-    height: calc(100% - 64px);
-    position: relative;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .existing-group-field{
-    margin: 0;
-    padding: 6px 24px 3px 27px;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .existing-group-field label{
-    padding-left: 45px;
-    height: unset;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap{
-    position: relative;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox{
-    margin: 0;
-    padding: 11px 24px 5px 27px;
-}
-
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-name {
-    top: -5px;
-    position: absolute;
-    margin: 0;
-    padding: 11px 0 6px 0;
-    left: 66px;
-}
-
 .details-panel-right .participant-view-wrap,
 .details-panel-right .restrictions-block-wrap,
 .details-panel-right .edit-block-wrap {
@@ -11681,10 +11676,12 @@ input[type='range'].voice-message-volume:focus {
 .details-panel-right .new-group-field-wrap .new-group-name input {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
     padding: 0 12px 0 6px;
-    width: calc(100% - 26px)!important;
+    height: 24px;
+    width: 163px !important;
     border-radius: 0.25rem;
+    font-size: 14px;
     border: 1px solid #f5f5f5;
-    margin: 0 !important;
+    margin: 0 0 8px 0 !important;
     color: #212529;
     box-shadow: none;
 }
@@ -11948,11 +11945,6 @@ input[type='range'].voice-message-volume:focus {
 .details-panel-right .groups-list-wrap {
     position: relative;
     padding-left: 72px;
-    cursor: pointer;
-}
-
-.details-panel-right .groups-list-wrap:hover {
-    cursor: pointer;
 }
 
 .details-panel-right .groups-list-wrap .details-icon {
@@ -11961,12 +11953,12 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .groups {
     display: flex;
-    padding: 19px 0 13px 0;
+    padding: 19px 0 0 0;
     flex-wrap: wrap;
 }
 
 .details-panel-right .groups .empty-groups {
-    padding: 0 6px 0 0;
+    padding: 0 12px 0 6px;
     color: #424242;
     border-radius: 4px;
     margin-right: 8px;
@@ -11977,6 +11969,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel-right .groups .group {
+    display: flex;
     background-color: #EEEEEE;
     padding: 0 6px;
     border-radius: 4px;
@@ -11985,6 +11978,12 @@ input[type='range'].voice-message-volume:focus {
     line-height: 24px;
     font-size: 14px;
     letter-spacing: 0.15px;
+    cursor: pointer;
+    transition: all .15s ease-in;
+}
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label:hover,
+.details-panel-right .groups .group:hover {
+    color: #757575;
 }
 
 .details-panel-right .groups-list-wrap:hover .groups .group {
