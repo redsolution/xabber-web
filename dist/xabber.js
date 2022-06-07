@@ -41464,7 +41464,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.36","version_description":"media gallery support"}'
+'{"version_number":"2.3.2.37","version_description":"media gallery omemo upload fix"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -67583,7 +67583,7 @@ define("xabber-chats", [],function () {
                         if (this.model.get('encrypted')) {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    new_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    new_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
                                     deferred.resolve({encrypted_file: new_file,key: key});
@@ -67618,7 +67618,7 @@ define("xabber-chats", [],function () {
                         reader.onload = (e) => {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    encrypted_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 file.voice && (encrypted_file.voice = true);
                                 file.duration && (encrypted_file.duration = file.duration);
                                 encrypted_file.key = key;
@@ -67647,8 +67647,7 @@ define("xabber-chats", [],function () {
             $message.find('.progress').show();
             let files_count = 0;
             $(message.get('files')).each((idx, file) => {
-                let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
-                enc_file.iv && (delete enc_file.iv);
+                let enc_file = new File([file], file.name);
                 enc_file.key && (delete enc_file.key);
                 let iq = $iq({type: 'get', to: message.get('upload_service')})
                         .c('request', {xmlns: Strophe.NS.HTTP_UPLOAD})
@@ -67727,6 +67726,10 @@ define("xabber-chats", [],function () {
                 self = this,
                 msg_files_count = message.get('files').length;
             $(message.get('files')).each((idx, file) => {
+                if (file.key) {
+                    file = new File([file], file.name);
+                    delete file.key
+                }
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
                     if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
                         message.set('state', constants.MSG_ERROR);
@@ -67816,7 +67819,6 @@ define("xabber-chats", [],function () {
                     description: file_.description || '',
                     sources: [file_.url]
                 };
-                file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";

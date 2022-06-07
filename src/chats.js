@@ -4730,7 +4730,7 @@ define("xabber-chats", function () {
                         if (this.model.get('encrypted')) {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    new_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    new_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
                                     deferred.resolve({encrypted_file: new_file,key: key});
@@ -4765,7 +4765,7 @@ define("xabber-chats", function () {
                         reader.onload = (e) => {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    encrypted_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 file.voice && (encrypted_file.voice = true);
                                 file.duration && (encrypted_file.duration = file.duration);
                                 encrypted_file.key = key;
@@ -4794,8 +4794,7 @@ define("xabber-chats", function () {
             $message.find('.progress').show();
             let files_count = 0;
             $(message.get('files')).each((idx, file) => {
-                let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
-                enc_file.iv && (delete enc_file.iv);
+                let enc_file = new File([file], file.name);
                 enc_file.key && (delete enc_file.key);
                 let iq = $iq({type: 'get', to: message.get('upload_service')})
                         .c('request', {xmlns: Strophe.NS.HTTP_UPLOAD})
@@ -4874,6 +4873,10 @@ define("xabber-chats", function () {
                 self = this,
                 msg_files_count = message.get('files').length;
             $(message.get('files')).each((idx, file) => {
+                if (file.key) {
+                    file = new File([file], file.name);
+                    delete file.key
+                }
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
                     if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
                         message.set('state', constants.MSG_ERROR);
@@ -4963,7 +4966,6 @@ define("xabber-chats", function () {
                     description: file_.description || '',
                     sources: [file_.url]
                 };
-                file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
