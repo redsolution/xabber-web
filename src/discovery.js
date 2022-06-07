@@ -104,6 +104,13 @@ define("xabber-discovery", function () {
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
                 this.connection.disco.addItem(jid, name, node, () => {});
+                if (jid.includes('mediagallery')){
+                    this.create({
+                        'var': 'media-gallery',
+                        jid: jid,
+                        from: node
+                    })
+                }
                 this.connection.disco.info(
                     jid,
                     null,
@@ -142,6 +149,9 @@ define("xabber-discovery", function () {
                     $iq({type: 'get'}).c('prefs', {xmlns: Strophe.NS.MAM}),
                     _.bind(this.receiveMAMPreferences, this, feature)
                 );
+            }
+            if (_var === 'media-gallery' && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
+                this.account.initGalleryAuth(feature);
             }
         },
 

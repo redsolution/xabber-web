@@ -1321,7 +1321,7 @@ define("xabber-chats", function () {
                         screen = xabber.body.screen.get('name');
                     xabber.body.setScreen(screen, {
                         right: 'message_context',
-                        model: this
+                        model: this,
                     }, {
                         right_contact_save: true
                     });
@@ -1839,8 +1839,8 @@ define("xabber-chats", function () {
             if (msg_files.length || msg_images.length || msg_locations.length) {
                 let $colored_span = $('<span class="text-color-500"/>');
                 if (msg.get('type') === 'file_upload') {
-                    msg_images = msg_files.filter(f => f.type && utils.isImageType(f.type));
-                    msg_files = msg_files.filter(f => !(f.type && utils.isImageType(f.type)));
+                    msg_images = msg_files.filter(f => f && f.type && utils.isImageType(f.type));
+                    msg_files = msg_files.filter(f => f && !(f.type && utils.isImageType(f.type)));
                 }
                 if (msg_files.length && msg_images.length)
                     msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
@@ -3456,7 +3456,10 @@ define("xabber-chats", function () {
             let $message = this.addMessage(message);
 
             if (message.get('type') === 'file_upload') {
-                this.startUploadFile(message, $message);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                    this.startGalleryUploadFile(message, $message);
+                else
+                    this.startUploadFile(message, $message);
             }
 
             if (this.isVisible()) {
@@ -4499,6 +4502,9 @@ define("xabber-chats", function () {
                     file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                     stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
+                    file['gallery-id'] && stanza.c('gallery-id').t(file['gallery-id']).up();
+                    file['thumbnail-uri'] && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
+                    file.created && stanza.c('created').t(file.created).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();
                     file.height && stanza.c('height').t(file.height).up();
@@ -4680,12 +4686,12 @@ define("xabber-chats", function () {
             if (this.model.messages_view)
                 if (this.model.messages_view.data.get('visible'))
                     this.model.messages_view.openChat();
-            if (files.length > 10) {
+            if (files.length > 10 && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
                 utils.dialogs.error(xabber.getString("too_many_files_at_once"));
                 return;
             }
             let http_upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
-            if (!http_upload_service) {
+            if (!http_upload_service && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
                 utils.dialogs.error(xabber.getString("error_file_upload_not_support", [this.account.domain]));
                 return;
             }
@@ -4858,14 +4864,97 @@ define("xabber-chats", function () {
             });
         },
 
+        startGalleryUploadFile: function (message, $message) {
+            $message.emojify('.chat-msg-author-badge', {emoji_size: 16});
+            $message.find('.cancel-upload').show();
+            $message.find('.repeat-upload').hide();
+            $message.find('.status').hide();
+            $message.find('.progress').show();
+            let files_count = 0,
+                self = this,
+                msg_files_count = message.get('files').length;
+            $(message.get('files')).each((idx, file) => {
+                let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
+                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                        message.set('state', constants.MSG_ERROR);
+                        clearInterval(_interval);
+                    }
+                    else if (message.get('state') !== constants.MSG_PENDING)
+                        clearInterval(_interval);
+                    _pending_time += 10;
+                }, 10000);
+
+                let formData = new FormData();
+                formData.append('file', file, file.name);
+                if (file.duration)
+                    formData.append('duration', file.duration);
+                if (file.voice)
+                    formData.append('media_type', file.type + '+voice');
+                else
+                    formData.append('media_type', file.type);
+                clearInterval(_interval);
+                let xhr = new XMLHttpRequest(),
+                    $bar = $message.find('.progress');
+                $message.find('.cancel-upload').click(() => {
+                    xhr.abort();
+                });
+                xhr.onabort = () => {
+                    this.removeMessage($message);
+                };
+                xhr.upload.onprogress = (event) => {
+                    let percentage = event.loaded / event.total;
+                    $bar.find('.determinate').attr('style', 'width: ' + (100 * percentage) + '%');
+                    $message.find('.filesize')
+                        .text(xabber.getString("file_upload__text_progress", [utils.pretty_size(event.loaded), utils.pretty_size(event.total)]));
+                };
+                xhr.onload = xhr.onerror = function () {
+                    if (this.status === 200) {
+                        let response = JSON.parse(this.response)
+                        message.get('files')[idx].id = response.id;
+                        message.get('files')[idx].created_at = response.created_at;
+                        response.thumbnail && (message.get('files')[idx].thumbnail = response.thumbnail.url);
+                        message.get('files')[idx].url = response.file;
+                        files_count++;
+                        if (files_count == message.get('files').length) {
+                            self.onFileUploaded(message, $message);
+                        }
+                    } else {
+                        let response_text;
+                        if (this.status === 500)
+                            response_text = this.statusText;
+                        else if (this.status === 400)
+                            response_text = JSON.parse(this.response).error
+                        message.get('files')[idx] = null;
+                        files_count++;
+                        if (files_count == msg_files_count && msg_files_count == 1) {
+                            self.onFileNotUploaded(message, $message, response_text);
+                        }
+                        else if (files_count == msg_files_count) {
+                            self.onFileUploaded(message, $message);
+                        }
+                    }
+                };
+                if ($message.data('cancel')) {
+                    xhr.abort();
+                } else {
+                    xhr.open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
+                    xhr.setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'))
+                    xhr.send(formData);
+                }
+            });
+        },
+
           encryptFile: async function (file) {
             return await utils.AES.encrypt(file);
           },
 
         onFileUploaded: function (message, $message) {
+            message.set('files', message.get('files').filter((element) => { return element != null}) );
             let files = message.get('files'),
                 self = this, is_audio = false,
                 images = [], files_ = [], body_message = "";
+            if (!files.length)
+                this.onFileNotUploaded(message, $message)
             $(files).each((idx, file_) => {
                 let file_new_format = {
                     name: file_.name,
@@ -4878,6 +4967,9 @@ define("xabber-chats", function () {
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')){
+                    _.extend(file_new_format, { 'gallery-id': file_.id, created: file_.created_at, 'thumbnail-uri': file_.thumbnail });
+                }
                 if (utils.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
@@ -6522,7 +6614,6 @@ define("xabber-chats", function () {
                             this.$('input[name="chat_domain"]').addClass('invalid');
                         }
                     }, (response) => {
-                        console.log(response)
                         this.$('span.errors').removeClass('hidden').text(`${xabber.getString("groupchat_add__alert_invalid_domain")}`); // !!!!!!!!!!!!!!!!!! :::::
                         this.$('input[name="chat_domain"]').addClass('invalid');
                     });

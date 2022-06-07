@@ -1211,6 +1211,123 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                initGalleryAuth: function(gallery_feature) {
+                    this.set('gallery_url', gallery_feature.get('from'));
+                    if (this.get('gallery_url'))
+                        $.ajax({
+                            type: 'POST',
+                            url: this.get('gallery_url') + 'v1/account/xmpp_code_request/',
+                            dataType: 'json',
+                            data: JSON.stringify({jid: this.jid, type: "iq"}),
+                            success: (response) => {
+                                if (response.request_id)
+                                    this.connection._addSysHandler(this.onAuthCode.bind(this),
+                                        null, "iq", null, response.request_id);
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                onAuthCode: function (stanza) {
+                    let confirm_code = stanza.getElementsByTagName("confirm");
+                    confirm_code = $(confirm_code).attr('id');
+                    if (confirm_code)
+                        $.ajax({
+                            type: 'POST',
+                            url: this.get('gallery_url') + 'v1/account/xmpp_auth/',
+                            dataType: 'json',
+                            data: JSON.stringify({jid: this.id, code: confirm_code}),
+                            success: (response) => {
+                                if (response.token)
+                                    this.set('gallery_token', response.token);
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                prepareFiles: function (files, callback) {
+                    files.forEach((file) => {
+                        let reader = new FileReader();
+                        reader.onloadend = () => {
+                            let b64 = reader.result.split('base64,'),
+                                binary_file = atob(b64[1]),
+                                bytes = new Uint8Array(binary_file.length);
+                            for (let i = 0; i < binary_file.length; i++)
+                                bytes[i] = binary_file.charCodeAt(i);
+                            this.testFile({size: file.size, name: file.name, hash: sha1(bytes)}, file, callback)
+                        }
+                        reader.readAsDataURL(file);
+                    })
+                },
+
+                getStorageStats: function (params, callback) {
+                    params && (params = {});
+                    if (this.get('gallery_token') && this.get('gallery_url'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/stats/',
+                            dataType: 'json',
+                            data: params,
+                            success: (response) => {
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                testFile: function (params, file, callback) {
+                    if (this.get('gallery_token') && this.get('gallery_url'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/slot/',
+                            dataType: 'json',
+                            data: params,
+                            success: (response) => {
+                                this.uploadFile(file , callback)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                uploadFile: function (file, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url')) {
+                        let formData = new FormData();
+                        formData.append('file', file, file.name);
+                        if (file.duration)
+                            formData.append('duration', file.duration);
+                        if (file.voice)
+                            formData.append('media_type', file.type + '+voice');
+                        else
+                            formData.append('media_type', file.type);
+                        $.ajax({
+                            type: 'POST',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/upload/',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                    }
+                },
+
                 createMessageFromIQ: function (attrs) {
                     let contact = this.contacts.mergeContact(attrs.from_jid),
                         chat = this.chats.getChat(contact);
@@ -1695,6 +1812,408 @@ define("xabber-accounts", function () {
             }
         });
 
+        xabber.AccountMediaGalleryView = xabber.BasicView.extend({
+            template: templates.media_gallery_account,
+            events: {
+                "change input.gallery-upload": "onFileInputChanged",
+                "click .btn-delete": "deleteFile",
+                "click .btn-delete-files": "deleteFilesFiltered",
+                "click .tabs .tab": "onTabClick",
+                "click .btn-gallery-sorting": "sortFiles",
+                "click .gallery-file": "onClickFile",
+                "click .btn-go-back": "closeStoragePanel",
+                "click .gallery-manage-storage": "openStoragePanel",
+            },
+
+            _initialize: function () {
+                this.account = this.model;
+                this.$el.html(this.template());
+                this.ps_container = this.$('.gallery-wrap');
+                this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+            },
+
+            render: function () {
+                this.updateStorage();
+                this.$('.gallery-wrap').hideIf(true)
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.$('.dropdown-button').dropdown(dropdown_settings);
+                this.$('.btn-delete-files-variants').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    hover: true,
+                    belowOrigin: true,
+                });
+            },
+
+            onScroll: function () {
+                let scrollTop = this.ps_container[0].scrollTop,
+                    scrollHeight = this.ps_container[0].scrollHeight,
+                    offsetHeight = this.ps_container[0].offsetHeight,
+                    persentScrolled = scrollTop / (scrollHeight - offsetHeight);
+                if (persentScrolled > 0.8 && !this.loading_files && (this.current_page < this.total_pages)){
+                    this.current_page++;
+                    this.current_options.page = this.current_page;
+                    this.getFiles(this.current_options)
+                }
+            },
+
+            updateStorage: function (after_deletion) {
+                this.account.getStorageStats(null,(response) => {
+                    let used_storage = utils.pretty_size(response.total.used) || '0';
+                    this.$('.btn-delete-files-dropdown').hideIf(!(response.total && response.total.used))
+                    this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used))
+                    this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
+                    this.$('.tabs .list-variant[data-value="image"]').hideIf(!(response.images && response.images.used))
+                    if (response.images && response.images.used)
+                        this.$('.tabs .list-variant[data-value="image"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="image"]').removeClass('tab')
+                    this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
+                    this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
+                    this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
+                    this.$('.tabs .list-variant[data-value="video"]').hideIf(!(response.videos && response.videos.used))
+                    if (response.videos && response.videos.used)
+                        this.$('.tabs .list-variant[data-value="video"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="video"]').removeClass('tab')
+                    this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used))
+                    this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used))
+                    this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used))
+                    this.$('.tabs .list-variant[data-value="voice"]').hideIf(!(response.voices && response.voices.used))
+                    if (response.voices && response.voices.used)
+                        this.$('.tabs .list-variant[data-value="voice"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="voice"]').removeClass('tab')
+                    this.$('.storage-label-voices').hideIf(!(response.voices && response.voices.used))
+                    this.$('.storage-usage-voices').hideIf(!(response.voices && response.voices.used))
+                    this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used))
+                    this.$('.tabs .list-variant[data-value="files"]').hideIf(!(response.files && response.files.used))
+                    if (response.files && response.files.used)
+                        this.$('.tabs .list-variant[data-value="files"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="files"]').removeClass('tab')
+                    this.$('.storage-label-files').hideIf(!(response.files && response.files.used))
+                    this.$('.storage-usage-files').hideIf(!(response.files && response.files.used))
+                    this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
+                    if (response.images){
+                        this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.videos){
+                        this.$('.storage-progress-videos').css('width', ((response.videos.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.voices){
+                        this.$('.storage-progress-voices').css('width', ((response.voices.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.files){
+                        this.$('.storage-progress-files').css('width', ((response.files.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    this.$('.tabs .indicator').remove();
+                    this.$('.tabs').tabs();
+                    this.$('.indicator').addClass('ground-color-500');
+                    if (after_deletion){
+                        !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
+                    }
+                });
+            },
+
+            closeStoragePanel: function () {
+                this.$('.gallery-wrap').hideIf(true);
+                this.ps_container.perfectScrollbar('destroy');
+                if (this.parent.ps_container.length) {
+                    this.parent.ps_container.perfectScrollbar(
+                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
+            },
+
+            openStoragePanel: function () {
+                this.updateStorage();
+                this.$('.gallery-wrap').hideIf(false)
+                if (this.ps_container.length) {
+                    this.ps_container.perfectScrollbar(
+                        _.extend(this.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
+                if (this.parent.ps_container.length) {
+                    this.parent.ps_container.perfectScrollbar('destroy');
+                }
+                this.$('.tabs .list-variant:not(.hidden) a').first().click();
+            },
+
+            filterType: function (file_type, sorting) {
+                this.$('.gallery-files').html('')
+                if (file_type === 'image' || file_type === 'video') {
+                    this.$('.gallery-files').removeClass('voice')
+                    this.$('.gallery-files').addClass('grid')
+                } else if (file_type === 'voice') {
+                    this.$('.gallery-files').addClass('voice')
+                    this.$('.gallery-files').removeClass('grid')
+                } else {
+                    this.$('.gallery-files').removeClass('voice')
+                    this.$('.gallery-files').removeClass('grid')
+                }
+                this.$('.tabs .list-variant a').removeClass('active');
+                this.$('.tabs .list-variant[data-value="' + file_type + '"] a').addClass('active');
+                let options = {type: file_type}
+                sorting && (options.order_by = sorting)
+                this.current_options = options
+                this.getFiles(options)
+            },
+
+            onTabClick: function (ev) {
+                let $target = $(ev.target).closest('.tab'),
+                    file_type = $target.attr('data-value');
+                this.current_page = 1;
+                this.total_pages = 0;
+                this.$('.gallery-files').html('')
+                this.filterType(file_type);
+            },
+
+            sortFiles: function (ev) {
+                let $target = $(ev.target).closest('.btn-gallery-sorting'),
+                    file_type = this.$('.tab .active').closest('.tab').attr('data-value'),
+                    sort_type = $target.attr('data-value');
+                this.current_page = 1;
+                this.total_pages = 0;
+                this.$('.gallery-files').html('')
+                this.filterType(file_type, sort_type);
+            },
+
+            onClickFile: function (ev) {
+                let $elem = $(ev.target);
+                if ($elem.hasClass('uploaded-video')) {
+                    let $file = $elem.closest('.gallery-file'),
+                        f_url = $file.attr('data-file');
+
+                    utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315"src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+                    return;
+                }
+                if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
+                    let $audio_elem = $elem.closest('.gallery-file'),
+                        f_url = $audio_elem.attr('data-file');
+                    $audio_elem.find('.mdi-play').removeClass('audio-file-play');
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-play')) {
+                    let $audio_elem = $elem.closest('.gallery-file');
+                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    $audio_elem[0].voice_message.play();
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-pause')) {
+                    this.prev_audio_message.voice_message.pause();
+                    return;
+                }
+            },
+
+            renderVoiceMessage: function (element, file_url) {
+                let not_expanded_msg = element.innerHTML,
+                    unique_id = 'waveform' + moment.now(),
+                    $elem = $(element),
+                    $msg_element = $elem.closest('.gallery-file');
+                $elem.addClass('voice-message-rendering').html($(templates.audio_file_waveform({waveform_id: unique_id})));
+                let aud = this.createAudio(file_url, unique_id);
+
+                aud.on('ready', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
+                    $msg_element.find('.gallery-file-placeholder-background').removeClass('gallery-audio-file-not-uploaded');
+                    let duration = Math.round(aud.getDuration());
+                    $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+                    aud.play();
+                });
+
+                aud.on('error', () => {
+                    $elem.removeClass('voice-message-rendering');
+                    element.innerHTML = not_expanded_msg;
+                    aud.unAll();
+                    $elem.find('.voice-message-play').get(0).remove();
+                    utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
+                });
+
+                aud.on('play', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').addClass('mdi-pause').removeClass('mdi-play');
+                    $msg_element.addClass('playing');
+                    let timerId = setInterval(function() {
+                        let cur_time = Math.round(aud.getCurrentTime());
+                        if (aud.isPlaying())
+                            $elem.find('.voice-msg-current-time').text(utils.pretty_duration(cur_time));
+                        else
+                            clearInterval(timerId);
+                    }, 100);
+                });
+
+                aud.on('finish', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                aud.on('pause', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                $elem.find('.voice-message-volume')[0].onchange = () => {
+                    aud.setVolume($elem.find('.voice-message-volume').val()/100);
+                };
+                return aud;
+            },
+
+            createAudio: function(file_url, unique_id) {
+                let audio = WaveSurfer.create({
+                    container: "#" + unique_id,
+                    scrollParent: false,
+                    barWidth: 3,
+                    height: 48,
+                    barHeight: 48,
+                    cursorColor: 'rgba(211,47,47,0.8)',
+                    autoCenter: false,
+                    normalize: true,
+                    hideScrollBar: true,
+                    progressColor: '#757575'
+                });
+                audio.load(file_url);
+                audio.setVolume(0.5);
+                return audio;
+            },
+
+            getFiles: function (options) {
+                options && options.file && (options = {});
+                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                    this.loading_files = true
+                    this.$('.gallery-files').html(env.templates.contacts.preloader())
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            response.type = options.type
+                            this.renderFiles(response)
+                            this.loading_files = false
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.loading_files = false
+                            this.$('.gallery-files .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            renderFiles: function (response) {
+                if (response.type != this.$('.tab .active').closest('.tab').attr('data-value'))
+                    return;
+                if (!response.items.length){
+                    !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
+                    return;
+                }
+                this.total_pages = response.total_pages;
+                this.$('.gallery-files .preloader-wrapper').remove()
+                if (response.items.length){
+                    response.items.forEach((item) => {
+                        let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
+                        $gallery_file.appendTo(this.$('.gallery-files'));
+                        $gallery_file.find('.uploaded-img').magnificPopup({
+                            type: 'image',
+                            closeOnContentClick: true,
+                            fixedContentPos: true,
+                            mainClass: 'mfp-no-margins mfp-with-zoom',
+                            image: {
+                                verticalFit: true,
+                                titleSrc: function(item) {
+                                    return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                                }
+                            },
+                            zoom: {
+                                enabled: true,
+                                duration: 300
+                            }
+                        });
+                    });
+                }
+                else {
+                    this.$('.gallery-files').html(xabber.getString("no_files"))
+                }
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.$('.dropdown-button').dropdown(dropdown_settings)
+            },
+
+            deleteFile: function (ev) {
+                let $target = $(ev.target).closest('.gallery-file'),
+                    file_id = $target.attr('data-id');
+                if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: JSON.stringify({id: file_id}),
+                        success: (response) => {
+                            this.updateStorage(true);
+                            $target.detach();
+                        },
+                        error: (response) => {
+                            console.log(response)
+                        }
+                    });
+            },
+
+            deleteFilesFiltered: function (ev) {
+                let $target = $(ev.target).closest('.property-variant'),
+                    days = $target.attr('data-date'),
+                    date = new Date();
+                days && date.setDate(date.getDate() - days)
+                if (this.account.get('gallery_token') && this.account.get('gallery_url') && date && date.toISOString().split('T') && date.toISOString().split('T')[0])
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
+                        success: (response) => {
+                            this.updateStorage(true);
+                            this.getFiles({type: this.$('.tab .active').closest('.tab').attr('data-value')})
+                        },
+                        error: (response) => {
+                            console.log(response)
+                        }
+                    });
+            },
+
+            onFileInputChanged: function (ev) {
+                let target = ev.target,
+                    files = [];
+                for (let i = 0; i < target.files.length; i++) {
+                    files.push(target.files[i]);
+                }
+
+                if (files) {
+                    this.account.prepareFiles(files, this.openStoragePanel.bind(this));
+                    $(target).val('')
+                }
+            },
+        });
+
         xabber.AccountSettingsLeftView = xabber.BasicView.extend({
             className: 'account-settings-left-wrap',
             template: templates.settings_left,
@@ -1722,6 +2241,7 @@ define("xabber-accounts", function () {
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("change:image", this.updateAvatar, this);
+                this.model.on("change:gallery_token", this.updateGallery, this);
                 this.model.on("activate deactivate", this.updateBlocks, this);
                 this.model.on("destroy", this.remove, this);
             },
@@ -1764,7 +2284,13 @@ define("xabber-accounts", function () {
                 this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="blocklist"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="groups-info"]').showIf(connected);
+                this.updateGallery();
                 this.updateScrollBar();
+            },
+
+            updateGallery: function () {
+                let connected = this.model.isConnected();
+                this.$('.settings-tab[data-block-name="media-gallery"]').showIf(connected && this.model.get('gallery_token'));
             },
 
             updateNameCSS: function () {
@@ -1890,6 +2416,8 @@ define("xabber-accounts", function () {
                 //     {model: this.model.resources, el: this.$('.xmpp-resources')[0]});
                 this.vcard_view = this.addChild('vcard', xabber.AccountVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
+                this.gallery_view = this.addChild('media-gallery', xabber.AccountMediaGalleryView,
+                    {model: this.model, el: this.$('.media-gallery')[0]});
                 this.$('.account-name .value').text(this.model.get('jid'));
                 this.updateStatus();
                 this.updateView();
@@ -1932,6 +2460,11 @@ define("xabber-accounts", function () {
                 this.$('.account-color .dropdown-content').hide();
                 this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
                 this.$('.panel-content-wrap').removeClass('hidden');
+                if (this.ps_container.length) {
+                    this.ps_container.perfectScrollbar(
+                        _.extend(this.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
                 return this;
             },
 
@@ -1949,7 +2482,13 @@ define("xabber-accounts", function () {
                 this.$('.server-info').showIf(connected);
                 this.$('.blocklist').showIf(connected);
                 this.$('.groups-info').showIf(connected);
+                this.updateGallery();
                 this.updateScrollBar();
+            },
+
+            updateGallery: function () {
+                let connected = this.model.isConnected();
+                this.$('.media-gallery').showIf(connected && this.model.get('gallery_token'));
             },
 
             updateSynchronizationBlock: function () {
@@ -2493,6 +3032,15 @@ define("xabber-accounts", function () {
             closeModal: function () {
                 this.$el.closeModal({ complete: this.hide.bind(this) });
             }
+        });
+
+        xabber.WebcamProfileImageView = xabber.BasicView.extend({
+            className: 'modal main-modal webcam-panel',
+            template: templates.webcam_panel,
+
+            events: {
+            },
+
         });
 
         xabber.WebcamProfileImageView = xabber.BasicView.extend({

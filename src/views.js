@@ -212,6 +212,11 @@ define("xabber-views", function () {
 
     xabber.NodeView = xabber.BasicView.extend({
         onShow: function (options, tree) {
+            if ((xabber.body.data.get('contact_details_view') && (this.vname === 'right_contact'))){
+                xabber.body.data.get('contact_details_view').scrollTo(xabber.body.data.get('contact_details_view').data.get('scroll_top'));
+                xabber.body.data.set('contact_details_view', null)
+                return;
+            }
             _.each(this.children, function (view) {
                 view.hide();
             });

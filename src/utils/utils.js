@@ -188,6 +188,27 @@ define([
             return 'mdi-file'
         },
 
+        file_type_icon_svg: function (mime_type) {
+            let filetype = utils.pretty_file_type(mime_type);
+            if (filetype === 'image')
+                return 'image';
+            if (filetype === 'audio')
+                return 'file-audio';
+            if (filetype === 'video')
+                return 'file-video';
+            if (filetype === 'document')
+                return 'file-document';
+            if (filetype === 'presentation')
+                return 'file-presentation';
+            if (filetype === 'archive')
+                return 'file-zip';
+            if (filetype === 'file')
+                return 'file';
+            if (filetype === 'pdf')
+                return 'file-pdf';
+            return 'file'
+        },
+
         pretty_file_type: function (mime_type) {
             if (constants.MIME_TYPES.image.includes(mime_type))
                 return 'image';

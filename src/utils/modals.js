@@ -125,7 +125,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         },
 
         dialogs: {
-            common: function (header, text, buttons, dialog_options, flag) {
+            common: function (header, text, buttons, dialog_options, flag, modal_class) {
                 var dialog = new Modal(function () {
                     buttons || (buttons = {});
                     dialog_options || (dialog_options = []);
@@ -141,7 +141,8 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                         cancel_button: cancel_button,
                         optional_buttons: optional_buttons,
                         dialog_options: dialog_options,
-                        flag: flag || ""
+                        flag: flag || "",
+                        modal_class: modal_class || ""
                     });
                 }, {use_queue: true});
 

@@ -1,0 +1,39 @@
+<div class="gallery-file" title="{{file.name}}" data-id="{{file.id}}" data-file="{{file.file}}" data-name="{{file.name}}" data-size="{{file.size}}" data-width="{{file.width}}" data-height="{{file.height}}" data-media-type="{{file.media_type}}" >
+    {[if (file.media_type && (file.media_type.includes('image') || file.media_type.includes('video'))){]}
+        <img class="{[if (file.media_type.includes('video')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}" data-mfp-src="{{file.file}}" src="{{file.thumbnail}}">
+    {[} else {]}
+        {[if (svg_icon == 'file-audio' && file.media_type.includes('+voice')){]}
+            <div class="gallery-file-placeholder-background gallery-audio-file-not-uploaded">
+                <i class="details-icon mdi mdi-play no-uploaded"></i>
+            </div>
+            <div class="gallery-file-audio-container">
+            </div>
+        {[} else {]}
+            <div class="gallery-file-placeholder-background">
+                <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="{{svg_icon}}"></svg>
+                <div class="gallery-file-title-grid">{{filesize}}</div>
+            </div>
+        {[}]}
+        <div class="gallery-file-title one-line">
+            {{file.name}},  <span class="gallery-file-size">{{filesize}}</span> <span class="gallery-file-date">{{file.created_at}}</span>
+        </div>
+        {[if (duration && file.media_type.includes('+voice')){]}
+            <div class="gallery-voice-file-duration">
+                0:00 / <span class="gallery-voice-file-total-duration">{{duration}}</span>
+            </div>
+        {[}]}
+    {[}]}
+    <div class="btn-more dropdown-button" data-activates="{{file.id}}-more">
+        <i class="mdi mdi-24px mdi-dots-vertical"></i>
+    </div>
+    <ul id="{{file.id}}-more" class="dropdown-content bootstrap-dropdown noselect">
+        <a class="one-line" target="_blank" rel="noopener noreferrer" href="{{file.file}}" download>
+            <div class="property-variant btn-download">
+                {[print(xabber.getString("action_download"))]}
+            </div>
+        </a>
+        <div class="property-variant btn-delete">
+            <span class="one-line">{[print(xabber.getString("delete"))]}</span>
+        </div>
+    </ul>
+</div>

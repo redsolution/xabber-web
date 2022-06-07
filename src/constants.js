@@ -280,6 +280,7 @@ var constants = {
             'audio/mpeg',
             'audio/ogg',
             'audio/ogg; codecs=opus',
+            'audio/ogg; codecs=opus+voice',
             'audio/vorbis',
             'audio/x-ms-wma',
             'audio/x-ms-wax',
