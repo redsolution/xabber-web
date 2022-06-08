@@ -945,6 +945,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .main-wrap {
     position: relative;
+    overflow: hidden;
     width: 1536px;
     height: 100%;
     margin: 0 auto;
