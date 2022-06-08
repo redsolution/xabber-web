@@ -1917,6 +1917,10 @@ define("xabber-accounts", function () {
                     this.$('.tabs').tabs();
                     this.$('.indicator').addClass('ground-color-500');
                     if (after_deletion){
+                        if (!this.$('.tabs .list-variant.tab').length) {
+                            this.closeStoragePanel();
+                            return;
+                        }
                         !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
                     }
                 });
