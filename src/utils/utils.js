@@ -251,6 +251,10 @@ define([
             return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
         },
 
+        getKeyByValue: function (object, value) {
+            return Object.keys(object).find(key => object[key] === value);
+        },
+
         slice_string: function (str, from, to) {
             to = _.isNumber(to) ? to : [...str].length;
             if (str.length === [...str].length)
