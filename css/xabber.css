@@ -5410,7 +5410,6 @@ input[type=text].simple-input-field:hover {
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
 .add-contact-modal.main-modal .modal-content {
-    min-height: 400px;
 }
 .add-contact-modal .row {
     margin: 0;
@@ -5687,6 +5686,15 @@ input[type=text].simple-input-field:hover {
 
 .add-contact-modal .input-field input#new_contact_username::placeholder {
     text-transform: none;
+}
+.add-contact-modal .btn-add.hidden-disabled{
+    pointer-events: none;
+    opacity: 0;
+}
+.add-contact-modal .preloader-wrapper{
+    position: absolute;
+    right: 64px;
+    bottom: 21px;
 }
 
 /* ----------------- ADD GROUP CHAT VIEW ------------------------ */

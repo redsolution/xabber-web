@@ -8995,7 +8995,6 @@ define("xabber-contacts", function () {
         xabber.AddContactView = xabber.BasicView.extend({
             className: 'modal main-modal add-contact-modal',
             template: templates.add_contact,
-            ps_selector: '.modal-content',
             avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
             events: {
@@ -9006,7 +9005,7 @@ define("xabber-contacts", function () {
                 "keyup .name-field #new_contact_username": "checkJid",
                 "focusout .name-field #new_contact_username": "focusoutInputField",
                 "focusout .new-group-name #new-group-name": "addNewGroup",
-                "click .btn-add": "addContact",
+                "click .btn-add": "stepForward",
                 "click .btn-cancel": "close"
             },
 
@@ -9059,6 +9058,28 @@ define("xabber-contacts", function () {
                 this.renderGroupsForAccount(account);
             },
 
+            stepForward: function () {
+                let jid = this.$('input[name=username]').val().trim();
+                this.$el.append($(templates.preloader()))
+                this.$('.btn-add').addClass('hidden-disabled')
+                this.$('input[name=contact_name]').val('');
+                if (this.account.connection && this.account.connection.connected) {
+                    ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid, (vcard) => {
+                            let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : ''
+                            username && this.$('input[name=contact_name]').val(username);
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.addContact()
+                        },
+                        (err) => {
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.$('input[name=username]').addClass('invalid')
+                                .siblings('.errors').text($(err).find('error text').text());
+                        });
+                }
+            },
+
             renderAccountItem: function (account) {
                 let $item = $(templates.add_contact_account_item({jid: account.get('jid'), name: account.get('name')}));
                 $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
@@ -9082,7 +9103,6 @@ define("xabber-contacts", function () {
                         return { name: name, id: uuid(), checked: _.contains(selected, name) };
                     })
                 }));
-                this.updateScrollBar();
             },
 
             selectAccount: function (ev) {
@@ -9130,7 +9150,6 @@ define("xabber-contacts", function () {
                     groups.push(name);
                     this.group_data.set({groups: groups, selected: selected});
                 }
-                this.scrollToBottom();
             },
 
             focusoutInputField: function () {
@@ -9140,7 +9159,7 @@ define("xabber-contacts", function () {
                 }
             },
 
-            checkJid: function () {
+            checkJid: function (ev) {
                 let jid = this.$('input[name=username]').val().trim(),
                     error_text,
                     regexp_full_jid = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))|(([0-9]{1,3}\.){3}[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -9154,6 +9173,8 @@ define("xabber-contacts", function () {
                 else {
                     this.$('input[name=username]').removeClass('invalid');
                     this.$('span.errors').text('').addClass('hidden');
+                    if (ev.keyCode === constants.KEY_ENTER)
+                        this.stepForward();
                 }
             },
 

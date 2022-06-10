@@ -38964,7 +38964,7 @@ define('text!templates/contacts/group_right.html',[],function () { return '<div 
 define('text!templates/contacts/group_left.html',[],function () { return '<div class="account-indicator ground-color-700"></div>\n<div class="group-head">\n    <i class="arrow mdi mdi-20px"></i>\n    <div class="group-title">\n        <span class="group-name one-line"></span>\n        <span class="member-counter one-line"></span>\n    </div>\n    <i class="group-icon mdi mdi-20px hidden"></i>\n</div>\n';});
 
 
-define('text!templates/contacts/add_contact.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("dialog_add_contact__header"))]}</span>\n        <div class="account-dropdown-wrap" data-activates="select-account-for-add-contact">\n            <div class="dropdown-button">\n                <div class="account-item-wrap">\n                    <div class="circle-avatar noselect">\n                        <img>\n                    </div>\n                </div>\n            </div>\n            <div id="select-account-for-add-contact" class="dropdown-content noselect">\n            </div>\n        </div>\n    </div>\n    <div class="modal-content">\n        <div class="row name-field">\n            <div class="input-field">\n                <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>\n                <input id="new_contact_username" type="text" placeholder=\'{[print(xabber.getString("dialog_add_contact__label_jid"))]}\' name="username">\n                <span class="errors fixed"></span>\n            </div>\n            <div class="input-field">\n                <label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>\n                <input id="new_contact_name" type="text" placeholder=\'{[print(xabber.getString("contact_user"))]}\' name="contact_name" required>\n            </div>\n            <span class="add-contact-feedback red-text"></span>\n        </div>\n        <div class="row groups-field">\n            <div class="field-header">{[print(xabber.getString("contact_circle"))]}</div>\n            <div class="groups checkbox-list">\n            </div>\n        </div>\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">{[print(xabber.getString("dialog_add_contact__button_add"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("dialog_add_contact__button_cancel"))]}</button>\n    </div>\n</div>\n';});
+define('text!templates/contacts/add_contact.html',[],function () { return '<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("dialog_add_contact__header"))]}</span>\n        <div class="account-dropdown-wrap" data-activates="select-account-for-add-contact">\n            <div class="dropdown-button">\n                <div class="account-item-wrap">\n                    <div class="circle-avatar noselect">\n                        <img>\n                    </div>\n                </div>\n            </div>\n            <div id="select-account-for-add-contact" class="dropdown-content noselect">\n            </div>\n        </div>\n    </div>\n    <div class="modal-content">\n        <div class="add-contact-jid-step">\n            <div class="row name-field">\n                <div class="input-field">\n                    <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>\n                    <input id="new_contact_username" type="text" placeholder=\'{[print(xabber.getString("dialog_add_contact__label_jid"))]}\' name="username">\n                    <span class="errors fixed"></span>\n                </div>\n            </div>\n        </div>\n        <!--<div class="add-contact-contact-step">-->\n            <!--<div class="row name-field">-->\n                <!--<div class="input-field">-->\n                    <!--<label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>-->\n                    <!--<input id="new_contact_name" type="text" placeholder=\'{[print(xabber.getString("contact_user"))]}\' name="contact_name" required>-->\n                <!--</div>-->\n            <!--</div>-->\n            <!--<div class="row groups-field">-->\n                <!--<div class="field-header">{[print(xabber.getString("contact_circle"))]}</div>-->\n                <!--<div class="groups checkbox-list">-->\n                <!--</div>-->\n            <!--</div>-->\n        <!--</div>-->\n    </div>\n    <div class="modal-footer">\n        <button class="btn-flat btn-main btn-add">{[print(xabber.getString("dialog_add_contact__button_add"))]}</button>\n        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("dialog_add_contact__button_cancel"))]}</button>\n    </div>\n</div>\n';});
 
 
 define('text!templates/contacts/contact_right_item.html',[],function () { return '<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <p class="name one-line"></p>\n    <p class="jid one-line hidden"></p>\n    <p class="status-message one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>\n';});
@@ -41380,7 +41380,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.38","version_description":"fixed contact details container overlaping main container"}'
+'{"version_number":"2.3.2.39","version_description":"add contact view changes"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -61433,7 +61433,6 @@ define("xabber-contacts", [],function () {
         xabber.AddContactView = xabber.BasicView.extend({
             className: 'modal main-modal add-contact-modal',
             template: templates.add_contact,
-            ps_selector: '.modal-content',
             avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
             events: {
@@ -61444,7 +61443,7 @@ define("xabber-contacts", [],function () {
                 "keyup .name-field #new_contact_username": "checkJid",
                 "focusout .name-field #new_contact_username": "focusoutInputField",
                 "focusout .new-group-name #new-group-name": "addNewGroup",
-                "click .btn-add": "addContact",
+                "click .btn-add": "stepForward",
                 "click .btn-cancel": "close"
             },
 
@@ -61497,6 +61496,28 @@ define("xabber-contacts", [],function () {
                 this.renderGroupsForAccount(account);
             },
 
+            stepForward: function () {
+                let jid = this.$('input[name=username]').val().trim();
+                this.$el.append($(templates.preloader()))
+                this.$('.btn-add').addClass('hidden-disabled')
+                this.$('input[name=contact_name]').val('');
+                if (this.account.connection && this.account.connection.connected) {
+                    ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid, (vcard) => {
+                            let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : ''
+                            username && this.$('input[name=contact_name]').val(username);
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.addContact()
+                        },
+                        (err) => {
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.$('input[name=username]').addClass('invalid')
+                                .siblings('.errors').text($(err).find('error text').text());
+                        });
+                }
+            },
+
             renderAccountItem: function (account) {
                 let $item = $(templates.add_contact_account_item({jid: account.get('jid'), name: account.get('name')}));
                 $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
@@ -61520,7 +61541,6 @@ define("xabber-contacts", [],function () {
                         return { name: name, id: uuid(), checked: _.contains(selected, name) };
                     })
                 }));
-                this.updateScrollBar();
             },
 
             selectAccount: function (ev) {
@@ -61568,7 +61588,6 @@ define("xabber-contacts", [],function () {
                     groups.push(name);
                     this.group_data.set({groups: groups, selected: selected});
                 }
-                this.scrollToBottom();
             },
 
             focusoutInputField: function () {
@@ -61578,7 +61597,7 @@ define("xabber-contacts", [],function () {
                 }
             },
 
-            checkJid: function () {
+            checkJid: function (ev) {
                 let jid = this.$('input[name=username]').val().trim(),
                     error_text,
                     regexp_full_jid = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))|(([0-9]{1,3}\.){3}[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -61592,6 +61611,8 @@ define("xabber-contacts", [],function () {
                 else {
                     this.$('input[name=username]').removeClass('invalid');
                     this.$('span.errors').text('').addClass('hidden');
+                    if (ev.keyCode === constants.KEY_ENTER)
+                        this.stepForward();
                 }
             },
 
