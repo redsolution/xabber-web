@@ -1078,6 +1078,8 @@ define("xabber-views", function () {
                             count_msg += chat.get('unread') + chat.get('const_unread');
                     }
                 });
+                let incoming_subscriptions = account.contacts.filter(item => item.get('subscription_request_in') && !item.get('subscription_request_out') && item.get('subscription_request_out') != 'both').length;
+                count_all_msg += incoming_subscriptions;
                 mentions += account.unread_mentions.length;
             });
             return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };

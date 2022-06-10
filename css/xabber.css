@@ -7213,12 +7213,20 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .last-msg {
-    width: calc(100% - 40px);
+    width: calc(100% - 42px);
     font-size: 13px;
     font-weight: 300;
     color: #757575;
     margin-top: 6px;
     line-height: 16px;
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .last-msg.triple-indicators {
+    width: calc(100% - 64px);
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .last-msg.quad-indicators {
+    width: calc(100% - 86px);
 }
 
 .chat-item .chat-states,
@@ -7281,7 +7289,20 @@ input[type=text].simple-input-field:hover {
     display: none !important;
 }
 
+.chat-item .chat-item-notifications-wrap{
+    position: absolute;
+    right: 2px;
+    bottom: 0px;
+    display:flex
+
+}
+.chat-item .chat-item-notifications-wrap .msg-counter,
+.chat-item .chat-item-notifications-wrap .msg-incoming-subscription{
+    position:static !important;
+    margin-left: 4px;
+}
 .chat-item .msg-counter,
+.chat-item .msg-incoming-subscription,
 .mention-item .msg-counter{
     position: absolute;
     right: 2px;
@@ -7297,6 +7318,7 @@ input[type=text].simple-input-field:hover {
     background-color: #388E3C;
 }
 .forward-panel-modal .chat-item .msg-counter,
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;
