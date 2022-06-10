@@ -6317,9 +6317,9 @@ define("xabber-chats", function () {
             let accounts = options.account ? [options.account] : xabber.accounts.connected;
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
-            this.$('.account-dropdown-wrap .dropdown-content').empty();
+            this.$('.dropdown-content#select-account-for-creating-groupchat').empty();
             _.each(accounts, (account) => {
-                this.$('.account-dropdown-wrap .dropdown-content').append(
+                this.$('.dropdown-content#select-account-for-creating-groupchat').append(
                         this.renderAccountItem(account));
             });
             this.$('.account-dropdown-wrap').hideIf(accounts.length < 2)
