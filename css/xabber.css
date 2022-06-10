@@ -7291,8 +7291,8 @@ input[type=text].simple-input-field:hover {
 
 .chat-item .chat-item-notifications-wrap{
     position: absolute;
-    right: 2px;
-    bottom: 0px;
+    right: 3px;
+    bottom: 3px;
     display:flex
 
 }

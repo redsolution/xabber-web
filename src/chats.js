@@ -3007,7 +3007,7 @@ define("xabber-chats", function () {
             else if (this.model.last_message && this.model.last_message.get('auth_request') && this.model.messages.length){
                 let messages = _.clone(this.model.messages.models),
                     msg = messages[messages.length - 2];
-                if (msg.get('is_unread')) {
+                if (msg && msg.get('is_unread')) {
                     this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
                     msg.set('is_unread', false);
                 }
