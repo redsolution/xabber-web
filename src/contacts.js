@@ -2571,7 +2571,7 @@ define("xabber-contacts", function () {
                     this.$('.btn-escape').addClass('btn-top');
                     this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').addClass('fixed-scroll');
-                    this.$('.buttons-wrap').hideIf(true);
+                    this.$('.main-info .buttons-wrap').hideIf(true);
                     this.$('.btn-edit').hideIf(true);
                     this.$('.btn-qr-code').hideIf(true);
                     this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
@@ -2583,7 +2583,7 @@ define("xabber-contacts", function () {
                     this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').removeClass('fixed-scroll');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
-                    this.$('.buttons-wrap').hideIf(false);
+                    this.$('.main-info .buttons-wrap').hideIf(false);
                     this.$('.btn-edit').hideIf(false);
                     this.$('.btn-qr-code').hideIf(false);
                 }
@@ -3645,7 +3645,6 @@ define("xabber-contacts", function () {
             },
 
             updateParticipantsList: function () {
-                this.$el.find('.members-list-wrap tbody').html('');
                 this.updateParticipants();
                 if (!this.model.all_rights)
                     this.model.getAllRights();
@@ -3663,6 +3662,8 @@ define("xabber-contacts", function () {
                 this.participants.each((participant) => {
                     this.renderMemberItem(participant);
                 });
+                if (this.$('.participants-search-form input').val())
+                    this.searchParticipant();
                 this.$el.removeClass('request-waiting');
             },
 
