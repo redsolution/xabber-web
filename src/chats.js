@@ -1630,7 +1630,11 @@ define("xabber-chats", function () {
             this.model.messages.on("destroy", this.onMessageRemoved, this);
             this.model.messages.on("change:state", this.onChangedMessageState, this);
             if (this.contact) {
+                this.updateIncomingSubscription();
                 this.contact.on("change:name", this.updateName, this);
+                this.contact.on("change:subscription", this.updateIncomingSubscription, this);
+                this.contact.on("change:subscription_request_in", this.updateIncomingSubscription, this);
+                this.contact.on("change:subscription_request_out", this.updateIncomingSubscription, this);
                 this.contact.on("change:status", this.updateStatus, this);
                 this.contact.on("change:private_chat", this.updateIcon, this);
                 this.contact.on("change:invitation", this.updateIcon, this);
@@ -1722,6 +1726,18 @@ define("xabber-chats", function () {
         updateCounter: function () {
             let unread = this.model.get('unread') + this.model.get('const_unread');
             this.$('.msg-counter').showIf(unread).text(unread || '');
+            this.updateTextClipping();
+        },
+
+        updateIncomingSubscription: function () {
+            this.$('.msg-incoming-subscription').showIf(this.contact.get('subscription_request_in') && !this.contact.get('subscription_request_out') && this.contact.get('subscription_request_out') != 'both');
+            this.updateTextClipping();
+        },
+
+        updateTextClipping: function () {
+            let indicators_count = this.$('.chat-item-notifications-wrap').children(':not(.hidden)').length;
+            this.$('.last-msg').switchClass('triple-indicators', indicators_count === 3)
+            this.$('.last-msg').switchClass('quad-indicators', indicators_count === 4)
         },
 
         updateAvatar: function () {
@@ -1874,6 +1890,9 @@ define("xabber-chats", function () {
                     else
                         msg_text = $('<span class=text-color-500/>').text(msg_text);
                     this.$('.last-msg').html(msg_text);
+                    if (msg.get('auth_request')){
+                        xabber.toolbar_view.recountAllMessageCounter();
+                    }
                 }
                 else {
                     if (forwarded_message) {
@@ -2984,6 +3003,14 @@ define("xabber-chats", function () {
                 let msg = this.model.last_message;
                 this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
                 msg.set('is_unread', false);
+            }
+            else if (this.model.last_message && this.model.last_message.get('auth_request') && this.model.messages.length){
+                let messages = _.clone(this.model.messages.models),
+                    msg = messages[messages.length - 2];
+                if (msg && msg.get('is_unread')) {
+                    this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+                    msg.set('is_unread', false);
+                }
             }
         },
 
@@ -6411,9 +6438,9 @@ define("xabber-chats", function () {
             let accounts = options.account ? [options.account] : xabber.accounts.connected;
             this.$('.single-acc').showIf(accounts.length === 1);
             this.$('.multiple-acc').hideIf(accounts.length === 1);
-            this.$('.account-dropdown-wrap .dropdown-content').empty();
+            this.$('.dropdown-content#select-account-for-creating-groupchat').empty();
             _.each(accounts, (account) => {
-                this.$('.account-dropdown-wrap .dropdown-content').append(
+                this.$('.dropdown-content#select-account-for-creating-groupchat').append(
                         this.renderAccountItem(account));
             });
             this.$('.account-dropdown-wrap').hideIf(accounts.length < 2)
@@ -6876,7 +6903,7 @@ define("xabber-chats", function () {
                     if (view.model.get('saved'))
                         xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
                     else if(xabber.right_contact_panel_saveable)
-                        view.contact.showDetailsRight('all-chats', {right_saved: true});
+                        view.contact.showDetailsRight('all-chats', {right_saved: true, encrypted: view.model.get('encrypted')});
                     else
                         view.contact.showDetailsRight('all-chats', {right_saved: false});
                 }
@@ -6996,8 +7023,8 @@ define("xabber-chats", function () {
                 all_chats = [],
                 all_chats_pinned = [];
             if (is_unread) {
-                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
-                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && !chat.contact.get('subscription_request_out') && chat.contact.get('subscription_request_out') != 'both')) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
+                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && !chat.contact.get('subscription_request_out') && chat.contact.get('subscription_request_out') != 'both')) && chat.get('pinned') !== '0' && chat.get('pinned'));
             }
             if (!all_chats.length && !all_chats_pinned.length) {
                 all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
@@ -7797,7 +7824,7 @@ define("xabber-chats", function () {
         },
 
         showContactDetailsRight: function () {
-            this.contact.showDetailsRight('all-chats');
+            this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
         },
 
         showContactResources: function () {

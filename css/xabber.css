@@ -945,6 +945,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 
 .main-wrap {
     position: relative;
+    overflow: hidden;
     width: 1536px;
     height: 100%;
     margin: 0 auto;
@@ -5448,7 +5449,6 @@ input[type=text].simple-input-field:hover {
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
 .add-contact-modal.main-modal .modal-content {
-    min-height: 400px;
 }
 .add-contact-modal .row {
     margin: 0;
@@ -5725,6 +5725,15 @@ input[type=text].simple-input-field:hover {
 
 .add-contact-modal .input-field input#new_contact_username::placeholder {
     text-transform: none;
+}
+.add-contact-modal .btn-add.hidden-disabled{
+    pointer-events: none;
+    opacity: 0;
+}
+.add-contact-modal .preloader-wrapper{
+    position: absolute;
+    right: 64px;
+    bottom: 21px;
 }
 
 /* ----------------- ADD GROUP CHAT VIEW ------------------------ */
@@ -6103,7 +6112,7 @@ input[type=text].simple-input-field:hover {
     height: 600px;
     max-width: 90%;
     max-height: 90%;
-    top: 5% !important;
+    top: 50% !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background-color: rgba(255, 255, 255, .8);
@@ -7243,12 +7252,20 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .last-msg {
-    width: calc(100% - 40px);
+    width: calc(100% - 42px);
     font-size: 13px;
     font-weight: 300;
     color: #757575;
     margin-top: 6px;
     line-height: 16px;
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .last-msg.triple-indicators {
+    width: calc(100% - 64px);
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .last-msg.quad-indicators {
+    width: calc(100% - 86px);
 }
 
 .chat-item .chat-states,
@@ -7311,7 +7328,20 @@ input[type=text].simple-input-field:hover {
     display: none !important;
 }
 
+.chat-item .chat-item-notifications-wrap{
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    display:flex
+
+}
+.chat-item .chat-item-notifications-wrap .msg-counter,
+.chat-item .chat-item-notifications-wrap .msg-incoming-subscription{
+    position:static !important;
+    margin-left: 4px;
+}
 .chat-item .msg-counter,
+.chat-item .msg-incoming-subscription,
 .mention-item .msg-counter{
     position: absolute;
     right: 2px;
@@ -7327,6 +7357,7 @@ input[type=text].simple-input-field:hover {
     background-color: #388E3C;
 }
 .forward-panel-modal .chat-item .msg-counter,
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;

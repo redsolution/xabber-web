@@ -14,23 +14,28 @@
         </div>
     </div>
     <div class="modal-content">
-        <div class="row name-field">
-            <div class="input-field">
-                <label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>
-                <input id="new_contact_username" type="text" placeholder='{[print(xabber.getString("dialog_add_contact__label_jid"))]}' name="username">
-                <span class="errors fixed"></span>
-            </div>
-            <div class="input-field">
-                <label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>
-                <input id="new_contact_name" type="text" placeholder='{[print(xabber.getString("contact_user"))]}' name="contact_name" required>
-            </div>
-            <span class="add-contact-feedback red-text"></span>
-        </div>
-        <div class="row groups-field">
-            <div class="field-header">{[print(xabber.getString("contact_circle"))]}</div>
-            <div class="groups checkbox-list">
+        <div class="add-contact-jid-step">
+            <div class="row name-field">
+                <div class="input-field">
+                    <!--<label for="new_contact_username">{[print(xabber.getString("dialog_add_contact__label_jid"))]}</label>-->
+                    <input id="new_contact_username" type="text" placeholder='{[print(xabber.getString("dialog_add_contact__label_jid"))]}' name="username">
+                    <span class="errors fixed"></span>
+                </div>
             </div>
         </div>
+        <!--<div class="add-contact-contact-step">-->
+            <!--<div class="row name-field">-->
+                <!--<div class="input-field">-->
+                    <!--<label for="new_contact_name">{[print(xabber.getString("contact_user"))]}</label>-->
+                    <!--<input id="new_contact_name" type="text" placeholder='{[print(xabber.getString("contact_user"))]}' name="contact_name" required>-->
+                <!--</div>-->
+            <!--</div>-->
+            <!--<div class="row groups-field">-->
+                <!--<div class="field-header">{[print(xabber.getString("contact_circle"))]}</div>-->
+                <!--<div class="groups checkbox-list">-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
     </div>
     <div class="modal-footer">
         <button class="btn-flat btn-main btn-add">{[print(xabber.getString("dialog_add_contact__button_add"))]}</button>

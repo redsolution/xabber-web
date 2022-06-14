@@ -247,6 +247,7 @@ define("xabber-ui", function () {
             path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_contact_details_right = new this.ViewPath('contact.details_view_right'),
+            path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
             path_participant_messages = new this.ViewPath('model.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
@@ -333,6 +334,9 @@ define("xabber-ui", function () {
                 return;
             if (options.right_contact === 'contact_details') {
                 return { details: path_contact_details_right };
+            }
+            if (options.right_contact === 'contact_details_encrypted') {
+                return { details: path_contact_details_right_encrypted };
             }
             if (options.details_content === 'participants')
                 return { details_content: path_details_participants };

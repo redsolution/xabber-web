@@ -984,16 +984,21 @@ define("xabber-contacts", function () {
                 if (xabber.chats_view)
                     scrolled_top_chats_view = xabber.chats_view.getScrollTop();
                 options = options || {};
-                if (!this.details_view_right)
+                if (!this.details_view_right && !options.encrypted)
                     this.details_view_right = (this.get('group_chat')) ? new xabber.GroupChatDetailsViewRight({model: this}) : new xabber.ContactDetailsViewRight({model: this});
+                if (!this.details_view_right_encrypted && options.encrypted)
+                    this.details_view_right_encrypted = new xabber.ContactDetailsViewRight({model: this, encrypted: true});
                 screen || (screen = 'contacts');
                 if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'members' && options.type != 'participant' && !options.right_saved) {
                     this.set('search_hidden', true)
                     xabber.body.setScreen(screen, {right_contact: '', contact: this});
                 }
                 else {
-                    xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
-                    if (this.details_view_right.contact_searched_messages_view){
+                    if (options.encrypted)
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this});
+                    else
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
+                    if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
                         this.details_view_right.contact_searched_messages_view.hideSearch();
                         if (options.type === 'search') {
                             this.details_view_right.contact_searched_messages_view.clearSearch();
@@ -1737,19 +1742,22 @@ define("xabber-contacts", function () {
                 "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
-            _initialize: function () {
+            _initialize: function (options) {
+                this.encrypted = options.encrypted;
                 this.ps_container = this.$('.panel-content-wrap');
                 this.account = this.model.account;
-                this.chat = this.account.chats.getChat(this.model);
+                this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
                 this.name_field = new xabber.ContactNameWidget({
                     el: this.$('.name-wrap')[0],
                     model: this.model
                 });
                 this.name_field.$('.contact-name-input').prop('disabled', true)
-                this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
-                    {model: this.model, el: this.$('.edit-block-wrap')[0]});
-                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                if (!this.encrypted){
+                    this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
+                        {model: this.model, el: this.$('.edit-block-wrap')[0]});
+                    this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                        {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                }
                 this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.edit_groups_view = this.addChild('groups',
@@ -1786,6 +1794,11 @@ define("xabber-contacts", function () {
                     outDuration: 100,
                     hover: false
                 });
+                if (this.encrypted){
+                    this.$('.btn-search-messages').remove()
+                    this.$('.btn-edit').remove()
+                    this.$('.btn-qr-code').remove()
+                }
                 this.updateChilds();
                 this.updateSubscriptions();
                 this.updateJingleButtons();
@@ -1801,9 +1814,9 @@ define("xabber-contacts", function () {
             },
 
             updateChilds: function () {
-                if (!this.model.get('vcard_hidden'))
+                if (this.vcard_view && !this.model.get('vcard_hidden'))
                     this.vcard_view.hideVCard();
-                if (!this.model.get('edit_hidden'))
+                if (this.contact_edit_view && !this.model.get('edit_hidden'))
                     this.contact_edit_view.hideEdit();
             },
 
@@ -2707,7 +2720,7 @@ define("xabber-contacts", function () {
                     this.$('.btn-escape').addClass('btn-top');
                     this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').addClass('fixed-scroll');
-                    this.$('.buttons-wrap').hideIf(true);
+                    this.$('.main-info .buttons-wrap').hideIf(true);
                     this.$('.btn-edit').hideIf(true);
                     this.$('.btn-qr-code').hideIf(true);
                     this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
@@ -2719,7 +2732,7 @@ define("xabber-contacts", function () {
                     this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').removeClass('fixed-scroll');
                     this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
-                    this.$('.buttons-wrap').hideIf(false);
+                    this.$('.main-info .buttons-wrap').hideIf(false);
                     this.$('.btn-edit').hideIf(false);
                     this.$('.btn-qr-code').hideIf(false);
                 }
@@ -4061,7 +4074,6 @@ define("xabber-contacts", function () {
             },
 
             updateParticipantsList: function () {
-                this.$el.find('.members-list-wrap tbody').html('');
                 this.updateParticipants();
                 if (!this.model.all_rights)
                     this.model.getAllRights();
@@ -4079,6 +4091,8 @@ define("xabber-contacts", function () {
                 this.participants.each((participant) => {
                     this.renderMemberItem(participant);
                 });
+                if (this.$('.participants-search-form input').val())
+                    this.searchParticipant();
                 this.$el.removeClass('request-waiting');
             },
 
@@ -9411,7 +9425,6 @@ define("xabber-contacts", function () {
         xabber.AddContactView = xabber.BasicView.extend({
             className: 'modal main-modal add-contact-modal',
             template: templates.add_contact,
-            ps_selector: '.modal-content',
             avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
             events: {
@@ -9422,7 +9435,7 @@ define("xabber-contacts", function () {
                 "keyup .name-field #new_contact_username": "checkJid",
                 "focusout .name-field #new_contact_username": "focusoutInputField",
                 "focusout .new-group-name #new-group-name": "addNewGroup",
-                "click .btn-add": "addContact",
+                "click .btn-add": "stepForward",
                 "click .btn-cancel": "close"
             },
 
@@ -9443,9 +9456,9 @@ define("xabber-contacts", function () {
                     .removeClass('invalid');
                 this.$('.single-acc').showIf(accounts.length === 1);
                 this.$('.multiple-acc').hideIf(accounts.length === 1);
-                this.$('.account-dropdown-wrap .dropdown-content').empty();
+                this.$('.dropdown-content#select-account-for-add-contact').empty();
                 _.each(accounts, (account) => {
-                    this.$('.account-dropdown-wrap .dropdown-content').append(
+                    this.$('.dropdown-content#select-account-for-add-contact').append(
                         this.renderAccountItem(account));
                 });
                 this.$('.account-dropdown-wrap').hideIf(accounts.length < 2)
@@ -9475,6 +9488,28 @@ define("xabber-contacts", function () {
                 this.renderGroupsForAccount(account);
             },
 
+            stepForward: function () {
+                let jid = this.$('input[name=username]').val().trim();
+                this.$el.append($(templates.preloader()))
+                this.$('.btn-add').addClass('hidden-disabled')
+                this.$('input[name=contact_name]').val('');
+                if (this.account.connection && this.account.connection.connected) {
+                    ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid, (vcard) => {
+                            let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : ''
+                            username && this.$('input[name=contact_name]').val(username);
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.addContact()
+                        },
+                        (err) => {
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.btn-add').removeClass('hidden-disabled');
+                            this.$('input[name=username]').addClass('invalid')
+                                .siblings('.errors').text($(err).find('error text').text());
+                        });
+                }
+            },
+
             renderAccountItem: function (account) {
                 let $item = $(templates.add_contact_account_item({jid: account.get('jid'), name: account.get('name')}));
                 $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
@@ -9498,7 +9533,6 @@ define("xabber-contacts", function () {
                         return { name: name, id: uuid(), checked: _.contains(selected, name) };
                     })
                 }));
-                this.updateScrollBar();
             },
 
             selectAccount: function (ev) {
@@ -9546,7 +9580,6 @@ define("xabber-contacts", function () {
                     groups.push(name);
                     this.group_data.set({groups: groups, selected: selected});
                 }
-                this.scrollToBottom();
             },
 
             focusoutInputField: function () {
@@ -9556,7 +9589,7 @@ define("xabber-contacts", function () {
                 }
             },
 
-            checkJid: function () {
+            checkJid: function (ev) {
                 let jid = this.$('input[name=username]').val().trim(),
                     error_text,
                     regexp_full_jid = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))|(([0-9]{1,3}\.){3}[0-9]{1,3})|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -9570,6 +9603,8 @@ define("xabber-contacts", function () {
                 else {
                     this.$('input[name=username]').removeClass('invalid');
                     this.$('span.errors').text('').addClass('hidden');
+                    if (ev.keyCode === constants.KEY_ENTER)
+                        this.stepForward();
                 }
             },
 
