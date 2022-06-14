@@ -848,16 +848,21 @@ define("xabber-contacts", function () {
                 if (xabber.chats_view)
                     scrolled_top_chats_view = xabber.chats_view.getScrollTop();
                 options = options || {};
-                if (!this.details_view_right)
+                if (!this.details_view_right && !options.encrypted)
                     this.details_view_right = (this.get('group_chat')) ? new xabber.GroupChatDetailsViewRight({model: this}) : new xabber.ContactDetailsViewRight({model: this});
+                if (!this.details_view_right_encrypted && options.encrypted)
+                    this.details_view_right_encrypted = new xabber.ContactDetailsViewRight({model: this, encrypted: true});
                 screen || (screen = 'contacts');
                 if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'members' && options.type != 'participant' && !options.right_saved) {
                     this.set('search_hidden', true)
                     xabber.body.setScreen(screen, {right_contact: '', contact: this});
                 }
                 else {
-                    xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
-                    if (this.details_view_right.contact_searched_messages_view){
+                    if (options.encrypted)
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this});
+                    else
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
+                    if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
                         this.details_view_right.contact_searched_messages_view.hideSearch();
                         if (options.type === 'search') {
                             this.details_view_right.contact_searched_messages_view.clearSearch();
@@ -1601,19 +1606,22 @@ define("xabber-contacts", function () {
                 "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
-            _initialize: function () {
+            _initialize: function (options) {
+                this.encrypted = options.encrypted;
                 this.ps_container = this.$('.panel-content-wrap');
                 this.account = this.model.account;
-                this.chat = this.account.chats.getChat(this.model);
+                this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
                 this.name_field = new xabber.ContactNameWidget({
                     el: this.$('.name-wrap')[0],
                     model: this.model
                 });
                 this.name_field.$('.contact-name-input').prop('disabled', true)
-                this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
-                    {model: this.model, el: this.$('.edit-block-wrap')[0]});
-                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                if (!this.encrypted){
+                    this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
+                        {model: this.model, el: this.$('.edit-block-wrap')[0]});
+                    this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                        {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                }
                 this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.edit_groups_view = this.addChild('groups',
@@ -1650,6 +1658,11 @@ define("xabber-contacts", function () {
                     outDuration: 100,
                     hover: false
                 });
+                if (this.encrypted){
+                    this.$('.btn-search-messages').remove()
+                    this.$('.btn-edit').remove()
+                    this.$('.btn-qr-code').remove()
+                }
                 this.updateChilds();
                 this.updateSubscriptions();
                 this.updateJingleButtons();
@@ -1665,9 +1678,9 @@ define("xabber-contacts", function () {
             },
 
             updateChilds: function () {
-                if (!this.model.get('vcard_hidden'))
+                if (this.vcard_view && !this.model.get('vcard_hidden'))
                     this.vcard_view.hideVCard();
-                if (!this.model.get('edit_hidden'))
+                if (this.contact_edit_view && !this.model.get('edit_hidden'))
                     this.contact_edit_view.hideEdit();
             },
 

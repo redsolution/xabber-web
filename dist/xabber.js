@@ -41380,7 +41380,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.43","version_description":"fixed memberlist rerendering"}'
+'{"version_number":"2.3.2.44","version_description":"added encrypted chat specified contact details view"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -53288,16 +53288,21 @@ define("xabber-contacts", [],function () {
                 if (xabber.chats_view)
                     scrolled_top_chats_view = xabber.chats_view.getScrollTop();
                 options = options || {};
-                if (!this.details_view_right)
+                if (!this.details_view_right && !options.encrypted)
                     this.details_view_right = (this.get('group_chat')) ? new xabber.GroupChatDetailsViewRight({model: this}) : new xabber.ContactDetailsViewRight({model: this});
+                if (!this.details_view_right_encrypted && options.encrypted)
+                    this.details_view_right_encrypted = new xabber.ContactDetailsViewRight({model: this, encrypted: true});
                 screen || (screen = 'contacts');
                 if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'members' && options.type != 'participant' && !options.right_saved) {
                     this.set('search_hidden', true)
                     xabber.body.setScreen(screen, {right_contact: '', contact: this});
                 }
                 else {
-                    xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
-                    if (this.details_view_right.contact_searched_messages_view){
+                    if (options.encrypted)
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this});
+                    else
+                        xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
+                    if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
                         this.details_view_right.contact_searched_messages_view.hideSearch();
                         if (options.type === 'search') {
                             this.details_view_right.contact_searched_messages_view.clearSearch();
@@ -54041,19 +54046,22 @@ define("xabber-contacts", [],function () {
                 "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
-            _initialize: function () {
+            _initialize: function (options) {
+                this.encrypted = options.encrypted;
                 this.ps_container = this.$('.panel-content-wrap');
                 this.account = this.model.account;
-                this.chat = this.account.chats.getChat(this.model);
+                this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
                 this.name_field = new xabber.ContactNameWidget({
                     el: this.$('.name-wrap')[0],
                     model: this.model
                 });
                 this.name_field.$('.contact-name-input').prop('disabled', true)
-                this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
-                    {model: this.model, el: this.$('.edit-block-wrap')[0]});
-                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                if (!this.encrypted){
+                    this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
+                        {model: this.model, el: this.$('.edit-block-wrap')[0]});
+                    this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                        {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                }
                 this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.edit_groups_view = this.addChild('groups',
@@ -54090,6 +54098,11 @@ define("xabber-contacts", [],function () {
                     outDuration: 100,
                     hover: false
                 });
+                if (this.encrypted){
+                    this.$('.btn-search-messages').remove()
+                    this.$('.btn-edit').remove()
+                    this.$('.btn-qr-code').remove()
+                }
                 this.updateChilds();
                 this.updateSubscriptions();
                 this.updateJingleButtons();
@@ -54105,9 +54118,9 @@ define("xabber-contacts", [],function () {
             },
 
             updateChilds: function () {
-                if (!this.model.get('vcard_hidden'))
+                if (this.vcard_view && !this.model.get('vcard_hidden'))
                     this.vcard_view.hideVCard();
-                if (!this.model.get('edit_hidden'))
+                if (this.contact_edit_view && !this.model.get('edit_hidden'))
                     this.contact_edit_view.hideEdit();
             },
 
@@ -68624,7 +68637,7 @@ define("xabber-chats", [],function () {
                     if (view.model.get('saved'))
                         xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
                     else if(xabber.right_contact_panel_saveable)
-                        view.contact.showDetailsRight('all-chats', {right_saved: true});
+                        view.contact.showDetailsRight('all-chats', {right_saved: true, encrypted: view.model.get('encrypted')});
                     else
                         view.contact.showDetailsRight('all-chats', {right_saved: false});
                 }
@@ -69545,7 +69558,7 @@ define("xabber-chats", [],function () {
         },
 
         showContactDetailsRight: function () {
-            this.contact.showDetailsRight('all-chats');
+            this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
         },
 
         showContactResources: function () {
@@ -72801,6 +72814,7 @@ define("xabber-ui", [],function () {
             path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
             path_contact_details = new this.ViewPath('contact.details_view'),
             path_contact_details_right = new this.ViewPath('contact.details_view_right'),
+            path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
             path_participant_messages = new this.ViewPath('model.messages_view'),
             path_details_participants = new this.ViewPath('contact.details_view.participants');
 
@@ -72887,6 +72901,9 @@ define("xabber-ui", [],function () {
                 return;
             if (options.right_contact === 'contact_details') {
                 return { details: path_contact_details_right };
+            }
+            if (options.right_contact === 'contact_details_encrypted') {
+                return { details: path_contact_details_right_encrypted };
             }
             if (options.details_content === 'participants')
                 return { details_content: path_details_participants };

@@ -6810,7 +6810,7 @@ define("xabber-chats", function () {
                     if (view.model.get('saved'))
                         xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
                     else if(xabber.right_contact_panel_saveable)
-                        view.contact.showDetailsRight('all-chats', {right_saved: true});
+                        view.contact.showDetailsRight('all-chats', {right_saved: true, encrypted: view.model.get('encrypted')});
                     else
                         view.contact.showDetailsRight('all-chats', {right_saved: false});
                 }
@@ -7731,7 +7731,7 @@ define("xabber-chats", function () {
         },
 
         showContactDetailsRight: function () {
-            this.contact.showDetailsRight('all-chats');
+            this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
         },
 
         showContactResources: function () {
