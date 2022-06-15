@@ -740,9 +740,9 @@ define("xabber-contacts", function () {
                     .c('value').t(Strophe.NS.MAM).up().up();
                 if (this.account.server_features.get(Strophe.NS.ARCHIVE) && options.encrypted)    {
                     iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
-                        .c('value').t(options.get('encrypted')).up().up();
+                        .c('value').t(options.encrypted).up().up();
                 }
-                if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+                if (this.account.server_features.get(Strophe.NS.ARCHIVE) && !options.encrypted)    {
                     if (options.filter_image)
                         iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_image`})
                             .c('value').t(options.filter_image).up().up();
@@ -849,7 +849,7 @@ define("xabber-contacts", function () {
                                     key = utils.fromBase64toArrayBuffer(uri.slice(uri.length - 64));
                                 uri = uri.slice(0, uri.length - 64 - 1);
                                 _.extend(file_attrs, {sources: [uri], key: key});
-                                attrs.has_encrypted_files = true;
+                                file_attrs.has_encrypted_files = true;
                             }
                             items.push(file_attrs);
                         }
@@ -1755,9 +1755,9 @@ define("xabber-contacts", function () {
                 if (!this.encrypted){
                     this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
                         {model: this.model, el: this.$('.edit-block-wrap')[0]});
-                    this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                        {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
                 }
+                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
                 this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.edit_groups_view = this.addChild('groups',
@@ -2155,15 +2155,9 @@ define("xabber-contacts", function () {
                     case 'voice':
                         constructor_func = xabber.MediaVoiceView;
                         break;
-                    case 'blocked':
-                        constructor_func = xabber.BlockedView;
-                        break;
-                    case 'invitations':
-                        constructor_func = xabber.InvitationsView;
-                        break;
                 };
                 if (constructor_func)
-                    return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
+                    return this.addChild(name, constructor_func, {model: this.model, encrypted: this.encrypted, el: this.$('.participants-wrap')[0]});
                 else
                     return;
             },
@@ -3395,8 +3389,9 @@ define("xabber-contacts", function () {
             _initialize: function (options) {
                 this.contact = options.model;
                 this.participant = options.participant;
+                this.encrypted = options.encrypted;
                 this.account = this.contact.account;
-                this.chat = this.account.chats.getChat(this.contact);
+                this.chat = this.account.chats.getChat(this.contact, this.encrypted && 'encrypted');
                 this.temporary_items = []
                 this.parent.ps_container.on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
             },
@@ -3406,6 +3401,7 @@ define("xabber-contacts", function () {
                     this.$el = this.parent.$('.participants-details-media-wrap')
                 this.$el.html($(templates.preloader()));
                 this.all_messages_loaded = false;
+                this.temporary_items = [];
                 this.messagesFileRequest({}, () => {
                     this.$el.html("<div class='gallery-files'></div>");
                     this.updateMedia();
@@ -3439,6 +3435,46 @@ define("xabber-contacts", function () {
                 });
             },
 
+            filterEncryptedFiles: function () {
+                return this.temporary_items;
+            },
+
+            encryptedFilesHandler: function () {
+                let files_count = 0;
+                this.temporary_items = this.filterEncryptedFiles();
+
+                if (this.temporary_items.length)
+                    this.temporary_items.forEach((item, idx) => {
+                        let source = item.sources[0];
+                        if (!item.key){
+                            files_count++;
+                            return;
+                        }
+                        this.chat.messages.decryptFile(source, item.key).then((result) => {
+                            if (!this.active)
+                                return
+                            item.sources[0] = result
+                            files_count++;
+                            if (files_count === this.temporary_items.length) {
+                                this.updateEncryptedMedia()
+                                this.loading_messages = false;
+                            }
+                        });
+                    });
+                else {
+                    this.updateEncryptedMedia()
+                    this.loading_messages = false;
+                    if (!this.all_messages_loaded){
+                        this.loadMoreFiles();
+                    }
+                }
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files').length && this.$el.html("<div class='gallery-files'></div>");
+                this.updateMedia();
+            },
+
             updateMedia: function (is_loaded) {
                 if (!this.active)
                     return
@@ -3450,45 +3486,77 @@ define("xabber-contacts", function () {
                         let $gallery_file = $(templates.media_item({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
                         $gallery_file.appendTo(this.$('.gallery-files'));
                     });
-                    this.temporary_items = []
                 }
+                this.temporary_items = []
                 $(templates.media_items_empty()).appendTo(this.$('.gallery-files'))
                 this.$('.gallery-files .preloader-wrapper').remove()
             },
 
             messagesFileRequest: function (query, callback) {
-                if (!this.active)
+                if (!this.active || this.loading_messages)
                     return
                 let options = query || {},
                     queryid = uuid();
                 this.loading_messages = true;
                 !options.max && (options.max = xabber.settings.mam_messages_limit);
                 !options.after && !options.before && (options.before = '');
+                this.encrypted && (options.encrypted = this.encrypted)
                 this.parent.participant && (options.var = [{var: 'with', value: this.parent.participant.id}]);
                 this.contact.MAMRequest(options, (success, messages, rsm) => {
+                    let messages_count = 0;
+                    if (this.encrypted) {
+                        $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                    }
                     $(messages).each((idx, message) => {
                         let $message = $(message),
+                            msg_items = [];
+                        if (this.encrypted) {
+                            let deferred = new $.Deferred();
+                            deferred.done(($msg) => {
+                                msg_items = this.contact.getFilesFromStanza($msg);
+                                if (msg_items.length)
+                                    this.temporary_items = this.temporary_items.concat(msg_items)
+                                messages_count++;
+                                if (messages_count === messages.length){
+                                    this.last_rsm_message = rsm.first;
+                                    this.encryptedFilesHandler();
+                                }
+                            }).fail(() => {
+                                messages_count++;
+                                if (messages_count === messages.length){
+                                    this.last_rsm_message = rsm.first;
+                                    this.all_messages_loaded = true;
+                                    this.encryptedFilesHandler();
+                                }
+                            });
+                            this.account.omemo.receiveChatMessage($message, {
+                                searched_message: true,
+                                gallery: true,
+                                query: query
+                            }, deferred);
+                        } else{
                             msg_items = this.contact.getFilesFromStanza($message);
-                        this.account.chats.receiveChatMessage($message, {
-                            searched_message: true,
-                            query: query
-                        });
-                        if (msg_items.length)
-                            this.temporary_items = this.temporary_items.concat(msg_items)
+                            this.account.chats.receiveChatMessage($message, {
+                                searched_message: true,
+                                query: query
+                            });
+                            if (msg_items.length)
+                                this.temporary_items = this.temporary_items.concat(msg_items)
+                        }
                     });
-                    this.last_rsm_message = rsm.first;
-                    if (!messages.length)
-                        this.all_messages_loaded = true;
-                    this.loading_messages = false;
-                    if (!(this.temporary_items.length >= xabber.settings.mam_messages_limit) && this.filter_type === 'filter_files' && !this.all_messages_loaded) {
-                        this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, callback);
-                    }else
-
-                        callback && callback();
-                    }, () => {
-
+                    if (!this.encrypted){
+                        this.last_rsm_message = rsm.first;
+                        if (!messages.length)
+                            this.all_messages_loaded = true;
+                        this.loading_messages = false;
+                        if (!(this.temporary_items.length >= xabber.settings.mam_messages_limit) && this.filter_type === 'filter_files' && !this.all_messages_loaded) {
+                            this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, callback);
+                        }else
+                            callback && callback();
                     }
-                );
+                }, () => {
+
+                });
             },
 
             onClickFile: function (ev) {
@@ -3517,7 +3585,7 @@ define("xabber-contacts", function () {
                     let $file = $elem.closest('.gallery-file');
                     this.parent.saveScrollBarOffset()
                     xabber.body.data.set('contact_details_view', this.parent)
-                    this.chat.getMessageContext($file.data('uniqueid'), {searched_messages: true});
+                    this.chat.getMessageContext($file.data('uniqueid'), {searched_messages: true, encrypted: this.encrypted});
                 }
             },
 
@@ -3608,12 +3676,22 @@ define("xabber-contacts", function () {
                 this.parent.children.voice && (this.parent.children.voice.active = false);
                 this.all_messages_loaded = false;
                 this.filter_type = 'filter_image';
+                this.temporary_items = [];
                 this.messagesFileRequest({[this.filter_type]: true}, () => {
                     this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'image')
                     this.$el.html("<div class='gallery-files images grid'></div>");
                     this.updateMedia();
                     this.participant && this.updateForParticipant();
                 });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'image');
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.images.grid').length && this.$el.html("<div class='gallery-files images grid'></div>");
+                this.updateMedia();
             },
 
             loadMoreFiles: function () {
@@ -3642,12 +3720,22 @@ define("xabber-contacts", function () {
                 this.parent.children.voice && (this.parent.children.voice.active = false);
                 this.all_messages_loaded = false;
                 this.filter_type = 'filter_video';
+                this.temporary_items = [];
                 this.messagesFileRequest({[this.filter_type]: true}, () => {
                     this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'video')
                     this.$el.html("<div class='gallery-files videos grid'></div>");
                     this.updateMedia();
                     this.participant && this.updateForParticipant();
                 });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'video');
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.videos.grid').length && this.$el.html("<div class='gallery-files videos grid'></div>");
+                this.updateMedia();
             },
 
             loadMoreFiles: function () {
@@ -3675,12 +3763,22 @@ define("xabber-contacts", function () {
                 this.parent.children.voice && (this.parent.children.voice.active = false);
                 this.all_messages_loaded = false;
                 this.filter_type = 'filter_files';
+                this.temporary_items = [];
                 this.messagesFileRequest({[this.filter_type]: true}, () => {
                     this.temporary_items = this.temporary_items.filter(item => (utils.pretty_file_type(item.media_type) != 'video' && utils.pretty_file_type(item.media_type) != 'image'))
                     this.$el.html("<div class='gallery-files files'></div>");
                     this.updateMedia();
                     this.participant && this.updateForParticipant();
                 });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => (utils.pretty_file_type(item.media_type) != 'video' && utils.pretty_file_type(item.media_type) != 'image'));
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.files').length && this.$el.html("<div class='gallery-files files'></div>");
+                this.updateMedia();
             },
 
             loadMoreFiles: function () {
@@ -3708,12 +3806,22 @@ define("xabber-contacts", function () {
                 this.parent.children.files && (this.parent.children.files.active = false);
                 this.all_messages_loaded = false;
                 this.filter_type = 'filter_voice'
+                this.temporary_items = [];
                 this.messagesFileRequest({[this.filter_type]: true}, () => {
                     this.temporary_items = this.temporary_items.filter(item => item.voice)
                     this.$el.html("<div class='gallery-files voice'></div>");
                     this.updateMedia();
                     this.participant && this.updateForParticipant();
                 });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => item.voice);
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.voice').length && this.$el.html("<div class='gallery-files voice'></div>");
+                this.updateMedia();
             },
 
             loadMoreFiles: function () {

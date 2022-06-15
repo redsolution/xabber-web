@@ -1127,7 +1127,7 @@ define("xabber-omemo", function () {
                 }
             },
 
-            receiveChatMessage: function (message, options) {
+            receiveChatMessage: function (message, options, deferred) {
                 options = options || {};
                 let $message = $(message);
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
@@ -1152,6 +1152,8 @@ define("xabber-omemo", function () {
                                 options.is_trusted = is_trusted;
                                 $message.find('body').remove();
                                 $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                                if (options.gallery && deferred)
+                                    deferred.resolve($message);
                                 this.account.chats.receiveChatMessage($message[0], options);
                             });
                             return;
@@ -1206,6 +1208,10 @@ define("xabber-omemo", function () {
                                 delete options.is_trusted;
                             }
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                            if (options.gallery && decrypted_msg && deferred)
+                                deferred.resolve($message);
+                            else if (options.gallery && deferred)
+                                deferred.reject();
                             this.account.chats.receiveChatMessage($message[0], options);
                         }).catch(() => {
                             if (options.synced_msg && !options.decryption_retry) {
@@ -1215,10 +1221,16 @@ define("xabber-omemo", function () {
                             options.not_encrypted = true;
                             delete options.is_trusted;
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
+                            if (options.gallery && deferred)
+                                deferred.reject();
                             this.account.chats.receiveChatMessage($message[0], options);
                         });
                     }
+                    if (options.gallery && deferred)
+                        deferred.reject();
                 }
+                if (options.gallery && deferred)
+                    deferred.reject();
             },
 
             checkOwnFingerprints: async function () {

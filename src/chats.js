@@ -1310,7 +1310,8 @@ define("xabber-chats", function () {
                     contact: this.contact,
                     mention_context: options.mention,
                     model: this,
-                    stanza_id_context: stanza_id
+                    stanza_id_context: stanza_id,
+                    encrypted: options.encrypted
                 });
                 this.account.context_messages.add(message);
                 this.messages_view.messagesRequest({after: stanza_id}, () => {
@@ -2156,6 +2157,7 @@ define("xabber-chats", function () {
           __initialize: function (options) {
               options = options || {};
               this.stanza_id = options.stanza_id_context;
+              this.encrypted = options.encrypted;
               this.mention_context = options.mention_context;
               if (!this.model.item_view.content)
                   this.chat_content = new xabber.ChatContentView({chat_item: this.model.item_view});
@@ -2168,6 +2170,7 @@ define("xabber-chats", function () {
           render: function () {
               this.scrollToTop();
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
+              this.encrypted && this.$el.attr('data-trust', true)
           },
 
           onMouseWheel: function (ev) {
@@ -3599,7 +3602,11 @@ define("xabber-chats", function () {
                           this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
-                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              let $msg = [];
+                              if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context')
+                                  $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              else
+                                  $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = result;
                                   $msg[0].onload = () => {

@@ -11439,6 +11439,7 @@ input[type='range'].voice-message-volume:focus {
     position: absolute;
     height: 100%;
     background: #EEEEEE;
+    cursor: pointer;
 }
 .gallery-files .gallery-file .gallery-file-placeholder-background .details-icon{
     top: 50% !important;
@@ -12607,6 +12608,7 @@ input[type='range'].voice-message-volume:focus {
 
 .details-panel-right .bottom-block .participants-wrap .gallery-files .preloader-wrapper{
     bottom: -64px;
+    top: unset;
 }
 
 .details-panel-right .bottom-block .media-wrap{
