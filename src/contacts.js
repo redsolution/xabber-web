@@ -443,6 +443,7 @@ define("xabber-contacts", function () {
 
             declineSubscribe: function () {
                 this.pres('unsubscribed');
+                this.set('subscription_preapproved', false)
             },
 
             deleteWithDialog: function () {
@@ -579,7 +580,7 @@ define("xabber-contacts", function () {
                 }
                 if (type === 'subscribe') {
                     this.set('subscription_request_in', true);
-                    if (this.get('in_roster') || this.get('subscription_preapproved')) {
+                    if (this.get('subscription_preapproved')) {
                         this.pres('subscribed');
                     } else {
                         this.trigger('presence', this, 'subscribe');
@@ -593,6 +594,7 @@ define("xabber-contacts", function () {
                     }
                     this.trigger('presence', this, 'subscribed');
                 } else if (type === 'unsubscribe') {
+                    this.set('subscription_request_in', false);
                     if (this.get('group_chat')) {
                         this.removeFromRoster();
                         let chat = this.account.chats.getChat(this);
