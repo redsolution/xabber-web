@@ -1731,7 +1731,7 @@ define("xabber-chats", function () {
         },
 
         updateIncomingSubscription: function () {
-            this.$('.msg-incoming-subscription').showIf(this.contact.get('subscription_request_in') && !this.contact.get('subscription_request_out') && this.contact.get('subscription_request_out') != 'both');
+            this.$('.msg-incoming-subscription').showIf(this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both');
             this.updateTextClipping();
         },
 
@@ -2673,6 +2673,7 @@ define("xabber-chats", function () {
               this.$el.html(this.template());
               this.contact = options.contact;
               this.contact.on("change:subscription", this.render, this);
+              this.contact.on("change:in_roster", this.render, this);
               this.contact.on("change:blocked", this.render, this);
               this.contact.on("change:subscription_request_in", this.render, this);
               this.contact.on("change:subscription_request_out", this.render, this);
@@ -2691,7 +2692,7 @@ define("xabber-chats", function () {
               this.$('.button').removeClass('hidden');
               this.$('.subscription-info').text("");
               this.$el.addClass('hidden');
-              if (subscription === 'both' || this.contact.get('blocked'))
+              if (subscription === 'both' || this.contact.get('blocked') || in_roster)
                   return;
               else if (subscription === 'to' && in_request || (!subscription && in_request && out_request)) {
                   this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_incoming"));
@@ -7030,8 +7031,8 @@ define("xabber-chats", function () {
                 all_chats = [],
                 all_chats_pinned = [];
             if (is_unread) {
-                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && !chat.contact.get('subscription_request_out') && chat.contact.get('subscription_request_out') != 'both')) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
-                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && !chat.contact.get('subscription_request_out') && chat.contact.get('subscription_request_out') != 'both')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both')) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
+                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both')) && chat.get('pinned') !== '0' && chat.get('pinned'));
             }
             if (!all_chats.length && !all_chats_pinned.length) {
                 all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
