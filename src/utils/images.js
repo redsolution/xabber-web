@@ -80,8 +80,10 @@ define(["xabber-dependencies"], function (deps) {
         ctx.font = font || "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
-        if (font)
-            ctx.fillText(_name, width/2 || 128, (height/2 + 30) || 160);
+        if (font){
+            ctx.textBaseline = 'ideographic';
+            ctx.fillText(_name, width/2 || 128, (height/2 + height *0.28) || 160);
+        }
         else
             ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
         var image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');

@@ -40115,8 +40115,10 @@ define('xabber-image-utils',["xabber-dependencies"], function (deps) {
         ctx.font = font || "bold 100px sans-serif";
         ctx.fillStyle = "#FFF";
         ctx.textAlign = "center";
-        if (font)
-            ctx.fillText(_name, width/2 || 128, (height/2 + 30) || 160);
+        if (font){
+            ctx.textBaseline = 'ideographic';
+            ctx.fillText(_name, width/2 || 128, (height/2 + height *0.28) || 160);
+        }
         else
             ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);
         var image = canvas.toDataURL().replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
@@ -41380,7 +41382,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.46","version_description":"subscriptions disable approval on roster, incoming subscription request fix"}'
+'{"version_number":"2.3.2.47","version_description":"changed emoji positioning on emoji html canvas"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
