@@ -41382,7 +41382,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.47","version_description":"changed emoji positioning on emoji html canvas"}'
+'{"version_number":"2.3.2.49","version_description":"fixed screen changing on chat deleted in sync, added invitations updating on adding and participants update, changed invitation msg counter to marker as in incoming subscription request"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -43009,7 +43009,7 @@ define("xabber-views", [],function () {
                             count_msg += chat.get('unread') + chat.get('const_unread');
                     }
                 });
-                let incoming_subscriptions = account.contacts.filter(item => item.get('subscription_request_in') && item.get('subscription') != 'both').length;
+                let incoming_subscriptions = account.contacts.filter(item => item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
                 count_all_msg += incoming_subscriptions;
                 mentions += account.unread_mentions.length;
             });
@@ -55638,6 +55638,8 @@ define("xabber-contacts", [],function () {
 
             _initialize: function (options) {
                 this.contact = options.model;
+                this.contact.participants.on("participants_updated", this._render, this);
+                this.contact.on("invitations_send", this._render, this);
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
             },
@@ -60730,9 +60732,7 @@ define("xabber-contacts", [],function () {
                         chat.set('archived', false);
                     if ($item.attr('status') === 'deleted') {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        contact && contact.details_view_right && contact.details_view_right.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
-                        contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        chat.get('opened') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
@@ -63463,6 +63463,7 @@ define("xabber-chats", [],function () {
             if (this.contact) {
                 this.updateIncomingSubscription();
                 this.contact.on("change:name", this.updateName, this);
+                this.contact.on("change:invitation", this.updateIncomingSubscription, this);
                 this.contact.on("change:subscription", this.updateIncomingSubscription, this);
                 this.contact.on("change:subscription_request_in", this.updateIncomingSubscription, this);
                 this.contact.on("change:subscription_request_out", this.updateIncomingSubscription, this);
@@ -63561,7 +63562,7 @@ define("xabber-chats", [],function () {
         },
 
         updateIncomingSubscription: function () {
-            this.$('.msg-incoming-subscription').showIf(this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both');
+            this.$('.msg-incoming-subscription').showIf(this.contact.get('invitation') || (this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both'));
             this.updateTextClipping();
         },
 
@@ -65371,6 +65372,7 @@ define("xabber-chats", [],function () {
                     this.contact.invitation = new xabber.GroupchatInvitationView({model: this.contact, message: message});
                 this.model.contact.set('invitation', true);
                 this.model.get('active') && this.model.contact.trigger('open_chat', this.model.contact);
+                message.set('is_unread', false);
             }
 
             let last_message = this.model.last_message;
@@ -68762,8 +68764,8 @@ define("xabber-chats", [],function () {
                 all_chats = [],
                 all_chats_pinned = [];
             if (is_unread) {
-                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both')) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
-                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+                all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('invitation') || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
+                all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('invitation') || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
             }
             if (!all_chats.length && !all_chats_pinned.length) {
                 all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
@@ -69121,6 +69123,7 @@ define("xabber-chats", [],function () {
                 else
                     toast_text = xabber.getQuantityString("groupchat__toast_failed_to_sent_invitations", selected_users_count);
                 utils.callback_popup_message(toast_text, 2000);
+                this.contact.trigger('invitations_send')
             });
             $(this.selected_contacts).each((idx, item) => {
                 this.sendInvite(item, () => {

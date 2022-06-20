@@ -3196,6 +3196,8 @@ define("xabber-contacts", function () {
 
             _initialize: function (options) {
                 this.contact = options.model;
+                this.contact.participants.on("participants_updated", this._render, this);
+                this.contact.on("invitations_send", this._render, this);
                 this.account = this.contact.account;
                 this.$error = $('<p class="errors"/>');
             },
@@ -8288,9 +8290,7 @@ define("xabber-contacts", function () {
                         chat.set('archived', false);
                     if ($item.attr('status') === 'deleted') {
                         contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        contact && contact.details_view_right && contact.details_view_right.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
-                        contact.get('visible') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        chat.get('opened') && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                        chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
                         chat.set('opened', false);
                         chat.set('const_unread', 0);
                         this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
