@@ -182,29 +182,71 @@ define("xabber-accounts", function () {
                         this.removeAvatar(callback, errback);
                         return;
                     }
-                    let avatar_hash = image.hash || sha1(image.base64),
-                        iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
-                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
-                            .c('item', {id: avatar_hash})
-                            .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
-                        iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
-                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                            .c('item', {id: avatar_hash})
-                            .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                            .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                    this.sendIQinBackground(iq_pub_data, () => {
+                    let dfd = new $.Deferred();
+
+                    dfd.done((data, http_avatar) => {
+                        if (http_avatar) {
+                            let avatar_hash = image.hash || sha1(image.base64),
+                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('info', {bytes: data.size, id: avatar_hash, type: data.type, url: data.file});
+                            data.thumbnails.forEach((thumbnail) => {
+                                iq_pub_metadata.c('thumbnail', {
+                                    xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
+                                    url: thumbnail.url,
+                                    width: thumbnail.width,
+                                    height: thumbnail.height,
+                                }).up()
+                            })
                             this.sendIQinBackground(iq_pub_metadata, () => {
                                     callback && callback(avatar_hash);
                                 },
                                 function (data_error) {
                                     errback && errback(data_error);
                                 });
-                        },
-                        (data_error) => {
-                            errback && errback(data_error);
+                        }
+                        else {
+                            let avatar_hash = image.hash || sha1(image.base64),
+                                iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(data),
+                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
+                            this.sendIQinBackground(iq_pub_data, () => {
+                                    this.sendIQinBackground(iq_pub_metadata, () => {
+                                            callback && callback(avatar_hash);
+                                        },
+                                        function (data_error) {
+                                            errback && errback(data_error);
+                                        });
+                                },
+                                (data_error) => {
+                                    errback && errback(data_error);
+                                });
+                        }
+                    });
+                    if (this.get('gallery_token') && this.get('gallery_url') && !image.generated){
+                        let file = image.name ? image : image.file;
+                        this.uploadAvatar(file, (res) => {
+                            if (res.thumbnails.length || res.file){
+                                res.type = file.type;
+                                dfd.resolve(res, true)
+                            } else
+                                dfd.resolve(image.base64)
+                        }, (res) => {
+                            dfd.resolve(image.base64)
                         });
+                    } else
+                        dfd.resolve(image.base64)
                 },
 
                 removeAvatar: function (callback, errback) {
@@ -1328,6 +1370,32 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                uploadAvatar: function (file, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url')) {
+                        if (!file)
+                            errback && errback('no file')
+                        let formData = new FormData();
+                        formData.append('file', file, file.name);
+                        formData.append('media_type', file.type);
+                        $.ajax({
+                            type: 'POST',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/avatar/upload/',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                    }
+                },
+
                 createMessageFromIQ: function (attrs) {
                     let contact = this.contacts.mergeContact(attrs.from_jid),
                         chat = this.chats.getChat(contact);
@@ -1816,7 +1884,8 @@ define("xabber-accounts", function () {
             template: templates.media_gallery_account,
             events: {
                 "change input.gallery-upload": "onFileInputChanged",
-                "click .btn-delete": "deleteFile",
+                "click .gallery-file:not(.gallery-avatar) .btn-delete": "deleteFile",
+                "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
                 "click .btn-delete-files": "deleteFilesFiltered",
                 "click .tabs .tab": "onTabClick",
                 "click .btn-gallery-sorting": "sortFiles",
@@ -1952,7 +2021,7 @@ define("xabber-accounts", function () {
 
             filterType: function (file_type, sorting) {
                 this.$('.gallery-files').html('')
-                if (file_type === 'image' || file_type === 'video') {
+                if (file_type === 'image' || file_type === 'video' || file_type === 'avatars') {
                     this.$('.gallery-files').removeClass('voice')
                     this.$('.gallery-files').addClass('grid')
                 } else if (file_type === 'voice') {
@@ -1967,7 +2036,10 @@ define("xabber-accounts", function () {
                 let options = {type: file_type}
                 sorting && (options.order_by = sorting)
                 this.current_options = options
-                this.getFiles(options)
+                if (file_type === 'avatars')
+                    this.getAvatars(options)
+                else
+                    this.getFiles(options)
             },
 
             onTabClick: function (ev) {
@@ -2097,7 +2169,7 @@ define("xabber-accounts", function () {
                 options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
                 if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
                     this.loading_files = true
-                    this.$('.gallery-files').html(env.templates.contacts.preloader())
+                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
                     $.ajax({
                         type: 'GET',
                         headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
@@ -2105,6 +2177,33 @@ define("xabber-accounts", function () {
                         dataType: 'json',
                         data: options,
                         success: (response) => {
+                            response.type = options.type
+                            this.renderFiles(response)
+                            this.loading_files = false
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.loading_files = false
+                            this.$('.gallery-files .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            getAvatars: function (options) {
+                options && options.file && (options = {});
+                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                    this.loading_files = true
+                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            console.log(response)
                             response.type = options.type
                             this.renderFiles(response)
                             this.loading_files = false
@@ -2129,6 +2228,10 @@ define("xabber-accounts", function () {
                 this.$('.gallery-files .preloader-wrapper').remove()
                 if (response.items.length){
                     response.items.forEach((item) => {
+                        if (response.type === 'avatars'){
+                            if (item.thumbnail.length)
+                                item.thumbnail = item.thumbnail[item.thumbnail.length - 1].url
+                        }
                         let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
                         $gallery_file.appendTo(this.$('.gallery-files'));
                         $gallery_file.find('.uploaded-img').magnificPopup({
@@ -2170,6 +2273,26 @@ define("xabber-accounts", function () {
                         type: 'DELETE',
                         headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
                         url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: JSON.stringify({id: file_id}),
+                        success: (response) => {
+                            this.updateStorage(true);
+                            $target.detach();
+                        },
+                        error: (response) => {
+                            console.log(response)
+                        }
+                    });
+            },
+
+            deleteAvatar: function (ev) {
+                let $target = $(ev.target).closest('.gallery-file'),
+                    file_id = $target.attr('data-id');
+                if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/avatar/',
                         dataType: 'json',
                         data: JSON.stringify({id: file_id}),
                         success: (response) => {
@@ -2333,7 +2456,7 @@ define("xabber-accounts", function () {
                     return;
                 let file = field.files[0];
                 field.value = '';
-                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                if (file.size > constants.MAX_AVATAR_FILE_SIZE && !(this.model.get('gallery_token') && this.model.get('gallery_url'))) {
                     utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
                     return;
                 } else if (!file.type.startsWith('image')) {
@@ -2343,7 +2466,7 @@ define("xabber-accounts", function () {
                 this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done((image, hash, size) => {
                     if (image) {
-                        this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type}, () => {
+                        this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
                                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                                 this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                             }, () => {
@@ -3181,7 +3304,7 @@ define("xabber-accounts", function () {
 
             saveAvatar: function () {
                 let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
-                    file = new File([blob], "avatar", {
+                    file = new File([blob], "avatar.png", {
                         type: "image/png",
                     });
                 file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
@@ -3262,6 +3385,7 @@ define("xabber-accounts", function () {
                     file = new File([blob], "avatar", {
                         type: "image/png",
                     });
+                file.generated = true;
                 file.base64 = blob;
                 if (file && file.base64) {
                     if (this.registration && this.registration_view){

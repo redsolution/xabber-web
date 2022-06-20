@@ -721,6 +721,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
+        Strophe.addNamespace('PUBSUB_AVATAR_METADATA_THUMBNAIL', 'urn:xmpp:thumbs:1');
         Strophe.addNamespace('REWRITE', 'https://xabber.com/protocol/rewrite');
         Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/references');
         Strophe.addNamespace('GEOLOC', 'http://jabber.org/protocol/geoloc');

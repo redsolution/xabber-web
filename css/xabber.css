@@ -11241,7 +11241,7 @@ input[type='range'].voice-message-volume:focus {
 }
 .details-panel .gallery-wrap{
     position: absolute;
-    z-index: 1000;
+    z-index: 1;
     background: #FFF;
     height: calc(100% + 68px);
     top: -58px;
