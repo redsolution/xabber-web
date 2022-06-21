@@ -41380,9 +41380,9 @@ define('xabber-utils',[
     return utils;
 });
 
-let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":60,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":15,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":68,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":22,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
+let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":58,"bs":0,"ca":26,"cs":98,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":67,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.49","version_description":"fixed screen changing on chat deleted in sync, added invitations updating on adding and participants update, changed invitation msg counter to marker as in incoming subscription request"}'
+'{"version_number":"2.3.2.50","version_description":"fixed incoming subscription request decline, fixed subscription descriptions"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -54047,7 +54047,6 @@ define("xabber-contacts", [],function () {
                 "click .btn-mute.muted": "unmuteChat",
                 "click .list-variant": "changeList",
                 "click .btn-auth-request": "requestAuthorization",
-                "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
             _initialize: function (options) {
@@ -54325,26 +54324,6 @@ define("xabber-contacts", [],function () {
                 }
                 if (out_request) {
                     $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', true);
-                }
-            },
-
-            onChangedSubscription: function (ev) {
-                let contact = this.model,
-                    $target = $(ev.target),
-                    is_checked = $target.prop('checked');
-                if (is_checked) {
-                    if ($target.attr('id') === "outcoming-subscription")
-                        contact.askRequest();
-                    else {
-                        contact.set('subscription_preapproved', true);
-                        contact.acceptRequest();
-                    }
-                }
-                else {
-                    if ($target.attr('id') === "outcoming-subscription")
-                        contact.declineSubscription();
-                    else
-                        contact.declineSubscribe();
                 }
             },
 
@@ -59364,7 +59343,7 @@ define("xabber-contacts", [],function () {
                     this.$('.status-in').addClass(statuses.status_in_class)
                     this.$('.status-in  .value').text(statuses.status_in)
                     this.$('.status-in').showIf(statuses.status_in)
-                    this.$('.status-description .value').text(statuses.status_description)
+                    this.$('.status-description .value').html(statuses.status_description)
                     this.$('.status-description').showIf(statuses.status_description)
                     this.$('.btn-delete').hideIf(!this.model.get('in_roster'));
                     if (statuses.status_out_color === 'request') {
@@ -59423,89 +59402,8 @@ define("xabber-contacts", [],function () {
 
             cancelSubscriptionIn: function () {
                 this.model.declineSubscribe();
+                this.model.set('subscription_request_in', false);
             },
-            //
-            // updateStatuses: function (ev) {
-            //     let statuses = this.model.getSubscriptionStatuses();
-            //     if (statuses){
-            //         this.$('.status-out').text(statuses.status_out).addClass(statuses.status_out_class)
-            //         this.$('.status-in').text(statuses.status_in).addClass(statuses.status_in_class)
-            //         this.$('.status-description').text(statuses.status_description)
-            //         if (statuses.status_out_color === 'request')
-            //             this.$('.status-out').addClass('text-color-500').addClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_in_color === 'request')
-            //             this.$('.status-in').addClass('text-color-500').addClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_out_color === 'subbed')
-            //             this.$('.status-out').addClass('text-color-500').addClass('border-color-100')
-            //                 .addClass('ground-color-50').addClass('subbed').removeClass('request')
-            //         if (statuses.status_in_color === 'subbed')
-            //             this.$('.status-in').addClass('text-color-500').addClass('border-color-100')
-            //                 .addClass('ground-color-50').addClass('subbed').removeClass('request')
-            //         if (statuses.status_out_color === '')
-            //             this.$('.status-out').removeClass('text-color-500').removeClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_in_color === '')
-            //             this.$('.status-in').removeClass('text-color-500').removeClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //     }
-            // },
-            //
-            // requestSubscription: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Request subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.askRequest();
-            //         }
-            //     });
-            // },
-            //
-            // allowSubscription: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.acceptRequest();
-            //         }
-            //     });
-            // },
-            //
-            // cancelSubscriptionRequest: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription request'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscription();
-            //         }
-            //     });
-            // },
-            //
-            // handleSubscriptionRequest: function () {
-            //     //добавить 3ий вариант
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.acceptRequest();
-            //         }
-            //     });
-            //     // //добавить 3ий вариант
-            //     // utils.dialogs.ask_extended('', '', null, { ok_button_text: 'Allow subscription', optional_button: 'decline'}).done((result) => {
-            //     //     if (result) {
-            //     //         this.model.acceptRequest();
-            //     //     }
-            //     // });
-            // },
-            //
-            // cancelSubscriptionOut: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscription();
-            //         }
-            //     });
-            // },
-            //
-            // cancelSubscriptionIn: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscribe();
-            //         }
-            //     });
-            // },
 
             hideEdit: function (ev) {
                 this.model.set('edit_hidden', true);
@@ -68439,8 +68337,8 @@ define("xabber-chats", [],function () {
             if (active_toolbar.hasClass('chats')) {
                 let private_chats = chats.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
                 private_chats.forEach((chat) => {
-                if (!chat.item_view.content)
-                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                    if (!chat.item_view.content)
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     chat.item_view.content.readMessages();
                 });
             }

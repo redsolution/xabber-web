@@ -1605,7 +1605,6 @@ define("xabber-contacts", function () {
                 "click .btn-mute.muted": "unmuteChat",
                 "click .list-variant": "changeList",
                 "click .btn-auth-request": "requestAuthorization",
-                "change .subscription-info-wrap input": "onChangedSubscription"
             },
 
             _initialize: function (options) {
@@ -1883,26 +1882,6 @@ define("xabber-contacts", function () {
                 }
                 if (out_request) {
                     $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', true);
-                }
-            },
-
-            onChangedSubscription: function (ev) {
-                let contact = this.model,
-                    $target = $(ev.target),
-                    is_checked = $target.prop('checked');
-                if (is_checked) {
-                    if ($target.attr('id') === "outcoming-subscription")
-                        contact.askRequest();
-                    else {
-                        contact.set('subscription_preapproved', true);
-                        contact.acceptRequest();
-                    }
-                }
-                else {
-                    if ($target.attr('id') === "outcoming-subscription")
-                        contact.declineSubscription();
-                    else
-                        contact.declineSubscribe();
                 }
             },
 
@@ -6922,7 +6901,7 @@ define("xabber-contacts", function () {
                     this.$('.status-in').addClass(statuses.status_in_class)
                     this.$('.status-in  .value').text(statuses.status_in)
                     this.$('.status-in').showIf(statuses.status_in)
-                    this.$('.status-description .value').text(statuses.status_description)
+                    this.$('.status-description .value').html(statuses.status_description)
                     this.$('.status-description').showIf(statuses.status_description)
                     this.$('.btn-delete').hideIf(!this.model.get('in_roster'));
                     if (statuses.status_out_color === 'request') {
@@ -6981,89 +6960,8 @@ define("xabber-contacts", function () {
 
             cancelSubscriptionIn: function () {
                 this.model.declineSubscribe();
+                this.model.set('subscription_request_in', false);
             },
-            //
-            // updateStatuses: function (ev) {
-            //     let statuses = this.model.getSubscriptionStatuses();
-            //     if (statuses){
-            //         this.$('.status-out').text(statuses.status_out).addClass(statuses.status_out_class)
-            //         this.$('.status-in').text(statuses.status_in).addClass(statuses.status_in_class)
-            //         this.$('.status-description').text(statuses.status_description)
-            //         if (statuses.status_out_color === 'request')
-            //             this.$('.status-out').addClass('text-color-500').addClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_in_color === 'request')
-            //             this.$('.status-in').addClass('text-color-500').addClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_out_color === 'subbed')
-            //             this.$('.status-out').addClass('text-color-500').addClass('border-color-100')
-            //                 .addClass('ground-color-50').addClass('subbed').removeClass('request')
-            //         if (statuses.status_in_color === 'subbed')
-            //             this.$('.status-in').addClass('text-color-500').addClass('border-color-100')
-            //                 .addClass('ground-color-50').addClass('subbed').removeClass('request')
-            //         if (statuses.status_out_color === '')
-            //             this.$('.status-out').removeClass('text-color-500').removeClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //         if (statuses.status_in_color === '')
-            //             this.$('.status-in').removeClass('text-color-500').removeClass('request')
-            //                 .removeClass('border-color-100').removeClass('ground-color-50').removeClass('subbed')
-            //     }
-            // },
-            //
-            // requestSubscription: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Request subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.askRequest();
-            //         }
-            //     });
-            // },
-            //
-            // allowSubscription: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.acceptRequest();
-            //         }
-            //     });
-            // },
-            //
-            // cancelSubscriptionRequest: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription request'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscription();
-            //         }
-            //     });
-            // },
-            //
-            // handleSubscriptionRequest: function () {
-            //     //добавить 3ий вариант
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Allow subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.acceptRequest();
-            //         }
-            //     });
-            //     // //добавить 3ий вариант
-            //     // utils.dialogs.ask_extended('', '', null, { ok_button_text: 'Allow subscription', optional_button: 'decline'}).done((result) => {
-            //     //     if (result) {
-            //     //         this.model.acceptRequest();
-            //     //     }
-            //     // });
-            // },
-            //
-            // cancelSubscriptionOut: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscription();
-            //         }
-            //     });
-            // },
-            //
-            // cancelSubscriptionIn: function () {
-            //     utils.dialogs.ask('', '', null, { ok_button_text: 'Cancel subscription'}).done((result) => {
-            //         if (result) {
-            //             this.model.declineSubscribe();
-            //         }
-            //     });
-            // },
 
             hideEdit: function (ev) {
                 this.model.set('edit_hidden', true);
