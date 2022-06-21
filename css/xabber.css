@@ -12283,8 +12283,12 @@ input[type='range'].voice-message-volume:focus {
     height: 48px;
 }
 
-.details-panel-right .edit-properties .group-property:hover .group-property-text{
+.details-panel-right .edit-properties .group-property:not(.property-disabled):hover .group-property-text{
     color: #616161;
+}
+
+.details-panel-right .edit-properties .group-property.property-disabled .group-property-text{
+    text-decoration-line: none;
 }
 
 .details-panel-right .edit-properties .group-property.property-disabled{

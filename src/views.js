@@ -1083,7 +1083,7 @@ define("xabber-views", function () {
                             count_msg += chat.get('unread') + chat.get('const_unread');
                     }
                 });
-                let incoming_subscriptions = account.contacts.filter(item => item.get('subscription_request_in') && item.get('subscription') != 'both').length;
+                let incoming_subscriptions = account.contacts.filter(item => item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
                 count_all_msg += incoming_subscriptions;
                 mentions += account.unread_mentions.length;
             });
