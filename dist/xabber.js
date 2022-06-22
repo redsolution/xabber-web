@@ -38935,6 +38935,9 @@ define('text!templates/accounts/current_token_item.html',[],function () { return
 define('text!templates/accounts/audio_file_waveform.html',[],function () { return '<div class="waveform" id="{{waveform_id}}"></div>\n<div class="audio-control-panel">\n    <span class="voice-msg-current-time">0:00</span> /\n    <span class="voice-msg-total-time">0:00</span>\n    <input value="50" type="range" class="voice-message-volume">\n</div>';});
 
 
+define('text!templates/accounts/avatars_gallery.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="library" class="menu-btn btn-library">{[print(xabber.getString("settings__dialog_background__menu_item_library"))]}</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">{[print(xabber.getString("settings__dialog_background__menu_item_upload"))]}</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">{[print(xabber.getString("settings__dialog_background__menu_item_url"))]}</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="library" class="screen-wrap library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">{[print(xabber.getString("settings__dialog_background__section_upload__text"))]}</div>\n            <div class="upload-button">\n                <button type="file">{[print(xabber.getString("settings__dialog_background__section_upload__button_upload"))]}</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">{[print(xabber.getString("settings__dialog_background__section_url__label"))]}</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>{[print(xabber.getString("settings__dialog_background__section_url__placeholder_preview"))]}</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("set"))]}</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    <div class="modal-preloader-wrap"></div>\n</div>';});
+
+
 define('text!templates/vcard/vcard.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <div class="btn-vcard-refresh">\n        <div class="button">\n            <i class="mdi mdi-20px mdi-refresh"></i>\n        </div>\n        <div class="preloader-wrapper preloader-20px active">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n<div class="vcard-wrap">\n    <div class="info-wrap jid-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg></div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap personal-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>\n        <div class="info first-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_given_name"))]}</div>\n        </div>\n        <div class="info middle-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_middle_name"))]}</div>\n        </div>\n        <div class="info last-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>\n        </div>\n        <div class="info fullname">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_full_name"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap nickname-info-wrap hidden">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info nickname">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap birthday-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday-outline"></svg></div>\n        <div class="info birthday">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_birth_date"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap job-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job-outline"></svg></div>\n        <div class="info org-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_organization"))]}</div>\n        </div>\n        <div class="info job-title">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_title"))]}</div>\n        </div>\n        <div class="info org-unit">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_organization_unit"))]}</div>\n        </div>\n        <div class="info role">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_role"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap site-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-web"></i>\n        <div class="info url">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_url"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">{[print(xabber.getString("vcard_decsription"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap phone-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-phone"></i>\n        <div class="info phone-work">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info phone-home">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>\n        </div>\n        <div class="info phone-mobile">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_mobile"))]}</div>\n        </div>\n        <div class="info phone-default">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_telephone"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap email-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-email"></i>\n        <div class="info email-work">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info email-home">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_personal"))]}</div>\n        </div>\n        <div class="info email-default">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_email"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap address-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-map-marker"></i>\n        <div class="info address-home">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>\n        </div>\n        <div class="info address-work">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info address-default">\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_address"))]}</div>\n        </div>\n    </div>\n    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("edit_vcard"))]}</button>\n</div>\n';});
 
 
@@ -39512,6 +39515,7 @@ define("xabber-templates", [
     "text!templates/accounts/token_item.html",
     "text!templates/accounts/current_token_item.html",
     "text!templates/accounts/audio_file_waveform.html",
+    "text!templates/accounts/avatars_gallery.html",
 
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
@@ -39802,6 +39806,7 @@ define("xabber-templates", [
     addTemplate('accounts.token_item');
     addTemplate('accounts.current_token_item');
     addTemplate('accounts.audio_file_waveform');
+    addTemplate('accounts.avatars_gallery');
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');
@@ -41470,7 +41475,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":58,"bs":0,"ca":26,"cs":98,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":67,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.51","version_description":"fixed incoming subscription request decline, fixed subscription descriptions"}'
+'{"version_number":"2.3.2.52","version_description":"added account avatar picker view"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -50414,7 +50419,11 @@ define("xabber-accounts", [],function () {
             },
 
             chooseAvatar: function () {
-                this.$('.main-info-wrap .circle-avatar input').click();
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    let avatar_view = new xabber.SetAvatarView();
+                    avatar_view.render({model: this.model});
+                } else
+                    this.$('.main-info-wrap .circle-avatar input').click();
             },
 
             openEmojiPanel: function () {
@@ -51138,13 +51147,235 @@ define("xabber-accounts", [],function () {
             }
         });
 
-        xabber.WebcamProfileImageView = xabber.BasicView.extend({
-            className: 'modal main-modal webcam-panel',
-            template: templates.webcam_panel,
+        xabber.SetAvatarView = xabber.BasicView.extend({
+            className: 'modal main-modal avatar-picker background-panel',
+            template: templates.avatars_gallery,
+            ps_selector: '.modal-content',
+            ps_settings: {theme: 'item-list'},
 
             events: {
+                "click .menu-btn": "updateActiveMenu",
+                "click .library-wrap .image-item": "setActiveImage",
+                'change input[type="file"]': "onFileInputChanged",
+                'keyup input.url': "onInputChanged",
+                "click .btn-add": "addBackground",
+                "click .btn-cancel": "close"
             },
 
+            _initialize: function () {
+                this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+            },
+
+            render: function (options) {
+                this.model = options.model;
+                this.createLibrary();
+                this.$('.menu-btn').removeClass('active');
+                this.$('.menu-btn[data-screen-name="library"]').addClass('active');
+                this.$('.modal-header span').text(xabber.getString("account_set_avatar_header"));
+                this.$el.openModal({
+                    ready: () => {
+                        this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                    },
+                    complete: this.close.bind(this)
+                });
+                let draggable = this.$('.upload-wrap');
+                draggable[0].ondragenter = function (ev) {
+                    ev.preventDefault();
+                    draggable.addClass('file-drop');
+                };
+                draggable[0].ondragover = function (ev) {
+                    ev.preventDefault();
+                };
+                draggable[0].ondragleave = function (ev) {
+                    if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                        return;
+                    ev.preventDefault();
+                    draggable.removeClass('file-drop');
+                };
+                draggable[0].ondrop = (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    draggable.removeClass('file-drop');
+                    let files = ev.dataTransfer.files || [], file;
+                    for (let i = 0; i < files.length; i++) {
+                        if (utils.isImageType(files[i].type)) {
+                            file = files[i];
+                            break;
+                        }
+                    }
+                    file && this.addFile(file);
+                };
+            },
+
+            onPaste: function (ev) {
+                let url = ev.clipboardData.getData('text').trim();
+                this.$('.image-preview img')[0].onload = () => {
+                    this.$('.image-preview img').removeClass('hidden');
+                    this.updateActiveButton();
+                };
+                this.$('.image-preview img').addClass('hidden')[0].src = url;
+                this.updateActiveButton();
+            },
+
+            updateActiveMenu: function (ev) {
+                let screen_name = ev.target.getAttribute('data-screen-name');
+                this.$('.menu-btn').removeClass('active');
+                this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+                this.updateScreen(screen_name);
+            },
+
+            updateScreen: function (name) {
+                this.$('.screen-wrap').addClass('hidden');
+                this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+                this.scrollToTop();
+                this.updateActiveButton();
+            },
+
+            updateActiveButton: function () {
+                let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                    non_active = true;
+                if ($active_screen.attr('data-screen') == 'library') {
+                    $active_screen.find('div.active').length && (non_active = false);
+                } else {
+                    $active_screen.find('img:not(.hidden)').length && (non_active = false);
+                }
+                this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+            },
+
+            renderFiles: function (response) {
+                this.$('.library-wrap .preloader-wrapper').remove()
+                if (response.items.length){
+                    response.items.forEach((item) => {
+                        if (item.thumbnail && item.thumbnail.length)
+                            item.thumbnail = item.thumbnail[item.thumbnail.length - 1].url
+                        let img = $(`<div class="image-item"/>`);
+                        img.css('background-image', `url("${item.thumbnail}")`);
+                        img.attr('data-src', item.file);
+                        this.$('.library-wrap').append(img);
+                    });
+                }
+            },
+
+            createLibrary: function () {
+                let options = {order_by: '-id'};
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    this.$('.library-wrap').html(env.templates.contacts.preloader())
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                        url: this.model.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            console.log(response)
+                            this.renderFiles(response)
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.$('.library-wrap .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            setActiveImage: function (ev) {
+                let $target = $(ev.target);
+                if ($target.hasClass('active'))
+                    $target.removeClass('active');
+                else {
+                    this.$('.library-wrap>div').removeClass('active');
+                    $target.addClass('active');
+                }
+                this.updateActiveButton();
+            },
+
+            onFileInputChanged: function (ev) {
+                let target = ev.target, file;
+                for (let i = 0; i < target.files.length; i++) {
+                    if (utils.isImageType(target.files[i].type)) {
+                        file = target.files[i];
+                        break;
+                    }
+                }
+                file && this.addFile(file);
+                $(target).val('');
+            },
+
+            addFile: function (file) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    let image_prev = new Image(),
+                        src = e.target.result;
+                    image_prev.src = src;
+                    this.$('.screen-wrap[data-screen="upload"] img').detach();
+                    this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                    this.current_file = file;
+                    this.updateActiveButton();
+                };
+                reader.readAsDataURL(file);
+            },
+
+            onInputChanged: function (ev) {
+                if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                    return;
+                if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                    let url = ev.target.value.trim();
+                    this.$('.image-preview img')[0].onload = () => {
+                        this.$('.image-preview img').removeClass('hidden');
+                        this.updateActiveButton();
+                    };
+                    this.$('.image-preview img').addClass('hidden')[0].src = url;
+                    this.updateActiveButton();
+                } else {
+                    this.$('.image-preview img').addClass('hidden')[0].src = "";
+                    this.updateActiveButton();
+                }
+            },
+
+            addBackground: function () {
+                if (this.$('.btn-add').hasClass('non-active'))
+                    return;
+                let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+                dfd.done((img) => {
+                    utils.images.getAvatarFromFile(img).done((image, hash, size) => {
+                        if (image) {
+                            this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
+                                this.close();
+                            }, () => {
+                                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                            });
+                        } else
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                    });
+                });
+                this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+                this.$('.btn-add').addClass('hidden-disabled');
+                if ($active_screen.attr('data-screen') == 'library' || $active_screen.attr('data-screen') == 'web-address') {
+                    image = $active_screen.attr('data-screen') == 'library' ? $active_screen.find('div.active').attr('data-src') : $active_screen.find('img:not(.hidden)')[0].src;
+                    this.createFileFromURL(image).then((file) => {
+                        dfd.resolve(file);
+                    })
+                } else
+                    dfd.resolve(this.current_file);
+            },
+
+            createFileFromURL: async function (url) {
+                let response = await fetch(url);
+                let data = await response.blob();
+                let metadata = {
+                    type: 'image/png'
+                };
+                let file = new File([data], "avatar.png", metadata);
+                return file
+            },
+
+            close: function () {
+                this.$el.closeModal({ complete: () => {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }
+                });
+            }
         });
 
         xabber.WebcamProfileImageView = xabber.BasicView.extend({

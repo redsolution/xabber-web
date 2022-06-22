@@ -45,6 +45,7 @@ define("xabber-templates", [
     "text!templates/accounts/token_item.html",
     "text!templates/accounts/current_token_item.html",
     "text!templates/accounts/audio_file_waveform.html",
+    "text!templates/accounts/avatars_gallery.html",
 
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
@@ -335,6 +336,7 @@ define("xabber-templates", [
     addTemplate('accounts.token_item');
     addTemplate('accounts.current_token_item');
     addTemplate('accounts.audio_file_waveform');
+    addTemplate('accounts.avatars_gallery');
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');

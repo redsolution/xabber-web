@@ -2437,7 +2437,11 @@ define("xabber-accounts", function () {
             },
 
             chooseAvatar: function () {
-                this.$('.main-info-wrap .circle-avatar input').click();
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    let avatar_view = new xabber.SetAvatarView();
+                    avatar_view.render({model: this.model});
+                } else
+                    this.$('.main-info-wrap .circle-avatar input').click();
             },
 
             openEmojiPanel: function () {
@@ -3161,13 +3165,235 @@ define("xabber-accounts", function () {
             }
         });
 
-        xabber.WebcamProfileImageView = xabber.BasicView.extend({
-            className: 'modal main-modal webcam-panel',
-            template: templates.webcam_panel,
+        xabber.SetAvatarView = xabber.BasicView.extend({
+            className: 'modal main-modal avatar-picker background-panel',
+            template: templates.avatars_gallery,
+            ps_selector: '.modal-content',
+            ps_settings: {theme: 'item-list'},
 
             events: {
+                "click .menu-btn": "updateActiveMenu",
+                "click .library-wrap .image-item": "setActiveImage",
+                'change input[type="file"]': "onFileInputChanged",
+                'keyup input.url': "onInputChanged",
+                "click .btn-add": "addBackground",
+                "click .btn-cancel": "close"
             },
 
+            _initialize: function () {
+                this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+            },
+
+            render: function (options) {
+                this.model = options.model;
+                this.createLibrary();
+                this.$('.menu-btn').removeClass('active');
+                this.$('.menu-btn[data-screen-name="library"]').addClass('active');
+                this.$('.modal-header span').text(xabber.getString("account_set_avatar_header"));
+                this.$el.openModal({
+                    ready: () => {
+                        this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                    },
+                    complete: this.close.bind(this)
+                });
+                let draggable = this.$('.upload-wrap');
+                draggable[0].ondragenter = function (ev) {
+                    ev.preventDefault();
+                    draggable.addClass('file-drop');
+                };
+                draggable[0].ondragover = function (ev) {
+                    ev.preventDefault();
+                };
+                draggable[0].ondragleave = function (ev) {
+                    if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                        return;
+                    ev.preventDefault();
+                    draggable.removeClass('file-drop');
+                };
+                draggable[0].ondrop = (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    draggable.removeClass('file-drop');
+                    let files = ev.dataTransfer.files || [], file;
+                    for (let i = 0; i < files.length; i++) {
+                        if (utils.isImageType(files[i].type)) {
+                            file = files[i];
+                            break;
+                        }
+                    }
+                    file && this.addFile(file);
+                };
+            },
+
+            onPaste: function (ev) {
+                let url = ev.clipboardData.getData('text').trim();
+                this.$('.image-preview img')[0].onload = () => {
+                    this.$('.image-preview img').removeClass('hidden');
+                    this.updateActiveButton();
+                };
+                this.$('.image-preview img').addClass('hidden')[0].src = url;
+                this.updateActiveButton();
+            },
+
+            updateActiveMenu: function (ev) {
+                let screen_name = ev.target.getAttribute('data-screen-name');
+                this.$('.menu-btn').removeClass('active');
+                this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+                this.updateScreen(screen_name);
+            },
+
+            updateScreen: function (name) {
+                this.$('.screen-wrap').addClass('hidden');
+                this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+                this.scrollToTop();
+                this.updateActiveButton();
+            },
+
+            updateActiveButton: function () {
+                let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                    non_active = true;
+                if ($active_screen.attr('data-screen') == 'library') {
+                    $active_screen.find('div.active').length && (non_active = false);
+                } else {
+                    $active_screen.find('img:not(.hidden)').length && (non_active = false);
+                }
+                this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+            },
+
+            renderFiles: function (response) {
+                this.$('.library-wrap .preloader-wrapper').remove()
+                if (response.items.length){
+                    response.items.forEach((item) => {
+                        if (item.thumbnail && item.thumbnail.length)
+                            item.thumbnail = item.thumbnail[item.thumbnail.length - 1].url
+                        let img = $(`<div class="image-item"/>`);
+                        img.css('background-image', `url("${item.thumbnail}")`);
+                        img.attr('data-src', item.file);
+                        this.$('.library-wrap').append(img);
+                    });
+                }
+            },
+
+            createLibrary: function () {
+                let options = {order_by: '-id'};
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    this.$('.library-wrap').html(env.templates.contacts.preloader())
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                        url: this.model.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            console.log(response)
+                            this.renderFiles(response)
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.$('.library-wrap .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            setActiveImage: function (ev) {
+                let $target = $(ev.target);
+                if ($target.hasClass('active'))
+                    $target.removeClass('active');
+                else {
+                    this.$('.library-wrap>div').removeClass('active');
+                    $target.addClass('active');
+                }
+                this.updateActiveButton();
+            },
+
+            onFileInputChanged: function (ev) {
+                let target = ev.target, file;
+                for (let i = 0; i < target.files.length; i++) {
+                    if (utils.isImageType(target.files[i].type)) {
+                        file = target.files[i];
+                        break;
+                    }
+                }
+                file && this.addFile(file);
+                $(target).val('');
+            },
+
+            addFile: function (file) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    let image_prev = new Image(),
+                        src = e.target.result;
+                    image_prev.src = src;
+                    this.$('.screen-wrap[data-screen="upload"] img').detach();
+                    this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                    this.current_file = file;
+                    this.updateActiveButton();
+                };
+                reader.readAsDataURL(file);
+            },
+
+            onInputChanged: function (ev) {
+                if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                    return;
+                if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                    let url = ev.target.value.trim();
+                    this.$('.image-preview img')[0].onload = () => {
+                        this.$('.image-preview img').removeClass('hidden');
+                        this.updateActiveButton();
+                    };
+                    this.$('.image-preview img').addClass('hidden')[0].src = url;
+                    this.updateActiveButton();
+                } else {
+                    this.$('.image-preview img').addClass('hidden')[0].src = "";
+                    this.updateActiveButton();
+                }
+            },
+
+            addBackground: function () {
+                if (this.$('.btn-add').hasClass('non-active'))
+                    return;
+                let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+                dfd.done((img) => {
+                    utils.images.getAvatarFromFile(img).done((image, hash, size) => {
+                        if (image) {
+                            this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
+                                this.close();
+                            }, () => {
+                                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                            });
+                        } else
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                    });
+                });
+                this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+                this.$('.btn-add').addClass('hidden-disabled');
+                if ($active_screen.attr('data-screen') == 'library' || $active_screen.attr('data-screen') == 'web-address') {
+                    image = $active_screen.attr('data-screen') == 'library' ? $active_screen.find('div.active').attr('data-src') : $active_screen.find('img:not(.hidden)')[0].src;
+                    this.createFileFromURL(image).then((file) => {
+                        dfd.resolve(file);
+                    })
+                } else
+                    dfd.resolve(this.current_file);
+            },
+
+            createFileFromURL: async function (url) {
+                let response = await fetch(url);
+                let data = await response.blob();
+                let metadata = {
+                    type: 'image/png'
+                };
+                let file = new File([data], "avatar.png", metadata);
+                return file
+            },
+
+            close: function () {
+                this.$el.closeModal({ complete: () => {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }
+                });
+            }
         });
 
         xabber.WebcamProfileImageView = xabber.BasicView.extend({

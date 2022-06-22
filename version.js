@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.51","version_description":"fixed incoming subscription request decline, fixed subscription descriptions"}'
+'{"version_number":"2.3.2.52","version_description":"added account avatar picker view"}'
 )});
