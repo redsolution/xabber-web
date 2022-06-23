@@ -9240,6 +9240,7 @@ img.fwd-img-preview {
 .input-toolbar .set-encryption,
 .input-toolbar .format-text,
 .input-toolbar .attach-location,
+.input-toolbar .attach-media,
 .input-toolbar .attach-file {
     position: relative;
     cursor: pointer;

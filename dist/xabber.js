@@ -39148,6 +39148,9 @@ define('text!templates/chats/chat_item.html',[],function () { return '<div class
 define('text!templates/chats/chat_head.html',[],function () { return '<div class="chat-head-details"></div>\n<div class="circle-avatar"/>\n<div class="contact-status hide-offline"/>\n<div class="chat-icon hidden"></div>\n<div class="contact-info">\n    <div class="contact-name-wrap">\n        <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>\n        <p class="contact-name one-line"></p>\n    </div>\n    <p class="contact-status-message one-line"></p>\n</div>\n<div class="chat-tools-wrap">\n    <div class="chat-tool btn-show-fingerprints">\n        <i class="mdi mdi-lock mdi-24px"></i>\n    </div>\n    <div class="chat-tool btn-jingle-message">\n        <i class="mdi mdi-phone mdi-24px"></i>\n    </div>\n    <!--<div class="chat-tool btn-set-status">\n        <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n            <g stroke="none" stroke-width="1" fill="none">\n                <rect x="0" y="0" width="24" height="24"/>\n                <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>\n            </g>\n        </svg>\n    </div>-->\n    <div class="chat-tool btn-search-messages">\n        <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n    </div>\n    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n        <li class="btn-chat-pin">\n            <span class="one-line"></span>\n        </li>\n        <li class="btn-archive-chat">\n            <span class="one-line"></span>\n        </li>\n        <li class="btn-notifications active-hover" data-activates="{{view.cid}}-mute-more">\n            <span class="one-line"></span>\n        </li>\n        <!--<li class="btn-contact-details">-->\n            <!--<span class="one-line">{[print(xabber.getString("contact_viewer"))]}</span>-->\n        <!--</li>-->\n        <li class="btn-call-attention">\n            <span class="one-line">{[print(xabber.getString("call_attention"))]}</span>\n        </li>\n        <!--<li class="btn-export-history">\n            <span class="one-line">{[print(xabber.getString("export_chat"))]}</span>\n        </li>-->\n        <!--<li class="btn-clear-history">-->\n            <!--<span class="one-line">{[print(xabber.getString("clear_history"))]}</span>-->\n        <!--</li>-->\n        <li class="btn-invite-users">\n            <span class="one-line">{[print(xabber.getString("groupchat_invite"))]}</span>\n        </li>\n        <li class="btn-start-encryption">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_start_encrypted_chat"))]}</span>\n        </li>\n        <li class="btn-open-encrypted-chat">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>\n        </li>\n        <li class="btn-open-regular-chat">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>\n        </li>\n        <!--<li class="btn-delete-chat">-->\n            <!--<span class="one-line">{[print(xabber.getString("delete_chat"))]}</span>-->\n        <!--</li>-->\n        <!--<li class="btn-delete-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("chat_settings__button_delete_contact"))]}</span>-->\n        <!--</li>-->\n        <!--<li class="btn-block-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("contact_block"))]}</span>-->\n        <!--</li>-->\n        <!--<li class="btn-unblock-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("chat_settings__button_unblock_contact"))]}</span>-->\n        <!--</li>-->\n    </ul>\n    <ul id="{{view.cid}}-mute-more" class="contact-mute-dropdown dropdown-content noselect">\n        <li class="btn-mute-dropdown" data-mute="minutes15">\n            <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="hours1">\n            <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="hours2">\n            <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="day">\n            <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="forever">\n            <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n        </li>\n    </ul>\n</div>\n';});
 
 
+define('text!templates/chats/send_media.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="image" class="menu-btn btn-library">{[print(xabber.getString("images"))]}</div>\n        <div data-screen-name="video" class="menu-btn btn-library">{[print(xabber.getString("videos"))]}</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">{[print(xabber.getString("settings__dialog_background__menu_item_upload"))]}</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">{[print(xabber.getString("settings__dialog_background__menu_item_url"))]}</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="image" class="screen-wrap library-wrap"></div>\n    <div data-screen="video" class="screen-wrap hidden library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">{[print(xabber.getString("chat_bottom__drag_and_drop__text_drop_files_here"))]}</div>\n            <div class="upload-button">\n                <button type="file">{[print(xabber.getString("send_media__btn_upload"))]}</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">{[print(xabber.getString("settings__dialog_background__section_url__label"))]}</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>{[print(xabber.getString("settings__dialog_background__section_url__placeholder_preview"))]}</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("chat_send"))]}</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    <div class="modal-preloader-wrap"></div>\n</div>';});
+
+
 define('text!templates/chats/saved_chat_head.html',[],function () { return '<div class="circle-avatar ground-color-700"></div>\n<div class="contact-info">\n    <p class="contact-name one-line">{[print(xabber.getString("saved_messages__header"))]}</p>\n    <p class="one-liner"></p>\n</div>\n<div class="chat-tools-wrap">\n    <div class="chat-tool btn-chat-pin">\n        <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n            <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                <path id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n        </svg>\n    </div>\n    <div class="chat-tool btn-search-messages">\n        <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n    </div>\n    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n        <li class="btn-delete-chat">\n            <span class="one-line">{[print(xabber.getString("chat_settings__button_delete_all"))]}</span>\n        </li>\n    </ul>\n</div>\n';});
 
 
@@ -39157,7 +39160,7 @@ define('text!templates/chats/chat_content.html',[],function () { return '  <div 
 define('text!templates/chats/chat_content_contact.html',[],function () { return '<div class="search-wrap">\n    <div class="search-content">\n        <div class="search-form-header block-header">\n            <i class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>\n            <div class="messages-search-form search-form ">\n                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder=\'{[print(xabber.getString("chat__search_messages_panel__placeholder"))]}\' autofocus>\n            </div>\n            <i class="close-search-icon mdi mdi-24px mdi-close"></i>\n        </div>\n        <div class="search-messages-content-wrap">\n            <div class="search-results">\n                {[print(xabber.getString("nothing_was_searched"))]}\n            </div>\n            <div class="preloader-wrap">\n                <div class="preloader-wrapper preloader-20px active">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div class="messages-count">\n            </div>\n            <div class="chat-content">\n            </div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix"></div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">{[print(xabber.getString("chat_bottom__placeholder__cancel_write_voice"))]}</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\' multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div class="attach attach-location">\n                    <input type="text" hidden title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\'>\n                    <i class="mdi mdi-24px mdi-map-marker"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-info-wrap">\n                    <div class="account-jid text-color-700"></div>\n                    <div class="account-nickname text-color-700"></div>\n                    <div class="account-badge"></div>\n                    <div class="account-role ground-color-700"></div>\n                </div>\n            </div>\n        </div>\n        <div class="send-area">\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">{[print(xabber.getString("chat_bottom__placeholder__blocked"))]}</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_reply").slice(0,1))]}</span>{[print(xabber.getString("chat_reply").slice(1))]}</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_froward").slice(0,1))]}</span>{[print(xabber.getString("chat_froward").slice(1))]}</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_copy").slice(0,1))]}</span>{[print(xabber.getString("message_copy").slice(1))]}</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("delete").slice(0,1))]}</span>{[print(xabber.getString("delete").slice(1))]}</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_edit").slice(0,1))]}</span>{[print(xabber.getString("message_edit").slice(1))]}</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_pin").slice(0,1))]}</span>{[print(xabber.getString("message_pin").slice(1))]}</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">{[print(xabber.getString("cancel"))]}</div>\n        </div>\n    </div>\n';});
+define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix"></div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">{[print(xabber.getString("chat_bottom__placeholder__cancel_write_voice"))]}</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\' multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div class="attach attach-media" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_media"))]}\'>\n                    <i class="mdi mdi-24px mdi-file-image"></i>\n                </div>\n                <div class="attach attach-location" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_location"))]}\'>\n                    <input type="text" hidden title=\'{[print(xabber.getString("chat_bottom__tooltip_send_location"))]}\'>\n                    <i class="mdi mdi-24px mdi-map-marker"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-info-wrap">\n                    <div class="account-jid text-color-700"></div>\n                    <div class="account-nickname text-color-700"></div>\n                    <div class="account-badge"></div>\n                    <div class="account-role ground-color-700"></div>\n                </div>\n            </div>\n        </div>\n        <div class="send-area">\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">{[print(xabber.getString("chat_bottom__placeholder__blocked"))]}</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_reply").slice(0,1))]}</span>{[print(xabber.getString("chat_reply").slice(1))]}</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_froward").slice(0,1))]}</span>{[print(xabber.getString("chat_froward").slice(1))]}</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_copy").slice(0,1))]}</span>{[print(xabber.getString("message_copy").slice(1))]}</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("delete").slice(0,1))]}</span>{[print(xabber.getString("delete").slice(1))]}</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_edit").slice(0,1))]}</span>{[print(xabber.getString("message_edit").slice(1))]}</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_pin").slice(0,1))]}</span>{[print(xabber.getString("message_pin").slice(1))]}</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">{[print(xabber.getString("cancel"))]}</div>\n        </div>\n    </div>\n';});
 
 
 define('text!templates/chats/location_popup.html',[],function () { return '\n<div class="modal-content-wrap">\n    <div class="modal-content{[ if (!popup_coordinates) { ]}popup{[ } ]}">\n        <div id="map" class="text-color-700" style="width:800px; height:490px;" data-type=\'map\'></div>\n        <div class="form-group">\n                <textarea id="output" class="form-control" disabled rows="20"></textarea>\n                <textarea id="lat" class="form-control" disabled rows="20"></textarea>\n                <textarea id="lon" class="form-control" disabled rows="20"></textarea>\n        </div>\n\n        <script type="text/javascript">\n            var layers = [ new ol.layer.Tile({ source: new ol.source.OSM() }) ];\n            var coordinates = popup_coordinates ? ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\') : [-9639318.435625363, 1667475.03690917];\n            var zoom = popup_coordinates ? 15 : 0;\n\n            var placemark = new ol.Overlay.Placemark ({\n                // backgroundColor : \'yellow\',\n                contentColor: \'#000\',\n                autoPan: true,\n                html: \'<?xml version="1.0" encoding="UTF-8"?><svg width="48px" height="48px" viewBox="0 0 24 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#000000" fill-rule="nonzero"></path></g></svg>\',\n                anchor: false,\n                autoPanAnimation: { duration: 250 }\n              });\n\n            var placemark_my_location = new ol.Overlay.Placemark ({\n                // backgroundColor : \'yellow\',\n                contentColor: \'#000\',\n                autoPan: true,\n                html: \'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="36px" height="36px"><circle class="outer" cx="20" cy="20" r="16" stroke="none" stroke-width="1.5" fill="none" style="opacity: 0.6;"></circle><circle class="inner" cx="20" cy="20" r="8" stroke="white" stroke-width="1.5" fill="none"></circle></svg>\',\n                anchor: false,\n                autoPanAnimation: { duration: 250 }\n              });\n\n            var map = new ol.Map\n            ({\ttarget: \'map\',\n                view: new ol.View\n                ({\tzoom: zoom,\n                    center: coordinates\n                }),\n                interactions: ol.interaction.defaults({ altShiftDragRotate:false, pinchRotate:false }),\n                layers: layers,\n                overlays: [placemark, placemark_my_location]\n            });\n\n            var getCurrentPositionControl = function (e) {\n                navigator.geolocation.getCurrentPosition(success, error, options);\n            };\n\n            var options = {\n              enableHighAccuracy: true,\n              timeout: 5000,\n              maximumAge: 0\n            };\n\n            function success(pos) {\n              var crd = pos.coords;\n              map.getView().setCenter(ol.proj.transform([crd.longitude, crd.latitude], \'EPSG:4326\', \'EPSG:3857\'));\n              placemark_my_location.show(ol.proj.transform([crd.longitude, crd.latitude], \'EPSG:4326\', \'EPSG:3857\'));\n              map.getView().setZoom(17);\n              button_geoposition.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-gps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M12,8 C14.209139,8 16,9.790861 16,12 C16,14.209139 14.209139,16 12,16 C9.790861,16 8,14.209139 8,12 C8,9.790861 9.790861,8 12,8 M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13400675,5 5,8.13400675 5,12 C5,15.8659932 8.13400675,19 12,19 C15.8659932,19 19,15.8659932 19,12 C19,8.13400675 15.8659932,5 12,5 L12,5 Z" id="mdi:crosshairs-gps" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n            };\n\n            function error(err) {\n              console.warn(`ERROR(${err.code}): ${err.message}`);\n            };\n\n            var button_geoposition = document.createElement(\'button\');\n            button_geoposition.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-question" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13,5 5,8.13 5,12 C5,15.87 8.13,19 12,19 C15.87,19 19,15.87 19,12 C19,8.13 15.87,5 12,5 M11.13,17.25 L12.88,17.25 L12.88,15.5 L11.13,15.5 L11.13,17.25 M12,6.75 C10.07,6.75 8.5,8.32 8.5,10.25 L10.25,10.25 C10.25,9.28 11.03,8.5 12,8.5 C12.97,8.5 13.75,9.28 13.75,10.25 C13.75,12 11.13,11.78 11.13,14.63 L12.88,14.63 C12.88,12.66 15.5,12.44 15.5,10.25 C15.5,8.32 13.93,6.75 12,6.75 Z" id="mdi:crosshairs-question" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n\n\n            button_geoposition.addEventListener(\'click\', getCurrentPositionControl, false);\n\n            var custom_element_position = document.createElement(\'div\');\n\n            if (popup_coordinates) {\n                custom_element_position.className = \'geoposition placemark-exist ol-control ol-unselectable\';\n            }\n            else {\n                custom_element_position.className = \'geoposition ol-control ol-unselectable\';\n            }\n            custom_element_position.appendChild(button_geoposition);\n\n            geoposition = new ol.control.Control({\n                className: \'myControl\',\n                element: custom_element_position,\n                target: document.getElementById("myCustomControl")\n            });\n\n            map.addControl(geoposition);\n\n            if (popup_coordinates) {\n                placemark.show(ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\'));\n                $(\'.ol-zoom.ol-unselectable.ol-control\').addClass(\'placemark-exist\');\n                var getPlacemarkPositionControl = function (e) {\n                    map.getView().setCenter(ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\'));\n                    map.getView().setZoom(15);\n                    $(\'.ol-location\').show()\n\n                };\n\n                var button_placemark_position = document.createElement(\'button\');\n                button_placemark_position.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n\n\n                button_placemark_position.addEventListener(\'click\', getPlacemarkPositionControl, false);\n\n                var custom_element_placemark_position = document.createElement(\'div\');\n                custom_element_placemark_position.className = \'placemark-position ol-control ol-unselectable\';\n                custom_element_placemark_position.appendChild(button_placemark_position);\n\n                placemark_position = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_placemark_position,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(placemark_position);\n\n                var custom_element_show_location_name = document.createElement(\'div\');\n                custom_element_show_location_name.innerHTML = \'{{location_name}}\';\n\n\n                custom_element_show_location_name.className = \'ol-location ol-control ol-unselectable\';\n\n                show_location_name = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_show_location_name,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(show_location_name);\n\n            }\n\n            if (!popup_coordinates) {\n\n                var send_buttom = document.createElement(\'button\');\n                send_buttom.className = \'btn-apply mdi mdi-28px mdi-send\';\n\n                var send_address_div = document.createElement(\'div\');\n                send_address_div.setAttribute("id", "send_address");\n                send_address_div.className = \'ol-send-address\';\n\n                var send_div = document.createElement(\'div\');\n                send_div.setAttribute("id", "send_text");\n                send_div.className = \'ol-send-text\';\n\n                var custom_element_send = document.createElement(\'div\');\n                custom_element_send.className = \'ol-send ol-control ol-unselectable\';\n                custom_element_send.appendChild(send_address_div);\n                custom_element_send.appendChild(send_div);\n                custom_element_send.appendChild(send_buttom);\n\n                send = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_send,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(send);\n\n                var sLayer = new ol.layer.Vector({\n                    source: new ol.source.Vector(),\n                    style: new ol.style.Style({\n                        image: new ol.style.Circle({\n                            radius: 5,\n                            stroke: new ol.style.Stroke ({\n                                color: \'rgb(255,165,0)\',\n                                width: 3\n                            }),\n                            fill: new ol.style.Fill({\n                                color: \'rgba(255,165,0,.3)\'\n                            })\n                        }),\n                        stroke: new ol.style.Stroke ({\n                            color: \'rgb(255,165,0)\',\n                            width: 3\n                        }),\n                        fill: new ol.style.Fill({\n                            color: \'rgba(255,165,0,.3)\'\n                        })\n                    })\n                });\n\n                map.addLayer(sLayer);\n\n                var search = new ol.control.SearchNominatim (\n                    {\t//target: $(".options").get(0),\n                        polygon: $("#polygon").prop("checked"),\n                        reverse: true,\n                        position: true\t// Search, with priority to geo position\n                    });\n\n                map.addControl (search);\n\n                search.on(\'select\', function(e){\n                    sLayer.getSource().clear();\n                    // Check if we get a geojson to describe the search\n                    if (e.search.geojson) {\n                        var format = new ol.format.GeoJSON();\n                        var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });\n                        sLayer.getSource().addFeature(f);\n                        var view = map.getView();\n                        var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());\n                        var zoom = view.getZoomForResolution(resolution);\n                        var center = ol.extent.getCenter(f.getGeometry().getExtent());\n                        // redraw before zoom\n                        setTimeout(function(){\n                                view.animate({\n                                center: center,\n                                zoom: Math.min (zoom, 16)\n                            });\n                        }, 100);\n                    }\n                    else {\n                        map.getView().animate({\n                            center:e.coordinate,\n                            zoom: Math.max (map.getView().getZoom(),16)\n                        });\n                    }\n                });\n\n                function reverseGeocode(json) {\n                    if (!json[0].error) {\n                        let house_number = json[0].address.house_number ? \' \' + json[0].address.house_number : \'\',\n                            road = json[0].address.road ? json[0].address.road + house_number + \', \' : \'\',\n                            state = json[0].address.state ? json[0].address.state + \', \' : \'\',\n                            neighbourhood = json[0].address.neighbourhood ? json[0].address.neighbourhood + \', \' : \'\',\n                            allotments = json[0].address.allotments ? json[0].address.allotments + \', \' : \'\',\n                            village = json[0].address.village ? json[0].address.village + \', \' : \'\',\n                            city = json[0].address.city ? json[0].address.city + \', \' : \'\',\n                            country = json[0].address.country ? state + json[0].address.country : \'\',\n                            final_text = \'\'\n                        if ( !road ){\n                            final_text = neighbourhood + allotments + village + city + country\n                        }\n                        else {\n                            final_text = road + neighbourhood + allotments + village + city + state.replace(\', \',\'\')\n                        }\n                        $(\'#send_address\').text(final_text);\n                    }\n                    else {\n                        $(\'#send_address\').text(xabber.getString("location_fragment__address_error__title"));\n                    }\n                }\n\n                map.on(\'click\', function(e) {\n                    placemark.show(e.coordinate);\n                    search.reverseGeocode(e.coordinate, reverseGeocode);\n                    let coordinates = ol.proj.transform(e.coordinate, map.getView().getProjection(), \'EPSG:4326\');\n                    $(\'.ol-control.ol-send\').show();\n                    $(\'#send_text\').text(coordinates[1].toFixed(6) + \':\' + coordinates[0].toFixed(6));\n                    $(\'#output\').text(\'geo:\' + coordinates[1] + \',\' + coordinates[0]);\n                    $(\'#lat\').text(coordinates[1]);\n                    $(\'#lon\').text(coordinates[0]);\n                  });\n            }\n            window.setTimeout(function () { map.updateSize(); }, 200)\n        </script>\n    </div>\n</div>';});
@@ -39591,6 +39594,7 @@ define("xabber-templates", [
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
+    "text!templates/chats/send_media.html",
     "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_content_contact.html",
@@ -39881,6 +39885,7 @@ define("xabber-templates", [
     addTemplate('chats.add_chat_account_item');
     addTemplate('chats.chat_item');
     addTemplate('chats.chat_head');
+    addTemplate('chats.send_media');
     addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_content_contact');
@@ -41473,9 +41478,9 @@ define('xabber-utils',[
     return utils;
 });
 
-let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":58,"bs":0,"ca":26,"cs":98,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":5,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":67,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":73,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
+let client_translation_progress = {"en":100,"ar":28,"az":2,"be":14,"bg":58,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":51,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":4,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":67,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":72,"pt-PT":15,"qya-AA":0,"ro":17,"ru":71,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":39,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":68,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.52","version_description":"added account avatar picker view"}'
+'{"version_number":"2.3.2.53","version_description":"added chat send media view"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -51158,7 +51163,7 @@ define("xabber-accounts", [],function () {
                 "click .library-wrap .image-item": "setActiveImage",
                 'change input[type="file"]': "onFileInputChanged",
                 'keyup input.url': "onInputChanged",
-                "click .btn-add": "addBackground",
+                "click .btn-add": "addAvatar",
                 "click .btn-cancel": "close"
             },
 
@@ -51332,7 +51337,7 @@ define("xabber-accounts", [],function () {
                 }
             },
 
-            addBackground: function () {
+            addAvatar: function () {
                 if (this.$('.btn-add').hasClass('non-active'))
                     return;
                 let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
@@ -71367,6 +71372,252 @@ define("xabber-chats", [],function () {
         }
     });
 
+
+      xabber.SendMediaView = xabber.BasicView.extend({
+          className: 'modal main-modal avatar-picker background-panel',
+          template: templates.send_media,
+          ps_selector: '.modal-content',
+          ps_settings: {theme: 'item-list'},
+
+          events: {
+              "click .menu-btn": "updateActiveMenu",
+              "click .library-wrap .image-item": "setActiveImage",
+              'change input[type="file"]': "onFileInputChanged",
+              'keyup input.url': "onInputChanged",
+              "click .btn-add": "addMedia",
+              "click .btn-cancel": "close"
+          },
+
+          _initialize: function () {
+              this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+          },
+
+          render: function (options) {
+              this.model = options.model;
+              this.parent = options.parent;
+              this.createLibrary();
+              this.$('.menu-btn').removeClass('active');
+              this.$('.menu-btn[data-screen-name="image"]').addClass('active');
+              this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_send_media"));
+              this.$el.openModal({
+                  ready: () => {
+                      this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                  },
+                  complete: this.close.bind(this)
+              });
+              let draggable = this.$('.upload-wrap');
+              draggable[0].ondragenter = function (ev) {
+                  ev.preventDefault();
+                  draggable.addClass('file-drop');
+              };
+              draggable[0].ondragover = function (ev) {
+                  ev.preventDefault();
+              };
+              draggable[0].ondragleave = function (ev) {
+                  if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                      return;
+                  ev.preventDefault();
+                  draggable.removeClass('file-drop');
+              };
+              draggable[0].ondrop = (ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  draggable.removeClass('file-drop');
+                  let files = ev.dataTransfer.files || [], file;
+                  for (let i = 0; i < files.length; i++) {
+                      if (utils.isImageType(files[i].type)) {
+                          file = files[i];
+                          break;
+                      }
+                  }
+                  file && this.addFile(file);
+              };
+          },
+
+          onPaste: function (ev) {
+              let url = ev.clipboardData.getData('text').trim();
+              this.$('.image-preview img')[0].onload = () => {
+                  this.$('.image-preview img').removeClass('hidden');
+                  this.updateActiveButton();
+              };
+              this.$('.image-preview img').addClass('hidden')[0].src = url;
+              this.updateActiveButton();
+          },
+
+          updateActiveMenu: function (ev) {
+              let screen_name = ev.target.getAttribute('data-screen-name');
+              this.$('.menu-btn').removeClass('active');
+              this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+              this.updateScreen(screen_name);
+          },
+
+          updateScreen: function (name) {
+              this.$('.screen-wrap').addClass('hidden');
+              this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+              this.scrollToTop();
+              this.updateActiveButton();
+          },
+
+          updateActiveButton: function () {
+              let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                  non_active = true;
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video') {
+                  $active_screen.find('div.active').length && (non_active = false);
+              } else {
+                  $active_screen.find('img:not(.hidden)').length && (non_active = false);
+              }
+              this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+          },
+
+          renderFiles: function (response) {
+              this.$(`.library-wrap[data-screen="${response.type}"] .preloader-wrapper`).remove()
+              if (response.items.length){
+                  response.items.forEach((item) => {
+                      let img = $(`<div class="image-item"/>`);
+                      img.css('background-image', `url("${item.thumbnail}")`);
+                      img.attr('data-src', item.file);
+                      img.attr('data-name', item.name);
+                      this.$(`.library-wrap[data-screen="${response.type}"]`).append(img);
+                  });
+              }
+          },
+
+          createLibrary: function () {
+              if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                  this.$('.library-wrap').html(env.templates.contacts.preloader())
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'image'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'image'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
+                      }
+                  });
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'video'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'video'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
+                      }
+                  });
+              }
+          },
+
+          setActiveImage: function (ev) {
+              let $target = $(ev.target),
+                  $active_screen = this.$('.screen-wrap:not(.hidden)');
+              if ($target.hasClass('active'))
+                  $target.removeClass('active');
+              else {
+                  this.$('.library-wrap>div').removeClass('active');
+                  $target.addClass('active');
+              }
+              this.updateActiveButton();
+          },
+
+          onFileInputChanged: function (ev) {
+              let target = ev.target, file;
+              for (let i = 0; i < target.files.length; i++) {
+                  if (utils.isImageType(target.files[i].type)) {
+                      file = target.files[i];
+                      break;
+                  }
+              }
+              file && this.addFile(file);
+              $(target).val('');
+          },
+
+          addFile: function (file) {
+              let reader = new FileReader();
+              reader.onload = (e) => {
+                  let image_prev = new Image(),
+                      src = e.target.result;
+                  image_prev.src = src;
+                  this.$('.screen-wrap[data-screen="upload"] img').detach();
+                  this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                  this.current_file = file;
+                  this.updateActiveButton();
+              };
+              reader.readAsDataURL(file);
+          },
+
+          onInputChanged: function (ev) {
+              if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                  return;
+              if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                  let url = ev.target.value.trim();
+                  this.$('.image-preview img')[0].onload = () => {
+                      this.$('.image-preview img').removeClass('hidden');
+                      this.updateActiveButton();
+                  };
+                  this.$('.image-preview img').addClass('hidden')[0].src = url;
+                  this.updateActiveButton();
+              } else {
+                  this.$('.image-preview img').addClass('hidden')[0].src = "";
+                  this.updateActiveButton();
+              }
+          },
+
+          addMedia: function () {
+              if (this.$('.btn-add').hasClass('non-active'))
+                  return;
+              let file, filename, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+              dfd.done((resolved_file) => {
+                  this.parent.view.addFileMessage([resolved_file])
+                  this.close();
+              });
+              this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+              this.$('.btn-add').addClass('hidden-disabled');
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' || $active_screen.attr('data-screen') == 'web-address') {
+                  file = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-src') :
+                      $active_screen.find('img:not(.hidden)')[0].src;
+                  filename = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-name') : '';
+
+                  this.createFileFromURL(file, filename).then((file) => {
+                      dfd.resolve(file);
+                  })
+              } else
+                  dfd.resolve(this.current_file);
+          },
+
+          createFileFromURL: async function (url, filename) {
+              let response = await fetch(url);
+              let data = await response.blob();
+              let metadata = {
+                  type: data.type
+              };
+              let file = new File([data], filename || url.split('#').shift().split('?').shift().split('/').pop() || 'file', metadata);
+              return file
+          },
+
+          close: function () {
+              this.$el.closeModal({ complete: () => {
+                      this.$el.detach();
+                      this.data.set('visible', false);
+                  }
+              });
+          }
+      });
+
     xabber.ChatLocationView = xabber.BasicView.extend({
         className: 'modal main-modal chat-location ',
         template: templates.location_popup,
@@ -71506,6 +71757,7 @@ define("xabber-chats", [],function () {
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
             "click .attach-location": "showLocationPopup",
+            "click .attach-media": "showMediaPopup",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
@@ -72284,6 +72536,13 @@ define("xabber-chats", [],function () {
             window.popup_coordinates = undefined;
             window.location_name = undefined;
             new xabber.ChatLocationView({content: this}).show(ev);
+        },
+
+        showMediaPopup: function (ev) {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let media_view = new xabber.SendMediaView();
+                media_view.render({parent: this, model: this.account});
+            }
         },
 
         stopWritingVoiceMessage: function (ev) {

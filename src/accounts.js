@@ -3176,7 +3176,7 @@ define("xabber-accounts", function () {
                 "click .library-wrap .image-item": "setActiveImage",
                 'change input[type="file"]': "onFileInputChanged",
                 'keyup input.url': "onInputChanged",
-                "click .btn-add": "addBackground",
+                "click .btn-add": "addAvatar",
                 "click .btn-cancel": "close"
             },
 
@@ -3350,7 +3350,7 @@ define("xabber-accounts", function () {
                 }
             },
 
-            addBackground: function () {
+            addAvatar: function () {
                 if (this.$('.btn-add').hasClass('non-active'))
                     return;
                 let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');

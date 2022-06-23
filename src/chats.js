@@ -8103,6 +8103,252 @@ define("xabber-chats", function () {
         }
     });
 
+
+      xabber.SendMediaView = xabber.BasicView.extend({
+          className: 'modal main-modal avatar-picker background-panel',
+          template: templates.send_media,
+          ps_selector: '.modal-content',
+          ps_settings: {theme: 'item-list'},
+
+          events: {
+              "click .menu-btn": "updateActiveMenu",
+              "click .library-wrap .image-item": "setActiveImage",
+              'change input[type="file"]': "onFileInputChanged",
+              'keyup input.url': "onInputChanged",
+              "click .btn-add": "addMedia",
+              "click .btn-cancel": "close"
+          },
+
+          _initialize: function () {
+              this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+          },
+
+          render: function (options) {
+              this.model = options.model;
+              this.parent = options.parent;
+              this.createLibrary();
+              this.$('.menu-btn').removeClass('active');
+              this.$('.menu-btn[data-screen-name="image"]').addClass('active');
+              this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_send_media"));
+              this.$el.openModal({
+                  ready: () => {
+                      this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                  },
+                  complete: this.close.bind(this)
+              });
+              let draggable = this.$('.upload-wrap');
+              draggable[0].ondragenter = function (ev) {
+                  ev.preventDefault();
+                  draggable.addClass('file-drop');
+              };
+              draggable[0].ondragover = function (ev) {
+                  ev.preventDefault();
+              };
+              draggable[0].ondragleave = function (ev) {
+                  if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                      return;
+                  ev.preventDefault();
+                  draggable.removeClass('file-drop');
+              };
+              draggable[0].ondrop = (ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  draggable.removeClass('file-drop');
+                  let files = ev.dataTransfer.files || [], file;
+                  for (let i = 0; i < files.length; i++) {
+                      if (utils.isImageType(files[i].type)) {
+                          file = files[i];
+                          break;
+                      }
+                  }
+                  file && this.addFile(file);
+              };
+          },
+
+          onPaste: function (ev) {
+              let url = ev.clipboardData.getData('text').trim();
+              this.$('.image-preview img')[0].onload = () => {
+                  this.$('.image-preview img').removeClass('hidden');
+                  this.updateActiveButton();
+              };
+              this.$('.image-preview img').addClass('hidden')[0].src = url;
+              this.updateActiveButton();
+          },
+
+          updateActiveMenu: function (ev) {
+              let screen_name = ev.target.getAttribute('data-screen-name');
+              this.$('.menu-btn').removeClass('active');
+              this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+              this.updateScreen(screen_name);
+          },
+
+          updateScreen: function (name) {
+              this.$('.screen-wrap').addClass('hidden');
+              this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+              this.scrollToTop();
+              this.updateActiveButton();
+          },
+
+          updateActiveButton: function () {
+              let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                  non_active = true;
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video') {
+                  $active_screen.find('div.active').length && (non_active = false);
+              } else {
+                  $active_screen.find('img:not(.hidden)').length && (non_active = false);
+              }
+              this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+          },
+
+          renderFiles: function (response) {
+              this.$(`.library-wrap[data-screen="${response.type}"] .preloader-wrapper`).remove()
+              if (response.items.length){
+                  response.items.forEach((item) => {
+                      let img = $(`<div class="image-item"/>`);
+                      img.css('background-image', `url("${item.thumbnail}")`);
+                      img.attr('data-src', item.file);
+                      img.attr('data-name', item.name);
+                      this.$(`.library-wrap[data-screen="${response.type}"]`).append(img);
+                  });
+              }
+          },
+
+          createLibrary: function () {
+              if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                  this.$('.library-wrap').html(env.templates.contacts.preloader())
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'image'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'image'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
+                      }
+                  });
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'video'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'video'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
+                      }
+                  });
+              }
+          },
+
+          setActiveImage: function (ev) {
+              let $target = $(ev.target),
+                  $active_screen = this.$('.screen-wrap:not(.hidden)');
+              if ($target.hasClass('active'))
+                  $target.removeClass('active');
+              else {
+                  this.$('.library-wrap>div').removeClass('active');
+                  $target.addClass('active');
+              }
+              this.updateActiveButton();
+          },
+
+          onFileInputChanged: function (ev) {
+              let target = ev.target, file;
+              for (let i = 0; i < target.files.length; i++) {
+                  if (utils.isImageType(target.files[i].type)) {
+                      file = target.files[i];
+                      break;
+                  }
+              }
+              file && this.addFile(file);
+              $(target).val('');
+          },
+
+          addFile: function (file) {
+              let reader = new FileReader();
+              reader.onload = (e) => {
+                  let image_prev = new Image(),
+                      src = e.target.result;
+                  image_prev.src = src;
+                  this.$('.screen-wrap[data-screen="upload"] img').detach();
+                  this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                  this.current_file = file;
+                  this.updateActiveButton();
+              };
+              reader.readAsDataURL(file);
+          },
+
+          onInputChanged: function (ev) {
+              if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                  return;
+              if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                  let url = ev.target.value.trim();
+                  this.$('.image-preview img')[0].onload = () => {
+                      this.$('.image-preview img').removeClass('hidden');
+                      this.updateActiveButton();
+                  };
+                  this.$('.image-preview img').addClass('hidden')[0].src = url;
+                  this.updateActiveButton();
+              } else {
+                  this.$('.image-preview img').addClass('hidden')[0].src = "";
+                  this.updateActiveButton();
+              }
+          },
+
+          addMedia: function () {
+              if (this.$('.btn-add').hasClass('non-active'))
+                  return;
+              let file, filename, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+              dfd.done((resolved_file) => {
+                  this.parent.view.addFileMessage([resolved_file])
+                  this.close();
+              });
+              this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+              this.$('.btn-add').addClass('hidden-disabled');
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' || $active_screen.attr('data-screen') == 'web-address') {
+                  file = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-src') :
+                      $active_screen.find('img:not(.hidden)')[0].src;
+                  filename = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-name') : '';
+
+                  this.createFileFromURL(file, filename).then((file) => {
+                      dfd.resolve(file);
+                  })
+              } else
+                  dfd.resolve(this.current_file);
+          },
+
+          createFileFromURL: async function (url, filename) {
+              let response = await fetch(url);
+              let data = await response.blob();
+              let metadata = {
+                  type: data.type
+              };
+              let file = new File([data], filename || url.split('#').shift().split('?').shift().split('/').pop() || 'file', metadata);
+              return file
+          },
+
+          close: function () {
+              this.$el.closeModal({ complete: () => {
+                      this.$el.detach();
+                      this.data.set('visible', false);
+                  }
+              });
+          }
+      });
+
     xabber.ChatLocationView = xabber.BasicView.extend({
         className: 'modal main-modal chat-location ',
         template: templates.location_popup,
@@ -8242,6 +8488,7 @@ define("xabber-chats", function () {
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
             "click .attach-location": "showLocationPopup",
+            "click .attach-media": "showMediaPopup",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .close-forward": "unsetForwardedMessages",
@@ -9020,6 +9267,13 @@ define("xabber-chats", function () {
             window.popup_coordinates = undefined;
             window.location_name = undefined;
             new xabber.ChatLocationView({content: this}).show(ev);
+        },
+
+        showMediaPopup: function (ev) {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let media_view = new xabber.SendMediaView();
+                media_view.render({parent: this, model: this.account});
+            }
         },
 
         stopWritingVoiceMessage: function (ev) {
