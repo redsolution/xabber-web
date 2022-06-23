@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.53","version_description":"added chat send media view"}'
+'{"version_number":"2.3.2.54","version_description":"sort gallery button design"}'
 )});

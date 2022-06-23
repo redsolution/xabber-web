@@ -81,9 +81,11 @@
         <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>
         <li data-value="avatars" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("avatars"))]}</a></li>
     </ul>
-    <button class="btn-sorting dropdown-button btn-flat btn-main text-color-700 hover-ground-color-300" data-activates="storage-file-sorting">
-        {[print(xabber.getString("searching__search_panel__label_sort_by"))]}
-    </button>
+    <div class="list-managment-wrap">
+        <button class="btn-sorting dropdown-button btn-flat btn-main text-color-700 hover-ground-color-300" data-activates="storage-file-sorting">
+            {[print(xabber.getString("searching__search_panel__label_sort_by"))]}
+        </button>
+    </div>
     <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">
         <div class="property-variant btn-gallery-sorting" data-value="-id">
             <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_new"))]}</span>
