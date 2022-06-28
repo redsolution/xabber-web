@@ -14,30 +14,34 @@
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__xabber_account"))]}</div>
             </div>
             {[}]}
-            <div class="settings-tab" data-block-name="xmpp-accounts">
-                <i class="mdi mdi-24px mdi-settings"/>
+            <div class="settings-tab active" data-block-name="xmpp-accounts">
+                <i class="mdi mdi-24px mdi-lightbulb"/>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__xmpp_account"))]}</div>
             </div>
-            <div class="settings-tab" data-block-name="keyboard">
-                <i class="mdi mdi-24px mdi-keyboard"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__keyboard"))]}</div>
-            </div>
-            <div class="settings-tab" data-block-name="contact-list">
-                <i class="mdi mdi-24px mdi-account-multiple"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("category_contact_list"))]}</div>
+            <div class="settings-tab" data-block-name="background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
+                <div class="settings-block-name one-line">{[print(xabber.getString("category_interface"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="notifications">
                 <i class="mdi mdi-24px mdi-bell"></i>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__notifications"))]}</div>
             </div>
-            <div class="settings-tab" data-block-name="sounds">
-                <i class="mdi mdi-24px mdi-volume-high"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
-            </div>
-            <div class="settings-tab" data-block-name="background">
-                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
-                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__appearance"))]}</div>
-            </div>
+            <!--<div class="settings-tab" data-block-name="storage">-->
+                <!--<i class="mdi mdi-24px mdi-database"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__data_and_storage"))]}</div>-->
+            <!--</div>-->
+            <!--<div class="settings-tab" data-block-name="privacy">-->
+                <!--<i class="mdi mdi-24px mdi-incognito"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__privacy"))]}</div>-->
+            <!--</div>-->
+            <!--<div class="settings-tab" data-block-name="connection">-->
+                <!--<i class="mdi mdi-24px mdi-wan"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__connection_settings"))]}</div>-->
+            <!--</div>-->
+            <!--<div class="settings-tab" data-block-name="developer">-->
+                <!--<i class="mdi mdi-24px mdi-bug"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__developer"))]}</div>-->
+            <!--</div>-->
             <div class="settings-tab" data-block-name="interface_language">
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="translate"></svg>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__interface_language"))]}</div>
@@ -50,7 +54,15 @@
             </a>
             {[}]}
         </div>
-        <div class="settings-tabs-bottom-wrap">
+        <div class="settings-tabs-bottom-wrap settings-tabs-wrap">
+            <!--<div class="settings-tab" data-block-name="security">-->
+                <!--<i class="mdi mdi-24px mdi-security"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__security"))]}</div>-->
+            <!--</div>-->
+            <!--<div class="settings-tab" data-block-name="about">-->
+                <!--<i class="mdi mdi-24px mdi-information"></i>-->
+                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__about"))]}</div>-->
+            <!--</div>-->
             <div class="settings-tab delete-all-accounts">
                 <i class="mdi mdi-24px mdi-logout-variant"></i>
                 <div class="settings-block-name">{[print(xabber.getString("button_quit"))]}</div>
@@ -66,16 +78,13 @@
         <div class="panel-content-wrap">
             <div class="panel-content">
                 {[if (ENABLE_XABBER_ACCOUNT) {]}
-                <div class="settings-block-wrap xabber-account">
+                <div data-block-name="" class="settings-block-wrap xabber-account">
                     <div class="block-header">
                         <span class="block-name">{[print(xabber.getString("settings__menu_item__xabber_account"))]}</span>
                     </div>
                 </div>
                 {[}]}
-                <div class="settings-block-wrap xmpp-accounts">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__xmpp_account"))]}</span>
-                    </div>
+                <div data-header='{[print(xabber.getString("settings__menu_item__xmpp_account"))]}' class="settings-block-wrap xmpp-accounts">
                     <div class="setting xmpp-account-list">
                         <div class="accounts-head-wrap">
                             <div class="accounts-head xmppid-head">{[print(xabber.getString("settings__section_xmpp_accounts__table_header_xmpp_id"))]}</div>
@@ -87,242 +96,546 @@
                     </div>
                 </div>
 
-                <div class="settings-block-wrap keyboard">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__keyboard"))]}</span>
-                    </div>
-
-                    <div class="setting hotkeys radio-button field-wrap">
-                        <div class="field radio-field clickable-field">
-                            <form action="#">
-                                <p>
-                                    <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />
-                                    <label for="{{view.cid}}-enter">{[print(xabber.getString("settings__section_keyboard__label_send_on_enter"))]}</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />
-                                    <label for="{{view.cid}}-ctrlenter">{[print(xabber.getString("settings__section_keyboard__label_send_on_ctrlenter"))]}</label>
-                                </p>
-                            </form>
+                <div data-header='{[print(xabber.getString("category_interface"))]}' class="settings-block-wrap background hidden">
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("settings__menu_item__appearance"))]}</span>
+                        </div>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("settings__section_appearance__palette"))]}</span>
+                        </div>
+                        <div class="toolbar-main-color-setting-wrap">
+                            <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</div>
+                            <div class="setting toolbar-main-color-setting field-wrap">
+                                <div class="current-main-color-wrap">
+                                    <div class="current-main-color ground-color-500"></div>
+                                    <div class="color-name"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="toolbar-color-setting-wrap">
+                            <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</div>
+                            <div class="setting toolbar-color-setting field-wrap">
+                                <div class="selected-color-wrap">
+                                    <div class="selected-color-item"></div>
+                                    <div class="selected-color-info">
+                                        <div class="selected-color-name"></div>
+                                        <div class="selected-color-hex"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("account_settings_background"))]}</span>
+                        </div>
+                        <div class="background-setting-wrap">
+                            <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</div>
+                            <div class="setting background radio-button field-wrap">
+                                <div class="field radio-field clickable-field">
+                                    <form action="#">
+                                        <p>
+                                            <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default-background" />
+                                            <label for="{{view.cid}}-default-background">{[print(xabber.getString("settings__section_appearance__background__label_default"))]}</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern-background" />
+                                            <label for="{{view.cid}}-repeating-pattern-background">{[print(xabber.getString("settings__section_appearance__background__label_pattern"))]}</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image-background" />
+                                            <label for="{{view.cid}}-image-background">{[print(xabber.getString("settings__section_appearance__background__label_image"))]}</label>
+                                        </p>
+                                    </form>
+                                </div>
+                                <div class="current-background-wrap">
+                                    <div class="dark-placeholder">{[print(xabber.getString("settings__section_appearance__background__button_update"))]}</div>
+                                    <div class="current-background"></div>
+                                </div>
+                            </div>
+                            <div class="blur-setting-wrap">
+                                <div class="setting blur-setting field-wrap">
+                                    <div class="input-field checkbox-field">
+                                        <input type="checkbox" class="filled-in" id="blur_switch"/>
+                                        <label for="blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
+                                    </div>
+                                    <form action="#">
+                                        <div class="disabled hidden"></div>
+                                        <p class="range-field">
+                                            <input type="range" id="blur" min="0" max="100" />
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="vignetting-setting-wrap">
+                                <div class="setting vignetting-setting field-wrap">
+                                    <div class="input-field checkbox-field">
+                                        <input type="checkbox" class="filled-in" id="vignetting_switch"/>
+                                        <label for="vignetting_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_vignette"))]}</label>
+                                    </div>
+                                    <form action="#">
+                                        <div class="disabled hidden"></div>
+                                        <p class="range-field">
+                                            <input type="range" id="vignetting" min="0" max="200" />
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="side-panel-setting-wrap">
+                            <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_side_panel"))]}</div>
+                            <div class="setting side-panel-setting radio-button field-wrap">
+                                <div class="field radio-field clickable-field">
+                                    <form action="#">
+                                        <p>
+                                            <input class="with-gap" name="side-panel" value="dark" type="radio" id="{{view.cid}}-dark-side-panel" />
+                                            <label for="{{view.cid}}-dark-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_dark"))]}</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="side-panel" value="light" type="radio" id="{{view.cid}}-light-side-panel" />
+                                            <label for="{{view.cid}}-light-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_light"))]}</label>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="setting side-panel-setting field-wrap">
+                                <div class="input-field checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="side_panel_blur_switch"/>
+                                    <label for="side_panel_blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
+                                </div>
+                                <div class="transparency-setting">
+                                    <div class="input-field checkbox-field">
+                                        <input type="checkbox" class="filled-in" id="transparency_switch"/>
+                                        <label for="transparency_switch">{[print(xabber.getString("settings__section_appearance__side_panel__checkbox_transparency"))]}</label>
+                                    </div>
+                                    <form action="#">
+                                        <div class="disabled hidden"></div>
+                                        <p class="range-field">
+                                            <input type="range" id="transparency" min="0" max="100" />
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="settings-block-wrap contact-list">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("category_contact_list"))]}</span>
-                    </div>
-                </div>
-
-                <div class="settings-block-wrap notifications">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__notifications"))]}</span>
-                    </div>
-
-                    <div class="setting notifications field-wrap">
-                        <div class="field clickable-field switch small">
-                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_desktop_notifications"))]}</span>
-                            <label class="field-value">
-                                <input type="checkbox" name="notifications">
-                                <span class="lever"></span>
-                            </label>
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("chat_viewer"))]}</span>
                         </div>
-                    </div>
-                    <div class="setting message-preview field-wrap">
-                        <div class="field clickable-field switch small">
-                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</span>
-                            <label class="field-value">
-                                <input type="checkbox" name="message-preview">
-                                <span class="lever"></span>
-                            </label>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("category_behavior"))]}</span>
                         </div>
-                    </div>
-                    <div class="setting call-attention field-wrap">
-                        <div class="field clickable-field switch small">
-                            <span class="field-name">{[print(xabber.getString("settings__section_notifications__toggle_call_attention"))]}</span>
-                            <label class="field-value">
-                                <input type="checkbox" name="call-attention">
-                                <span class="lever"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-block-wrap sounds">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__sounds"))]}</span>
-                    </div>
-                    <div class="setting sound radio-button field-wrap">
-                        <div class="field radio-field clickable-field">
-                            <form action="#">
-                                <p>
-                                    <input class="with-gap" name="sound" value="" type="radio" id="{{view.cid}}-sound-no" />
-                                    <label for="{{view.cid}}-sound-no">No sound</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="beep_up" type="radio" id="{{view.cid}}-sound-beep-up" />
-                                    <label for="{{view.cid}}-sound-beep-up">Beep Up</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="tiny_noize" type="radio" id="{{view.cid}}-sound-tiny-noize" />
-                                    <label for="{{view.cid}}-sound-tiny-noize">Tiny Noize</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="retro_game" type="radio" id="{{view.cid}}-sound-retro-game" />
-                                    <label for="{{view.cid}}-sound-retro-game">Retro Game</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="pixel_beep" type="radio" id="{{view.cid}}-sound-pixel-beep" />
-                                    <label for="{{view.cid}}-sound-pixel-beep">Pixel Beep</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="beep_positive" type="radio" id="{{view.cid}}-sound-beep-positive" />
-                                    <label for="{{view.cid}}-sound-beep-positive">Beep Positive</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="good_chime" type="radio" id="{{view.cid}}-sound-good-chime" />
-                                    <label for="{{view.cid}}-sound-good-chime">Good Chime</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="cellular_click" type="radio" id="{{view.cid}}-sound-cellular-click" />
-                                    <label for="{{view.cid}}-sound-cellular-click">Cellular Click</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="bleep" type="radio" id="{{view.cid}}-sound-bleep" />
-                                    <label for="{{view.cid}}-sound-bleep">Bleep</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="mono_u" type="radio" id="{{view.cid}}-sound-mono-u" />
-                                    <label for="{{view.cid}}-sound-mono-u">Mono U</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="plop" type="radio" id="{{view.cid}}-sound-plop" />
-                                    <label for="{{view.cid}}-sound-plop">Plop</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="ether" type="radio" id="{{view.cid}}-sound-ether" />
-                                    <label for="{{view.cid}}-sound-ether">Ether</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="pop" type="radio" id="{{view.cid}}-sound-pop" />
-                                    <label for="{{view.cid}}-sound-pop">Pop</label>
-                                </p>
-                                <p>
-                                    <input class="with-gap" name="sound" value="computer_chime" type="radio" id="{{view.cid}}-sound-computer-chime" />
-                                    <label for="{{view.cid}}-sound-computer-chime">Computer Chime</label>
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-block-wrap background">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__appearance"))]}</span>
-                    </div>
-
-                    <div class="background-setting-wrap">
-                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</div>
-                        <div class="setting background radio-button field-wrap">
+                        <div class="setting hotkeys radio-button field-wrap">
                             <div class="field radio-field clickable-field">
                                 <form action="#">
                                     <p>
-                                        <input class="with-gap" name="background" value="default" type="radio" id="{{view.cid}}-default-background" />
-                                        <label for="{{view.cid}}-default-background">{[print(xabber.getString("settings__section_appearance__background__label_default"))]}</label>
+                                        <input class="with-gap" name="hotkeys" value="enter" type="radio" id="{{view.cid}}-enter" />
+                                        <label for="{{view.cid}}-enter">{[print(xabber.getString("settings__section_keyboard__label_send_on_enter"))]}</label>
                                     </p>
                                     <p>
-                                        <input class="with-gap" name="background" value="repeating-pattern" type="radio" id="{{view.cid}}-repeating-pattern-background" />
-                                        <label for="{{view.cid}}-repeating-pattern-background">{[print(xabber.getString("settings__section_appearance__background__label_pattern"))]}</label>
-                                    </p>
-                                    <p>
-                                        <input class="with-gap" name="background" value="image" type="radio" id="{{view.cid}}-image-background" />
-                                        <label for="{{view.cid}}-image-background">{[print(xabber.getString("settings__section_appearance__background__label_image"))]}</label>
-                                    </p>
-                                </form>
-                            </div>
-                            <div class="current-background-wrap">
-                                <div class="dark-placeholder">{[print(xabber.getString("settings__section_appearance__background__button_update"))]}</div>
-                                <div class="current-background"></div>
-                            </div>
-                        </div>
-                        <div class="vignetting-setting-wrap">
-                            <div class="setting vignetting-setting field-wrap">
-                                <div class="input-field checkbox-field">
-                                    <input type="checkbox" class="filled-in" id="vignetting_switch"/>
-                                    <label for="vignetting_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_vignette"))]}</label>
-                                </div>
-                                <form action="#">
-                                    <div class="disabled hidden"></div>
-                                    <p class="range-field">
-                                        <input type="range" id="vignetting" min="0" max="200" />
-                                    </p>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="blur-setting-wrap">
-                            <div class="setting blur-setting field-wrap">
-                                <div class="input-field checkbox-field">
-                                    <input type="checkbox" class="filled-in" id="blur_switch"/>
-                                    <label for="blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
-                                </div>
-                                <form action="#">
-                                    <div class="disabled hidden"></div>
-                                    <p class="range-field">
-                                        <input type="range" id="blur" min="0" max="100" />
+                                        <input class="with-gap" name="hotkeys" value="ctrlenter" type="radio" id="{{view.cid}}-ctrlenter" />
+                                        <label for="{{view.cid}}-ctrlenter">{[print(xabber.getString("settings__section_keyboard__label_send_on_ctrlenter"))]}</label>
                                     </p>
                                 </form>
                             </div>
                         </div>
                     </div>
-                    <div class="toolbar-color-setting-wrap">
-                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</div>
-                        <div class="setting toolbar-color-setting field-wrap">
-                            <div class="selected-color-wrap">
-                                <div class="selected-color-item"></div>
-                                <div class="selected-color-info">
-                                    <div class="selected-color-name"></div>
-                                    <div class="selected-color-hex"></div>
-                                </div>
-                            </div>
+                    <div class="settings-subblock-wrap contact-list">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("category_contact_list"))]}</span>
                         </div>
                     </div>
-                    <div class="toolbar-main-color-setting-wrap">
-                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</div>
-                       <div class="setting toolbar-main-color-setting field-wrap">
-                           <div class="current-main-color-wrap">
-                               <div class="current-main-color ground-color-500"></div>
-                               <div class="color-name"></div>
-                           </div>
-                       </div>
-                    </div>
-                    <div class="side-panel-setting-wrap">
-                        <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_side_panel"))]}</div>
-                        <div class="setting side-panel-setting field-wrap">
-                            <div class="field radio-field clickable-field">
-                                <form action="#">
-                                    <p>
-                                        <input class="with-gap" name="side-panel" value="dark" type="radio" id="{{view.cid}}-dark-side-panel" />
-                                        <label for="{{view.cid}}-dark-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_dark"))]}</label>
-                                    </p>
-                                    <p>
-                                        <input class="with-gap" name="side-panel" value="light" type="radio" id="{{view.cid}}-light-side-panel" />
-                                        <label for="{{view.cid}}-light-side-panel">{[print(xabber.getString("settings__section_appearance__side_panel__label_light"))]}</label>
-                                    </p>
-                                </form>
-                            </div>
+                </div>
+
+                <div data-header='{[print(xabber.getString("settings__menu_item__notifications"))]}'  class="settings-block-wrap notifications hidden">
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__web_notifications"))]}</span>
+                        </div>
+                        <div class="setting notifications field-wrap">
                             <div class="input-field checkbox-field">
-                                <input type="checkbox" class="filled-in" id="side_panel_blur_switch"/>
-                                <label for="side_panel_blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
+                                <input type="checkbox" class="filled-in" id="notifications"/>
+                                <label for="notifications">{[print(xabber.getString("settings__section_notifications__toggle_desktop_notifications"))]}</label>
                             </div>
-                            <div class="transparency-setting">
+                        </div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_notifications__volume"))]}</div>
+                        <div class="setting volume-setting">
+                            <i class="mdi mdi-24px mdi-volume-low"></i>
+                            <form action="#">
+                                <div class="disabled hidden"></div>
+                                <p class="range-field">
+                                    <input type="range" id="notifications_volume" min="0" max="100" />
+                                </p>
+                            </form>
+                            <i class="mdi mdi-24px mdi-volume-high"></i>
+                        </div>
+                    </div>
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__chats"))]}</span>
+                        </div>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__private_chats"))]}</span>
+                        </div>
+                        <div class="setting private-notifications field-wrap">
+                            <div class="input-field checkbox-field">
+                                <input type="checkbox" class="filled-in" id="private-notifications"/>
+                                <label for="private-notifications">{[print(xabber.getString("settings__section_notifications__private_chats_notifications"))]}</label>
+                            </div>
+                        </div>
+                        <div class="settings-shifted-block">
+                            <div class="setting message-preview private-preview field-wrap">
                                 <div class="input-field checkbox-field">
-                                    <input type="checkbox" class="filled-in" id="transparency_switch"/>
-                                    <label for="transparency_switch">{[print(xabber.getString("settings__section_appearance__side_panel__checkbox_transparency"))]}</label>
+                                    <input type="checkbox" class="filled-in" id="preview_private"/>
+                                    <label for="preview_private">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</label>
                                 </div>
+                            </div>
+                            <div class="setting-name">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
+                            <div class="setting sound radio-button field-wrap">
+                                <div class="field radio-field clickable-field">
+                                    <form action="#">
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="" type="radio" id="{{view.cid}}-private-sound-no" />
+                                            <label for="{{view.cid}}-private-sound-no">No sound</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="beep_up" type="radio" id="{{view.cid}}-private-sound-beep-up" />
+                                            <label for="{{view.cid}}-private-sound-beep-up">Beep Up</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="tiny_noize" type="radio" id="{{view.cid}}-private-sound-tiny-noize" />
+                                            <label for="{{view.cid}}-private-sound-tiny-noize">Tiny Noize</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="retro_game" type="radio" id="{{view.cid}}-private-sound-retro-game" />
+                                            <label for="{{view.cid}}-private-sound-retro-game">Retro Game</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="pixel_beep" type="radio" id="{{view.cid}}-private-sound-pixel-beep" />
+                                            <label for="{{view.cid}}-private-sound-pixel-beep">Pixel Beep</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="beep_positive" type="radio" id="{{view.cid}}-private-sound-beep-positive" />
+                                            <label for="{{view.cid}}-private-sound-beep-positive">Beep Positive</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="good_chime" type="radio" id="{{view.cid}}-private-sound-good-chime" />
+                                            <label for="{{view.cid}}-private-sound-good-chime">Good Chime</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="cellular_click" type="radio" id="{{view.cid}}-private-sound-cellular-click" />
+                                            <label for="{{view.cid}}-private-sound-cellular-click">Cellular Click</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="bleep" type="radio" id="{{view.cid}}-private-sound-bleep" />
+                                            <label for="{{view.cid}}-private-sound-bleep">Bleep</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="mono_u" type="radio" id="{{view.cid}}-private-sound-mono-u" />
+                                            <label for="{{view.cid}}-private-sound-mono-u">Mono U</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="plop" type="radio" id="{{view.cid}}-private-sound-plop" />
+                                            <label for="{{view.cid}}-private-sound-plop">Plop</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="ether" type="radio" id="{{view.cid}}-private-sound-ether" />
+                                            <label for="{{view.cid}}-private-sound-ether">Ether</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="pop" type="radio" id="{{view.cid}}-private-sound-pop" />
+                                            <label for="{{view.cid}}-private-sound-pop">Pop</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="private_sound" value="computer_chime" type="radio" id="{{view.cid}}-private-sound-computer-chime" />
+                                            <label for="{{view.cid}}-private-sound-computer-chime">Computer Chime</label>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__group_chats"))]}</span>
+                        </div>
+                        <div class="setting group-notifications field-wrap">
+                            <div class="input-field checkbox-field">
+                                <input type="checkbox" class="filled-in" id="group-notifications"/>
+                                <label for="group-notifications">{[print(xabber.getString("settings__section_notifications__group_chats_notifications"))]}</label>
+                            </div>
+                        </div>
+                        <div class="settings-shifted-block">
+                            <div class="setting message-preview group-preview field-wrap">
+                                <div class="input-field checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="preview_group"/>
+                                    <label for="preview_group">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</label>
+                                </div>
+                            </div>
+                            <div class="setting-name">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
+                            <div class="setting sound radio-button field-wrap">
+                                <div class="field radio-field clickable-field">
+                                    <form action="#">
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="" type="radio" id="{{view.cid}}-group-sound-no" />
+                                            <label for="{{view.cid}}-group-sound-no">No sound</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="beep_up" type="radio" id="{{view.cid}}-group-sound-beep-up" />
+                                            <label for="{{view.cid}}-group-sound-beep-up">Beep Up</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="tiny_noize" type="radio" id="{{view.cid}}-group-sound-tiny-noize" />
+                                            <label for="{{view.cid}}-group-sound-tiny-noize">Tiny Noize</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="retro_game" type="radio" id="{{view.cid}}-group-sound-retro-game" />
+                                            <label for="{{view.cid}}-group-sound-retro-game">Retro Game</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="pixel_beep" type="radio" id="{{view.cid}}-group-sound-pixel-beep" />
+                                            <label for="{{view.cid}}-group-sound-pixel-beep">Pixel Beep</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="beep_positive" type="radio" id="{{view.cid}}-group-sound-beep-positive" />
+                                            <label for="{{view.cid}}-group-sound-beep-positive">Beep Positive</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="good_chime" type="radio" id="{{view.cid}}-group-sound-good-chime" />
+                                            <label for="{{view.cid}}-group-sound-good-chime">Good Chime</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="cellular_click" type="radio" id="{{view.cid}}-group-sound-cellular-click" />
+                                            <label for="{{view.cid}}-group-sound-cellular-click">Cellular Click</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="bleep" type="radio" id="{{view.cid}}-group-sound-bleep" />
+                                            <label for="{{view.cid}}-group-sound-bleep">Bleep</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="mono_u" type="radio" id="{{view.cid}}-group-sound-mono-u" />
+                                            <label for="{{view.cid}}-group-sound-mono-u">Mono U</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="plop" type="radio" id="{{view.cid}}-group-sound-plop" />
+                                            <label for="{{view.cid}}-group-sound-plop">Plop</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="ether" type="radio" id="{{view.cid}}-group-sound-ether" />
+                                            <label for="{{view.cid}}-group-sound-ether">Ether</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="pop" type="radio" id="{{view.cid}}-group-sound-pop" />
+                                            <label for="{{view.cid}}-group-sound-pop">Pop</label>
+                                        </p>
+                                        <p>
+                                            <input class="with-gap" name="group_sound" value="computer_chime" type="radio" id="{{view.cid}}-group-sound-computer-chime" />
+                                            <label for="{{view.cid}}-group-sound-computer-chime">Computer Chime</label>
+                                        </p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__calls"))]}</span>
+                        </div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_notifications__ringtone"))]}</div>
+                        <div class="setting sound radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
                                 <form action="#">
-                                    <div class="disabled hidden"></div>
-                                    <p class="range-field">
-                                        <input type="range" id="transparency" min="0" max="100" />
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="call" type="radio" id="{{view.cid}}-call-sound-call" />
+                                        <label for="{{view.cid}}-call-sound-call">Call</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="beep_up" type="radio" id="{{view.cid}}-call-sound-beep-up" />
+                                        <label for="{{view.cid}}-call-sound-beep-up">Beep Up</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="tiny_noize" type="radio" id="{{view.cid}}-call-sound-tiny-noize" />
+                                        <label for="{{view.cid}}-call-sound-tiny-noize">Tiny Noize</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="retro_game" type="radio" id="{{view.cid}}-call-sound-retro-game" />
+                                        <label for="{{view.cid}}-call-sound-retro-game">Retro Game</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="pixel_beep" type="radio" id="{{view.cid}}-call-sound-pixel-beep" />
+                                        <label for="{{view.cid}}-call-sound-pixel-beep">Pixel Beep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="beep_positive" type="radio" id="{{view.cid}}-call-sound-beep-positive" />
+                                        <label for="{{view.cid}}-call-sound-beep-positive">Beep Positive</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="good_chime" type="radio" id="{{view.cid}}-call-sound-good-chime" />
+                                        <label for="{{view.cid}}-call-sound-good-chime">Good Chime</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="cellular_click" type="radio" id="{{view.cid}}-call-sound-cellular-click" />
+                                        <label for="{{view.cid}}-call-sound-cellular-click">Cellular Click</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="bleep" type="radio" id="{{view.cid}}-call-sound-bleep" />
+                                        <label for="{{view.cid}}-call-sound-bleep">Bleep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="mono_u" type="radio" id="{{view.cid}}-call-sound-mono-u" />
+                                        <label for="{{view.cid}}-call-sound-mono-u">Mono U</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="plop" type="radio" id="{{view.cid}}-call-sound-plop" />
+                                        <label for="{{view.cid}}-call-sound-plop">Plop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="ether" type="radio" id="{{view.cid}}-call-sound-ether" />
+                                        <label for="{{view.cid}}-call-sound-ether">Ether</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="pop" type="radio" id="{{view.cid}}-call-sound-pop" />
+                                        <label for="{{view.cid}}-call-sound-pop">Pop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="call_sound" value="computer_chime" type="radio" id="{{view.cid}}-call-sound-computer-chime" />
+                                        <label for="{{view.cid}}-call-sound-computer-chime">Computer Chime</label>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_notifications__dialtone"))]}</div>
+                        <div class="setting sound radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="connecting" type="radio" id="{{view.cid}}-connection-sound-connecting" />
+                                        <label for="{{view.cid}}-connection-sound-connecting">Connection</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="beep_up" type="radio" id="{{view.cid}}-connection-sound-beep-up" />
+                                        <label for="{{view.cid}}-connection-sound-beep-up">Beep Up</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="tiny_noize" type="radio" id="{{view.cid}}-connection-sound-tiny-noize" />
+                                        <label for="{{view.cid}}-connection-sound-tiny-noize">Tiny Noize</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="retro_game" type="radio" id="{{view.cid}}-connection-sound-retro-game" />
+                                        <label for="{{view.cid}}-connection-sound-retro-game">Retro Game</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="pixel_beep" type="radio" id="{{view.cid}}-connection-sound-pixel-beep" />
+                                        <label for="{{view.cid}}-connection-sound-pixel-beep">Pixel Beep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="beep_positive" type="radio" id="{{view.cid}}-connection-sound-beep-positive" />
+                                        <label for="{{view.cid}}-connection-sound-beep-positive">Beep Positive</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="good_chime" type="radio" id="{{view.cid}}-connection-sound-good-chime" />
+                                        <label for="{{view.cid}}-connection-sound-good-chime">Good Chime</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="cellular_click" type="radio" id="{{view.cid}}-connection-sound-cellular-click" />
+                                        <label for="{{view.cid}}-connection-sound-cellular-click">Cellular Click</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="bleep" type="radio" id="{{view.cid}}-connection-sound-bleep" />
+                                        <label for="{{view.cid}}-connection-sound-bleep">Bleep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="mono_u" type="radio" id="{{view.cid}}-connection-sound-mono-u" />
+                                        <label for="{{view.cid}}-connection-sound-mono-u">Mono U</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="plop" type="radio" id="{{view.cid}}-connection-sound-plop" />
+                                        <label for="{{view.cid}}-connection-sound-plop">Plop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="ether" type="radio" id="{{view.cid}}-connection-sound-ether" />
+                                        <label for="{{view.cid}}-connection-sound-ether">Ether</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="pop" type="radio" id="{{view.cid}}-connection-sound-pop" />
+                                        <label for="{{view.cid}}-connection-sound-pop">Pop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="connection_sound" value="computer_chime" type="radio" id="{{view.cid}}-connection-sound-computer-chime" />
+                                        <label for="{{view.cid}}-connection-sound-computer-chime">Computer Chime</label>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-subblock-wrap">
+                        <div class="block-header">
+                            <span class="block-name">{[print(xabber.getString("settings__section_notifications__attention_calls"))]}</span>
+                        </div>
+                        <div class="setting call-attention field-wrap">
+                            <div class="input-field checkbox-field">
+                                <input type="checkbox" class="filled-in" id="call_attention"/>
+                                <label for="call_attention">{[print(xabber.getString("settings__section_notifications__toggle_call_attention"))]}</label>
+                            </div>
+                        </div>
+                        <div class="setting-name">{[print(xabber.getString("settings__section_notifications__ringtone"))]}</div>
+                        <div class="setting sound radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="attention" type="radio" id="{{view.cid}}-attention-sound-attention" />
+                                        <label for="{{view.cid}}-attention-sound-attention">Attention</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="beep_up" type="radio" id="{{view.cid}}-attention-sound-beep-up" />
+                                        <label for="{{view.cid}}-attention-sound-beep-up">Beep Up</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="tiny_noize" type="radio" id="{{view.cid}}-attention-sound-tiny-noize" />
+                                        <label for="{{view.cid}}-attention-sound-tiny-noize">Tiny Noize</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="retro_game" type="radio" id="{{view.cid}}-attention-sound-retro-game" />
+                                        <label for="{{view.cid}}-attention-sound-retro-game">Retro Game</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="pixel_beep" type="radio" id="{{view.cid}}-attention-sound-pixel-beep" />
+                                        <label for="{{view.cid}}-attention-sound-pixel-beep">Pixel Beep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="beep_positive" type="radio" id="{{view.cid}}-attention-sound-beep-positive" />
+                                        <label for="{{view.cid}}-attention-sound-beep-positive">Beep Positive</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="good_chime" type="radio" id="{{view.cid}}-attention-sound-good-chime" />
+                                        <label for="{{view.cid}}-attention-sound-good-chime">Good Chime</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="cellular_click" type="radio" id="{{view.cid}}-attention-sound-cellular-click" />
+                                        <label for="{{view.cid}}-attention-sound-cellular-click">Cellular Click</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="bleep" type="radio" id="{{view.cid}}-attention-sound-bleep" />
+                                        <label for="{{view.cid}}-attention-sound-bleep">Bleep</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="mono_u" type="radio" id="{{view.cid}}-attention-sound-mono-u" />
+                                        <label for="{{view.cid}}-attention-sound-mono-u">Mono U</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="plop" type="radio" id="{{view.cid}}-attention-sound-plop" />
+                                        <label for="{{view.cid}}-attention-sound-plop">Plop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="ether" type="radio" id="{{view.cid}}-attention-sound-ether" />
+                                        <label for="{{view.cid}}-attention-sound-ether">Ether</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="pop" type="radio" id="{{view.cid}}-attention-sound-pop" />
+                                        <label for="{{view.cid}}-attention-sound-pop">Pop</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="attention_sound" value="computer_chime" type="radio" id="{{view.cid}}-attention-sound-computer-chime" />
+                                        <label for="{{view.cid}}-attention-sound-computer-chime">Computer Chime</label>
                                     </p>
                                 </form>
                             </div>
@@ -330,10 +643,7 @@
                     </div>
                 </div>
 
-                <div class="settings-block-wrap interface_language">
-                    <div class="block-header">
-                        <span class="block-name">{[print(xabber.getString("settings__menu_item__interface_language"))]}</span>
-                    </div>
+                <div data-header='{[print(xabber.getString("settings__menu_item__interface_language"))]}'  class="settings-block-wrap interface_language hidden">
                     <div class="setting interface-language-setting">
                         <div class="languages-list field radio-field clickable-field">
                             <form action="#">

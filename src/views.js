@@ -1348,12 +1348,20 @@ define("xabber-views", function () {
         events: {
             "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
             "click .setting.notifications label": "setNotifications",
-            "click .setting.message-preview label": "setMessagePreview",
+            "click .setting.private-notifications label": "setPrivateNotifications",
+            "click .setting.group-notifications label": "setGroupNotifications",
+            "click .setting.message-preview.private-preview label": "setPrivateMessagePreview",
+            "click .setting.message-preview.group-preview label": "setGroupMessagePreview",
             "click .setting.call-attention label": "setCallAttention",
-            "change .sound input[type=radio][name=sound]": "setSound",
+            "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
+            "change .sound input[type=radio][name=group_sound]": "setGroupSound",
+            "change .sound input[type=radio][name=call_sound]": "setCallSound",
+            "change .sound input[type=radio][name=connection_sound]": "setConnectionSound",
+            "change .sound input[type=radio][name=attention_sound]": "setAttentionSound",
             "change .languages-list input[type=radio][name=language]": "changeLanguage",
             "change #vignetting": "changeVignetting",
             "change #blur": "changeBlur",
+            "change #notifications_volume": "changeNotificationsVolume",
             "change #transparency": "changeTransparency",
             "change #blur_switch": "switchBlur",
             "change #vignetting_switch": "switchVignetting",
@@ -1379,18 +1387,37 @@ define("xabber-views", function () {
             this.$('.notifications input[type=checkbox]').prop({
                 checked: settings.notifications && xabber._cache.get('notifications')
             });
-            this.$('.message-preview input[type=checkbox]')
-                .prop({checked: settings.message_preview});
+            this.$('.private-notifications input[type=checkbox]')
+                .prop({checked: settings.notifications_private});
+            this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private)
+            this.$('.group-notifications input[type=checkbox]')
+                .prop({checked: settings.notifications_group});
+            this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
+            this.$('.message-preview.private-preview input[type=checkbox]')
+                .prop({checked: settings.message_preview_private});
+            this.$('.message-preview.group-preview input[type=checkbox]')
+                .prop({checked: settings.message_preview_group});
             this.$('.call-attention input[type=checkbox]')
                 .prop({checked: settings.call_attention});
-            let sound_value = settings.sound ? settings.sound_on_message : '';
-            this.$(`.sound input[type=radio][name=sound][value="${sound_value}"]`)
+            let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
+            this.$(`.sound input[type=radio][name=private_sound][value="${sound_private_value}"]`)
+                    .prop('checked', true);
+            let sound_group_value = settings.group_sound ? settings.sound_on_group_message : '';
+            this.$(`.sound input[type=radio][name=group_sound][value="${sound_group_value}"]`)
+                    .prop('checked', true);
+            this.$(`.sound input[type=radio][name=call_sound][value="${settings.sound_on_call}"]`)
+                    .prop('checked', true);
+            this.$(`.sound input[type=radio][name=connection_sound][value="${settings.sound_on_connection}"]`)
+                    .prop('checked', true);
+            this.$(`.sound input[type=radio][name=attention_sound][value="${settings.sound_on_attention}"]`)
                     .prop('checked', true);
             this.$(`.hotkeys input[type=radio][name=hotkeys][value=${settings.hotkeys}]`)
                     .prop('checked', true);
             (lang == xabber.get("default_language")) && (lang = 'default');
             this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
                 .prop('checked', true);
+            this.$(`#notifications_volume`).val(this.model.get('notifications_volume'));
+            this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
             this.updateDescription();
             this.updateBackgroundSetting();
             this.updateColor();
@@ -1462,6 +1489,9 @@ define("xabber-views", function () {
                 this.scrollTo(0);
                 return;
             }
+            this.$('.settings-block-wrap').addClass('hidden');
+            $elem.removeClass('hidden');
+            this.$('.settings-panel-head span').text($elem.attr('data-header'))
             $tab.addClass('active').siblings().removeClass('active');
             this.scrollToChild($elem);
         },
@@ -1490,28 +1520,79 @@ define("xabber-views", function () {
             }
         },
 
-        setMessagePreview: function (ev) {
-            let value = !this.model.get('message_preview');
-            this.model.save('message_preview', value);
+        setPrivateNotifications: function (ev) {
+            let value = !this.model.get('notifications_private');
+            this.model.save('notifications_private', value);
             ev.preventDefault();
-            $(ev.target).closest('input').prop('checked', value);
+            this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !value)
+            $(ev.target).closest('.setting.private-notifications').find('input').prop('checked', value);
+        },
+
+        setGroupNotifications: function (ev) {
+            let value = !this.model.get('notifications_group');
+            this.model.save('notifications_group', value);
+            ev.preventDefault();
+            this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value)
+            $(ev.target).closest('.setting.group-notifications').find('input').prop('checked', value);
+        },
+
+        setPrivateMessagePreview: function (ev) {
+            let value = !this.model.get('message_preview_private');
+            this.model.save('message_preview_private', value);
+            ev.preventDefault();
+            $(ev.target).closest('.setting.message-preview').find('input').prop('checked', value);
+        },
+
+        setGroupMessagePreview: function (ev) {
+            let value = !this.model.get('message_preview_group');
+            this.model.save('message_preview_group', value);
+            ev.preventDefault();
+            $(ev.target).closest('.setting.message-preview').find('input').prop('checked', value);
         },
 
         setCallAttention: function (ev) {
             let value = !this.model.get('call_attention');
             this.model.save('call_attention', value);
             ev.preventDefault();
-            $(ev.target).closest('input').prop('checked', value);
+            $(ev.target).closest('.setting.call-attention').find('input').prop('checked', value);
         },
 
-        setSound: function (ev) {
+        setPrivateSound: function (ev) {
             let value = ev.target.value;
             if (value) {
-                xabber.playAudio(value);
-                this.model.save({sound: true, sound_on_message: value});
+                xabber.playAudio(value, false, this.model.get('notifications_volume'));
+                this.model.save({private_sound: true, sound_on_private_message: value});
             } else {
-                this.model.save('sound', false);
+                this.model.save('private_sound', false);
             }
+        },
+
+        setGroupSound: function (ev) {
+            let value = ev.target.value;
+            if (value) {
+                xabber.playAudio(value, false, this.model.get('notifications_volume'));
+                this.model.save({group_sound: true, sound_on_group_message: value});
+            } else {
+                this.model.save('group_sound', false);
+            }
+        },
+
+        setCallSound: function (ev) {
+            let value = ev.target.value;
+            xabber.playAudio(value, false);
+            this.model.save({sound_on_call: value});
+        },
+
+        setConnectionSound: function (ev) {
+            let value = ev.target.value;
+            xabber.playAudio(value, false);
+            this.model.save({sound_on_connection: value});
+        },
+
+        setAttentionSound: function (ev) {
+            let value = ev.target.value;
+            xabber.playAudio(value, false);
+            this.model.save({sound_on_attention: value});
         },
 
         setBackground: function (ev) {
@@ -1575,6 +1656,13 @@ define("xabber-views", function () {
             this.$('#transparency')[0].value = constants.TRANSPARENCY_VALUE;
             this.model.save('side_panel', _.extend(side_panel_settings, {transparency: value}));
             xabber.roster_view.updateTransparency(value);
+        },
+
+        changeNotificationsVolume: function () {
+            let volume = this.$('#notifications_volume')[0].value / 100,
+                sound = this.$('.sound input[type=radio][name=private_sound]:checked').val() || this.$('.sound input[type=radio][name=group_sound]:checked').val();
+            this.model.save('notifications_volume', volume);
+            sound && xabber.playAudio(sound, false, volume);
         },
 
         changeTransparency: function () {
@@ -3193,12 +3281,15 @@ define("xabber-views", function () {
             return notification;
         },
 
-        playAudio: function (name, loop) {
+        playAudio: function (name, loop, volume) {
+            if (!((volume || volume === 0) && !isNaN(volume)))
+                volume = 1;
             loop = loop || false;
             let filename = constants.SOUNDS[name];
             if (filename) {
                 let audio = new window.Audio(filename);
                 audio.loop = loop;
+                audio.volume = volume;
                 audio.play();
                 return audio;
             }

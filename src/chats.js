@@ -492,7 +492,7 @@ define("xabber-chats", function () {
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
-              this.audio_notifiation = xabber.playAudio('call', true);
+              this.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_call, true);
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({
                   iceServers: [
@@ -808,7 +808,7 @@ define("xabber-chats", function () {
               xabber.stopAudio(this.audio_notifiation);
               this.set('status', 'connecting');
               this.updateStatus(xabber.getString("dialog_jingle_message__status_connecting"));
-              this.audio_notifiation = xabber.playAudio('connecting', true);
+              this.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_connection, true);
           },
 
           reject: function (reason) {
@@ -1164,7 +1164,7 @@ define("xabber-chats", function () {
                         xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                         xabber.current_voip_call.set('status', 'connecting');
                         xabber.current_voip_call.updateStatus(xabber.getString("dialog_jingle_message__status_connecting"));
-                        xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
+                        xabber.current_voip_call.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_connection);
                     }
                 }
             }
@@ -4390,10 +4390,15 @@ define("xabber-chats", function () {
         },
 
         notifyMessage: function (message) {
-            if (xabber.settings.notifications) {
+            if (xabber.settings.notifications && ((xabber.settings.notifications_private && !this.model.get('group_chat')) || (xabber.settings.notifications_group && this.model.get('group_chat')))) {
+                let notification_text;
+                if ((this.model.get('group_chat') && xabber.settings.message_preview_group) || (!this.model.get('group_chat') && xabber.settings.message_preview_private))
+                    notification_text = message.getText();
+                else
+                    notification_text = xabber.getString("notification__text_sent_a_message");
                 let notification = xabber.popupNotification({
                     title: this.contact.get('name'),
-                    text: (xabber.settings.message_preview ? message.getText() : xabber.getString("notification__text_sent_a_message")),
+                    text: notification_text,
                     icon: this.contact.cached_image.url
                 });
                 notification.onclick = () => {
@@ -4401,14 +4406,23 @@ define("xabber-chats", function () {
                     this.model.trigger('open');
                 };
             }
-            if (xabber.settings.sound) {
+            if (xabber.settings.group_sound && xabber.settings.notifications_group && this.model.get('group_chat')) {
                 let sound;
                 if (message.get('auth_request')) {
                     sound = xabber.settings.sound_on_auth_request;
                 } else {
-                    sound = xabber.settings.sound_on_message;
+                    sound = xabber.settings.sound_on_group_message;
                 }
-                xabber.playAudio(sound);
+                xabber.playAudio(sound, false, xabber.settings.notifications_volume);
+            }
+            else if (xabber.settings.private_sound && xabber.settings.notifications_private && !this.model.get('group_chat')) {
+                let sound;
+                if (message.get('auth_request')) {
+                    sound = xabber.settings.sound_on_auth_request;
+                } else {
+                    sound = xabber.settings.sound_on_private_message;
+                }
+                xabber.playAudio(sound, false, xabber.settings.notifications_volume);
             }
             xabber.recountAllMessageCounter();
         },
@@ -6552,7 +6566,6 @@ define("xabber-chats", function () {
                             this.$('input[name="chat_domain"]').addClass('invalid');
                         }
                     }, (response) => {
-                        console.log(response)
                         this.$('span.errors').removeClass('hidden').text(`${xabber.getString("groupchat_add__alert_invalid_domain")}`); // !!!!!!!!!!!!!!!!!! :::::
                         this.$('input[name="chat_domain"]').addClass('invalid');
                     });

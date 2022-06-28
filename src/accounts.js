@@ -2366,21 +2366,6 @@ define("xabber-accounts", function () {
             updateHtml: function () {
                 this.$('.no-accounts-tip').hideIf(this.model.length);
                 this.$('.accounts-head-wrap').showIf(this.model.length);
-                this.updateCSS();
-            },
-
-            // TODO: refactor CSS and remove this
-            updateCSS: function () {
-                let max_width = 0;
-                this.$('.jid').addClass('inline').each(function () {
-                    this.offsetWidth > max_width && (max_width = this.offsetWidth);
-                }).removeClass('inline');
-                max_width += 150;
-                (xabber.api_account && xabber.api_account.get('connected')) && (max_width += 45);
-                this.$('.xmpp-account-list').css('width', max_width + 48);
-                _.each(this.children, function (view) {
-                    view.$el.css('width', max_width);
-                });
             },
 
             updateSyncState: function () {
@@ -2389,7 +2374,6 @@ define("xabber-accounts", function () {
                 this.$('.sync-marker-wrap').showIf(connected);
                 this.$('.sync-head').hideIf(!connected);
                 this.$('.sync-marker-wrap').hideIf(!connected);
-                this.updateCSS();
             },
 
             onMoveAccountToBottom: function (ev, account) {

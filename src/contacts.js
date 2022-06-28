@@ -8853,7 +8853,7 @@ define("xabber-contacts", function () {
             },
 
             _initialize: function () {
-                this.$el.appendTo(this.parent.$('.settings-block-wrap.contact-list'));
+                this.$el.appendTo(this.parent.$('.settings-subblock-wrap.contact-list'));
             },
 
             render: function () {
