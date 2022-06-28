@@ -9883,7 +9883,7 @@ input[type='range'].voice-message-volume:focus {
     padding: 0 19px;
 }
 
-.settings-panel .setting.radio-button .radio-field form{
+.settings-panel .notifications .setting.radio-button .radio-field form{
     display: flex;
     height: 360px;
     flex-direction: column;
