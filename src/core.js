@@ -271,7 +271,7 @@
                 notifications: true,
                 notifications_private: true,
                 notifications_group: true,
-                notifications_volume: 50,
+                notifications_volume: 0.50,
                 message_preview_private: false,
                 message_preview_group: false,
                 private_sound: true,
