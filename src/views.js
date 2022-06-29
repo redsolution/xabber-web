@@ -1416,7 +1416,8 @@ define("xabber-views", function () {
             (lang == xabber.get("default_language")) && (lang = 'default');
             this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
                 .prop('checked', true);
-            this.$(`#notifications_volume`).val(this.model.get('notifications_volume'));
+            let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
+            this.$(`#notifications_volume`).val(notifications_volume);
             this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
             this.updateDescription();
             this.updateBackgroundSetting();
@@ -1560,7 +1561,8 @@ define("xabber-views", function () {
         setPrivateSound: function (ev) {
             let value = ev.target.value;
             if (value) {
-                xabber.playAudio(value, false, this.model.get('notifications_volume'));
+                this.current_sound && this.current_sound.pause();
+                this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
                 this.model.save({private_sound: true, sound_on_private_message: value});
             } else {
                 this.model.save('private_sound', false);
@@ -1570,7 +1572,8 @@ define("xabber-views", function () {
         setGroupSound: function (ev) {
             let value = ev.target.value;
             if (value) {
-                xabber.playAudio(value, false, this.model.get('notifications_volume'));
+                this.current_sound && this.current_sound.pause();
+                this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
                 this.model.save({group_sound: true, sound_on_group_message: value});
             } else {
                 this.model.save('group_sound', false);
@@ -1579,19 +1582,22 @@ define("xabber-views", function () {
 
         setCallSound: function (ev) {
             let value = ev.target.value;
-            xabber.playAudio(value, false);
+            this.current_sound && this.current_sound.pause();
+            this.current_sound = xabber.playAudio(value, false);
             this.model.save({sound_on_call: value});
         },
 
         setConnectionSound: function (ev) {
             let value = ev.target.value;
-            xabber.playAudio(value, false);
+            this.current_sound && this.current_sound.pause();
+            this.current_sound = xabber.playAudio(value, false);
             this.model.save({sound_on_connection: value});
         },
 
         setAttentionSound: function (ev) {
             let value = ev.target.value;
-            xabber.playAudio(value, false);
+            this.current_sound && this.current_sound.pause();
+            this.current_sound = xabber.playAudio(value, false);
             this.model.save({sound_on_attention: value});
         },
 
@@ -1662,7 +1668,10 @@ define("xabber-views", function () {
             let volume = this.$('#notifications_volume')[0].value / 100,
                 sound = this.$('.sound input[type=radio][name=private_sound]:checked').val() || this.$('.sound input[type=radio][name=group_sound]:checked').val();
             this.model.save('notifications_volume', volume);
-            sound && xabber.playAudio(sound, false, volume);
+            if (sound) {
+                this.current_sound && this.current_sound.pause();
+                this.current_sound = xabber.playAudio(sound, false, volume);
+            }
         },
 
         changeTransparency: function () {

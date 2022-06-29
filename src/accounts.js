@@ -1023,7 +1023,7 @@ define("xabber-accounts", function () {
                             stanza.c('device', {xmlns: Strophe.NS.AUTH_DEVICES, id: this.get('x_token').token_uid}).up();
                     }
                     stanza.cnode(this.connection.caps.createCapsNode({
-                        node: 'https://www.xabber.com/'
+                        node: 'https://www.xabber.com/clients/xabber/web'
                     }).tree());
                     return this.sendPres(stanza);
                 },
