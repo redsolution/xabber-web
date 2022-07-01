@@ -805,8 +805,10 @@ define("xabber-views", function () {
             $('body').append(this.$el);
             this.updateBackground();
             this.updateMainColor();
+            this.updateAvatarShape();
             $('#modals').insertAfter(this.$el);
             xabber.on('update_main_color', this.updateMainColor, this);
+            xabber.on('update_avatar_shape', this.updateAvatarShape, this);
         },
 
         addScreen: function (name, attrs) {
@@ -817,6 +819,17 @@ define("xabber-views", function () {
             this.$el.attr('data-main-color', xabber.settings.main_color);
             this.$el.siblings('#modals').attr('data-main-color', xabber.settings.main_color);
             $(window.document).find('.login-container').attr('data-main-color', xabber.settings.main_color);
+        },
+
+        updateAvatarShape: function () {
+            let shape = xabber.settings.avatar_shape;
+            $('body').switchClass('non-circle-avatars', shape != 'circle');
+            $('body').switchClass('octagon-avatars', shape === 'octagon');
+            $('body').switchClass('hexagon-avatars', shape === 'hexagon');
+            $('body').switchClass('pentagon-avatars', shape === 'pentagon');
+            $('body').switchClass('rounded-avatars', shape === 'rounded');
+            $('body').switchClass('star-avatars', shape === 'star');
+            $('body').switchClass('squircle-avatars', shape === 'squircle');
         },
 
         updateBackground: function () {
@@ -1373,6 +1386,7 @@ define("xabber-views", function () {
             "change #transparency_switch": "switchTransparency",
             "click .current-background-wrap": "changeBackgroundImage",
             "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
+            "change .avatar-shape input[type=radio][name=avatar_shape]": "setAvatarShape",
             "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
         },
 
@@ -1412,6 +1426,8 @@ define("xabber-views", function () {
             this.$(`.sound input[type=radio][name=attention_sound][value="${settings.sound_on_attention}"]`)
                     .prop('checked', true);
             this.$(`.hotkeys input[type=radio][name=hotkeys][value=${settings.hotkeys}]`)
+                    .prop('checked', true);
+            this.$(`.avatar-shape input[type=radio][name=avatar_shape][value=${settings.avatar_shape}]`)
                     .prop('checked', true);
             (lang == xabber.get("default_language")) && (lang = 'default');
             this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
@@ -1710,6 +1726,11 @@ define("xabber-views", function () {
 
         setHotkeys: function (ev) {
             this.model.save('hotkeys', ev.target.value);
+        },
+
+        setAvatarShape: function (ev) {
+            this.model.save('avatar_shape', ev.target.value);
+            xabber.trigger('update_avatar_shape');
         },
 
         deleteAllAccounts: function (ev) {

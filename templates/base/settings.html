@@ -243,6 +243,41 @@
                         <div class="block-header">
                             <span class="block-name">{[print(xabber.getString("category_contact_list"))]}</span>
                         </div>
+                        <div class="setting-name">{[print(xabber.getString("avatars"))]}</div>
+                        <div class="setting avatar-shape radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="circle" type="radio" id="{{view.cid}}-circle" />
+                                        <label for="{{view.cid}}-circle">{[print(xabber.getString("settings__section_appearance__avatars_circle"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="squircle" type="radio" id="{{view.cid}}-squircle" />
+                                        <label for="{{view.cid}}-squircle">{[print(xabber.getString("settings__section_appearance__avatars_squircle"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="octagon" type="radio" id="{{view.cid}}-octagon" />
+                                        <label for="{{view.cid}}-octagon">{[print(xabber.getString("settings__section_appearance__avatars_octagon"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="hexagon" type="radio" id="{{view.cid}}-hexagon" />
+                                        <label for="{{view.cid}}-hexagon">{[print(xabber.getString("settings__section_appearance__avatars_hexagon"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="pentagon" type="radio" id="{{view.cid}}-pentagon" />
+                                        <label for="{{view.cid}}-pentagon">{[print(xabber.getString("settings__section_appearance__avatars_pentagon"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="rounded" type="radio" id="{{view.cid}}-rounded" />
+                                        <label for="{{view.cid}}-rounded">{[print(xabber.getString("settings__section_appearance__avatars_rounded"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="avatar_shape" value="star" type="radio" id="{{view.cid}}-star" />
+                                        <label for="{{view.cid}}-star">{[print(xabber.getString("settings__section_appearance__avatars_star"))]}</label>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

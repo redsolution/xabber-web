@@ -288,6 +288,7 @@
                 sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',
+                avatar_shape: 'circle',
                 language: 'default',
                 load_history: true,
                 mam_requests_limit: 200,

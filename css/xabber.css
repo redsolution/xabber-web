@@ -191,6 +191,33 @@ input[type=checkbox].filled-in:checked + label:after {
     margin: 0 !important;
 }
 
+.ql-snow .ql-formats {
+    position:relative;
+}
+
+.ql-snow .ql-formats:empty {
+    display: none;
+}
+
+.ql-snow .ql-formats .ql-mention {
+    font-size: 17px;
+    line-height: 18px;
+}
+
+.ql-snow .ql-formats .ql-mention .chat-mention {
+    position: absolute;
+    top: 3px;
+    z-index: 1;
+    left: 0;
+    width: 24px;
+    pointer-events: all;
+    height: 28px;
+}
+
+.ql-snow .ql-formats .ql-mention .chat-mention:hover {
+    color: #06c;
+}
+
 /* ---------------------------------- */
 
 /* ---------- Perfect scrollbar themes ------------------ */
@@ -384,6 +411,47 @@ button.btn-float-left {
     border-radius: 50%;
     background-position: center center;
     background-repeat: no-repeat no-repeat;
+}
+body:not(.non-circle-avatars) .circle-avatar-wrap{
+    background: none !important;
+}
+.non-circle-avatars .circle-avatar{
+    border-radius: 0;
+}
+.circle-avatar,
+.circle-avatar-wrap {
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
+.octagon-avatars .circle-avatar,
+.octagon-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/octagon/octagon176.png);
+    mask-image: url(../images/masks/octagon/octagon176.png);
+}
+.hexagon-avatars .circle-avatar,
+.hexagon-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/hexagon/hexagon176.png);
+    mask-image: url(../images/masks/hexagon/hexagon176.png);
+}
+.pentagon-avatars .circle-avatar,
+.pentagon-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/pentagon/pentagon176.png);
+    mask-image: url(../images/masks/pentagon/pentagon176.png);
+}
+.rounded-avatars .circle-avatar,
+.rounded-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
+    mask-image: url(../images/masks/rounded/rounded176.png);
+}
+.star-avatars .circle-avatar,
+.star-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/star/star176.png);
+    mask-image: url(../images/masks/star/star176.png);
+}
+.squircle-avatars .circle-avatar,
+.squircle-avatars .circle-avatar-wrap {
+    -webkit-mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
+    mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
 }
 
 .circle-avatar.circle-image-fix {
@@ -3152,6 +3220,22 @@ input[type=text].simple-input-field:hover {
     border: 1px solid;
 }
 
+.non-circle-avatars .account-item .circle-avatar {
+    margin: 1px;
+    border: 0;
+}
+
+.toolbar-item.account-item .circle-avatar-wrap {
+    height: 48px;
+}
+
+.non-circle-avatars .account-item .circle-avatar-wrap {
+    display: inline-grid;
+    margin: 6px 0 6px 8px;
+    width: 36px;
+    height: 36px !important;
+}
+
 .account-item .status {
     position: absolute;
     top: 32px;
@@ -5021,6 +5105,10 @@ input[type=text].simple-input-field:hover {
     border: 1px solid;
 }
 
+.non-circle-avatars .roster-right-container .roster-account-info .circle-avatar {
+    border: none;
+    margin: 1px;
+}
 .roster-group .contacts {
     margin: 0;
 }
@@ -5150,6 +5238,20 @@ input[type=text].simple-input-field:hover {
     height: 40px;
     top: 6px;
     left: 12px;
+}
+
+.non-circle-avatars .roster-account-info .circle-avatar-wrap {
+    position: absolute;
+    width: 42px;
+    height: 41px;
+    top: 6px;
+    left: 12px;
+}
+
+.non-circle-avatars .roster-account-info .circle-avatar {
+    position: static;
+    width: 40px;
+    height: 40px;
 }
 
 .roster-account-info .status-message {
@@ -10514,6 +10616,7 @@ input[type='range'].voice-message-volume:focus {
     padding: 8px 60px;
     height: 344px;
     align-content: flex-start;
+    justify-content: center;
 }
 .main-modal.emoji-panel .emoji-picker-wrap .emojis-tab .emoji-picker-emoji{
     width: 34px;

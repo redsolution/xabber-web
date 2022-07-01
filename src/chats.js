@@ -8157,6 +8157,7 @@ define("xabber-chats", function () {
             "click .attach-location": "showLocationPopup",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
+            "click .chat-mention": "onMentionButtonClick",
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
             "click .markup-text": "onShowMarkupPanel",
@@ -8263,6 +8264,7 @@ define("xabber-chats", function () {
                     },
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                        this.model.get('group_chat') ? ['mention'] : [],
                         ['clean']
                     ]
                 },
@@ -8272,6 +8274,8 @@ define("xabber-chats", function () {
                 theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
+            this.$('.ql-mention').prop('disabled', true);
+            this.$('.ql-mention').append('<div class="chat-mention" ="">@</div>');
             this.contact = this.view.contact;
             this.account = this.view.account;
             this.fwd_messages = [];
@@ -8698,6 +8702,28 @@ define("xabber-chats", function () {
                 } else
                     this.$('.mentions-list').html("").hide();
             });
+        },
+
+        onMentionButtonClick: function () {
+            if (this.$('.ql-mention').hasClass('ql-active')){
+                this.$('.ql-mention').prop('disabled', false);
+                this.$('.ql-mention').click();
+                this.$('.ql-mention').prop('disabled', true);
+
+                return;
+            }
+            let selection = this.quill.getSelection() ? this.quill.getSelection().index : (this.quill.getLength() - 1);
+            this.quill.insertText(selection, ' @ ', 'user')
+            this.quill.setSelection(selection + 2, 0)
+            let mention_text = "";
+            if (this.contact.participants.length && this.contact.participants.version > 0 && (this.contact.get('group_info') && this.contact.participants && this.contact.get('group_info').members_num == this.contact.participants.length)) {
+                this.updateMentionsList(mention_text);
+            } else {
+                this.contact.participants.participantsRequest({version: 0}, () => {
+                    this.updateMentionsList(mention_text);
+                });
+            }
+
         },
 
         inputMention: function (ev) {
@@ -9240,16 +9266,16 @@ define("xabber-chats", function () {
             this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
             this.displaySend();
             xabber.chat_body.updateHeight();
-            let markup_body = utils.markupBodyMessage(message),
+            let markup_body = utils.markupBodyMessage(message, 'mention'),
                 emoji_node = markup_body.emojify({tag_name: 'div'}),
-                arr_text = Array.from(emoji_node);
+                arr_text = emoji_node.split('\n');
             arr_text.forEach((item, idx) => {
-                if (item == '\n')
-                    arr_text[idx] = '<br>';
+                if (!item.includes('</blockquote>'))
+                    arr_text[idx] = '<p>' + arr_text[idx] + '</p>';
             });
             emoji_node = arr_text.join("");
             this.quill.setText("");
-            this.quill.pasteHTML(0, emoji_node, 'user');
+            this.quill.root.innerHTML = emoji_node;
             this.focusOnInput();
         },
 
