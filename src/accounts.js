@@ -516,7 +516,10 @@ define("xabber-accounts", function () {
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            this.onTokenRevoked();
+                            if (this.session.get('conn_retries') <= 3)
+                                this.reconnect();
+                            else
+                                this.onTokenRevoked();
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -606,7 +609,8 @@ define("xabber-accounts", function () {
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            this.onTokenRevoked();
+                            if (this.session.get('conn_retries') > 3)
+                                this.onTokenRevoked();
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
