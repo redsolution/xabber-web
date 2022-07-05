@@ -440,8 +440,8 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 .rounded-avatars .circle-avatar,
 .rounded-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
-    mask-image: url(../images/masks/rounded/rounded176.png);
+    -webkit-mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
+    mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
 }
 .star-avatars .circle-avatar,
 .star-avatars .circle-avatar-wrap {
@@ -450,8 +450,8 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 .squircle-avatars .circle-avatar,
 .squircle-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
-    mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
+    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
+    mask-image: url(../images/masks/rounded/rounded176.png);
 }
 
 .circle-avatar.circle-image-fix {
@@ -9864,6 +9864,19 @@ input[type='range'].voice-message-volume:focus {
     font-size: 18px;
     line-height: 21px;
     color: #212121;
+}
+
+.settings-panel .settings-subblock-wrap{
+    position: relative;
+}
+
+.settings-panel .settings-subblock-wrap.contact-list .circle-avatar{
+    width: 176px;
+    height: 176px;
+    position: absolute;
+    left: 256px;
+    top: 128px;
+    background-color: #BDBDBD;
 }
 
 .settings-panel .settings-subblock-wrap .block-header{
