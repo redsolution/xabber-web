@@ -41390,7 +41390,7 @@ define('xabber-utils',[
     return utils;
 });
 
-let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":58,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":50,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":4,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":69,"is":0,"it":74,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":72,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":39,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
+let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":58,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":50,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":4,"fi":10,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":69,"is":0,"it":73,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":68,"pt-BR":72,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":38,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
 '{"version_number":"2.3.2.60","version_description":"fixed mentions and quotes disappearing on edit message, added mention button in message text formatting, added avatar shape option in settings"}'
 )});
@@ -41451,6 +41451,8 @@ define('xabber-environment',[
             this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cache.client_id && (this.set('client_id', this.cache.client_id));
+            this._cache.save('client_id', this.get('client_id'));
             this.cacheFavicons();
             this.extendFunction();
             this.check_config = new $.Deferred();
@@ -48501,10 +48503,7 @@ define("xabber-accounts", [],function () {
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
                     if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
-                        if (this.get('auth_type') === 'x-token')
-                            this.onTokenRevoked();
-                        else
-                            this.onAuthFailed();
+                        this.onConnectionConflict();
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
@@ -48750,6 +48749,16 @@ define("xabber-accounts", [],function () {
                     });
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
+                },
+
+                onConnectionConflict: function () {
+                    utils.dialogs.error(xabber.getString("connection__error__text_connection_conflict", [this.get('jid')]));
+                    this.session.set({
+                        auth_failed: true,
+                        no_reconnect: true
+                    });
+                    this.trigger('deactivate', this);
+                    this.connFeedback(xabber.getString("connection__error__text_connection_conflict_short"));
                 },
 
                 getAllXTokens: function () {

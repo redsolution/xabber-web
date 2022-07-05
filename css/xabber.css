@@ -14195,7 +14195,8 @@ input[type='range'].voice-message-volume:focus {
 /* ---------------- DIALOG MODALS --------------------- */
 
 .dialog-modal {
-    width: 440px;
+    min-width: 440px;
+    max-width: 880px;
 }
 
 .dialog-modal .modal-header {
@@ -14250,7 +14251,7 @@ input[type='range'].voice-message-volume:focus {
 
 .dialog-modal .dialog-text {
     font-size: 16px;
-    white-space: nowrap;
+    white-space: pre-wrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }

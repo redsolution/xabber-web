@@ -37,6 +37,8 @@
             this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cache.client_id && (this.set('client_id', this.cache.client_id));
+            this._cache.save('client_id', this.get('client_id'));
             this.cacheFavicons();
             this.extendFunction();
             this.check_config = new $.Deferred();

@@ -478,10 +478,7 @@ define("xabber-accounts", function () {
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
                     if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
-                        if (this.get('auth_type') === 'x-token')
-                            this.onTokenRevoked();
-                        else
-                            this.onAuthFailed();
+                        this.onConnectionConflict();
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
@@ -727,6 +724,16 @@ define("xabber-accounts", function () {
                     });
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
+                },
+
+                onConnectionConflict: function () {
+                    utils.dialogs.error(xabber.getString("connection__error__text_connection_conflict", [this.get('jid')]));
+                    this.session.set({
+                        auth_failed: true,
+                        no_reconnect: true
+                    });
+                    this.trigger('deactivate', this);
+                    this.connFeedback(xabber.getString("connection__error__text_connection_conflict_short"));
                 },
 
                 getAllXTokens: function () {
