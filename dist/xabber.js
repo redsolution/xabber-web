@@ -41392,7 +41392,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":58,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":50,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":4,"fi":9,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":69,"is":0,"it":73,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":67,"pt-BR":72,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":38,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.64","version_description":"fixed encrypted last message replacing on sync set"}'
+'{"version_number":"2.3.2.65","version_description":"fixed filter chats by account button visibility, removed symmetric deletion option in clear chat history dialog"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -65667,19 +65667,13 @@ define("xabber-chats", [],function () {
                 dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
-                (this.contact && !this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
-                    name: 'symmetric_deletion',
-                    checked: false,
-                    text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
-                }]);
                 utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
                     dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
                     }
-                    let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                    this.model.retractAllMessages(symmetric, () => {
+                    this.model.retractAllMessages(false, () => {
                         this._clearing_history = false;
                         this.chat_item.updateLastMessage();
                         this.updateScrollBar();

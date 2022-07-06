@@ -3783,19 +3783,13 @@ define("xabber-chats", function () {
                 dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
-                (this.contact && !this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
-                    name: 'symmetric_deletion',
-                    checked: false,
-                    text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
-                }]);
                 utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
                     dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
                     }
-                    let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                    this.model.retractAllMessages(symmetric, () => {
+                    this.model.retractAllMessages(false, () => {
                         this._clearing_history = false;
                         this.chat_item.updateLastMessage();
                         this.updateScrollBar();

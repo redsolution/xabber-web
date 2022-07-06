@@ -3299,7 +3299,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .account-item .account-actions-panel:hover,
-.toolbar .account-item .circle-avatar:hover ~ .account-actions-panel {
+.toolbar .account-item .circle-avatar-wrap:hover ~ .account-actions-panel {
     opacity: 1;
     visibility: visible !important;
 }
