@@ -8166,7 +8166,8 @@ define("xabber-contacts", function () {
                     if (encrypted && this.account.omemo) {
                         chat.set('timestamp', chat_timestamp);
                         chat.set('opened', true);
-                        chat.item_view.updateEncryptedChat();
+                        if ($(iq).attr('type') != 'set')
+                            chat.item_view.updateEncryptedChat();
                     }
                     if (!saved) {
                         if ($item.attr('mute') || $item.attr('mute') === '0') {
