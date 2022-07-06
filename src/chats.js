@@ -205,12 +205,11 @@ define("xabber-chats", function () {
                 message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
-                let by_jid = $message.children('replace').attr('by'),
-                    conversation = $message.children('replace').attr('conversation');
+                let conversation = $message.children('replace').attr('conversation');
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
                     return;
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: conversation}));
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: conversation, conversation: conversation}));
                     return;
                 }
                 $message = $message.children('replace').children('message');
