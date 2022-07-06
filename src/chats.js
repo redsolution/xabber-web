@@ -50,8 +50,8 @@ define("xabber-chats", function () {
 
         getText: function () {
             let forwarded_message = this.get('forwarded_message');
-            if (forwarded_message) {
-                return forwarded_message.get('message');
+            if (forwarded_message && forwarded_message.length) {
+                return forwarded_message[0].get('message');
             }
             return this.get('message');
         },
