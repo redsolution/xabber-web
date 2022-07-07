@@ -176,7 +176,7 @@ input[type=checkbox].filled-in:checked + label:after {
     display: none;
     position: absolute;
     bottom: -40px;
-    left: 88px;
+    left: 122px;
     border: none !important;
     z-index: 100;
 }
