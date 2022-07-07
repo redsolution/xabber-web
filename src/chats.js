@@ -301,6 +301,7 @@ define("xabber-chats", function () {
                             description: $file.children('desc').text(),
                             height: $file.children('height').text(),
                             width: $file.children('width').text(),
+                            id: $file.children('gallery-id').text(),
                             voice: type === 'voice',
                             sources: sources
                         };
@@ -4546,7 +4547,7 @@ define("xabber-chats", function () {
                     file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                     stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
-                    file['gallery-id'] && stanza.c('gallery-id').t(file['gallery-id']).up();
+                    file['id'] && stanza.c('gallery-id').t(file['id']).up();
                     file['thumbnail-uri'] && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
                     file.created && stanza.c('created').t(file.created).up();
                     file.name && stanza.c('name').t(file.name).up();
@@ -5014,7 +5015,7 @@ define("xabber-chats", function () {
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
                 if (this.account.get('gallery_token') && this.account.get('gallery_url')){
-                    _.extend(file_new_format, { 'gallery-id': file_.id, created: file_.created_at, 'thumbnail-uri': file_.thumbnail });
+                    _.extend(file_new_format, { id: file_.id, created: file_.created_at, 'thumbnail-uri': file_.thumbnail });
                 }
                 if (utils.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
@@ -9898,6 +9899,8 @@ define("xabber-chats", function () {
                     }
                     let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
                     this.resetSelectedMessages();
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                        this.deleteFilesFromMessages(msgs)
                     this.model.retractMessages(msgs, this.model.get('group_chat'), symmetric);
                 });
             }
@@ -9909,9 +9912,28 @@ define("xabber-chats", function () {
                         return;
                     }
                     this.resetSelectedMessages();
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                        this.deleteFilesFromMessages(msgs)
                     msgs.forEach((item) => { this.view.removeMessage(item); })
                 });
             }
+        },
+
+        deleteFilesFromMessages: function (messages) {
+            messages.forEach((item) => {
+                if (!item.isSenderMe())
+                    return;
+                item.get('files') && _.isArray(item.get('files')) && item.get('files').forEach((item) => {
+                    item.id && this.account.deleteFile(item.id,(response) => {
+                    }, (err) => {
+                    });
+                });
+                item.get('images') && _.isArray(item.get('images')) && item.get('images').forEach((item) => {
+                    item.id && this.account.deleteFile(item.id,(response) => {
+                    }, (err) => {
+                    });
+                });
+            });
         },
 
         pushMessagesToClipboard: function (messages) {

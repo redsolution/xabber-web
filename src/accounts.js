@@ -1407,6 +1407,25 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                deleteFile: function (file_id, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url') && file_id)
+                        $.ajax({
+                            type: 'DELETE',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/',
+                            dataType: 'json',
+                            data: JSON.stringify({id: file_id}),
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                },
+
                 createMessageFromIQ: function (attrs) {
                     let contact = this.contacts.mergeContact(attrs.from_jid),
                         chat = this.chats.getChat(contact);
@@ -2279,21 +2298,11 @@ define("xabber-accounts", function () {
             deleteFile: function (ev) {
                 let $target = $(ev.target).closest('.gallery-file'),
                     file_id = $target.attr('data-id');
-                if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
-                    $.ajax({
-                        type: 'DELETE',
-                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/files/',
-                        dataType: 'json',
-                        data: JSON.stringify({id: file_id}),
-                        success: (response) => {
-                            this.updateStorage(true);
-                            $target.detach();
-                        },
-                        error: (response) => {
-                            console.log(response)
-                        }
-                    });
+                this.account.deleteFile(file_id,(response) => {
+                    this.updateStorage(true);
+                    $target.detach();
+                }, (err) => {
+                })
             },
 
             deleteAvatar: function (ev) {
