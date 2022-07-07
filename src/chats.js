@@ -50,8 +50,8 @@ define("xabber-chats", function () {
 
         getText: function () {
             let forwarded_message = this.get('forwarded_message');
-            if (forwarded_message) {
-                return forwarded_message.get('message');
+            if (forwarded_message && forwarded_message.length) {
+                return forwarded_message[0].get('message');
             }
             return this.get('message');
         },
@@ -205,12 +205,11 @@ define("xabber-chats", function () {
                 message = unique_id && this.get(unique_id);
 
             if (options.replaced) {
-                let by_jid = $message.children('replace').attr('by'),
-                    conversation = $message.children('replace').attr('conversation');
+                let conversation = $message.children('replace').attr('conversation');
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
                     return;
                 if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: by_jid, conversation: conversation}));
+                    this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: conversation, conversation: conversation}));
                     return;
                 }
                 $message = $message.children('replace').children('message');
@@ -492,7 +491,7 @@ define("xabber-chats", function () {
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
-              this.audio_notifiation = xabber.playAudio('call', true);
+              this.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_call, true);
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({
                   iceServers: [
@@ -808,7 +807,7 @@ define("xabber-chats", function () {
               xabber.stopAudio(this.audio_notifiation);
               this.set('status', 'connecting');
               this.updateStatus(xabber.getString("dialog_jingle_message__status_connecting"));
-              this.audio_notifiation = xabber.playAudio('connecting', true);
+              this.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_connection, true);
           },
 
           reject: function (reason) {
@@ -1164,7 +1163,7 @@ define("xabber-chats", function () {
                         xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                         xabber.current_voip_call.set('status', 'connecting');
                         xabber.current_voip_call.updateStatus(xabber.getString("dialog_jingle_message__status_connecting"));
-                        xabber.current_voip_call.audio_notifiation = xabber.playAudio('connecting');
+                        xabber.current_voip_call.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_connection);
                     }
                 }
             }
@@ -3794,19 +3793,13 @@ define("xabber-chats", function () {
                 dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
-                (this.contact && !this.contact.get('group_chat') && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
-                    name: 'symmetric_deletion',
-                    checked: false,
-                    text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
-                }]);
                 utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
                     dialog_options, {ok_button_text: xabber.getString("clear_chat_history_dialog_button")}).done((res) => {
                     if (!res) {
                         this._clearing_history = false;
                         return;
                     }
-                    let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                    this.model.retractAllMessages(symmetric, () => {
+                    this.model.retractAllMessages(false, () => {
                         this._clearing_history = false;
                         this.chat_item.updateLastMessage();
                         this.updateScrollBar();
@@ -4400,10 +4393,15 @@ define("xabber-chats", function () {
         },
 
         notifyMessage: function (message) {
-            if (xabber.settings.notifications) {
+            if (xabber.settings.notifications && ((xabber.settings.notifications_private && !this.model.get('group_chat')) || (xabber.settings.notifications_group && this.model.get('group_chat')))) {
+                let notification_text;
+                if ((this.model.get('group_chat') && xabber.settings.message_preview_group) || (!this.model.get('group_chat') && xabber.settings.message_preview_private))
+                    notification_text = message.getText();
+                else
+                    notification_text = xabber.getString("notification__text_sent_a_message");
                 let notification = xabber.popupNotification({
                     title: this.contact.get('name'),
-                    text: (xabber.settings.message_preview ? message.getText() : xabber.getString("notification__text_sent_a_message")),
+                    text: notification_text,
                     icon: this.contact.cached_image.url
                 });
                 notification.onclick = () => {
@@ -4411,14 +4409,23 @@ define("xabber-chats", function () {
                     this.model.trigger('open');
                 };
             }
-            if (xabber.settings.sound) {
+            if (xabber.settings.group_sound && xabber.settings.notifications_group && this.model.get('group_chat')) {
                 let sound;
                 if (message.get('auth_request')) {
                     sound = xabber.settings.sound_on_auth_request;
                 } else {
-                    sound = xabber.settings.sound_on_message;
+                    sound = xabber.settings.sound_on_group_message;
                 }
-                xabber.playAudio(sound);
+                xabber.playAudio(sound, false, xabber.settings.notifications_volume);
+            }
+            else if (xabber.settings.private_sound && xabber.settings.notifications_private && !this.model.get('group_chat')) {
+                let sound;
+                if (message.get('auth_request')) {
+                    sound = xabber.settings.sound_on_auth_request;
+                } else {
+                    sound = xabber.settings.sound_on_private_message;
+                }
+                xabber.playAudio(sound, false, xabber.settings.notifications_volume);
             }
             xabber.recountAllMessageCounter();
         },
@@ -8491,6 +8498,7 @@ define("xabber-chats", function () {
             "click .attach-media": "showMediaPopup",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
+            "click .chat-mention": "onMentionButtonClick",
             "click .close-forward": "unsetForwardedMessages",
             "click .send-message": "submit",
             "click .markup-text": "onShowMarkupPanel",
@@ -8597,6 +8605,7 @@ define("xabber-chats", function () {
                     },
                     toolbar: [
                         ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                        this.model.get('group_chat') ? ['mention'] : [],
                         ['clean']
                     ]
                 },
@@ -8606,6 +8615,8 @@ define("xabber-chats", function () {
                 theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
+            this.$('.ql-mention').prop('disabled', true);
+            this.$('.ql-mention').append('<div class="chat-mention" ="">@</div>');
             this.contact = this.view.contact;
             this.account = this.view.account;
             this.fwd_messages = [];
@@ -9032,6 +9043,28 @@ define("xabber-chats", function () {
                 } else
                     this.$('.mentions-list').html("").hide();
             });
+        },
+
+        onMentionButtonClick: function () {
+            if (this.$('.ql-mention').hasClass('ql-active')){
+                this.$('.ql-mention').prop('disabled', false);
+                this.$('.ql-mention').click();
+                this.$('.ql-mention').prop('disabled', true);
+
+                return;
+            }
+            let selection = this.quill.getSelection() ? this.quill.getSelection().index : (this.quill.getLength() - 1);
+            this.quill.insertText(selection, ' @ ', 'user')
+            this.quill.setSelection(selection + 2, 0)
+            let mention_text = "";
+            if (this.contact.participants.length && this.contact.participants.version > 0 && (this.contact.get('group_info') && this.contact.participants && this.contact.get('group_info').members_num == this.contact.participants.length)) {
+                this.updateMentionsList(mention_text);
+            } else {
+                this.contact.participants.participantsRequest({version: 0}, () => {
+                    this.updateMentionsList(mention_text);
+                });
+            }
+
         },
 
         inputMention: function (ev) {
@@ -9581,16 +9614,16 @@ define("xabber-chats", function () {
             this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
             this.displaySend();
             xabber.chat_body.updateHeight();
-            let markup_body = utils.markupBodyMessage(message),
+            let markup_body = utils.markupBodyMessage(message, 'mention'),
                 emoji_node = markup_body.emojify({tag_name: 'div'}),
-                arr_text = Array.from(emoji_node);
+                arr_text = emoji_node.split('\n');
             arr_text.forEach((item, idx) => {
-                if (item == '\n')
-                    arr_text[idx] = '<br>';
+                if (!item.includes('</blockquote>'))
+                    arr_text[idx] = '<p>' + arr_text[idx] + '</p>';
             });
             emoji_node = arr_text.join("");
             this.quill.setText("");
-            this.quill.pasteHTML(0, emoji_node, 'user');
+            this.quill.root.innerHTML = emoji_node;
             this.focusOnInput();
         },
 

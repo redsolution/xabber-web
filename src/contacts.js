@@ -8690,7 +8690,8 @@ define("xabber-contacts", function () {
                     if (encrypted && this.account.omemo) {
                         chat.set('timestamp', chat_timestamp);
                         chat.set('opened', true);
-                        chat.item_view.updateEncryptedChat();
+                        if ($(iq).attr('type') != 'set')
+                            chat.item_view.updateEncryptedChat();
                     }
                     if (!saved) {
                         if ($item.attr('mute') || $item.attr('mute') === '0') {
@@ -9377,7 +9378,7 @@ define("xabber-contacts", function () {
             },
 
             _initialize: function () {
-                this.$el.appendTo(this.parent.$('.settings-block-wrap.contact-list'));
+                this.$el.appendTo(this.parent.$('.settings-subblock-wrap.contact-list'));
             },
 
             render: function () {

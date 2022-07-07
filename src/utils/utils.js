@@ -330,6 +330,11 @@ define([
                 }
                 else
                     target = target.slice(5);
+                if (mention_tag === 'mention'){
+                    markup_body[start_idx] = '<' + mention_tag + ' data-target="?jid=' + target + '">' + markup_body[start_idx];
+                    markup_body[end_idx] += '</' + mention_tag + '>';
+                    return;
+                }
                 markup_body[start_idx] = '<' + mention_tag + ' data-target="' + target + '" class="mention' + (mention.me ? ' ground-color-100' : '') + '">' + markup_body[start_idx];
                 markup_body[end_idx] += '</' + mention_tag + '>';
             }.bind(this));
@@ -371,6 +376,11 @@ define([
                             markup_body[child_idx] = "";
                         idx+= constants.QUOTE_MARKER.length - 1;
                     }
+                }
+                if (mention_tag === 'mention'){
+                    markup_body[quote.start] = '<blockquote>';
+                    markup_body[end_idx] += '</blockquote>';
+                    return;
                 }
                 markup_body[quote.start] = '<div class="quote">';
                 markup_body[end_idx] += '</div>';

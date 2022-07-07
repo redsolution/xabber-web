@@ -9,7 +9,19 @@
         xabber_i18next = env.xabber_i18next,
         xabber_i18next_sprintf = env.xabber_i18next_sprintf,
         uuid = env.uuid,
-        utils = env.utils;
+        utils = env.utils,
+        bc = new BroadcastChannel("xabber-web");
+
+    bc.onmessage = (event) => {
+        if (event.data === `1` && !bc.disabled_client) {
+            bc.postMessage(`2`);
+        }
+        if (event.data === `2`) {
+            bc.disabled_client = true
+        }
+    };
+
+    bc.postMessage(`1`);
 
     let Xabber = Backbone.Model.extend({
         defaults: {
@@ -37,6 +49,8 @@
             this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                     {storage_name: this.getStorageName(), fetch: 'before'});
             this.cache = this._cache.attributes;
+            this.cache.client_id && (this.set('client_id', this.cache.client_id));
+            this._cache.save('client_id', this.get('client_id'));
             this.cacheFavicons();
             this.extendFunction();
             this.check_config = new $.Deferred();
@@ -269,17 +283,26 @@
             defaults: {
                 max_connection_retries: -1,
                 notifications: true,
-                message_preview: false,
-                sound: true,
+                notifications_private: true,
+                notifications_group: true,
+                notifications_volume: 0.50,
+                message_preview_private: false,
+                message_preview_group: false,
+                private_sound: true,
+                group_sound: true,
                 background: {type: 'default'},
                 side_panel: {theme: 'dark', blur: false, transparency: 50},
                 appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
                 main_color: 'default',
-                sound_on_message: 'beep_up',
+                sound_on_private_message: 'beep_up',
+                sound_on_group_message: 'beep_up',
                 call_attention: true,
+                sound_on_call: 'call',
+                sound_on_connection: 'connecting',
                 sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',
                 hotkeys: 'enter',
+                avatar_shape: 'circle',
                 language: 'default',
                 load_history: true,
                 mam_requests_limit: 200,
@@ -383,6 +406,11 @@
                 }
                 if (!constants.CONNECTION_URL) {
                     utils.dialogs.error(this.getString("client_error__missing_connection_url"));
+                    this.check_config.resolve(false);
+                    return;
+                }
+                if (bc.disabled_client){
+                    utils.dialogs.error(this.getString("client_error__another_tab_active"));
                     this.check_config.resolve(false);
                     return;
                 }

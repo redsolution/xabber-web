@@ -520,10 +520,7 @@ define("xabber-accounts", function () {
                     this.auth_view && this.loginCallback(status, condition);
                     this.session.set({conn_status: status, conn_condition: condition});
                     if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
-                        if (this.get('auth_type') === 'x-token')
-                            this.onTokenRevoked();
-                        else
-                            this.onAuthFailed();
+                        this.onConnectionConflict();
                     }
                     if (status === Strophe.Status.CONNECTED) {
                         this.session.set('on_token_revoked', false);
@@ -558,7 +555,10 @@ define("xabber-accounts", function () {
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            this.onTokenRevoked();
+                            if (this.session.get('conn_retries') <= 3)
+                                this.reconnect();
+                            else
+                                this.onTokenRevoked();
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -648,7 +648,8 @@ define("xabber-accounts", function () {
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            this.onTokenRevoked();
+                            if (this.session.get('conn_retries') > 3)
+                                this.onTokenRevoked();
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -765,6 +766,16 @@ define("xabber-accounts", function () {
                     });
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
+                },
+
+                onConnectionConflict: function () {
+                    utils.dialogs.error(xabber.getString("connection__error__text_connection_conflict", [this.get('jid')]));
+                    this.session.set({
+                        auth_failed: true,
+                        no_reconnect: true
+                    });
+                    this.trigger('deactivate', this);
+                    this.connFeedback(xabber.getString("connection__error__text_connection_conflict_short"));
                 },
 
                 getAllXTokens: function () {
@@ -1065,7 +1076,7 @@ define("xabber-accounts", function () {
                             stanza.c('device', {xmlns: Strophe.NS.AUTH_DEVICES, id: this.get('x_token').token_uid}).up();
                     }
                     stanza.cnode(this.connection.caps.createCapsNode({
-                        node: 'https://www.xabber.com/'
+                        node: 'https://www.xabber.com/clients/xabber/web'
                     }).tree());
                     return this.sendPres(stanza);
                 },
@@ -3036,21 +3047,6 @@ define("xabber-accounts", function () {
             updateHtml: function () {
                 this.$('.no-accounts-tip').hideIf(this.model.length);
                 this.$('.accounts-head-wrap').showIf(this.model.length);
-                this.updateCSS();
-            },
-
-            // TODO: refactor CSS and remove this
-            updateCSS: function () {
-                let max_width = 0;
-                this.$('.jid').addClass('inline').each(function () {
-                    this.offsetWidth > max_width && (max_width = this.offsetWidth);
-                }).removeClass('inline');
-                max_width += 150;
-                (xabber.api_account && xabber.api_account.get('connected')) && (max_width += 45);
-                this.$('.xmpp-account-list').css('width', max_width + 48);
-                _.each(this.children, function (view) {
-                    view.$el.css('width', max_width);
-                });
             },
 
             updateSyncState: function () {
@@ -3059,7 +3055,6 @@ define("xabber-accounts", function () {
                 this.$('.sync-marker-wrap').showIf(connected);
                 this.$('.sync-head').hideIf(!connected);
                 this.$('.sync-marker-wrap').hideIf(!connected);
-                this.updateCSS();
             },
 
             onMoveAccountToBottom: function (ev, account) {
