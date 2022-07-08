@@ -5387,7 +5387,15 @@ input[type=text].simple-input-field:hover {
 }
 
 .pinned-icon {
-    height: 24px;
+    height: 18px;
+    width: 18px;
+    position: relative;
+    margin-left: 1px;
+}
+
+.pinned-icon svg{
+    position: absolute;
+    bottom: -3px;
 }
 
 .pinned-icon path {
@@ -7387,7 +7395,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-item .msg-delivering-state {
-    margin-top: 3px;
+    margin-top: 5px;
     margin-right: 3px;
     color: #388E3C;
 }
@@ -7409,19 +7417,22 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-item .chat-item-notifications-wrap{
-    position: absolute;
-    right: 3px;
-    bottom: 3px;
-    display:flex
+    margin: 4px 6px 0 0;
+    display: flex;
 
 }
+.chat-item .chat-item-notifications-wrap .msg-chat-error{
+    background-color: #D32F2F !important;
+}
 .chat-item .chat-item-notifications-wrap .msg-counter,
+.chat-item .chat-item-notifications-wrap .msg-chat-error,
 .chat-item .chat-item-notifications-wrap .msg-incoming-subscription{
     position:static !important;
     margin-left: 4px;
 }
 .chat-item .msg-counter,
 .chat-item .msg-incoming-subscription,
+.chat-item .msg-chat-error,
 .mention-item .msg-counter{
     position: absolute;
     right: 2px;
@@ -7438,6 +7449,7 @@ input[type=text].simple-input-field:hover {
 }
 .forward-panel-modal .chat-item .msg-counter,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription,
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-chat-error,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;

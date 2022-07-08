@@ -1615,6 +1615,7 @@ define("xabber-chats", function () {
             this.updateGroupChats();
             this.updateIcon();
             this.updateEncrypted();
+            this.updateChatError();
             this.model.on("change:active", this.updateActiveStatus, this);
             this.model.on("change:unread", this.updateCounter, this);
             this.model.on("change:encrypted", this.updateEncrypted, this);
@@ -1689,6 +1690,7 @@ define("xabber-chats", function () {
             if (message === this.model.last_message) {
                 this.updateLastMessage();
             }
+            this.updateChatError();
         },
 
         updateName: function () {
@@ -1733,8 +1735,15 @@ define("xabber-chats", function () {
             this.updateTextClipping();
         },
 
+        updateChatError: function () {
+            let error_msgs = this.model.messages.filter(m => m.get('state') === -1)
+            this.$('.msg-chat-error').showIf(error_msgs.length);
+            this.updateTextClipping();
+        },
+
         updateTextClipping: function () {
             let indicators_count = this.$('.chat-item-notifications-wrap').children(':not(.hidden)').length;
+            !this.$('.msg-delivering-state').hasClass('hidden') && indicators_count++;
             this.$('.last-msg').switchClass('triple-indicators', indicators_count === 3)
             this.$('.last-msg').switchClass('quad-indicators', indicators_count === 4)
         },
