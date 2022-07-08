@@ -440,8 +440,8 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 .rounded-avatars .circle-avatar,
 .rounded-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
-    mask-image: url(../images/masks/rounded_square/roundedsquare176.png);
+    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
+    mask-image: url(../images/masks/rounded/rounded176.png);
 }
 .star-avatars .circle-avatar,
 .star-avatars .circle-avatar-wrap {
@@ -450,8 +450,8 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 .squircle-avatars .circle-avatar,
 .squircle-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
-    mask-image: url(../images/masks/rounded/rounded176.png);
+    -webkit-mask-image: url(../images/masks/squircle/squircle176.png);
+    mask-image: url(../images/masks/squircle/squircle176.png);
 }
 
 .circle-avatar.circle-image-fix {

@@ -1369,7 +1369,7 @@ define("xabber-views", function () {
             "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
             "change .sound input[type=radio][name=group_sound]": "setGroupSound",
             "change .sound input[type=radio][name=call_sound]": "setCallSound",
-            "change .sound input[type=radio][name=connection_sound]": "setConnectionSound",
+            "change .sound input[type=radio][name=dialtone_sound]": "setDialtoneSound",
             "change .sound input[type=radio][name=attention_sound]": "setAttentionSound",
             "change .languages-list input[type=radio][name=language]": "changeLanguage",
             "change #vignetting": "changeVignetting",
@@ -1421,7 +1421,7 @@ define("xabber-views", function () {
                     .prop('checked', true);
             this.$(`.sound input[type=radio][name=call_sound][value="${settings.sound_on_call}"]`)
                     .prop('checked', true);
-            this.$(`.sound input[type=radio][name=connection_sound][value="${settings.sound_on_connection}"]`)
+            this.$(`.sound input[type=radio][name=dialtone_sound][value="${settings.sound_on_dialtone}"]`)
                     .prop('checked', true);
             this.$(`.sound input[type=radio][name=attention_sound][value="${settings.sound_on_attention}"]`)
                     .prop('checked', true);
@@ -1603,11 +1603,11 @@ define("xabber-views", function () {
             this.model.save({sound_on_call: value});
         },
 
-        setConnectionSound: function (ev) {
+        setDialtoneSound: function (ev) {
             let value = ev.target.value;
             this.current_sound && this.current_sound.pause();
             this.current_sound = xabber.playAudio(value, false);
-            this.model.save({sound_on_connection: value});
+            this.model.save({sound_on_dialtone: value});
         },
 
         setAttentionSound: function (ev) {

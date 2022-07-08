@@ -491,7 +491,7 @@ define("xabber-chats", function () {
               this.contact = options.contact;
               this.account = this.contact.account;
               this.registerIqHandler();
-              this.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_call, true);
+              this.audio_notifiation = xabber.playAudio(attrs.call_initiator ? xabber.settings.sound_on_call : xabber.settings.sound_on_dialtone, true);
               this.modal_view = new xabber.JingleMessageView({model: this});
               this.conn = new RTCPeerConnection({
                   iceServers: [
@@ -1096,9 +1096,8 @@ define("xabber-chats", function () {
                 });
                 return;
             }
-            xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id}, {contact: this.contact});
+            xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id, call_initiator: this.contact.get('jid')}, {contact: this.contact, });
             xabber.current_voip_call.modal_view.show({status: 'in'});
-            xabber.current_voip_call.set('call_initiator', this.contact.get('jid'));
         },
 
         endCall: function (status) {

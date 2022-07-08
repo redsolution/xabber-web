@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>rounded/rounded</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Masks" transform="translate(-768.000000, -568.000000)" fill="#000000">
+            <path d="M800,568 L864,568 C881.673112,568 896,582.326888 896,600 L896,664 C896,681.673112 881.673112,696 864,696 L800,696 C782.326888,696 768,681.673112 768,664 L768,600 C768,582.326888 782.326888,568 800,568 Z" id="rounded/rounded"></path>
+        </g>
+    </g>
+</svg>
