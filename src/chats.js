@@ -1743,7 +1743,6 @@ define("xabber-chats", function () {
 
         updateTextClipping: function () {
             let indicators_count = this.$('.chat-item-notifications-wrap').children(':not(.hidden)').length;
-            !this.$('.msg-delivering-state').hasClass('hidden') && indicators_count++;
             this.$('.last-msg').switchClass('triple-indicators', indicators_count === 3)
             this.$('.last-msg').switchClass('quad-indicators', indicators_count === 4)
         },

@@ -7430,6 +7430,10 @@ input[type=text].simple-input-field:hover {
     position:static !important;
     margin-left: 4px;
 }
+
+.chat-item .chat-item-notifications-wrap .msg-delivering-state {
+    margin: 0 0 0 4px;
+}
 .chat-item .msg-counter,
 .chat-item .msg-incoming-subscription,
 .chat-item .msg-chat-error,
