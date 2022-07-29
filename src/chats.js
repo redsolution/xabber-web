@@ -7734,9 +7734,11 @@ define("xabber-chats", function () {
             this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
             this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
             this.$('.btn-retract-own-messages').showIf(is_group_chat);
-            this.$('.btn-block-contact').hideIf(this.model.get('blocked'));
-            this.$('.btn-unblock-contact').showIf(this.model.get('blocked'));
+            this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
+            this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
             this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
+            this.$('.btn-notifications').hideIf(this.contact.get('blocked'));
+            this.$('.btn-jingle-message').hideIf(this.contact.get('blocked'));
         },
 
         renderSearchPanel: function () {

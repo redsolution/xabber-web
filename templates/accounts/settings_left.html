@@ -48,29 +48,13 @@
                 <i class="mdi mdi-24px mdi-settings"></i>
                 <div class="settings-block-name one-line">{[print(xabber.getString("account_connection_settings"))]}</div>
             </div>
-            <div class="settings-tab" data-block-name="tokens">
-                <i class="mdi mdi-24px mdi-key"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("account_active_sessions"))]}</div>
+            <div class="settings-tab" data-block-name="vcard_edit">
+                <i class="mdi mdi-24px mdi-account-card-details"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_profile"))]}</div>
             </div>
-            <!--<div class="settings-tab" data-block-name="synchronization">-->
-                <!--<i class="mdi mdi-24px mdi-sync"></i>-->
-                <!--<div class="settings-block-name one-line">{[print(xabber.getString("account_sync"))]}</div>-->
-            <!--</div>-->
             <div class="settings-tab" data-block-name="color-scheme">
                 <i class="mdi mdi-24px mdi-palette"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("account_color_scheme"))]}</div>
-            </div>
-            <div class="settings-tab" data-block-name="vcard">
-                <i class="mdi mdi-24px mdi-account-card-details"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_vcard"))]}</div>
-            </div>
-            <div class="settings-tab" data-block-name="omemo-info">
-                <i class="mdi mdi-24px mdi-fingerprint"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("omemo__settings__menu_item"))]}</div>
-            </div>
-            <div class="settings-tab" data-block-name="server-info">
-                <i class="mdi mdi-24px mdi-information"></i>
-                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>
+                <div class="settings-block-name one-line">{[print(xabber.getString("color"))]}</div>
             </div>
             <div class="settings-tab" data-block-name="blocklist-info">
                 <i class="mdi mdi-24px mdi-block-helper"></i>
@@ -79,6 +63,18 @@
             <div class="settings-tab" data-block-name="groups-info">
                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>
                 <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>
+            </div>
+            <div class="settings-tab" data-block-name="server-info">
+                <i class="mdi mdi-24px mdi-information"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>
+            </div>
+            <div class="settings-tab" data-block-name="omemo-info">
+                <i class="mdi mdi-24px mdi-fingerprint"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_encryption"))]}</div>
+            </div>
+            <div class="settings-tab" data-block-name="tokens">
+                <i class="mdi mdi-24px mdi-key"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_devices"))]}</div>
             </div>
         </div>
         <div class="settings-tabs-bottom-wrap ground-color-900">

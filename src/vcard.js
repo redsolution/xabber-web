@@ -477,15 +477,18 @@ define("xabber-vcard", function () {
         ps_selector: '.panel-content',
 
         events: {
+            "keyup input": "keyUp",
+            "keyup textarea": "keyUp",
             "input .first-name input": "changePlaceholder",
             "input .middle-name input": "changePlaceholder",
             "input .last-name input": "changePlaceholder",
             "click .btn-vcard-save": "save",
-            "click .btn-vcard-back": "back"
+            "click .btn-vcard-back": "render",
         },
 
         _initialize: function () {
-            let $input = this.$('.datepicker').pickadate({
+            let self = this,
+                $input = this.$('.datepicker').pickadate({
                 selectMonths: true,
                 selectYears: 100,
                 autoOk: false,
@@ -497,6 +500,8 @@ define("xabber-vcard", function () {
                 today: '',
                 onClose: function(){
                     $(document.activeElement).blur();
+                    self.$('.btn-vcard-back').removeClass('hidden');
+                    self.$('.btn-vcard-save').removeClass('hidden');
                 },
                 klass: {
                     weekday_display: 'picker__weekday-display ground-color-700',
@@ -521,6 +526,8 @@ define("xabber-vcard", function () {
             Materialize.updateTextFields();
             this.changePlaceholder();
             this.updateScrollBar();
+            this.$('.btn-vcard-back').addClass('hidden');
+            this.$('.btn-vcard-save').addClass('hidden');
         },
 
         changePlaceholder: function () {
@@ -640,6 +647,8 @@ define("xabber-vcard", function () {
                 () => {
                     this.model.getVCard();
                     this.data.set('saving', false);
+                    this.$('.btn-vcard-back').addClass('hidden');
+                    this.$('.btn-vcard-save').addClass('hidden');
                 },
                 function () {
                     utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
@@ -648,9 +657,10 @@ define("xabber-vcard", function () {
             );
         },
 
-        back: function () {
-            this.model.showSettings(null, 'vcard');
-        }
+        keyUp: function () {
+            this.$('.btn-vcard-back').removeClass('hidden');
+            this.$('.btn-vcard-save').removeClass('hidden');
+        },
     });
 
     return xabber;

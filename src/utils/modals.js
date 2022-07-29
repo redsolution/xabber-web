@@ -145,6 +145,10 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                     });
                 }, {use_queue: true});
 
+                if (dialog_options.modal_class) {
+                    dialog.$modal.addClass(dialog_options.modal_class)
+                }
+
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
                     dialog.$modal.find('.img-from-clipboard')[0].src = dialog_options.blob_image_from_clipboard;

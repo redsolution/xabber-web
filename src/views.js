@@ -1360,6 +1360,7 @@ define("xabber-views", function () {
 
         events: {
             "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
+            "click .btn-add-account": "showAddAccountView",
             "click .setting.notifications label": "setNotifications",
             "click .setting.private-notifications label": "setPrivateNotifications",
             "click .setting.group-notifications label": "setGroupNotifications",
@@ -1501,6 +1502,7 @@ define("xabber-views", function () {
         jumpToBlock: function (ev) {
             let $tab = $(ev.target).closest('.settings-tab'),
                 $elem = this.$('.settings-block-wrap.' + $tab.data('block-name'));
+            this.$('.btn-add-account').hideIf($tab.data('block-name') != 'xmpp-accounts')
             if ($tab.hasClass('link-button')) {
                 $tab.parent().siblings().removeClass('active');
                 this.scrollTo(0);
@@ -1750,6 +1752,10 @@ define("xabber-views", function () {
                         .prop('checked', true);
                 }
             });
+        },
+
+        showAddAccountView: function () {
+            xabber.trigger('add_account', {right: null});
         },
 
         updateDescription: function () {

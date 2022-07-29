@@ -58,6 +58,9 @@ define("xabber-discovery", function () {
             this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
             this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
             this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
+            this.addFeature(Strophe.NS.SYNCHRONIZATION, 'XEP-0ССС: Client Synchronization');
+            this.addFeature(Strophe.NS.AUTH_DEVICES, 'XEP-DEVICES: HOTP and Device Management');
+            this.addFeature(Strophe.NS.GEOLOC, 'XEP-0080: User Location');
         },
 
         addFeature: function (namespace, verbose_name) {
