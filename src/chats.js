@@ -8592,6 +8592,19 @@ define("xabber-chats", function () {
             return this;
         },
 
+        moveCursorToEnd: function () {
+            let range = document.createRange(),
+                sel = window.getSelection(),
+                target = this.quill.root;
+            range.selectNodeContents(target);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            target.focus();
+            range.detach(); // optimization
+            target.scrollTop = target.scrollHeight;
+        },
+
         keyDown: function (ev) {
             let $rich_textarea = this.$('.input-message .rich-textarea');
             if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact') ||
@@ -9278,6 +9291,7 @@ define("xabber-chats", function () {
             emoji_node = arr_text.join("");
             this.quill.setText("");
             this.quill.root.innerHTML = emoji_node;
+            this.moveCursorToEnd();
             this.focusOnInput();
         },
 
