@@ -177,6 +177,7 @@ define("xabber-templates", [
     "text!templates/svg/call-outline.html",
     "text!templates/svg/call.html",
     "text!templates/svg/search.html",
+    "text!templates/svg/devices.html",
     "text!templates/svg/bell.html",
     "text!templates/svg/bell-sleep.html",
     "text!templates/svg/bell-off.html",
@@ -454,6 +455,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.search');
+    addSvgTemplate('svg.devices');
     addSvgTemplate('svg.bell');
     addSvgTemplate('svg.bell-sleep');
     addSvgTemplate('svg.bell-off');

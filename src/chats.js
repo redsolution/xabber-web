@@ -8462,7 +8462,7 @@ define("xabber-chats", function () {
                         xabber.chat_body.updateHeight();
                         is_scrolled_bottom && this.view.scrollToBottom();
                         this.account.omemo.checkContactFingerprints(this.contact);
-                        this.focusOnInput();
+                        (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
                     } else {
                         this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
                             let is_scrolled_bottom = this.view.isScrolledToBottom();
@@ -8488,7 +8488,7 @@ define("xabber-chats", function () {
                             this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
                             xabber.chat_body.updateHeight();
                             is_scrolled_bottom && this.view.scrollToBottom();
-                            this.focusOnInput();
+                            (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
                         });
                     }
                 });
@@ -8588,7 +8588,13 @@ define("xabber-chats", function () {
         },
 
         focusOnInput: function () {
-            this.quill.focus();
+            if (!xabber.body.$el.siblings('#modals').children('.open').length){
+                this.quill.enable();
+                this.quill.focus();
+            } else {
+                this.quill.blur();
+                this.quill.disable();
+            }
             return this;
         },
 
@@ -8902,11 +8908,13 @@ define("xabber-chats", function () {
                         blob_image = window.URL.createObjectURL(new Blob([image_from_clipboard])),
                         options = { blob_image_from_clipboard: blob_image};
                     utils.dialogs.ask(xabber.getString("dialog_send_image_from_clipboard__header"), xabber.getString("dialog_send_image_from_clipboard__confirm"), options, { ok_button_text: xabber.getString("chat_send")}).done((result) => {
+                        this.focusOnInput();
                         if (result) {
                             image_from_clipboard.name = 'clipboard.png';
                             this.view.addFileMessage([image_from_clipboard]);
                         }
                     });
+                    this.focusOnInput();
                 }
                 else if (clipboard_data.items.length > 0) {
                     let image_from_clipboard = clipboard_data.items[clipboard_data.items.length - 1];
@@ -8916,10 +8924,12 @@ define("xabber-chats", function () {
                         reader.onload = function(event){
                             let options = { blob_image_from_clipboard: event.target.result};
                             utils.dialogs.ask(xabber.getString("dialog_send_image_from_clipboard__header"), xabber.getString("dialog_send_image_from_clipboard__confirm"), options, { ok_button_text: xabber.getString("chat_send")}).done((result) => {
+                                this.focusOnInput();
                                 if (result) {
                                     deferred.resolve();
                                 }
                             });
+                            this.focusOnInput();
                         };
                         deferred.done(() => {
                             blob.name = 'clipboard.png';

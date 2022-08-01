@@ -9923,6 +9923,10 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 
+.settings-panel .settings-tab.omemo-info {
+    margin: 16px 0;
+}
+
 .settings-panel .settings-tab:hover {
     background-color: rgba(255, 255, 255, 0.07);
 }
