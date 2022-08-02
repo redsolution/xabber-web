@@ -26,7 +26,6 @@ define("xabber-templates", [
     "text!templates/accounts/xmpp_login.html",
     "text!templates/accounts/add_account.html",
     "text!templates/accounts/change_password.html",
-    "text!templates/accounts/change_account_password.html",
     "text!templates/accounts/toolbar_item.html",
     "text!templates/accounts/media_gallery_account_file.html",
     "text!templates/accounts/media_gallery_account.html",
@@ -193,6 +192,7 @@ define("xabber-templates", [
     "text!templates/svg/call-outline.html",
     "text!templates/svg/call.html",
     "text!templates/svg/search.html",
+    "text!templates/svg/devices.html",
     "text!templates/svg/bell.html",
     "text!templates/svg/bell-sleep.html",
     "text!templates/svg/bell-off.html",
@@ -319,7 +319,6 @@ define("xabber-templates", [
     addTemplate('accounts.xmpp_login');
     addTemplate('accounts.add_account');
     addTemplate('accounts.change_password');
-    addTemplate('accounts.change_account_password');
     addTemplate('accounts.toolbar_item');
     addTemplate('accounts.media_gallery_account_file');
     addTemplate('accounts.media_gallery_account');
@@ -486,6 +485,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.search');
+    addSvgTemplate('svg.devices');
     addSvgTemplate('svg.bell');
     addSvgTemplate('svg.bell-sleep');
     addSvgTemplate('svg.bell-off');

@@ -298,6 +298,7 @@
                 sound_on_group_message: 'beep_up',
                 call_attention: true,
                 sound_on_call: 'call',
+                sound_on_dialtone: 'call',
                 sound_on_connection: 'connecting',
                 sound_on_attention: 'attention',
                 sound_on_auth_request: 'beep_a',

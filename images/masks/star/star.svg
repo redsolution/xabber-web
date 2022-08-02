@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>star/star</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Masks" transform="translate(-1792.000000, -568.000000)">
+            <g id="star/star" transform="translate(1792.000000, 567.996302)">
+                <rect id="bounds" x="0" y="0.00369837035" width="128" height="128"></rect>
+                <polygon id="star128" fill="#000000" points="40.0684623 104.197096 0.705 94.3162932 13.1850606 55.698156 10.4182841 15.2079426 51.0028659 15.1435249 88.6563662 0 101.258957 38.5783249 127.296876 69.7093251 94.5011235 93.6164588 72.9399424 128"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -35,6 +35,7 @@ let badges_names = [
         'call-outline',
         'call',
         'search',
+        'devices',
         'bell',
         'bell-off',
         'bell-sleep',

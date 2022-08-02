@@ -1963,7 +1963,8 @@ define("xabber-contacts", function () {
                 this.$('.btn-add').hideIf(in_roster);
                 this.$('.btn-block-wrap .contact-btn').switchClass('btn-block', !is_blocked).switchClass('btn-unblock', is_blocked);
                 this.$('.btn-block-wrap .btn-name').text(is_blocked ? xabber.getString("contact_bar_unblock") : xabber.getString("contact_bar_block"));
-                this.$('.buttons-wrap .button-wrap:not(.btn-block-wrap)').switchClass('non-active', is_blocked);
+                this.$('.buttons-wrap .button-wrap:not(.btn-block-wrap):not(.btn-search-messages)').switchClass('non-active', is_blocked);
+                this.$('.contact-mute-dropdown').hideIf(is_blocked);
                 this.$('.btn-auth-request').showIf(!is_server && in_roster && !is_blocked &&
                     subscription !== 'both' && subscription !== 'to');
             },
@@ -9075,9 +9076,11 @@ define("xabber-contacts", function () {
         xabber.BlockListView = xabber.BasicView.extend({
             avatar_size: constants.AVATAR_SIZES.CONTACT_BLOCKED_ITEM,
             events: {
-                "click .blocked-item": "toggleItems",
-                "click .btn-block": "openBlockWindow",
-                "click .btn-unblock": "unblockContact"
+                "click .blocked-item": "onTabClick",
+                "click .btn-reset-panel": "deselectParticipants",
+                "click .btn-remove-selected": "actionSelectedParticipants",
+                "click .blocked-contact input": "selectUnblock",
+                "click .btn-unblock-selected": "unblockSelected"
             },
 
             _initialize: function (options) {
@@ -9085,23 +9088,49 @@ define("xabber-contacts", function () {
                 for (let jid in this.account.blocklist.list) {
                     this.onContactAdded(this.account.blocklist.list[jid], false);
                 };
+                this.$('.blocked-item:not(.hidden)').first().click().find('a').addClass('active');
+                this.hideTabs();
                 this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
                 this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
             },
 
-            toggleItems: function (ev) {
-                let $item = $(ev.target).closest('.blocked-item'),
-                    $list = $item.siblings('.blocked-list'),
-                    is_hidden = $list.hasClass('hidden');
-                $list.switchClass('hidden', !is_hidden);
-                $item.find('.toggle-items').switchClass('mdi-chevron-right', !is_hidden).switchClass('mdi-chevron-down', is_hidden);
-                this.parent.updateScrollBar();
+            render: function (options) {
+                this.deselectBlocked();
+                this.updateIndicator();
+                xabber.once("update_css", this.updateIndicator, this);
             },
 
-            unblockContact: function (ev) {
-                let jid = $(ev.target).closest('.blocked-contact').attr('data-jid'),
-                    contact = this.account.contacts.get(jid);
-                ev.stopPropagation();
+            updateIndicator: function () {
+                this.$('.tabs .indicator').remove();
+                this.$('.tabs').tabs();
+                this.$('.indicator').addClass('ground-color-500');
+            },
+
+            selectUnblock: function (ev) {
+                this.updateUnblockButton();
+            },
+
+            deselectBlocked: function (ev) {
+                this.$('.blocked-contact input').prop('checked', false)
+                this.updateUnblockButton();
+            },
+
+            updateUnblockButton: function () {
+                let has_changes = this.$('.blocked-contact input:checked').length;
+                this.parent.$('.btn-unblock-selected').hideIf(!has_changes)
+                this.parent.$('.btn-deselect-blocked').hideIf(!has_changes)
+                this.parent.$('.btn-block').hideIf(has_changes)
+            },
+
+            unblockSelected: function (ev) {
+                let selected = this.$('.blocked-contact input:checked').closest('.blocked-contact');
+                selected.each((index, item) => {
+                    this.unblockContactByJid($(item).attr('data-jid'))
+                });
+            },
+
+            unblockContactByJid: function (jid) {
+                let contact = this.account.contacts.get(jid);
                 if (contact)
                     contact.unblock();
                 else {
@@ -9109,23 +9138,60 @@ define("xabber-contacts", function () {
                 }
             },
 
+            onTabClick: function (ev) {
+                let tab = $(ev.target).closest('.blocked-item'),
+                    tab_name = $(ev.target).closest('.blocked-item').attr('data-tab-name');
+                this.$('.blocked-item a').removeClass('active');
+                tab.find('a').addClass('active');
+                this.$('.blocked-items-container').addClass('hidden');
+                this.$('.' + tab_name).removeClass('hidden');
+                this.$('.blocked-contact input').prop('checked', false)
+                this.updateUnblockButton();
+            },
+
+            hideTabs: function () {
+                this.$('.tabs').hideIf(this.$('.blocked-item:not(.hidden)').length === 1)
+            },
+
+            hideEmptyContainers: function () {
+                let tabs = this.$('.blocked-list:empty');
+                tabs.each((idx, item) => {
+                    let tab_name = $(item).closest('.blocked-items-container').addClass('hidden').attr('data-tab-name');
+                    this.$('.' + tab_name).addClass('hidden').removeClass('tab');
+                });
+                if (this.$('.blocked-item.hidden .active').length){
+                    this.$('.blocked-item:not(.hidden)').first().click().find('a').addClass('active');
+
+                }
+                this.hideTabs();
+                this.updateUnblockButton();
+                this.updateIndicator();
+            },
+
             onContactAdded: function (attrs) {
                 let tmp = templates.contact_blocked_item({jid: attrs.jid});
                 if (attrs.resource) {
-                    this.$('.blocked-invitations-wrap').removeClass('hidden').find('.blocked-invitations').append(tmp);
+                    this.$('.invitations-item').removeClass('hidden').addClass('tab');
+                    this.$('.blocked-invitations-wrap').find('.blocked-invitations').append(tmp);
                 }
                 else if (attrs.domain) {
-                    let $domain_wrap = this.$('.blocked-domains-wrap').removeClass('hidden'),
+                    this.$('.domains-item').removeClass('hidden').addClass('tab');
+                    let $domain_wrap = this.$('.blocked-domains-wrap'),
                         $desc = $domain_wrap.find('.blocked-item-description');
                     $domain_wrap.find('.blocked-domains').append(tmp);
                     $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
                 }
                 else {
-                    this.$('.blocked-contacts-wrap').removeClass('hidden').find('.blocked-contacts').append(tmp);
+                    this.$('.contacts-item').removeClass('hidden').addClass('tab');
+                    this.$('.blocked-contacts-wrap').find('.blocked-contacts').append(tmp);
                     let $desc = this.$('.blocked-contacts-wrap .blocked-item-description');
                     $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
                 }
                 this.$('.placeholder').addClass('hidden');
+                this.hideTabs();
+                this.updateIndicator();
+                if (this.$('.blocked-items-container.hidden').length === 3)
+                    this.$('.blocked-list:not(:empty)').closest('.blocked-items-container').removeClass('hidden');
                 this.isVisible() && this.parent.updateScrollBar();
             },
 
@@ -9141,20 +9207,8 @@ define("xabber-contacts", function () {
                 $elem.detach();
                 this.$('.placeholder').hideIf(this.account.blocklist.length());
                 this.parent.updateScrollBar();
+                this.hideEmptyContainers();
             },
-
-            openBlockWindow: function () {
-                utils.dialogs.ask_enter_value(xabber.getString("contact_bar_block"), xabber.getString("dialog_block_xmpp_address__text"), {input_placeholder_value: xabber.getString("dialog_block_xmpp_address__hint_address")}, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
-                    if (result) {
-                        let contact = this.account.contacts.get(result);
-                        if (contact)
-                            contact.block();
-                        else {
-                            this.account.contacts.blockContact(result);
-                        }
-                    }
-                });
-            }
         });
 
         xabber.RosterView = xabber.SearchPanelView.extend({
@@ -9402,15 +9456,16 @@ define("xabber-contacts", function () {
         xabber.AccountGroupView = xabber.BasicView.extend({
             className: 'group',
             template: function () {
-                this.$el.append('<span class="group-name"/>');
+                this.$el.append('<div class="group-name one-line"/><span class="group-members-count"/>');
             },
 
             events: {
-                "click .group-name": "showGroupSettings"
+                "click": "showGroupSettings"
             },
 
             _initialize: function (options) {
                 this.$('.group-name').text(this.model.get('name'));
+                this.$('.group-members-count').text(this.model.get('counter').all);
                 let index = this.model.collection.indexOf(this.model),
                     $parent_el = this.model.account.settings_right.$('.groups');
                 if (index === 0) {

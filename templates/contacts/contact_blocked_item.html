@@ -1,6 +1,6 @@
 <div data-jid="{{jid}}" class="blocked-contact">
-    <div class="text-info-wrap">
-        <p class="jid one-line">{{jid}}</p>
-        <p class="btn-unblock text-color-700 hover-text-color-900 one-line">{[print(xabber.getString("contact_bar_unblock"))]}</p>
+    <div class="input-field checkbox-field">
+        <input type="checkbox" class="filled-in" id="blocked-jid-switch-{{jid}}"/>
+        <label for="blocked-jid-switch-{{jid}}">{{jid}}</label>
     </div>
 </div>
