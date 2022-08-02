@@ -1450,12 +1450,6 @@ define("xabber-chats", function () {
                         from_jid: this.account.get('jid'),
                         message: xabber.getString("action_subscription_sent")
                     });
-                } else if (type === 'subscribe') {
-                    this.messages.createSystemMessage({
-                        from_jid: jid,
-                        auth_request: true,
-                        message: xabber.getString("action_subscription_received")
-                    });
                 } else if (type === 'subscribed') {
                     this.messages.createSystemMessage({
                         from_jid: jid,
@@ -2696,10 +2690,10 @@ define("xabber-chats", function () {
               this.$('.button').removeClass('hidden');
               this.$('.subscription-info').text("");
               this.$el.addClass('hidden');
-              if (subscription === 'both' || this.contact.get('blocked') || in_roster)
+              if (subscription === 'both' || this.contact.get('blocked'))
                   return;
-              else if (subscription === 'to' && in_request || (!subscription && in_request && out_request)) {
-                  this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_incoming"));
+              else if (subscription === 'to' && in_request || (!subscription && in_request && in_roster)) {
+                  this.$('.subscription-info').text(xabber.getString("subscription_status_in_request_incoming"));
                   this.$('.button:not(.btn-allow)').addClass('hidden');
               } else if (!out_request && !in_roster && !in_request && (subscription === 'from' || _.isNull(subscription))) {
                   this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_outgoing"));
@@ -8942,7 +8936,7 @@ define("xabber-chats", function () {
                             arr_text = Array.from(text);
                         arr_text.forEach((item, idx) => {
                             if (item == '\n')
-                                arr_text.splice(idx, 1, '<br>');
+                                arr_text.splice(idx, 1, '</p><p>');
                         });
                         text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
                         window.document.execCommand('insertHTML', false, text);
@@ -8953,7 +8947,7 @@ define("xabber-chats", function () {
                         arr_text = Array.from(text);
                     arr_text.forEach((item, idx) => {
                         if (item == '\n')
-                            arr_text.splice(idx, 1, '<br>');
+                            arr_text.splice(idx, 1, '</p><p>');
                         if (item == ' ')
                             arr_text.splice(idx, 1, '&nbsp');
                     });
