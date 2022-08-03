@@ -8216,7 +8216,7 @@ define("xabber-chats", function () {
               if (response.items.length){
                   response.items.forEach((item) => {
                       let img = $(`<div class="image-item"/>`);
-                      img.css('background-image', `url("${item.thumbnail}")`);
+                      img.css('background-image', `url("${item.thumbnail.url}")`);
                       img.attr('data-src', item.file);
                       img.attr('data-name', item.name);
                       this.$(`.library-wrap[data-screen="${response.type}"]`).append(img);

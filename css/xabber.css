@@ -1394,6 +1394,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #E53935;
 }
 [data-main-color=red] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=red] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=red] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=red] .add-contact-modal .dropdown-content .property-variant:active,
@@ -1505,6 +1506,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #D81B60;
 }
 [data-main-color=pink] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=pink] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=pink] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=pink] .add-contact-modal .dropdown-content .property-variant:active,
@@ -1616,6 +1618,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #8E24AA;
 }
 [data-main-color=purple] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=purple] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=purple] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=purple] .add-contact-modal .dropdown-content .property-variant:active,
@@ -1726,6 +1729,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #5E35B1;
 }
 [data-main-color=deep-purple] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=deep-purple] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-purple] .add-contact-modal .dropdown-content .property-variant:active,
@@ -1837,6 +1841,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #3949AB;
 }
 [data-main-color=indigo] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=indigo] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=indigo] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=indigo] .add-contact-modal .dropdown-content .property-variant:active,
@@ -1948,6 +1953,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #1E88E5;
 }
 [data-main-color=blue] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=blue] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=blue] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2059,6 +2065,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #039BE5;
 }
 [data-main-color=light-blue] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=light-blue] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-blue] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2170,6 +2177,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00ACC1;
 }
 [data-main-color=cyan] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=cyan] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=cyan] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=cyan] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2281,6 +2289,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #00897B;
 }
 [data-main-color=teal] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=teal] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=teal] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=teal] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2392,6 +2401,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #43A047;
 }
 [data-main-color=green] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=green] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=green] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=green] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2503,6 +2513,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #7CB342;
 }
 [data-main-color=light-green] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=light-green] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=light-green] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=light-green] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2614,6 +2625,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #C0CA33;
 }
 [data-main-color=lime] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=lime] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=lime] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=lime] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2725,6 +2737,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FFB300;
 }
 [data-main-color=amber] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=amber] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=amber] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=amber] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2836,6 +2849,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #FB8C00;
 }
 [data-main-color=orange] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=orange] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=orange] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=orange] .add-contact-modal .dropdown-content .property-variant:active,
@@ -2947,6 +2961,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #F4511E;
 }
 [data-main-color=deep-orange] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=deep-orange] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=deep-orange] .add-contact-modal .dropdown-content .property-variant:active,
@@ -3058,6 +3073,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #6D4C41;
 }
 [data-main-color=brown] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=brown] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=brown] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=brown] .add-contact-modal .dropdown-content .property-variant:active,
@@ -3170,6 +3186,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
     color: #546E7A;
 }
 [data-main-color=blue-grey] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
+[data-main-color=blue-grey] .settings-panel-head .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .dropdown-content.bootstrap-dropdown .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 [data-main-color=blue-grey] .add-contact-modal .dropdown-content .property-variant:active,
@@ -4000,6 +4017,7 @@ input[type=text].simple-input-field:hover {
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:focus,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:hover,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:focus,
+.settings-panel-head .dropdown-content .property-variant:hover,
 .details-panel .gallery-wrap .dropdown-content .property-variant:hover,
 .dropdown-content.bootstrap-dropdown .property-variant:hover,
 .dropdown-content.bootstrap-dropdown .property-variant:focus,
@@ -4012,6 +4030,7 @@ input[type=text].simple-input-field:hover {
 .add-contact-modal .dropdown-content .property-variant:active .jid,
 .login-panel-form .register-form-picture .dropdown-content .property-variant:active,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active,
+.settings-panel-head .dropdown-content .property-variant:active,
 .details-panel .gallery-wrap .dropdown-content .property-variant:active,
 .dropdown-content.bootstrap-dropdown .property-variant:active,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active{
@@ -11566,6 +11585,9 @@ input[type='range'].voice-message-volume:focus {
 .details-panel .groups-wrap {
     width: calc(100% - 7px);
 }
+.details-panel .media-gallery .block-header{
+    padding: 0 20px 6px 36px;
+}
 .details-panel .gallery-storage-wrap{
     padding: 0 20px 6px 36px;
 }
@@ -11577,9 +11599,19 @@ input[type='range'].voice-message-volume:focus {
     font-size: 20px;
     line-height: 24px;
 }
-.details-panel .gallery-wrap .btn-more{
+.settings-panel-head .btn-more{
+    position: absolute;
     right: 20px;
-    top: 10px;
+    top: 20px;
+    cursor: pointer;
+    color: #80868b;
+}
+.settings-panel-head .property-variant span{
+    font-size: unset;
+    height: unset;
+    line-height: unset;
+    max-width: unset;
+    color: unset;
 }
 .details-panel .gallery-storage-wrap .storage-usage{
     position: absolute;
@@ -11667,12 +11699,7 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 .details-panel .gallery-wrap{
-    position: absolute;
-    z-index: 1;
-    background: #FFF;
-    height: calc(100% + 68px);
-    top: -58px;
-    padding: 60px 20px 6px 36px;
+    padding: 20px 20px 6px 36px;
 }
 .details-panel .gallery-wrap .details-icon{
     left: 8px;
@@ -11906,6 +11933,7 @@ input[type='range'].voice-message-volume:focus {
     display: block;
 }
 .bottom-block .gallery-files .dropdown-content,
+.settings-panel-head .dropdown-content,
 .details-panel .gallery-wrap .dropdown-content{
     width: fit-content !important;
     position: absolute;
@@ -11926,7 +11954,7 @@ input[type='range'].voice-message-volume:focus {
     border-radius: 0.25rem;
     overflow: visible;
 }
-.details-panel .gallery-wrap .dropdown-content#storage-delete-files{
+.settings-panel-head .dropdown-content#storage-delete-files{
     top: -3px!important;
     left: initial!important;
     right: 100.5%!important;
@@ -11936,6 +11964,7 @@ input[type='range'].voice-message-volume:focus {
     overflow: hidden;
 }
 .bottom-block .gallery-files .dropdown-content .property-variant,
+.settings-panel-head .dropdown-content .property-variant,
 .details-panel .gallery-wrap .dropdown-content .property-variant{
     display: block;
     width: 100%;
@@ -11950,6 +11979,7 @@ input[type='range'].voice-message-volume:focus {
 }
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active
 .bottom-block .gallery-files .dropdown-content .property-variant:active,
+.settings-panel-head .dropdown-content .property-variant:active,
 .details-panel .gallery-wrap .dropdown-content .property-variant:active{
     display: block;
     width: 100%;

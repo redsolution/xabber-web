@@ -38192,6 +38192,7 @@ var constants = {
             'audio/mpeg',
             'audio/ogg',
             'audio/ogg; codecs=opus',
+            'audio/ogg; codecs=opus+voice',
             'audio/vorbis',
             'audio/x-ms-wma',
             'audio/x-ms-wax',
@@ -38811,7 +38812,7 @@ define('text',['module'], function (module) {
 });
 
 
-define('text!templates/base/dialog.html',[],function () { return '<div class="modal dialog-modal">\n    <div class="modal-header">\n        <div class="panel-header black-text">{{header}}</div>\n    </div>\n    <div class="modal-content">\n        <div class="dialog-text">{{text}}</div>\n        <div class="dialog-options-wrap">\n        {[ for (var idx in dialog_options) { var option = dialog_options[idx]; ]}\n            <div class="dialog-option" data-name="{{option.name}}">\n                <input type="checkbox" class="filled-in" id="dialog_option_{{option.name}}" {[ if (option.checked) { ]}checked="checked"{[ } ]}/>\n                <label for="dialog_option_{{option.name}}">{{option.text}}</label>\n            </div>\n        {[ } ]}\n        </div>\n        <div class="container-for-img hidden"><img class="img-from-clipboard"></div>\n    </div>\n    <div class="modal-footer {{flag}}">\n        {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}\n        <button class="optional-button btn-flat btn-main" data-option="{{button.value}}">{{button.name}}</button>\n        {[ } ]}\n        {[ if (ok_button) { ]}\n        <button class="ok-button btn-flat btn-main" data-option=true>{{ok_button.text}}</button>\n        {[ } ]}\n        {[ if (cancel_button) { ]}\n        <button class="cancel-button btn-flat btn-main btn-dark btn-cancel" data-option=false>{{cancel_button.text}}</button>\n        {[ } ]}\n    </div>\n</div>\n';});
+define('text!templates/base/dialog.html',[],function () { return '<div class="modal dialog-modal {{modal_class}}">\n    <div class="modal-header">\n        <div class="panel-header black-text">{{header}}</div>\n    </div>\n    <div class="modal-content">\n        <div class="dialog-text">{{text}}</div>\n        <div class="dialog-options-wrap">\n        {[ for (var idx in dialog_options) { var option = dialog_options[idx]; ]}\n            <div class="dialog-option" data-name="{{option.name}}">\n                <input type="checkbox" class="filled-in" id="dialog_option_{{option.name}}" {[ if (option.checked) { ]}checked="checked"{[ } ]}/>\n                <label for="dialog_option_{{option.name}}">{{option.text}}</label>\n            </div>\n        {[ } ]}\n        </div>\n        <div class="container-for-img hidden"><img class="img-from-clipboard"></div>\n    </div>\n    <div class="modal-footer {{flag}}">\n        {[ for (var idx in optional_buttons) { var button = optional_buttons[idx]; ]}\n        <button class="optional-button btn-flat btn-main" data-option="{{button.value}}">{{button.name}}</button>\n        {[ } ]}\n        {[ if (ok_button) { ]}\n        <button class="ok-button btn-flat btn-main" data-option=true>{{ok_button.text}}</button>\n        {[ } ]}\n        {[ if (cancel_button) { ]}\n        <button class="cancel-button btn-flat btn-main btn-dark btn-cancel" data-option=false>{{cancel_button.text}}</button>\n        {[ } ]}\n    </div>\n</div>\n';});
 
 
 define('text!templates/base/fingerprints.html',[],function () { return '<div class="modal-header fingerprints-header">\n    <div class="header"></div>\n    <div class="additional-info"></div>\n</div>\n<div class="fingerprints-content">\n</div>\n<div class="fingerprints-bottom">\n    <div class="this-device-wrap">\n        <div class="this-device-header-wrap">\n            <div class="divider"></div>\n            <div class="this-device-header">{[print(xabber.getString("omemo__dialog_fingerprints__text_this_device"))]}</div>\n        </div>\n        <div class="this-device-content">\n        </div>\n    </div>\n    <div class="fingerprints-description-wrap">\n        <div class="fingerprints-description">{[print(xabber.getString("omemo__dialog_fingerprints__text_description"))]}</div>\n        <div class="link-about-encryption"><a href="{[print(xabber.getString(\'omemo__dialog_fingerprints__link_learn_more\'))]}" target="_blank">{[print(xabber.getString("omemo__dialog_fingerprints__text_learn_more"))]}</a></div>\n    </div>\n</div>';});
@@ -38880,10 +38881,16 @@ define('text!templates/accounts/change_password.html',[],function () { return '<
 define('text!templates/accounts/toolbar_item.html',[],function () { return '<div class="border"/>\n<div class="circle-avatar-wrap ground-color-500">\n    <div class="dropdown-button circle-avatar border-color ground-color-700 noselect"/>\n</div>\n<div class="status"/>\n<i class="auth-failed mdi mdi-16px mdi-close"></i>\n<div class="account-actions-panel">\n    <div class="filter-chats">\n        <i class="mdi mdi-filter mdi-20px"></i>\n        <div class="text">{[print(xabber.getString("account__toolbar_item__button_filter_chats"))]}</div>\n    </div>\n</div>';});
 
 
-define('text!templates/accounts/settings_left.html',[],function () { return '    <div class="left-column ground-color-900 noselect">\n        <div class="main-info-wrap account-main-info-wrap">\n            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->\n            <div class="picture-wrap">\n                <div class="avatar-wrap">\n                    <div class="circle-avatar dropdown-button" data-activates="{{view.cid}}-profile-image">\n                        <img/>\n                        <input type="file"/>\n                        <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown dropdown-content noselect">\n                            <div class="btn-emoji-panel property-variant">\n                                {[print(xabber.getString("account_emoji_profile_image_button"))]}\n                            </div>\n                            <div class="btn-selfie property-variant">\n                                {[print(xabber.getString("account_webcam_profile_image_button"))]}\n                            </div>\n                            <div class="btn-choose-image property-variant">\n                                {[print(xabber.getString("account_profile_image_button"))]}\n                            </div>\n                        </ul>\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        </div>\n                    </div>\n                    <div class="status"></div>\n                </div>\n            </div>\n            <div class="name-wrap">\n                <div class="name"></div>\n            </div>\n            <div class="status-wrap"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab" data-block-name="connection">\n                <i class="mdi mdi-24px mdi-settings"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_connection_settings"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="vcard_edit">\n                <i class="mdi mdi-24px mdi-account-box"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_profile"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="color-scheme">\n                <i class="mdi mdi-24px mdi-palette"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("color"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="blocklist-info">\n                <i class="mdi mdi-24px mdi-block-helper"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("blocked_contacts"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="groups-info">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="server-info">\n                <i class="mdi mdi-24px mdi-information"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>\n            </div>\n            <div class="settings-tab omemo-info" data-block-name="omemo-info">\n                <i class="mdi mdi-24px mdi-security"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_encryption"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="tokens">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="devices"></svg>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_devices"))]}</div>\n            </div>\n        </div>\n        <div class="settings-tabs-bottom-wrap ground-color-900">\n            <div class="settings-tab delete-account">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">{[print(xabber.getString("settings_account__button_quit_account"))]}</div>\n            </div>\n        </div>\n    </div>\n';});
+define('text!templates/accounts/media_gallery_account_file.html',[],function () { return '<div class="gallery-file{[if (file.is_avatar === \'True\'){]} gallery-avatar{[}]}" title="{{file.name}}" data-id="{{file.id}}" data-file="{{file.file}}" data-name="{{file.name}}" data-size="{{file.size}}" data-width="{{file.width}}" data-height="{{file.height}}" data-media-type="{{file.media_type}}" >\n    {[if (file.media_type && (file.media_type.includes(\'image\') || file.media_type.includes(\'video\'))){]}\n        <img class="{[if (file.media_type.includes(\'video\')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}" data-mfp-src="{{file.file}}" src="{{file.thumbnail}}">\n    {[} else {]}\n        {[if (svg_icon == \'file-audio\' && file.media_type.includes(\'+voice\')){]}\n            <div class="gallery-file-placeholder-background gallery-audio-file-not-uploaded">\n                <i class="details-icon mdi mdi-play no-uploaded"></i>\n            </div>\n            <div class="gallery-file-audio-container">\n            </div>\n        {[} else {]}\n            <div class="gallery-file-placeholder-background">\n                <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="{{svg_icon}}"></svg>\n                <div class="gallery-file-title-grid">{{filesize}}</div>\n            </div>\n        {[}]}\n        <div class="gallery-file-title one-line">\n            {{file.name}},  <span class="gallery-file-size">{{filesize}}</span> <span class="gallery-file-date">{{file.created_at}}</span>\n        </div>\n        {[if (duration && file.media_type.includes(\'+voice\')){]}\n            <div class="gallery-voice-file-duration">\n                0:00 / <span class="gallery-voice-file-total-duration">{{duration}}</span>\n            </div>\n        {[}]}\n    {[}]}\n    <div class="btn-more dropdown-button" data-activates="{{file.id}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{file.id}}-more" class="dropdown-content bootstrap-dropdown noselect">\n        <a class="one-line" target="_blank" rel="noopener noreferrer" href="{{file.file}}" download>\n            <div class="property-variant btn-download">\n                {[print(xabber.getString("action_download"))]}\n            </div>\n        </a>\n        <div class="property-variant btn-delete">\n            <span class="one-line">{[print(xabber.getString("delete"))]}</span>\n        </div>\n    </ul>\n</div>';});
 
 
-define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span class="settings-panel-head-title">{[print(xabber.getString("account_editor"))]}</span>\n        <div class="buttons-wrap">\n            <button class="btn-block btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>\n            <button class="btn-deselect-blocked btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("cancel"))]}</button>\n            <button class="btn-unblock-selected btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("unblock_selected"))]}</button>\n        </div>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div data-header=\'{[print(xabber.getString("account_connection_settings"))]}\' class="settings-block-wrap connection">\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="change-password-container">\n                        <div class="change-password-fields">\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_old_pass"))]}\' id="old_password" type="password" name="old_password">\n                                <span class="errors fixed"></span>\n                            </div>\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_new_pass"))]}\' id="password" type="password" name="password">\n                                <span class="errors fixed"></span>\n                            </div>\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_confirm_pass"))]}\' id="password_confirm" type="password" name="password_confirm">\n                                <span class="errors fixed"></span>\n                            </div>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-change btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_change_pass"))]}</button>\n                            <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_set_pass"))]}</button>\n                            <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("settings_account__button_reconnect"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("color"))]}\' class="settings-block-wrap color-scheme">\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="account_color" value="red" type="radio" id="color-red" />\n                                    <label class="text-color-red-700" for="color-red">{[print(xabber.getString("account_color_name_red"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="pink" type="radio" id="color-pink" />\n                                    <label class="text-color-pink-700" for="color-pink">{[print(xabber.getString("account_color_name_pink"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="purple" type="radio" id="color-purple" />\n                                    <label class="text-color-purple-700" for="color-purple">{[print(xabber.getString("account_color_name_purple"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="deep-purple" type="radio" id="color-deep-purple" />\n                                    <label class="text-color-deep-purple-700" for="color-deep-purple">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="indigo" type="radio" id="color-indigo" />\n                                    <label class="text-color-indigo-700" for="color-indigo">{[print(xabber.getString("account_color_name_indigo"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="blue" type="radio" id="color-blue" />\n                                    <label class="text-color-blue-700" for="color-blue">{[print(xabber.getString("account_color_name_blue"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="light-blue" type="radio" id="color-light-blue" />\n                                    <label class="text-color-light-blue-700" for="color-light-blue">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="cyan" type="radio" id="color-cyan" />\n                                    <label class="text-color-cyan-700" for="color-cyan">{[print(xabber.getString("account_color_name_cyan"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="teal" type="radio" id="color-teal" />\n                                    <label class="text-color-teal-700" for="color-teal">{[print(xabber.getString("account_color_name_teal"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="green" type="radio" id="color-green" />\n                                    <label class="text-color-green-700" for="color-green">{[print(xabber.getString("account_color_name_green"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="light-green" type="radio" id="color-light-green" />\n                                    <label class="text-color-light-green-700" for="color-light-green">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="lime" type="radio" id="color-lime" />\n                                    <label class="text-color-lime-700" for="color-lime">{[print(xabber.getString("account_color_name_lime"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="amber" type="radio" id="color-amber" />\n                                    <label class="text-color-amber-700" for="color-amber">{[print(xabber.getString("account_color_name_amber"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="orange" type="radio" id="color-orange" />\n                                    <label class="text-color-orange-700" for="color-orange">{[print(xabber.getString("account_color_name_orange"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="deep-orange" type="radio" id="color-deep-orange" />\n                                    <label class="text-color-deep-orange-700" for="color-deep-orange">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="brown" type="radio" id="color-brown" />\n                                    <label class="text-color-brown-700" for="color-brown">{[print(xabber.getString("account_color_name_brown"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="blue-grey" type="radio" id="color-blue-grey" />\n                                    <label class="text-color-blue-grey-700" for="color-blue-grey">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("settings_account__section_header_profile"))]}\' class="settings-block-wrap vcard">\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("account_server_info_description"))]}\' class="settings-block-wrap server-info">\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("blocked_contacts"))]}\' class="settings-block-wrap blocklist-info">\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>\n                        <div class="blocklist-tabs-wrap">\n                            <ul class="tabs">\n                                <li class="blocked-item contacts-item hidden" data-tab-name="blocked-contacts-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__contacts"))]}</a>\n                                </li>\n                                <li class="blocked-item domains-item hidden" data-tab-name="blocked-domains-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__domains"))]}</a>\n                                </li>\n                                <li class="blocked-item invitations-item hidden" data-tab-name="blocked-invitations-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__invitations"))]}</a>\n                                </li>\n                            </ul>\n                        </div>\n                        <div class="blocked-items-container blocked-contacts-wrap hidden" data-tab-name="contacts-item">\n                            <div class="blocked-contacts blocked-list"/>\n                        </div>\n                        <div class="blocked-items-container blocked-domains-wrap hidden" data-tab-name="domains-item">\n                            <div class="blocked-domains blocked-list"/>\n                        </div>\n                        <div class="blocked-items-container blocked-invitations-wrap hidden" data-tab-name="invitations-item">\n                            <div class="blocked-invitations blocked-list"/>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("settings_account__section_header_circles"))]}\' class="settings-block-wrap groups-info">\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("account_settings_devices"))]}\' class="settings-block-wrap tokens">\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n\n            <div data-header=\'{[print(xabber.getString("account_settings_encryption"))]}\' class="settings-block-wrap omemo-info">\n                <div class="omemo-settings-wrap">\n                    <div class="settings">\n                        <div class="setting-wrap omemo-enable">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_enable_encryption"))]}</span>\n                            <div class="field setting-use-omemo switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap send-chat-states">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_send_typing_notifications"))]}</span>\n                            <div class="field setting-send-chat-states switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap manage-devices">\n                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>\n                        </div>\n                        <div class="setting-wrap purge-keys">\n                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
+define('text!templates/accounts/media_gallery_account.html',[],function () { return '<div class="gallery-wrap">\n    <!--<svg class="details-icon btn-go-back mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>-->\n    <div class="gallery-storage-wrap">\n        <div class="storage-usage"></div>\n        <div class="storage-progress-bar">\n            <div class="storage-progress-images"></div>\n            <div class="storage-progress-videos"></div>\n            <div class="storage-progress-voices"></div>\n            <div class="storage-progress-files"></div>\n        </div>\n        <div class="storage-labels">\n            <div class="storage-label storage-label-images"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("images"))]}</div></div>\n            <div class="storage-label storage-label-videos"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("videos"))]}</div></div>\n            <div class="storage-label storage-label-voices"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("vcard_type_voice"))]}</div></div>\n            <div class="storage-label storage-label-files"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("files"))]}</div></div>\n        </div>\n        <div class="storage-usages">\n            <div class="storage-category-usage storage-usage-images">\n                {[print(xabber.getString("images"))]}<span class="storage-usage-amount"></span>\n            </div>\n            <div class="storage-category-usage storage-usage-videos">\n                {[print(xabber.getString("videos"))]}<span class="storage-usage-amount"></span>\n            </div>\n            <div class="storage-category-usage storage-usage-voices">\n                {[print(xabber.getString("vcard_type_voice"))]}<span class="storage-usage-amount"></span>\n            </div>\n            <div class="storage-category-usage storage-usage-files">\n                {[print(xabber.getString("files"))]}<span class="storage-usage-amount"></span>\n            </div>\n        </div>\n    </div>\n    <ul class="tabs">\n        <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>\n        <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>\n        <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>\n        <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>\n        <li data-value="avatars" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("avatars"))]}</a></li>\n    </ul>\n    <div class="list-managment-wrap">\n        <button class="btn-sorting dropdown-button btn-flat btn-main text-color-700 hover-ground-color-300" data-activates="storage-file-sorting">\n            {[print(xabber.getString("searching__search_panel__label_sort_by"))]}\n        </button>\n    </div>\n    <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">\n        <div class="property-variant btn-gallery-sorting" data-value="-id">\n            <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_new"))]}</span>\n        </div>\n        <div class="property-variant btn-gallery-sorting" data-value="-size">\n            <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_size"))]}</span>\n        </div>\n    </ul>\n    <div class="gallery-files zoom-gallery">\n    </div>\n</div>\n\n';});
+
+
+define('text!templates/accounts/settings_left.html',[],function () { return '    <div class="left-column ground-color-900 noselect">\n        <div class="main-info-wrap account-main-info-wrap">\n            <!--<i title="Back to settings" class="mdi mdi-arrow-left mdi-28px back-to-settings"></i>-->\n            <div class="picture-wrap">\n                <div class="avatar-wrap">\n                    <div class="circle-avatar dropdown-button" data-activates="{{view.cid}}-profile-image">\n                        <img/>\n                        <input type="file"/>\n                        <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown dropdown-content noselect">\n                            <div class="btn-emoji-panel property-variant">\n                                {[print(xabber.getString("account_emoji_profile_image_button"))]}\n                            </div>\n                            <div class="btn-selfie property-variant">\n                                {[print(xabber.getString("account_webcam_profile_image_button"))]}\n                            </div>\n                            <div class="btn-choose-image property-variant">\n                                {[print(xabber.getString("account_profile_image_button"))]}\n                            </div>\n                        </ul>\n                        <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                            <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                        </svg>\n                        <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                        </div>\n                    </div>\n                    <div class="status"></div>\n                </div>\n            </div>\n            <div class="name-wrap">\n                <div class="name"></div>\n            </div>\n            <div class="status-wrap"></div>\n        </div>\n        <div class="settings-tabs-wrap">\n            <div class="settings-tab" data-block-name="connection">\n                <i class="mdi mdi-24px mdi-settings"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_connection_settings"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="vcard_edit">\n                <i class="mdi mdi-24px mdi-account-box"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_profile"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="color-scheme">\n                <i class="mdi mdi-24px mdi-palette"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("color"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="media-gallery">\n                <i class="mdi mdi-24px mdi-chart-arc"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_cloud_storage"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="blocklist-info">\n                <i class="mdi mdi-24px mdi-block-helper"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("blocked_contacts"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="groups-info">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="server-info">\n                <i class="mdi mdi-24px mdi-information"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_server_info"))]}</div>\n            </div>\n            <div class="settings-tab omemo-info" data-block-name="omemo-info">\n                <i class="mdi mdi-24px mdi-security"></i>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_encryption"))]}</div>\n            </div>\n            <div class="settings-tab" data-block-name="tokens">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="devices"></svg>\n                <div class="settings-block-name one-line">{[print(xabber.getString("account_settings_devices"))]}</div>\n            </div>\n        </div>\n        <div class="settings-tabs-bottom-wrap ground-color-900">\n            <div class="settings-tab delete-account">\n                <i class="mdi mdi-24px mdi-logout-variant"></i>\n                <div class="settings-block-name">{[print(xabber.getString("settings_account__button_quit_account"))]}</div>\n            </div>\n        </div>\n    </div>\n';});
+
+
+define('text!templates/accounts/settings_right.html',[],function () { return '<div class="right-column noselect">\n    <div class="settings-panel-head">\n        <span class="settings-panel-head-title">{[print(xabber.getString("account_editor"))]}</span>\n        <div class="buttons-wrap">\n            <button class="btn-block btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>\n            <button class="btn-deselect-blocked btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("cancel"))]}</button>\n            <button class="btn-unblock-selected btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("unblock_selected"))]}</button>\n        </div>\n        <div class="btn-more media-gallery-button dropdown-button" data-activates="storage-actions">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul id="storage-actions" class="dropdown-content noselect">\n            <div class="property-variant btn-delete-files-variants" data-activates="storage-delete-files">\n                <span class="one-line">{[print(xabber.getString("account_delete_files"))]}</span>\n            </div>\n        </ul>\n        <ul id="storage-delete-files" class="dropdown-content bootstrap-dropdown noselect">\n            <div class="property-variant btn-delete-files" data-date="15">\n                <span class="one-line">{[print(xabber.getString("delete_files_older_than_15_days"))]}</span>\n            </div>\n            <div class="property-variant btn-delete-files" data-date="30">\n                <span class="one-line">{[print(xabber.getString("delete_files_older_than_30_days"))]}</span>\n            </div>\n            <div class="property-variant btn-delete-files" data-date="60">\n                <span class="one-line">{[print(xabber.getString("delete_files_older_than_60_days"))]}</span>\n            </div>\n        </ul>\n    </div>\n\n    <div class="panel-content-wrap">\n        <div class="panel-content details-panel">\n\n            <div data-header=\'{[print(xabber.getString("account_connection_settings"))]}\' class="settings-block-wrap connection">\n                <div class="connection-wrap">\n                    <div class="readonly-setting">\n                        <i class="details-icon mdi mdi-24px mdi-account"></i>\n                        <div class="setting-wrap account-name">\n                            <div class="value one-line"></div>\n                            <div class="label conn-status"></div>\n                        </div>\n                    </div>\n                    <div class="change-password-container">\n                        <div class="change-password-fields">\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_old_pass"))]}\' id="old_password" type="password" name="old_password">\n                                <span class="errors fixed"></span>\n                            </div>\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_new_pass"))]}\' id="password" type="password" name="password">\n                                <span class="errors fixed"></span>\n                            </div>\n                            <div class="input-field">\n                                <input class="input-glow" placeholder=\'{[print(xabber.getString("hint_confirm_pass"))]}\' id="password_confirm" type="password" name="password_confirm">\n                                <span class="errors fixed"></span>\n                            </div>\n                        </div>\n                        <div class="buttons-wrap">\n                            <button class="btn-change btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_change_pass"))]}</button>\n                            <button class="btn-change-password btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("button_set_pass"))]}</button>\n                            <button class="btn-reconnect btn-flat btn-main btn-dark ground-color-100 hover-ground-color-300">{[print(xabber.getString("settings_account__button_reconnect"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("color"))]}\' class="settings-block-wrap color-scheme">\n                <div class="color-scheme-wrap">\n                    <div class="account-color">\n                        <div class="field radio-field clickable-field">\n                            <form action="#">\n                                <p>\n                                    <input class="with-gap" name="account_color" value="red" type="radio" id="color-red" />\n                                    <label class="text-color-red-700" for="color-red">{[print(xabber.getString("account_color_name_red"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="pink" type="radio" id="color-pink" />\n                                    <label class="text-color-pink-700" for="color-pink">{[print(xabber.getString("account_color_name_pink"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="purple" type="radio" id="color-purple" />\n                                    <label class="text-color-purple-700" for="color-purple">{[print(xabber.getString("account_color_name_purple"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="deep-purple" type="radio" id="color-deep-purple" />\n                                    <label class="text-color-deep-purple-700" for="color-deep-purple">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="indigo" type="radio" id="color-indigo" />\n                                    <label class="text-color-indigo-700" for="color-indigo">{[print(xabber.getString("account_color_name_indigo"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="blue" type="radio" id="color-blue" />\n                                    <label class="text-color-blue-700" for="color-blue">{[print(xabber.getString("account_color_name_blue"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="light-blue" type="radio" id="color-light-blue" />\n                                    <label class="text-color-light-blue-700" for="color-light-blue">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="cyan" type="radio" id="color-cyan" />\n                                    <label class="text-color-cyan-700" for="color-cyan">{[print(xabber.getString("account_color_name_cyan"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="teal" type="radio" id="color-teal" />\n                                    <label class="text-color-teal-700" for="color-teal">{[print(xabber.getString("account_color_name_teal"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="green" type="radio" id="color-green" />\n                                    <label class="text-color-green-700" for="color-green">{[print(xabber.getString("account_color_name_green"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="light-green" type="radio" id="color-light-green" />\n                                    <label class="text-color-light-green-700" for="color-light-green">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="lime" type="radio" id="color-lime" />\n                                    <label class="text-color-lime-700" for="color-lime">{[print(xabber.getString("account_color_name_lime"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="amber" type="radio" id="color-amber" />\n                                    <label class="text-color-amber-700" for="color-amber">{[print(xabber.getString("account_color_name_amber"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="orange" type="radio" id="color-orange" />\n                                    <label class="text-color-orange-700" for="color-orange">{[print(xabber.getString("account_color_name_orange"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="deep-orange" type="radio" id="color-deep-orange" />\n                                    <label class="text-color-deep-orange-700" for="color-deep-orange">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="brown" type="radio" id="color-brown" />\n                                    <label class="text-color-brown-700" for="color-brown">{[print(xabber.getString("account_color_name_brown"))]}</label>\n                                </p>\n                                <p>\n                                    <input class="with-gap" name="account_color" value="blue-grey" type="radio" id="color-blue-grey" />\n                                    <label class="text-color-blue-grey-700" for="color-blue-grey">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</label>\n                                </p>\n                            </form>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("settings_account__section_header_profile"))]}\' class="settings-block-wrap vcard">\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("account_server_info_description"))]}\' class="settings-block-wrap server-info">\n                <div class="capabilities-wrap">\n                    <div class="capabilities">\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("blocked_contacts"))]}\' class="settings-block-wrap blocklist-info">\n                <div class="blocklist-wrap">\n                    <div class="blocked-items">\n                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>\n                        <div class="blocklist-tabs-wrap">\n                            <ul class="tabs">\n                                <li class="blocked-item contacts-item hidden" data-tab-name="blocked-contacts-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__contacts"))]}</a>\n                                </li>\n                                <li class="blocked-item domains-item hidden" data-tab-name="blocked-domains-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__domains"))]}</a>\n                                </li>\n                                <li class="blocked-item invitations-item hidden" data-tab-name="blocked-invitations-wrap">\n                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__invitations"))]}</a>\n                                </li>\n                            </ul>\n                        </div>\n                        <div class="blocked-items-container blocked-contacts-wrap hidden" data-tab-name="contacts-item">\n                            <div class="blocked-contacts blocked-list"/>\n                        </div>\n                        <div class="blocked-items-container blocked-domains-wrap hidden" data-tab-name="domains-item">\n                            <div class="blocked-domains blocked-list"/>\n                        </div>\n                        <div class="blocked-items-container blocked-invitations-wrap hidden" data-tab-name="invitations-item">\n                            <div class="blocked-invitations blocked-list"/>\n                        </div>\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("account_cloud_storage"))]}\' class="settings-block-wrap media-gallery">\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("settings_account__section_header_circles"))]}\' class="settings-block-wrap groups-info">\n                <div class="groups-wrap">\n                    <div class="groups">\n                    </div>\n                </div>\n            </div>\n\n            <div data-header=\'{[print(xabber.getString("account_settings_devices"))]}\' class="settings-block-wrap tokens">\n                <div class="tokens-wrap">\n                    <div class="current-token-wrap">\n                        <div class="sessions-wrap current-session selectable-text"></div>\n                        <div class="buttons-wrap">\n                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>\n                        </div>\n                    </div>\n                    <div class="all-sessions-wrap">\n                        <div class="sessions-wrap all-sessions selectable-text"></div>\n                    </div>\n                </div>\n            </div>\n\n\n            <div data-header=\'{[print(xabber.getString("account_settings_encryption"))]}\' class="settings-block-wrap omemo-info">\n                <div class="omemo-settings-wrap">\n                    <div class="settings">\n                        <div class="setting-wrap omemo-enable">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_enable_encryption"))]}</span>\n                            <div class="field setting-use-omemo switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap send-chat-states">\n                            <span>{[print(xabber.getString("omemo__settings__toggle_send_typing_notifications"))]}</span>\n                            <div class="field setting-send-chat-states switch normal">\n                                <label class="field-value">\n                                    <input type="checkbox">\n                                    <span class="lever"></span>\n                                </label>\n                            </div>\n                        </div>\n                        <div class="setting-wrap manage-devices">\n                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>\n                        </div>\n                        <div class="setting-wrap purge-keys">\n                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>\n                        </div>\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/accounts/existing_groupchat_item.html',[],function () { return '<div class="existing-chat-wrap" data-name="{{name}}" data-jid="{{jid}}">\n    <div class="circle-avatar">\n        <img>\n    </div>\n    <div class="existing-chat-item">\n        <div class="name one-line">{{name}}</div>\n        <div class="jid one-line">{{jid}}</div>\n    </div>\n    <button class="btn-join-existing-chat btn-flat btn-dark btn-main">join</button>\n</div>';});
@@ -38920,6 +38927,12 @@ define('text!templates/accounts/token_item.html',[],function () { return '<div c
 
 
 define('text!templates/accounts/current_token_item.html',[],function () { return '<div class="token-wrap" data-token-uid="{{token_uid}}">\n    <div class="client one-line">{{client}}</div>\n    <div class="device one-line">{{device}}</div>\n    <div class="ip-address">{{ip}}</div>\n    <div class="last-auth resource text-color-700" {[ if (resource_obj) {]}data-resource-id="{{resource_obj.resource}}"{[}]}>{[print(xabber.getString("account_state_connected"))]}</div>\n    {[ if (resource_obj) {]}\n        <table class="token-resource-wrap hidden" {[ if (resource_obj) {]}data-resource-id="{{resource_obj.resource}}"{[}]}>\n            <tbody>\n            <tr class="info status-info">\n                <td class="label">{[print(xabber.getString("settings_account__label_status"))]}:</td>\n                <td>\n                    <div class="value status-message one-line">{{resource_obj.status}}</div>\n                    <div class="status" data-status="{{resource_obj.status}}"></div>\n                </td>\n            </tr>\n            <tr class="info resource-info">\n                <td class="label">{[print(xabber.getString("account_resource"))]}:</td>\n                <td class="value resource one-line">{{resource_obj.resource}}</td>\n            </tr>\n            <tr class="info priority-info">\n                <td class="label">{[print(xabber.getString("account_priority"))]}:</td>\n                <td class="value priority">{{resource_obj.priority}}</td>\n            </tr>\n            </tbody>\n        </table>\n    {[}]}\n    <div class="token-indicator">{[print(xabber.getString("settings_account__label_this_device"))]}</div>\n</div>';});
+
+
+define('text!templates/accounts/audio_file_waveform.html',[],function () { return '<div class="waveform" id="{{waveform_id}}"></div>\n<div class="audio-control-panel">\n    <span class="voice-msg-current-time">0:00</span> /\n    <span class="voice-msg-total-time">0:00</span>\n    <input value="50" type="range" class="voice-message-volume">\n</div>';});
+
+
+define('text!templates/accounts/avatars_gallery.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="library" class="menu-btn btn-library">{[print(xabber.getString("settings__dialog_background__menu_item_library"))]}</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">{[print(xabber.getString("settings__dialog_background__menu_item_upload"))]}</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">{[print(xabber.getString("settings__dialog_background__menu_item_url"))]}</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="library" class="screen-wrap library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">{[print(xabber.getString("settings__dialog_background__section_upload__text"))]}</div>\n            <div class="upload-button">\n                <button type="file">{[print(xabber.getString("settings__dialog_background__section_upload__button_upload"))]}</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">{[print(xabber.getString("settings__dialog_background__section_url__label"))]}</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>{[print(xabber.getString("settings__dialog_background__section_url__placeholder_preview"))]}</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("set"))]}</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    <div class="modal-preloader-wrap"></div>\n</div>';});
 
 
 define('text!templates/vcard/vcard.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <div class="btn-vcard-refresh">\n        <div class="button">\n            <i class="mdi mdi-20px mdi-refresh"></i>\n        </div>\n        <div class="preloader-wrapper preloader-20px active">\n            <div class="spinner-layer">\n                <div class="circle-clipper left">\n                    <div class="circle"></div>\n                </div>\n                <div class="gap-patch">\n                    <div class="circle"></div>\n                </div>\n                <div class="circle-clipper right">\n                    <div class="circle"></div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n<div class="vcard-wrap">\n    <div class="info-wrap jid-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg></div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap personal-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg></div>\n        <div class="info first-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_given_name"))]}</div>\n        </div>\n        <div class="info middle-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_middle_name"))]}</div>\n        </div>\n        <div class="info last-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_family_name"))]}</div>\n        </div>\n        <div class="info fullname">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_full_name"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap nickname-info-wrap hidden">\n        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info nickname">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_nick_name"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap birthday-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday-outline"></svg></div>\n        <div class="info birthday">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_birth_date"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap job-info-wrap hidden">\n        <div class="details-icon-wrap" title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\'><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job-outline"></svg></div>\n        <div class="info org-name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_organization"))]}</div>\n        </div>\n        <div class="info job-title">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_title"))]}</div>\n        </div>\n        <div class="info org-unit">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_organization_unit"))]}</div>\n        </div>\n        <div class="info role">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_role"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap site-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-web"></i>\n        <div class="info url">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_url"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">{[print(xabber.getString("vcard_decsription"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap phone-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-phone"></i>\n        <div class="info phone-work">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info phone-home">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>\n        </div>\n        <div class="info phone-mobile">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_mobile"))]}</div>\n        </div>\n        <div class="info phone-default">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_telephone"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap email-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-email"></i>\n        <div class="info email-work">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info email-home">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_personal"))]}</div>\n        </div>\n        <div class="info email-default">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_email"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap address-info-wrap hidden">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-map-marker"></i>\n        <div class="info address-home">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_home"))]}</div>\n        </div>\n        <div class="info address-work">\n            <div class="pobox value one-line"></div>\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_type_work"))]}</div>\n        </div>\n        <div class="info address-default">\n            <div class="extadd value one-line"></div>\n            <div class="street value one-line"></div>\n            <div class="locality value one-line"></div>\n            <div class="region value one-line"></div>\n            <div class="pcode value one-line"></div>\n            <div class="country value one-line"></div>\n            <div class="label">{[print(xabber.getString("vcard_address"))]}</div>\n        </div>\n    </div>\n    <button class="btn-vcard-edit btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("edit_vcard"))]}</button>\n</div>\n';});
@@ -38976,7 +38989,7 @@ define('text!templates/contacts/contact_blocked_item.html',[],function () { retu
 define('text!templates/contacts/contact_details.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar"/>\n            <div class="status hide-offline"></div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n            <div class="status-message one-line"></div>\n        </div>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n        </div>\n        <div class="btn-more  dropdown-button" data-activates="{{view.cid}}-buttons-wrap">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">\n            <li class="btn-qr-code"><span class="one-line">{[print(xabber.getString("contact_settings__button_show_qr_code"))]}</span></li>\n            <li class="btn-auth-request"><span class="one-line">{[print(xabber.getString("contact_settings__button_request_authorization"))]}</span></li>\n            <li class="btn-add"><span class="one-line">{[print(xabber.getString("contact_add"))]}</span></li>\n            <li class="btn-delete"><span class="one-line">{[print(xabber.getString("remove_contact"))]}</span></li>\n        </ul>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-chat-wrap">\n                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_chat"))]}</div>\n            </div>\n            <div class="button-wrap btn-voice-call-wrap">\n                <i class="mdi mdi-24px mdi-phone btn-voice-call"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <i class="mdi mdi-24px mdi-bell btn-mute"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n            </div>\n            <div class="button-wrap btn-block-wrap">\n                <i class="mdi mdi-24px mdi-block-helper btn-block"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_block"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content private-chat">\n        <div class="left-column">\n            <div class="block-wrap subscription-block-wrap">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("contact_subscription_settings"))]}</span>\n                </div>\n                <div class="subscription-info-wrap">\n                    <div class="incoming-subscription-wrap">\n                        <div class="input-field checkbox-field incoming-subscription-wrap">\n                            <input type="checkbox" class="filled-in" id="incoming-subscription"/>\n                            <label for="incoming-subscription"></label>\n                        </div>\n                    </div>\n                    <div class="outcoming-subscription-wrap">\n                        <div class="input-field checkbox-field incoming-subscription-wrap">\n                            <input type="checkbox" class="filled-in" id="outcoming-subscription"/>\n                            <label for="outcoming-subscription"></label>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div class="block-wrap vcard">\n            </div>\n        </div>\n        <div class="right-column">\n            <div class="block-wrap resources-block-wrap hidden">\n                <div class="block-header">\n                    <span class="block-name">{[print(xabber.getString("contact_info_connected_clients_header"))]}</span>\n                </div>\n                <div class="resources-wrap">\n                </div>\n            </div>\n            <div class="block-wrap groups-block-wrap"></div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/contact_details_right.html',[],function () { return '<div class="panel-background-clickable"></div>\n<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar"/>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n        </div>\n        <div class="header-buttons">\n            <div class="btn-escape">\n                <i class="mdi mdi-24px mdi-close"></i>\n                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n            </div>\n            <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>\n            <span class="block-name second-text"></span>\n            <div class="btn-qr-code">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>\n            </div>\n            <div class="btn-edit">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>\n            </div>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-voice-call-wrap">\n                <div class="contact-btn btn-voice-call  fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>\n            </div>\n            <div class="button-wrap btn-search-messages">\n                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("search"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n\n                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">\n                    <li class="btn-unmute-dropdown">\n                        <span class="one-line">{[print(xabber.getString("unmute_chat"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="minutes15">\n                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours1">\n                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours2">\n                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="day">\n                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="forever">\n                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n                    </li>\n                </ul>\n            </div>\n            <div class="button-wrap btn-block-wrap">\n                <div class="contact-btn btn-block fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>\n                <div class="btn-name text-color-500">{[print(xabber.getString("contact_bar_block"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content private-chat">\n        <div class="block-wrap vcard">\n        </div>\n        <div class="block-wrap groups-block-wrap"></div>\n        <div class="block-wrap edit-block-wrap"></div>\n        <div class="block-wrap search-messages-block-wrap"></div>\n        <div class="bottom-block">\n            <ul class="tabs">\n                <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>\n                <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>\n                <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>\n                <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>';});
+define('text!templates/contacts/contact_details_right.html',[],function () { return '<div class="panel-background-clickable"></div>\n<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar"/>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n        </div>\n        <div class="header-buttons">\n            <div class="btn-escape">\n                <i class="mdi mdi-24px mdi-close"></i>\n                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n            </div>\n            <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>\n            <span class="block-name second-text"></span>\n            <div class="btn-qr-code">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>\n            </div>\n            <div class="btn-edit">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>\n            </div>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-voice-call-wrap">\n                <div class="contact-btn btn-voice-call  fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>\n            </div>\n            <div class="button-wrap btn-search-messages">\n                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("search"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n\n                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">\n                    <li class="btn-unmute-dropdown">\n                        <span class="one-line">{[print(xabber.getString("unmute_chat"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="minutes15">\n                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours1">\n                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours2">\n                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="day">\n                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="forever">\n                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n                    </li>\n                </ul>\n            </div>\n            <div class="button-wrap btn-block-wrap">\n                <div class="contact-btn btn-block fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>\n                <div class="btn-name text-color-500">{[print(xabber.getString("contact_bar_block"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content private-chat">\n        <div class="block-wrap vcard">\n        </div>\n        <div class="block-wrap groups-block-wrap"></div>\n        <div class="block-wrap edit-block-wrap"></div>\n        <div class="block-wrap search-messages-block-wrap"></div>\n        <div class="bottom-block">\n            <ul class="tabs">\n                <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>\n                <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>\n                <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>\n                <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>';});
 
 
 define('text!templates/contacts/roster_settings.html',[],function () { return '    <div class="setting-name">{[print(xabber.getString("settings__section_contact_list__header_offline_contacts"))]}</div>\n    <div class="setting offline-contacts radio-button field-wrap">\n        <div class="field radio-field clickable-field">\n            <form action="#">\n                <p>\n                    <input class="with-gap" name="offline-contacts" value="yes" type="radio" id="{{view.cid}}-show" />\n                    <label for="{{view.cid}}-show">{[print(xabber.getString("settings__section_contact_list__offline_contacts__label_show"))]}</label>\n                </p>\n                <p>\n                    <input class="with-gap" name="offline-contacts" value="no" type="radio" id="{{view.cid}}-hide" />\n                    <label for="{{view.cid}}-hide">{[print(xabber.getString("settings__section_contact_list__offline_contacts__label_hide"))]}</label>\n                </p>\n            </form>\n        </div>\n    </div>\n    <div class="setting-name">{[print(xabber.getString("settings__section_contact_list__header_sorting"))]}</div>\n    <div class="setting sorting-contacts radio-button field-wrap">\n        <div class="field radio-field clickable-field">\n            <form action="#">\n                <p>\n                    <input class="with-gap" name="sorting-contacts" value="online-first" type="radio" id="{{view.cid}}-online-first" />\n                    <label for="{{view.cid}}-online-first">{[print(xabber.getString("settings__section_contact_list__sorting__label_online_first"))]}</label>\n                </p>\n                <p>\n                    <input class="with-gap" name="sorting-contacts" value="by-alphabet" type="radio" id="{{view.cid}}-by-alphabet" />\n                    <label for="{{view.cid}}-by-alphabet">{[print(xabber.getString("settings__section_contact_list__sorting__label_alphabet"))]}</label>\n                </p>\n            </form>\n        </div>\n    </div>\n';});
@@ -39015,6 +39028,15 @@ define('text!templates/contacts/edit_group.html',[],function () { return '\n<div
 define('text!templates/contacts/preloader.html',[],function () { return '<div class="preloader-wrapper preloader-17px active visible">\n    <div class="spinner-layer">\n        <div class="circle-clipper left">\n            <div class="circle"></div>\n        </div>\n        <div class="gap-patch">\n            <div class="circle"></div>\n        </div>\n        <div class="circle-clipper right">\n            <div class="circle"></div>\n        </div>\n    </div>\n</div>';});
 
 
+define('text!templates/contacts/media_item.html',[],function () { return '<div class="gallery-file" title="{{file.name}}" data-id="{{file.id}}" data-uniqueid="{{file.uniqueid}}"  data-file="{{file.sources[0]}}" data-name="{{file.name}}" data-size="{{file.size}}" data-width="{{file.width}}" data-height="{{file.height}}" data-media-type="{{file.media_type}}" >\n    {[if (file.media_type && (file.media_type.includes(\'image\') || (file.media_type.includes(\'video\') && !file.has_encrypted_files))){]}\n    <img class="{[if (file.media_type.includes(\'video\')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}"\n         data-mfp-src="{{file.sources[0]}}"\n         src="{[if (file.thumbnail){]}{{file.thumbnail}}{[} else {]}{{file.sources[0]}}{[}]}"\n         onError="this.parentElement.className = this.parentElement.className + \' hidden\';"\n    >\n    {[} else {]}\n    {[if (svg_icon == \'file-audio\' && file.true_voice){]}\n    <div class="gallery-file-placeholder-background gallery-audio-file-not-uploaded">\n        <i class="details-icon mdi mdi-play no-uploaded"></i>\n    </div>\n    <div class="gallery-file-audio-container">\n    </div>\n    {[} else {]}\n    <div class="gallery-file-placeholder-background">\n        <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="{{svg_icon}}"></svg>\n        <div class="gallery-file-title-grid">{{filesize}}</div>\n    </div>\n    {[}]}\n    <div class="gallery-file-title one-line">\n        {{file.name}},  <span class="gallery-file-size">{{filesize}}</span>\n    </div>\n    {[if (duration && file.true_voice){]}\n    <div class="gallery-voice-file-duration">\n        0:00 / <span class="gallery-voice-file-total-duration">{{duration}}</span>\n    </div>\n    {[}]}\n    {[}]}\n</div>';});
+
+
+define('text!templates/contacts/media_items_empty.html',[],function () { return '<div class="gallery-empty">\n    <div class="gallery-empty-icon-wrap">\n        <i class="gallery-empty-icon mdi mdi-24px mdi-package-variant"></i>\n    </div>\n    <div class="gallery-empty-text">{[print(xabber.getString("no_files"))]}</div>\n</div>';});
+
+
+define('text!templates/contacts/audio_file_waveform.html',[],function () { return '<div class="waveform" id="{{waveform_id}}"></div>\n<div class="audio-control-panel">\n    <span class="voice-msg-current-time">0:00</span> /\n    <span class="voice-msg-total-time">0:00</span>\n    <input value="50" type="range" class="voice-message-volume">\n</div>';});
+
+
 define('text!templates/contacts/group_chats/group_chat_properties.html',[],function () { return '<div class="block-header">\n    <span class="block-name"></span>\n    <span class="btn-edit-settings">{[print(xabber.getString("group_settings__properties__button_edit"))]}</span>\n</div>\n<div class="group-chat-properties vcard">\n    <div class="info-wrap jid-info-wrap">\n        <div title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon-wrap">\n            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="xmpp"></svg>\n        </div>\n        <div class="info jabber-id">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("group_settings__properties__label_jid"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap name-info-wrap">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-account-box-outline"></i>\n        <div class="info name">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("groupchat_name"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap description-info-wrap">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-file-document-box"></i>\n        <div class="info description">\n            <div class="value"></div>\n            <div class="label">{[print(xabber.getString("groupchat_description"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap searchable-info-wrap">\n        <svg class="details-icon toolbar-icon mdi mdi-24px" viewBox="0 0 24 24">\n            <path title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' d="M15.5,12C18,12 20,14 20,16.5C20,17.38 19.75,18.21 19.31,18.9L22.39,22L21,23.39L17.88,20.32C17.19,20.75 16.37,21 15.5,21C13,21 11,19 11,16.5C11,14 13,12 15.5,12M15.5,14A2.5,2.5 0 0,0 13,16.5A2.5,2.5 0 0,0 15.5,19A2.5,2.5 0 0,0 18,16.5A2.5,2.5 0 0,0 15.5,14M19.35,8.03C21.95,8.22 24,10.36 24,13C24,14.64 23.21,16.1 22,17V16.5A6.5,6.5 0 0,0 15.5,10A6.5,6.5 0 0,0 9,16.5C9,17 9.06,17.5 9.17,18H6A6,6 0 0,1 0,12C0,8.9 2.34,6.36 5.35,6.03C6.6,3.64 9.11,2 12,2C15.64,2 18.67,4.59 19.35,8.03Z"></path>\n        </svg>\n        <div class="info searchable">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("group_settings__properties__label_indexed"))]}</div>\n        </div>\n    </div>\n    <div class="info-wrap model-info-wrap">\n        <i title=\'{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}\' class="details-icon mdi mdi-24px mdi-lock"></i>\n        <div class="info model">\n            <div class="value one-line"></div>\n            <div class="label">{[print(xabber.getString("groupchat_membership"))]}</div>\n        </div>\n    </div>\n</div>';});
 
 
@@ -39024,7 +39046,7 @@ define('text!templates/contacts/group_chats/group_chat_properties_right.html',[]
 define('text!templates/contacts/group_chats/group_chat_details.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar">\n                <input title=\'{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}\' type="file"/>\n                <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                    <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                </svg>\n                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                </div>\n            </div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n            <div class="status-message one-line"></div>\n        </div>\n        <div class="btn-more dropdown-button" data-activates="{{view.cid}}-buttons-wrap">\n            <i class="mdi mdi-24px mdi-dots-vertical"></i>\n        </div>\n        <ul class="buttons-menu-wrap dropdown-content noselect" id="{{view.cid}}-buttons-wrap">\n            <li class="btn-qr-code"><span class="one-line">{[print(xabber.getString("contact_settings__button_show_qr_code"))]}</span></li>\n            <li class="btn-edit-settings"><span class="one-line">{[print(xabber.getString("groupchat_settings"))]}</span></li>\n            <li class="btn-default-restrictions"><span class="one-line">{[print(xabber.getString("groupchat_default_restrictions"))]}</span></li>\n            <li class="btn-delete-group"><span class="one-line">{[print(xabber.getString("group_settings__button_delete_group"))]}</span></li>\n        </ul>\n        <div class="btn-escape">\n            <i class="mdi mdi-24px mdi-close"></i>\n            <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-chat-wrap">\n                <i class="mdi mdi-24px mdi-message-text btn-chat"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_chat"))]}</div>\n            </div>\n            <div class="button-wrap btn-invite-wrap">\n                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite"></i>\n                <div class="btn-name">{[print(xabber.getString("groupchat_bar_invite"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <i class="mdi mdi-24px mdi-bell btn-mute"></i>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n            </div>\n            <div class="button-wrap btn-leave-wrap">\n                <div class="btn-leave"><svg viewBox="0 0 24 24">\n                    <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />\n                </svg>\n                </div>\n                <div class="btn-name">{[print(xabber.getString("groupchat_bar_leave"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="head-block">\n            <div class="left-column">\n                <div class="block-wrap group-chat-properties-wrap"></div>\n            </div>\n            <div class="right-column">\n                <div class="block-wrap status-block-wrap"></div>\n                <div class="block-wrap groups-block-wrap"></div>\n            </div>\n        </div>\n        <div class="bottom-block">\n            <ul class="tabs">\n                <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>\n                <li data-value="invitations" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("groupchat_invitations"))]}</a></li>\n                <li data-value="blocked" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__block_list__header"))]}</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>\n';});
 
 
-define('text!templates/contacts/group_chats/group_chat_details_right.html',[],function () { return '<div class="panel-background-clickable"></div>\n<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar">\n                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                </div>\n            </div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n        </div>\n        <div class="header-buttons">\n            <div class="btn-escape">\n                <i class="mdi mdi-24px mdi-close"></i>\n                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n            </div>\n            <span class="block-name">{[print(xabber.getString("groupchat_group"))]}</span>\n            <span class="block-name second-text"></span>\n            <div class="btn-qr-code">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>\n            </div>\n            <div class="btn-edit">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg>\n            </div>\n            <div class="group-edit-preloader">\n            </div>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-invite-wrap">\n                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite text-color-500"></i>\n                <div class="btn-name">{[print(xabber.getString("groupchat_bar_invite"))]}</div>\n            </div>\n            <div class="button-wrap btn-search-messages">\n                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("search"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n\n                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">\n                    <li class="btn-mute-dropdown" data-mute="minutes15">\n                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours1">\n                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours2">\n                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="day">\n                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="forever">\n                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n                    </li>\n                </ul>\n            </div>\n            <div class="button-wrap btn-leave-wrap">\n                <div class="contact-btn btn-leave fill-color-500">\n                    <svg viewBox="0 0 24 24">\n                        <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />\n                    </svg>\n                </div>\n                <div class="btn-name text-color-500">{[print(xabber.getString("groupchat_bar_leave"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="block-wrap group-chat-properties-wrap vcard"></div>\n        <div class="block-wrap status-block-wrap"></div>\n        <div class="block-wrap edit-block-wrap"></div>\n        <div class="block-wrap restrictions-block-wrap"></div>\n        <div class="block-wrap groups-block-wrap"></div>\n        <div class="block-wrap search-messages-block-wrap"></div>\n        <div class="block-wrap participant-view-wrap"></div>\n        <div class="bottom-block">\n            <ul class="tabs not-edit">\n                <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>\n                <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>\n                <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>\n                <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>\n                <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>\n';});
+define('text!templates/contacts/group_chats/group_chat_details_right.html',[],function () { return '<div class="panel-background-clickable"></div>\n<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="avatar-wrap">\n            <div class="circle-avatar">\n                <div class="preloader-wrap"><div class="preloader-wrapper preloader-32px visible">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n                </div>\n            </div>\n        </div>\n        <div class="text-info">\n            <div class="name-wrap"></div>\n        </div>\n        <div class="header-buttons">\n            <div class="btn-escape">\n                <i class="mdi mdi-24px mdi-close"></i>\n                <span class="btn-text">{[print(xabber.getString("button_esc"))]}</span>\n            </div>\n            <span class="block-name">{[print(xabber.getString("groupchat_group"))]}</span>\n            <span class="block-name second-text"></span>\n            <div class="btn-qr-code">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>\n            </div>\n            <div class="btn-edit">\n                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="information-outline"></svg>\n            </div>\n            <div class="group-edit-preloader">\n            </div>\n        </div>\n        <div class="buttons-wrap">\n            <div class="button-wrap btn-invite-wrap">\n                <i class="mdi mdi-24px mdi-account-multiple-plus btn-invite text-color-500"></i>\n                <div class="btn-name">{[print(xabber.getString("groupchat_bar_invite"))]}</div>\n            </div>\n            <div class="button-wrap btn-search-messages">\n                <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("search"))]}</div>\n            </div>\n            <div class="button-wrap btn-mute-wrap">\n                <div class="contact-btn btn-mute dropdown-button fill-color-500" data-activates="{{view.cid}}-more"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg></div>\n                <div class="btn-name">{[print(xabber.getString("contact_bar_notifications"))]}</div>\n\n                <ul id="{{view.cid}}-more" class="contact-mute-dropdown dropdown-content noselect">\n                    <li class="btn-mute-dropdown" data-mute="minutes15">\n                        <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours1">\n                        <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="hours2">\n                        <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="day">\n                        <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n                    </li>\n                    <li class="btn-mute-dropdown" data-mute="forever">\n                        <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n                    </li>\n                </ul>\n            </div>\n            <div class="button-wrap btn-leave-wrap">\n                <div class="contact-btn btn-leave fill-color-500">\n                    <svg viewBox="0 0 24 24">\n                        <path d="M13.34,8.17C12.41,8.17 11.65,7.4 11.65,6.47A1.69,1.69 0 0,1 13.34,4.78C14.28,4.78 15.04,5.54 15.04,6.47C15.04,7.4 14.28,8.17 13.34,8.17M10.3,19.93L4.37,18.75L4.71,17.05L8.86,17.9L10.21,11.04L8.69,11.64V14.5H7V10.54L11.4,8.67L12.07,8.59C12.67,8.59 13.17,8.93 13.5,9.44L14.36,10.79C15.04,12 16.39,12.82 18,12.82V14.5C16.14,14.5 14.44,13.67 13.34,12.4L12.84,14.94L14.61,16.63V23H12.92V17.9L11.14,16.21L10.3,19.93M21,23H19V3H6V16.11L4,15.69V1H21V23M6,23H4V19.78L6,20.2V23Z" />\n                    </svg>\n                </div>\n                <div class="btn-name text-color-500">{[print(xabber.getString("groupchat_bar_leave"))]}</div>\n            </div>\n        </div>\n    </div>\n    <div class="panel-content">\n        <div class="block-wrap group-chat-properties-wrap vcard"></div>\n        <div class="block-wrap status-block-wrap"></div>\n        <div class="block-wrap edit-block-wrap"></div>\n        <div class="block-wrap restrictions-block-wrap"></div>\n        <div class="block-wrap groups-block-wrap"></div>\n        <div class="block-wrap search-messages-block-wrap"></div>\n        <div class="block-wrap participant-view-wrap"></div>\n        <div class="bottom-block">\n            <ul class="tabs not-edit">\n                <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>\n                <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>\n                <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>\n                <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>\n                <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>\n            </ul>\n            <div class="block-wrap participants-wrap"></div>\n        </div>\n    </div>\n</div>\n';});
 
 
 define('text!templates/contacts/group_chats/invitation.html',[],function () { return '<div class="panel-content-wrap noselect">\n    <div class="main-info">\n        <div class="circle-avatar"></div>\n        <div class="text-info">\n            <div class="name-wrap one-line"></div>\n            <div class="jid one-line"></div>\n        </div>\n    </div>\n\n    <div class="panel-content">\n        <div class="msg-wrap"><p class="msg-text"></p></div>\n        <div class="panel-footer noselect">\n            <div class="buttons-wrap">\n                <button class="btn-join btn-flat btn-main">{[print(xabber.getString("groupchat_join"))]}</button>\n                <button class="btn-decline btn-flat btn-main">{[print(xabber.getString("groupchat_decline"))]}</button>\n                <button class="btn-block btn-flat btn-main">{[print(xabber.getString("groupchat_block"))]}</button>\n            </div>\n        </div>\n    </div>\n</div>';});
@@ -39060,7 +39082,7 @@ define('text!templates/contacts/group_chats/invited_member_item.html',[],functio
 define('text!templates/contacts/group_chats/add_blocked_participant_form.html',[],function () { return '<div class="block-form">\n    <div class="input-field">\n        <input id="blocking_id" class="rich-textarea field-input" placeholder="{[print(xabber.getString(\'vcard_jabber_id\'))]}" type="text" name="title">\n    </div>\n    <button class="btn-block-id btn btn-main-filled ground-color-700">{[print(xabber.getString("contact_bar_block"))]}</button>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/participant_details_right.html',[],function () { return '<div class="participant-details-wrap">\n    <div class="participant-details-info-wrap">\n    </div>\n    <div class="bottom-block participant-bottom-block">\n        <ul class="tabs participant-tabs">\n            <li data-value="media" class="list-variant tab"><a class="text-color-700">Media</a></li>\n            <li data-value="files" class="list-variant tab"><a class="text-color-700">Files</a></li>\n            <li data-value="links" class="list-variant tab"><a class="text-color-700">Links</a></li>\n            <li data-value="voice" class="list-variant tab"><a class="text-color-700">Voice</a></li>\n        </ul>\n        <div class="block-wrap participants-details-media-wrap"></div>\n    </div>\n    <div class="participant-details-edit-wrap edit-wrap">\n        <div class="main-info">\n            <div class="avatar-wrap">\n                <div class="circle-avatar">\n                    <input title=\'{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}\' type="file"/>\n                    <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                        <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                    </svg>\n                    <div class="preloader-wrap">\n                        <div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <div class="set-groupchat-avatar-text">{[print(xabber.getString("groupchat_set_avatar"))]}</div>\n            </div>\n        </div>\n        <div class="participant-details-edit-inputs">\n            <div class="edit-participant-name-wrap">\n            </div>\n            <div class="edit-participant-badge-wrap">\n            </div>\n        </div>\n        <div class="rights-wrap">\n        </div>\n    </div>\n</div>';});
+define('text!templates/contacts/group_chats/participant_details_right.html',[],function () { return '<div class="participant-details-wrap">\n    <div class="participant-details-info-wrap">\n    </div>\n    <div class="bottom-block participant-bottom-block">\n        <ul class="tabs participant-tabs">\n            <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>\n            <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>\n            <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>\n            <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>\n        </ul>\n        <div class="block-wrap participants-details-media-wrap"></div>\n    </div>\n    <div class="participant-details-edit-wrap edit-wrap">\n        <div class="main-info">\n            <div class="avatar-wrap">\n                <div class="circle-avatar">\n                    <input title=\'{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}\' type="file"/>\n                    <svg class="set-groupchat-avatar" viewBox="0 0 24 24">\n                        <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />\n                    </svg>\n                    <div class="preloader-wrap">\n                        <div class="preloader-wrapper preloader-32px visible">\n                            <div class="spinner-layer">\n                                <div class="circle-clipper left">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="gap-patch">\n                                    <div class="circle"></div>\n                                </div>\n                                <div class="circle-clipper right">\n                                    <div class="circle"></div>\n                                </div>\n                            </div>\n                        </div>\n                    </div>\n                </div>\n                <div class="set-groupchat-avatar-text">{[print(xabber.getString("groupchat_set_avatar"))]}</div>\n            </div>\n        </div>\n        <div class="participant-details-edit-inputs">\n            <div class="edit-participant-name-wrap">\n            </div>\n            <div class="edit-participant-badge-wrap">\n            </div>\n        </div>\n        <div class="rights-wrap">\n        </div>\n    </div>\n</div>';});
 
 
 define('text!templates/contacts/group_chats/participant_rights.html',[],function () { return '<div class="header">\n</div>\n<div class="modal-content">\n    <div class="rights-wrap">\n    </div>\n</div>\n';});
@@ -39108,9 +39130,6 @@ define('text!templates/contacts/group_chats/group_status.html',[],function () { 
 define('text!templates/contacts/group_chats/group_status_right.html',[],function () { return '<div class="group-chat-status-wrap" title="{[print(xabber.getString(\'group_settings__properties__tooltip_click_to_set_status\'))]}">\n    <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg></div>\n    <div class="group-chat-status-border">\n        <div class="group-chat-status">\n            <div class="status-wrap">\n                <div class="status-message dotted-underline"></div>\n                <div class="status status-bulb"></div>\n            </div>\n            <div class="label">{[print(xabber.getString("groupchat_status"))]}</div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/contacts/group_chats/media_item.html',[],function () { return '<div class="media-item">\n</div>';});
-
-
 define('text!templates/contacts/group_chats/file_item.html',[],function () { return '<div class="media-item">\n</div>';});
 
 
@@ -39126,6 +39145,9 @@ define('text!templates/chats/chat_item.html',[],function () { return '<div class
 define('text!templates/chats/chat_head.html',[],function () { return '<div class="chat-head-details"></div>\n<div class="circle-avatar"/>\n<div class="contact-status hide-offline"/>\n<div class="chat-icon hidden"></div>\n<div class="contact-info">\n    <div class="contact-name-wrap">\n        <i class="mdi encrypted-icon mdi-14px mdi-lock"></i>\n        <p class="contact-name one-line"></p>\n    </div>\n    <p class="contact-status-message one-line"></p>\n</div>\n<div class="chat-tools-wrap">\n    <div class="chat-tool btn-show-fingerprints">\n        <i class="mdi mdi-lock mdi-24px"></i>\n    </div>\n    <div class="chat-tool btn-jingle-message">\n        <i class="mdi mdi-phone mdi-24px"></i>\n    </div>\n    <!--<div class="chat-tool btn-set-status">\n        <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n            <g stroke="none" stroke-width="1" fill="none">\n                <rect x="0" y="0" width="24" height="24"/>\n                <path d="M20,4 C21.1045695,4 22,4.8954305 22,6 L22,16 C22,17.1045695 21.1045695,18 20,18 L16,18 L12,22 L8,18 L4,18 C2.8954305,18 2,17.1045695 2,16 L2,6 C2,4.8954305 2.8954305,4 4,4 L20,4 Z M16,12 L6,12 L6,14 L16,14 L16,12 Z M18,8 L6,8 L6,10 L18,10 L18,8 Z" id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero"/>\n            </g>\n        </svg>\n    </div>-->\n    <div class="chat-tool btn-search-messages">\n        <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n    </div>\n    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n        <li class="btn-chat-pin">\n            <span class="one-line"></span>\n        </li>\n        <li class="btn-archive-chat">\n            <span class="one-line"></span>\n        </li>\n        <li class="btn-notifications active-hover" data-activates="{{view.cid}}-mute-more">\n            <span class="one-line"></span>\n        </li>\n        <!--<li class="btn-contact-details">-->\n            <!--<span class="one-line">{[print(xabber.getString("contact_viewer"))]}</span>-->\n        <!--</li>-->\n        <li class="btn-call-attention">\n            <span class="one-line">{[print(xabber.getString("call_attention"))]}</span>\n        </li>\n        <!--<li class="btn-export-history">\n            <span class="one-line">{[print(xabber.getString("export_chat"))]}</span>\n        </li>-->\n        <li class="btn-invite-users">\n            <span class="one-line">{[print(xabber.getString("groupchat_invite"))]}</span>\n        </li>\n        <li class="btn-start-encryption">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_start_encrypted_chat"))]}</span>\n        </li>\n        <li class="btn-open-encrypted-chat">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>\n        </li>\n        <li class="btn-open-regular-chat">\n            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>\n        </li>\n        <li class="btn-delete-chat">\n            <span class="one-line text-color-500">{[print(xabber.getString("delete_chat"))]}</span>\n        </li>\n        <li class="btn-clear-history">\n            <span class="one-line text-color-500">{[print(xabber.getString("clear_history"))]}</span>\n        </li>\n        <!--<li class="btn-delete-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("chat_settings__button_delete_contact"))]}</span>-->\n        <!--</li>-->\n        <!--<li class="btn-block-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("contact_block"))]}</span>-->\n        <!--</li>-->\n        <!--<li class="btn-unblock-contact">-->\n            <!--<span class="one-line">{[print(xabber.getString("chat_settings__button_unblock_contact"))]}</span>-->\n        <!--</li>-->\n    </ul>\n    <ul id="{{view.cid}}-mute-more" class="contact-mute-dropdown dropdown-content noselect">\n        <li class="btn-mute-dropdown" data-mute="minutes15">\n            <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="hours1">\n            <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="hours2">\n            <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="day">\n            <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>\n        </li>\n        <li class="btn-mute-dropdown" data-mute="forever">\n            <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>\n        </li>\n    </ul>\n</div>\n';});
 
 
+define('text!templates/chats/send_media.html',[],function () { return '<div class="modal-header">\n    <span></span>\n    <div class="menu-wrap">\n        <div data-screen-name="image" class="menu-btn btn-library">{[print(xabber.getString("images"))]}</div>\n        <div data-screen-name="video" class="menu-btn btn-library">{[print(xabber.getString("videos"))]}</div>\n        <div data-screen-name="upload" class="menu-btn btn-upload">{[print(xabber.getString("settings__dialog_background__menu_item_upload"))]}</div>\n        <div data-screen-name="web-address" class="menu-btn btn-web-address">{[print(xabber.getString("settings__dialog_background__menu_item_url"))]}</div>\n    </div>\n</div>\n<div class="modal-content">\n    <div data-screen="image" class="screen-wrap library-wrap"></div>\n    <div data-screen="video" class="screen-wrap hidden library-wrap"></div>\n    <div data-screen="upload" class="hidden screen-wrap">\n        <div class="upload-wrap">\n            <div class="upload-text">{[print(xabber.getString("chat_bottom__drag_and_drop__text_drop_files_here"))]}</div>\n            <div class="upload-button">\n                <button type="file">{[print(xabber.getString("send_media__btn_upload"))]}</button>\n                <input type="file">\n            </div></div>\n    </div>\n    <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">\n        <div class="web-address">\n            <div class="label">{[print(xabber.getString("settings__dialog_background__section_url__label"))]}</div>\n            <input class="url"/>\n        </div>\n        <div class="image-preview">\n            <img class="hidden">\n            <p>{[print(xabber.getString("settings__dialog_background__section_url__placeholder_preview"))]}</p>\n        </div>\n    </div>\n</div>\n<div class="modal-footer">\n    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("chat_send"))]}</button>\n    <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>\n    <div class="modal-preloader-wrap"></div>\n</div>';});
+
+
 define('text!templates/chats/saved_chat_head.html',[],function () { return '<div class="circle-avatar ground-color-700"></div>\n<div class="contact-info">\n    <p class="contact-name one-line">{[print(xabber.getString("saved_messages__header"))]}</p>\n    <p class="one-liner"></p>\n</div>\n<div class="chat-tools-wrap">\n    <div class="chat-tool btn-chat-pin">\n        <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n            <svg class="mdi mdi-24px" viewBox="0 0 24 24">\n                <path id="tooltip-variant" fill="#9E9E9E" fill-rule="nonzero" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n        </svg>\n    </div>\n    <div class="chat-tool btn-search-messages">\n        <i class="search-icon mdi mdi-24px mdi-magnify"></i>\n    </div>\n    <div class="chat-tool btn-more dropdown-button" data-activates="{{view.cid}}-more">\n        <i class="mdi mdi-24px mdi-dots-vertical"></i>\n    </div>\n    <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">\n        <li class="btn-delete-chat">\n            <span class="one-line">{[print(xabber.getString("chat_settings__button_delete_all"))]}</span>\n        </li>\n    </ul>\n</div>\n';});
 
 
@@ -39135,7 +39157,7 @@ define('text!templates/chats/chat_content.html',[],function () { return '  <div 
 define('text!templates/chats/chat_content_contact.html',[],function () { return '<div class="search-wrap">\n    <div class="search-content">\n        <div class="search-form-header block-header">\n            <i class="details-icon btn-back mdi mdi-24px mdi-arrow-left"></i>\n            <div class="messages-search-form search-form ">\n                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder=\'{[print(xabber.getString("chat__search_messages_panel__placeholder"))]}\' autofocus>\n            </div>\n            <i class="close-search-icon mdi mdi-24px mdi-close"></i>\n        </div>\n        <div class="search-messages-content-wrap">\n            <div class="search-results">\n                {[print(xabber.getString("nothing_was_searched"))]}\n            </div>\n            <div class="preloader-wrap">\n                <div class="preloader-wrapper preloader-20px active">\n                    <div class="spinner-layer">\n                        <div class="circle-clipper left">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="gap-patch">\n                            <div class="circle"></div>\n                        </div>\n                        <div class="circle-clipper right">\n                            <div class="circle"></div>\n                        </div>\n                    </div>\n                </div>\n            </div>\n            <div class="messages-count">\n            </div>\n            <div class="chat-content">\n            </div>\n        </div>\n    </div>\n</div>';});
 
 
-define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix"></div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">{[print(xabber.getString("chat_bottom__placeholder__cancel_write_voice"))]}</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\' multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div class="attach attach-location">\n                    <input type="text" hidden title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\'>\n                    <i class="mdi mdi-24px mdi-map-marker"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-info-wrap">\n                    <div class="account-jid text-color-700"></div>\n                    <div class="account-nickname text-color-700"></div>\n                    <div class="account-badge"></div>\n                    <div class="account-role ground-color-700"></div>\n                </div>\n            </div>\n        </div>\n        <div class="send-area">\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">{[print(xabber.getString("chat_bottom__placeholder__blocked"))]}</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_reply").slice(0,1))]}</span>{[print(xabber.getString("chat_reply").slice(1))]}</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_froward").slice(0,1))]}</span>{[print(xabber.getString("chat_froward").slice(1))]}</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_copy").slice(0,1))]}</span>{[print(xabber.getString("message_copy").slice(1))]}</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("delete").slice(0,1))]}</span>{[print(xabber.getString("delete").slice(1))]}</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_edit").slice(0,1))]}</span>{[print(xabber.getString("message_edit").slice(1))]}</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_pin").slice(0,1))]}</span>{[print(xabber.getString("message_pin").slice(1))]}</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">{[print(xabber.getString("cancel"))]}</div>\n        </div>\n    </div>\n';});
+define('text!templates/chats/chat_bottom.html',[],function () { return '    <div class="message-input-panel noselect">\n        <div class="my-avatar circle-avatar circle-image-fix"></div>\n        <div class="message-form">\n            <div class="fwd-messages-preview noselect hidden">\n                <div class="msg-border ground-color-700">\n                </div>\n                <div class="msg-content">\n                    <p class="msg-author text-color-700 one-line"></p>\n                    <p class="msg-text one-line"></p>\n                </div>\n                <div class="close-forward">\n                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>\n                </div>\n            </div>\n            <div class="input-field input-message">\n                <div class="mentions-list"></div>\n                <div class="rich-textarea-wrap notranslate">\n                </div>\n                <div class="scrollbar-cover"></div>\n                <div class="insert-emoticon">\n                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>\n                </div>\n                <div class="emoticons-panel-wrap">\n                    <div class="emoticons-panel"></div>\n                    <div class="emoji-menu"></div>\n                    <div class="uploading-emoticons">\n                    <div class="preloader-wrapper preloader-20px active visible">\n                        <div class="spinner-layer">\n                            <div class="circle-clipper left">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="gap-patch">\n                                <div class="circle"></div>\n                            </div>\n                            <div class="circle-clipper right">\n                                <div class="circle"></div>\n                            </div>\n                        </div>\n                    </div>\n                    </div>\n                </div>\n            </div>\n            <div class="input-voice-message">\n                <div class="voice-visualizer"></div>\n                <div class="timer">0:00</div>\n                <div class="voice-msg-status">{[print(xabber.getString("chat_bottom__placeholder__cancel_write_voice"))]}</div>\n            </div>\n            <div class="input-toolbar">\n                <div class="attach attach-file">\n                    <input type="file" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}\' multiple>\n                    <i class="mdi mdi-24px mdi-paperclip"></i>\n                </div>\n                <div class="attach attach-media" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_media"))]}\'>\n                    <i class="mdi mdi-24px mdi-file-image"></i>\n                </div>\n                <div class="attach attach-location" title=\'{[print(xabber.getString("chat_bottom__tooltip_send_location"))]}\'>\n                    <input type="text" hidden title=\'{[print(xabber.getString("chat_bottom__tooltip_send_location"))]}\'>\n                    <i class="mdi mdi-24px mdi-map-marker"></i>\n                </div>\n                <div title="Format text" class="format-text">\n                    <i class="mdi mdi-24px mdi-format-text"></i>\n                </div>\n                <div class="last-emoticons">\n                </div>\n                <div class="account-info-wrap">\n                    <div class="account-jid text-color-700"></div>\n                    <div class="account-nickname text-color-700"></div>\n                    <div class="account-badge"></div>\n                    <div class="account-role ground-color-700"></div>\n                </div>\n            </div>\n        </div>\n        <div class="send-area">\n            <i class="send-message mdi mdi-28px mdi-send text-color-700 hover-text-color-500 hidden"></i>\n            <i class="mdi mdi-28px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>\n        </div>\n    </div>\n    <div class="blocked-msg hidden">{[print(xabber.getString("chat_bottom__placeholder__blocked"))]}</div>\n    <div class="message-actions-panel noselect hidden">\n        <div class="button-wrap reply-message-wrap">\n            <i class="action-button reply-message mdi ground-color-700 mdi-reply mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_reply").slice(0,1))]}</span>{[print(xabber.getString("chat_reply").slice(1))]}</div>\n        </div>\n        <div class="button-wrap forward-message-wrap">\n            <i class="action-button forward-message mdi ground-color-700 mdi-forward mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("chat_froward").slice(0,1))]}</span>{[print(xabber.getString("chat_froward").slice(1))]}</div>\n        </div>\n        <div class="button-wrap copy-message-wrap">\n            <i class="action-button copy-message mdi ground-color-700 mdi-content-copy mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_copy").slice(0,1))]}</span>{[print(xabber.getString("message_copy").slice(1))]}</div>\n        </div>\n        <div class="button-wrap delete-message-wrap">\n            <i class="action-button delete-message mdi ground-color-700 mdi-delete mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("delete").slice(0,1))]}</span>{[print(xabber.getString("delete").slice(1))]}</div>\n        </div>\n        <div class="button-wrap edit-message-wrap">\n            <i class="action-button edit-message mdi ground-color-700 mdi-pencil mdi-24px"></i>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_edit").slice(0,1))]}</span>{[print(xabber.getString("message_edit").slice(1))]}</div>\n        </div>\n        <div class="button-wrap pin-message-wrap">\n            <svg class="action-button pin-message ground-color-700" viewBox="0 0 24 24">\n                <path fill="#FFF" d="M16,12V4H17V2H7V4H8V12L6,14V16H11.2V22H12.8V16H18V14L16,12Z"/>\n            </svg>\n            <div class="button-name"><span class="text-color-500">{[print(xabber.getString("message_pin").slice(0,1))]}</span>{[print(xabber.getString("message_pin").slice(1))]}</div>\n        </div>\n        <div class="button-wrap cancel-message-wrap">\n            <i class="action-button close-message-panel mdi mdi-close mdi-24px"></i>\n            <div class="button-name">{[print(xabber.getString("cancel"))]}</div>\n        </div>\n    </div>\n';});
 
 
 define('text!templates/chats/location_popup.html',[],function () { return '\n<div class="modal-content-wrap">\n    <div class="modal-content{[ if (!popup_coordinates) { ]}popup{[ } ]}">\n        <div id="map" class="text-color-700" style="width:800px; height:490px;" data-type=\'map\'></div>\n        <div class="form-group">\n                <textarea id="output" class="form-control" disabled rows="20"></textarea>\n                <textarea id="lat" class="form-control" disabled rows="20"></textarea>\n                <textarea id="lon" class="form-control" disabled rows="20"></textarea>\n        </div>\n\n        <script type="text/javascript">\n            var layers = [ new ol.layer.Tile({ source: new ol.source.OSM() }) ];\n            var coordinates = popup_coordinates ? ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\') : [-9639318.435625363, 1667475.03690917];\n            var zoom = popup_coordinates ? 15 : 0;\n\n            var placemark = new ol.Overlay.Placemark ({\n                // backgroundColor : \'yellow\',\n                contentColor: \'#000\',\n                autoPan: true,\n                html: \'<?xml version="1.0" encoding="UTF-8"?><svg width="48px" height="48px" viewBox="0 0 24 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#000000" fill-rule="nonzero"></path></g></svg>\',\n                anchor: false,\n                autoPanAnimation: { duration: 250 }\n              });\n\n            var placemark_my_location = new ol.Overlay.Placemark ({\n                // backgroundColor : \'yellow\',\n                contentColor: \'#000\',\n                autoPan: true,\n                html: \'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="36px" height="36px"><circle class="outer" cx="20" cy="20" r="16" stroke="none" stroke-width="1.5" fill="none" style="opacity: 0.6;"></circle><circle class="inner" cx="20" cy="20" r="8" stroke="white" stroke-width="1.5" fill="none"></circle></svg>\',\n                anchor: false,\n                autoPanAnimation: { duration: 250 }\n              });\n\n            var map = new ol.Map\n            ({\ttarget: \'map\',\n                view: new ol.View\n                ({\tzoom: zoom,\n                    center: coordinates\n                }),\n                interactions: ol.interaction.defaults({ altShiftDragRotate:false, pinchRotate:false }),\n                layers: layers,\n                overlays: [placemark, placemark_my_location]\n            });\n\n            var getCurrentPositionControl = function (e) {\n                navigator.geolocation.getCurrentPosition(success, error, options);\n            };\n\n            var options = {\n              enableHighAccuracy: true,\n              timeout: 5000,\n              maximumAge: 0\n            };\n\n            function success(pos) {\n              var crd = pos.coords;\n              map.getView().setCenter(ol.proj.transform([crd.longitude, crd.latitude], \'EPSG:4326\', \'EPSG:3857\'));\n              placemark_my_location.show(ol.proj.transform([crd.longitude, crd.latitude], \'EPSG:4326\', \'EPSG:3857\'));\n              map.getView().setZoom(17);\n              button_geoposition.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-gps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M12,8 C14.209139,8 16,9.790861 16,12 C16,14.209139 14.209139,16 12,16 C9.790861,16 8,14.209139 8,12 C8,9.790861 9.790861,8 12,8 M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13400675,5 5,8.13400675 5,12 C5,15.8659932 8.13400675,19 12,19 C15.8659932,19 19,15.8659932 19,12 C19,8.13400675 15.8659932,5 12,5 L12,5 Z" id="mdi:crosshairs-gps" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n            };\n\n            function error(err) {\n              console.warn(`ERROR(${err.code}): ${err.message}`);\n            };\n\n            var button_geoposition = document.createElement(\'button\');\n            button_geoposition.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-question" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13,5 5,8.13 5,12 C5,15.87 8.13,19 12,19 C15.87,19 19,15.87 19,12 C19,8.13 15.87,5 12,5 M11.13,17.25 L12.88,17.25 L12.88,15.5 L11.13,15.5 L11.13,17.25 M12,6.75 C10.07,6.75 8.5,8.32 8.5,10.25 L10.25,10.25 C10.25,9.28 11.03,8.5 12,8.5 C12.97,8.5 13.75,9.28 13.75,10.25 C13.75,12 11.13,11.78 11.13,14.63 L12.88,14.63 C12.88,12.66 15.5,12.44 15.5,10.25 C15.5,8.32 13.93,6.75 12,6.75 Z" id="mdi:crosshairs-question" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n\n\n            button_geoposition.addEventListener(\'click\', getCurrentPositionControl, false);\n\n            var custom_element_position = document.createElement(\'div\');\n\n            if (popup_coordinates) {\n                custom_element_position.className = \'geoposition placemark-exist ol-control ol-unselectable\';\n            }\n            else {\n                custom_element_position.className = \'geoposition ol-control ol-unselectable\';\n            }\n            custom_element_position.appendChild(button_geoposition);\n\n            geoposition = new ol.control.Control({\n                className: \'myControl\',\n                element: custom_element_position,\n                target: document.getElementById("myCustomControl")\n            });\n\n            map.addControl(geoposition);\n\n            if (popup_coordinates) {\n                placemark.show(ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\'));\n                $(\'.ol-zoom.ol-unselectable.ol-control\').addClass(\'placemark-exist\');\n                var getPlacemarkPositionControl = function (e) {\n                    map.getView().setCenter(ol.proj.transform(popup_coordinates, \'EPSG:4326\', \'EPSG:3857\'));\n                    map.getView().setZoom(15);\n                    $(\'.ol-location\').show()\n\n                };\n\n                var button_placemark_position = document.createElement(\'button\');\n                button_placemark_position.innerHTML = \'<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>\';\n\n\n                button_placemark_position.addEventListener(\'click\', getPlacemarkPositionControl, false);\n\n                var custom_element_placemark_position = document.createElement(\'div\');\n                custom_element_placemark_position.className = \'placemark-position ol-control ol-unselectable\';\n                custom_element_placemark_position.appendChild(button_placemark_position);\n\n                placemark_position = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_placemark_position,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(placemark_position);\n\n                var custom_element_show_location_name = document.createElement(\'div\');\n                custom_element_show_location_name.innerHTML = \'{{location_name}}\';\n\n\n                custom_element_show_location_name.className = \'ol-location ol-control ol-unselectable\';\n\n                show_location_name = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_show_location_name,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(show_location_name);\n\n            }\n\n            if (!popup_coordinates) {\n\n                var send_buttom = document.createElement(\'button\');\n                send_buttom.className = \'btn-apply mdi mdi-28px mdi-send\';\n\n                var send_address_div = document.createElement(\'div\');\n                send_address_div.setAttribute("id", "send_address");\n                send_address_div.className = \'ol-send-address\';\n\n                var send_div = document.createElement(\'div\');\n                send_div.setAttribute("id", "send_text");\n                send_div.className = \'ol-send-text\';\n\n                var custom_element_send = document.createElement(\'div\');\n                custom_element_send.className = \'ol-send ol-control ol-unselectable\';\n                custom_element_send.appendChild(send_address_div);\n                custom_element_send.appendChild(send_div);\n                custom_element_send.appendChild(send_buttom);\n\n                send = new ol.control.Control({\n                    className: \'myControl\',\n                    element: custom_element_send,\n                    target: document.getElementById("myCustomControl")\n                });\n\n                map.addControl(send);\n\n                var sLayer = new ol.layer.Vector({\n                    source: new ol.source.Vector(),\n                    style: new ol.style.Style({\n                        image: new ol.style.Circle({\n                            radius: 5,\n                            stroke: new ol.style.Stroke ({\n                                color: \'rgb(255,165,0)\',\n                                width: 3\n                            }),\n                            fill: new ol.style.Fill({\n                                color: \'rgba(255,165,0,.3)\'\n                            })\n                        }),\n                        stroke: new ol.style.Stroke ({\n                            color: \'rgb(255,165,0)\',\n                            width: 3\n                        }),\n                        fill: new ol.style.Fill({\n                            color: \'rgba(255,165,0,.3)\'\n                        })\n                    })\n                });\n\n                map.addLayer(sLayer);\n\n                var search = new ol.control.SearchNominatim (\n                    {\t//target: $(".options").get(0),\n                        polygon: $("#polygon").prop("checked"),\n                        reverse: true,\n                        position: true\t// Search, with priority to geo position\n                    });\n\n                map.addControl (search);\n\n                search.on(\'select\', function(e){\n                    sLayer.getSource().clear();\n                    // Check if we get a geojson to describe the search\n                    if (e.search.geojson) {\n                        var format = new ol.format.GeoJSON();\n                        var f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });\n                        sLayer.getSource().addFeature(f);\n                        var view = map.getView();\n                        var resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());\n                        var zoom = view.getZoomForResolution(resolution);\n                        var center = ol.extent.getCenter(f.getGeometry().getExtent());\n                        // redraw before zoom\n                        setTimeout(function(){\n                                view.animate({\n                                center: center,\n                                zoom: Math.min (zoom, 16)\n                            });\n                        }, 100);\n                    }\n                    else {\n                        map.getView().animate({\n                            center:e.coordinate,\n                            zoom: Math.max (map.getView().getZoom(),16)\n                        });\n                    }\n                });\n\n                function reverseGeocode(json) {\n                    if (!json[0].error) {\n                        let house_number = json[0].address.house_number ? \' \' + json[0].address.house_number : \'\',\n                            road = json[0].address.road ? json[0].address.road + house_number + \', \' : \'\',\n                            state = json[0].address.state ? json[0].address.state + \', \' : \'\',\n                            neighbourhood = json[0].address.neighbourhood ? json[0].address.neighbourhood + \', \' : \'\',\n                            allotments = json[0].address.allotments ? json[0].address.allotments + \', \' : \'\',\n                            village = json[0].address.village ? json[0].address.village + \', \' : \'\',\n                            city = json[0].address.city ? json[0].address.city + \', \' : \'\',\n                            country = json[0].address.country ? state + json[0].address.country : \'\',\n                            final_text = \'\'\n                        if ( !road ){\n                            final_text = neighbourhood + allotments + village + city + country\n                        }\n                        else {\n                            final_text = road + neighbourhood + allotments + village + city + state.replace(\', \',\'\')\n                        }\n                        $(\'#send_address\').text(final_text);\n                    }\n                    else {\n                        $(\'#send_address\').text(xabber.getString("location_fragment__address_error__title"));\n                    }\n                }\n\n                map.on(\'click\', function(e) {\n                    placemark.show(e.coordinate);\n                    search.reverseGeocode(e.coordinate, reverseGeocode);\n                    let coordinates = ol.proj.transform(e.coordinate, map.getView().getProjection(), \'EPSG:4326\');\n                    $(\'.ol-control.ol-send\').show();\n                    $(\'#send_text\').text(coordinates[1].toFixed(6) + \':\' + coordinates[0].toFixed(6));\n                    $(\'#output\').text(\'geo:\' + coordinates[1] + \',\' + coordinates[0]);\n                    $(\'#lat\').text(coordinates[1]);\n                    $(\'#lon\').text(coordinates[0]);\n                  });\n            }\n            window.setTimeout(function () { map.updateSize(); }, 200)\n        </script>\n    </div>\n</div>';});
@@ -39280,6 +39302,30 @@ define('text!templates/svg/subscription-to.html',[],function () { return '<?xml 
 
 
 define('text!templates/svg/subscription-from.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/subscription-from</title>\n    <g id="icon/material/subscription-from" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M14,8 C17.3137085,8 20,10.6862915 20,14 C20,17.3137085 17.3137085,20 14,20 C10.6862915,20 8,17.3137085 8,14 C8,13.462632 8.07064283,12.9417636 8.20314833,12.4461748 L9.67168223,13.9143229 C9.77459988,14.0172246 9.8859413,14.1065666 10.0034864,14.1823489 L10.0048953,14.1996403 C10.1089211,16.3160315 11.8578046,18 14,18 C16.209139,18 18,16.209139 18,14 C18,11.851413 16.3059677,10.0984884 14.180685,10.0040081 C14.1065666,9.8859413 14.0172246,9.77459988 13.9143229,9.67168223 L12.4461748,8.20314833 C12.9417636,8.07064283 13.462632,8 14,8 Z M11,4 L11,6 L7.415,6 L12.5,11.0857864 L11.0857864,12.5 L6,7.415 L6,11 L4,11 L4,4 L11,4 Z" id="xabber:subscribe-from" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/image.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/image</title>\n    <g id="icon/material/image" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M8.5,13.5 L11,16.5 L14.5,12 L19,18 L5,18 M21,19 L21,5 C21,3.89 20.1,3 19,3 L5,3 C3.8954305,3 3,3.8954305 3,5 L3,19 C3,20.1045695 3.8954305,21 5,21 L19,21 C20.1045695,21 21,20.1045695 21,19 Z" id="mdi:image" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-audio.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-audio</title>\n    <g id="icon/material/file-audio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M12,3 L12,13.55 C11.41,13.21 10.73,13 10,13 C7.79,13 6,14.79 6,17 C6,19.21 7.79,21 10,21 C12.21,21 14,19.21 14,17 L14,7 L18,7 L18,3 L12,3 Z" id="mdi:music-note" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-video.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-video</title>\n    <g id="icon/material/file-video" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M18,9 L16,9 L16,7 L18,7 M18,13 L16,13 L16,11 L18,11 M18,17 L16,17 L16,15 L18,15 M8,9 L6,9 L6,7 L8,7 M8,13 L6,13 L6,11 L8,11 M8,17 L6,17 L6,15 L8,15 M18,3 L18,5 L16,5 L16,3 L8,3 L8,5 L6,5 L6,3 L4,3 L4,21 L6,21 L6,19 L8,19 L8,21 L16,21 L16,19 L18,19 L18,21 L20,21 L20,3 L18,3 Z" id="mdi:filmstrip" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-document.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-document</title>\n    <g id="icon/material/file-document" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M13,9 L18.5,9 L13,3.5 L13,9 M6,2 L14,2 L20,8 L20,20 C20,21.1045695 19.1045695,22 18,22 L6,22 C4.8954305,22 4,21.1045695 4,20 L4,4 C4,2.89 4.89,2 6,2 M15,18 L15,16 L6,16 L6,18 L15,18 M18,14 L18,12 L6,12 L6,14 L18,14 Z" id="mdi:file-document" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-presentation.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-presentation</title>\n    <g id="icon/material/file-presentation" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M13,2 L13,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,16 C21,17.1045695 20.1045695,18 19,18 L13,18 L13,21 L17,21 L17,23 L7,23 L7,21 L11,21 L11,18 L5,18 C3.8954305,18 3,17.1045695 3,16 L3,5 C3,3.8954305 3.8954305,3 5,3 L11,3 L11,2 L13,2 Z M19,5 L5,5 L5,16 L19,16 L19,5 Z M9,9 L9,14 L7,14 L7,9 L9,9 Z M13,7 L13,14 L11,14 L11,7 L13,7 Z M17,11 L17,14 L15,14 L15,11 L17,11 Z" id="xabber:presentation" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-zip.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-zip</title>\n    <g id="icon/material/file-zip" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M14,17 L12,17 L12,15 L10,15 L10,13 L12,13 L12,15 L14,15 M14,9 L12,9 L12,11 L14,11 L14,13 L12,13 L12,11 L10,11 L10,9 L12,9 L12,7 L10,7 L10,5 L12,5 L12,7 L14,7 M19,3 L5,3 C3.89,3 3,3.89 3,5 L3,19 C3,20.1045695 3.8954305,21 5,21 L19,21 C20.1045695,21 21,20.1045695 21,19 L21,5 C21,3.89 20.1,3 19,3 Z" id="mdi:zip-box" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file</title>\n    <g id="icon/material/file" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M13,9 L13,3.5 L18.5,9 M6,2 C4.89,2 4,2.89 4,4 L4,20 C4,21.1045695 4.8954305,22 6,22 L18,22 C19.1045695,22 20,21.1045695 20,20 L20,8 L14,2 L6,2 Z" id="mdi:file" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
+
+
+define('text!templates/svg/file-pdf.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/file-pdf</title>\n    <g id="icon/material/file-pdf" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M19,3 C20.1045695,3 21,3.8954305 21,5 L21,19 C21,20.1045695 20.1045695,21 19,21 L5,21 C3.89,21 3,20.1 3,19 L3,5 C3,3.89 3.89,3 5,3 L19,3 M10.59,10.08 C10.57,10.13 10.3,11.84 8.5,14.77 C8.5,14.77 5,16.58 5.83,17.94 C6.5,19 8.15,17.9 9.56,15.27 C9.56,15.27 11.38,14.63 13.79,14.45 C13.79,14.45 17.65,16.19 18.17,14.34 C18.69,12.5 15.12,12.9 14.5,13.09 C14.5,13.09 12.46,11.75 12,9.89 C12,9.89 13.13,5.95 11.38,6 C9.63,6.05 10.29,9.12 10.59,10.08 M11.4,11.13 C11.43,11.13 11.87,12.33 13.29,13.58 C13.29,13.58 10.96,14.04 9.9,14.5 C9.9,14.5 10.9,12.75 11.4,11.13 M15.32,13.84 C15.9,13.69 17.64,14 17.58,14.32 C17.5,14.65 15.32,13.84 15.32,13.84 M8.26,15.7 C7.73,16.91 6.83,17.68 6.6,17.67 C6.37,17.66 7.3,16.07 8.26,15.7 M11.4,8.76 C11.39,8.71 11.03,6.57 11.4,6.61 C11.94,6.67 11.4,8.71 11.4,8.76 Z" id="mdi:file-pdf-box" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
 
 
 define('text!templates/svg/status-outline.html',[],function () { return '<?xml version="1.0" encoding="UTF-8"?>\n<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n    <title>icon/material/status-outline</title>\n    <g id="icon/material/status-outline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">\n        <rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="24" height="24"></rect>\n        <path d="M16.06,2.2 L17.74,6.26 L21.8,7.94 L20.12,12 L21.8,16.06 L17.74,17.74 L16.06,21.8 L12,20.12 L7.94,21.8 L6.26,17.74 L2.2,16.06 L3.88,12 L2.2,7.94 L6.26,6.26 L7.94,2.2 L12,3.88 L16.06,2.2 Z M15,4.81 L12,6.05 L9,4.81 L7.79,7.79 L4.81,9 L6.05,12 L4.81,15 L7.79,16.21 L9,19.19 L12,17.95 L15,19.19 L16.21,16.21 L19.19,15 L17.95,12 L19.19,9 L16.21,7.79 L15,4.81 Z M13.5,7 L12,11 L15,11 L11.5,17 L10.5,17 L12,13 L9,13 L12.5,7 L13.5,7 Z" id="xabber:status-outline" fill="#000000" fill-rule="nonzero"></path>\n    </g>\n</svg>';});
@@ -39454,6 +39500,8 @@ define("xabber-templates", [
     "text!templates/accounts/add_account.html",
     "text!templates/accounts/change_password.html",
     "text!templates/accounts/toolbar_item.html",
+    "text!templates/accounts/media_gallery_account_file.html",
+    "text!templates/accounts/media_gallery_account.html",
     "text!templates/accounts/settings_left.html",
     "text!templates/accounts/settings_right.html",
     "text!templates/accounts/existing_groupchat_item.html",
@@ -39468,6 +39516,8 @@ define("xabber-templates", [
     "text!templates/accounts/change_status.html",
     "text!templates/accounts/token_item.html",
     "text!templates/accounts/current_token_item.html",
+    "text!templates/accounts/audio_file_waveform.html",
+    "text!templates/accounts/avatars_gallery.html",
 
     "text!templates/vcard/vcard.html",
     "text!templates/vcard/vcard_edit.html",
@@ -39503,6 +39553,9 @@ define("xabber-templates", [
     "text!templates/contacts/edit_contact.html",
     "text!templates/contacts/edit_group.html",
     "text!templates/contacts/preloader.html",
+    "text!templates/contacts/media_item.html",
+    "text!templates/contacts/media_items_empty.html",
+    "text!templates/contacts/audio_file_waveform.html",
     "text!templates/contacts/group_chats/group_chat_properties.html",
     "text!templates/contacts/group_chats/group_chat_properties_right.html",
     "text!templates/contacts/group_chats/group_chat_details.html",
@@ -39534,13 +39587,13 @@ define("xabber-templates", [
     "text!templates/contacts/group_chats/status_item.html",
     "text!templates/contacts/group_chats/group_status.html",
     "text!templates/contacts/group_chats/group_status_right.html",
-    "text!templates/contacts/group_chats/media_item.html",
     "text!templates/contacts/group_chats/file_item.html",
 
     "text!templates/chats/chats_panel.html",
     "text!templates/chats/add_chat_account_item.html",
     "text!templates/chats/chat_item.html",
     "text!templates/chats/chat_head.html",
+    "text!templates/chats/send_media.html",
     "text!templates/chats/saved_chat_head.html",
     "text!templates/chats/chat_content.html",
     "text!templates/chats/chat_content_contact.html",
@@ -39595,6 +39648,14 @@ define("xabber-templates", [
     "text!templates/svg/chevron-left-variant.html",
     "text!templates/svg/subscription-to.html",
     "text!templates/svg/subscription-from.html",
+    "text!templates/svg/image.html",
+    "text!templates/svg/file-audio.html",
+    "text!templates/svg/file-video.html",
+    "text!templates/svg/file-document.html",
+    "text!templates/svg/file-presentation.html",
+    "text!templates/svg/file-zip.html",
+    "text!templates/svg/file.html",
+    "text!templates/svg/file-pdf.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
     "text!templates/svg/job-outline.html",
@@ -39732,6 +39793,8 @@ define("xabber-templates", [
     addTemplate('accounts.add_account');
     addTemplate('accounts.change_password');
     addTemplate('accounts.toolbar_item');
+    addTemplate('accounts.media_gallery_account_file');
+    addTemplate('accounts.media_gallery_account');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');
     addTemplate('accounts.existing_groupchat_item');
@@ -39745,6 +39808,8 @@ define("xabber-templates", [
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item');
     addTemplate('accounts.current_token_item');
+    addTemplate('accounts.audio_file_waveform');
+    addTemplate('accounts.avatars_gallery');
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_edit');
@@ -39779,6 +39844,9 @@ define("xabber-templates", [
     addTemplate('contacts.edit_contact');
     addTemplate('contacts.edit_group');
     addTemplate('contacts.preloader');
+    addTemplate('contacts.media_item');
+    addTemplate('contacts.media_items_empty');
+    addTemplate('contacts.audio_file_waveform');
     addTemplate('contacts.group_chats.group_chat_properties');
     addTemplate('contacts.group_chats.group_chat_properties_right');
     addTemplate('contacts.group_chats.group_chat_details');
@@ -39810,13 +39878,13 @@ define("xabber-templates", [
     addTemplate('contacts.group_chats.status_item');
     addTemplate('contacts.group_chats.group_status');
     addTemplate('contacts.group_chats.group_status_right');
-    addTemplate('contacts.group_chats.media_item');
     addTemplate('contacts.group_chats.file_item');
 
     addTemplate('chats.chats_panel');
     addTemplate('chats.add_chat_account_item');
     addTemplate('chats.chat_item');
     addTemplate('chats.chat_head');
+    addTemplate('chats.send_media');
     addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_content_contact');
@@ -39872,6 +39940,14 @@ define("xabber-templates", [
     addSvgTemplate('svg.chevron-left-variant');
     addSvgTemplate('svg.subscription-to');
     addSvgTemplate('svg.subscription-from');
+    addSvgTemplate('svg.image');
+    addSvgTemplate('svg.file-audio');
+    addSvgTemplate('svg.file-video');
+    addSvgTemplate('svg.file-document');
+    addSvgTemplate('svg.file-presentation');
+    addSvgTemplate('svg.file-zip');
+    addSvgTemplate('svg.file');
+    addSvgTemplate('svg.file-pdf');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');
@@ -40386,7 +40462,7 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
         },
 
         dialogs: {
-            common: function (header, text, buttons, dialog_options, flag) {
+            common: function (header, text, buttons, dialog_options, flag, modal_class) {
                 var dialog = new Modal(function () {
                     buttons || (buttons = {});
                     dialog_options || (dialog_options = []);
@@ -40402,7 +40478,8 @@ define('xabber-modal-utils',["xabber-dependencies", "xabber-templates"], functio
                         cancel_button: cancel_button,
                         optional_buttons: optional_buttons,
                         dialog_options: dialog_options,
-                        flag: flag || ""
+                        flag: flag || "",
+                        modal_class: modal_class || ""
                     });
                 }, {use_queue: true});
 
@@ -40803,6 +40880,27 @@ define('xabber-utils',[
             if (filetype === 'pdf')
                 return 'mdi-file-pdf';
             return 'mdi-file'
+        },
+
+        file_type_icon_svg: function (mime_type) {
+            let filetype = utils.pretty_file_type(mime_type);
+            if (filetype === 'image')
+                return 'image';
+            if (filetype === 'audio')
+                return 'file-audio';
+            if (filetype === 'video')
+                return 'file-video';
+            if (filetype === 'document')
+                return 'file-document';
+            if (filetype === 'presentation')
+                return 'file-presentation';
+            if (filetype === 'archive')
+                return 'file-zip';
+            if (filetype === 'file')
+                return 'file';
+            if (filetype === 'pdf')
+                return 'file-pdf';
+            return 'file'
         },
 
         pretty_file_type: function (mime_type) {
@@ -41396,7 +41494,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":58,"bs":0,"ca":26,"cs":99,"cy":0,"da":0,"de":50,"el":30,"es-ES":35,"es-latin":7,"et":0,"fa":4,"fi":9,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":9,"id":69,"is":0,"it":73,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":67,"pt-BR":72,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":38,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.73","version_description":"removed incoming subscription system message, added subscription button for incoming subscription, changed line breaker for quill textarea text pasting"}'
+'{"version_number":"2.3.2.74","version_description":"media gallery redesign, thumbnail and file request fixes"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -42186,6 +42284,11 @@ define("xabber-views", [],function () {
 
     xabber.NodeView = xabber.BasicView.extend({
         onShow: function (options, tree) {
+            if ((xabber.body.data.get('contact_details_view') && (this.vname === 'right_contact'))){
+                xabber.body.data.get('contact_details_view').scrollTo(xabber.body.data.get('contact_details_view').data.get('scroll_top'));
+                xabber.body.data.set('contact_details_view', null)
+                return;
+            }
             _.each(this.children, function (view) {
                 view.hide();
             });
@@ -47382,6 +47485,7 @@ define("xabber-strophe", [],function () {
         Strophe.addNamespace('PUBSUB', 'http://jabber.org/protocol/pubsub');
         Strophe.addNamespace('PUBSUB_AVATAR_DATA', 'urn:xmpp:avatar:data');
         Strophe.addNamespace('PUBSUB_AVATAR_METADATA', 'urn:xmpp:avatar:metadata');
+        Strophe.addNamespace('PUBSUB_AVATAR_METADATA_THUMBNAIL', 'urn:xmpp:thumbs:1');
         Strophe.addNamespace('REWRITE', 'https://xabber.com/protocol/rewrite');
         Strophe.addNamespace('REFERENCE', 'https://xabber.com/protocol/references');
         Strophe.addNamespace('GEOLOC', 'http://jabber.org/protocol/geoloc');
@@ -48244,29 +48348,71 @@ define("xabber-accounts", [],function () {
                         this.removeAvatar(callback, errback);
                         return;
                     }
-                    let avatar_hash = image.hash || sha1(image.base64),
-                        iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
-                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
-                            .c('item', {id: avatar_hash})
-                            .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
-                        iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
-                            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                            .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                            .c('item', {id: avatar_hash})
-                            .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                            .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                    this.sendIQinBackground(iq_pub_data, () => {
+                    let dfd = new $.Deferred();
+
+                    dfd.done((data, http_avatar) => {
+                        if (http_avatar) {
+                            let avatar_hash = image.hash || sha1(image.base64),
+                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('info', {bytes: data.size, id: avatar_hash, type: data.type, url: data.file});
+                            data.thumbnails.forEach((thumbnail) => {
+                                iq_pub_metadata.c('thumbnail', {
+                                    xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
+                                    url: thumbnail.url,
+                                    width: thumbnail.width,
+                                    height: thumbnail.height,
+                                }).up()
+                            })
                             this.sendIQinBackground(iq_pub_metadata, () => {
                                     callback && callback(avatar_hash);
                                 },
                                 function (data_error) {
                                     errback && errback(data_error);
                                 });
-                        },
-                        (data_error) => {
-                            errback && errback(data_error);
+                        }
+                        else {
+                            let avatar_hash = image.hash || sha1(image.base64),
+                                iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(data),
+                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                    .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                                    .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('item', {id: avatar_hash})
+                                    .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                                    .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
+                            this.sendIQinBackground(iq_pub_data, () => {
+                                    this.sendIQinBackground(iq_pub_metadata, () => {
+                                            callback && callback(avatar_hash);
+                                        },
+                                        function (data_error) {
+                                            errback && errback(data_error);
+                                        });
+                                },
+                                (data_error) => {
+                                    errback && errback(data_error);
+                                });
+                        }
+                    });
+                    if (this.get('gallery_token') && this.get('gallery_url') && !image.generated){
+                        let file = image.name ? image : image.file;
+                        this.uploadAvatar(file, (res) => {
+                            if (res.thumbnails.length || res.file){
+                                res.type = file.type;
+                                dfd.resolve(res, true)
+                            } else
+                                dfd.resolve(image.base64)
+                        }, (res) => {
+                            dfd.resolve(image.base64)
                         });
+                    } else
+                        dfd.resolve(image.base64)
                 },
 
                 removeAvatar: function (callback, errback) {
@@ -49289,6 +49435,168 @@ define("xabber-accounts", [],function () {
                     }
                 },
 
+                initGalleryAuth: function(gallery_feature) {
+                    this.set('gallery_url', gallery_feature.get('from'));
+                    if (this.get('gallery_url'))
+                        $.ajax({
+                            type: 'POST',
+                            url: this.get('gallery_url') + 'v1/account/xmpp_code_request/',
+                            dataType: 'json',
+                            data: JSON.stringify({jid: this.jid, type: "iq"}),
+                            success: (response) => {
+                                if (response.request_id)
+                                    this.connection._addSysHandler(this.onAuthCode.bind(this),
+                                        null, "iq", null, response.request_id);
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                onAuthCode: function (stanza) {
+                    let confirm_code = stanza.getElementsByTagName("confirm");
+                    confirm_code = $(confirm_code).attr('id');
+                    if (confirm_code)
+                        $.ajax({
+                            type: 'POST',
+                            url: this.get('gallery_url') + 'v1/account/xmpp_auth/',
+                            dataType: 'json',
+                            data: JSON.stringify({jid: this.id, code: confirm_code}),
+                            success: (response) => {
+                                if (response.token)
+                                    this.set('gallery_token', response.token);
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                prepareFiles: function (files, callback) {
+                    files.forEach((file) => {
+                        let reader = new FileReader();
+                        reader.onloadend = () => {
+                            let b64 = reader.result.split('base64,'),
+                                binary_file = atob(b64[1]),
+                                bytes = new Uint8Array(binary_file.length);
+                            for (let i = 0; i < binary_file.length; i++)
+                                bytes[i] = binary_file.charCodeAt(i);
+                            this.testFile({size: file.size, name: file.name, hash: sha1(bytes)}, file, callback)
+                        }
+                        reader.readAsDataURL(file);
+                    })
+                },
+
+                getStorageStats: function (params, callback) {
+                    params && (params = {});
+                    if (this.get('gallery_token') && this.get('gallery_url'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/stats/',
+                            dataType: 'json',
+                            data: params,
+                            success: (response) => {
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                testFile: function (params, file, callback) {
+                    if (this.get('gallery_token') && this.get('gallery_url'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/slot/',
+                            dataType: 'json',
+                            data: params,
+                            success: (response) => {
+                                this.uploadFile(file , callback)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                            }
+                        });
+                },
+
+                uploadFile: function (file, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url')) {
+                        let formData = new FormData();
+                        formData.append('file', file, file.name);
+                        if (file.duration)
+                            formData.append('duration', file.duration);
+                        if (file.voice)
+                            formData.append('media_type', file.type + '+voice');
+                        else
+                            formData.append('media_type', file.type);
+                        $.ajax({
+                            type: 'POST',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/upload/',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                    }
+                },
+
+                uploadAvatar: function (file, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url')) {
+                        if (!file)
+                            errback && errback('no file')
+                        let formData = new FormData();
+                        formData.append('file', file, file.name);
+                        formData.append('media_type', file.type);
+                        $.ajax({
+                            type: 'POST',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/avatar/upload/',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                    }
+                },
+
+                deleteFile: function (file_id, callback, errback) {
+                    if (this.get('gallery_token') && this.get('gallery_url') && file_id)
+                        $.ajax({
+                            type: 'DELETE',
+                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                            url: this.get('gallery_url') + 'v1/files/',
+                            dataType: 'json',
+                            data: JSON.stringify({id: file_id}),
+                            success: (response) => {
+                                console.log(response)
+                                callback && callback(response)
+                            },
+                            error: (response) => {
+                                console.log(response)
+                                errback && errback(response)
+                            }
+                        });
+                },
+
                 createMessageFromIQ: function (attrs) {
                     let contact = this.contacts.mergeContact(attrs.from_jid),
                         chat = this.chats.getChat(contact);
@@ -49773,6 +50081,438 @@ define("xabber-accounts", [],function () {
             }
         });
 
+        xabber.AccountMediaGalleryView = xabber.BasicView.extend({
+            template: templates.media_gallery_account,
+            events: {
+                "change input.gallery-upload": "onFileInputChanged",
+                "click .gallery-file:not(.gallery-avatar) .btn-delete": "deleteFile",
+                "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
+                "click .tabs .tab": "onTabClick",
+                "click .btn-gallery-sorting": "sortFiles",
+                "click .gallery-file": "onClickFile",
+            },
+
+            _initialize: function () {
+                this.account = this.model;
+                this.$el.html(this.template());
+                this.ps_container = this.$('.gallery-wrap');
+                this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+            },
+
+            render: function () {
+                this.updateStorage();
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.ps_container.perfectScrollbar('destroy');
+                if (this.parent.ps_container.length) {
+                    this.parent.ps_container.perfectScrollbar(
+                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
+                this.$('.dropdown-button').dropdown(dropdown_settings);
+            },
+
+            onScroll: function () {
+                let scrollTop = this.ps_container[0].scrollTop,
+                    scrollHeight = this.ps_container[0].scrollHeight,
+                    offsetHeight = this.ps_container[0].offsetHeight,
+                    persentScrolled = scrollTop / (scrollHeight - offsetHeight);
+                if (persentScrolled > 0.8 && !this.loading_files && (this.current_page < this.total_pages)){
+                    this.current_page++;
+                    this.current_options.page = this.current_page;
+                    this.getFiles(this.current_options)
+                }
+            },
+
+            updateStorage: function (after_deletion) {
+                this.account.getStorageStats(null,(response) => {
+                    let used_storage = utils.pretty_size(response.total.used) || '0';
+                    this.$('.btn-delete-files-dropdown').hideIf(!(response.total && response.total.used))
+                    this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used))
+                    this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
+                    this.$('.tabs .list-variant[data-value="image"]').hideIf(!(response.images && response.images.used))
+                    if (response.images && response.images.used)
+                        this.$('.tabs .list-variant[data-value="image"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="image"]').removeClass('tab')
+                    this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
+                    this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
+                    this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
+                    this.$('.tabs .list-variant[data-value="video"]').hideIf(!(response.videos && response.videos.used))
+                    if (response.videos && response.videos.used)
+                        this.$('.tabs .list-variant[data-value="video"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="video"]').removeClass('tab')
+                    this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used))
+                    this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used))
+                    this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used))
+                    this.$('.tabs .list-variant[data-value="voice"]').hideIf(!(response.voices && response.voices.used))
+                    if (response.voices && response.voices.used)
+                        this.$('.tabs .list-variant[data-value="voice"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="voice"]').removeClass('tab')
+                    this.$('.storage-label-voices').hideIf(!(response.voices && response.voices.used))
+                    this.$('.storage-usage-voices').hideIf(!(response.voices && response.voices.used))
+                    this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used))
+                    this.$('.tabs .list-variant[data-value="files"]').hideIf(!(response.files && response.files.used))
+                    if (response.files && response.files.used)
+                        this.$('.tabs .list-variant[data-value="files"]').addClass('tab')
+                    else
+                        this.$('.tabs .list-variant[data-value="files"]').removeClass('tab')
+                    this.$('.storage-label-files').hideIf(!(response.files && response.files.used))
+                    this.$('.storage-usage-files').hideIf(!(response.files && response.files.used))
+                    this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
+                    if (response.images){
+                        this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.videos){
+                        this.$('.storage-progress-videos').css('width', ((response.videos.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.voices){
+                        this.$('.storage-progress-voices').css('width', ((response.voices.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    if (response.files){
+                        this.$('.storage-progress-files').css('width', ((response.files.used/response.quota) * 100).toFixed(2) + '%')
+                    }
+                    this.$('.tabs .indicator').remove();
+                    this.$('.tabs').tabs();
+                    this.$('.indicator').addClass('ground-color-500');
+                    if (after_deletion){
+                        if (!this.$('.tabs .list-variant.tab').length) {
+                            return;
+                        }
+                        !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
+                    }
+                });
+            },
+
+            filterType: function (file_type, sorting) {
+                this.$('.gallery-files').html('')
+                if (file_type === 'image' || file_type === 'video' || file_type === 'avatars') {
+                    this.$('.gallery-files').removeClass('voice')
+                    this.$('.gallery-files').addClass('grid')
+                } else if (file_type === 'voice') {
+                    this.$('.gallery-files').addClass('voice')
+                    this.$('.gallery-files').removeClass('grid')
+                } else {
+                    this.$('.gallery-files').removeClass('voice')
+                    this.$('.gallery-files').removeClass('grid')
+                }
+                this.$('.tabs .list-variant a').removeClass('active');
+                this.$('.tabs .list-variant[data-value="' + file_type + '"] a').addClass('active');
+                let options = {type: file_type}
+                sorting && (options.order_by = sorting)
+                this.current_options = options
+                if (file_type === 'avatars')
+                    this.getAvatars(options)
+                else
+                    this.getFiles(options)
+            },
+
+            onTabClick: function (ev) {
+                let $target = $(ev.target).closest('.tab'),
+                    file_type = $target.attr('data-value');
+                this.current_page = 1;
+                this.total_pages = 0;
+                this.$('.gallery-files').html('')
+                this.filterType(file_type);
+            },
+
+            sortFiles: function (ev) {
+                let $target = $(ev.target).closest('.btn-gallery-sorting'),
+                    file_type = this.$('.tab .active').closest('.tab').attr('data-value'),
+                    sort_type = $target.attr('data-value');
+                this.current_page = 1;
+                this.total_pages = 0;
+                this.$('.gallery-files').html('')
+                this.filterType(file_type, sort_type);
+            },
+
+            onClickFile: function (ev) {
+                let $elem = $(ev.target);
+                if ($elem.hasClass('uploaded-video')) {
+                    let $file = $elem.closest('.gallery-file'),
+                        f_url = $file.attr('data-file');
+
+                    utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315"src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+                    return;
+                }
+                if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
+                    let $audio_elem = $elem.closest('.gallery-file'),
+                        f_url = $audio_elem.attr('data-file');
+                    $audio_elem.find('.mdi-play').removeClass('audio-file-play');
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-play')) {
+                    let $audio_elem = $elem.closest('.gallery-file');
+                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    $audio_elem[0].voice_message.play();
+                    return;
+                }
+
+                if ($elem.hasClass('mdi-pause')) {
+                    this.prev_audio_message.voice_message.pause();
+                    return;
+                }
+            },
+
+            renderVoiceMessage: function (element, file_url) {
+                let not_expanded_msg = element.innerHTML,
+                    unique_id = 'waveform' + moment.now(),
+                    $elem = $(element),
+                    $msg_element = $elem.closest('.gallery-file');
+                $elem.addClass('voice-message-rendering').html($(templates.audio_file_waveform({waveform_id: unique_id})));
+                let aud = this.createAudio(file_url, unique_id);
+
+                aud.on('ready', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
+                    $msg_element.find('.gallery-file-placeholder-background').removeClass('gallery-audio-file-not-uploaded');
+                    let duration = Math.round(aud.getDuration());
+                    $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+                    aud.play();
+                });
+
+                aud.on('error', () => {
+                    $elem.removeClass('voice-message-rendering');
+                    element.innerHTML = not_expanded_msg;
+                    aud.unAll();
+                    $elem.find('.voice-message-play').get(0).remove();
+                    utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
+                });
+
+                aud.on('play', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').addClass('mdi-pause').removeClass('mdi-play');
+                    $msg_element.addClass('playing');
+                    let timerId = setInterval(function() {
+                        let cur_time = Math.round(aud.getCurrentTime());
+                        if (aud.isPlaying())
+                            $elem.find('.voice-msg-current-time').text(utils.pretty_duration(cur_time));
+                        else
+                            clearInterval(timerId);
+                    }, 100);
+                });
+
+                aud.on('finish', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                aud.on('pause', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                $elem.find('.voice-message-volume')[0].onchange = () => {
+                    aud.setVolume($elem.find('.voice-message-volume').val()/100);
+                };
+                return aud;
+            },
+
+            createAudio: function(file_url, unique_id) {
+                let audio = WaveSurfer.create({
+                    container: "#" + unique_id,
+                    scrollParent: false,
+                    barWidth: 3,
+                    height: 48,
+                    barHeight: 48,
+                    cursorColor: 'rgba(211,47,47,0.8)',
+                    autoCenter: false,
+                    normalize: true,
+                    hideScrollBar: true,
+                    progressColor: '#757575'
+                });
+                audio.load(file_url);
+                audio.setVolume(0.5);
+                return audio;
+            },
+
+            getFiles: function (options) {
+                options && options.file && (options = {});
+                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                    this.loading_files = true
+                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            response.type = options.type
+                            this.renderFiles(response)
+                            this.loading_files = false
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.loading_files = false
+                            this.$('.gallery-files .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            getAvatars: function (options) {
+                options && options.file && (options = {});
+                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                    this.loading_files = true
+                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            console.log(response)
+                            response.type = options.type
+                            this.renderFiles(response)
+                            this.loading_files = false
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.loading_files = false
+                            this.$('.gallery-files .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            renderFiles: function (response) {
+                if (response.type != this.$('.tab .active').closest('.tab').attr('data-value'))
+                    return;
+                if (!response.total_objects && response.type != 'avatars'){
+                    if (response.type){
+                        let tab = this.$('.tabs .list-variant[data-value=' + response.type + ']');
+                        tab.removeClass('tab');
+                        tab.addClass('hidden');
+                        this.$('.tabs .indicator').remove();
+                        this.$('.tabs').tabs();
+                        this.$('.indicator').addClass('ground-color-500');
+                    }
+                }
+                if (!response.items.length){
+                    !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
+                    return;
+                }
+                this.total_pages = response.total_pages;
+                this.$('.gallery-files .preloader-wrapper').remove()
+                if (response.items.length){
+                    response.items.forEach((item) => {
+                        if (response.type === 'avatars'){
+                            if (item.thumbnails.length)
+                                item.thumbnail = item.thumbnails[0].url
+                        } else if (item.thumbnail)
+                            item.thumbnail = item.thumbnail.url
+                        let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
+                        $gallery_file.appendTo(this.$('.gallery-files'));
+                        $gallery_file.find('.uploaded-img').magnificPopup({
+                            type: 'image',
+                            closeOnContentClick: true,
+                            fixedContentPos: true,
+                            mainClass: 'mfp-no-margins mfp-with-zoom',
+                            image: {
+                                verticalFit: true,
+                                titleSrc: function(item) {
+                                    return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                                }
+                            },
+                            zoom: {
+                                enabled: true,
+                                duration: 300
+                            }
+                        });
+                    });
+                }
+                else {
+                    this.$('.gallery-files').html(xabber.getString("no_files"))
+                }
+                let dropdown_settings = {
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                };
+                this.$('.dropdown-button').dropdown(dropdown_settings)
+            },
+
+            deleteFile: function (ev) {
+                let $target = $(ev.target).closest('.gallery-file'),
+                    file_id = $target.attr('data-id');
+                this.account.deleteFile(file_id,(response) => {
+                    this.updateStorage(true);
+                    $target.detach();
+                }, (err) => {
+                })
+            },
+
+            deleteAvatar: function (ev) {
+                let $target = $(ev.target).closest('.gallery-file'),
+                    file_id = $target.attr('data-id');
+                if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: JSON.stringify({id: file_id}),
+                        success: (response) => {
+                            this.updateStorage(true);
+                            $target.detach();
+                        },
+                        error: (response) => {
+                            console.log(response)
+                        }
+                    });
+            },
+
+            deleteFilesFiltered: function (ev) {
+                let $target = $(ev.target).closest('.property-variant'),
+                    days = $target.attr('data-date'),
+                    date = new Date();
+                days && date.setDate(date.getDate() - days)
+                if (this.account.get('gallery_token') && this.account.get('gallery_url') && date && date.toISOString().split('T') && date.toISOString().split('T')[0])
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
+                        success: (response) => {
+                            this.updateStorage(true);
+                        },
+                        error: (response) => {
+                            console.log(response)
+                        }
+                    });
+            },
+
+            onFileInputChanged: function (ev) {
+                let target = ev.target,
+                    files = [];
+                for (let i = 0; i < target.files.length; i++) {
+                    files.push(target.files[i]);
+                }
+
+                if (files) {
+                    this.account.prepareFiles(files, this.openStoragePanel.bind(this));
+                    $(target).val('')
+                }
+            },
+        });
+
         xabber.AccountSettingsLeftView = xabber.BasicView.extend({
             className: 'account-settings-left-wrap',
             template: templates.settings_left,
@@ -49800,6 +50540,7 @@ define("xabber-accounts", [],function () {
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("change:image", this.updateAvatar, this);
+                this.model.on("change:gallery_token", this.updateGallery, this);
                 this.model.on("activate deactivate", this.updateBlocks, this);
                 this.model.on("destroy", this.remove, this);
             },
@@ -49843,7 +50584,13 @@ define("xabber-accounts", [],function () {
                 this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="blocklist"]').showIf(connected);
                 this.$('.settings-tab[data-block-name="groups-info"]').showIf(connected);
+                this.updateGallery();
                 this.updateScrollBar();
+            },
+
+            updateGallery: function () {
+                let connected = this.model.isConnected();
+                this.$('.settings-tab[data-block-name="media-gallery"]').showIf(connected && this.model.get('gallery_token'));
             },
 
             updateNameCSS: function () {
@@ -49863,7 +50610,11 @@ define("xabber-accounts", [],function () {
             },
 
             chooseAvatar: function () {
-                this.$('.main-info-wrap .circle-avatar input').click();
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    let avatar_view = new xabber.SetAvatarView();
+                    avatar_view.render({model: this.model});
+                } else
+                    this.$('.main-info-wrap .circle-avatar input').click();
             },
 
             openEmojiPanel: function () {
@@ -49882,7 +50633,7 @@ define("xabber-accounts", [],function () {
                     return;
                 let file = field.files[0];
                 field.value = '';
-                if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                if (file.size > constants.MAX_AVATAR_FILE_SIZE && !(this.model.get('gallery_token') && this.model.get('gallery_url'))) {
                     utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
                     return;
                 } else if (!file.type.startsWith('image')) {
@@ -49892,7 +50643,7 @@ define("xabber-accounts", [],function () {
                 this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 utils.images.getAvatarFromFile(file).done((image, hash, size) => {
                     if (image) {
-                        this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type}, () => {
+                        this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
                                 this.$('.circle-avatar').setAvatar(image, this.avatar_size);
                                 this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                             }, () => {
@@ -49920,6 +50671,10 @@ define("xabber-accounts", [],function () {
                     this.model.showSettings(block_name, 'vcard');
                     this.$('.settings-tab').removeClass('active');
                     $tab.addClass('active');
+                }
+                else if (block_name === 'media-gallery'){
+                    this.model.showSettings(null, block_name);
+                    this.model.settings_right.gallery_view.$('.tabs .list-variant:not(.hidden)').first().click();
                 }
                 else
                     this.model.showSettings(null, block_name);
@@ -49969,6 +50724,7 @@ define("xabber-accounts", [],function () {
                 "click .btn-block": "openBlockWindow",
                 "click .btn-unblock-selected": "unblockSelected",
                 "click .btn-deselect-blocked": "deselectBlocked",
+                "click .btn-delete-files": "deleteFilesFiltered",
                 "click .omemo-info .btn-purge-keys": "purgeKeys"
             },
 
@@ -49977,6 +50733,8 @@ define("xabber-accounts", [],function () {
                 //     {model: this.model.resources, el: this.$('.xmpp-resources')[0]});
                 this.vcard_view = this.addChild('vcard', xabber.AccountVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
+                this.gallery_view = this.addChild('media-gallery', xabber.AccountMediaGalleryView,
+                    {model: this.model, el: this.$('.media-gallery')[0]});
                 this.$('.account-name .value').text(this.model.get('jid'));
                 this.updateStatus();
                 this.updateView();
@@ -50018,9 +50776,32 @@ define("xabber-accounts", [],function () {
                     this.$('.settings-block-wrap.'+options.block_name).removeClass('hidden');
                     this.$('.settings-panel-head span.settings-panel-head-title').text(this.$('.settings-block-wrap.'+options.block_name).attr('data-header'));
                     this.$('.btn-block').switchClass('hidden2', options.block_name != 'blocklist-info');
+                    this.$('.media-gallery-button.btn-more').hideIf(options.block_name != 'media-gallery');
+                    if (options.block_name === 'media-gallery') {
+                        let dropdown_settings = {
+                            inDuration: 100,
+                            outDuration: 100,
+                            constrainWidth: false,
+                            hover: false,
+                            alignment: 'right'
+                        };
+                        this.$('.media-gallery-button.dropdown-button').dropdown(dropdown_settings);
+
+                        this.$('.btn-delete-files-variants').dropdown({
+                            inDuration: 100,
+                            outDuration: 100,
+                            hover: true,
+                            belowOrigin: true,
+                        });
+                    }
                 }
                 this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
                 this.$('.panel-content-wrap').removeClass('hidden');
+                if (this.ps_container.length) {
+                    this.ps_container.perfectScrollbar(
+                        _.extend(this.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
                 return this;
             },
 
@@ -50038,7 +50819,13 @@ define("xabber-accounts", [],function () {
                 this.$('.server-info').showIf(connected);
                 this.$('.blocklist').showIf(connected);
                 this.$('.groups-info').showIf(connected);
+                this.updateGallery();
                 this.updateScrollBar();
+            },
+
+            updateGallery: function () {
+                let connected = this.model.isConnected();
+                this.$('.media-gallery').showIf(connected && this.model.get('gallery_token'));
             },
 
             updateSynchronizationBlock: function () {
@@ -50325,6 +51112,11 @@ define("xabber-accounts", [],function () {
                 if (this.children && this.children.blocklist)
                     this.children.blocklist.deselectBlocked();
             },
+
+            deleteFilesFiltered: function (ev) {
+                if (this.gallery_view)
+                    this.gallery_view.deleteFilesFiltered(ev);
+            },
         });
 
         xabber.StatusMessageWidget = xabber.InputWidget.extend({
@@ -50588,6 +51380,237 @@ define("xabber-accounts", [],function () {
             }
         });
 
+        xabber.SetAvatarView = xabber.BasicView.extend({
+            className: 'modal main-modal avatar-picker background-panel',
+            template: templates.avatars_gallery,
+            ps_selector: '.modal-content',
+            ps_settings: {theme: 'item-list'},
+
+            events: {
+                "click .menu-btn": "updateActiveMenu",
+                "click .library-wrap .image-item": "setActiveImage",
+                'change input[type="file"]': "onFileInputChanged",
+                'keyup input.url': "onInputChanged",
+                "click .btn-add": "addAvatar",
+                "click .btn-cancel": "close"
+            },
+
+            _initialize: function () {
+                this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+            },
+
+            render: function (options) {
+                this.model = options.model;
+                this.createLibrary();
+                this.$('.menu-btn').removeClass('active');
+                this.$('.menu-btn[data-screen-name="library"]').addClass('active');
+                this.$('.modal-header span').text(xabber.getString("account_set_avatar_header"));
+                this.$el.openModal({
+                    ready: () => {
+                        this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                    },
+                    complete: this.close.bind(this)
+                });
+                let draggable = this.$('.upload-wrap');
+                draggable[0].ondragenter = function (ev) {
+                    ev.preventDefault();
+                    draggable.addClass('file-drop');
+                };
+                draggable[0].ondragover = function (ev) {
+                    ev.preventDefault();
+                };
+                draggable[0].ondragleave = function (ev) {
+                    if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                        return;
+                    ev.preventDefault();
+                    draggable.removeClass('file-drop');
+                };
+                draggable[0].ondrop = (ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    draggable.removeClass('file-drop');
+                    let files = ev.dataTransfer.files || [], file;
+                    for (let i = 0; i < files.length; i++) {
+                        if (utils.isImageType(files[i].type)) {
+                            file = files[i];
+                            break;
+                        }
+                    }
+                    file && this.addFile(file);
+                };
+            },
+
+            onPaste: function (ev) {
+                let url = ev.clipboardData.getData('text').trim();
+                this.$('.image-preview img')[0].onload = () => {
+                    this.$('.image-preview img').removeClass('hidden');
+                    this.updateActiveButton();
+                };
+                this.$('.image-preview img').addClass('hidden')[0].src = url;
+                this.updateActiveButton();
+            },
+
+            updateActiveMenu: function (ev) {
+                let screen_name = ev.target.getAttribute('data-screen-name');
+                this.$('.menu-btn').removeClass('active');
+                this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+                this.updateScreen(screen_name);
+            },
+
+            updateScreen: function (name) {
+                this.$('.screen-wrap').addClass('hidden');
+                this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+                this.scrollToTop();
+                this.updateActiveButton();
+            },
+
+            updateActiveButton: function () {
+                let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                    non_active = true;
+                if ($active_screen.attr('data-screen') == 'library') {
+                    $active_screen.find('div.active').length && (non_active = false);
+                } else {
+                    $active_screen.find('img:not(.hidden)').length && (non_active = false);
+                }
+                this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+            },
+
+            renderFiles: function (response) {
+                this.$('.library-wrap .preloader-wrapper').remove()
+                if (response.items.length){
+                    response.items.forEach((item) => {
+                        if (item.thumbnails && item.thumbnails.length)
+                            item.thumbnail = item.thumbnails[item.thumbnails.length - 1].url
+                        let img = $(`<div class="image-item"/>`);
+                        img.css('background-image', `url("${item.thumbnail}")`);
+                        img.attr('data-src', item.file);
+                        this.$('.library-wrap').append(img);
+                    });
+                }
+            },
+
+            createLibrary: function () {
+                let options = {order_by: '-id'};
+                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                    this.$('.library-wrap').html(env.templates.contacts.preloader())
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                        url: this.model.get('gallery_url') + 'v1/avatar/',
+                        dataType: 'json',
+                        data: options,
+                        success: (response) => {
+                            console.log(response)
+                            this.renderFiles(response)
+                        },
+                        error: (response) => {
+                            console.log(response)
+                            this.$('.library-wrap .preloader-wrapper').remove()
+                        }
+                    });
+                }
+            },
+
+            setActiveImage: function (ev) {
+                let $target = $(ev.target);
+                if ($target.hasClass('active'))
+                    $target.removeClass('active');
+                else {
+                    this.$('.library-wrap>div').removeClass('active');
+                    $target.addClass('active');
+                }
+                this.updateActiveButton();
+            },
+
+            onFileInputChanged: function (ev) {
+                let target = ev.target, file;
+                for (let i = 0; i < target.files.length; i++) {
+                    if (utils.isImageType(target.files[i].type)) {
+                        file = target.files[i];
+                        break;
+                    }
+                }
+                file && this.addFile(file);
+                $(target).val('');
+            },
+
+            addFile: function (file) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    let image_prev = new Image(),
+                        src = e.target.result;
+                    image_prev.src = src;
+                    this.$('.screen-wrap[data-screen="upload"] img').detach();
+                    this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                    this.current_file = file;
+                    this.updateActiveButton();
+                };
+                reader.readAsDataURL(file);
+            },
+
+            onInputChanged: function (ev) {
+                if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                    return;
+                if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                    let url = ev.target.value.trim();
+                    this.$('.image-preview img')[0].onload = () => {
+                        this.$('.image-preview img').removeClass('hidden');
+                        this.updateActiveButton();
+                    };
+                    this.$('.image-preview img').addClass('hidden')[0].src = url;
+                    this.updateActiveButton();
+                } else {
+                    this.$('.image-preview img').addClass('hidden')[0].src = "";
+                    this.updateActiveButton();
+                }
+            },
+
+            addAvatar: function () {
+                if (this.$('.btn-add').hasClass('non-active'))
+                    return;
+                let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+                dfd.done((img) => {
+                    utils.images.getAvatarFromFile(img).done((image, hash, size) => {
+                        if (image) {
+                            this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
+                                this.close();
+                            }, () => {
+                                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                            });
+                        } else
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                    });
+                });
+                this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+                this.$('.btn-add').addClass('hidden-disabled');
+                if ($active_screen.attr('data-screen') == 'library' || $active_screen.attr('data-screen') == 'web-address') {
+                    image = $active_screen.attr('data-screen') == 'library' ? $active_screen.find('div.active').attr('data-src') : $active_screen.find('img:not(.hidden)')[0].src;
+                    this.createFileFromURL(image).then((file) => {
+                        dfd.resolve(file);
+                    })
+                } else
+                    dfd.resolve(this.current_file);
+            },
+
+            createFileFromURL: async function (url) {
+                let response = await fetch(url);
+                let data = await response.blob();
+                let metadata = {
+                    type: 'image/png'
+                };
+                let file = new File([data], "avatar.png", metadata);
+                return file
+            },
+
+            close: function () {
+                this.$el.closeModal({ complete: () => {
+                        this.$el.detach();
+                        this.data.set('visible', false);
+                    }
+                });
+            }
+        });
+
         xabber.WebcamProfileImageView = xabber.BasicView.extend({
             className: 'modal main-modal webcam-panel',
             template: templates.webcam_panel,
@@ -50722,7 +51745,7 @@ define("xabber-accounts", [],function () {
 
             saveAvatar: function () {
                 let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
-                    file = new File([blob], "avatar", {
+                    file = new File([blob], "avatar.png", {
                         type: "image/png",
                     });
                 file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
@@ -50803,6 +51826,7 @@ define("xabber-accounts", [],function () {
                     file = new File([blob], "avatar", {
                         type: "image/png",
                     });
+                file.generated = true;
                 file.base64 = blob;
                 if (file && file.base64) {
                     if (this.registration && this.registration_view){
@@ -52397,6 +53421,13 @@ define("xabber-discovery", [],function () {
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
                 this.connection.disco.addItem(jid, name, node, () => {});
+                if (jid.includes('mediagallery')){
+                    this.create({
+                        'var': 'media-gallery',
+                        jid: jid,
+                        from: node
+                    })
+                }
                 this.connection.disco.info(
                     jid,
                     null,
@@ -52435,6 +53466,9 @@ define("xabber-discovery", [],function () {
                     $iq({type: 'get'}).c('prefs', {xmlns: Strophe.NS.MAM}),
                     _.bind(this.receiveMAMPreferences, this, feature)
                 );
+            }
+            if (_var === 'media-gallery' && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
+                this.account.initGalleryAuth(feature);
             }
         },
 
@@ -53345,6 +54379,142 @@ define("xabber-contacts", [],function () {
                 );
             },
 
+            MAMRequest: function (options, callback, errback) {
+                let account = this.account,
+                    is_fast = options.fast && account.fast_connection && account.fast_connection.connected,
+                    conn = is_fast ? account.fast_connection : account.connection,
+                    contact = this,
+                    messages = [], queryid = uuid(),
+                    is_groupchat = contact && contact.get('group_chat'), success = true, iq;
+                delete options.fast;
+                if (is_groupchat)
+                    iq = $iq({type: 'set', to: contact.get('full_jid') || contact.get('jid')});
+                else
+                    iq = $iq({type: 'set'});
+                iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
+                    .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                    .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+                    .c('value').t(Strophe.NS.MAM).up().up();
+                if (this.account.server_features.get(Strophe.NS.ARCHIVE) && options.encrypted)    {
+                    iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
+                        .c('value').t(options.encrypted).up().up();
+                }
+                if (this.account.server_features.get(Strophe.NS.ARCHIVE) && !options.encrypted)    {
+                    if (options.filter_image)
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_image`})
+                            .c('value').t(options.filter_image).up().up();
+                    if (options.filter_video)
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_video`})
+                            .c('value').t(options.filter_video).up().up();
+                    if (options.filter_voice)
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_voice`})
+                            .c('value').t(options.filter_voice).up().up();
+                    if (options.filter_files){
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_image`})
+                            .c('value').t('false').up().up();
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_video`})
+                            .c('value').t('false').up().up();
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_voice`})
+                            .c('value').t('false').up().up();
+                        iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_sticker`})
+                            .c('value').t('false').up().up();
+                    }
+                }
+                if (!is_groupchat)
+                    iq.c('field', {'var': 'with'})
+                        .c('value').t(this.get('jid')).up().up();
+                if (options.var)
+                    options.var.forEach((opt_var) => {
+                        iq.c('field', {'var': opt_var.var})
+                            .c('value').t(opt_var.value).up().up();
+                    });
+                iq.up().cnode(new Strophe.RSM(options).toXML());
+                let deferred = new $.Deferred();
+                account.chats.onStartedMAMRequest(deferred);
+                deferred.done(function () {
+                    let handler = conn.addHandler(function (message) {
+                        if ((contact && is_groupchat == contact.get('group_chat'))) {
+                            let $msg = $(message);
+                            if ($msg.find('result').attr('queryid') === queryid) {
+                                messages.push(message);
+                            }
+                        }
+                        else {
+                            messages = [];
+                            success = false;
+                        }
+                        return true;
+                    }, Strophe.NS.MAM);
+                    let callb = function (res) {
+                            conn.deleteHandler(handler);
+                            account.chats.onCompletedMAMRequest(deferred);
+                            let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
+                            if ($fin.length && $fin.attr('queryid') === queryid) {
+                                let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
+                                rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
+                                callback && callback(success, messages, rsm);
+                            }
+                        },
+                        errb = function (err) {
+                            conn.deleteHandler(handler);
+                            xabber.error("MAM error");
+                            xabber.error(err);
+                            account.chats.onCompletedMAMRequest(deferred);
+                            errback && errback(err);
+                        };
+                    if (is_fast)
+                        account.sendFast(iq, callb, errb);
+                    else
+                        account.sendIQ(iq, callb, errb);
+                });
+            },
+
+            getFilesFromStanza: function ($message, options) {
+                $message = $message.find('message')
+                let references = $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`).length ?
+                    $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`) :
+                    $message.children('envelope').children('content').children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`),
+                    items = [];
+
+                references.each((idx, reference) => {
+                    let $reference = $(reference),
+                        type = $reference.attr('type');
+                    if (type === 'mutable') {
+                        let $file_sharing = $reference.find(`file-sharing[xmlns="${Strophe.NS.FILES}"]`).first();
+                        if ($file_sharing.length) {
+                            let type = $file_sharing.parent(`voice-message[xmlns="${Strophe.NS.VOICE_MESSAGE}"]`).length ? 'voice' : 'file',
+                                $file = $file_sharing.children('file'), file_attrs = {}, sources = [];
+                            $file_sharing.children('sources').children('uri').each((i, uri) => {sources.push($(uri).text());});
+                            file_attrs = {
+                                name: $file.children('name').text(),
+                                hash: $file.children(`hash[xmlns="${Strophe.NS.HASH}"]`).text(),
+                                size: $file.children('size').text(),
+                                uniqueid: $message.attr('id'),
+                                id: $file.children('gallery-id').text(),
+                                created_at: $file.children('created').text(),
+                                thumbnail: $file.children('thumbnail-uri').text(),
+                                media_type: $file.children('media-type').text(),
+                                duration: $file.children('duration').text(),
+                                description: $file.children('desc').text(),
+                                height: $file.children('height').text(),
+                                width: $file.children('width').text(),
+                                voice: type === 'voice',
+                                sources: sources
+                            };
+                            if (sources[0].indexOf('aescbc') == 0) {
+                                let uri = sources[0].replace(/^aescbc/, 'https'),
+                                    key = utils.fromBase64toArrayBuffer(uri.slice(uri.length - 64));
+                                uri = uri.slice(0, uri.length - 64 - 1);
+                                _.extend(file_attrs, {sources: [uri], key: key});
+                                file_attrs.has_encrypted_files = true;
+                            }
+                            items.push(file_attrs);
+                        }
+                    }
+                });
+                return items
+            },
+
             parsePinnedMessage: function ($message, pinned_msg_elem) {
                 if (!$message) {
                     this.renderPinnedMessage(null, pinned_msg_elem);
@@ -54241,9 +55411,9 @@ define("xabber-contacts", [],function () {
                 if (!this.encrypted){
                     this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
                         {model: this.model, el: this.$('.edit-block-wrap')[0]});
-                    this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                        {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
                 }
+                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
                 this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
                     {model: this.model, el: this.$('.vcard')[0]});
                 this.edit_groups_view = this.addChild('groups',
@@ -54292,7 +55462,7 @@ define("xabber-contacts", [],function () {
                 this.updateName();
                 this.updateNotifications();
                 this.setButtonsWidth();
-                this.updateList('media');
+                this.updateList('image');
                 xabber.once("update_css", this.updateIndicator, this);
                 this.onScroll();
                 this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
@@ -54610,27 +55780,21 @@ define("xabber-contacts", [],function () {
             addList: function (name) {
                 let constructor_func;
                 switch (name) {
-                    case 'media':
-                        constructor_func = xabber.MediaView;
+                    case 'image':
+                        constructor_func = xabber.MediaImagesView;
+                        break;
+                    case 'video':
+                        constructor_func = xabber.MediaVideosView;
                         break;
                     case 'files':
-                        constructor_func = xabber.FilesView;
-                        break;
-                    case 'links':
-                        constructor_func = xabber.FilesView;
+                        constructor_func = xabber.MediaFilesView;
                         break;
                     case 'voice':
-                        constructor_func = xabber.FilesView;
-                        break;
-                    case 'blocked':
-                        constructor_func = xabber.BlockedView;
-                        break;
-                    case 'invitations':
-                        constructor_func = xabber.InvitationsView;
+                        constructor_func = xabber.MediaVoiceView;
                         break;
                 };
                 if (constructor_func)
-                    return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
+                    return this.addChild(name, constructor_func, {model: this.model, encrypted: this.encrypted, el: this.$('.participants-wrap')[0]});
                 else
                     return;
             },
@@ -55311,17 +56475,17 @@ define("xabber-contacts", [],function () {
             addList: function (name) {
                 let constructor_func, edit_view;
                 switch (name) {
-                    case 'media':
-                        constructor_func = xabber.MediaView;
+                    case 'image':
+                        constructor_func = xabber.MediaImagesView;
+                        break;
+                    case 'video':
+                        constructor_func = xabber.MediaVideosView;
                         break;
                     case 'files':
-                        constructor_func = xabber.FilesView;
-                        break;
-                    case 'links':
-                        constructor_func = xabber.FilesView;
+                        constructor_func = xabber.MediaFilesView;
                         break;
                     case 'voice':
-                        constructor_func = xabber.FilesView;
+                        constructor_func = xabber.MediaVoiceView;
                         break;
                     case 'blocked':
                         constructor_func = xabber.BlockedView;
@@ -55857,60 +57021,454 @@ define("xabber-contacts", [],function () {
             }
         });
 
-        xabber.MediaView = xabber.BasicView.extend({
-            events: {
-            },
-            status: 'media',
+        xabber.MediaBaseView = xabber.BasicView.extend({
+            status: 'base',
             member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
 
             _initialize: function (options) {
                 this.contact = options.model;
+                this.participant = options.participant;
+                this.encrypted = options.encrypted;
+                this.account = this.contact.account;
+                this.chat = this.account.chats.getChat(this.contact, this.encrypted && 'encrypted');
+                this.temporary_items = []
+                this.parent.ps_container.on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
             },
 
             _render: function () {
                 if (this.$el.length && this.$el.closest("body").length == 0)
                     this.$el = this.parent.$('.participants-details-media-wrap')
                 this.$el.html($(templates.preloader()));
-                this.updateMedia(28);
+                this.all_messages_loaded = false;
+                this.temporary_items = [];
+                this.messagesFileRequest({}, () => {
+                    this.$el.html("<div class='gallery-files'></div>");
+                    this.updateMedia();
+                });
             },
 
-            updateMedia: function (times) {
-                this.$el.html("<div class='media-wrap'></div>");
-                for(var i = 0; i < times; i++){
-                    let $item_view = $(templates.group_chats.media_item());
-                    this.$el.find('.media-wrap').append($item_view);
+            onScroll: function () {
+                if (!this.active)
+                    return
+                let scrollTop = this.parent.ps_container[0].scrollTop,
+                    scrollHeight = this.parent.ps_container[0].scrollHeight,
+                    offsetHeight = this.parent.ps_container[0].offsetHeight,
+                    persentScrolled = scrollTop / (scrollHeight - offsetHeight);
+                if (persentScrolled > 0.8 && this.last_rsm_message && !this.all_messages_loaded && !this.loading_messages){
+                    this.loadMoreFiles();
                 }
+            },
+
+            updateForParticipant: function () {
+                this.delegateEvents({})
+                this.parent.ps_container.off('ps-scroll-up.mediagallery').off('ps-scroll-down.mediagallery').on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
+                this.$('.gallery-file').on('click', (ev) => {
+                    this.onClickFile(ev);
+                });
+            },
+
+            loadMoreFiles: function () {
+                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, () => {
+                    this.updateMedia(true);
+                });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items;
+            },
+
+            encryptedFilesHandler: function () {
+                let files_count = 0;
+                this.temporary_items = this.filterEncryptedFiles();
+
+                if (this.temporary_items.length)
+                    this.temporary_items.forEach((item, idx) => {
+                        let source = item.sources[0];
+                        if (!item.key){
+                            files_count++;
+                            return;
+                        }
+                        this.chat.messages.decryptFile(source, item.key).then((result) => {
+                            if (!this.active)
+                                return
+                            item.sources[0] = result
+                            files_count++;
+                            if (files_count === this.temporary_items.length) {
+                                this.updateEncryptedMedia()
+                                this.loading_messages = false;
+                            }
+                        });
+                    });
+                else {
+                    this.updateEncryptedMedia()
+                    this.loading_messages = false;
+                    if (!this.all_messages_loaded){
+                        this.loadMoreFiles();
+                    }
+                }
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files').length && this.$el.html("<div class='gallery-files'></div>");
+                this.updateMedia();
+            },
+
+            updateMedia: function (is_loaded) {
+                if (!this.active)
+                    return
+                if (this.temporary_items.length){
+                    this.temporary_items.reverse();
+                    this.temporary_items.forEach((item) => {
+                        if (this.filter_type === 'filter_voice')
+                            item.true_voice = true;
+                        let $gallery_file = $(templates.media_item({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
+                        $gallery_file.appendTo(this.$('.gallery-files'));
+                    });
+                }
+                this.temporary_items = []
+                $(templates.media_items_empty()).appendTo(this.$('.gallery-files'))
+                this.$('.gallery-files .preloader-wrapper').remove()
+            },
+
+            messagesFileRequest: function (query, callback) {
+                if (!this.active || this.loading_messages)
+                    return
+                let options = query || {},
+                    queryid = uuid();
+                this.loading_messages = true;
+                !options.max && (options.max = xabber.settings.mam_messages_limit);
+                !options.after && !options.before && (options.before = '');
+                this.encrypted && (options.encrypted = this.encrypted)
+                this.parent.participant && (options.var = [{var: 'with', value: this.parent.participant.id}]);
+                this.contact.MAMRequest(options, (success, messages, rsm) => {
+                    let messages_count = 0;
+                    if (this.encrypted) {
+                        $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                    }
+                    $(messages).each((idx, message) => {
+                        let $message = $(message),
+                            msg_items = [];
+                        if (this.encrypted) {
+                            let deferred = new $.Deferred();
+                            deferred.done(($msg) => {
+                                msg_items = this.contact.getFilesFromStanza($msg);
+                                if (msg_items.length)
+                                    this.temporary_items = this.temporary_items.concat(msg_items)
+                                messages_count++;
+                                if (messages_count === messages.length){
+                                    this.last_rsm_message = rsm.first;
+                                    this.encryptedFilesHandler();
+                                }
+                            }).fail(() => {
+                                messages_count++;
+                                if (messages_count === messages.length){
+                                    this.last_rsm_message = rsm.first;
+                                    this.all_messages_loaded = true;
+                                    this.encryptedFilesHandler();
+                                }
+                            });
+                            this.account.omemo.receiveChatMessage($message, {
+                                searched_message: true,
+                                gallery: true,
+                                query: query
+                            }, deferred);
+                        } else{
+                            msg_items = this.contact.getFilesFromStanza($message);
+                            this.account.chats.receiveChatMessage($message, {
+                                searched_message: true,
+                                query: query
+                            });
+                            if (msg_items.length)
+                                this.temporary_items = this.temporary_items.concat(msg_items)
+                        }
+                    });
+                    if (!this.encrypted){
+                        this.last_rsm_message = rsm.first;
+                        if (!messages.length)
+                            this.all_messages_loaded = true;
+                        this.loading_messages = false;
+                        if (!(this.temporary_items.length >= xabber.settings.mam_messages_limit) && this.filter_type === 'filter_files' && !this.all_messages_loaded) {
+                            this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, callback);
+                        }else
+                            callback && callback();
+                    }
+                }, () => {
+
+                });
+            },
+
+            onClickFile: function (ev) {
+                let $elem = $(ev.target);
+                if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
+                    let $audio_elem = $elem.closest('.gallery-file'),
+                        f_url = $audio_elem.attr('data-file');
+                    $audio_elem.find('.mdi-play').removeClass('audio-file-play');
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+                    this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    return;
+                }
+                else if ($elem.hasClass('mdi-play') || $elem.children('.mdi-play').length) {
+                    let $audio_elem = $elem.closest('.gallery-file');
+                    this.prev_audio_message.voice_message.pause();
+                    this.prev_audio_message = $audio_elem[0];
+                    $audio_elem[0].voice_message.play();
+                    return;
+                }
+                else if ($elem.hasClass('mdi-pause') || $elem.children('.mdi-pause').length) {
+                    this.prev_audio_message.voice_message.pause();
+                    return;
+                }
+                else if (!$elem.parents('.gallery-file-audio-container').length) {
+                    let $file = $elem.closest('.gallery-file');
+                    this.parent.saveScrollBarOffset()
+                    xabber.body.data.set('contact_details_view', this.parent)
+                    this.chat.getMessageContext($file.data('uniqueid'), {searched_messages: true, encrypted: this.encrypted});
+                }
+            },
+
+            renderVoiceMessage: function (element, file_url) {
+                let not_expanded_msg = element.innerHTML,
+                    unique_id = 'waveform' + moment.now(),
+                    $elem = $(element),
+                    $msg_element = $elem.closest('.gallery-file');
+                $elem.addClass('voice-message-rendering').html($(templates.audio_file_waveform({waveform_id: unique_id})));
+                let aud = this.createAudio(file_url, unique_id);
+
+                aud.on('ready', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
+                    $msg_element.find('.gallery-file-placeholder-background').removeClass('gallery-audio-file-not-uploaded');
+                    let duration = Math.round(aud.getDuration());
+                    $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+                    aud.play();
+                });
+
+                aud.on('error', () => {
+                    $elem.removeClass('voice-message-rendering');
+                    element.innerHTML = not_expanded_msg;
+                    aud.unAll();
+                    $elem.find('.voice-message-play').get(0).remove();
+                    utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
+                });
+
+                aud.on('play', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').addClass('mdi-pause').removeClass('mdi-play');
+                    $msg_element.addClass('playing');
+                    let timerId = setInterval(function() {
+                        let cur_time = Math.round(aud.getCurrentTime());
+                        if (aud.isPlaying())
+                            $elem.find('.voice-msg-current-time').text(utils.pretty_duration(cur_time));
+                        else
+                            clearInterval(timerId);
+                    }, 100);
+                });
+
+                aud.on('finish', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                aud.on('pause', () => {
+                    $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('mdi-pause').addClass('mdi-play');
+                    $msg_element.removeClass('playing');
+                });
+
+                $elem.find('.voice-message-volume')[0].onchange = () => {
+                    aud.setVolume($elem.find('.voice-message-volume').val()/100);
+                };
+                return aud;
+            },
+
+            createAudio: function(file_url, unique_id) {
+                let audio = WaveSurfer.create({
+                    container: "#" + unique_id,
+                    scrollParent: false,
+                    barWidth: 3,
+                    height: 48,
+                    barHeight: 48,
+                    cursorColor: 'rgba(211,47,47,0.8)',
+                    autoCenter: false,
+                    normalize: true,
+                    hideScrollBar: true,
+                    progressColor: '#757575'
+                });
+                audio.load(file_url);
+                audio.setVolume(0.5);
+                return audio;
             },
         });
 
-        xabber.FilesView = xabber.BasicView.extend({
+        xabber.MediaImagesView = xabber.MediaBaseView.extend({
             events: {
+                "click .gallery-files.images .gallery-file": "onClickFile",
             },
-            status: 'files',
-            member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
-
-            _initialize: function (options) {
-                this.contact = options.model;
-            },
+            status: 'image',
 
             _render: function () {
                 if (this.$el.length && this.$el.closest("body").length == 0)
                     this.$el = this.parent.$('.participants-details-media-wrap')
                 this.$el.html($(templates.preloader()));
-                this.updateFiles(0);
+                this.active = true;
+                this.parent.children.video && (this.parent.children.video.active = false);
+                this.parent.children.files && (this.parent.children.files.active = false);
+                this.parent.children.voice && (this.parent.children.voice.active = false);
+                this.all_messages_loaded = false;
+                this.filter_type = 'filter_image';
+                this.temporary_items = [];
+                this.messagesFileRequest({[this.filter_type]: true}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'image')
+                    this.$el.html("<div class='gallery-files images grid'></div>");
+                    this.updateMedia();
+                    this.participant && this.updateForParticipant();
+                });
             },
 
-            updateFiles: function (times) {
-                this.$el.html("<div class='files-wrap'></div>");
-                if (times) {
-                    for (var i = 0; i < times; i++) {
-                        let $item_view = $(templates.group_chats.file_item());
-                        this.$el.find('.media-wrap').append($item_view);
-                    }
-                }
-                else
-                    this.$el.html("<div class='empty-files'>No files here yet</div>");
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'image');
+            },
 
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.images.grid').length && this.$el.html("<div class='gallery-files images grid'></div>");
+                this.updateMedia();
+            },
+
+            loadMoreFiles: function () {
+                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'image')
+                    this.updateMedia(true);
+                });
+            },
+
+        });
+
+        xabber.MediaVideosView = xabber.MediaBaseView.extend({
+            events: {
+                "click .gallery-files.videos .gallery-file": "onClickFile",
+            },
+            status: 'video',
+
+            _render: function () {
+                if (this.$el.length && this.$el.closest("body").length == 0)
+                    this.$el = this.parent.$('.participants-details-media-wrap')
+                this.$el.html($(templates.preloader()));
+                this.active = true;
+                this.parent.children.image && (this.parent.children.image.active = false);
+                this.parent.children.files && (this.parent.children.files.active = false);
+                this.parent.children.voice && (this.parent.children.voice.active = false);
+                this.all_messages_loaded = false;
+                this.filter_type = 'filter_video';
+                this.temporary_items = [];
+                this.messagesFileRequest({[this.filter_type]: true}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'video')
+                    this.$el.html("<div class='gallery-files videos grid'></div>");
+                    this.updateMedia();
+                    this.participant && this.updateForParticipant();
+                });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'video');
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.videos.grid').length && this.$el.html("<div class='gallery-files videos grid'></div>");
+                this.updateMedia();
+            },
+
+            loadMoreFiles: function () {
+                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => utils.pretty_file_type(item.media_type) === 'video')
+                    this.updateMedia(true);
+                });
+            },
+        });
+
+        xabber.MediaFilesView = xabber.MediaBaseView.extend({
+            events: {
+                "click .gallery-files.files .gallery-file": "onClickFile",
+            },
+            status: 'files',
+
+            _render: function () {
+                if (this.$el.length && this.$el.closest("body").length == 0)
+                    this.$el = this.parent.$('.participants-details-media-wrap')
+                this.$el.html($(templates.preloader()));
+                this.active = true;
+                this.parent.children.image && (this.parent.children.image.active = false);
+                this.parent.children.video && (this.parent.children.video.active = false);
+                this.parent.children.voice && (this.parent.children.voice.active = false);
+                this.all_messages_loaded = false;
+                this.filter_type = 'filter_files';
+                this.temporary_items = [];
+                this.messagesFileRequest({[this.filter_type]: true}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => (utils.pretty_file_type(item.media_type) != 'video' && utils.pretty_file_type(item.media_type) != 'image'))
+                    this.$el.html("<div class='gallery-files files'></div>");
+                    this.updateMedia();
+                    this.participant && this.updateForParticipant();
+                });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => (utils.pretty_file_type(item.media_type) != 'video' && utils.pretty_file_type(item.media_type) != 'image'));
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.files').length && this.$el.html("<div class='gallery-files files'></div>");
+                this.updateMedia();
+            },
+
+            loadMoreFiles: function () {
+                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => (utils.pretty_file_type(item.media_type) != 'video' && utils.pretty_file_type(item.media_type) != 'image'))
+                    this.updateMedia(true);
+                });
+            },
+        });
+
+        xabber.MediaVoiceView = xabber.MediaBaseView.extend({
+            events: {
+                "click .gallery-files.voice .gallery-file": "onClickFile",
+            },
+            status: 'files',
+
+            _render: function () {
+                if (this.$el.length && this.$el.closest("body").length == 0)
+                    this.$el = this.parent.$('.participants-details-media-wrap')
+                this.$el.html($(templates.preloader()));
+                this.active = true;
+                this.parent.children.image && (this.parent.children.image.active = false);
+                this.parent.children.video && (this.parent.children.video.active = false);
+                this.parent.children.files && (this.parent.children.files.active = false);
+                this.all_messages_loaded = false;
+                this.filter_type = 'filter_voice'
+                this.temporary_items = [];
+                this.messagesFileRequest({[this.filter_type]: true}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => item.voice)
+                    this.$el.html("<div class='gallery-files voice'></div>");
+                    this.updateMedia();
+                    this.participant && this.updateForParticipant();
+                });
+            },
+
+            filterEncryptedFiles: function () {
+                return this.temporary_items.filter(item => item.voice);
+            },
+
+            updateEncryptedMedia: function (is_loaded) {
+                !this.$('.gallery-files.voice').length && this.$el.html("<div class='gallery-files voice'></div>");
+                this.updateMedia();
+            },
+
+            loadMoreFiles: function () {
+                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, () => {
+                    this.temporary_items = this.temporary_items.filter(item => item.voice)
+                    this.updateMedia(true);
+                });
             },
         });
 
@@ -57095,7 +58653,7 @@ define("xabber-contacts", [],function () {
                     model: this.participant,
                     parent: this,
                 });
-                this.updateList('media');
+                this.updateList('image');
                 xabber.once("update_css", this.updateIndicator, this);
                 this.updateIndicator()
                 this.$('.participant-details-edit-wrap').hideIf(true);
@@ -57181,21 +58739,21 @@ define("xabber-contacts", [],function () {
             addList: function (name) {
                 let constructor_func;
                 switch (name) {
-                    case 'media':
-                        constructor_func = xabber.MediaView;
+                    case 'image':
+                        constructor_func = xabber.MediaImagesView;
+                        break;
+                    case 'video':
+                        constructor_func = xabber.MediaVideosView;
                         break;
                     case 'files':
-                        constructor_func = xabber.FilesView;
-                        break;
-                    case 'links':
-                        constructor_func = xabber.FilesView;
+                        constructor_func = xabber.MediaFilesView;
                         break;
                     case 'voice':
-                        constructor_func = xabber.FilesView;
+                        constructor_func = xabber.MediaVoiceView;
                         break;
                 };
                 if (constructor_func)
-                    return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-details-media-wrap')[0]});
+                    return this.addChild(name, constructor_func, {model: this.model, participant: true, el: this.$('.participants-details-media-wrap')[0]});
                 else
                     return;
             },
@@ -62265,6 +63823,7 @@ define("xabber-chats", [],function () {
                             description: $file.children('desc').text(),
                             height: $file.children('height').text(),
                             width: $file.children('width').text(),
+                            id: $file.children('gallery-id').text(),
                             voice: type === 'voice',
                             sources: sources
                         };
@@ -63272,7 +64831,8 @@ define("xabber-chats", [],function () {
                     contact: this.contact,
                     mention_context: options.mention,
                     model: this,
-                    stanza_id_context: stanza_id
+                    stanza_id_context: stanza_id,
+                    encrypted: options.encrypted
                 });
                 this.account.context_messages.add(message);
                 this.messages_view.messagesRequest({after: stanza_id}, () => {
@@ -63283,7 +64843,7 @@ define("xabber-chats", [],function () {
                         screen = xabber.body.screen.get('name');
                     xabber.body.setScreen(screen, {
                         right: 'message_context',
-                        model: this
+                        model: this,
                     }, {
                         right_contact_save: true
                     });
@@ -63820,8 +65380,8 @@ define("xabber-chats", [],function () {
             if (msg_files.length || msg_images.length || msg_locations.length) {
                 let $colored_span = $('<span class="text-color-500"/>');
                 if (msg.get('type') === 'file_upload') {
-                    msg_images = msg_files.filter(f => f.type && utils.isImageType(f.type));
-                    msg_files = msg_files.filter(f => !(f.type && utils.isImageType(f.type)));
+                    msg_images = msg_files.filter(f => f && f.type && utils.isImageType(f.type));
+                    msg_files = msg_files.filter(f => f && !(f.type && utils.isImageType(f.type)));
                 }
                 if (msg_files.length && msg_images.length)
                     msg_text = $colored_span.text(xabber.getString("recent_chat__last_message__attachments", [msg_files.length + msg_images.length]));
@@ -64121,6 +65681,7 @@ define("xabber-chats", [],function () {
           __initialize: function (options) {
               options = options || {};
               this.stanza_id = options.stanza_id_context;
+              this.encrypted = options.encrypted;
               this.mention_context = options.mention_context;
               if (!this.model.item_view.content)
                   this.chat_content = new xabber.ChatContentView({chat_item: this.model.item_view});
@@ -64133,6 +65694,7 @@ define("xabber-chats", [],function () {
           render: function () {
               this.scrollToTop();
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
+              this.encrypted && this.$el.attr('data-trust', true)
           },
 
           onMouseWheel: function (ev) {
@@ -65449,7 +67011,10 @@ define("xabber-chats", [],function () {
             let $message = this.addMessage(message);
 
             if (message.get('type') === 'file_upload') {
-                this.startUploadFile(message, $message);
+                if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                    this.startGalleryUploadFile(message, $message);
+                else
+                    this.startUploadFile(message, $message);
             }
 
             if (this.isVisible()) {
@@ -65563,7 +67128,11 @@ define("xabber-chats", [],function () {
                           this.model.messages.decryptFile(source, img.key).then((result) => {
                               if (result === null)
                                   return;
-                              let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              let $msg = [];
+                              if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context')
+                                  $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                              else
+                                  $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
                               if ($msg.length) {
                                   $msg[0].src = result;
                                   $msg[0].onload = () => {
@@ -66501,6 +68070,9 @@ define("xabber-chats", [],function () {
                     file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                     stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
+                    file['id'] && stanza.c('gallery-id').t(file['id']).up();
+                    file['thumbnail-uri'] && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
+                    file.created && stanza.c('created').t(file.created).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();
                     file.height && stanza.c('height').t(file.height).up();
@@ -66682,12 +68254,12 @@ define("xabber-chats", [],function () {
             if (this.model.messages_view)
                 if (this.model.messages_view.data.get('visible'))
                     this.model.messages_view.openChat();
-            if (files.length > 10) {
+            if (files.length > 10 && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
                 utils.dialogs.error(xabber.getString("too_many_files_at_once"));
                 return;
             }
             let http_upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
-            if (!http_upload_service) {
+            if (!http_upload_service && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
                 utils.dialogs.error(xabber.getString("error_file_upload_not_support", [this.account.domain]));
                 return;
             }
@@ -66726,7 +68298,7 @@ define("xabber-chats", [],function () {
                         if (this.model.get('encrypted')) {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    new_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    new_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 new_file.key = key;
                                 if (new_file.type === 'image/svg+xml') {
                                     deferred.resolve({encrypted_file: new_file,key: key});
@@ -66761,7 +68333,7 @@ define("xabber-chats", [],function () {
                         reader.onload = (e) => {
                             this.encryptFile(e.target.result).then((encrypted) => {
                                 let key = encrypted.keydata,
-                                    encrypted_file = new File([encrypted.payload], file.name, {type: file.type});
+                                    encrypted_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                                 file.voice && (encrypted_file.voice = true);
                                 file.duration && (encrypted_file.duration = file.duration);
                                 encrypted_file.key = key;
@@ -66790,8 +68362,7 @@ define("xabber-chats", [],function () {
             $message.find('.progress').show();
             let files_count = 0;
             $(message.get('files')).each((idx, file) => {
-                let enc_file = new File([file], (file.iv && file.key) ? uuid().replace(/-/g, "") : file.name);
-                enc_file.iv && (delete enc_file.iv);
+                let enc_file = new File([file], file.name);
                 enc_file.key && (delete enc_file.key);
                 let iq = $iq({type: 'get', to: message.get('upload_service')})
                         .c('request', {xmlns: Strophe.NS.HTTP_UPLOAD})
@@ -66860,14 +68431,101 @@ define("xabber-chats", [],function () {
             });
         },
 
+        startGalleryUploadFile: function (message, $message) {
+            $message.emojify('.chat-msg-author-badge', {emoji_size: 16});
+            $message.find('.cancel-upload').show();
+            $message.find('.repeat-upload').hide();
+            $message.find('.status').hide();
+            $message.find('.progress').show();
+            let files_count = 0,
+                self = this,
+                msg_files_count = message.get('files').length;
+            $(message.get('files')).each((idx, file) => {
+                if (file.key) {
+                    file = new File([file], file.name);
+                    delete file.key
+                }
+                let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
+                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                        message.set('state', constants.MSG_ERROR);
+                        clearInterval(_interval);
+                    }
+                    else if (message.get('state') !== constants.MSG_PENDING)
+                        clearInterval(_interval);
+                    _pending_time += 10;
+                }, 10000);
+
+                let formData = new FormData();
+                formData.append('file', file, file.name);
+                if (file.duration)
+                    formData.append('duration', file.duration);
+                if (file.voice)
+                    formData.append('media_type', file.type + '+voice');
+                else
+                    formData.append('media_type', file.type);
+                clearInterval(_interval);
+                let xhr = new XMLHttpRequest(),
+                    $bar = $message.find('.progress');
+                $message.find('.cancel-upload').click(() => {
+                    xhr.abort();
+                });
+                xhr.onabort = () => {
+                    this.removeMessage($message);
+                };
+                xhr.upload.onprogress = (event) => {
+                    let percentage = event.loaded / event.total;
+                    $bar.find('.determinate').attr('style', 'width: ' + (100 * percentage) + '%');
+                    $message.find('.filesize')
+                        .text(xabber.getString("file_upload__text_progress", [utils.pretty_size(event.loaded), utils.pretty_size(event.total)]));
+                };
+                xhr.onload = xhr.onerror = function () {
+                    if (this.status === 200) {
+                        let response = JSON.parse(this.response)
+                        message.get('files')[idx].id = response.id;
+                        message.get('files')[idx].created_at = response.created_at;
+                        response.thumbnail && (message.get('files')[idx].thumbnail = response.thumbnail.url);
+                        message.get('files')[idx].url = response.file;
+                        files_count++;
+                        if (files_count == message.get('files').length) {
+                            self.onFileUploaded(message, $message);
+                        }
+                    } else {
+                        let response_text;
+                        if (this.status === 500)
+                            response_text = this.statusText;
+                        else if (this.status === 400)
+                            response_text = JSON.parse(this.response).error
+                        message.get('files')[idx] = null;
+                        files_count++;
+                        if (files_count == msg_files_count && msg_files_count == 1) {
+                            self.onFileNotUploaded(message, $message, response_text);
+                        }
+                        else if (files_count == msg_files_count) {
+                            self.onFileUploaded(message, $message);
+                        }
+                    }
+                };
+                if ($message.data('cancel')) {
+                    xhr.abort();
+                } else {
+                    xhr.open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
+                    xhr.setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'))
+                    xhr.send(formData);
+                }
+            });
+        },
+
           encryptFile: async function (file) {
             return await utils.AES.encrypt(file);
           },
 
         onFileUploaded: function (message, $message) {
+            message.set('files', message.get('files').filter((element) => { return element != null}) );
             let files = message.get('files'),
                 self = this, is_audio = false,
                 images = [], files_ = [], body_message = "";
+            if (!files.length)
+                this.onFileNotUploaded(message, $message)
             $(files).each((idx, file_) => {
                 let file_new_format = {
                     name: file_.name,
@@ -66876,10 +68534,12 @@ define("xabber-chats", [],function () {
                     description: file_.description || '',
                     sources: [file_.url]
                 };
-                file_.iv && (file_new_format.iv = file_.iv);
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 body_message += file_new_format.sources[0] + "\n";
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')){
+                    _.extend(file_new_format, { id: file_.id, created: file_.created_at, 'thumbnail-uri': file_.thumbnail });
+                }
                 if (utils.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
@@ -69976,6 +71636,252 @@ define("xabber-chats", [],function () {
         }
     });
 
+
+      xabber.SendMediaView = xabber.BasicView.extend({
+          className: 'modal main-modal avatar-picker background-panel',
+          template: templates.send_media,
+          ps_selector: '.modal-content',
+          ps_settings: {theme: 'item-list'},
+
+          events: {
+              "click .menu-btn": "updateActiveMenu",
+              "click .library-wrap .image-item": "setActiveImage",
+              'change input[type="file"]': "onFileInputChanged",
+              'keyup input.url': "onInputChanged",
+              "click .btn-add": "addMedia",
+              "click .btn-cancel": "close"
+          },
+
+          _initialize: function () {
+              this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+          },
+
+          render: function (options) {
+              this.model = options.model;
+              this.parent = options.parent;
+              this.createLibrary();
+              this.$('.menu-btn').removeClass('active');
+              this.$('.menu-btn[data-screen-name="image"]').addClass('active');
+              this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_send_media"));
+              this.$el.openModal({
+                  ready: () => {
+                      this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                  },
+                  complete: this.close.bind(this)
+              });
+              let draggable = this.$('.upload-wrap');
+              draggable[0].ondragenter = function (ev) {
+                  ev.preventDefault();
+                  draggable.addClass('file-drop');
+              };
+              draggable[0].ondragover = function (ev) {
+                  ev.preventDefault();
+              };
+              draggable[0].ondragleave = function (ev) {
+                  if ($(ev.relatedTarget).closest('.upload-wrap').length)
+                      return;
+                  ev.preventDefault();
+                  draggable.removeClass('file-drop');
+              };
+              draggable[0].ondrop = (ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  draggable.removeClass('file-drop');
+                  let files = ev.dataTransfer.files || [], file;
+                  for (let i = 0; i < files.length; i++) {
+                      if (utils.isImageType(files[i].type)) {
+                          file = files[i];
+                          break;
+                      }
+                  }
+                  file && this.addFile(file);
+              };
+          },
+
+          onPaste: function (ev) {
+              let url = ev.clipboardData.getData('text').trim();
+              this.$('.image-preview img')[0].onload = () => {
+                  this.$('.image-preview img').removeClass('hidden');
+                  this.updateActiveButton();
+              };
+              this.$('.image-preview img').addClass('hidden')[0].src = url;
+              this.updateActiveButton();
+          },
+
+          updateActiveMenu: function (ev) {
+              let screen_name = ev.target.getAttribute('data-screen-name');
+              this.$('.menu-btn').removeClass('active');
+              this.$(`.menu-btn[data-screen-name="${screen_name}"]`).addClass('active');
+              this.updateScreen(screen_name);
+          },
+
+          updateScreen: function (name) {
+              this.$('.screen-wrap').addClass('hidden');
+              this.$(`.screen-wrap[data-screen="${name}"]`).removeClass('hidden');
+              this.scrollToTop();
+              this.updateActiveButton();
+          },
+
+          updateActiveButton: function () {
+              let $active_screen = this.$('.screen-wrap:not(.hidden)'),
+                  non_active = true;
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video') {
+                  $active_screen.find('div.active').length && (non_active = false);
+              } else {
+                  $active_screen.find('img:not(.hidden)').length && (non_active = false);
+              }
+              this.$('.modal-footer .btn-add').switchClass('non-active', non_active);
+          },
+
+          renderFiles: function (response) {
+              this.$(`.library-wrap[data-screen="${response.type}"] .preloader-wrapper`).remove()
+              if (response.items.length){
+                  response.items.forEach((item) => {
+                      let img = $(`<div class="image-item"/>`);
+                      img.css('background-image', `url("${item.thumbnail.url}")`);
+                      img.attr('data-src', item.file);
+                      img.attr('data-name', item.name);
+                      this.$(`.library-wrap[data-screen="${response.type}"]`).append(img);
+                  });
+              }
+          },
+
+          createLibrary: function () {
+              if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                  this.$('.library-wrap').html(env.templates.contacts.preloader())
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'image'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'image'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
+                      }
+                  });
+                  $.ajax({
+                      type: 'GET',
+                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                      url: this.model.get('gallery_url') + 'v1/files/',
+                      dataType: 'json',
+                      data: {obj_per_page: 50, order_by: '-id', type: 'video'},
+                      success: (response) => {
+                          console.log(response)
+                          response.type = 'video'
+                          this.renderFiles(response)
+                      },
+                      error: (response) => {
+                          console.log(response)
+                          this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
+                      }
+                  });
+              }
+          },
+
+          setActiveImage: function (ev) {
+              let $target = $(ev.target),
+                  $active_screen = this.$('.screen-wrap:not(.hidden)');
+              if ($target.hasClass('active'))
+                  $target.removeClass('active');
+              else {
+                  this.$('.library-wrap>div').removeClass('active');
+                  $target.addClass('active');
+              }
+              this.updateActiveButton();
+          },
+
+          onFileInputChanged: function (ev) {
+              let target = ev.target, file;
+              for (let i = 0; i < target.files.length; i++) {
+                  if (utils.isImageType(target.files[i].type)) {
+                      file = target.files[i];
+                      break;
+                  }
+              }
+              file && this.addFile(file);
+              $(target).val('');
+          },
+
+          addFile: function (file) {
+              let reader = new FileReader();
+              reader.onload = (e) => {
+                  let image_prev = new Image(),
+                      src = e.target.result;
+                  image_prev.src = src;
+                  this.$('.screen-wrap[data-screen="upload"] img').detach();
+                  this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
+                  this.current_file = file;
+                  this.updateActiveButton();
+              };
+              reader.readAsDataURL(file);
+          },
+
+          onInputChanged: function (ev) {
+              if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+                  return;
+              if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
+                  let url = ev.target.value.trim();
+                  this.$('.image-preview img')[0].onload = () => {
+                      this.$('.image-preview img').removeClass('hidden');
+                      this.updateActiveButton();
+                  };
+                  this.$('.image-preview img').addClass('hidden')[0].src = url;
+                  this.updateActiveButton();
+              } else {
+                  this.$('.image-preview img').addClass('hidden')[0].src = "";
+                  this.updateActiveButton();
+              }
+          },
+
+          addMedia: function () {
+              if (this.$('.btn-add').hasClass('non-active'))
+                  return;
+              let file, filename, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
+              dfd.done((resolved_file) => {
+                  this.parent.view.addFileMessage([resolved_file])
+                  this.close();
+              });
+              this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+              this.$('.btn-add').addClass('hidden-disabled');
+              if ($active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' || $active_screen.attr('data-screen') == 'web-address') {
+                  file = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-src') :
+                      $active_screen.find('img:not(.hidden)')[0].src;
+                  filename = $active_screen.attr('data-screen') == 'image' || $active_screen.attr('data-screen') == 'video' ?
+                      $active_screen.find('div.active').attr('data-name') : '';
+
+                  this.createFileFromURL(file, filename).then((file) => {
+                      dfd.resolve(file);
+                  })
+              } else
+                  dfd.resolve(this.current_file);
+          },
+
+          createFileFromURL: async function (url, filename) {
+              let response = await fetch(url);
+              let data = await response.blob();
+              let metadata = {
+                  type: data.type
+              };
+              let file = new File([data], filename || url.split('#').shift().split('?').shift().split('/').pop() || 'file', metadata);
+              return file
+          },
+
+          close: function () {
+              this.$el.closeModal({ complete: () => {
+                      this.$el.detach();
+                      this.data.set('visible', false);
+                  }
+              });
+          }
+      });
+
     xabber.ChatLocationView = xabber.BasicView.extend({
         className: 'modal main-modal chat-location ',
         template: templates.location_popup,
@@ -70115,6 +72021,7 @@ define("xabber-chats", [],function () {
             "keydown .input-message .rich-textarea": "keyDown",
             "change .attach-file input": "onFileInputChanged",
             "click .attach-location": "showLocationPopup",
+            "click .attach-media": "showMediaPopup",
             "mouseup .message-input-panel": "stopWritingVoiceMessage",
             "mousedown .attach-voice-message": "writeVoiceMessage",
             "click .chat-mention": "onMentionButtonClick",
@@ -70944,6 +72851,13 @@ define("xabber-chats", [],function () {
             new xabber.ChatLocationView({content: this}).show(ev);
         },
 
+        showMediaPopup: function (ev) {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let media_view = new xabber.SendMediaView();
+                media_view.render({parent: this, model: this.account});
+            }
+        },
+
         stopWritingVoiceMessage: function (ev) {
             let $bottom_panel = this.$('.message-input-panel');
             if ($bottom_panel.find('.recording').length > 0) {
@@ -71534,6 +73448,8 @@ define("xabber-chats", [],function () {
                     }
                     let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
                     this.resetSelectedMessages();
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                        this.deleteFilesFromMessages(msgs)
                     this.model.retractMessages(msgs, this.model.get('group_chat'), symmetric);
                 });
             }
@@ -71545,9 +73461,28 @@ define("xabber-chats", [],function () {
                         return;
                     }
                     this.resetSelectedMessages();
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                        this.deleteFilesFromMessages(msgs)
                     msgs.forEach((item) => { this.view.removeMessage(item); })
                 });
             }
+        },
+
+        deleteFilesFromMessages: function (messages) {
+            messages.forEach((item) => {
+                if (!item.isSenderMe())
+                    return;
+                item.get('files') && _.isArray(item.get('files')) && item.get('files').forEach((item) => {
+                    item.id && this.account.deleteFile(item.id,(response) => {
+                    }, (err) => {
+                    });
+                });
+                item.get('images') && _.isArray(item.get('images')) && item.get('images').forEach((item) => {
+                    item.id && this.account.deleteFile(item.id,(response) => {
+                    }, (err) => {
+                    });
+                });
+            });
         },
 
         pushMessagesToClipboard: function (messages) {
@@ -74265,7 +76200,7 @@ define("xabber-omemo", [],function () {
                 }
             },
 
-            receiveChatMessage: function (message, options) {
+            receiveChatMessage: function (message, options, deferred) {
                 options = options || {};
                 let $message = $(message);
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
@@ -74290,6 +76225,8 @@ define("xabber-omemo", [],function () {
                                 options.is_trusted = is_trusted;
                                 $message.find('body').remove();
                                 $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                                if (options.gallery && deferred)
+                                    deferred.resolve($message);
                                 this.account.chats.receiveChatMessage($message[0], options);
                             });
                             return;
@@ -74344,6 +76281,10 @@ define("xabber-omemo", [],function () {
                                 delete options.is_trusted;
                             }
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                            if (options.gallery && decrypted_msg && deferred)
+                                deferred.resolve($message);
+                            else if (options.gallery && deferred)
+                                deferred.reject();
                             this.account.chats.receiveChatMessage($message[0], options);
                         }).catch(() => {
                             if (options.synced_msg && !options.decryption_retry) {
@@ -74353,10 +76294,16 @@ define("xabber-omemo", [],function () {
                             options.not_encrypted = true;
                             delete options.is_trusted;
                             $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
+                            if (options.gallery && deferred)
+                                deferred.reject();
                             this.account.chats.receiveChatMessage($message[0], options);
                         });
                     }
+                    if (options.gallery && deferred)
+                        deferred.reject();
                 }
+                if (options.gallery && deferred)
+                    deferred.reject();
             },
 
             checkOwnFingerprints: async function () {

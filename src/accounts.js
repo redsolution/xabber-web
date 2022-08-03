@@ -1920,12 +1920,9 @@ define("xabber-accounts", function () {
                 "change input.gallery-upload": "onFileInputChanged",
                 "click .gallery-file:not(.gallery-avatar) .btn-delete": "deleteFile",
                 "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
-                "click .btn-delete-files": "deleteFilesFiltered",
                 "click .tabs .tab": "onTabClick",
                 "click .btn-gallery-sorting": "sortFiles",
                 "click .gallery-file": "onClickFile",
-                "click .btn-go-back": "closeStoragePanel",
-                "click .gallery-manage-storage": "openStoragePanel",
             },
 
             _initialize: function () {
@@ -1937,7 +1934,6 @@ define("xabber-accounts", function () {
 
             render: function () {
                 this.updateStorage();
-                this.$('.gallery-wrap').hideIf(true)
                 let dropdown_settings = {
                     inDuration: 100,
                     outDuration: 100,
@@ -1945,13 +1941,13 @@ define("xabber-accounts", function () {
                     hover: false,
                     alignment: 'right'
                 };
+                this.ps_container.perfectScrollbar('destroy');
+                if (this.parent.ps_container.length) {
+                    this.parent.ps_container.perfectScrollbar(
+                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
                 this.$('.dropdown-button').dropdown(dropdown_settings);
-                this.$('.btn-delete-files-variants').dropdown({
-                    inDuration: 100,
-                    outDuration: 100,
-                    hover: true,
-                    belowOrigin: true,
-                });
             },
 
             onScroll: function () {
@@ -2021,36 +2017,11 @@ define("xabber-accounts", function () {
                     this.$('.indicator').addClass('ground-color-500');
                     if (after_deletion){
                         if (!this.$('.tabs .list-variant.tab').length) {
-                            this.closeStoragePanel();
                             return;
                         }
                         !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
                     }
                 });
-            },
-
-            closeStoragePanel: function () {
-                this.$('.gallery-wrap').hideIf(true);
-                this.ps_container.perfectScrollbar('destroy');
-                if (this.parent.ps_container.length) {
-                    this.parent.ps_container.perfectScrollbar(
-                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                    );
-                }
-            },
-
-            openStoragePanel: function () {
-                this.updateStorage();
-                this.$('.gallery-wrap').hideIf(false)
-                if (this.ps_container.length) {
-                    this.ps_container.perfectScrollbar(
-                        _.extend(this.ps_settings || {}, xabber.ps_settings)
-                    );
-                }
-                if (this.parent.ps_container.length) {
-                    this.parent.ps_container.perfectScrollbar('destroy');
-                }
-                this.$('.tabs .list-variant:not(.hidden) a').first().click();
             },
 
             filterType: function (file_type, sorting) {
@@ -2254,6 +2225,16 @@ define("xabber-accounts", function () {
             renderFiles: function (response) {
                 if (response.type != this.$('.tab .active').closest('.tab').attr('data-value'))
                     return;
+                if (!response.total_objects && response.type != 'avatars'){
+                    if (response.type){
+                        let tab = this.$('.tabs .list-variant[data-value=' + response.type + ']');
+                        tab.removeClass('tab');
+                        tab.addClass('hidden');
+                        this.$('.tabs .indicator').remove();
+                        this.$('.tabs').tabs();
+                        this.$('.indicator').addClass('ground-color-500');
+                    }
+                }
                 if (!response.items.length){
                     !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
                     return;
@@ -2263,9 +2244,10 @@ define("xabber-accounts", function () {
                 if (response.items.length){
                     response.items.forEach((item) => {
                         if (response.type === 'avatars'){
-                            if (item.thumbnail.length)
-                                item.thumbnail = item.thumbnail[item.thumbnail.length - 1].url
-                        }
+                            if (item.thumbnails.length)
+                                item.thumbnail = item.thumbnails[0].url
+                        } else if (item.thumbnail)
+                            item.thumbnail = item.thumbnail.url
                         let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
                         $gallery_file.appendTo(this.$('.gallery-files'));
                         $gallery_file.find('.uploaded-img').magnificPopup({
@@ -2343,7 +2325,6 @@ define("xabber-accounts", function () {
                         data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
                         success: (response) => {
                             this.updateStorage(true);
-                            this.getFiles({type: this.$('.tab .active').closest('.tab').attr('data-value')})
                         },
                         error: (response) => {
                             console.log(response)
@@ -2524,6 +2505,10 @@ define("xabber-accounts", function () {
                     this.$('.settings-tab').removeClass('active');
                     $tab.addClass('active');
                 }
+                else if (block_name === 'media-gallery'){
+                    this.model.showSettings(null, block_name);
+                    this.model.settings_right.gallery_view.$('.tabs .list-variant:not(.hidden)').first().click();
+                }
                 else
                     this.model.showSettings(null, block_name);
             },
@@ -2572,6 +2557,7 @@ define("xabber-accounts", function () {
                 "click .btn-block": "openBlockWindow",
                 "click .btn-unblock-selected": "unblockSelected",
                 "click .btn-deselect-blocked": "deselectBlocked",
+                "click .btn-delete-files": "deleteFilesFiltered",
                 "click .omemo-info .btn-purge-keys": "purgeKeys"
             },
 
@@ -2623,6 +2609,24 @@ define("xabber-accounts", function () {
                     this.$('.settings-block-wrap.'+options.block_name).removeClass('hidden');
                     this.$('.settings-panel-head span.settings-panel-head-title').text(this.$('.settings-block-wrap.'+options.block_name).attr('data-header'));
                     this.$('.btn-block').switchClass('hidden2', options.block_name != 'blocklist-info');
+                    this.$('.media-gallery-button.btn-more').hideIf(options.block_name != 'media-gallery');
+                    if (options.block_name === 'media-gallery') {
+                        let dropdown_settings = {
+                            inDuration: 100,
+                            outDuration: 100,
+                            constrainWidth: false,
+                            hover: false,
+                            alignment: 'right'
+                        };
+                        this.$('.media-gallery-button.dropdown-button').dropdown(dropdown_settings);
+
+                        this.$('.btn-delete-files-variants').dropdown({
+                            inDuration: 100,
+                            outDuration: 100,
+                            hover: true,
+                            belowOrigin: true,
+                        });
+                    }
                 }
                 this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
                 this.$('.panel-content-wrap').removeClass('hidden');
@@ -2940,6 +2944,11 @@ define("xabber-accounts", function () {
             deselectBlocked: function () {
                 if (this.children && this.children.blocklist)
                     this.children.blocklist.deselectBlocked();
+            },
+
+            deleteFilesFiltered: function (ev) {
+                if (this.gallery_view)
+                    this.gallery_view.deleteFilesFiltered(ev);
             },
         });
 
@@ -3303,8 +3312,8 @@ define("xabber-accounts", function () {
                 this.$('.library-wrap .preloader-wrapper').remove()
                 if (response.items.length){
                     response.items.forEach((item) => {
-                        if (item.thumbnail && item.thumbnail.length)
-                            item.thumbnail = item.thumbnail[item.thumbnail.length - 1].url
+                        if (item.thumbnails && item.thumbnails.length)
+                            item.thumbnail = item.thumbnails[item.thumbnails.length - 1].url
                         let img = $(`<div class="image-item"/>`);
                         img.css('background-image', `url("${item.thumbnail}")`);
                         img.attr('data-src', item.file);
