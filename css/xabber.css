@@ -14761,7 +14761,6 @@ input[type='range'].voice-message-volume:focus {
 
 .main-modal.chat-location {
     width: 800px;
-    top: 10% !important;
 }
 .main-modal.chat-location .modal-header {
     width: 100%;

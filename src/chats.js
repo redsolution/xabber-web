@@ -1371,6 +1371,10 @@ define("xabber-chats", function () {
             if (msg.isSenderMe()) {
                 if ($received.length) {
                     let msg_state = msg.get('state');
+                    if (msg_state === constants.MSG_ERROR){
+                        message.set('state', constants.MSG_DELIVERED)
+                        return;
+                    }
                     if (msg_state !== constants.MSG_DISPLAYED) {
                         let delivered_time = $received.children('time').attr('stamp');
                         if (delivered_time) {
@@ -1379,9 +1383,14 @@ define("xabber-chats", function () {
                         }
                     }
                     this.setMessagesDelivered(msg.get('timestamp'));
-                }
-                else
+                } else {
+                    let msg_state = msg.get('state');
+                    if (msg_state === constants.MSG_ERROR){
+                        message.set('state', constants.MSG_DISPLAYED)
+                        return;
+                    }
                     this.setMessagesDisplayed(msg.get('timestamp'));
+                }
             } else {
                 msg.set('is_unread', false);
             }
