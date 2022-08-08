@@ -297,6 +297,9 @@
                 sound_on_private_message: 'beep_up',
                 sound_on_group_message: 'beep_up',
                 call_attention: true,
+                load_media: 'default',
+                typing_notifications: 'default',
+                mapping_service: 'default',
                 sound_on_call: 'call',
                 sound_on_dialtone: 'call',
                 sound_on_connection: 'connecting',
@@ -347,7 +350,10 @@
                     'TOOLBAR_LOGO',
                     'ENABLE_XABBER_ACCOUNT',
                     'SCREEN_ABOUT',
-                    'DISABLE_LOOKUP_WS'
+                    'DISABLE_LOOKUP_WS',
+                    'PRIVACY_LOAD_MEDIA',
+                    'PRIVACY_TYPING_NOTIFICATIONS',
+                    'PRIVACY_MAPPING_SERVICE',
                 ]));
 
                 let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
@@ -355,6 +361,18 @@
                 constants.MATERIAL_COLORS.includes(config.MAIN_COLOR) && (constants.MAIN_COLOR = config.MAIN_COLOR);
                 (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
                 this.trigger("update_main_color");
+                if (this._settings.get("load_media") === 'default' && config.PRIVACY_LOAD_MEDIA != null)
+                    this._settings.set("load_media", config.PRIVACY_LOAD_MEDIA);
+                else if (this._settings.get("load_media") === 'default')
+                    this._settings.set("load_media", true);
+                if (this._settings.get("typing_notifications") === 'default' && config.PRIVACY_TYPING_NOTIFICATIONS != null)
+                    this._settings.set("typing_notifications", config.PRIVACY_TYPING_NOTIFICATIONS);
+                else if (this._settings.get("typing_notifications") === 'default')
+                    this._settings.set("typing_notifications", true);
+                if (this._settings.get("mapping_service") === 'default' && config.PRIVACY_MAPPING_SERVICE != null)
+                    this._settings.set("mapping_service", config.PRIVACY_MAPPING_SERVICE);
+                else if (this._settings.get("mapping_service") === 'default')
+                    this._settings.set("mapping_service", true);
 
                 window.xabber = this;
                 _.extend(window, env);

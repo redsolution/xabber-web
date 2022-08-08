@@ -1367,6 +1367,9 @@ define("xabber-views", function () {
             "click .setting.message-preview.private-preview label": "setPrivateMessagePreview",
             "click .setting.message-preview.group-preview label": "setGroupMessagePreview",
             "click .setting.call-attention label": "setCallAttention",
+            "click .setting.load-media label": "setLoadMedia",
+            "click .setting.typing-notifications label": "setTypingNotifications",
+            "click .setting.mapping-service label": "setMappingService",
             "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
             "change .sound input[type=radio][name=group_sound]": "setGroupSound",
             "change .sound input[type=radio][name=call_sound]": "setCallSound",
@@ -1414,6 +1417,12 @@ define("xabber-views", function () {
                 .prop({checked: settings.message_preview_group});
             this.$('.call-attention input[type=checkbox]')
                 .prop({checked: settings.call_attention});
+            this.$('.load-media input[type=checkbox]')
+                .prop({checked: settings.load_media});
+            this.$('.typing-notifications input[type=checkbox]')
+                .prop({checked: settings.typing_notifications});
+            this.$('.mapping-service input[type=checkbox]')
+                .prop({checked: settings.mapping_service});
             let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
             this.$(`.sound input[type=radio][name=private_sound][value="${sound_private_value}"]`)
                     .prop('checked', true);
@@ -1574,6 +1583,27 @@ define("xabber-views", function () {
             this.model.save('call_attention', value);
             ev.preventDefault();
             $(ev.target).closest('.setting.call-attention').find('input').prop('checked', value);
+        },
+
+        setLoadMedia: function (ev) {
+            let value = !this.model.get('load_media');
+            this.model.save('load_media', value);
+            ev.preventDefault();
+            $(ev.target).closest('.setting.load-media').find('input').prop('checked', value);
+        },
+
+        setTypingNotifications: function (ev) {
+            let value = !this.model.get('typing_notifications');
+            this.model.save('typing_notifications', value);
+            ev.preventDefault();
+            $(ev.target).closest('.setting.typing-notifications').find('input').prop('checked', value);
+        },
+
+        setMappingService: function (ev) {
+            let value = !this.model.get('mapping_service');
+            this.model.save('mapping_service', value);
+            ev.preventDefault();
+            $(ev.target).closest('.setting.mapping-service').find('input').prop('checked', value);
         },
 
         setPrivateSound: function (ev) {

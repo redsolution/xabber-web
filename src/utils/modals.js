@@ -149,6 +149,23 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
                     dialog.$modal.addClass(dialog_options.modal_class)
                 }
 
+                if (dialog_options.inverted_buttons) {
+                    dialog.$modal.find('.dialog-options-wrap').html('');
+                    dialog.$modal.find('.cancel-button').removeClass('btn-dark');
+                    dialog.$modal.find('.ok-button').addClass('btn-dark');
+                    dialog.$modal.find('.modal-footer').addClass('inverted-buttons');
+                }
+
+                if (dialog_options.img_details) {
+                    dialog.$modal.find('.modal-content').append('<div class="modal-images-details"/>').append('<div class="modal-images-details-btn btn-flat btn-dark btn-main"/>');
+                    dialog.$modal.find('.modal-images-details-btn').text(xabber.getString("details"));
+                    dialog.$modal.find('.modal-images-details').append('<div class="image-details-container hidden"/>');
+                    dialog.$modal.find('.image-details-container').html(dialog_options.img_details);
+                    dialog.$modal.find('.modal-images-details-btn').click(function () {
+                        dialog.$modal.find('.image-details-container').switchClass('hidden', !dialog.$modal.find('.image-details-container').hasClass('hidden'));
+                    });
+                }
+
                 if (dialog_options.blob_image_from_clipboard) {
                     dialog.$modal.find('.dialog-options-wrap').html('');
                     dialog.$modal.find('.img-from-clipboard')[0].src = dialog_options.blob_image_from_clipboard;
