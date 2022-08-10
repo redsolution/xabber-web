@@ -39171,6 +39171,9 @@ define('text!templates/chats/messages/file_upload.html',[],function () { return 
 define('text!templates/chats/messages/file.html',[],function () { return '<div class="one-file-wrap link-file">\n    <i class="mdi {{mdi_icon}}"></i>\n    <div class="file-container">\n        <div class="file-info one-line">\n            <span class="file-name">{{name}}</span>{[ if (is_audio && duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span>\n        </div>\n        <a href="{{sources[0]}}" class="file-link-download">{[print(xabber.getString("action_download"))]}</a>\n    </div>\n</div>';});
 
 
+define('text!templates/chats/messages/video.html',[],function () { return '<div class="video-file-wrap">\n    <div class="video-metadata">\n        {{video.name}}, {{video.pretty_size}}\n    </div>\n    <div class="video-container">\n    </div>\n    <div class="video-controls control">\n        <div class="progress-bar">\n            <span class="time-bar"></span>\n        </div>\n        <div class="bottom-wrapper no-select">\n            <div class="play-button mini" title="Play/Pause Video">\n                <i class="mdi mdi-20px mdi-play"></i>\n            </div>\n            <div class="time">\n                <span class="current">00:00</span> / <span class="duration">00:00</span>\n            </div>\n            <div class="sound-button sound-med" title="Mute/Unmute sound">\n                <i class="mdi mdi-20px mdi-volume-high"></i>\n            </div>\n            <div class="volume" title="Set volume">\n                <span class="volume-bar"></span>\n            </div>\n            <div class="video-fullscreen" title="Switch to full screen">\n                <i class="mdi mdi-20px mdi-fullscreen"></i>\n            </div>\n        </div>\n    </div>\n</div>\n</div>';});
+
+
 define('text!templates/chats/messages/location.html',[],function () { return '    <div id="{{id}}" class="text-color-700" style="width:350px; height:300px;pointer-events: none;" data-type=\'map\'><img id="img_{{ id }}" ></div>\n\n\n    <script type="text/javascript">\n    let map{{id}} = new ol.Map\n        ({\ttarget: \'{{id}}\',\n        \tview: new ol.View\n            ({\tzoom: 15,\n                center: ol.proj.transform([{{lon}}, {{lat}}], \'EPSG:4326\', \'EPSG:3857\')\n            }),\n            interactions: ol.interaction.defaults({\n                altShiftDragRotate:false,\n                doubleClickZoom:false,\n                keyboard:false,\n                mouseWheelZoom:false,\n                shiftDragZoom:false,\n                dragPan:false,\n                pinchRotate:false,\n                pinchZoom:false\n            }),\n            layers: [ new ol.layer.Tile({ source: new ol.source.OSM() }) ],\n        });\n\n    map{{id}}.once(\'rendercomplete\', function(event) {\n        const mapCanvas = document.createElement(\'canvas\');\n        const size = map{{id}}.getSize();\n        mapCanvas.width = size[0];\n        mapCanvas.height = size[1];\n        const mapContext = mapCanvas.getContext(\'2d\');\n        Array.prototype.forEach.call(\n          document.querySelectorAll(\'#{{id}} .ol-layer canvas\'),\n          function (canvas) {\n            if (canvas.width > 0) {\n              const opacity = canvas.parentNode.style.opacity;\n              mapContext.globalAlpha = opacity === \'\' ? 1 : Number(opacity);\n              const transform = canvas.style.transform;\n              // Get the transform parameters from the style\'s transform matrix\n              const matrix = transform\n                .match(/^matrix\\(([^\\(]*)\\)$/)[1]\n                .split(\',\')\n                .map(Number);\n              // Apply the transform to the export map context\n              CanvasRenderingContext2D.prototype.setTransform.apply(\n                mapContext,\n                matrix\n              );\n              path = new Path2D(\'M 18 17.25 C 15.9289 17.25 14.25 15.5711 14.25 13.5 C 14.25 12.5054 14.6451 11.5516 15.3483 10.8483 C 16.0516 10.1451 17.0054 9.75 18 9.75 C 20.0711 9.75 21.75 11.4289 21.75 13.5 C 21.75 14.4946 21.3549 15.4484 20.6517 16.1517 C 19.9484 16.8549 18.9946 17.25 18 17.25 M 18 3 C 12.201 3 7.5 7.701 7.5 13.5 C 7.5 21.375 18 33 18 33 C 18 33 28.5 21.375 28.5 13.5 C 28.5 7.701 23.799 3 18 3 Z\');\n              mapContext.fillStyle = getComputedStyle(document.querySelector(\'#{{id}}\')).color;\n              mapContext.drawImage(canvas, 0, 0);\n              mapContext.translate(157, 117);\n\n              mapContext.fill(path);\n            }\n          }\n        );\n        if (navigator.msSaveBlob) {\n          // link download attribute does not work on MS browsers\n          navigator.msSaveBlob(mapCanvas.msToBlob(), \'map.png\');\n        } else {\n          var img = document.getElementById(\'img_{{ id }}\');\n          dataURL = mapCanvas.toDataURL(\'image/png\');\n          map{{id}}.setTarget(null)\n          map{{id}} = null;\n          img.src= dataURL\n        }\n    });\n    </script>\n</div>';});
 
 
@@ -39574,6 +39577,7 @@ define("xabber-templates", [
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
     "text!templates/chats/messages/file.html",
+    "text!templates/chats/messages/video.html",
     "text!templates/chats/messages/location.html",
     "text!templates/chats/messages/audio_file.html",
     "text!templates/chats/messages/audio_file_waveform.html",
@@ -39856,6 +39860,7 @@ define("xabber-templates", [
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
     addTemplate('chats.messages.file');
+    addTemplate('chats.messages.video');
     addTemplate('chats.messages.location');
     addTemplate('chats.messages.audio_file');
     addTemplate('chats.messages.audio_file_waveform');
@@ -40831,6 +40836,13 @@ define('xabber-utils',[
                 return false;
         },
 
+        isVideoType: function(type) {
+            if (type.indexOf('video') > -1)
+                return true;
+            else
+                return false;
+        },
+
         file_type_icon: function (mime_type) {
             let filetype = utils.pretty_file_type(mime_type);
             if (filetype === 'image')
@@ -41443,7 +41455,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":57,"bs":0,"ca":25,"cs":99,"cy":0,"da":0,"de":50,"el":29,"es-ES":34,"es-latin":7,"et":0,"fa":4,"fi":9,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":8,"id":68,"is":0,"it":73,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":67,"pt-BR":71,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":38,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.77","version_description":"returned incoming subscription system message for when ontact is not in roster and sending subscription"}'
+'{"version_number":"2.3.2.78","version_description":"added video files player in chat"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -62306,7 +62318,7 @@ define("xabber-chats", [],function () {
                     contact_stanza_id: options.contact_stanza_id,
                     is_archived: options.is_archived
                 },
-                mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], locations = [];
+                mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [];
 
             options.encrypted && _.extend(attrs, {encrypted: true});
             options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
@@ -62378,6 +62390,8 @@ define("xabber-chats", [],function () {
                         }
                         if (this.getFileType($file.children('media-type').text()) === 'image')
                             images.push(file_attrs);
+                        else if (this.getFileType($file.children('media-type').text()) === 'video')
+                            videos.push(file_attrs);
                         else
                             files.push(file_attrs);
                     }
@@ -62413,6 +62427,7 @@ define("xabber-chats", [],function () {
             mentions.length && (attrs.mentions = mentions);
             markups.length && (attrs.markups = markups);
             images.length && (attrs.images = images);
+            videos.length && (attrs.videos = videos);
             files.length && (attrs.files = files);
             locations.length && (attrs.locations = locations);
             attrs.mutable_content = mutable_content;
@@ -65422,6 +65437,14 @@ define("xabber-chats", [],function () {
             });
         },
 
+        videoOnload: function ($message) {
+            let $image_container = $message.find('.img-content'),
+                $copy_link_icon = $message.find('.mdi-link-variant');
+            $copy_link_icon.attr({
+                'data-image': 'true'
+            });
+        },
+
         locationOnload: function ($message) {
             let $copy_location_div = $message.find('.msg-copy-location-content');
             $copy_location_div.html(env.templates.svg['map-marker-outline']());
@@ -65970,9 +65993,11 @@ define("xabber-chats", [],function () {
                 is_sender = (message instanceof xabber.Message) ? message.isSenderMe() : false,
                 user_info = attrs.user_info || {}, username,
                 images = attrs.images,
+                videos = attrs.videos,
                 emoji = message.get('only_emoji'),
                 files =  attrs.files,
                 locations =  attrs.locations,
+                is_video = !_.isUndefined(videos),
                 is_image = !_.isUndefined(images),
                 is_location = locations ? true : false,
                 is_file = files ? true : false,
@@ -66023,6 +66048,7 @@ define("xabber-chats", [],function () {
                 avatar_id: avatar_id,
                 avatar_url: avatar_url,
                 is_image: is_image,
+                is_video: is_video,
                 is_file: is_file,
                 is_location: is_location,
                 files: files,
@@ -66103,6 +66129,16 @@ define("xabber-chats", [],function () {
                     this.updateScrollBar();
                 }
             }
+            if (is_video) {
+                let video_content = this.createVideoContainer();
+                $message.find('.chat-msg-media-content').append(video_content);
+                videos.forEach((video) => {
+                    let video_el = this.createVideo(video);
+                    $message.find('.video-content').append(video_el);
+                });
+                this.videoOnload($message);
+                $message.removeClass('file-upload noselect');
+            }
 
             if (is_file) {
                 if (files.length > 0) {
@@ -66156,6 +66192,7 @@ define("xabber-chats", [],function () {
                     let is_image_forward = attrs.images && attrs.images.length,
                         images_forward = is_image_forward ? _.clone(attrs.images) : undefined,
                         $img_html_forward,
+                        is_forward_video = (attrs.videos) ? true : false,
                         is_forward_file = (attrs.files) ? true : false,
                         is_forward_location = (attrs.locations) ? true : false,
                         is_fwd_voice_message,
@@ -66215,6 +66252,16 @@ define("xabber-chats", [],function () {
                             $f_message.find('.chat-msg-media-content').html($(img_content_forward).html($img_html_forward));
                             !xabber.settings.load_media && $f_message.find('.img-content').append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
                         }
+                    }
+                    if (is_forward_video) {
+                        let video_content = this.createVideoContainer();
+                        $f_message.find('.chat-msg-media-content').append(video_content);
+                        attrs.videos.forEach((video) => {
+                            let video_el = this.createVideo(video);
+                            $f_message.find('.video-content').append(video_el);
+                        });
+                        this.videoOnload($message);
+                        $f_message.removeClass('file-upload noselect');
                     }
 
                     if (is_forward_file) {
@@ -66625,7 +66672,9 @@ define("xabber-chats", [],function () {
                 body = "";
                 let files = message.get('files') || [],
                     images = message.get('images') || [],
+                    videos = message.get('videos') || [],
                     all_files = files.concat(images);
+                all_files = all_files.concat(videos)
                 all_files.forEach((file, idx) => {
                     legacy_body = file.sources[0] + ((idx != all_files.length - 1) ? '\n' : "");
                     let start_idx = body.length,
@@ -67005,7 +67054,7 @@ define("xabber-chats", [],function () {
         onFileUploaded: function (message, $message) {
             let files = message.get('files'),
                 self = this, is_audio = false,
-                images = [], files_ = [], body_message = "";
+                images = [], files_ = [], videos = [], body_message = "";
             $(files).each((idx, file_) => {
                 let file_new_format = {
                     name: file_.name,
@@ -67022,8 +67071,11 @@ define("xabber-chats", [],function () {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
                     images.push(file_new_format);
                 }
-                else {
+                else if (utils.isVideoType(file_.type)) {
                     _.extend(file_new_format, { duration: file_.duration});
+                    videos.push(file_new_format);
+                }
+                else {
                     files_.push(file_new_format);
                 }
             });
@@ -67065,6 +67117,17 @@ define("xabber-chats", [],function () {
                     !xabber.settings.load_media && $message.find('.img-content').append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
                 }
             }
+            if (videos.length > 0) {
+                let video_content = this.createVideoContainer();
+                $message.find('.chat-msg-media-content').removeClass('chat-file-content').find('.chat-file-info').remove();
+                $message.find('.chat-msg-media-content').append(video_content);
+                videos.forEach((video) => {
+                    let video_el = this.createVideo(video);
+                    $message.find('.video-content').append(video_el);
+                });
+                this.videoOnload($message);
+                $message.removeClass('file-upload noselect');
+            }
             if (files_.length > 0) {
                 $message.removeClass('file-upload noselect');
                 $(files_).each((idx, item) => {
@@ -67091,6 +67154,7 @@ define("xabber-chats", [],function () {
             }
             this.initPopup($message);
             message.set('images', images);
+            message.set('videos', videos);
             message.set('files', files_);
             if ((message.get('encrypted') || this.model.get('encrypted')) && message.get('images').length) {
                 this.decryptImages(message);
@@ -67146,8 +67210,166 @@ define("xabber-chats", [],function () {
             return imgContent;
         },
 
+        updateVolume: function($video, $volume_wrapper, $volume_bar, $mute_button, x, vol) {
+            let $percentage, $position;
+            if (vol) {
+                $percentage = vol * 100;
+            } else {
+                $position = x - $volume_wrapper.offset().left;
+                $percentage = 100 * $position / $volume_wrapper.width();
+            }
+            if ($percentage > 100) {
+                $percentage = 100;
+            }
+            if ($percentage < 0) {
+                $percentage = 0;
+            }
+            $volume_bar.css("width", $percentage + "%");
+            $video[0].volume = $percentage / 100;
+
+            if ($video[0].volume == 0) {
+                $mute_button.find('i').removeClass('mdi-volume-high').removeClass("mdi-volume-medium").addClass("mdi-volume-off");
+            } else if ($video[0].volume > 0.5) {
+                $mute_button.find('i').addClass('mdi-volume-high').removeClass("mdi-volume-medium").removeClass("mdi-volume-off");
+            } else {
+                $mute_button.find('i').removeClass('mdi-volume-high').addClass("mdi-volume-medium").removeClass("mdi-volume-off");
+            }
+        },
+
+        playVideo: function($video, $video_controls) {
+            if ($video[0].paused) {
+                $video[0].play();
+                $video_controls.find('.play-button i').removeClass('mdi-play').addClass("mdi-pause");
+            } else {
+                $video[0].pause();
+                $video_controls.find('.play-button i').removeClass('mdi-pause').addClass("mdi-play");
+            }
+        },
+
+        launchFullscreen: function($video) {
+            if ($video[0].requestFullscreen) {
+                $video[0].requestFullscreen();
+            } else if ($video[0].mozRequestFullScreen) {
+                $video[0].mozRequestFullScreen();
+            } else if ($video[0].webkitRequestFullscreen) {
+                $video[0].webkitRequestFullscreen();
+            } else if ($video[0].msRequestFullscreen) {
+                $video[0].msRequestFullscreen();
+            }
+        },
+
+        updateBar: function($video, $progress, $progress_bar, x) {
+            let $position = x - $progress.offset().left,
+                $percentage = 100 * $position / $progress_bar.width();
+            if ($percentage > 100) {
+                $percentage = 100;
+            }
+            if ($percentage < 0) {
+                $percentage = 0;
+            }
+            $progress.css("width", $percentage + "%");
+            $video[0].currentTime = $video[0].duration * $percentage / 100;
+        },
+
+        createVideo: function(video) {
+            video.pretty_size = utils.pretty_size(video.size)
+            let video_el = document.createElement("video"),
+                $video_wrap_template = $(templates.messages.video({video: video}));
+            if (xabber.settings.load_media)
+                video_el.setAttribute("preload", "auto");
+            else
+                video_el.setAttribute("preload", "none");
+            video_el.height = 300;
+            video_el.controls = false;
+            video_el.src = video.sources[0]
+            $video_wrap_template.find('.video-container').html(video_el)
+            let $video = $video_wrap_template.find('video'),
+                $video_controls = $video_wrap_template.find(".video-controls"),
+                $button_controls = $video_wrap_template.find(".bottom-wrapper"),
+                $progress_bar = $video_wrap_template.find(".progress-bar"),
+                $progress = $video_wrap_template.find(".time-bar"),
+                $buffer_bar = $video_wrap_template.find(".buffer-bar"),
+                $play_button = $video_wrap_template.find(".play-button"),
+                $mute_button = $video_wrap_template.find(".sound-button"),
+                $volume_wrapper = $video_wrap_template.find(".volume"),
+                $volume_bar = $video_wrap_template.find(".volume-bar"),
+                $full_screen_btn = $video_wrap_template.find(".video-fullscreen"),
+                $current = $video_wrap_template.find(".current"),
+                $duration = $video_wrap_template.find(".duration");
+
+            $video.click(() => {
+                this.playVideo($video, $video_controls);
+            });
+            $play_button.click(() => {
+                this.playVideo($video, $video_controls);
+            });
+
+            $video.on("loadedmetadata", () => {
+                $current.text(utils.pretty_duration((0)));
+                $duration.text(utils.pretty_duration(($video[0].duration)).split('.')[0]);
+                this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, 0, 0.7);
+            });
+            $video.on("timeupdate", () => {
+                $current.text(utils.pretty_duration($video[0].currentTime).split('.')[0]);
+                $duration.text(utils.pretty_duration($video[0].duration).split('.')[0]);
+                let currentPos = $video[0].currentTime,
+                    maxduration = $video[0].duration,
+                    perc = 100 * $video[0].currentTime / $video[0].duration;
+                $progress.css("width", perc + "%");
+            });
+            $full_screen_btn.click(() => {
+                this.launchFullscreen($video);
+            });
+
+            let volumeDrag = false,
+                timeDrag = false;
+            $volume_wrapper.on("mousedown", (e) => {
+                volumeDrag = true;
+                $video[0].muted = false;
+                $mute_button.removeClass("muted");
+                this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
+            });
+            $mute_button.click(() => {
+                $video[0].muted = !$video[0].muted;
+                if ($video[0].muted) {
+                    $mute_button.find('i').addClass("mdi-volume-off");
+                    $volume_bar.css("width", 0);
+                } else {
+                    $mute_button.find('i').removeClass("mdi-volume-off");
+                    $volume_bar.css("width", $video[0].volume * 100 + "%");
+                }
+            });
+            $progress_bar.on("mousedown", (e) => {
+                timeDrag = true;
+                this.updateBar($video, $progress, $progress_bar, e.pageX);
+            });
+            $(document).on("mouseup", (e) => {
+                if (volumeDrag) {
+                    volumeDrag = false;
+                    this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
+                }
+                if (timeDrag) {
+                    timeDrag = false;
+                    this.updateBar($video, $progress, $progress_bar, e.pageX);
+                }
+            });
+            $(document).on("mousemove", (e) => {
+                if (timeDrag) {
+                    this.updateBar($video, $progress, $progress_bar, e.pageX);
+                }
+                if (volumeDrag) {
+                    this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
+                }
+            });
+            return $video_wrap_template;
+        },
+
         createImageContainer: function() {
             return $('<div class="img-content"/>')[0];
+        },
+
+        createVideoContainer: function() {
+            return $('<div class="video-content"/>')[0];
         },
 
         onFileNotUploaded: function (message, $message, error_text, type, error_type) {
@@ -67188,7 +67410,7 @@ define("xabber-chats", [],function () {
                     this.chat_state = false;
                 }, constants.CHATSTATE_TIMEOUT_PAUSED);
                 this._chatstate_send_timeout = setTimeout(() => {
-                    !this.chat_state && this.sendChatState('paused');
+                    (!this.chat_state && xabber.settings.typing_notifications) && this.sendChatState('paused');
                 }, constants.CHATSTATE_TIMEOUT_PAUSED*2);
             }
         },
@@ -67274,6 +67496,7 @@ define("xabber-chats", [],function () {
                 msg = this.account.participant_messages.get($message.data('uniqueid'));
             }
             let files = msg.get('files'),
+                videos = msg.get('videos'),
                 images = msg.get('images'),
                 fwd_messages = [],
                 files_links = '';
@@ -67288,6 +67511,11 @@ define("xabber-chats", [],function () {
                 files_links += file.sources[0];
             });
             $(images).each(function(idx, image) {
+                if (idx > 0)
+                    files_links += '\n';
+                files_links += image.sources[0];
+            });
+            $(videos).each(function(idx, image) {
                 if (idx > 0)
                     files_links += '\n';
                 files_links += image.sources[0];
@@ -67500,7 +67728,7 @@ define("xabber-chats", [],function () {
                     return;
                 }
 
-                if ($elem.hasClass('mdi-play')) {
+                if ($elem.hasClass('mdi-play') && !($elem.closest(".video-file-wrap").length > 0)) {
                     let $audio_elem = $elem.closest('.link-file');
                     this.prev_audio_message.voice_message.pause();
                     this.prev_audio_message = $audio_elem[0];
@@ -67508,7 +67736,7 @@ define("xabber-chats", [],function () {
                     return;
                 }
 
-                if ($elem.hasClass('mdi-pause')) {
+                if ($elem.hasClass('mdi-pause') && !($elem.closest(".video-file-wrap").length > 0)) {
                     this.prev_audio_message.voice_message.pause();
                     return;
                 }
@@ -67561,7 +67789,7 @@ define("xabber-chats", [],function () {
                     return;
                 }
 
-                if ($elem.hasClass('chat-msg-location-content') || $elem.hasClass('location-link')) {
+                if ($elem.hasClass('chat-msg-location-content') || $elem.hasClass('location-link') || $elem.closest(".video-file-wrap").length > 0) {
                     return;
                 }
 
@@ -71219,7 +71447,7 @@ define("xabber-chats", [],function () {
 
                         mediaRecorder.onstop = () => {
                         clearInterval(this._chatstate_send_timeout);
-                        this.view.sendChatState('paused');
+                        (xabber.settings.typing_notifications) && this.view.sendChatState('paused');
                         end_time = moment.now();
                         if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
                             let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',

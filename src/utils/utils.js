@@ -167,6 +167,13 @@ define([
                 return false;
         },
 
+        isVideoType: function(type) {
+            if (type.indexOf('video') > -1)
+                return true;
+            else
+                return false;
+        },
+
         file_type_icon: function (mime_type) {
             let filetype = utils.pretty_file_type(mime_type);
             if (filetype === 'image')
