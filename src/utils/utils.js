@@ -79,7 +79,6 @@ define([
                         html_concat += x;
                     }
                     if (options.embed_video){
-                        console.log(list);
                         let youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i');
                         for (i = 0; i < list.length; i++) {
                             let youtube_url = youtube_url_regexp.exec(list[i]);
@@ -92,7 +91,6 @@ define([
                         let vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                         for (i = 0; i < list.length; i++) {
                             let vimeo_url = vimeo_url_regexp.exec(list[i]);
-                            console.log(vimeo_url)
                             if (vimeo_url && vimeo_url[1]){
                                 html_concat += '<div class="embed-video"><iframe src="https://player.vimeo.com/video/' + vimeo_url[1] +'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>';
                             }

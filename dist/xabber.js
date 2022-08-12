@@ -40748,7 +40748,6 @@ define('xabber-utils',[
                         html_concat += x;
                     }
                     if (options.embed_video){
-                        console.log(list);
                         let youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i');
                         for (i = 0; i < list.length; i++) {
                             let youtube_url = youtube_url_regexp.exec(list[i]);
@@ -40761,7 +40760,6 @@ define('xabber-utils',[
                         let vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                         for (i = 0; i < list.length; i++) {
                             let vimeo_url = vimeo_url_regexp.exec(list[i]);
-                            console.log(vimeo_url)
                             if (vimeo_url && vimeo_url[1]){
                                 html_concat += '<div class="embed-video"><iframe src="https://player.vimeo.com/video/' + vimeo_url[1] +'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>';
                             }
@@ -41475,7 +41473,7 @@ define('xabber-utils',[
 
 let client_translation_progress = {"en":100,"ar":28,"az":2,"be":13,"bg":57,"bs":0,"ca":25,"cs":99,"cy":0,"da":0,"de":50,"el":29,"es-ES":34,"es-latin":7,"et":0,"fa":4,"fi":9,"fil":14,"fr":36,"ga-IE":0,"he":21,"hi":0,"hr":0,"hu":15,"hy-AM":8,"id":68,"is":0,"it":73,"ja":20,"ka":0,"kmr":0,"ko":1,"ku":2,"ky":5,"la-LA":0,"lb":0,"lt":4,"me":0,"mk":0,"mn":0,"mr":0,"ms":6,"nb":21,"ne-NP":0,"nl":20,"no":0,"oc":13,"pa-IN":0,"pl":67,"pt-BR":71,"pt-PT":15,"qya-AA":0,"ro":16,"ru":70,"sat":1,"sco":0,"si-LK":38,"sk":20,"sl":28,"sq":3,"sr":13,"sr-Cyrl-ME":0,"sv-SE":38,"sw":1,"ta":1,"te":0,"tg":0,"tk":0,"tlh-AA":0,"tr":67,"uk":28,"uz":0,"vi":13,"yo":0,"zh-CN":38,"zh-TW":11,"zu":0}; typeof define === "function" && define('xabber-translations-info',[],() => { return client_translation_progress;});
 define('xabber-version',[],function () { return JSON.parse(
-'{"version_number":"2.3.2.79","version_description":"embed videos from youtube and vimeo"}'
+'{"version_number":"2.3.2.80","version_description":"fixed account settings updating on changes in account connections, fixed connection callback behaviour on credentials-expired auth error"}'
 )});
 // expands dependencies with internal xabber modules
 define('xabber-environment',[
@@ -48659,7 +48657,7 @@ define("xabber-accounts", [],function () {
                     }, timeout);
                 },
 
-                connectionCallback: function (status, condition) {
+                connectionCallback: function (status, condition, elem) {
                     if (this.session.get('reconnecting')) {
                         xabber.info('ignore connection callback for status: '+constants.CONN_STATUSES[status]);
                         return;
@@ -48701,11 +48699,12 @@ define("xabber-accounts", [],function () {
                         if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            if (this.session.get('conn_retries') <= 3)
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
+                            if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
                                 this.reconnect();
                             else
                                 this.onTokenRevoked();
+                        }
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -48774,7 +48773,7 @@ define("xabber-accounts", [],function () {
                     $.ajax(request);
                 },
 
-                reconnectionCallback: function (status, condition) {
+                reconnectionCallback: function (status, condition, elem) {
                     if (!this.session.get('reconnecting')) {
                         xabber.info('ignore reconnection callback for status: '+constants.CONN_STATUSES[status]);
                         return;
@@ -48794,9 +48793,10 @@ define("xabber-accounts", [],function () {
                         this.session.set({connected: true, reconnected: true,
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            if (this.session.get('conn_retries') > 3)
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
+                            if (this.session.get('conn_retries') > 2 || $(elem).find('credentials-expired').length > 0)
                                 this.onTokenRevoked();
+                        }
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -50124,6 +50124,7 @@ define("xabber-accounts", [],function () {
                 this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
+                this.model.on("change:auth_type", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
             },
 
@@ -50133,8 +50134,7 @@ define("xabber-accounts", [],function () {
                 this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
-                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
-                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
+                this.updateView();
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -50161,10 +50161,8 @@ define("xabber-accounts", [],function () {
 
             updateView: function () {
                 let connected = this.model.isConnected();
-                // this.$('.xmpp-resources').showIf(connected);
-                this.$('.server-info').showIf(connected);
-                this.$('.blocklist').showIf(connected);
-                this.$('.groups-info').showIf(connected);
+                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
                 this.updateScrollBar();
             },
 
