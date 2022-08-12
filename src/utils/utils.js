@@ -83,16 +83,14 @@ define([
                         for (i = 0; i < list.length; i++) {
                             let youtube_url = youtube_url_regexp.exec(list[i]);
                             if (youtube_url && youtube_url[6]){
-                                html_concat += '<div class="embed-video"><iframe type="text/html"\n' +
-                                    '  src="https://www.youtube.com/embed/' + youtube_url[6] + '"\n' +
-                                    '  frameborder="0" allowfullscreen scrolling="no" controls="2" sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"/></div>';
+                                html_concat += '<div class="embed-video"><div class="plyr-video-container" data-plyr-provider="youtube" data-plyr-embed-id="' + youtube_url[6] + '"/></div>';
                             }
                         }
                         let vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                         for (i = 0; i < list.length; i++) {
                             let vimeo_url = vimeo_url_regexp.exec(list[i]);
                             if (vimeo_url && vimeo_url[1]){
-                                html_concat += '<div class="embed-video"><iframe src="https://player.vimeo.com/video/' + vimeo_url[1] +'" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></div>';
+                                html_concat += '<div class="embed-video"><div class="plyr-video-container"><iframe src="https://player.vimeo.com/video/' + vimeo_url[1] +'" frameborder="0" ></iframe></div></div>';
                             }
                         }
                     }

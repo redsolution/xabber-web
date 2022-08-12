@@ -25,6 +25,7 @@ require.config({
         "i18next":                  "node_modules/i18next/i18next.min",
 
         // modified libs and plugins
+        "Plyr":                     "src/lib/plyr",
         "backbone.localsync":       "src/lib/backbone.localsync",
         "hammerjs":                 "src/lib/hammer.min",
         "materialize":              "src/lib/materialize",

@@ -3366,6 +3366,7 @@ define("xabber-chats", function () {
             $copy_link_icon.attr({
                 'data-image': 'true'
             });
+            this.initPlyrEmbedPlayer($message);
         },
 
         locationOnload: function ($message) {
@@ -4282,6 +4283,15 @@ define("xabber-chats", function () {
                 day_date.format('x')+'">'+pretty_date(day_date)+'</div>');
         },
 
+        initPlyrEmbedPlayer: function ($msg) {
+            $msg.find('.plyr-video-container').each((idx, item) => {
+                if ($(item).hasClass('plyr-loading'))
+                    return;
+                let player = new Plyr(item)
+                $(item).addClass('plyr-loading')
+            });
+        },
+
         hideMessageAuthor: function ($msg) {
             $msg.removeClass('with-author');
         },
@@ -4420,6 +4430,9 @@ define("xabber-chats", function () {
             if ($msg.find('.data-form').length) {
                 this.showMessageAuthor($msg);
                 return;
+            }
+            if ($msg.find('.plyr-video-container').length) {
+                this.initPlyrEmbedPlayer($msg);
             }
             let is_system = $prev_msg.hasClass('system'),
                 is_same_sender = ($msg.data('from') === $prev_msg.data('from')),
@@ -5133,67 +5146,6 @@ define("xabber-chats", function () {
             return imgContent;
         },
 
-        updateVolume: function($video, $volume_wrapper, $volume_bar, $mute_button, x, vol) {
-            let $percentage, $position;
-            if (vol) {
-                $percentage = vol * 100;
-            } else {
-                $position = x - $volume_wrapper.offset().left;
-                $percentage = 100 * $position / $volume_wrapper.width();
-            }
-            if ($percentage > 100) {
-                $percentage = 100;
-            }
-            if ($percentage < 0) {
-                $percentage = 0;
-            }
-            $volume_bar.css("width", $percentage + "%");
-            $video[0].volume = $percentage / 100;
-
-            if ($video[0].volume == 0) {
-                $mute_button.find('i').removeClass('mdi-volume-high').removeClass("mdi-volume-medium").addClass("mdi-volume-off");
-            } else if ($video[0].volume > 0.5) {
-                $mute_button.find('i').addClass('mdi-volume-high').removeClass("mdi-volume-medium").removeClass("mdi-volume-off");
-            } else {
-                $mute_button.find('i').removeClass('mdi-volume-high').addClass("mdi-volume-medium").removeClass("mdi-volume-off");
-            }
-        },
-
-        playVideo: function($video, $video_controls) {
-            if ($video[0].paused) {
-                $video[0].play();
-                $video_controls.find('.play-button i').removeClass('mdi-play').addClass("mdi-pause");
-            } else {
-                $video[0].pause();
-                $video_controls.find('.play-button i').removeClass('mdi-pause').addClass("mdi-play");
-            }
-        },
-
-        launchFullscreen: function($video) {
-            if ($video[0].requestFullscreen) {
-                $video[0].requestFullscreen();
-            } else if ($video[0].mozRequestFullScreen) {
-                $video[0].mozRequestFullScreen();
-            } else if ($video[0].webkitRequestFullscreen) {
-                $video[0].webkitRequestFullscreen();
-            } else if ($video[0].msRequestFullscreen) {
-                $video[0].msRequestFullscreen();
-            }
-        },
-
-        updateBar: function($video, $progress, $progress_bar, x) {
-            let $position = x - $progress.offset().left,
-                $percentage = 100 * $position / $progress_bar.width();
-            if ($percentage > 100) {
-                $percentage = 100;
-            }
-            if ($percentage < 0) {
-                $percentage = 0;
-            }
-            $progress.css("width", $percentage + "%");
-            $video[0].currentTime = $video[0].duration * $percentage / 100;
-        },
-
         createVideo: function(video) {
             video.pretty_size = utils.pretty_size(video.size)
             let video_el = document.createElement("video"),
@@ -5202,88 +5154,10 @@ define("xabber-chats", function () {
                 video_el.setAttribute("preload", "auto");
             else
                 video_el.setAttribute("preload", "none");
-            video_el.height = 300;
             video_el.controls = false;
             video_el.src = video.sources[0]
-            $video_wrap_template.find('.video-container').html(video_el)
-            let $video = $video_wrap_template.find('video'),
-                $video_controls = $video_wrap_template.find(".video-controls"),
-                $button_controls = $video_wrap_template.find(".bottom-wrapper"),
-                $progress_bar = $video_wrap_template.find(".progress-bar"),
-                $progress = $video_wrap_template.find(".time-bar"),
-                $buffer_bar = $video_wrap_template.find(".buffer-bar"),
-                $play_button = $video_wrap_template.find(".play-button"),
-                $mute_button = $video_wrap_template.find(".sound-button"),
-                $volume_wrapper = $video_wrap_template.find(".volume"),
-                $volume_bar = $video_wrap_template.find(".volume-bar"),
-                $full_screen_btn = $video_wrap_template.find(".video-fullscreen"),
-                $current = $video_wrap_template.find(".current"),
-                $duration = $video_wrap_template.find(".duration");
-
-            $video.click(() => {
-                this.playVideo($video, $video_controls);
-            });
-            $play_button.click(() => {
-                this.playVideo($video, $video_controls);
-            });
-
-            $video.on("loadedmetadata", () => {
-                $current.text(utils.pretty_duration((0)));
-                $duration.text(utils.pretty_duration(($video[0].duration)).split('.')[0]);
-                this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, 0, 0.7);
-            });
-            $video.on("timeupdate", () => {
-                $current.text(utils.pretty_duration($video[0].currentTime).split('.')[0]);
-                $duration.text(utils.pretty_duration($video[0].duration).split('.')[0]);
-                let currentPos = $video[0].currentTime,
-                    maxduration = $video[0].duration,
-                    perc = 100 * $video[0].currentTime / $video[0].duration;
-                $progress.css("width", perc + "%");
-            });
-            $full_screen_btn.click(() => {
-                this.launchFullscreen($video);
-            });
-
-            let volumeDrag = false,
-                timeDrag = false;
-            $volume_wrapper.on("mousedown", (e) => {
-                volumeDrag = true;
-                $video[0].muted = false;
-                $mute_button.removeClass("muted");
-                this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
-            });
-            $mute_button.click(() => {
-                $video[0].muted = !$video[0].muted;
-                if ($video[0].muted) {
-                    $mute_button.find('i').addClass("mdi-volume-off");
-                    $volume_bar.css("width", 0);
-                } else {
-                    $mute_button.find('i').removeClass("mdi-volume-off");
-                    $volume_bar.css("width", $video[0].volume * 100 + "%");
-                }
-            });
-            $progress_bar.on("mousedown", (e) => {
-                timeDrag = true;
-                this.updateBar($video, $progress, $progress_bar, e.pageX);
-            });
-            $(document).on("mouseup", (e) => {
-                if (volumeDrag) {
-                    volumeDrag = false;
-                    this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
-                }
-                if (timeDrag) {
-                    timeDrag = false;
-                    this.updateBar($video, $progress, $progress_bar, e.pageX);
-                }
-            });
-            $(document).on("mousemove", (e) => {
-                if (timeDrag) {
-                    this.updateBar($video, $progress, $progress_bar, e.pageX);
-                }
-                if (volumeDrag) {
-                    this.updateVolume($video, $volume_wrapper, $volume_bar, $mute_button, e.pageX);
-                }
-            });
+            $(video_el).addClass('plyr-video-container');
+            $video_wrap_template.html(video_el)
             return $video_wrap_template;
         },
 
@@ -5712,7 +5586,7 @@ define("xabber-chats", function () {
                     return;
                 }
 
-                if ($elem.hasClass('chat-msg-location-content') || $elem.hasClass('location-link') || $elem.closest(".video-file-wrap").length > 0) {
+                if ($elem.hasClass('chat-msg-location-content') || $elem.hasClass('location-link') || $elem.closest(".video-file-wrap").length > 0 || $elem.closest(".embed-video").length > 0) {
                     return;
                 }
 
