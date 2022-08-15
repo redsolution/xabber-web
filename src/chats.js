@@ -963,6 +963,7 @@ define("xabber-chats", function () {
             this.messages = new xabber.Messages(null, {account: this.account});
             this.messages_unread = new xabber.Messages(null, {account: this.account});
             this.item_view = new xabber.ChatItemView({model: this});
+            this.plyr_players = [];
             this.on("get_retractions_list", this.getAllMessageRetractions, this);
             this.on("change:timestamp", this.onChangedTimestamp, this);
         },
@@ -2700,13 +2701,13 @@ define("xabber-chats", function () {
               this.$el.addClass('hidden');
               if (subscription === 'both' || this.contact.get('blocked'))
                   return;
-              else if (subscription === 'to' && in_request || (!subscription && in_request && in_roster)) {
+              else if (subscription === 'to' && in_request || (subscription === 'none' && in_request && in_roster)) {
                   this.$('.subscription-info').text(xabber.getString("subscription_status_in_request_incoming"));
                   this.$('.button:not(.btn-allow)').addClass('hidden');
-              } else if (!out_request && !in_roster && !in_request && (subscription === 'from' || _.isNull(subscription))) {
+              } else if (!out_request && !in_roster && !in_request && (subscription === 'from' || subscription === 'none')) {
                   this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_outgoing"));
                   this.$('.button:not(.btn-subscribe)').addClass('hidden');
-              } else if (subscription === undefined || !subscription && in_request) {
+              } else if (subscription === undefined || subscription === 'none' && in_request) {
                   this.$('.button:not(.btn-add):not(.btn-block)').addClass('hidden');
               } else {
                   return;
@@ -2741,8 +2742,8 @@ define("xabber-chats", function () {
           },
 
           sendAndAskSubscription: function () {
-              this.contact.acceptRequest();
               this.contact.askRequest();
+              this.contact.acceptRequest();
           },
 
           blockContact: function () {
@@ -4288,6 +4289,13 @@ define("xabber-chats", function () {
                 if ($(item).hasClass('plyr-loading'))
                     return;
                 let player = new Plyr(item)
+                this.model.plyr_players.push(player)
+                player.on('play',() => {
+                    let other_players = this.model.plyr_players.filter(other => other != player)
+                    other_players.forEach(function(other) {
+                        other.pause();
+                    })
+                });
                 $(item).addClass('plyr-loading')
             });
         },
