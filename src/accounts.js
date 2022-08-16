@@ -511,7 +511,7 @@ define("xabber-accounts", function () {
                     }, timeout);
                 },
 
-                connectionCallback: function (status, condition) {
+                connectionCallback: function (status, condition, elem) {
                     if (this.session.get('reconnecting')) {
                         xabber.info('ignore connection callback for status: '+constants.CONN_STATUSES[status]);
                         return;
@@ -553,11 +553,12 @@ define("xabber-accounts", function () {
                         if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
                             this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            if (this.session.get('conn_retries') <= 3)
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
+                            if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
                                 this.reconnect();
                             else
                                 this.onTokenRevoked();
+                        }
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -626,7 +627,7 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                reconnectionCallback: function (status, condition) {
+                reconnectionCallback: function (status, condition, elem) {
                     if (!this.session.get('reconnecting')) {
                         xabber.info('ignore reconnection callback for status: '+constants.CONN_STATUSES[status]);
                         return;
@@ -646,9 +647,10 @@ define("xabber-accounts", function () {
                         this.session.set({connected: true, reconnected: true,
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
-                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token))
-                            if (this.session.get('conn_retries') > 3)
+                        if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
+                            if (this.session.get('conn_retries') > 2 || $(elem).find('credentials-expired').length > 0)
                                 this.onTokenRevoked();
+                        }
                         else
                             this.onAuthFailed();
                     } else if (status === Strophe.Status.DISCONNECTED) {
@@ -2588,6 +2590,7 @@ define("xabber-accounts", function () {
                 this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
                 this.model.on("activate deactivate", this.updateView, this);
+                this.model.on("change:auth_type", this.updateView, this);
                 this.model.on("destroy", this.remove, this);
             },
 
@@ -2597,8 +2600,7 @@ define("xabber-accounts", function () {
                 this.updateEncryptedChatstates();
                 this.updateEnabled();
                 this.updateXTokens();
-                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
-                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
+                this.updateView();
                 this.$('.main-resource .client').text(xabber.get('client_name'));
                 this.$('.main-resource .resource').text(this.model.resource);
                 this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -2648,10 +2650,8 @@ define("xabber-accounts", function () {
 
             updateView: function () {
                 let connected = this.model.isConnected();
-                // this.$('.xmpp-resources').showIf(connected);
-                this.$('.server-info').showIf(connected);
-                this.$('.blocklist').showIf(connected);
-                this.$('.groups-info').showIf(connected);
+                this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
+                this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
                 this.updateGallery();
                 this.updateScrollBar();
             },

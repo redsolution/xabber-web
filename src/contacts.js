@@ -89,16 +89,17 @@ define("xabber-contacts", function () {
                             status_text = xabber.getString("contact_state_outgoing_request");
                         else
                             status_text = xabber.getString("contact_state_subscribed_to_account");
-                    } else if (!subscription) {
+                    } else if (subscription === 'none') {
                         if (out_request)
                             status_text = xabber.getString("contact_state_outgoing_request");
                         else if (in_request)
                             status_text = xabber.getString("contact_state_incoming_request");
-                        else if (_.isNull(subscription))
-                            status_text = xabber.getString("contact_state_no_subscriptions");
                         else
-                            status_text = xabber.getString("contact_state_not_in_contact_list");
-                    } else
+                            status_text = xabber.getString("contact_state_no_subscriptions");
+                    }
+                    else if (!subscription)
+                        status_text = xabber.getString("contact_state_not_in_contact_list");
+                    else
                         status_text = this.get('status_message') || xabber.getString(this.get('status'));
                 }
                 return status_text;
@@ -106,6 +107,7 @@ define("xabber-contacts", function () {
 
             getSubscriptionStatuses: function () {
                 let subscription = this.get('subscription'),
+                    subscription_preapproved = this.get('subscription_preapproved'),
                     in_request = this.get('subscription_request_in'),
                     out_request = this.get('subscription_request_out'),
                     status_description = "",
@@ -142,8 +144,12 @@ define("xabber-contacts", function () {
                         status_out_text = xabber.getString("subscription_status_out_to");
                         status_in_text = xabber.getString("subscription_status_in_not_allowed");
                         status_description = xabber.getString("subscription_status_description_out_to_in_not_allowed");
+                        if (subscription_preapproved){
+                            status_in_text = xabber.getString("subscription_status_is_allowed");
+                            status_description = xabber.getString("subscription_status_description_out_to_in_allowed");
+                        }
                     }
-                } else if (!subscription) {
+                } else if (subscription === 'none') {
                     if (out_request && in_request){
                         status_out_text = xabber.getString("subscription_status_out_requested");
                         status_in_text = xabber.getString("subscription_status_in_request_incoming");
@@ -153,20 +159,28 @@ define("xabber-contacts", function () {
                         status_out_text = xabber.getString("subscription_status_out_requested");
                         status_in_text = xabber.getString("subscription_status_in_not_allowed");
                         status_description = xabber.getString("subscription_status_description_out_requested_in_not_allowed");
+                        if (subscription_preapproved){
+                            status_in_text = xabber.getString("subscription_status_is_allowed");
+                            status_description = xabber.getString("subscription_status_description_out_request_in_allowed");
+                        }
                     }
                     else if (in_request){
                         status_out_text = xabber.getString("subscription_status_out_none");
                         status_in_text = xabber.getString("subscription_status_in_request_incoming");
                         status_description = xabber.getString("subscription_status_description_out_none_in_request_incoming");
                     }
-                    else if (_.isNull(subscription)) {
+                    else {
                         status_out_text = xabber.getString("subscription_status_out_none");
                         status_in_text = xabber.getString("subscription_status_in_not_allowed");
                         status_description = xabber.getString("subscription_status_description_out_none_in_not_allowed");
+                        if (subscription_preapproved){
+                            status_in_text = xabber.getString("subscription_status_is_allowed");
+                            status_description = xabber.getString("subscription_status_description_out_none_in_allowed");
+                        }
                     }
-                    else
-                        status_out_text = xabber.getString("contact_add");
                 }
+                else if (!subscription)
+                    status_out_text = xabber.getString("contact_add");
 
                 if (out_request)
                     status_out_color = "request";
@@ -443,7 +457,7 @@ define("xabber-contacts", function () {
 
             declineSubscribe: function () {
                 this.pres('unsubscribed');
-                this.set('subscription_preapproved', false)
+                !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', false)
             },
 
             deleteWithDialog: function () {
@@ -1630,7 +1644,7 @@ define("xabber-contacts", function () {
                     $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
                 }
-                else if (!subscription) {
+                else if (!subscription || subscription === 'none') {
                     $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
                 }
@@ -2010,7 +2024,7 @@ define("xabber-contacts", function () {
                     $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
                 }
-                else if (!subscription) {
+                else if (!subscription || subscription === 'none') {
                     $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', this.model.get('subscription_preapproved') ? true : false);
                     $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
                 }
@@ -7373,6 +7387,7 @@ define("xabber-contacts", function () {
                 'click .btn-cancel-request': 'cancelSubscriptionRequest',
                 'click .btn-allow-request': 'handleSubscriptionRequest',
                 'click .btn-disallow-request': 'cancelSubscriptionIn',
+                'click .btn-disallow-preapproved': 'cancelSubscriptionIn',
                 'click .btn-cancel-subscription-out': 'cancelSubscriptionOut',
                 'click .btn-cancel-subscription-in': 'cancelSubscriptionIn',
             },
@@ -7383,6 +7398,7 @@ define("xabber-contacts", function () {
                 this.model.set('edit_hidden', true)
                 this.model.on("change:status_updated", this.updateStatuses, this);
                 this.model.on("change:subscription", this.updateStatuses, this);
+                this.model.on("change:subscription_preapproved", this.updateStatuses, this);
                 this.model.on("change:blocked", this.updateStatuses, this);
                 this.model.on("change:subscription_request_in", this.updateStatuses, this);
                 this.model.on("change:subscription_request_out", this.updateStatuses, this);
@@ -7418,7 +7434,8 @@ define("xabber-contacts", function () {
             },
 
             updateStatuses: function () {
-                let statuses = this.model.getSubscriptionStatuses();
+                let statuses = this.model.getSubscriptionStatuses(),
+                    subscription_preapproved = this.model.get('subscription_preapproved');
                 if (statuses){
                     this.$('.status-out').addClass(statuses.status_out_class)
                     this.$('.status-out .value').text(statuses.status_out)
@@ -7454,7 +7471,8 @@ define("xabber-contacts", function () {
                         this.$('.status-in').removeClass('text-decoration-color-300')
                     }
                     this.$('.btn-request').hideIf(!(statuses.status_out_color === ''))
-                    this.$('.btn-allow').hideIf(!(statuses.status_in_color === ''))
+                    this.$('.btn-allow').hideIf(!(statuses.status_in_color === '' && !subscription_preapproved))
+                    this.$('.btn-disallow-preapproved').hideIf(!(statuses.status_in_color === '' && subscription_preapproved))
                     this.$('.btn-cancel-request').hideIf(!(statuses.status_out_color === 'request'))
                     this.$('.btn-allow-request').hideIf(!(statuses.status_in_color === 'request'))
                     this.$('.btn-disallow-request').hideIf(!(statuses.status_in_color === 'request'))
@@ -7469,6 +7487,7 @@ define("xabber-contacts", function () {
 
             allowSubscription: function () {
                 this.model.acceptRequest();
+                !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', true)
             },
 
             cancelSubscriptionRequest: function () {
@@ -8874,6 +8893,7 @@ define("xabber-contacts", function () {
                     return;
                 let contact = this.contacts.mergeContact(jid),
                     subscription = item.getAttribute("subscription"),
+                    subscription_preapproved = item.getAttribute("approved"),
                     ask = item.getAttribute("ask");
                 if (contact.get('invitation') && (subscription === 'both' || subscription === 'to')) {
                     contact.set('invitation', false);
@@ -8887,6 +8907,7 @@ define("xabber-contacts", function () {
                         subscription: undefined,
                         subscription_request_out: false
                     });
+                    contact.set('subscription_preapproved', false)
                     this.account.cached_roster.removeFromRoster(jid);
                     return;
                 }
@@ -8896,7 +8917,7 @@ define("xabber-contacts", function () {
                     groups.indexOf(group) < 0 && groups.push(group);
                 });
                 let attrs = {
-                    subscription: subscription,
+                    subscription: subscription || 'none',
                     in_roster: true,
                     roster_name: item.getAttribute("name"),
                     groups: groups
@@ -8904,7 +8925,6 @@ define("xabber-contacts", function () {
                 if (subscription === 'both') {
                     attrs.subscription_request_out = false;
                     attrs.subscription_request_in = false;
-                    attrs.subscription_preapproved = undefined;
                 }
                 if (subscription === 'from')
                     attrs.subscription_request_in = false;
@@ -8913,6 +8933,7 @@ define("xabber-contacts", function () {
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
                 attrs.roster_name && (attrs.name = attrs.roster_name);
+                this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && (attrs.subscription_preapproved = subscription_preapproved ? true : subscription_preapproved);
                 contact.set(attrs);
                 contact.updateCachedInfo();
             }
@@ -9699,7 +9720,7 @@ define("xabber-contacts", function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
-                    contact.set('subscription_preapproved', true);
+                    !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && contact.set('subscription_preapproved', true);
                     contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, () => {
                         contact.pres('subscribe');

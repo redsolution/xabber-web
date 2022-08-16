@@ -1,0 +1,26 @@
+<div class="images-details">
+    <div class="images-details-header">
+        {[print(xabber.getString("privacy_risk_images_header"))]}
+    </div>
+    {[img_information.images.forEach((image) => {]}
+        <div class="image-details">
+            {{image.name}} <span>{{image.pretty_size}}, {{image.height}}x{{image.width}}</span>
+        </div>
+    {[})]}
+</div>
+<div class="image-servers-details">
+    {[if (img_information.servers.length === 1) {]}
+        <div class="images-details-header">
+            {[print(xabber.getString("privacy_risk_server_header", [img_information.servers[0]]))]}
+        </div>
+    {[} else {]}
+        <div class="images-details-header">
+            {[print(xabber.getString("privacy_risk_servers_header"))]}
+        </div>
+        {[img_information.servers.forEach((server) => {]}
+            <div class="server-details">
+                {{server}}
+            </div>
+        {[})]}
+    {[}]}
+</div>

@@ -30,10 +30,10 @@
                 <!--<i class="mdi mdi-24px mdi-database"></i>-->
                 <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__data_and_storage"))]}</div>-->
             <!--</div>-->
-            <!--<div class="settings-tab" data-block-name="privacy">-->
-                <!--<i class="mdi mdi-24px mdi-incognito"></i>-->
-                <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__privacy"))]}</div>-->
-            <!--</div>-->
+            <div class="settings-tab" data-block-name="privacy">
+                <i class="mdi mdi-24px mdi-incognito"></i>
+                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__privacy"))]}</div>
+            </div>
             <!--<div class="settings-tab" data-block-name="connection">-->
                 <!--<i class="mdi mdi-24px mdi-wan"></i>-->
                 <!--<div class="settings-block-name one-line line-through">{[print(xabber.getString("settings__menu_item__connection_settings"))]}</div>-->
@@ -680,6 +680,27 @@
                                     </p>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div data-header='{[print(xabber.getString("settings__menu_item__privacy"))]}'  class="settings-block-wrap privacy hidden">
+                    <div class="setting load-media field-wrap">
+                        <div class="input-field checkbox-field">
+                            <input type="checkbox" class="filled-in" id="load-media"/>
+                            <label for="load-media">{[print(xabber.getString("settings__section_privacy__load_media"))]}</label>
+                        </div>
+                    </div>
+                    <div class="setting typing-notifications field-wrap">
+                        <div class="input-field checkbox-field">
+                            <input type="checkbox" class="filled-in" id="typing-notifications"/>
+                            <label for="typing-notifications">{[print(xabber.getString("settings__section_privacy__typing_notifications"))]}</label>
+                        </div>
+                    </div>
+                    <div class="setting mapping-service field-wrap">
+                        <div class="input-field checkbox-field">
+                            <input type="checkbox" class="filled-in" id="mapping-service"/>
+                            <label for="mapping-service">{[print(xabber.getString("settings__section_privacy__mapping_service"))]}</label>
                         </div>
                     </div>
                 </div>
