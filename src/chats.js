@@ -8935,7 +8935,9 @@ define("xabber-chats", function () {
             this.renderLastEmoticons();
             this.$('.attach-file').showIf(http_upload);
             this.$('.attach-location').showIf(xabber.settings.mapping_service);
-            this.$('.ql-toolbar.ql-snow').switchClass('ql-moved-left', !xabber.settings.mapping_service);
+            this.$('.attach-media').showIf(this.account.get('gallery_token') && this.account.get('gallery_url'));
+            this.$('.ql-toolbar.ql-snow').switchClass('ql-moved-left', !xabber.settings.mapping_service || !(this.account.get('gallery_token') && this.account.get('gallery_url')));
+            this.$('.ql-toolbar.ql-snow').switchClass('ql-moved-left-extra', !xabber.settings.mapping_service && !(this.account.get('gallery_token') && this.account.get('gallery_url')));
             if (this.model.get('group_chat')) {
                 this.updateInfoInBottom();
             }

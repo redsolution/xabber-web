@@ -182,6 +182,10 @@ input[type=checkbox].filled-in:checked + label:after {
 }
 
 .ql-toolbar.ql-snow.ql-moved-left {
+    left: 84px;
+}
+
+.ql-toolbar.ql-snow.ql-moved-left-extra {
     left: 56px;
 }
 

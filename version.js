@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.83","version_description":"added checks for subscription pre-approval feature"}'
+'{"version_number":"2.3.2.84","version_description":"Fixed bottom chat toolbar position, merged media gallery branch"}'
 )});
