@@ -457,7 +457,7 @@ define("xabber-contacts", function () {
 
             declineSubscribe: function () {
                 this.pres('unsubscribed');
-                this.set('subscription_preapproved', false)
+                !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', false)
             },
 
             deleteWithDialog: function () {
@@ -6963,6 +6963,7 @@ define("xabber-contacts", function () {
 
             allowSubscription: function () {
                 this.model.acceptRequest();
+                !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', true)
             },
 
             cancelSubscriptionRequest: function () {
@@ -8408,7 +8409,7 @@ define("xabber-contacts", function () {
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
                 attrs.roster_name && (attrs.name = attrs.roster_name);
-                attrs.subscription_preapproved = subscription_preapproved ? true : subscription_preapproved;
+                this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && (attrs.subscription_preapproved = subscription_preapproved ? true : subscription_preapproved);
                 contact.set(attrs);
                 contact.updateCachedInfo();
             }
@@ -9195,7 +9196,7 @@ define("xabber-contacts", function () {
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text(error_text);
                 } else {
-                    contact.set('subscription_preapproved', true);
+                    !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && contact.set('subscription_preapproved', true);
                     contact.pres('subscribed');
                     contact.pushInRoster({name: name, groups: groups}, () => {
                         contact.pres('subscribe');

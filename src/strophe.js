@@ -577,6 +577,13 @@ define("xabber-strophe", function () {
                         });
                         this.do_synchronization = true;
                     }
+
+                    if ((child.nodeName === 'sub') && (child.namespaceURI === Strophe.NS.SUBSCRIPTION_PREAPPROVAL)) {
+                        this.account.server_features.create({
+                            'var': child.namespaceURI,
+                            from: this.domain
+                        });
+                    }
                 }
 
                 if (!this.do_bind) {
@@ -727,6 +734,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('MARKUP', 'https://xabber.com/protocol/markup');
         Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-messages');
         Strophe.addNamespace('FILES', 'https://xabber.com/protocol/files');
+        Strophe.addNamespace('SUBSCRIPTION_PREAPPROVAL', 'urn:xmpp:features:pre-approval');
         return xabber;
     };
 });
