@@ -2074,7 +2074,7 @@ define("xabber-accounts", function () {
                     let $file = $elem.closest('.gallery-file'),
                         f_url = $file.attr('data-file');
 
-                    utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315"src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+                    utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
                     return;
                 }
                 if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
@@ -2251,6 +2251,7 @@ define("xabber-accounts", function () {
                         } else if (item.thumbnail)
                             item.thumbnail = item.thumbnail.url
                         let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
+                        (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
                         $gallery_file.appendTo(this.$('.gallery-files'));
                         $gallery_file.find('.uploaded-img').magnificPopup({
                             type: 'image',
