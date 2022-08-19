@@ -1272,7 +1272,7 @@ define("xabber-accounts", function () {
 
                 initGalleryAuth: function(gallery_feature) {
                     this.set('gallery_url', gallery_feature.get('from'));
-                    if (this.get('gallery_url') && !this.get('gallery_auth'))
+                    if (this.get('gallery_url') && !this.get('gallery_auth')) {
                         this.set('gallery_auth', true)
                         $.ajax({
                             type: 'POST',
@@ -1290,6 +1290,7 @@ define("xabber-accounts", function () {
                                 console.log(response)
                             }
                         });
+                    }
                 },
 
                 onAuthCode: function (stanza) {
@@ -1302,9 +1303,9 @@ define("xabber-accounts", function () {
                             dataType: 'json',
                             data: JSON.stringify({jid: this.id, code: confirm_code}),
                             success: (response) => {
-                                this.set('gallery_auth', false)
                                 if (response.token)
                                     this.set('gallery_token', response.token);
+                                this.set('gallery_auth', false)
                             },
                             error: (response) => {
                                 this.set('gallery_auth', false)
