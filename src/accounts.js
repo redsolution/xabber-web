@@ -1272,7 +1272,8 @@ define("xabber-accounts", function () {
 
                 initGalleryAuth: function(gallery_feature) {
                     this.set('gallery_url', gallery_feature.get('from'));
-                    if (this.get('gallery_url'))
+                    if (this.get('gallery_url') && !this.get('gallery_auth'))
+                        this.set('gallery_auth', true)
                         $.ajax({
                             type: 'POST',
                             url: this.get('gallery_url') + 'v1/account/xmpp_code_request/',
@@ -1284,6 +1285,8 @@ define("xabber-accounts", function () {
                                         null, "iq", null, response.request_id);
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
+                                this.set('gallery_auth', false)
                                 console.log(response)
                             }
                         });
@@ -1299,10 +1302,13 @@ define("xabber-accounts", function () {
                             dataType: 'json',
                             data: JSON.stringify({jid: this.id, code: confirm_code}),
                             success: (response) => {
+                                this.set('gallery_auth', false)
                                 if (response.token)
                                     this.set('gallery_token', response.token);
                             },
                             error: (response) => {
+                                this.set('gallery_auth', false)
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                             }
                         });
@@ -1323,6 +1329,17 @@ define("xabber-accounts", function () {
                     })
                 },
 
+                handleCommonGalleryErrors: function (response) {
+                    if (response.status === 401){
+                        if (this.server_features.get('media-gallery')){
+                            this.initGalleryAuth(this.server_features.get('media-gallery'))
+                        } else {
+                            this.set('gallery_url', null);
+                            this.set('gallery_token', null);
+                        }
+                    }
+                },
+
                 getStorageStats: function (params, callback) {
                     params && (params = {});
                     if (this.get('gallery_token') && this.get('gallery_url'))
@@ -1336,6 +1353,7 @@ define("xabber-accounts", function () {
                                 callback && callback(response)
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                             }
                         });
@@ -1353,6 +1371,7 @@ define("xabber-accounts", function () {
                                 this.uploadFile(file , callback)
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                             }
                         });
@@ -1380,6 +1399,7 @@ define("xabber-accounts", function () {
                                 callback && callback(response)
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                                 errback && errback(response)
                             }
@@ -1406,6 +1426,7 @@ define("xabber-accounts", function () {
                                 callback && callback(response)
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                                 errback && errback(response)
                             }
@@ -1426,6 +1447,7 @@ define("xabber-accounts", function () {
                                 callback && callback(response)
                             },
                             error: (response) => {
+                                this.handleCommonGalleryErrors(response)
                                 console.log(response)
                                 errback && errback(response)
                             }
@@ -1932,6 +1954,7 @@ define("xabber-accounts", function () {
                 this.$el.html(this.template());
                 this.ps_container = this.$('.gallery-wrap');
                 this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+                this.account.on("update_avatar_list", this.onUpdateAvatars.bind(this));
             },
 
             render: function () {
@@ -1964,17 +1987,19 @@ define("xabber-accounts", function () {
                 }
             },
 
-            updateStorage: function (after_deletion) {
+            updateStorage: function (after_deletion, after_avatar_update) {
                 this.account.getStorageStats(null,(response) => {
                     let used_storage = utils.pretty_size(response.total.used) || '0';
                     this.$('.btn-delete-files-dropdown').hideIf(!(response.total && response.total.used))
                     this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used))
                     this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
-                    this.$('.tabs .list-variant[data-value="image"]').hideIf(!(response.images && response.images.used))
-                    if (response.images && response.images.used)
-                        this.$('.tabs .list-variant[data-value="image"]').addClass('tab')
-                    else
-                        this.$('.tabs .list-variant[data-value="image"]').removeClass('tab')
+                    if (!after_avatar_update){
+                        this.$('.tabs .list-variant[data-value="image"]').hideIf(!(response.images && response.images.used))
+                        if (response.images && response.images.used)
+                            this.$('.tabs .list-variant[data-value="image"]').addClass('tab')
+                        else
+                            this.$('.tabs .list-variant[data-value="image"]').removeClass('tab')
+                    }
                     this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
                     this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
                     this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
@@ -2056,6 +2081,16 @@ define("xabber-accounts", function () {
                 this.total_pages = 0;
                 this.$('.gallery-files').html('')
                 this.filterType(file_type);
+            },
+
+            onUpdateAvatars: function (ev) {
+                this.updateStorage(false, true);
+                if (this.$('.tab .active').closest('.tab').attr('data-value') === 'avatars'){
+                    this.current_page = 1;
+                    this.total_pages = 0;
+                    this.$('.gallery-files').html('');
+                    this.filterType('avatars');
+                }
             },
 
             sortFiles: function (ev) {
@@ -2189,6 +2224,7 @@ define("xabber-accounts", function () {
                             this.loading_files = false
                         },
                         error: (response) => {
+                            this.account.handleCommonGalleryErrors(response)
                             console.log(response)
                             this.loading_files = false
                             this.$('.gallery-files .preloader-wrapper').remove()
@@ -2199,7 +2235,7 @@ define("xabber-accounts", function () {
 
             getAvatars: function (options) {
                 options && options.file && (options = {});
-                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars"}, options);
                 if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
                     this.loading_files = true
                     $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
@@ -2216,6 +2252,7 @@ define("xabber-accounts", function () {
                             this.loading_files = false
                         },
                         error: (response) => {
+                            this.account.handleCommonGalleryErrors(response)
                             console.log(response)
                             this.loading_files = false
                             this.$('.gallery-files .preloader-wrapper').remove()
@@ -2309,6 +2346,7 @@ define("xabber-accounts", function () {
                             $target.detach();
                         },
                         error: (response) => {
+                            this.account.handleCommonGalleryErrors(response)
                             console.log(response)
                         }
                     });
@@ -2330,6 +2368,7 @@ define("xabber-accounts", function () {
                             this.updateStorage(true);
                         },
                         error: (response) => {
+                            this.account.handleCommonGalleryErrors(response)
                             console.log(response)
                         }
                     });
@@ -3338,6 +3377,7 @@ define("xabber-accounts", function () {
                             this.renderFiles(response)
                         },
                         error: (response) => {
+                            this.model.handleCommonGalleryErrors(response)
                             console.log(response)
                             this.$('.library-wrap .preloader-wrapper').remove()
                         }
@@ -3408,6 +3448,7 @@ define("xabber-accounts", function () {
                         if (image) {
                             this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
                                 this.close();
+                                this.model.trigger('update_avatar_list');
                             }, () => {
                                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
                             });
@@ -3421,6 +3462,10 @@ define("xabber-accounts", function () {
                     image = $active_screen.attr('data-screen') == 'library' ? $active_screen.find('div.active').attr('data-src') : $active_screen.find('img:not(.hidden)')[0].src;
                     this.createFileFromURL(image).then((file) => {
                         dfd.resolve(file);
+                    }, (e) => {
+                        this.$('.preloader-wrapper').remove();
+                        this.$('.btn-add').removeClass('hidden-disabled');
+                        utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
                     })
                 } else
                     dfd.resolve(this.current_file);

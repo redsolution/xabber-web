@@ -16495,7 +16495,7 @@ ul.restrictions-list-content>li {
 }
 
 .modal.avatar-picker .library-wrap .image-item {
-    background-repeat: no-repeat;
+    background-repeat: round;
     background-size: cover;
     background-color: #E0E0E0;
 }

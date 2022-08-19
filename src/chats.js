@@ -5064,6 +5064,7 @@ define("xabber-chats", function () {
                         }
                     } else {
                         let response_text;
+                        self.account.handleCommonGalleryErrors(this.response)
                         if (this.status === 500)
                             response_text = this.statusText;
                         else if (this.status === 400)
@@ -8417,6 +8418,7 @@ define("xabber-chats", function () {
                           this.renderFiles(response)
                       },
                       error: (response) => {
+                          this.model.handleCommonGalleryErrors(response)
                           console.log(response)
                           this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
                       }
@@ -8433,6 +8435,7 @@ define("xabber-chats", function () {
                           this.renderFiles(response)
                       },
                       error: (response) => {
+                          this.model.handleCommonGalleryErrors(response)
                           console.log(response)
                           this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
                       }
