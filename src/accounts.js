@@ -908,9 +908,9 @@ define("xabber-accounts", function () {
                     this.enableCarbons();
                     this.getVCard();
                     this.sendPendingStanzas();
-                    /*setTimeout(() => {
+                    setTimeout(() => {
                         this.sendPendingMessages();
-                    }, 5000);*/
+                    }, 5000);
                 },
 
                 getAllMessageRetractions: function (encrypted, callback) {
@@ -935,10 +935,11 @@ define("xabber-accounts", function () {
 
                 sendPendingMessages: function () {
                     _.each(this._pending_messages, (item) => {
-                        let msg = this.messages.get(item.msg_id), $msg_iq;
+                        let msg = this.messages.get(item.unique_id), $msg_iq;
                         msg && ($msg_iq = msg.get('xml')) && msg.set('state', constants.MSG_PENDING);
                         $msg_iq && this.sendMsg($msg_iq);
                     });
+                    this._pending_messages = [];
                 },
 
                 _after_connected_plugins: [],

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.88","version_description":"changed avatar uploading from mediagallery, now it goes straight from mediagallery without processing, delete account on token revoked, changed thumbnail handling on mediagallery avatars, added subscription_request_in setting to false on subscription buttons decline of subscription, added plyr initialisation for expanded forwarded messages, fixed jingle call appearing for group chats, added check for if mediagallery url has changed"}'
+'{"version_number":"2.3.2.89","version_description":"added send pending messages function on afterconnected, fixed chat marker for msgs with error"}'
 )});
