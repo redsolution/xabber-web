@@ -2727,6 +2727,7 @@ define("xabber-chats", function () {
 
           declineSubscription: function () {
               this.contact.declineSubscribe();
+              this.contact.set('subscription_request_in', false);
               this.hideElement();
           },
 
@@ -5844,6 +5845,9 @@ define("xabber-chats", function () {
                 ready: () => {
                     this.updateScrollBar();
                     this.$('.modal-content').css('height', this.$el.height() - 12);
+                    if ($message.find('.plyr-video-container').length) {
+                        this.chat_content.initPlyrEmbedPlayer($message);
+                    }
                 },
                 complete: () => {
                     this.$el.detach();
@@ -8013,7 +8017,7 @@ define("xabber-chats", function () {
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
             this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
             this.$('.btn-notifications').hideIf(this.contact.get('blocked'));
-            this.$('.btn-jingle-message').hideIf(this.contact.get('blocked'));
+            this.$('.btn-jingle-message').hideIf(this.contact.get('blocked') || is_group_chat);
         },
 
         renderSearchPanel: function () {

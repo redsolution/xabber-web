@@ -185,7 +185,7 @@ define("xabber-accounts", function () {
 
                     dfd.done((data, http_avatar) => {
                         if (http_avatar) {
-                            let avatar_hash = image.hash || sha1(image.base64),
+                            let avatar_hash = data.hash || image.hash || sha1(image.base64),
                                 iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
                                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                                     .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
@@ -233,7 +233,10 @@ define("xabber-accounts", function () {
                                 });
                         }
                     });
-                    if (this.get('gallery_token') && this.get('gallery_url') && !image.generated){
+                    if (image.uploaded){
+                        dfd.resolve(image, true)
+                    }
+                    else if (this.get('gallery_token') && this.get('gallery_url') && !image.generated && !image.uploaded){
                         let file = image.name ? image : image.file;
                         this.uploadAvatar(file, (res) => {
                             if (res.thumbnails.length || res.file){
@@ -823,7 +826,7 @@ define("xabber-accounts", function () {
                     this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_token_invalidated_short"));
-                    // this.connect({token_invalidated: true});
+                    this.deleteAccount()
                 },
 
                 onChangedConnected: function () {
@@ -2283,11 +2286,7 @@ define("xabber-accounts", function () {
                 this.$('.gallery-files .preloader-wrapper').remove()
                 if (response.items.length){
                     response.items.forEach((item) => {
-                        if (response.type === 'avatars'){
-                            if (item.thumbnails.length)
-                                item.thumbnail = item.thumbnails[0].url
-                        } else if (item.thumbnail)
-                            item.thumbnail = item.thumbnail.url
+                        item.thumbnail = item.thumbnail.url
                         let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
                         (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
                         $gallery_file.appendTo(this.$('.gallery-files'));
@@ -3352,12 +3351,12 @@ define("xabber-accounts", function () {
             renderFiles: function (response) {
                 this.$('.library-wrap .preloader-wrapper').remove()
                 if (response.items.length){
-                    response.items.forEach((item) => {
-                        if (item.thumbnails && item.thumbnails.length)
-                            item.thumbnail = item.thumbnails[item.thumbnails.length - 1].url
+                    this.current_items = response.items
+                    response.items.forEach((item, idx) => {
                         let img = $(`<div class="image-item"/>`);
-                        img.css('background-image', `url("${item.thumbnail}")`);
+                        img.css('background-image', `url("${item.thumbnail.url}")`);
                         img.attr('data-src', item.file);
+                        img.attr('data-id', idx);
                         this.$('.library-wrap').append(img);
                     });
                 }
@@ -3444,23 +3443,39 @@ define("xabber-accounts", function () {
                 if (this.$('.btn-add').hasClass('non-active'))
                     return;
                 let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
-                dfd.done((img) => {
-                    utils.images.getAvatarFromFile(img).done((image, hash, size) => {
-                        if (image) {
-                            this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
-                                this.close();
-                                this.model.trigger('update_avatar_list');
-                            }, () => {
-                                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-                            });
-                        } else
+                dfd.done((img, img_from_gallery) => {
+                    if (img_from_gallery){
+                        this.model.pubAvatar(image, () => {
+                            this.current_items = [];
+                            this.close();
+                            this.model.trigger('update_avatar_list');
+                        }, () => {
                             utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-                    });
+                        });
+                    } else {
+                        utils.images.getAvatarFromFile(img).done((image, hash, size) => {
+                            if (image) {
+                                this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
+                                    this.close();
+                                    this.model.trigger('update_avatar_list');
+                                }, () => {
+                                    utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                                });
+                            } else
+                                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                        });
+                    }
                 });
                 this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
                 this.$('.btn-add').addClass('hidden-disabled');
-                if ($active_screen.attr('data-screen') == 'library' || $active_screen.attr('data-screen') == 'web-address') {
-                    image = $active_screen.attr('data-screen') == 'library' ? $active_screen.find('div.active').attr('data-src') : $active_screen.find('img:not(.hidden)')[0].src;
+
+                if ($active_screen.attr('data-screen') == 'library') {
+                    image = this.current_items[$active_screen.find('div.active').attr('data-id')]
+                    image.uploaded = true;
+                    dfd.resolve(image, true);
+                }
+                else if ($active_screen.attr('data-screen') == 'web-address') {
+                    image = $active_screen.find('img:not(.hidden)')[0].src;
                     this.createFileFromURL(image).then((file) => {
                         dfd.resolve(file);
                     }, (e) => {

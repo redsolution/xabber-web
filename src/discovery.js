@@ -159,8 +159,9 @@ define("xabber-discovery", function () {
                     _.bind(this.receiveMAMPreferences, this, feature)
                 );
             }
-            if (_var === 'media-gallery' && !(this.account.get('gallery_token') && this.account.get('gallery_url'))) {
-                this.account.initGalleryAuth(feature);
+            if (_var === 'media-gallery') {
+                if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))
+                    this.account.initGalleryAuth(feature);
             }
         },
 
