@@ -651,8 +651,12 @@ define("xabber-accounts", function () {
                             reconnecting: false, conn_retries: 0});
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
-                            if (this.session.get('conn_retries') > 2 || $(elem).find('credentials-expired').length > 0)
+                            if ($(elem).find('credentials-expired').length > 0)
                                 this.onTokenRevoked();
+                            else if (this.session.get('conn_retries') > 2 )
+                                this.onAuthFailed();
+                            else
+                                this.reconnect();
                         }
                         else
                             this.onAuthFailed();
@@ -768,8 +772,11 @@ define("xabber-accounts", function () {
                         utils.dialogs.error(xabber.getString("connection__error__text_authentication_failed", [this.get('jid')]));
                     this.session.set({
                         auth_failed: true,
+                        connected: false,
                         no_reconnect: true
                     });
+                    this.save({auth_type: 'password', password: null, x_token: null});
+                    this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
                 },

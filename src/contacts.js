@@ -8934,6 +8934,8 @@ define("xabber-contacts", function () {
                     attrs.subscription_request_out = false;
                 if (ask === 'subscribe')
                     attrs.subscription_request_out = true;
+                else
+                    attrs.subscription_request_out = false;
                 attrs.roster_name && (attrs.name = attrs.roster_name);
                 this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && (attrs.subscription_preapproved = subscription_preapproved ? true : subscription_preapproved);
                 contact.set(attrs);

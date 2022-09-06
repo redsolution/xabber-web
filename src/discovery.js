@@ -160,6 +160,7 @@ define("xabber-discovery", function () {
                 );
             }
             if (_var === 'media-gallery') {
+                this.account.set('gallery_auth', false)
                 if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))
                     this.account.initGalleryAuth(feature);
             }
