@@ -8683,6 +8683,7 @@ define("xabber-contacts", function () {
                         return true;
                     let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
                         type = $item.attr('type'),
+                        presence = $item.children('presence'),
                         $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
                         is_incognito =  type === Strophe.NS.GROUP_CHAT && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('privacy').text() === 'incognito',
                         is_private = is_incognito && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('parent').text(),
@@ -8800,6 +8801,7 @@ define("xabber-contacts", function () {
                         }
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
+                    presence.length && contact.handlePresence(presence[0]);
                     xabber.toolbar_view.recountAllMessageCounter();
                 });
             },
