@@ -6477,11 +6477,13 @@ define("xabber-chats", function () {
                     }));
                 }
                 let $carbons = $message.find(`[xmlns="${Strophe.NS.CARBONS}"]`);
-                if ($carbons.length && is_sender && ['received', 'sent'].includes($carbons[0].tagName)) {
+                if ($carbons.length && ['received', 'sent'].includes($carbons[0].tagName)) {
                     if ($message.find('invite').length) {
                         if ($carbons[0].tagName === 'sent')
                             return;
                     }
+                    if (!is_sender)
+                        return;
                     $forwarded = $carbons.children('forwarded');
                     if ($forwarded.length)
                         $message = $forwarded.children('message');
