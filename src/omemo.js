@@ -1485,8 +1485,11 @@ define("xabber-omemo", function () {
                     from_jid = Strophe.getBareJidFromJid($m.attr('from'));
                     $encrypted = $message.children(`result`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
                 }
-                else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length)
+                else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length){
+                    if ($message.attr('from') != $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).attr('from'))
+                        return null;
                     $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+                }
                 else
                     $encrypted = $message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
 
