@@ -6477,7 +6477,7 @@ define("xabber-chats", function () {
                     }));
                 }
                 let $carbons = $message.find(`[xmlns="${Strophe.NS.CARBONS}"]`);
-                if ($carbons.length && ['received', 'sent'].includes($carbons[0].tagName)) {
+                if ($carbons.length && is_sender && ['received', 'sent'].includes($carbons[0].tagName)) {
                     if ($message.find('invite').length) {
                         if ($carbons[0].tagName === 'sent')
                             return;
@@ -6485,8 +6485,6 @@ define("xabber-chats", function () {
                     $forwarded = $carbons.children('forwarded');
                     if ($forwarded.length)
                         $message = $forwarded.children('message');
-                    if (from_jid != $message.attr('from'))
-                        return;
                     if ($carbons.find(`request[xmlns="${Strophe.NS.DELIVERY}"][to="${to_bare_jid}"]`).length)
                         return;
                     if (this.account.fast_connection && ($message.attr('from') === this.account.fast_connection.jid))

@@ -1159,6 +1159,10 @@ define("xabber-contacts", function () {
                 this.model.on("change:name", this.updateName, this);
                 this.model.on("change:image", this.updateAvatar, this);
                 this.model.on("change:status_updated", this.updateStatus, this);
+                this.model.on("change:subscription", this.updateStatus, this);
+                this.model.on("change:subscription_preapproved", this.updateStatus, this);
+                this.model.on("change:subscription_request_in", this.updateStatus, this);
+                this.model.on("change:subscription_request_out", this.updateStatus, this);
                 this.model.on("change:private_chat", this.updateIcon, this);
                 this.model.on("change:incognito_chat", this.updateIcon, this);
                 this.model.on("change:bot", this.updateIcon, this);
@@ -8801,7 +8805,11 @@ define("xabber-contacts", function () {
                         }
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
-                    presence.length && contact.handlePresence(presence[0]);
+                    if (presence.length)
+                        contact.handlePresence(presence[0]);
+                    else {
+                        contact.set('subscription_request_in', false)
+                    }
                     xabber.toolbar_view.recountAllMessageCounter();
                 });
             },

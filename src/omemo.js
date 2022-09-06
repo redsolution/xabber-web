@@ -1145,6 +1145,9 @@ define("xabber-omemo", function () {
                         stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                         cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
+                    if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied)
+                        return;
+
                     if (cached_msg) {
                         if (!options.replaced) {
                             options.encrypted = true;
@@ -1486,8 +1489,6 @@ define("xabber-omemo", function () {
                     $encrypted = $message.children(`result`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
                 }
                 else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length){
-                    if ($message.attr('from') != $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).attr('from'))
-                        return null;
                     $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
                 }
                 else
