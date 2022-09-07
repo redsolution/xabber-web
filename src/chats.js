@@ -5412,6 +5412,7 @@ define("xabber-chats", function () {
             if (msg.get('forwarded_message')) {
                 msg.get('forwarded_message').forEach((message) => {
                     message.get('images') && fwd_messages.push(message.get('images'));
+                    message.get('videos') && fwd_messages.push(message.get('videos'));
                 });
             }
             $(files).each(function(idx, file) {
@@ -5832,6 +5833,7 @@ define("xabber-chats", function () {
             "click .collapsed-forwarded-message": "expandFwdMessage",
             "click .chat-message": "onClickPinnedMessage",
             'click .chat-msg-location-content': 'onClickExpandedMessageLocation',
+            'click .mdi-link-variant' : 'onClickLink',
         },
 
         _initialize: function (options) {
@@ -5856,11 +5858,14 @@ define("xabber-chats", function () {
             });
             $message.find('.right-side .msg-delivering-state').remove();
             this.$('.modal-content').html($message);
-            this.$('.msg-copy-link').remove();
         },
 
         close: function () {
             this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
+
+        onClickLink:function (ev) {
+            this.chat_content.onClickLink(ev);
         },
 
         onClickPinnedMessage: function (ev) {

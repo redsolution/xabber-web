@@ -9298,8 +9298,7 @@ define("xabber-contacts", function () {
 
             events: {
                 "mouseover .collapsed-wrap": "expand",
-                "mouseleave .expanded-wrap": "collaps",
-                "click .btn-pin": "pinUnpin"
+                "mouseleave .expanded-wrap": "collaps"
             },
 
             __initialize: function () {
@@ -9310,7 +9309,7 @@ define("xabber-contacts", function () {
                 this.model.on("activate deactivate destroy", this.updateCounter, this);
                 this.data.on("change", this.updateLayout, this);
                 let pinned = this._settings.get('pinned');
-                this.data.set({expanded: pinned, pinned: pinned});
+                this.data.set({expanded: false, pinned: false});
             },
 
             updateTheme: function (theme) {
@@ -9339,12 +9338,6 @@ define("xabber-contacts", function () {
             collaps: function () {
                 if (!this.data.get('pinned'))
                     this.data.set('expanded', false);
-            },
-
-            pinUnpin: function () {
-                let pinned = !this.data.get('pinned');
-                this._settings.save('pinned', pinned);
-                this.data.set('pinned', pinned);
             },
 
             updateLayout: function () {
