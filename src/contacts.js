@@ -8806,9 +8806,9 @@ define("xabber-contacts", function () {
                         chat.set('first_archive_id', msg.get('stanza_id'));
                     }
                     if (presence.length)
-                        contact.handlePresence(presence[0]);
+                        contact && contact.handlePresence(presence[0]);
                     else {
-                        contact.set('subscription_request_in', false)
+                        contact && contact.set('subscription_request_in', false)
                     }
                     xabber.toolbar_view.recountAllMessageCounter();
                 });
