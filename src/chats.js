@@ -5083,9 +5083,11 @@ define("xabber-chats", function () {
                 if ($message.data('cancel')) {
                     xhr.abort();
                 } else {
-                    xhr.open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
-                    xhr.setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'))
-                    xhr.send(formData);
+                    this.account.testGalleryTokenExpire(() => {
+                        xhr.open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
+                        xhr.setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'))
+                        xhr.send(formData);
+                    });
                 }
             });
         },
@@ -8415,43 +8417,45 @@ define("xabber-chats", function () {
           },
 
           createLibrary: function () {
-              if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
-                  this.$('.library-wrap').html(env.templates.contacts.preloader())
-                  $.ajax({
-                      type: 'GET',
-                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
-                      url: this.model.get('gallery_url') + 'v1/files/',
-                      dataType: 'json',
-                      data: {obj_per_page: 50, order_by: '-id', type: 'image'},
-                      success: (response) => {
-                          console.log(response)
-                          response.type = 'image'
-                          this.renderFiles(response)
-                      },
-                      error: (response) => {
-                          this.model.handleCommonGalleryErrors(response)
-                          console.log(response)
-                          this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
-                      }
-                  });
-                  $.ajax({
-                      type: 'GET',
-                      headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
-                      url: this.model.get('gallery_url') + 'v1/files/',
-                      dataType: 'json',
-                      data: {obj_per_page: 50, order_by: '-id', type: 'video'},
-                      success: (response) => {
-                          console.log(response)
-                          response.type = 'video'
-                          this.renderFiles(response)
-                      },
-                      error: (response) => {
-                          this.model.handleCommonGalleryErrors(response)
-                          console.log(response)
-                          this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
-                      }
-                  });
-              }
+              this.model.testGalleryTokenExpire(() => {
+                  if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                      this.$('.library-wrap').html(env.templates.contacts.preloader())
+                      $.ajax({
+                          type: 'GET',
+                          headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                          url: this.model.get('gallery_url') + 'v1/files/',
+                          dataType: 'json',
+                          data: {obj_per_page: 50, order_by: '-id', type: 'image'},
+                          success: (response) => {
+                              console.log(response)
+                              response.type = 'image'
+                              this.renderFiles(response)
+                          },
+                          error: (response) => {
+                              this.model.handleCommonGalleryErrors(response)
+                              console.log(response)
+                              this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
+                          }
+                      });
+                      $.ajax({
+                          type: 'GET',
+                          headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                          url: this.model.get('gallery_url') + 'v1/files/',
+                          dataType: 'json',
+                          data: {obj_per_page: 50, order_by: '-id', type: 'video'},
+                          success: (response) => {
+                              console.log(response)
+                              response.type = 'video'
+                              this.renderFiles(response)
+                          },
+                          error: (response) => {
+                              this.model.handleCommonGalleryErrors(response)
+                              console.log(response)
+                              this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
+                          }
+                      });
+                  }
+              });
           },
 
           setActiveImage: function (ev) {

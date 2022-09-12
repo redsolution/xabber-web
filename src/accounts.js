@@ -66,6 +66,7 @@ define("xabber-accounts", function () {
                     });
                     this._waiting_code = false;
                     this.code_requests = [];
+                    this.gallery_code_requests = [];
                     this.xabber_auth = {};
                     this.session.on("change:connected", this.onChangedConnected, this);
                     this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
@@ -609,7 +610,7 @@ define("xabber-accounts", function () {
                                     message: xabber.getString("xmpp_confirm__text_message__verification_code_is", [Number(this.code_requests[0].code)]),
                                     is_archived: false
                                 };
-                                this.createMessageFromIQ(msg_attr);
+                                this.createMessageFromIQ(msg_attrs);
                             }
                         }
                     });
@@ -1236,32 +1237,14 @@ define("xabber-accounts", function () {
                         from_jid = $incoming_iq.attr('from');
                     if ($confirm.length) {
                         request_code = $confirm.attr('id');
-                        if (this._waiting_code && ($confirm.attr('url') === constants.XABBER_ACCOUNT_URL + '/auth/login/')) {
-                            if (this.xabber_auth.api_jid && this.xabber_auth.request_id) {
-                                if (($incoming_iq.attr('id') === this.xabber_auth.request_id) && (from_jid === this.xabber_auth.api_jid))
-                                    this.verifyXabberAccount(request_code, (data) => {
-                                        this._waiting_code = false;
-                                        if (this.get('auto_login_xa')) {
-                                            xabber.api_account.save('token', data);
-                                            xabber.api_account.login_by_token();
-                                        }
-                                    });
-                            }
-                            else {
-                                this.code_requests.push({
-                                    jid: from_jid,
-                                    id: $incoming_iq.attr('id'),
-                                    code: request_code
-                                });
-                            }
+                        if (this.get('gallery_auth_request_code')) {
+                            this.onAuthCode(request_code)
                         }
                         else {
-                            let msg_attrs = {
-                                    from_jid: from_jid,
-                                    message: xabber.getString("xmpp_confirm__text_message__verification_code_is", [request_code]),
-                                    is_archived: false
-                                };
-                            this.createMessageFromIQ(msg_attr);
+                            this.gallery_code_requests.push({
+                                id: $incoming_iq.attr('id'),
+                                code: request_code
+                            });
                         }
                     }
                     if ($session_availability.length) {
@@ -1281,6 +1264,21 @@ define("xabber-accounts", function () {
                     }
                 },
 
+                testGalleryTokenExpire: function(callback) {
+                    let currentTime = new Date(),
+                        tokenExpireTime = new Date(this.get('gallery_token_expires'));
+                    if (this.get('gallery_auth')){
+                        this.once('gallery_token_authenticated', callback)
+                    }
+                    else if (currentTime < tokenExpireTime){
+                        callback && callback();
+                    }
+                    else if (this.server_features.get('media-gallery')){
+                        this.initGalleryAuth(this.server_features.get('media-gallery'))
+                        this.once('gallery_token_authenticated', callback)
+                    }
+                },
+
                 initGalleryAuth: function(gallery_feature) {
                     this.set('gallery_url', gallery_feature.get('from'));
                     if (this.get('gallery_url') && !this.get('gallery_auth')) {
@@ -1291,22 +1289,28 @@ define("xabber-accounts", function () {
                             dataType: 'json',
                             data: JSON.stringify({jid: this.jid, type: "iq"}),
                             success: (response) => {
-                                if (response.request_id)
-                                    this.connection._addSysHandler(this.onAuthCode.bind(this),
-                                        null, "iq", null, response.request_id);
+                                if (response.request_id){
+                                    this.set('gallery_auth_request_code', response.request_id)
+                                    if (this.gallery_code_requests.length){
+                                        let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('gallery_auth_request_code')));
+                                        if (verifying_code && verifying_code.code)
+                                            this.onAuthCode(verifying_code.code)
+                                    }
+                                }
                             },
                             error: (response) => {
                                 this.handleCommonGalleryErrors(response)
                                 this.set('gallery_auth', false)
+                                this.gallery_code_requests = [];
                                 console.log(response)
                             }
                         });
                     }
                 },
 
-                onAuthCode: function (stanza) {
-                    let confirm_code = stanza.getElementsByTagName("confirm");
-                    confirm_code = $(confirm_code).attr('id');
+                onAuthCode: function (confirm_code) {
+                    this.gallery_code_requests = [];
+                    this.set('gallery_auth_request_code', undefined);
                     if (confirm_code)
                         $.ajax({
                             type: 'POST',
@@ -1316,6 +1320,9 @@ define("xabber-accounts", function () {
                             success: (response) => {
                                 if (response.token)
                                     this.set('gallery_token', response.token);
+                                if (response.expires)
+                                    this.set('gallery_token_expires', response.expires);
+                                this.trigger('gallery_token_authenticated')
                                 this.set('gallery_auth', false)
                             },
                             error: (response) => {
@@ -1353,117 +1360,128 @@ define("xabber-accounts", function () {
                 },
 
                 getStorageStats: function (params, callback) {
-                    params && (params = {});
-                    if (this.get('gallery_token') && this.get('gallery_url'))
-                        $.ajax({
-                            type: 'GET',
-                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                            url: this.get('gallery_url') + 'v1/files/stats/',
-                            dataType: 'json',
-                            data: params,
-                            success: (response) => {
-                                callback && callback(response)
-                            },
-                            error: (response) => {
-                                this.handleCommonGalleryErrors(response)
-                                console.log(response)
-                            }
-                        });
+                    this.testGalleryTokenExpire(() => {
+                        params && (params = {});
+                        if (this.get('gallery_token') && this.get('gallery_url'))
+                            $.ajax({
+                                type: 'GET',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                                url: this.get('gallery_url') + 'v1/files/stats/',
+                                dataType: 'json',
+                                data: params,
+                                success: (response) => {
+                                    callback && callback(response)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    console.log(response)
+                                }
+                            });
+                    });
                 },
 
                 testFile: function (params, file, callback) {
-                    if (this.get('gallery_token') && this.get('gallery_url'))
-                        $.ajax({
-                            type: 'GET',
-                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                            url: this.get('gallery_url') + 'v1/files/slot/',
-                            dataType: 'json',
-                            data: params,
-                            success: (response) => {
-                                this.uploadFile(file , callback)
-                            },
-                            error: (response) => {
-                                this.handleCommonGalleryErrors(response)
-                                console.log(response)
-                            }
-                        });
+                    this.testGalleryTokenExpire(() => {
+                        if (this.get('gallery_token') && this.get('gallery_url'))
+                            $.ajax({
+                                type: 'GET',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                                url: this.get('gallery_url') + 'v1/files/slot/',
+                                dataType: 'json',
+                                data: params,
+                                success: (response) => {
+                                    this.uploadFile(file , callback)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    console.log(response)
+                                }
+                            });
+
+                    });
                 },
 
                 uploadFile: function (file, callback, errback) {
-                    if (this.get('gallery_token') && this.get('gallery_url')) {
-                        let formData = new FormData();
-                        formData.append('file', file, file.name);
-                        if (file.duration)
-                            formData.append('duration', file.duration);
-                        if (file.voice)
-                            formData.append('media_type', file.type + '+voice');
-                        else
-                            formData.append('media_type', file.type);
-                        $.ajax({
-                            type: 'POST',
-                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                            url: this.get('gallery_url') + 'v1/files/upload/',
-                            data: formData,
-                            contentType: false,
-                            processData: false,
-                            success: (response) => {
-                                console.log(response)
-                                callback && callback(response)
-                            },
-                            error: (response) => {
-                                this.handleCommonGalleryErrors(response)
-                                console.log(response)
-                                errback && errback(response)
-                            }
-                        });
-                    }
+                    this.testGalleryTokenExpire(() => {
+                        if (this.get('gallery_token') && this.get('gallery_url')) {
+                            let formData = new FormData();
+                            formData.append('file', file, file.name);
+                            if (file.duration)
+                                formData.append('duration', file.duration);
+                            if (file.voice)
+                                formData.append('media_type', file.type + '+voice');
+                            else
+                                formData.append('media_type', file.type);
+                            $.ajax({
+                                type: 'POST',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                                url: this.get('gallery_url') + 'v1/files/upload/',
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: (response) => {
+                                    console.log(response)
+                                    callback && callback(response)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    console.log(response)
+                                    errback && errback(response)
+                                }
+                            });
+                        }
+                    });
                 },
 
                 uploadAvatar: function (file, callback, errback) {
-                    if (this.get('gallery_token') && this.get('gallery_url')) {
-                        if (!file)
-                            errback && errback('no file')
-                        let formData = new FormData();
-                        formData.append('file', file, file.name);
-                        formData.append('media_type', file.type);
-                        $.ajax({
-                            type: 'POST',
-                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                            url: this.get('gallery_url') + 'v1/avatar/upload/',
-                            data: formData,
-                            contentType: false,
-                            processData: false,
-                            success: (response) => {
-                                console.log(response)
-                                callback && callback(response)
-                            },
-                            error: (response) => {
-                                this.handleCommonGalleryErrors(response)
-                                console.log(response)
-                                errback && errback(response)
-                            }
-                        });
-                    }
+                    this.testGalleryTokenExpire(() => {
+                        if (this.get('gallery_token') && this.get('gallery_url')) {
+                            if (!file)
+                                errback && errback('no file')
+                            let formData = new FormData();
+                            formData.append('file', file, file.name);
+                            formData.append('media_type', file.type);
+                            $.ajax({
+                                type: 'POST',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                                url: this.get('gallery_url') + 'v1/avatar/upload/',
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: (response) => {
+                                    console.log(response)
+                                    callback && callback(response)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    console.log(response)
+                                    errback && errback(response)
+                                }
+                            });
+                        }
+                    });
                 },
 
                 deleteFile: function (file_id, callback, errback) {
-                    if (this.get('gallery_token') && this.get('gallery_url') && file_id)
-                        $.ajax({
-                            type: 'DELETE',
-                            headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                            url: this.get('gallery_url') + 'v1/files/',
-                            dataType: 'json',
-                            data: JSON.stringify({id: file_id}),
-                            success: (response) => {
-                                console.log(response)
-                                callback && callback(response)
-                            },
-                            error: (response) => {
-                                this.handleCommonGalleryErrors(response)
-                                console.log(response)
-                                errback && errback(response)
-                            }
-                        });
+                    this.testGalleryTokenExpire(() => {
+                        if (this.get('gallery_token') && this.get('gallery_url') && file_id)
+                            $.ajax({
+                                type: 'DELETE',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                                url: this.get('gallery_url') + 'v1/files/',
+                                dataType: 'json',
+                                data: JSON.stringify({id: file_id}),
+                                success: (response) => {
+                                    console.log(response)
+                                    callback && callback(response)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    console.log(response)
+                                    errback && errback(response)
+                                }
+                            });
+                    });
                 },
 
                 createMessageFromIQ: function (attrs) {
@@ -2219,58 +2237,62 @@ define("xabber-accounts", function () {
             },
 
             getFiles: function (options) {
-                options && options.file && (options = {});
-                options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
-                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
-                    this.loading_files = true
-                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
-                    $.ajax({
-                        type: 'GET',
-                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/files/',
-                        dataType: 'json',
-                        data: options,
-                        success: (response) => {
-                            response.type = options.type
-                            this.renderFiles(response)
-                            this.loading_files = false
-                        },
-                        error: (response) => {
-                            this.account.handleCommonGalleryErrors(response)
-                            console.log(response)
-                            this.loading_files = false
-                            this.$('.gallery-files .preloader-wrapper').remove()
-                        }
-                    });
-                }
+                this.account.testGalleryTokenExpire(() => {
+                    options && options.file && (options = {});
+                    options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                        this.loading_files = true
+                        $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                            url: this.account.get('gallery_url') + 'v1/files/',
+                            dataType: 'json',
+                            data: options,
+                            success: (response) => {
+                                response.type = options.type
+                                this.renderFiles(response)
+                                this.loading_files = false
+                            },
+                            error: (response) => {
+                                this.account.handleCommonGalleryErrors(response)
+                                console.log(response)
+                                this.loading_files = false
+                                this.$('.gallery-files .preloader-wrapper').remove()
+                            }
+                        });
+                    }
+                });
             },
 
             getAvatars: function (options) {
-                options && options.file && (options = {});
-                options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars"}, options);
-                if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
-                    this.loading_files = true
-                    $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
-                    $.ajax({
-                        type: 'GET',
-                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/avatar/',
-                        dataType: 'json',
-                        data: options,
-                        success: (response) => {
-                            console.log(response)
-                            response.type = options.type
-                            this.renderFiles(response)
-                            this.loading_files = false
-                        },
-                        error: (response) => {
-                            this.account.handleCommonGalleryErrors(response)
-                            console.log(response)
-                            this.loading_files = false
-                            this.$('.gallery-files .preloader-wrapper').remove()
-                        }
-                    });
-                }
+                this.account.testGalleryTokenExpire(() => {
+                    options && options.file && (options = {});
+                    options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars"}, options);
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                        this.loading_files = true
+                        $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                            url: this.account.get('gallery_url') + 'v1/avatar/',
+                            dataType: 'json',
+                            data: options,
+                            success: (response) => {
+                                console.log(response)
+                                response.type = options.type
+                                this.renderFiles(response)
+                                this.loading_files = false
+                            },
+                            error: (response) => {
+                                this.account.handleCommonGalleryErrors(response)
+                                console.log(response)
+                                this.loading_files = false
+                                this.$('.gallery-files .preloader-wrapper').remove()
+                            }
+                        });
+                    }
+                });
             },
 
             renderFiles: function (response) {
@@ -2340,46 +2362,50 @@ define("xabber-accounts", function () {
             },
 
             deleteAvatar: function (ev) {
-                let $target = $(ev.target).closest('.gallery-file'),
-                    file_id = $target.attr('data-id');
-                if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
-                    $.ajax({
-                        type: 'DELETE',
-                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/avatar/',
-                        dataType: 'json',
-                        data: JSON.stringify({id: file_id}),
-                        success: (response) => {
-                            this.updateStorage(true);
-                            $target.detach();
-                        },
-                        error: (response) => {
-                            this.account.handleCommonGalleryErrors(response)
-                            console.log(response)
-                        }
-                    });
+                this.account.testGalleryTokenExpire(() => {
+                    let $target = $(ev.target).closest('.gallery-file'),
+                        file_id = $target.attr('data-id');
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url') && file_id)
+                        $.ajax({
+                            type: 'DELETE',
+                            headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                            url: this.account.get('gallery_url') + 'v1/avatar/',
+                            dataType: 'json',
+                            data: JSON.stringify({id: file_id}),
+                            success: (response) => {
+                                this.updateStorage(true);
+                                $target.detach();
+                            },
+                            error: (response) => {
+                                this.account.handleCommonGalleryErrors(response)
+                                console.log(response)
+                            }
+                        });
+                });
             },
 
             deleteFilesFiltered: function (ev) {
-                let $target = $(ev.target).closest('.property-variant'),
-                    days = $target.attr('data-date'),
-                    date = new Date();
-                days && date.setDate(date.getDate() - days)
-                if (this.account.get('gallery_token') && this.account.get('gallery_url') && date && date.toISOString().split('T') && date.toISOString().split('T')[0])
-                    $.ajax({
-                        type: 'DELETE',
-                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/files/',
-                        dataType: 'json',
-                        data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
-                        success: (response) => {
-                            this.updateStorage(true);
-                        },
-                        error: (response) => {
-                            this.account.handleCommonGalleryErrors(response)
-                            console.log(response)
-                        }
-                    });
+                this.account.testGalleryTokenExpire(() => {
+                    let $target = $(ev.target).closest('.property-variant'),
+                        days = $target.attr('data-date'),
+                        date = new Date();
+                    days && date.setDate(date.getDate() - days)
+                    if (this.account.get('gallery_token') && this.account.get('gallery_url') && date && date.toISOString().split('T') && date.toISOString().split('T')[0])
+                        $.ajax({
+                            type: 'DELETE',
+                            headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                            url: this.account.get('gallery_url') + 'v1/files/',
+                            dataType: 'json',
+                            data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
+                            success: (response) => {
+                                this.updateStorage(true);
+                            },
+                            error: (response) => {
+                                this.account.handleCommonGalleryErrors(response)
+                                console.log(response)
+                            }
+                        });
+                });
             },
 
             onFileInputChanged: function (ev) {
@@ -3371,26 +3397,28 @@ define("xabber-accounts", function () {
             },
 
             createLibrary: function () {
-                let options = {order_by: '-id'};
-                if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
-                    this.$('.library-wrap').html(env.templates.contacts.preloader())
-                    $.ajax({
-                        type: 'GET',
-                        headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
-                        url: this.model.get('gallery_url') + 'v1/avatar/',
-                        dataType: 'json',
-                        data: options,
-                        success: (response) => {
-                            console.log(response)
-                            this.renderFiles(response)
-                        },
-                        error: (response) => {
-                            this.model.handleCommonGalleryErrors(response)
-                            console.log(response)
-                            this.$('.library-wrap .preloader-wrapper').remove()
-                        }
-                    });
-                }
+                this.model.testGalleryTokenExpire(() => {
+                    let options = {order_by: '-id'};
+                    if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+                        this.$('.library-wrap').html(env.templates.contacts.preloader())
+                        $.ajax({
+                            type: 'GET',
+                            headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
+                            url: this.model.get('gallery_url') + 'v1/avatar/',
+                            dataType: 'json',
+                            data: options,
+                            success: (response) => {
+                                console.log(response)
+                                this.renderFiles(response)
+                            },
+                            error: (response) => {
+                                this.model.handleCommonGalleryErrors(response)
+                                console.log(response)
+                                this.$('.library-wrap .preloader-wrapper').remove()
+                            }
+                        });
+                    }
+                });
             },
 
             setActiveImage: function (ev) {

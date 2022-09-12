@@ -66,6 +66,7 @@ define([
                     if (node.nodeName === '#text')
                         x = _.escape($node.text());
                     let list = x && x.match(url_regexp);
+                    list = Array.from(new Set(list));
                     if (!list) {
                         html_concat += x;
                         return;
@@ -74,7 +75,7 @@ define([
                         html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                     } else {
                         for (i = 0; i < list.length; i++) {
-                            x = x.replace(list[i], options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
+                            x = x.split(list[i]).join(options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
                         }
                         html_concat += x;
                     }
