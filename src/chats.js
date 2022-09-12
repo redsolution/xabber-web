@@ -6484,7 +6484,7 @@ define("xabber-chats", function () {
                     }));
                 }
                 let $carbons = $message.find(`[xmlns="${Strophe.NS.CARBONS}"]`);
-                if ($carbons.length && ['received', 'sent'].includes($carbons[0].tagName)) {
+                if (!options.carbon_copied && $carbons.length && ['received', 'sent'].includes($carbons[0].tagName)) {
                     if ($message.find('invite').length) {
                         if ($carbons[0].tagName === 'sent')
                             return;

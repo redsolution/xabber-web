@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.99","version_description":"added megia gallery check token expired wrapping function to megiagallery api requests, fixed hyperlinkify for identical links in message, fixed gallery token auth on get iq"}'
+'{"version_number":"2.3.2.100","version_description":"add to pending stanzas fix when disconnecting or session is not connected or socket has been closed and removed, carbon copy in carbon copy parsing fix"}'
 )});

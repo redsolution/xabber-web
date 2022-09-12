@@ -665,6 +665,36 @@ define("xabber-strophe", function () {
             }
         });
 
+        _.extend(Strophe.Websocket.prototype, {
+
+            _onIdle: function () {
+                var data = this._conn._data;
+                if (data.length > 0 && !this._conn.paused) {
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i] !== null) {
+                            var stanza, rawStanza;
+                            if (data[i] === "restart") {
+                                stanza = this._buildStream().tree();
+                            } else {
+                                stanza = data[i];
+                            }
+                            rawStanza = Strophe.serialize(stanza);
+                            this._conn.xmlOutput(stanza);
+                            this._conn.rawOutput(rawStanza);
+                            if (this.socket && this.socket.readyState === 1){
+                                this.socket.send(rawStanza);
+                            } else {
+                                this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
+                                this._conn._data = [];
+                                return;
+                            }
+                        }
+                    }
+                    this._conn._data = [];
+                }
+            },
+        });
+
         Strophe.xmlunescape = function (text) {
             let reg_exp = {
                 '&amp;': '&',

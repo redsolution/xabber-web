@@ -139,7 +139,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendMsg: function (stanza, callback) {
-                    let res = this.connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline';
                     if (res) {
                         this.connection.send(stanza);
                         callback && callback();
@@ -150,7 +150,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendMsgFast: function (stanza, callback) {
-                    let res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.fast_connection.send(stanza);
                         callback && callback();
@@ -161,7 +161,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQFast: function () {
-                    let res = this.fast_connection && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
                         return res;
@@ -281,7 +281,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQ: function () {
-                    let res = this.connection.authenticated && this.get('status') !== 'offline';
+                    let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline';
                     if (res) {
                         let elem = arguments[0];
                         if (typeof(elem.tree) === "function" && elem.tree().getAttribute('type') == 'get') {
@@ -297,7 +297,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendIQinBackground: function () {
-                    let res = this.background_connection && this.background_connection.authenticated && this.background_connection.connected && this.get('status') !== 'offline';
+                    let res = this.background_connection && !this.background_connection.disconnecting && this.background_connection.authenticated && this.background_connection.connected && this.get('status') !== 'offline';
                     if (res) {
                         this.background_connection.sendIQ.apply(this.background_connection, arguments);
                         return res;
@@ -360,7 +360,7 @@ define("xabber-accounts", function () {
                 },
 
                 sendPres: function (stanza) {
-                    if (this.connection.authenticated) {
+                    if (this.connection.authenticated && this.session.get('connected')) {
                         this.connection.send(stanza);
                     } else {
                         this._pending_stanzas.push({stanza: stanza});
@@ -494,6 +494,8 @@ define("xabber-accounts", function () {
                 },
 
                 reconnect: function () {
+                    if (this.session.get('reconnecting'))
+                        return;
                     let conn_retries = this.session.get('conn_retries'),
                         timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
                     this.connection.reset();
