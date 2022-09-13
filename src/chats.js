@@ -4735,7 +4735,7 @@ define("xabber-chats", function () {
               }
               else {
                   let _pending_time = 5, _interval = setInterval(() => {
-                      if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                      if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
                           message.set('state', constants.MSG_ERROR);
                           clearInterval(_interval);
                       }
@@ -4960,7 +4960,7 @@ define("xabber-chats", function () {
                     }
                 );
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
-                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
                         message.set('state', constants.MSG_ERROR);
                         clearInterval(_interval);
                     }
@@ -5020,7 +5020,7 @@ define("xabber-chats", function () {
                     delete file.key
                 }
                 let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
-                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 60) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 60)) {
+                    if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
                         message.set('state', constants.MSG_ERROR);
                         clearInterval(_interval);
                     }

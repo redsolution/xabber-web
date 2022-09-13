@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.100","version_description":"add to pending stanzas fix when disconnecting or session is not connected or socket has been closed and removed, carbon copy in carbon copy parsing fix"}'
+'{"version_number":"2.3.2.101","version_description":"fixed reconnection, gallery loading same objects when tab clicked multiple times, fixed load more pages on scrolling in mediagallery, changed time to change msg state to error to 20 seconds"}'
 )});

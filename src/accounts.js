@@ -494,8 +494,6 @@ define("xabber-accounts", function () {
                 },
 
                 reconnect: function () {
-                    if (this.session.get('reconnecting'))
-                        return;
                     let conn_retries = this.session.get('conn_retries'),
                         timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
                     this.connection.reset();
@@ -946,7 +944,7 @@ define("xabber-accounts", function () {
                 sendPendingMessages: function () {
                     _.each(this._pending_messages, (item) => {
                         let msg = this.messages.get(item.unique_id), $msg_iq;
-                        msg && ($msg_iq = msg.get('xml')) && msg.set('state', constants.MSG_PENDING);
+                        msg && ($msg_iq = msg.get('xml'));
                         $msg_iq && this.sendMsg($msg_iq);
                     });
                     this._pending_messages = [];
@@ -1984,8 +1982,7 @@ define("xabber-accounts", function () {
             _initialize: function () {
                 this.account = this.model;
                 this.$el.html(this.template());
-                this.ps_container = this.$('.gallery-wrap');
-                this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+                this.parent.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
                 this.account.on("update_avatar_list", this.onUpdateAvatars.bind(this));
             },
 
@@ -1998,19 +1995,15 @@ define("xabber-accounts", function () {
                     hover: false,
                     alignment: 'right'
                 };
-                this.ps_container.perfectScrollbar('destroy');
-                if (this.parent.ps_container.length) {
-                    this.parent.ps_container.perfectScrollbar(
-                        _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                    );
-                }
                 this.$('.dropdown-button').dropdown(dropdown_settings);
             },
 
             onScroll: function () {
-                let scrollTop = this.ps_container[0].scrollTop,
-                    scrollHeight = this.ps_container[0].scrollHeight,
-                    offsetHeight = this.ps_container[0].offsetHeight,
+                if (this.$el.hasClass('hidden'))
+                    return;
+                let scrollTop = this.parent.ps_container[0].scrollTop,
+                    scrollHeight = this.parent.ps_container[0].scrollHeight,
+                    offsetHeight = this.parent.ps_container[0].offsetHeight,
                     persentScrolled = scrollTop / (scrollHeight - offsetHeight);
                 if (persentScrolled > 0.8 && !this.loading_files && (this.current_page < this.total_pages)){
                     this.current_page++;
@@ -2243,6 +2236,9 @@ define("xabber-accounts", function () {
                     options && options.file && (options = {});
                     options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
                     if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                        if (this.loading_files && this.current_rendered_type === options.type && !options.page)
+                            return;
+                        this.current_rendered_type = options.type;
                         this.loading_files = true
                         $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
                         $.ajax({
@@ -2258,6 +2254,7 @@ define("xabber-accounts", function () {
                             },
                             error: (response) => {
                                 this.account.handleCommonGalleryErrors(response)
+                                this.current_rendered_type = undefined;
                                 console.log(response)
                                 this.loading_files = false
                                 this.$('.gallery-files .preloader-wrapper').remove()
@@ -2272,6 +2269,9 @@ define("xabber-accounts", function () {
                     options && options.file && (options = {});
                     options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars"}, options);
                     if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                        if (this.loading_files && this.current_rendered_type === options.type && !options.page)
+                            return;
+                        this.current_rendered_type = options.type;
                         this.loading_files = true
                         $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
                         $.ajax({
@@ -2281,13 +2281,13 @@ define("xabber-accounts", function () {
                             dataType: 'json',
                             data: options,
                             success: (response) => {
-                                console.log(response)
                                 response.type = options.type
                                 this.renderFiles(response)
                                 this.loading_files = false
                             },
                             error: (response) => {
                                 this.account.handleCommonGalleryErrors(response)
+                                this.current_rendered_type = undefined
                                 console.log(response)
                                 this.loading_files = false
                                 this.$('.gallery-files .preloader-wrapper').remove()
