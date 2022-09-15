@@ -2731,13 +2731,7 @@ define("xabber-accounts", function () {
                 let connected = this.model.isConnected();
                 this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
                 this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
-                this.updateGallery();
                 this.updateScrollBar();
-            },
-
-            updateGallery: function () {
-                let connected = this.model.isConnected();
-                this.$('.media-gallery').showIf(connected && this.model.get('gallery_token'));
             },
 
             updateSynchronizationBlock: function () {
