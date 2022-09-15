@@ -493,10 +493,10 @@ define("xabber-accounts", function () {
                     this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
                 },
 
-                reconnect: function () {
+                reconnect: function (is_fast) {
                     let conn_retries = this.session.get('conn_retries'),
                         timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
-                    this.connection.reset();
+                    is_fast && (timeout = 1500);
                     this.session.set({
                         connected: false,
                         reconnected: false,
@@ -511,6 +511,7 @@ define("xabber-accounts", function () {
                     setTimeout(() => {
                         this.connFeedback(xabber.getString("application_state_connecting"));
                         this.restoreStatus();
+                        this.connection.reset();
                         this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
                     }, timeout);
                 },
@@ -559,7 +560,7 @@ define("xabber-accounts", function () {
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
                             if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
-                                this.reconnect();
+                                this.reconnect(true);
                             else
                                 this.onTokenRevoked();
                         }
@@ -657,7 +658,7 @@ define("xabber-accounts", function () {
                             else if (this.session.get('conn_retries') > 2 )
                                 this.onAuthFailed();
                             else
-                                this.reconnect();
+                                this.reconnect(true);
                         }
                         else
                             this.onAuthFailed();
@@ -769,8 +770,10 @@ define("xabber-accounts", function () {
                 },
 
                 onAuthFailed: function () {
-                    if (!this.auth_view)
+                    if (!this.auth_view){
                         utils.dialogs.error(xabber.getString("connection__error__text_authentication_failed", [this.get('jid')]));
+                        this.password_view.show();
+                    }
                     this.session.set({
                         auth_failed: true,
                         connected: false,

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.101","version_description":"fixed reconnection, gallery loading same objects when tab clicked multiple times, fixed load more pages on scrolling in mediagallery, changed time to change msg state to error to 20 seconds"}'
+'{"version_number":"2.3.2.102","version_description":"added password deletion from local storage, fixed connection handlers being added to new reconnection handlers, added fast reconnection for authfail reconnections, added password view on connection authFail"}'
 )});

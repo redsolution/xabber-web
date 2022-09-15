@@ -514,7 +514,7 @@ define("xabber-strophe", function () {
 
             _attemptSASLAuth: function (mechanisms) {
                 mechanisms = this.sortMechanismsByPriority(mechanisms || []);
-                let i = 0, mechanism_found = false;
+                var i = 0, mechanism_found = false;
                 for (i = 0; i < mechanisms.length; ++i) {
                     if (!mechanisms[i].prototype.test(this)) {
                         continue;
@@ -532,12 +532,12 @@ define("xabber-strophe", function () {
                     this._sasl_mechanism = new mechanisms[i]();
                     this._sasl_mechanism.onStart(this);
 
-                    let request_auth_exchange = $build("auth", {
+                    var request_auth_exchange = $build("auth", {
                         xmlns: Strophe.NS.SASL,
                         mechanism: this._sasl_mechanism.name
                     });
                     if (this._sasl_mechanism.isClientFirst) {
-                        let response = this._sasl_mechanism.onChallenge(this, null);
+                        var response = this._sasl_mechanism.onChallenge(this, null);
                         request_auth_exchange.t(btoa(response));
                     }
                     this.send(request_auth_exchange.tree());
@@ -602,6 +602,7 @@ define("xabber-strophe", function () {
                             if (this.account) {
                                 this.account.save({
                                     hotp_counter: this.counter,
+                                    password: null,
                                 });
                             }
                         }, () => {
