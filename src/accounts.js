@@ -937,7 +937,7 @@ define("xabber-accounts", function () {
                         if (item.stanza instanceof Strophe.Builder) {
                             this.connection.send(item.stanza);
                             item.callback && item.callback();
-                        } else {
+                        } else if (item && item.stanza){
                             this.connection.sendIQ.apply(this.connection, item.stanza);
                         }
                     });
