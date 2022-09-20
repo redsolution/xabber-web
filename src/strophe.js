@@ -633,15 +633,24 @@ define("xabber-strophe", function () {
             },
 
             getXToken: function (callback, errback) {
-                let uniq_id = uuid(),
+                let uniq_id = uuid(), old_token,
                     iq = $iq({
                     type: 'set',
                     to: this.domain,
                     id: uniq_id
-                }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES}).c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
-                    .c('client').t(xabber.get('client_name')).up()
-                    .c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
-
+                }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES});
+                this.account && (old_token = this.account.get('old_device_token'));
+                if (old_token && old_token.token && old_token.token_uid){
+                    iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token.token_uid})
+                        .c('client').t(xabber.get('client_name')).up()
+                        .c('secret').t(old_token.token).up()
+                        .c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
+                    this.account.save('old_device_token', null);
+                } else {
+                    iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
+                        .c('client').t(xabber.get('client_name')).up()
+                        .c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
+                }
                 handler = function (stanza) {
                     let iqtype = stanza.getAttribute('type');
                     if (iqtype == 'result') {

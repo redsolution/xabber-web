@@ -534,6 +534,7 @@ define("xabber-accounts", function () {
                                 x_token: this.connection.x_token,
                                 hotp_counter: this.connection.counter,
                             });
+                            this.conn_manager.auth_type = 'x-token';
                         }
 
                         if (this.get('registration_nickname')){
@@ -551,9 +552,6 @@ define("xabber-accounts", function () {
                             );
                         }
                         this.createFastConnection();
-                        if (this.connection.x_token) {
-                            this.conn_manager.auth_type = 'x-token';
-                        }
                         this.session.set({connected: true, reconnected: false});
                         if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
                             this.connectXabberAccount();
@@ -779,7 +777,7 @@ define("xabber-accounts", function () {
                         connected: false,
                         no_reconnect: true
                     });
-                    this.save({auth_type: 'password', password: null, x_token: null});
+                    this.save({old_device_token: this.get('x_token'), auth_type: 'password', password: null, x_token: null});
                     this.connection.pass = "";
                     this.trigger('deactivate', this);
                     this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
