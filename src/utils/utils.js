@@ -87,13 +87,6 @@ define([
                                 html_concat += '<div class="embed-video"><div class="plyr-video-container" data-plyr-provider="youtube" data-plyr-embed-id="' + youtube_url[6] + '"/></div>';
                             }
                         }
-                        let vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
-                        for (i = 0; i < list.length; i++) {
-                            let vimeo_url = vimeo_url_regexp.exec(list[i]);
-                            if (vimeo_url && vimeo_url[1]){
-                                html_concat += '<div class="embed-video"><div class="plyr-video-container"><iframe src="https://player.vimeo.com/video/' + vimeo_url[1] +'" frameborder="0" ></iframe></div></div>';
-                            }
-                        }
                     }
                 }
             }.bind(this));
@@ -325,6 +318,7 @@ define([
             let attrs = _.clone(message.attributes),
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
+                link_references = attrs.link_references || [],
                 mutable_refs = attrs.mutable_content || [],
                 blockquotes = attrs.blockquotes || [],
                 markup_body = Array.from(deps.Strophe.xmlescape(attrs.original_message || attrs.message || ""));
@@ -332,6 +326,11 @@ define([
 
             mutable_refs.forEach(function (muted) {
                 for (let idx = muted.start; idx < muted.end; idx++)
+                    markup_body[idx] = "";
+            }.bind(this));
+
+            link_references.forEach(function (link_reference) {
+                for (let idx = link_reference.start; idx < link_reference.end; idx++)
                     markup_body[idx] = "";
             }.bind(this));
 

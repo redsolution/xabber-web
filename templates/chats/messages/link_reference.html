@@ -1,0 +1,13 @@
+{[ if (url) {]}
+<a href="{{url}}" target=”_blank” class="msg-hyperlink">
+    <div class="link-message-reference message-reference-preview-item">
+        <div class="link-title one-line">{{title}}</div>
+        <div class="link-description one-line">{{description}}</div>
+    </div>
+</a>
+{[} else {]}
+<div class="link-message-reference message-reference-preview-item">
+    <div class="link-title one-line">{{title}}</div>
+    <i class="mdi mdi-18px mdi-close hover-text-color-500"></i>
+</div>
+{[}]}

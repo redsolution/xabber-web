@@ -776,6 +776,7 @@ define("xabber-strophe", function () {
         Strophe.addNamespace('VOICE_MESSAGE', 'https://xabber.com/protocol/voice-messages');
         Strophe.addNamespace('FILES', 'https://xabber.com/protocol/files');
         Strophe.addNamespace('SUBSCRIPTION_PREAPPROVAL', 'urn:xmpp:features:pre-approval');
+        Strophe.addNamespace('OGP', 'https://xabber.com/protocol/ogp');
         return xabber;
     };
 });

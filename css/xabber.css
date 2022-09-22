@@ -9206,6 +9206,7 @@ img.fwd-img-preview {
     background-color: #EEE;
 }
 
+.message-reference-preview,
 .fwd-messages-preview {
     position: relative;
     min-height: 40px;
@@ -9245,6 +9246,36 @@ img.fwd-img-preview {
 }
 
 .fwd-messages-preview .close-forward i {
+    cursor: pointer;
+    color: #808080;
+}
+
+.message-reference-preview .preloader-wrapper {
+    margin: 8px;
+}
+
+.message-reference-preview .link-message-reference {
+    max-width: 120px;
+    position: relative;
+    background: #e0e0e0;
+    border-radius: 6px;
+    height: 40px;
+}
+
+.message-reference-preview .link-message-reference .link-title{
+    position: absolute;
+    left: 50%;
+    font-size: 12px;
+    text-align: center;
+    width: 80%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.message-reference-preview .link-message-reference .mdi-close{
+    position: absolute;
+    right: 0;
+    top: 0;
     cursor: pointer;
     color: #808080;
 }
@@ -15739,6 +15770,31 @@ input[type='range'].voice-message-volume:focus {
 }
 .fwd-message.with-author .chat-msg-location-content:empty {
     margin: 0;
+}
+/* ------------------ CHAT LINK REFERENCE -------------------- */
+.chat-message .chat-msg-link-reference-content {
+}
+.chat-message .plyr-video-container.no-load,
+.chat-message .chat-msg-link-reference-content .link-message-reference {
+    background: #e0e0e0;
+    padding: 12px;
+    border-radius: 8px;
+}
+.chat-message .chat-msg-link-reference-content .link-message-reference .link-title {
+    font-size: 12px;
+    width: 100%;
+    line-height: 20px;
+    color: #212121;
+}
+.chat-message .chat-msg-link-reference-content .link-message-reference .link-description {
+    font-size: 10px;
+    width: 100%;
+    line-height: 16px;
+    color: #212121;
+    opacity: 0.6;
+}
+.fwd-message.with-author .chat-message .chat-msg-link-reference-content .link-message-reference {
+    margin-top:20px;
 }
 /* ------------------ RECENT CHATS MODAL ------------------ */
 

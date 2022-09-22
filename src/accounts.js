@@ -1485,6 +1485,36 @@ define("xabber-accounts", function () {
                     });
                 },
 
+                getOpenGraphData: function (url, callback, errback) {
+                    this.testGalleryTokenExpire(() => {
+                        if (this.get('gallery_token') && this.get('gallery_url'))
+                            console.log(JSON.stringify({url: url}))
+                            $.ajax({
+                                type: 'POST',
+                                headers: {"Authorization": 'Bearer ' + this.get('gallery_token'), "Content-Type": "application/json"},
+                                url: this.get('gallery_url') + 'v1/opengraph/',
+                                dataType: 'json',
+                                data: JSON.stringify({url: url}),
+                                success: (response) => {
+                                    response.site = $(response.ogp).closest('meta[property="og:site_name"]').attr('content')
+                                    response.type = $(response.ogp).closest('meta[property="og:type"]').attr('content')
+                                    response.url = $(response.ogp).closest('meta[property="og:url"]').attr('content')
+                                    response.description = $(response.ogp).closest('meta[property="og:description"]').attr('content')
+                                    response.title = $(response.ogp).closest('meta[property="og:title"]').attr('content')
+                                    response.image = $(response.ogp).closest('meta[property="og:image"]').attr('content')
+                                    response.video_url = $(response.ogp).closest('meta[property="og:video:url"]').attr('content')
+                                    console.log(response)
+                                    callback && callback(response)
+                                },
+                                error: (response) => {
+                                    this.handleCommonGalleryErrors(response)
+                                    errback && errback(response)
+                                    console.log(response)
+                                }
+                            });
+                    });
+                },
+
                 createMessageFromIQ: function (attrs) {
                     let contact = this.contacts.mergeContact(attrs.from_jid),
                         chat = this.chats.getChat(contact);
