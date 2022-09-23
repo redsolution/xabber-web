@@ -424,6 +424,7 @@ define("xabber-chats", function () {
 
             if (options.searched_message) {
                 options.query && (attrs.query = options.query);
+                options.searched_in_contact_messages && (attrs.searched_in_contact_messages = options.searched_in_contact_messages)
                 return this.account.searched_messages.create(attrs);
             }
 
@@ -2518,6 +2519,7 @@ define("xabber-chats", function () {
                                       message_count--;
                                   this.account.chats.receiveChatMessage($message, {
                                       searched_message: true,
+                                      searched_in_contact_messages: true,
                                       query: query
                                   });
                               });
@@ -2555,7 +2557,7 @@ define("xabber-chats", function () {
 
           addMessage: function (message) {
               if (!this.parent.model.get('search_hidden')) {
-                  if (message.get('auth_request'))
+                  if (message.get('auth_request') || !message.get('searched_in_contact_messages'))
                       return;
                   message.set('is_archived', true);
                   message.set('searched_message', true);
