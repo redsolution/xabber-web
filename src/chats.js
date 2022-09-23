@@ -6304,7 +6304,7 @@ define("xabber-chats", function () {
             if (type === 'headline') {
                 return this.receiveHeadlineMessage(message);
             }
-            if (type === 'chat' || (type === 'normal')) {
+            if (type === 'chat' || (type === 'normal') || !type) {
                 return this.receiveChatMessage(message);
             }
             if (type === 'error') {
@@ -9932,7 +9932,11 @@ define("xabber-chats", function () {
             if (link_reference && link_reference.original_text){
                 this.removeLinkReference();
                 link_reference.start = text.indexOf(link_reference.original_text);
-                link_reference.end = link_reference.start + link_reference.original_text.length;
+                if (link_reference.start === -1) {
+                    link_reference.start = 0;
+                    link_reference.end = 0;
+                } else
+                    link_reference.end = link_reference.start + link_reference.original_text.length;
             } else {
                 link_reference = null;
                 this.removeLinkReference();
