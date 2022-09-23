@@ -4140,8 +4140,9 @@ define("xabber-chats", function () {
                 let link_references_attrs = _.clone(link_references),
                     template_for_link_reference_content;
                 $(link_references_attrs).each((idx, link) => {
-                    if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url){
-                        $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
+                    if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video')){
+                        let video_url = link_references_attrs[idx].video_url ? link_references_attrs[idx].video_url : link_references_attrs[idx].url;
+                        $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                     } else {
                         let copied_attrs = _.clone(link_references_attrs[idx]);
                         template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
@@ -4277,8 +4278,9 @@ define("xabber-chats", function () {
                         let link_references_attrs = _.clone(attrs.link_references),
                             template_for_link_reference_content;
                         $(link_references_attrs).each((idx, link) => {
-                            if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url){
-                                $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
+                            if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video')){
+                                let video_url = link_references_attrs[idx].video_url ? link_references_attrs[idx].video_url : link_references_attrs[idx].url;
+                                $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                             } else {
                                 let copied_attrs = _.clone(link_references_attrs[idx]);
                                 template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));

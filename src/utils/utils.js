@@ -79,15 +79,6 @@ define([
                         }
                         html_concat += x;
                     }
-                    if (options.embed_video){
-                        let youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i');
-                        for (i = 0; i < list.length; i++) {
-                            let youtube_url = youtube_url_regexp.exec(list[i]);
-                            if (youtube_url && youtube_url[6]){
-                                html_concat += '<div class="embed-video"><div class="plyr-video-container" data-plyr-provider="youtube" data-plyr-embed-id="' + youtube_url[6] + '"/></div>';
-                            }
-                        }
-                    }
                 }
             }.bind(this));
             $obj.html(html_concat);
