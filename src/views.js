@@ -553,7 +553,7 @@ define("xabber-views", function () {
                       name = chat.contact ? (chat.contact.get('roster_name') || chat.contact.get('name')) : chat.get('name');
                   name && (name = name.toLowerCase());
                   if (chat.get('timestamp') || chat.get('saved')) {
-                      if (name.indexOf(query) > -1 || jid.indexOf(query) > -1) {
+                      if (name.indexOf(query) > -1 || jid.indexOf(query) > -1 || (chat.get('saved') && query.includes('saved'))) {
                           let searched_by = name.indexOf(query) > -1 ? 'by-name' : 'by-jid',
                               chat_item = xabber.chats_view.child(chat.get('id'));
                           chat_item && (chat_item = chat_item.$el.clone().addClass(searched_by));

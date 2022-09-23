@@ -260,6 +260,21 @@ define("xabber-chats", function () {
                             target = $mention.text(),
                             is_gc = $mention.attr('node') === Strophe.NS.GROUP_CHAT ? true : false;
                         mentions.push({start: begin, end: end, target: target, is_gc: is_gc});
+                    } else if ($reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).length) {
+                        let $ogp = $reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).first(),
+                            link_reference_attrs = {};
+                        if ($ogp.length){
+                            link_reference_attrs = {
+                                site: $ogp.children('meta[property="og:site_name"]').attr('content'),
+                                type: $ogp.children('meta[property="og:type"]').attr('content'),
+                                url: $ogp.children('meta[property="og:url"]').attr('content'),
+                                description: $ogp.children('meta[property="og:description"]').attr('content'),
+                                title: $ogp.children('meta[property="og:title"]').attr('content'),
+                                image: $ogp.children('meta[property="og:image"]').attr('content'),
+                                video_url: $ogp.children('meta[property="og:video:url"]').attr('content'),
+                            }
+                            link_references.push(link_reference_attrs);
+                        };
                     } else {
                         let markup = [];
                         $reference.children().each((i, child_ref) => {
@@ -284,21 +299,6 @@ define("xabber-chats", function () {
                         }
                         locations.push(loc_attrs);
                         mutable_content.push({ start: begin, end: end, type: 'geolocation'});
-                    };
-                    let $ogp = $reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).first(),
-                        link_reference_attrs = {};
-                    if ($ogp.length){
-                        link_reference_attrs = {
-                            site: $ogp.children('meta[property="og:site_name"]').attr('content'),
-                            type: $ogp.children('meta[property="og:type"]').attr('content'),
-                            url: $ogp.children('meta[property="og:url"]').attr('content'),
-                            description: $ogp.children('meta[property="og:description"]').attr('content'),
-                            title: $ogp.children('meta[property="og:title"]').attr('content'),
-                            image: $ogp.children('meta[property="og:image"]').attr('content'),
-                            video_url: $ogp.children('meta[property="og:video:url"]').attr('content'),
-                        }
-                        link_references.push(link_reference_attrs);
-                        mutable_content.push({ start: begin, end: end, type: 'link_reference'});
                     };
                     let $file_sharing = $reference.find(`file-sharing[xmlns="${Strophe.NS.FILES}"]`).first();
                     if ($reference.children('forwarded').length)
@@ -4720,7 +4720,7 @@ define("xabber-chats", function () {
                     xmlns: Strophe.NS.REFERENCE,
                     begin: link_reference.start + legacy_body.length,
                     end: link_reference.end + legacy_body.length,
-                    type: 'mutable',
+                    type: 'decoration',
                 }).c('ogp', { xmlns: Strophe.NS.OGP });
                 link_reference.site && stanza.c('meta', { property: 'og:site_name', content: link_reference.site}).up();
                 link_reference.type && stanza.c('meta', { property: 'og:type', content: link_reference.type}).up();
@@ -4730,11 +4730,6 @@ define("xabber-chats", function () {
                 link_reference.image && stanza.c('meta', { property: 'og:image', content: link_reference.image}).up();
                 link_reference.video_url && stanza.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
                 stanza.up().up();
-                mutable_content.push({
-                    start: link_reference.start + legacy_body.length,
-                    end: link_reference.end + legacy_body.length,
-                    type: 'link_reference'
-                });
             }
 
             mutable_content.length && message.set({mutable_content: mutable_content});
@@ -9326,7 +9321,6 @@ define("xabber-chats", function () {
             }
             clearTimeout(this._timeout_textchange);
             this._timeout_textchange = setTimeout(() => {
-                this.removeLinkReference();
                 this.updateOpenGraphReference(this.quill.getText())
             }, 500);
         },

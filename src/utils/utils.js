@@ -318,7 +318,6 @@ define([
             let attrs = _.clone(message.attributes),
                 mentions = attrs.mentions || [],
                 markups = attrs.markups || [],
-                link_references = attrs.link_references || [],
                 mutable_refs = attrs.mutable_content || [],
                 blockquotes = attrs.blockquotes || [],
                 markup_body = Array.from(deps.Strophe.xmlescape(attrs.original_message || attrs.message || ""));
@@ -326,11 +325,6 @@ define([
 
             mutable_refs.forEach(function (muted) {
                 for (let idx = muted.start; idx < muted.end; idx++)
-                    markup_body[idx] = "";
-            }.bind(this));
-
-            link_references.forEach(function (link_reference) {
-                for (let idx = link_reference.start; idx < link_reference.end; idx++)
                     markup_body[idx] = "";
             }.bind(this));
 

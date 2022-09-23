@@ -15774,7 +15774,6 @@ input[type='range'].voice-message-volume:focus {
 /* ------------------ CHAT LINK REFERENCE -------------------- */
 .chat-message .chat-msg-link-reference-content {
 }
-.chat-message .plyr-video-container.no-load,
 .chat-message .chat-msg-link-reference-content .link-message-reference {
     background: #e0e0e0;
     padding: 12px;
@@ -15795,6 +15794,9 @@ input[type='range'].voice-message-volume:focus {
 }
 .fwd-message.with-author .chat-message .chat-msg-link-reference-content .link-message-reference {
     margin-top:20px;
+}
+.chat-message .embed-video{
+    width: 66%;
 }
 /* ------------------ RECENT CHATS MODAL ------------------ */
 
