@@ -4882,7 +4882,7 @@ define("xabber-chats", function () {
                     this.sendMessage(message);
                 } else if (attrs.files && attrs.files.length) {
                     attrs.type = 'file_upload';
-                    attrs.upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD);
+                    this.account.server_features.get(Strophe.NS.HTTP_UPLOAD) && (attrs.upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD).get('from'));
                     this.model.messages.create(attrs);
                 } else if (text || attrs.link_references) {
                     let message = this.model.messages.create(attrs);
