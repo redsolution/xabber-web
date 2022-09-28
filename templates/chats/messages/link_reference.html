@@ -7,7 +7,20 @@
 </a>
 {[} else {]}
 <div class="link-message-reference message-reference-preview-item">
-    <div class="link-title one-line">{{title}}</div>
     <i class="mdi mdi-18px mdi-close hover-text-color-500"></i>
+    {[ if (item.image && item.video_url) {]}
+    <img class="attached-image" src="{{item.image}}">
+    {[} else if (item.image) {]}
+    <img class="attached-image" src="{{item.image}}">
+    <div class="attached-text-block">
+        <div class="link-site one-line">{{item.site}}</div>
+        <div class="link-title one-line">{{item.title}}</div>
+    </div>
+    {[} else {]}
+    <div class="attached-text-block">
+        <div class="link-site one-line">{{item.site}}</div>
+        <div class="link-title one-line">{{item.title}}</div>
+    </div>
+    {[}]}
 </div>
 {[}]}

@@ -1488,7 +1488,6 @@ define("xabber-accounts", function () {
                 getOpenGraphData: function (url, callback, errback) {
                     this.testGalleryTokenExpire(() => {
                         if (this.get('gallery_token') && this.get('gallery_url'))
-                            console.log(JSON.stringify({url: url}))
                             $.ajax({
                                 type: 'POST',
                                 headers: {"Authorization": 'Bearer ' + this.get('gallery_token'), "Content-Type": "application/json"},
