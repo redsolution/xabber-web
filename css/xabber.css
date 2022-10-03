@@ -9172,7 +9172,7 @@ img.fwd-img-preview {
 
 .message-input-panel .circle-avatar {
     position: absolute;
-    top: 8px;
+    bottom: 56px;
     left: 8px;
     width: 48px;
     height: 48px;
@@ -9192,7 +9192,7 @@ img.fwd-img-preview {
 
 .message-input-panel .send-message {
     position: absolute;
-    top: 14px;
+    bottom: 70px;
     left: 18px;
     cursor: pointer;
 }
@@ -9257,8 +9257,18 @@ img.fwd-img-preview {
     color: #808080;
 }
 
-.message-reference-preview .preloader-wrapper {
-    margin: 8px;
+.message-reference-preview .preview-preloader-container {
+    height: 80px;
+    border: 1px solid #00000073;
+    margin: 2px;
+}
+
+.message-reference-preview .preview-preloader-container:empty {
+    display:none;
+}
+
+.message-reference-preview .preview-preloader-container .preloader-wrapper {
+    margin: 30px;
 }
 
 .message-reference-preview .attached-file-preview,
@@ -9278,13 +9288,11 @@ img.fwd-img-preview {
 .message-reference-preview .attached-file-preview .link-title,
 .message-reference-preview .link-message-reference .link-title{
     color: #212121;
-    position: absolute;
-    left: 50%;
-    font-size: 16px;
-    width: 90%;
+    font-size: 14px;
     bottom: 16px;
-    transform: translate(-50%, 0);
     font-weight: 500;
+    margin: 40px 16px 0;
+    text-align: center;
 }
 
 .message-reference-preview .attached-file-preview .link-site,
@@ -9340,7 +9348,8 @@ img.fwd-img-preview {
 
 .message-reference-preview .attached-file-preview .attached-text-block,
 .message-reference-preview .link-message-reference .attached-text-block{
-    width: 140px;
+    min-width: 140px;
+    max-width: 280px;
     height: 100%;
     position: relative;
 }

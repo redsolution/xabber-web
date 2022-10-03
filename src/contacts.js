@@ -901,6 +901,7 @@ define("xabber-contacts", function () {
                         fwd_message = message.get('forwarded_message'),
                         fwd_msg_author = null,
                         msg_text = _.escape(message.get('message'));
+                    message.get('videos') && message.get('videos').length && (files = files.concat(message.get('videos')));
                     if (fwd_message) {
                         let user_info = fwd_message[0].get('user_info') || {};
                         if (msg_text) {

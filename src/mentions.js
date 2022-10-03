@@ -344,6 +344,7 @@ define("xabber-mentions", function () {
                     msg_images = msg.get('images') || [],
                     msg_locations = msg.get('locations') || [],
                     msg_text = (forwarded_message) ? (msg.get('message') || xabber.getString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText();
+                msg.get('videos') && msg.get('videos').length && (msg_files = msg_files.concat(msg.get('videos')));
                 this.model.set({timestamp: timestamp});
                 if (msg_files.length || msg_images.length || msg_locations.length) {
                     let $colored_span = $('<span class="text-color-500"/>');
