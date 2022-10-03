@@ -9650,7 +9650,7 @@ img.fwd-img-preview {
 .send-area .attach-voice-message {
     border-radius: 50%;
     position: absolute;
-    top: 4px;
+    bottom: 60px;
     left: 8px;
     width: 48px;
     height: 48px;

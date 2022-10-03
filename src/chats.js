@@ -9660,7 +9660,7 @@ define("xabber-chats", function () {
         removeLinkReference: function () {
             this.$('.message-reference-preview .preloader-wrapper').remove();
             this.$('.message-reference-preview .link-message-reference').remove();
-            if (!(this.$('.message-reference-preview').children().length > 0))
+            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.link_reference = null;
             this.loading_link_reference = false;
@@ -9685,7 +9685,7 @@ define("xabber-chats", function () {
             let $elem = $(ev.target).closest('.attached-file-preview'),
                 id = $elem.attr('data-id');
             $elem.remove();
-            if (!(this.$('.message-reference-preview').children().length > 0))
+            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = this.attached_files.filter(item => item.uid != id);
             xabber.chat_body.updateHeight();
@@ -9693,7 +9693,7 @@ define("xabber-chats", function () {
 
         removeAllFileSnippets: function (ev) {
             this.$('.message-reference-preview .attached-file-preview').remove();
-            if (!(this.$('.message-reference-preview').children().length > 0))
+            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = [];
             xabber.chat_body.updateHeight();
