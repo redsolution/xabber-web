@@ -168,6 +168,12 @@ define([
                 return false;
         },
 
+        getDomainFromUrl: function(url) {
+            let a = document.createElement('a');
+            a.href = url;
+            return a.hostname;
+        },
+
         isVideoType: function(type) {
             if (type.indexOf('video') > -1)
                 return true;

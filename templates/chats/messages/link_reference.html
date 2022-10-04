@@ -1,25 +1,42 @@
 {[ if (url) {]}
 <a href="{{url}}" target=”_blank” class="msg-hyperlink">
     <div class="link-message-reference message-reference-preview-item">
-        <div class="link-title one-line">{{title}}</div>
-        <div class="link-description one-line">{{description}}</div>
+        {[ if (image) {]}
+        <img class="attached-image" src="{{image}}">
+        {[}]}
+        <div class="attached-text-block">
+            <div class="link-title one-line">{{domain}}</div>
+            {[if (description) {]}
+            <div class="link-description{[if (description.length <= 25) {]} link-description-short{[}]}">{{description}}</div>
+            {[} else {]}
+            <div class="link-description{[if (title && title.length <= 25) {]} link-description-short{[}]}">{{title}}</div>
+            {[}]}
+        </div>
     </div>
 </a>
 {[} else {]}
 <div class="link-message-reference message-reference-preview-item">
-    <i class="mdi mdi-18px mdi-close hover-text-color-500"></i>
+    <i class="mdi mdi-18px mdi-close"></i>
     {[ if (item.image && item.video_url) {]}
     <img class="attached-image" src="{{item.image}}">
     {[} else if (item.image) {]}
     <img class="attached-image" src="{{item.image}}">
     <div class="attached-text-block">
-        <div class="link-site one-line">{{item.site}}</div>
-        <div class="link-title one-line">{{item.title}}</div>
+        <div class="link-site one-line">{{domain}}</div>
+        {[if (item.description) {]}
+            <div class="link-title{[if (item.description.length <= 25) {]} link-title-short{[}]}">{{item.description}}</div>
+        {[} else {]}
+            <div class="link-title{[if (item.title.length <= 25) {]} link-title-short{[}]}">{{item.title}}</div>
+        {[}]}
     </div>
     {[} else {]}
     <div class="attached-text-block">
-        <div class="link-site one-line">{{item.site}}</div>
-        <div class="link-title one-line">{{item.title}}</div>
+        <div class="link-site one-line">{{domain}}</div>
+        {[if (item.description) {]}
+            <div class="link-title{[if (item.description.length <= 29) {]} link-title-short{[}]}">{{item.description}}</div>
+        {[} else {]}
+            <div class="link-title{[if (item.title.length <= 29) {]} link-title-short{[}]}">{{item.title}}</div>
+        {[}]}
     </div>
     {[}]}
 </div>

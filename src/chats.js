@@ -4161,6 +4161,7 @@ define("xabber-chats", function () {
                         $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                     } else {
                         let copied_attrs = _.clone(link_references_attrs[idx]);
+                        copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
                         template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
                         $message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                     }
@@ -4299,6 +4300,7 @@ define("xabber-chats", function () {
                                 $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                             } else {
                                 let copied_attrs = _.clone(link_references_attrs[idx]);
+                                copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
                                 template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
                                 $f_message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                             }
@@ -9639,7 +9641,11 @@ define("xabber-chats", function () {
                         return;
                     this.displaySend();
                     this.$('.message-reference-preview .preloader-wrapper').remove();
-                    this.$('.message-reference-preview').prepend($(templates.messages.link_reference({item: res, url: null})));
+                    this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
+                        item: res,
+                        domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
+                        url: null
+                    })));
                     this.link_reference = res;
                     this.link_reference.original_text = list[0];
                     this.loading_link_reference = false;
@@ -9676,7 +9682,12 @@ define("xabber-chats", function () {
                 let id = uuid();
                 file.uid = id;
                 this.attached_files.push(file);
-                this.$('.message-reference-preview').append($(templates.messages.attached_file({file: file, uid: id, blob: window.URL.createObjectURL(new Blob([file])), filesize: utils.pretty_size(file.size)})));
+                this.$('.message-reference-preview').append($(templates.messages.attached_file({
+                    file: file,
+                    uid: id,
+                    blob: utils.isImageType(file.type) ? window.URL.createObjectURL(new Blob([file])) : null,
+                    filesize: utils.pretty_size(file.size),
+                })));
                 xabber.chat_body.updateHeight();
             });
         },
@@ -9713,7 +9724,11 @@ define("xabber-chats", function () {
                 this.displaySend();
             }
             if (link_references && link_references.length) {
-                this.$('.message-reference-preview').append($(templates.messages.link_reference({item: link_references[0], url: null})));
+                this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
+                    item: link_references[0],
+                    domain: link_references[0].url ? utils.getDomainFromUrl(link_references[0].url) : link_references[0].site_name,
+                    url: null
+                })));
                 this.link_reference = link_references[0];
                 xabber.chat_body.updateHeight();
             }
