@@ -15931,9 +15931,11 @@ input[type='range'].voice-message-volume:focus {
 .fwd-message.with-author .chat-message .chat-msg-link-reference-content .link-message-reference {
     margin-top:20px;
 }
-.chat-message .video-content,
-.chat-message .embed-video{
+.chat-message .video-content{
     width: 66%;
+}
+.chat-message .plyr .thumb.active{
+    display:none;
 }
 /* ------------------ RECENT CHATS MODAL ------------------ */
 

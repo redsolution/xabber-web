@@ -1,16 +1,33 @@
 {[ if (url) {]}
-<a href="{{url}}" target=”_blank” class="msg-hyperlink">
-    <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590) {]} message-reference-preview-item-big-image{[}]}">
-        {[ if (image) {]}
-            <img class="attached-image" src="{{image}}">
-        {[}]}
-        <div class="attached-text-block">
-            <div class="link-title one-line">{{domain}}</div>
-            <div class="link-site-title">{{title}}</div>
-            <div class="link-description">{{description}}</div>
-        </div>
-    </div>
-</a>
+    {[ if (is_video) {]}
+            <div class="link-message-reference message-reference-preview-item message-reference-preview-item-big-image">
+                <div class="embed-video">
+                    <div class="plyr-video-container">
+                        <iframe src="{{video_url}}" frameborder="0"></iframe>
+                    </div>
+                </div>
+                <a href="{{url}}" target=”_blank” class="msg-hyperlink">
+                    <div class="attached-text-block">
+                        <div class="link-title one-line">{{domain}}</div>
+                        <div class="link-site-title">{{title}}</div>
+                        <div class="link-description">{{description}}</div>
+                    </div>
+                </a>
+            </div>
+    {[} else {]}
+        <a href="{{url}}" target=”_blank” class="msg-hyperlink">
+            <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590) {]} message-reference-preview-item-big-image{[}]}">
+                {[ if (image) {]}
+                <img class="attached-image" src="{{image}}">
+                {[}]}
+                <div class="attached-text-block">
+                    <div class="link-title one-line">{{domain}}</div>
+                    <div class="link-site-title">{{title}}</div>
+                    <div class="link-description">{{description}}</div>
+                </div>
+            </div>
+        </a>
+    {[}]}
 {[} else {]}
 <div class="link-message-reference message-reference-preview-item">
     <i class="mdi mdi-18px mdi-close"></i>

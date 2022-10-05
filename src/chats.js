@@ -4160,14 +4160,15 @@ define("xabber-chats", function () {
                     youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i'),
                     vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                 $(link_references_attrs).each((idx, link) => {
+                    let copied_attrs = _.clone(link_references_attrs[idx]);
+                    copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name;
                     if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
-                        $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
-                    } else {
-                        let copied_attrs = _.clone(link_references_attrs[idx]);
-                        copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
-                        template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
-                        $message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
-                    }
+                        copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
+                        copied_attrs.is_video = true;
+                    } else
+                        copied_attrs.is_video = false;
+                    template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
+                    $message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                 });
             }
 
@@ -4300,14 +4301,15 @@ define("xabber-chats", function () {
                             youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i'),
                             vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                         $(link_references_attrs).each((idx, link) => {
+                            let copied_attrs = _.clone(link_references_attrs[idx]);
+                            copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name;
                             if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
-                                $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
-                            } else {
-                                let copied_attrs = _.clone(link_references_attrs[idx]);
-                                copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
-                                template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
-                                $f_message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
-                            }
+                                copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
+                                copied_attrs.is_video = true;
+                            } else
+                                copied_attrs.is_video = false;
+                            template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
+                            $f_message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                         });
                     }
                     if (fwd_msg.get('data_form')) {
