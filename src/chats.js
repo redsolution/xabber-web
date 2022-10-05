@@ -8822,6 +8822,7 @@ define("xabber-chats", function () {
             "click .mention-item": "inputMention",
             "click .format-text": "updateMarkupPanel",
             "click .link-message-reference .mdi-close": "removeLinkReference",
+            "click .preview-preloader-container .mdi-close": "removeLinkReference",
             "click .attached-file-preview .mdi-close": "removeFileSnippet",
             "click .btn-manage-devices": "openDevicesWindow"
         },
@@ -9643,6 +9644,7 @@ define("xabber-chats", function () {
             if (list && list.length){
                 this.loading_link_reference = true;
                 this.$('.message-reference-preview .preview-preloader-container').append($(env.templates.contacts.preloader()));
+                this.$('.message-reference-preview .preview-preloader-container').removeClass('hidden');
                 this.$('.message-reference-preview').removeClass('hidden');
                 this.account.getOpenGraphData(list[0], (res) =>{
                     if (!this.loading_link_reference)
@@ -9651,6 +9653,7 @@ define("xabber-chats", function () {
                     dfd.done(() => {
                         this.displaySend();
                         this.$('.message-reference-preview .preloader-wrapper').remove();
+                        this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
                         this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
                             item: res,
                             domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
@@ -9677,6 +9680,7 @@ define("xabber-chats", function () {
                     if (list.length > 1){
                         this.loading_link_reference = false;
                         this.$('.message-reference-preview .preloader-wrapper').remove();
+                        this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
                         this.updateOpenGraphReference(this.quill.getText());
                     }
                     else
@@ -9687,6 +9691,7 @@ define("xabber-chats", function () {
 
         removeLinkReference: function () {
             this.$('.message-reference-preview .preloader-wrapper').remove();
+            this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
             this.$('.message-reference-preview .link-message-reference').remove();
             if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');

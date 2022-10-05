@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.119","version_description":"moved plyr player into ogp snippet"}'
+'{"version_number":"2.3.2.120","version_description":"ogp snippet preload closing button"}'
 )});

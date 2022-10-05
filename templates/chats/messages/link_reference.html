@@ -33,6 +33,7 @@
     <i class="mdi mdi-18px mdi-close"></i>
     {[ if (item.image && item.video_url) {]}
     <img class="attached-image" src="{{item.image}}">
+    <div class="attached-site-name one-line">{{item.site}}</div>
     {[} else if (item.image) {]}
     <img class="attached-image" src="{{item.image}}">
     <div class="attached-text-block">

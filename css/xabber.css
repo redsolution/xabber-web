@@ -9261,10 +9261,7 @@ img.fwd-img-preview {
     height: 80px;
     border: 1px solid #E0E0E0;
     margin: 2px;
-}
-
-.message-reference-preview .preview-preloader-container:empty {
-    display:none;
+    position: relative;
 }
 
 .message-reference-preview .preview-preloader-container .preloader-wrapper {
@@ -9325,6 +9322,7 @@ img.fwd-img-preview {
     text-align: center;
 }
 
+.message-reference-preview .preview-preloader-container .mdi-close,
 .message-reference-preview .link-message-reference .mdi-close{
     position: absolute;
     z-index: 1000;
@@ -9339,6 +9337,7 @@ img.fwd-img-preview {
     text-align: center;
 }
 
+.message-reference-preview .preview-preloader-container .mdi-close:before,
 .message-reference-preview .attached-file-preview .mdi-close:before,
 .message-reference-preview .link-message-reference .mdi-close:before{
     font-size: 12px;
@@ -9352,7 +9351,8 @@ img.fwd-img-preview {
 }
 
 .message-reference-preview .attached-file-preview .attached-file-size,
-.message-reference-preview .link-message-reference .attached-file-size{
+.message-reference-preview .link-message-reference .attached-file-size,
+.message-reference-preview .link-message-reference .attached-site-name{
     position: absolute;
     right: 4px;
     color: #fff;
