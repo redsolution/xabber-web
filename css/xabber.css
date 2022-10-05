@@ -15866,12 +15866,25 @@ input[type='range'].voice-message-volume:focus {
     margin: 0;
 }
 /* ------------------ CHAT LINK REFERENCE -------------------- */
+.chat-message .fwd-message .chat-msg-link-reference-content {
+    width: calc(66% + 45px);
+}
 .chat-message .chat-msg-link-reference-content {
+    position: relative;
+    width: 66%;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference {
     border: 1px solid #E0E0E0;
-    height: 80px;
     display: flex;
+    background: #FFF;
+    overflow: hidden;
+}
+.chat-message .chat-msg-link-reference-content .link-message-reference.message-reference-preview-item-big-image{
+    height: unset !important;
+    flex-direction: column;
+}
+.chat-message .chat-msg-link-reference-content .link-message-reference:not(.message-reference-preview-item-big-image) .attached-image{
+    max-height: 104px;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference .attached-image {
     height: 100%;
@@ -15880,19 +15893,31 @@ input[type='range'].voice-message-volume:focus {
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference .attached-text-block {
     width: 100%;
-    height: 100%;
+    min-height: 80px;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow: hidden;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference .link-title {
     color: #9E9E9E;
-    margin: 0 16px;
+    margin: 8px 16px 0;
     font-size: 12px;
     font-weight: 500;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference .link-description {
+    color: #616161;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 14px;
+    margin: 4px 16px 8px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+.chat-message .chat-msg-link-reference-content .link-message-reference .link-site-title {
     color: #212121;
     font-size: 14px;
     font-weight: 500;
@@ -15900,7 +15925,7 @@ input[type='range'].voice-message-volume:focus {
     margin: 4px 16px 0;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
 }
 .fwd-message.with-author .chat-message .chat-msg-link-reference-content .link-message-reference {

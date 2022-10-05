@@ -296,6 +296,8 @@ define("xabber-chats", function () {
                                 description: $ogp.children('meta[property="og:description"]').attr('content'),
                                 title: $ogp.children('meta[property="og:title"]').attr('content'),
                                 image: $ogp.children('meta[property="og:image"]').attr('content'),
+                                image_width: $ogp.children('meta[property="og:image:width"]').attr('content'),
+                                image_height: $ogp.children('meta[property="og:image:height"]').attr('content'),
                                 video_url: $ogp.children('meta[property="og:video:url"]').attr('content'),
                                 original_text: $ogp.attr('url'),
                                 start: begin,
@@ -4753,6 +4755,8 @@ define("xabber-chats", function () {
                 link_reference.url && stanza.c('meta', { property: 'og:url', content: link_reference.url}).up();
                 link_reference.description && stanza.c('meta', { property: 'og:description', content: link_reference.description}).up();
                 link_reference.image && stanza.c('meta', { property: 'og:image', content: link_reference.image}).up();
+                link_reference.image_width && stanza.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
+                link_reference.image_height && stanza.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
                 link_reference.video_url && stanza.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
                 stanza.up().up();
                 mutable_content.push({start: link_reference.start, end: link_reference.end});
@@ -9639,17 +9643,31 @@ define("xabber-chats", function () {
                 this.account.getOpenGraphData(list[0], (res) =>{
                     if (!this.loading_link_reference)
                         return;
-                    this.displaySend();
-                    this.$('.message-reference-preview .preloader-wrapper').remove();
-                    this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
-                        item: res,
-                        domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
-                        url: null
-                    })));
-                    this.link_reference = res;
-                    this.link_reference.original_text = list[0];
-                    this.loading_link_reference = false;
-                    xabber.chat_body.updateHeight();
+                    let dfd = new $.Deferred();
+                    dfd.done(() => {
+                        this.displaySend();
+                        this.$('.message-reference-preview .preloader-wrapper').remove();
+                        this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
+                            item: res,
+                            domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
+                            url: null
+                        })));
+                        this.link_reference = res;
+                        this.link_reference.original_text = list[0];
+                        this.loading_link_reference = false;
+                        xabber.chat_body.updateHeight();
+                    });
+                    if ((res.image_height && res.image_width) || !res.image){
+                        dfd.resolve()
+                    } else {
+                        let img = new Image();
+                        img.onload = (image) => {
+                            res.image_height = img.height;
+                            res.image_width = img.width;
+                            dfd.resolve()
+                        };
+                        img.src = res.image;
+                    }
                 }, (err) => {
                     this.link_reference_exempted.push(list[0]);
                     if (list.length > 1){
@@ -10370,6 +10388,8 @@ define("xabber-chats", function () {
                 link_reference.url && $message.c('meta', { property: 'og:url', content: link_reference.url}).up();
                 link_reference.description && $message.c('meta', { property: 'og:description', content: link_reference.description}).up();
                 link_reference.image && $message.c('meta', { property: 'og:image', content: link_reference.image}).up();
+                link_reference.image_width && $message.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
+                link_reference.image_height && $message.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
                 link_reference.video_url && $message.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
                 $message.up().up();
                 mutable_refs.push({start: link_reference.start, end: link_reference.end});

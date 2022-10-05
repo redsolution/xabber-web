@@ -1,16 +1,13 @@
 {[ if (url) {]}
 <a href="{{url}}" target=”_blank” class="msg-hyperlink">
-    <div class="link-message-reference message-reference-preview-item">
+    <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590) {]} message-reference-preview-item-big-image{[}]}">
         {[ if (image) {]}
-        <img class="attached-image" src="{{image}}">
+            <img class="attached-image" src="{{image}}">
         {[}]}
         <div class="attached-text-block">
             <div class="link-title one-line">{{domain}}</div>
-            {[if (description) {]}
-            <div class="link-description{[if (description.length <= 25) {]} link-description-short{[}]}">{{description}}</div>
-            {[} else {]}
-            <div class="link-description{[if (title && title.length <= 25) {]} link-description-short{[}]}">{{title}}</div>
-            {[}]}
+            <div class="link-site-title">{{title}}</div>
+            <div class="link-description">{{description}}</div>
         </div>
     </div>
 </a>

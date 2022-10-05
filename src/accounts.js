@@ -1501,6 +1501,8 @@ define("xabber-accounts", function () {
                                     response.description = $(response.ogp).closest('meta[property="og:description"]').attr('content')
                                     response.title = $(response.ogp).closest('meta[property="og:title"]').attr('content')
                                     response.image = $(response.ogp).closest('meta[property="og:image"]').attr('content')
+                                    response.image_height = $(response.ogp).closest('meta[property="og:image:height"]').attr('content')
+                                    response.image_width = $(response.ogp).closest('meta[property="og:image:width"]').attr('content')
                                     response.video_url = $(response.ogp).closest('meta[property="og:video:url"]').attr('content')
                                     console.log(response)
                                     callback && callback(response)
