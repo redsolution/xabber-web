@@ -9717,6 +9717,22 @@ define("xabber-chats", function () {
                 })));
                 xabber.chat_body.updateHeight();
             });
+            files && files.length && this.$('.attached-image').magnificPopup({
+                type: 'image',
+                closeOnContentClick: true,
+                fixedContentPos: true,
+                mainClass: 'mfp-no-margins mfp-with-zoom',
+                image: {
+                    verticalFit: true,
+                    titleSrc: function(item) {
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                    }
+                },
+                zoom: {
+                    enabled: true,
+                    duration: 300
+                }
+            });
         },
 
         removeFileSnippet: function (ev) {
@@ -9770,6 +9786,22 @@ define("xabber-chats", function () {
                     filesize: utils.pretty_size(file.size)
                 })));
                 xabber.chat_body.updateHeight();
+            });
+            files && files.length && this.$('.attached-image').magnificPopup({
+                type: 'image',
+                closeOnContentClick: true,
+                fixedContentPos: true,
+                mainClass: 'mfp-no-margins mfp-with-zoom',
+                image: {
+                    verticalFit: true,
+                    titleSrc: function(item) {
+                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                    }
+                },
+                zoom: {
+                    enabled: true,
+                    duration: 300
+                }
             });
         },
 
