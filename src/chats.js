@@ -4156,11 +4156,12 @@ define("xabber-chats", function () {
 
             if (link_references && link_references.length > 0) {
                 let link_references_attrs = _.clone(link_references),
-                    template_for_link_reference_content;
+                    template_for_link_reference_content,
+                    youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i'),
+                    vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                 $(link_references_attrs).each((idx, link) => {
-                    if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video')){
-                        let video_url = link_references_attrs[idx].video_url ? link_references_attrs[idx].video_url : link_references_attrs[idx].url;
-                        $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
+                    if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
+                        $message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                     } else {
                         let copied_attrs = _.clone(link_references_attrs[idx]);
                         copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
@@ -4295,11 +4296,12 @@ define("xabber-chats", function () {
                     }
                     if (attrs.link_references && attrs.link_references.length > 0) {
                         let link_references_attrs = _.clone(attrs.link_references),
-                            template_for_link_reference_content;
+                            template_for_link_reference_content,
+                            youtube_url_regexp = new RegExp('^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube(-nocookie)?\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$', 'i'),
+                            vimeo_url_regexp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
                         $(link_references_attrs).each((idx, link) => {
-                            if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video')){
-                                let video_url = link_references_attrs[idx].video_url ? link_references_attrs[idx].video_url : link_references_attrs[idx].url;
-                                $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
+                            if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
+                                $f_message.find('.chat-msg-media-content').append($('<div class="embed-video"><div class="plyr-video-container"><iframe src="' + link_references_attrs[idx].video_url.replace("autoplay=1&", "") +'" frameborder="0"></iframe></div></div>'));
                             } else {
                                 let copied_attrs = _.clone(link_references_attrs[idx]);
                                 copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name,
@@ -10140,7 +10142,7 @@ define("xabber-chats", function () {
                             msg_text = fwd_images.length + fwd_files.length + ' attachments';
                         }
                         else {
-                            if (fwd_images) {
+                            if (fwd_images && fwd_images.length) {
                                 if (fwd_images.length > 1) {
                                     msg_text =xabber.getQuantityString("recent_chat__last_message__images", fwd_images.length);
                                 }
@@ -10149,7 +10151,7 @@ define("xabber-chats", function () {
                                     $img_html_preview = this.createPreviewImage(image_preview);
                                 }
                             }
-                            if (fwd_files) {
+                            if (fwd_files && fwd_files.length) {
                                 if (fwd_files.length > 1) {
                                     msg_text = xabber.getQuantityString("recent_chat__last_message__files", fwd_files.length);
                                 }
@@ -10158,7 +10160,7 @@ define("xabber-chats", function () {
                                     msg_text = filesize ? fwd_files[0].name + ",   " + filesize : fwd_files[0].name;
                                 }
                             }
-                            if (fwd_locations) {
+                            if (fwd_locations && fwd_locations.length) {
                                 if (fwd_locations.length > 1) {
                                     msg_text = xabber.getQuantityString("recent_chat__last_message__locations", fwd_locations.length);
                                 }
