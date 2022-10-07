@@ -29,8 +29,8 @@
         </a>
     {[}]}
 {[} else {]}
-<div class="link-message-reference message-reference-preview-item">
-    <i class="mdi mdi-18px mdi-close"></i>
+<div class="link-message-reference message-reference-preview-item {[ if (item.image && item.video_url) {]}link-message-reference-video{[}]}">
+    <svg class="details-icon mdi mdi-18px mdi-close mdi-svg-template" data-svgname="close"></svg>
     {[ if (item.image && item.video_url) {]}
     <img class="attached-image" src="{{item.image}}">
     <div class="attached-site-name one-line">{{item.site}}</div>

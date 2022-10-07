@@ -1,7 +1,18 @@
-<div class="attached-file-preview message-reference-preview-item" data-id="{{uid}}">
+{[ if (blob) {]}
+<div class="attached-image-preview message-reference-preview-item-file" data-id="{{uid}}">
     <div class="attached-file-size one-line">{{filesize}}</div>
-    <i class="mdi mdi-18px mdi-close"></i>
+    <svg class="details-icon mdi mdi-18px mdi-close mdi-svg-template" data-svgname="close"></svg>
     {[ if (blob) {]}
     <img class="attached-image" data-mfp-src="{{blob}}" src="{{blob}}">
     {[}]}
 </div>
+{[} else {]}
+<div class="attached-file-preview message-reference-preview-item-file" data-id="{{uid}}">
+    <div class="attached-file-text">
+        <div class="attached-file-name one-line">{{file.name}}</div>
+        <div class="attached-file-size one-line">{{filetype}}, {{filesize}}</div>
+    </div>
+    <i class="mdi attached-file-icon {{typeicon}}"></i>
+    <svg class="details-icon mdi mdi-18px mdi-close mdi-svg-template" data-svgname="close"></svg>
+</div>
+{[}]}
