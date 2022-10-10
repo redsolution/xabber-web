@@ -16593,13 +16593,15 @@ ul.restrictions-list-content>li {
 
 .avatar-picker .modal-content .screen-wrap[data-screen=upload] {
     display: flex;
+    height: 100%;
     flex-direction: column;
 }
 
 .avatar-picker .modal-content .upload-wrap {
     margin: 4px;
     border: 4px dashed #E0E0E0;
-    height: 256px;
+    min-height: 256px;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;

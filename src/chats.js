@@ -8452,7 +8452,7 @@ define("xabber-chats", function () {
               this.createLibrary();
               this.$('.menu-btn').removeClass('active');
               this.$('.menu-btn[data-screen-name="upload"]').addClass('active');
-              this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_send_media"));
+              this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_add_media"));
               this.$el.openModal({
                   ready: () => {
                       this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
@@ -8477,14 +8477,9 @@ define("xabber-chats", function () {
                   ev.preventDefault();
                   ev.stopPropagation();
                   draggable.removeClass('file-drop');
-                  let files = ev.dataTransfer.files || [], file;
-                  for (let i = 0; i < files.length; i++) {
-                      if (utils.isImageType(files[i].type)) {
-                          file = files[i];
-                          break;
-                      }
-                  }
-                  file && this.addFile(file);
+                  let files = ev.dataTransfer.files || [];
+                  this.parent.view.addFileMessage(files);
+                  this.close();
               };
           },
 
@@ -8591,29 +8586,17 @@ define("xabber-chats", function () {
           },
 
           onFileInputChanged: function (ev) {
-              let target = ev.target, file;
+              let target = ev.target,
+                  files = [];
               for (let i = 0; i < target.files.length; i++) {
-                  if (utils.isImageType(target.files[i].type)) {
-                      file = target.files[i];
-                      break;
-                  }
+                  files.push(target.files[i]);
               }
-              file && this.addFile(file);
-              $(target).val('');
-          },
 
-          addFile: function (file) {
-              let reader = new FileReader();
-              reader.onload = (e) => {
-                  let image_prev = new Image(),
-                      src = e.target.result;
-                  image_prev.src = src;
-                  this.$('.screen-wrap[data-screen="upload"] img').detach();
-                  this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
-                  this.current_file = file;
-                  this.updateActiveButton();
-              };
-              reader.readAsDataURL(file);
+              if (files && files.length) {
+                  this.parent.view.addFileMessage(files);
+                  $(target).val('');
+                  this.close();
+              }
           },
 
           onInputChanged: function (ev) {
@@ -9639,7 +9622,7 @@ define("xabber-chats", function () {
                 files.push(target.files[i]);
             }
 
-            if (files) {
+            if (files && files.length) {
                 this.view.addFileMessage(files);
                 $(target).val('');
             }

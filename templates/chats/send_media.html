@@ -15,7 +15,7 @@
             <div class="upload-text">{[print(xabber.getString("chat_bottom__drag_and_drop__text_drop_files_here"))]}</div>
             <div class="upload-button">
                 <button type="file">{[print(xabber.getString("send_media__btn_upload"))]}</button>
-                <input type="file">
+                <input type="file" multiple>
             </div></div>
     </div>
     <div data-screen="web-address" class="hidden screen-wrap web-address-wrap">
@@ -30,7 +30,7 @@
     </div>
 </div>
 <div class="modal-footer">
-    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("chat_send"))]}</button>
+    <button class="btn-flat btn-main text-color-700 non-active btn-add">{[print(xabber.getString("add"))]}</button>
     <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
     <div class="modal-preloader-wrap"></div>
 </div>
