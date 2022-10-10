@@ -88,14 +88,14 @@ define("xabber-contacts", function () {
                         if (out_request)
                             status_text = xabber.getString("contact_state_outgoing_request");
                         else
-                            status_text = xabber.getString("contact_state_subscribed_to_account");
+                            status_text = xabber.getString("chat_receives_presence_updates");
                     } else if (subscription === 'none') {
                         if (out_request)
                             status_text = xabber.getString("contact_state_outgoing_request");
                         else if (in_request)
-                            status_text = xabber.getString("contact_state_incoming_request");
+                            status_text = xabber.getString("contact_state_in_contact_list");
                         else
-                            status_text = xabber.getString("contact_state_no_subscriptions");
+                            status_text = xabber.getString("contact_state_in_contact_list");
                     }
                     else if (!subscription)
                         status_text = xabber.getString("contact_state_not_in_contact_list");

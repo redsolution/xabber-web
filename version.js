@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.122","version_description":"fixed that forwarded messages with files and images didnt have files, fixed that send messages had different order of file types, fixed some chats scrolling to bottom when chat height was updated, changed non image attached files visual, changed close icon in message attachments, made that voice messages are not attached and are instantly sent"}'
+'{"version_number":"2.3.2.123","version_description":"changed presence status strings"}'
 )});
