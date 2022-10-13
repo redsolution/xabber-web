@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.124","version_description":"changed send message file uploading"}'
+'{"version_number":"2.3.2.125","version_description":"fixed createfromstanza checks, fixed mutable reference begins and ends for editmessage and when there is emojis, fixed emoji size when there is attachment in message, fixed forwards with attachments, fixed that active jingle window was blocking message input, fixed that when files were attached it was adding this files to existing messages"}'
 )});
