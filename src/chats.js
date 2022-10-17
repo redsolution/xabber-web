@@ -4372,12 +4372,24 @@ define("xabber-chats", function () {
                 if ($(item).hasClass('plyr-loading'))
                     return;
                 let player = new Plyr(item)
-                this.model.plyr_players.push(player)
-                player.on('play',() => {
-                    let other_players = this.model.plyr_players.filter(other => other != player)
-                    other_players.forEach(function(other) {
-                        other.pause();
-                    })
+                this.model.plyr_players = this.model.plyr_players.concat([player])
+                xabber.plyr_players = xabber.plyr_players.concat([player])
+                player.on('play',(event) => {
+                    if (xabber.current_plyr_player && xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
+                        xabber.plyr_player_popup.showNewVideo({on_play: true, player: player});
+                    } else {
+                        xabber.current_plyr_player = player;
+                        xabber.current_plyr_player.chat_players = this.model.plyr_players;
+                        xabber.current_plyr_player.chat_item = this.model.item_view;
+                        let other_players = xabber.plyr_players.filter(other => other != player);
+                        other_players.forEach(function(other) {
+                            other.pause();
+                        })
+                        xabber.trigger('plyr_player_updated');
+                    }
+                });
+                player.on('pause',(event) => {
+                    xabber.trigger('plyr_player_updated');
                 });
                 $(item).addClass('plyr-loading')
             });
@@ -7906,6 +7918,12 @@ define("xabber-chats", function () {
               "click .circle-avatar": "showSettings",
               "click .btn-chat-pin": "pinSavedChat",
               "click .btn-delete-chat": "deleteChat",
+              "click .btn-set-status": "setStatus",
+              "click .btn-play-pause-plyr": "playPausePlyr",
+              "click .btn-next-plyr": "nextPlyr",
+              "click .btn-previous-plyr": "previousPlyr",
+              "click .btn-stop-plyr": "stopPlyr",
+              "click .btn-popup-plyr": "popupPlyr",
               "click .btn-search-messages": "renderSearchPanel"
           },
 
@@ -7921,6 +7939,7 @@ define("xabber-chats", function () {
               this.account = this.model.account;
               this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
               this.model.on("close_chat", this.closeChat, this);
+              xabber.on('plyr_player_updated', this.updatePlyrControls, this);
           },
 
           render: function () {
@@ -7931,6 +7950,7 @@ define("xabber-chats", function () {
                   hover: false
               });
               this.$('.chat-head-menu').hide();
+              this.updatePlyrControls();
               return this;
           },
 
@@ -8001,7 +8021,74 @@ define("xabber-chats", function () {
                   if (visible_view.$search_form.css('display') !== 'none')
                       visible_view.$search_form.find('input').focus();
               });
-          }
+          },
+
+          playPausePlyr: function () {
+              if (!xabber.current_plyr_player)
+                  return;
+              xabber.current_plyr_player.togglePlay();
+              xabber.trigger('plyr_player_updated');
+          },
+
+          stopPlyr: function () {
+              if (!xabber.current_plyr_player)
+                  return;
+              xabber.plyr_players.forEach((item) => {
+                  item.stop();
+              })
+              if(xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
+                  xabber.plyr_player_popup.closePopup();
+              } else {
+                  xabber.current_plyr_player = null;
+                  xabber.trigger('plyr_player_updated');
+              }
+          },
+
+          popupPlyr: function () {
+              if (!xabber.current_plyr_player)
+                  return;
+              xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+              xabber.plyr_player_popup.show({});
+          },
+
+          nextPlyr: function () {
+              let player_index = xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+              if (player_index === -1 && xabber.current_plyr_player.is_popup)
+                  player_index = xabber.current_plyr_player.player_index;
+              if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1))
+                  return;
+              if (xabber.current_plyr_player.is_popup) {
+                  xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index + 1, player: xabber.current_plyr_player.chat_players[player_index + 1]});
+              } else {
+                  xabber.current_plyr_player.chat_players[player_index + 1].play();
+              }
+          },
+
+          previousPlyr: function () {
+              let player_index = xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+              if (player_index === -1 && xabber.current_plyr_player.is_popup)
+                  player_index = xabber.current_plyr_player.player_index;
+              if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0))
+                  return;
+              if (xabber.current_plyr_player.is_popup) {
+                  xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index - 1, player: xabber.current_plyr_player.chat_players[player_index - 1]});
+              } else {
+                  xabber.current_plyr_player.chat_players[player_index - 1].play();
+              }
+          },
+
+          updatePlyrControls: function () {
+              this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
+              if (xabber.current_plyr_player) {
+                  this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
+                  this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
+                  this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
+                  let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+                  this.$('.btn-next-plyr').showIf(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1)
+                  this.$('.btn-previous-plyr').showIf(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0)
+              }
+
+          },
       });
 
       xabber.ChatHeadView = xabber.BasicView.extend({
@@ -8035,7 +8122,12 @@ define("xabber-chats", function () {
             "click .btn-jingle-message": "sendJingleMessage",
             "click .btn-mute-dropdown": "muteChat",
             "click .btn-notifications.muted": "unmuteChat",
-            "click .btn-set-status": "setStatus"
+            "click .btn-set-status": "setStatus",
+            "click .btn-play-pause-plyr": "playPausePlyr",
+            "click .btn-next-plyr": "nextPlyr",
+            "click .btn-previous-plyr": "previousPlyr",
+            "click .btn-stop-plyr": "stopPlyr",
+            "click .btn-popup-plyr": "popupPlyr",
         },
 
         _initialize: function (options) {
@@ -8069,6 +8161,7 @@ define("xabber-chats", function () {
             this.contact.on("change:in_roster", this.updateMenu, this);
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
+            xabber.on('plyr_player_updated', this.updatePlyrControls, this);
         },
 
         render: function (options) {
@@ -8092,6 +8185,7 @@ define("xabber-chats", function () {
                 this.$('.contact-status-message').addClass('members-hover')
             else
                 this.$('.contact-status-message').addClass('resource-hover')
+            this.updatePlyrControls();
             return this;
         },
 
@@ -8295,6 +8389,73 @@ define("xabber-chats", function () {
         setStatus: function () {
             let set_status_view = new xabber.SetGroupchatStatusView();
             set_status_view.open(this.contact);
+        },
+
+        playPausePlyr: function () {
+            if (!xabber.current_plyr_player)
+                return;
+            xabber.current_plyr_player.togglePlay();
+            xabber.trigger('plyr_player_updated');
+        },
+
+        stopPlyr: function () {
+            if (!xabber.current_plyr_player)
+                return;
+            xabber.plyr_players.forEach((item) => {
+                item.stop();
+            })
+            if(xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
+                xabber.plyr_player_popup.closePopup();
+            } else {
+                xabber.current_plyr_player = null;
+                xabber.trigger('plyr_player_updated');
+            }
+        },
+
+        popupPlyr: function () {
+            if (!xabber.current_plyr_player)
+                return;
+            xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+            xabber.plyr_player_popup.show({});
+        },
+
+        nextPlyr: function () {
+            let player_index = xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+            if (player_index === -1 && xabber.current_plyr_player.is_popup)
+                player_index = xabber.current_plyr_player.player_index;
+            if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1))
+                return;
+            if (xabber.current_plyr_player.is_popup) {
+                xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index + 1, player: xabber.current_plyr_player.chat_players[player_index + 1]});
+            } else {
+                xabber.current_plyr_player.chat_players[player_index + 1].play();
+            }
+        },
+
+        previousPlyr: function () {
+            let player_index = xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+            if (player_index === -1 && xabber.current_plyr_player.is_popup)
+                player_index = xabber.current_plyr_player.player_index;
+            if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0))
+                return;
+            if (xabber.current_plyr_player.is_popup) {
+                xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index - 1, player: xabber.current_plyr_player.chat_players[player_index - 1]});
+            } else {
+                xabber.current_plyr_player.chat_players[player_index - 1].play();
+            }
+        },
+
+        updatePlyrControls: function () {
+            this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
+            if (xabber.current_plyr_player) {
+                this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
+                this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
+                this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
+                let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
+                this.$('.btn-next-plyr').showIf(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1)
+                this.$('.btn-previous-plyr').showIf(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0)
+            }
+
         },
 
         getActiveScreen: function () {

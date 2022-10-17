@@ -54,6 +54,8 @@
             this.cacheFavicons();
             this.extendFunction();
             this.check_config = new $.Deferred();
+            this.plyr_players = [];
+            this.current_plyr_player = null;
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);

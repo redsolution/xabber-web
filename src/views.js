@@ -885,6 +885,11 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
+            if ((xabber.current_plyr_player && xabber.current_plyr_player.playing && !xabber.current_plyr_player.is_popup)
+                && ((attrs && attrs.chat_item != xabber.current_plyr_player.chat_item) || !attrs)) {
+                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                xabber.plyr_player_popup.show({on_change: true});
+            }
             options = options || {};
             $(window).unbind("keydown.contact_panel");
             xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
@@ -1356,6 +1361,105 @@ define("xabber-views", function () {
             this.model.reject();
             this.close();
         }
+    });
+
+    xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
+        className: 'modal main-modal plyr-player-popup-view',
+        template: templates.plyr_player_popup,
+
+        events: {
+            "click .mdi-close": "closePopup",
+        },
+
+        _initialize: function (options) {
+        },
+
+        render: function (options) {
+            options = options || {};
+            this.$el.openModal({
+                dismissible: false,
+                ready: () => {
+                    let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
+                    $overlay.toggle();
+                    this.showNewVideo(options);
+                    this.pos1 = 0;
+                    this.pos2 = 0;
+                    this.pos3 = 0;
+                    this.pos4 = 0;
+                    this.$('.plyr-player-header').mousedown((e) => {
+                        e = e || window.event;
+                        e.preventDefault();
+                        // get the mouse cursor position at startup:
+                        this.pos3 = e.clientX;
+                        this.pos4 = e.clientY;
+                        document.onmouseup = (e) => {
+                            document.onmouseup = null;
+                            document.onmousemove = null;
+                        };
+                        // call a function whenever the cursor moves:
+                        document.onmousemove = (e) => {
+                            e = e || window.event;
+                            e.preventDefault();
+                            // calculate the new cursor position:
+                            this.pos1 = this.pos3 - e.clientX;
+                            this.pos2 = this.pos4 - e.clientY;
+                            this.pos3 = e.clientX;
+                            this.pos4 = e.clientY;
+                            // set the element's new position:
+                            this.$el.css('top', (this.$el.offset().top - this.pos2) + "px");
+                            this.$el.css('left', (this.$el.offset().left - this.pos1) + "px");
+                            this.$el.css('transform', "none");
+                            this.$el.css('right', "unset");
+                        };
+                    });
+                },
+            });
+
+        },
+
+        showNewVideo: function (options) {
+            options = options || {};
+            if (!this.player){
+                this.player = new Plyr('.plyr-player-popup');
+                this.player.on('play',(event) => {
+                    xabber.trigger('plyr_player_updated');
+                });
+                this.player.on('pause',(event) => {
+                    xabber.trigger('plyr_player_updated');
+                });
+            }
+            let previous_player = (options.on_play && options.player) ? options.player : xabber.current_plyr_player;
+            this.player.chat_players =  (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? xabber.current_plyr_player.chat_players : previous_player.chat_players;
+            this.player.player_index = (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? options.new_player_index : this.player.chat_players.indexOf(previous_player);
+            this.player.source = {
+                type: 'video',
+                sources: [
+                    {
+                        src: previous_player.source,
+                        provider: previous_player.provider,
+                    },
+                ],
+            }
+            this.player.once('playing',(event) => {
+                this.player.currentTime = previous_player.currentTime;
+                !options.on_play && !options.on_change && !previous_player.playing && this.player.pause();
+                previous_player.stop();
+                xabber.plyr_players = xabber.plyr_players.concat([this.player])
+                xabber.current_plyr_player = this.player;
+                xabber.current_plyr_player.is_popup = true;
+                xabber.trigger('plyr_player_updated');
+            });
+            this.player.once('ready',(event) => {
+                this.player.play();
+            });
+        },
+
+        closePopup: function () {
+            this.$el.detach();
+            xabber.current_plyr_player = null;
+            xabber.plyr_player_popup = null;
+            xabber.trigger('plyr_player_updated');
+        },
     });
 
     xabber.SettingsView = xabber.BasicView.extend({
