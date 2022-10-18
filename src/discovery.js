@@ -113,13 +113,6 @@ define("xabber-discovery", function () {
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
                 this.connection.disco.addItem(jid, name, node, () => {});
-                if (jid.includes('mediagallery')){
-                    this.create({
-                        'var': 'media-gallery',
-                        jid: jid,
-                        from: node
-                    })
-                }
                 this.connection.disco.info(
                     jid,
                     null,
@@ -139,6 +132,18 @@ define("xabber-discovery", function () {
                 });
                 if (namespace === Strophe.NS.AUTH_DEVICES)
                     self.account.getAllXTokens();
+            });
+            $stanza.find('x').each(function () {
+                let form_type_val = $(this).find('field[var="FORM_TYPE"] value');
+                if (form_type_val.length && form_type_val.text() === Strophe.NS.URLDISCO){
+                    let media_gallery_url = $(this).find('field[var="' + Strophe.NS.MEDIAGALLERY + '"] value');
+                    if (media_gallery_url.length && media_gallery_url.text()){
+                        self.create({
+                            'var': 'media-gallery',
+                            from: media_gallery_url.text()
+                        });
+                    }
+                }
             });
             if (this.account.auth_view && !(constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1)){
                 this.account.auth_view.first_features_received = true
