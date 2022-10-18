@@ -1420,12 +1420,17 @@ define("xabber-views", function () {
         showNewVideo: function (options) {
             options = options || {};
             if (!this.player){
-                this.player = new Plyr('.plyr-player-popup');
+                this.player = new Plyr('.plyr-player-popup', {controls: [
+                    'play-large', 'play', 'progress', 'duration', 'mute', 'volume', 'settings', 'fullscreen',
+                ]});
                 this.player.on('play',(event) => {
                     xabber.trigger('plyr_player_updated');
                 });
                 this.player.on('pause',(event) => {
                     xabber.trigger('plyr_player_updated');
+                });
+                this.player.on('timeupdate',(event) => {
+                    xabber.trigger('plyr_player_time_updated');
                 });
             }
             let previous_player = (options.on_play && options.player) ? options.player : xabber.current_plyr_player;

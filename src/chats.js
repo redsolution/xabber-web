@@ -4371,11 +4371,15 @@ define("xabber-chats", function () {
             $msg.find('.plyr-video-container:not(.no-load)').each((idx, item) => {
                 if ($(item).hasClass('plyr-loading'))
                     return;
-                let player = new Plyr(item)
-                this.model.plyr_players = this.model.plyr_players.concat([player])
+                let player = new Plyr(item, {controls: [
+                        'play-large', 'play', 'progress', 'duration', 'mute', 'volume', 'settings', 'download', 'fullscreen',
+                    ]})
+                player.msg_time = $msg.attr('data-time');
+                this.model.plyr_players = this.model.plyr_players.concat([player]).sort((a, b) => a.msg_time - b.msg_time);
                 xabber.plyr_players = xabber.plyr_players.concat([player])
                 player.on('play',(event) => {
                     if (xabber.current_plyr_player && xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
+                        player.chat_players = this.model.plyr_players;
                         xabber.plyr_player_popup.showNewVideo({on_play: true, player: player});
                     } else {
                         xabber.current_plyr_player = player;
@@ -4387,6 +4391,9 @@ define("xabber-chats", function () {
                         })
                         xabber.trigger('plyr_player_updated');
                     }
+                });
+                player.on('timeupdate',(event) => {
+                    xabber.trigger('plyr_player_time_updated');
                 });
                 player.on('pause',(event) => {
                     xabber.trigger('plyr_player_updated');
@@ -7940,6 +7947,7 @@ define("xabber-chats", function () {
               this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
               this.model.on("close_chat", this.closeChat, this);
               xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+              xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
           },
 
           render: function () {
@@ -7951,6 +7959,7 @@ define("xabber-chats", function () {
               });
               this.$('.chat-head-menu').hide();
               this.updatePlyrControls();
+              this.updatePlyrTime();
               return this;
           },
 
@@ -8081,6 +8090,9 @@ define("xabber-chats", function () {
               this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
               if (xabber.current_plyr_player) {
                   this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
+                  this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
+                  this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
+                  this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                   let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
@@ -8088,6 +8100,11 @@ define("xabber-chats", function () {
                   this.$('.btn-previous-plyr').showIf(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0)
               }
 
+          },
+
+          updatePlyrTime: function () {
+              if (xabber.current_plyr_player && !isNaN(xabber.current_plyr_player.currentTime))
+                  this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
           },
       });
 
@@ -8162,6 +8179,7 @@ define("xabber-chats", function () {
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
             xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+            xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
         },
 
         render: function (options) {
@@ -8186,6 +8204,7 @@ define("xabber-chats", function () {
             else
                 this.$('.contact-status-message').addClass('resource-hover')
             this.updatePlyrControls();
+            this.updatePlyrTime();
             return this;
         },
 
@@ -8449,6 +8468,9 @@ define("xabber-chats", function () {
             this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
             if (xabber.current_plyr_player) {
                 this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
+                this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
+                this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
+                this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                 let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
@@ -8457,6 +8479,11 @@ define("xabber-chats", function () {
             }
 
         },
+
+          updatePlyrTime: function () {
+              if (xabber.current_plyr_player)
+                  this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
+          },
 
         getActiveScreen: function () {
             let active_screen = xabber.toolbar_view.$('.active');
