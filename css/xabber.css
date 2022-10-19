@@ -602,7 +602,7 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 
 
 .main-modal.collapsed {
-    width: 64px;
+    width: 64px !important;
     height: 48px;
     position: absolute;
     top: 64px !important;
@@ -6393,7 +6393,7 @@ input.input-glow.invalid,
 /* ----------------- JINGLE MESSAGE VIEW -------------------- */
 
 .jingle-message-view {
-    width: 800px;
+    width: 800px !important;
     height: 600px;
     max-width: 90%;
     max-height: 90%;
@@ -7845,6 +7845,10 @@ input.input-glow.invalid,
     float: left;
 }
 
+.chat-tools-wrap .chat-tool.disabled {
+    pointer-events:none;
+}
+
 .chat-tools-wrap .chat-tool.chat-player-duration {
     cursor: auto;
     font-size: 14px;
@@ -7874,6 +7878,10 @@ input.input-glow.invalid,
 
 .chat-tools-wrap .chat-tool:hover i {
     color: #616161;
+}
+
+.chat-tools-wrap .chat-tool.disabled i {
+    color: #e0e0e0;
 }
 
 .chat-tools-wrap .btn-delete-chat,

@@ -895,8 +895,8 @@ define("xabber-contacts", function () {
                     pinned_msg_elem.siblings('.chat-content').css({'height':'100%'});
                 }
                 else {
-                    let images = message.get('images'),
-                        files = message.get('files'),
+                    let images = message.get('images') || [],
+                        files = message.get('files') || [],
                         locations = message.get('locations'),
                         fwd_message = message.get('forwarded_message'),
                         fwd_msg_author = null,

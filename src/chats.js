@@ -8056,8 +8056,15 @@ define("xabber-chats", function () {
           popupPlyr: function () {
               if (!xabber.current_plyr_player)
                   return;
-              xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-              xabber.plyr_player_popup.show({});
+              if (xabber.current_plyr_player.is_popup) {
+                  let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index];
+                  player.currentTime = xabber.current_plyr_player.currentTime;
+                  xabber.plyr_player_popup.closePopup();
+                  player.play();
+              } else {
+                  xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                  xabber.plyr_player_popup.show({});
+              }
           },
 
           nextPlyr: function () {
@@ -8089,15 +8096,14 @@ define("xabber-chats", function () {
           updatePlyrControls: function () {
               this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
               if (xabber.current_plyr_player) {
-                  this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
                   this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                   this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
                   this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                   let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
-                  this.$('.btn-next-plyr').showIf(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1)
-                  this.$('.btn-previous-plyr').showIf(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0)
+                  this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1));
+                  this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0));
               }
 
           },
@@ -8434,8 +8440,15 @@ define("xabber-chats", function () {
         popupPlyr: function () {
             if (!xabber.current_plyr_player)
                 return;
-            xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-            xabber.plyr_player_popup.show({});
+            if (xabber.current_plyr_player.is_popup) {
+                let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index];
+                player.currentTime = xabber.current_plyr_player.currentTime;
+                xabber.plyr_player_popup.closePopup();
+                player.play();
+            } else {
+                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                xabber.plyr_player_popup.show({});
+            }
         },
 
         nextPlyr: function () {
@@ -8467,15 +8480,14 @@ define("xabber-chats", function () {
         updatePlyrControls: function () {
             this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
             if (xabber.current_plyr_player) {
-                this.$('.btn-popup-plyr').hideIf(xabber.current_plyr_player.is_popup);
                 this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                 this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
                 this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                 let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
-                this.$('.btn-next-plyr').showIf(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1)
-                this.$('.btn-previous-plyr').showIf(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0)
+                this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_players.length - 1));
+                this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_players.length && player_index > 0));
             }
 
         },
@@ -10364,11 +10376,11 @@ define("xabber-chats", function () {
                     }
                     else {
                         msg_text = (msg.get('message') || msg.get('original_message')).emojify();
-                        let fwd_images = msg.get('images'),
-                            fwd_files = msg.get('files'),
+                        let fwd_images = msg.get('images') || [],
+                            fwd_files = msg.get('files') || [],
                             fwd_locations = msg.get('locations');
                         msg.get('videos') && msg.get('videos').length && (fwd_files = fwd_files.concat(msg.get('videos')));
-                        if ((fwd_images) && (fwd_files)) {
+                        if ((fwd_images && fwd_images.length) && (fwd_files && fwd_files.length)) {
                             msg_text = fwd_images.length + fwd_files.length + ' attachments';
                         }
                         else {
