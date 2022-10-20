@@ -602,6 +602,7 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 
 
 .main-modal.collapsed {
+    display: none !important;
     width: 64px !important;
     height: 48px;
     position: absolute;
@@ -614,7 +615,8 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 
 .main-modal.collapsed.collapsed-video {
-    width: 16vh;
+    display: block !important;
+    width: 16vh !important;
     height: 12vh;
     cursor: pointer;
 }
@@ -7843,6 +7845,25 @@ input.input-glow.invalid,
     margin-left: 24px;
     cursor: pointer;
     float: left;
+}
+
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call {
+    -webkit-animation: pulsate 0.5s ease-out;
+    -webkit-animation-iteration-count: infinite;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call i{
+    color: #4CAF50;
+}
+@-webkit-keyframes pulsate {
+    0% {
+        opacity: 1.0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1.0;
+    }
 }
 
 .chat-tools-wrap .chat-tool.disabled {

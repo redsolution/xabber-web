@@ -610,6 +610,7 @@ define("xabber-chats", function () {
                       this._timeout_failed = setTimeout(() => {
                           if (peer_conn.connectionState === 'failed' || peer_conn.connectionState === 'disconnected') {
                               this.set('status', conn_state);
+                              xabber.trigger('update_jingle_button');
                               this.reject();
                               this.destroy();
                               this.updateStatus(xabber.getString("dialog_jingle_message__status_network_error"));
@@ -620,6 +621,7 @@ define("xabber-chats", function () {
                   }
                   if (conn_state === 'disconnected') {
                       this.set('status', conn_state);
+                      xabber.trigger('update_jingle_button');
                       this.destroy();
                       xabber.current_voip_call = null;
                   }
@@ -640,6 +642,7 @@ define("xabber-chats", function () {
                   this._timeout_failed = setTimeout(() => {
                       if (peer_conn.iceConnectionState === 'failed' || peer_conn.connectionState === 'disconnected') {
                           this.set('status', conn_state);
+                          xabber.trigger('update_jingle_button');
                           this.reject();
                           this.destroy();
                           this.updateStatus(xabber.getString("dialog_jingle_message__status_network_error"));
@@ -863,6 +866,7 @@ define("xabber-chats", function () {
               this.account.sendMsg($reject_msg);
               this.createSystemMessage($reject_msg);
               this.set('status', 'disconnected');
+              xabber.trigger('update_jingle_button');
               this.destroy();
               xabber.current_voip_call = null;
           },
@@ -1132,10 +1136,12 @@ define("xabber-chats", function () {
             }
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id, call_initiator: this.contact.get('jid')}, {contact: this.contact, });
             xabber.current_voip_call.modal_view.show({status: 'in'});
+            xabber.trigger('update_jingle_button');
         },
 
         endCall: function (status) {
             status && xabber.current_voip_call.set('status', status);
+            xabber.trigger('update_jingle_button');
             xabber.current_voip_call.destroy();
             xabber.current_voip_call = null;
         },
@@ -1189,12 +1195,14 @@ define("xabber-chats", function () {
                         this.endCall();
                     else {
                         !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
+                        xabber.trigger('update_jingle_button');
                         let jingle_start = $jingle_msg_accept.find('time').attr('stamp');
                         jingle_start = jingle_start ? Number(moment(jingle_start)) : moment.now();
                         xabber.current_voip_call.set('jingle_start', jingle_start);
                         !xabber.current_voip_call.get('contact_full_jid') && xabber.current_voip_call.set('contact_full_jid', $message.attr('from'));
                         xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
                         xabber.current_voip_call.set('status', 'connecting');
+                        xabber.trigger('update_jingle_button');
                         xabber.current_voip_call.updateStatus(xabber.getString("dialog_jingle_message__status_connecting"));
                         xabber.current_voip_call.audio_notifiation = xabber.playAudio(xabber.settings.sound_on_connection);
                     }
@@ -4870,6 +4878,7 @@ define("xabber-chats", function () {
             xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video_live: media_type === 'video'}, {contact: this.contact});
             xabber.current_voip_call.startCall();
             xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
+            xabber.trigger('update_jingle_button');
         },
 
         saveForwardedMessage: function (msg) {
@@ -8186,6 +8195,7 @@ define("xabber-chats", function () {
             xabber.on('change:audio', this.updateGroupChatHead, this);
             xabber.on('plyr_player_updated', this.updatePlyrControls, this);
             xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
+            xabber.on("update_jingle_button", this.updateJingleButton, this);
         },
 
         render: function (options) {
@@ -8211,6 +8221,7 @@ define("xabber-chats", function () {
                 this.$('.contact-status-message').addClass('resource-hover')
             this.updatePlyrControls();
             this.updatePlyrTime();
+            this.updateJingleButton();
             return this;
         },
 
@@ -8405,7 +8416,7 @@ define("xabber-chats", function () {
 
         sendJingleMessage: function () {
             if (xabber.current_voip_call) {
-                utils.callback_popup_message(xabber.getString("jingle__error__call_in_progress"), 1000);
+                xabber.current_voip_call.modal_view.collapse();
                 return;
             }
             this.content.initJingleMessage();
@@ -8492,10 +8503,20 @@ define("xabber-chats", function () {
 
         },
 
-          updatePlyrTime: function () {
-              if (xabber.current_plyr_player)
-                  this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
-          },
+        updatePlyrTime: function () {
+            if (xabber.current_plyr_player)
+                this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
+        },
+
+
+        updateJingleButton: function () {
+            this.$('.btn-jingle-message').switchClass('active-call', xabber.current_voip_call);
+            if (xabber.current_voip_call){
+                let voip_status = xabber.current_voip_call.get('status')
+                if (voip_status === 'disconnected')
+                    this.$('.btn-jingle-message').removeClass('active-call');
+            }
+        },
 
         getActiveScreen: function () {
             let active_screen = xabber.toolbar_view.$('.active');
