@@ -7850,9 +7850,16 @@ input.input-glow.invalid,
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call {
     -webkit-animation: pulsate 0.5s ease-out;
     -webkit-animation-iteration-count: infinite;
+    height: 24px;
+    outline: 9px;
+    outline-style: solid;
+    outline-offset: -1px;
+    border-radius: 50%;
+    background-color: #81D4FA;
+    outline-color: #81D4FA;
 }
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call i{
-    color: #4CAF50;
+    color: #0277BD;
 }
 @-webkit-keyframes pulsate {
     0% {
@@ -7864,6 +7871,50 @@ input.input-glow.invalid,
     100% {
         opacity: 1.0;
     }
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=search],
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=calling] {
+    background-color: #81D4FA;
+    outline-color: #81D4FA;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=search] i,
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=calling] i{
+    color: #0277BD;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connecting] {
+    background-color: #80DEEA;
+    outline-color: #80DEEA;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connecting] i{
+    color: #00838F;
+}
+
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connected] {
+    background-color: #A5D6A7;
+    outline-color: #A5D6A7;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connected] i{
+    color: #2E7D32;
+}
+
+
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=disconnected] {
+    background-color: #EF9A9A;
+    outline-color: #EF9A9A;
+}
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=disconnected] i{
+    color: #C62828;
+}
+
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=busy],
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=device_busy]{
+    background-color: #FFCC80;
+    outline-color: #FFCC80;
+}
+
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=busy] i,
+.chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=device_busy] i{
+    color: #EF6C00;
 }
 
 .chat-tools-wrap .chat-tool.disabled {

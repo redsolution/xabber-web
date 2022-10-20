@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.130","version_description":"changed how jingle is collapsing, added pulsating to jingle button when there is an active call"}'
+'{"version_number":"2.3.2.131","version_description":"added colored background to jingle button, added state setting for coloring that button"}'
 )});
