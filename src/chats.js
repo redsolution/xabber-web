@@ -9055,6 +9055,7 @@ define("xabber-chats", function () {
 
         events: {
             "click": "onClickBottom",
+            "click .ql-editor": "focusOnInput",
             "click .my-avatar": "showAccountSettings",
             "keyup .input-message .rich-textarea": "keyUp",
             "keydown .input-message .rich-textarea": "keyDown",
