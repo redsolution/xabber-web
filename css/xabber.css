@@ -527,7 +527,7 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
     width: 33%;
 }
 
-.main-modal:not(.plyr-player-popup-view) {
+.main-modal:not(.plyr-player-popup-view):not(.collapsed-video) {
     top: 50% !important;
     width: 400px;
     transform: translate(0, -50%) !important;
@@ -603,10 +603,9 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 
 .main-modal.collapsed {
     display: none !important;
-    width: 64px !important;
     height: 48px;
     position: absolute;
-    top: 64px !important;
+    top: 64px;
     left: unset;
     margin: 0;
     transition: width .1s;
@@ -616,9 +615,27 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 
 .main-modal.collapsed.collapsed-video {
     display: block !important;
-    width: 16vh !important;
+    width: 16vh;
     height: 12vh;
     cursor: pointer;
+    resize: both;
+    overflow: hidden;
+    padding: 20px 8px 8px 8px;
+    background-color: #757575;
+}
+
+.main-modal:not(.collapsed-video) .collapsed-movable {
+    display: none !important;
+}
+
+.main-modal.collapsed-video .collapsed-movable {
+    height: 20px;
+    width: 100%;
+    background-color: #757575;
+    cursor: grabbing;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 .main-modal .modal-header {
@@ -6395,15 +6412,17 @@ input.input-glow.invalid,
 /* ----------------- JINGLE MESSAGE VIEW -------------------- */
 
 .jingle-message-view {
-    width: 800px !important;
     height: 600px;
     max-width: 90%;
     max-height: 90%;
-    top: 50% !important;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     background-color: rgba(255, 255, 255, .8);
     position: relative;
+}
+.jingle-message-view:not(.collapsed-video) {
+    top: 50% !important;
+    width: 800px !important;
 }
 
 .jingle-message-view .blur-background {
@@ -6615,6 +6634,23 @@ input.input-glow.invalid,
 .jingle-message-view.collapsed>i.btn-collapse,
 .jingle-message-view.collapsed-video .video-wrap {
     display: block !important;
+}
+.jingle-message-view.collapsed-video .video-wrap {
+    position: relative;
+    background-color: #757575;
+    display: flex !important;
+    overflow: hidden;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+.jingle-message-view.collapsed-video video{
+    background-color: #757575 !important;
+    box-shadow: none !important;
+    height: unset !important;
+}
+
+.jingle-message-view.collapsed-video video.multiple-videos{
+    height: 50% !important;
 }
 
 .jingle-message-view.collapsed .default-screen,
@@ -7848,7 +7884,7 @@ input.input-glow.invalid,
 }
 
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call {
-    -webkit-animation: pulsate 0.5s ease-out;
+    -webkit-animation: pulsate 1.5s ease-out;
     -webkit-animation-iteration-count: infinite;
     height: 24px;
     outline: 9px;

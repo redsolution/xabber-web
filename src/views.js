@@ -1162,10 +1162,10 @@ define("xabber-views", function () {
             this.model.on('change:state', this.updateCallingStatus, this);
             this.model.on('change:status', this.updateBackground, this);
             this.model.on('change:volume_on', this.updateButtons, this);
-            this.model.on('change:video', this.updateButtons, this);
             this.model.on('change:video_live', this.updateButtons, this);
             this.model.on('change:video_screen', this.updateButtons, this);
             this.model.on('change:video_in', this.updateCollapsedWindow, this);
+            this.model.on('change:video', this.updateCollapsedWindow, this);
             this.model.on('change:audio', this.updateButtons, this);
         },
 
@@ -1185,6 +1185,36 @@ define("xabber-views", function () {
                 dismissible: false,
                 ready: () => {
                     this.updateAvatar();
+                    this.pos1 = 0;
+                    this.pos2 = 0;
+                    this.pos3 = 0;
+                    this.pos4 = 0;
+                    this.$('.collapsed-movable').mousedown((e) => {
+                        e = e || window.event;
+                        e.preventDefault();
+                        // get the mouse cursor position at startup:
+                        this.pos3 = e.clientX;
+                        this.pos4 = e.clientY;
+                        document.onmouseup = (e) => {
+                            document.onmouseup = null;
+                            document.onmousemove = null;
+                        };
+                        // call a function whenever the cursor moves:
+                        document.onmousemove = (e) => {
+                            e = e || window.event;
+                            e.preventDefault();
+                            // calculate the new cursor position:
+                            this.pos1 = this.pos3 - e.clientX;
+                            this.pos2 = this.pos4 - e.clientY;
+                            this.pos3 = e.clientX;
+                            this.pos4 = e.clientY;
+                            // set the element's new position:
+                            this.$el.css('top', (this.$el.offset().top - this.pos2) + "px");
+                            this.$el.css('left', (this.$el.offset().left - this.pos1) + "px");
+                            this.$el.css('transform', "none");
+                            this.$el.css('right', "unset");
+                        };
+                    });
                 },
                 complete: () => {
                     this.$el.detach();
@@ -1309,8 +1339,11 @@ define("xabber-views", function () {
             this.model.initSession();
         },
 
-        clickOnWindow: function () {
-            (this.$el.hasClass('collapsed') && this.$el.hasClass('collapsed-video')) && this.collapse();
+        clickOnWindow: function (ev) {
+            if ($(ev.target).closest('.collapsed-movable').length)
+                return;
+            if ($(ev.target).closest('.video-wrap').length && this.$el.hasClass('collapsed') && this.$el.hasClass('collapsed-video'))
+                this.collapse();
         },
 
         collapse: function (ev) {
@@ -1322,10 +1355,17 @@ define("xabber-views", function () {
             let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
             $overlay.toggle();
             this.$el.toggleClass('collapsed');
-            if (this.$el.hasClass('collapsed'))
+            if (this.$el.hasClass('collapsed')) {
                 this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
-            else
+                this.$('video:not(.blank-video)').switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
+            }
+            else {
                 this.$el.css('right', "");
+                this.$el.css('left', "");
+                this.$el.css('width', "");
+                this.$el.css('height', "");
+                this.$el.removeClass('collapsed-video');
+            }
             this.windowResized();
         },
 
@@ -1333,6 +1373,7 @@ define("xabber-views", function () {
             this.updateButtons();
             if (this.$el.hasClass('collapsed')) {
                 this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
+                this.$('video:not(.blank-video)').switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
             }
         },
 

@@ -665,6 +665,7 @@ define("xabber-chats", function () {
               if (incoming_video) {
                   this.$remote_video_el[0].srcObject = this.remote_stream;
                   this.modal_view.$el.find('.webrtc-remote-audio').replaceWith(this.$remote_video_el);
+                  this.modal_view.$('video:not(.blank-video)').switchClass('multiple-videos', this.get('video') && this.get('video_in'));
               }
               else {
                   this.$remote_audio_el[0].srcObject = this.remote_stream;
@@ -7943,6 +7944,7 @@ define("xabber-chats", function () {
               "click .btn-previous-plyr": "previousPlyr",
               "click .btn-stop-plyr": "stopPlyr",
               "click .btn-popup-plyr": "popupPlyr",
+              "click .btn-jingle-message": "openJingleMessage",
               "click .btn-search-messages": "renderSearchPanel"
           },
 
@@ -7960,6 +7962,7 @@ define("xabber-chats", function () {
               this.model.on("close_chat", this.closeChat, this);
               xabber.on('plyr_player_updated', this.updatePlyrControls, this);
               xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
+              xabber.on("update_jingle_button", this.updateJingleButton, this);
           },
 
           render: function () {
@@ -7972,6 +7975,7 @@ define("xabber-chats", function () {
               this.$('.chat-head-menu').hide();
               this.updatePlyrControls();
               this.updatePlyrTime();
+              this.updateJingleButton();
               return this;
           },
 
@@ -8123,6 +8127,28 @@ define("xabber-chats", function () {
           updatePlyrTime: function () {
               if (xabber.current_plyr_player && !isNaN(xabber.current_plyr_player.currentTime))
                   this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
+          },
+
+          updateJingleButton: function () {
+              this.$('.btn-jingle-message').switchClass('active-call', xabber.current_voip_call);
+              if (xabber.current_voip_call){
+                  this.$('.btn-jingle-message').removeClass('hidden');
+                  let voip_status = xabber.current_voip_call.get('status');
+                  if (voip_status)
+                      this.$('.btn-jingle-message').attr('data-state', voip_status);
+                  else
+                      this.$('.btn-jingle-message').attr('data-state', '');
+                  if (voip_status === 'disconnected')
+                      this.$('.btn-jingle-message').removeClass('active-call');
+              } else
+                  this.$('.btn-jingle-message').addClass('hidden');
+          },
+
+          openJingleMessage: function () {
+              if (xabber.current_voip_call) {
+                  xabber.current_voip_call.modal_view.collapse();
+                  return;
+              }
           },
       });
 
@@ -8285,7 +8311,7 @@ define("xabber-chats", function () {
             this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
             this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
             this.$('.btn-notifications').hideIf(this.contact.get('blocked'));
-            this.$('.btn-jingle-message').hideIf(this.contact.get('blocked') || is_group_chat);
+            this.$('.btn-jingle-message').hideIf((this.contact.get('blocked') || is_group_chat) && xabber.current_voip_call);
         },
 
         renderSearchPanel: function () {
@@ -8422,7 +8448,7 @@ define("xabber-chats", function () {
                 xabber.current_voip_call.modal_view.collapse();
                 return;
             }
-            this.content.initJingleMessage();
+            !this.contact.get('group_chat') && this.content.initJingleMessage();
         },
 
         setStatus: function () {
@@ -8515,6 +8541,7 @@ define("xabber-chats", function () {
         updateJingleButton: function () {
             this.$('.btn-jingle-message').switchClass('active-call', xabber.current_voip_call);
             if (xabber.current_voip_call){
+                this.contact.get('group_chat') && this.$('.btn-jingle-message').removeClass('hidden');
                 let voip_status = xabber.current_voip_call.get('status');
                 if (voip_status)
                     this.$('.btn-jingle-message').attr('data-state', voip_status);
@@ -8522,7 +8549,8 @@ define("xabber-chats", function () {
                     this.$('.btn-jingle-message').attr('data-state', '');
                 if (voip_status === 'disconnected')
                     this.$('.btn-jingle-message').removeClass('active-call');
-            }
+            } else if (this.contact.get('group_chat'))
+                this.$('.btn-jingle-message').addClass('hidden');
         },
 
         getActiveScreen: function () {
@@ -8553,7 +8581,7 @@ define("xabber-chats", function () {
         updateGroupChatHead: function () {
             let is_group_chat = this.contact.get('group_chat');
             this.updateIcon();
-            this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio'));
+            this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio') || xabber.current_voip_call);
             this.$('.contact-status').hideIf(is_group_chat);
             this.updateMenu();
         },
