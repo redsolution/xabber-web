@@ -1226,11 +1226,14 @@ define("xabber-chats", function () {
                 }
                 else
                     msg_text =  xabber.getString("jingle__system_message__cancelled_call");
+                options.is_unread && (options.reject_contact_stanza_id = options.contact_stanza_id);
                 message = this.messages.createSystemMessage({
                     from_jid: this.account.get('jid'),
                     time: time,
                     session_id: $jingle_msg_reject.attr('id'),
                     stanza_id: options.stanza_id,
+                    contact_stanza_id: options.reject_contact_stanza_id,
+                    is_unread: options.is_unread,
                     message: msg_text
                 });
                 if (options.is_archived || options.synced_msg)
