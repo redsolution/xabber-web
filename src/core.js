@@ -315,7 +315,7 @@
                 mam_messages_limit_start: 1,
                 mam_messages_limit: 20,
                 ping_interval: 60,
-                reconnect_interval: 120
+                reconnect_interval: 90
             }
         }),
 

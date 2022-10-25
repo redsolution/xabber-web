@@ -4865,8 +4865,14 @@ define("xabber-chats", function () {
                   }, 1000);
               }
               else {
-                  let _pending_time = 5, _interval = setInterval(() => {
-                      if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
+                  let _pending_time = 5, was_reconnecting, _interval = setInterval(() => {
+                      (!was_reconnecting && this.account.session.get('reconnecting')) && (was_reconnecting = true);
+                      if (_pending_time >= 10 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
+                          this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
+                              this.account.connection.disconnect();
+                          }, 5000);
+                      }
+                      if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {//34
                           message.set('state', constants.MSG_ERROR);
                           clearInterval(_interval);
                       }

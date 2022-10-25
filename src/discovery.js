@@ -258,7 +258,7 @@ define("xabber-discovery", function () {
         this.connection.deleteTimedHandler(this._ping_handler);
         this._ping_handler = this.connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 90)) {
                 if (this.connection.connected)
                     this.connection.disconnect();
                 else
@@ -293,7 +293,7 @@ define("xabber-discovery", function () {
         this.background_connection.deleteTimedHandler(this._background_ping_handler);
         this._background_ping_handler = this.background_connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_background_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 90)) {
                 if (this.background_connection.connected)
                     this.background_connection.disconnect();
                 else
@@ -326,7 +326,7 @@ define("xabber-discovery", function () {
         this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
         this._fast_ping_handler = this.fast_connection.addTimedHandler(30000, () => {
             let downtime = moment.now() - this.last_fast_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.reconnect_interval || 120)) {
+            if (downtime / 1000 > (xabber.settings.reconnect_interval || 90)) {
                 if (this.fast_connection.connected)
                     this.fast_connection.disconnect();
                 else
