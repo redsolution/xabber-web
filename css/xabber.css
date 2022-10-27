@@ -1198,6 +1198,7 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-container {
     position: absolute;
     transform: translate(-50%, 0);
+    border-top: 1px solid #f5f5f5;
     bottom: 0;
     left: 50%;
     max-width: 100%;
@@ -8654,6 +8655,7 @@ input.input-glow.invalid,
 }
 
 .chat-message .img-content {
+    border: 1px solid rgb(158 158 158 / 25%);
     background-image: url(../images/loading.png);
     background-position: center center;
     background-repeat: no-repeat;
@@ -8667,6 +8669,10 @@ input.input-glow.invalid,
     overflow: hidden;
     max-width: 100%;
     max-height: 400px;
+}
+
+.chat-message .img-content .unloaded-img {
+    visibility: hidden;
 }
 
 .chat-message .image-collection:hover .img-privacy-warning,
@@ -8698,7 +8704,7 @@ input.input-glow.invalid,
     background-position: center center;
     background-repeat: no-repeat;
     position: relative;
-    border: 1px solid #E0E0E0;
+    border: 1px solid rgb(158 158 158 / 25%);
     margin: 1px;
     display: inline-block !important;
     overflow-x: hidden;
@@ -9395,7 +9401,7 @@ img.fwd-img-preview {
 .message-reference-preview .preview-preloader-container {
     height: 80px;
     border: 1px solid #E0E0E0;
-    margin: 4px;
+    margin: 4px 8px 4px 0;
     position: relative;
 }
 
@@ -9407,10 +9413,10 @@ img.fwd-img-preview {
 .message-reference-preview .link-message-reference{
     max-width: 120px;
     position: relative;
-    border: 1px solid #E0E0E0;
+    border: 1px solid rgb(158 158 158 / 25%);
     height: 80px;
     min-width: 64px;
-    margin: 4px;
+    margin: 4px 8px 4px 0;
 }
 .message-reference-preview .attached-image-preview{
     max-width: 80%;
@@ -9450,15 +9456,15 @@ img.fwd-img-preview {
 .message-reference-preview .attached-image-preview .mdi-close{
     position: absolute;
     z-index: 1000;
-    padding: 2px;
+    padding: 1px 1px 2px 2px;
     right: 0;
     top: 0;
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     font-size: 8px;
     line-height: 16px;
-    background: #00000073;
+    background: radial-gradient(circle, rgba(158,158,158,0.35) 35%, rgba(158,158,158,0.25) 70%);
     text-align: center;
 }
 
@@ -9510,6 +9516,12 @@ img.fwd-img-preview {
     background: #00000073;
     border-radius: 2px;
     font-weight: 500;
+    display: none;
+}
+.message-reference-preview .attached-image-preview:hover .attached-file-size,
+.message-reference-preview .link-message-reference:hover .attached-file-size,
+.message-reference-preview .link-message-reference:hover .attached-site-name{
+    display: block;
 }
 
 .message-reference-preview .attached-image-preview .attached-text-block,

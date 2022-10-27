@@ -18,7 +18,7 @@
         <a href="{{url}}" target=”_blank” class="msg-hyperlink">
             <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590) {]} message-reference-preview-item-big-image{[}]}">
                 {[ if (image) {]}
-                <img class="attached-image" src="{{image}}">
+                <img class="attached-image" data-mfp-src="{{item.image}}" src="{{image}}">
                 {[}]}
                 <div class="attached-text-block">
                     <div class="link-title one-line">{{domain}}</div>
@@ -32,10 +32,10 @@
 <div class="link-message-reference message-reference-preview-item {[ if (item.image && item.video_url) {]}link-message-reference-video{[}]}">
     <svg class="details-icon mdi mdi-18px mdi-close mdi-svg-template" data-svgname="close"></svg>
     {[ if (item.image && item.video_url) {]}
-    <img class="attached-image" src="{{item.image}}">
+    <img class="attached-image" data-mfp-src="{{item.image}}" src="{{item.image}}">
     <div class="attached-site-name one-line">{{item.site}}</div>
     {[} else if (item.image) {]}
-    <img class="attached-image" src="{{item.image}}">
+    <img class="attached-image" data-mfp-src="{{item.image}}" src="{{item.image}}">
     <div class="attached-text-block">
         <div class="link-site one-line">{{domain}}</div>
         {[if (item.description) {]}
