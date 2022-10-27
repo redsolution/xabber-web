@@ -4182,7 +4182,7 @@ define("xabber-chats", function () {
                         copied_attrs.is_video = true;
                     } else
                         copied_attrs.is_video = false;
-                    template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
+                    template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
                     $message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                 });
             }
@@ -4322,7 +4322,7 @@ define("xabber-chats", function () {
                                 copied_attrs.is_video = true;
                             } else
                                 copied_attrs.is_video = false;
-                            template_for_link_reference_content = $(templates.messages.link_reference(copied_attrs));
+                            template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
                             $f_message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                         });
                     }
