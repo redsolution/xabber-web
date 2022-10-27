@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.136","version_description":"added removal of last attachment on escape key up, changed positioning of attachments, added magnificPopup initiation on link reference attachment added, added mfp sources to link reference images, changed removeFileSnippet function, added appropriate scrolling on chat height update, added top border to chat-bottom-container,  returned borders to single chat image, fixed images borders with load media disabled, changed attached image close button visuals, changed attached items visuals"}'
+'{"version_number":"2.3.2.137","version_description":"fixed mfp src for link-reference"}'
 )});
