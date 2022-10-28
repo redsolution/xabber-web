@@ -3342,7 +3342,7 @@ define("xabber-accounts", function () {
                 this.$('.modal-header span').text(xabber.getString("account_set_avatar_header"));
                 this.$el.openModal({
                     ready: () => {
-                        this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                        this.$('.modal-content').perfectScrollbar({theme: 'item-list'});
                     },
                     complete: this.close.bind(this)
                 });

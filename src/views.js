@@ -1195,9 +1195,12 @@ define("xabber-views", function () {
                         // get the mouse cursor position at startup:
                         this.pos3 = e.clientX;
                         this.pos4 = e.clientY;
+                        let didDrag = false;
                         document.onmouseup = (e) => {
                             document.onmouseup = null;
                             document.onmousemove = null;
+                            if (!didDrag)
+                                this.collapse();
                         };
                         // call a function whenever the cursor moves:
                         document.onmousemove = (e) => {
@@ -1213,6 +1216,7 @@ define("xabber-views", function () {
                             this.$el.css('left', (this.$el.offset().left - this.pos1) + "px");
                             this.$el.css('transform', "none");
                             this.$el.css('right', "unset");
+                            didDrag = true;
                         };
                     });
                 },
@@ -1357,7 +1361,7 @@ define("xabber-views", function () {
             this.$el.toggleClass('collapsed');
             if (this.$el.hasClass('collapsed')) {
                 this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
-                this.$('video:not(.blank-video)').switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
+                this.$el.switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
             }
             else {
                 this.$el.css('right', "");
@@ -1373,7 +1377,7 @@ define("xabber-views", function () {
             this.updateButtons();
             if (this.$el.hasClass('collapsed')) {
                 this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
-                this.$('video:not(.blank-video)').switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
+                this.$el.switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
             }
         },
 

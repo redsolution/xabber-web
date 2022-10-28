@@ -665,7 +665,7 @@ define("xabber-chats", function () {
               if (incoming_video) {
                   this.$remote_video_el[0].srcObject = this.remote_stream;
                   this.modal_view.$el.find('.webrtc-remote-audio').replaceWith(this.$remote_video_el);
-                  this.modal_view.$('video:not(.blank-video)').switchClass('multiple-videos', this.get('video') && this.get('video_in'));
+                  this.modal_view.$el.switchClass('multiple-videos', this.get('video') && this.get('video_in'));
               }
               else {
                   this.$remote_audio_el[0].srcObject = this.remote_stream;
@@ -8726,7 +8726,7 @@ define("xabber-chats", function () {
               this.$('.modal-header span').text(xabber.getString("chat_bottom__tooltip_add_media"));
               this.$el.openModal({
                   ready: () => {
-                      this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+                      this.$('.modal-content').perfectScrollbar({theme: 'item-list'});
                   },
                   complete: this.close.bind(this)
               });
