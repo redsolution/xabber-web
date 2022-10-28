@@ -9087,7 +9087,7 @@ define("xabber-chats", function () {
             "click .mention-item": "inputMention",
             "click .format-text": "updateMarkupPanel",
             "click .link-message-reference .mdi-close": "removeLinkReference",
-            "click .preview-preloader-container .mdi-close": "removeLinkReference",
+            "click .preview-preloader-container .preview-cancel-preloader": "removeLinkReference",
             "click .message-reference-preview-item-file .mdi-close": "removeFileSnippet",
             "click .btn-manage-devices": "openDevicesWindow"
         },
@@ -9759,8 +9759,8 @@ define("xabber-chats", function () {
             if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
                 ev.preventDefault();
                 this.unsetForwardedMessages();
-                if (this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0) {
-                    let $elem = this.$('.message-reference-preview .preview-preloader-container').prev();
+                if (this.$('.message-reference-preview').children('div').length > 0) {
+                    let $elem = this.$('.message-reference-preview').children().last();
                     console.log($elem)
                     if ($elem.hasClass('link-message-reference')){
                         this.removeLinkReference();
@@ -9923,8 +9923,15 @@ define("xabber-chats", function () {
             list = _.difference(list, this.link_reference_exempted)
             if (list && list.length){
                 this.loading_link_reference = true;
-                this.$('.message-reference-preview .preview-preloader-container').append($(env.templates.contacts.preloader()));
-                this.$('.message-reference-preview .preview-preloader-container').removeClass('hidden');
+                this.$('.preview-preloader-container').removeClass('hidden');
+                this.$('.account-info-wrap').addClass('hidden');
+                this._preloader_loading = setInterval(() => {
+                    let current_dots = this.$('.preview-preloader-dots').text();
+                    if (current_dots.length >= 3 )
+                        this.$('.preview-preloader-dots').text('')
+                    else
+                        this.$('.preview-preloader-dots').text(current_dots + '.')
+                }, 250);
                 this.$('.message-reference-preview').removeClass('hidden');
                 this.account.getOpenGraphData(list[0], (res) =>{
                     if (!this.loading_link_reference)
@@ -9933,12 +9940,14 @@ define("xabber-chats", function () {
                     dfd.done(() => {
                         this.displaySend();
                         this.$('.message-reference-preview .preloader-wrapper').remove();
-                        this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
-                        $(templates.messages.link_reference({
+                        this.$('.preview-preloader-container').addClass('hidden');
+                        this.$('.account-info-wrap').removeClass('hidden');
+                        clearInterval(this._preloader_loading);
+                        this.$('.message-reference-preview').append($(templates.messages.link_reference({
                             item: res,
                             domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
                             url: null
-                        })).insertBefore(this.$('.message-reference-preview .preview-preloader-container'));
+                        })));
                         this.$('.attached-image').magnificPopup({
                             type: 'image',
                             closeOnContentClick: true,
@@ -9976,7 +9985,9 @@ define("xabber-chats", function () {
                     if (list.length > 1){
                         this.loading_link_reference = false;
                         this.$('.message-reference-preview .preloader-wrapper').remove();
-                        this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
+                        this.$('.preview-preloader-container').addClass('hidden');
+                        this.$('.account-info-wrap').removeClass('hidden');
+                        clearInterval(this._preloader_loading);
                         this.updateOpenGraphReference(this.quill.getText());
                     }
                     else
@@ -9987,9 +9998,11 @@ define("xabber-chats", function () {
 
         removeLinkReference: function () {
             this.$('.message-reference-preview .preloader-wrapper').remove();
-            this.$('.message-reference-preview .preview-preloader-container').addClass('hidden');
+            this.$('.preview-preloader-container').addClass('hidden');
+            this.$('.account-info-wrap').removeClass('hidden');
+            clearInterval(this._preloader_loading);
             this.$('.message-reference-preview .link-message-reference').remove();
-            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
+            if (!(this.$('.message-reference-preview').children('div').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.link_reference = null;
             this.loading_link_reference = false;
@@ -10005,14 +10018,14 @@ define("xabber-chats", function () {
                 let id = uuid();
                 file.uid = id;
                 this.attached_files = this.attached_files.concat([file]);
-                $(templates.messages.attached_file({
+                this.$('.message-reference-preview').append($(templates.messages.attached_file({
                     file: file,
                     uid: id,
                     blob: utils.isImageType(file.type) ? window.URL.createObjectURL(new Blob([file])) : null,
                     filesize: utils.pretty_size(file.size),
                     typeicon: utils.file_type_icon(file.type),
                     filetype: utils.pretty_file_type(file.type),
-                })).insertBefore(this.$('.message-reference-preview .preview-preloader-container'));
+                })));
                 xabber.chat_body.updateHeight();
             });
             files && files.length && this.$('.attached-image').magnificPopup({
@@ -10041,7 +10054,7 @@ define("xabber-chats", function () {
         },
 
         removeFileSnippetById: function (id) {
-            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
+            if (!(this.$('.message-reference-preview').children('div').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = this.attached_files.filter(item => item.uid != id);
             xabber.chat_body.updateHeight();
@@ -10049,7 +10062,7 @@ define("xabber-chats", function () {
 
         removeAllFileSnippets: function (ev) {
             this.$('.message-reference-preview .message-reference-preview-item-file').remove();
-            if (!(this.$('.message-reference-preview').children('div:not(.preview-preloader-container)').length > 0))
+            if (!(this.$('.message-reference-preview').children('div').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = [];
             xabber.chat_body.updateHeight();

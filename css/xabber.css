@@ -1198,7 +1198,6 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 .chat-bottom-container {
     position: absolute;
     transform: translate(-50%, 0);
-    border-top: 1px solid #f5f5f5;
     bottom: 0;
     left: 50%;
     max-width: 100%;
@@ -9309,6 +9308,7 @@ img.fwd-img-preview {
     max-width: 768px;
     left: 50%;
     transform: translate(-50%, 0);
+    border-top: 1px solid #f5f5f5;
 }
 
 .message-input-panel .circle-avatar {
@@ -9327,7 +9327,7 @@ img.fwd-img-preview {
     position: absolute;
     top: 0;
     right: 0;
-    width: 88px;
+    width: 64px;
     height: 100%;
 }
 
@@ -9340,7 +9340,7 @@ img.fwd-img-preview {
 
 .message-input-panel .message-form {
     position: relative;
-    padding: 8px 88px 0 64px;
+    padding: 8px 64px 0 64px;
 }
 
 .message-input-panel .rich-textarea mention {
@@ -9351,7 +9351,6 @@ img.fwd-img-preview {
 
 .message-reference-preview{
     position: relative;
-    min-height: 40px;
     display: flex;
     flex-wrap: wrap;
 }
@@ -9398,15 +9397,33 @@ img.fwd-img-preview {
     color: #808080;
 }
 
-.message-reference-preview .preview-preloader-container {
-    height: 80px;
-    border: 1px solid #E0E0E0;
-    margin: 4px 8px 4px 0;
-    position: relative;
+.input-toolbar .preview-preloader-container {
+    margin: 0 0 0 auto;
+    height: 100%;
 }
 
-.message-reference-preview .preview-preloader-container .preloader-wrapper {
-    margin: 30px;
+.input-toolbar .preview-preloader-container .preview-cancel-preloader,
+.input-toolbar .preview-preloader-container .preview-preloader-text {
+    margin-left: 4px;
+    font-size: 12px;
+}
+.input-toolbar .preview-preloader-container .preview-cancel-preloader{
+    display: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.input-toolbar .preview-preloader-container:hover .preview-cancel-preloader{
+    display: block;
+}
+.input-toolbar .preview-preloader-container:hover .preview-preloader-text {
+    display: none;
+}
+
+.input-toolbar .preview-preloader-container .mdi-close {
+    line-height: 16px;
+    margin-left: 4px;
+    font-size: 12px;
+    display: inline-block;
 }
 
 .message-reference-preview .attached-image-preview,
@@ -9473,7 +9490,6 @@ img.fwd-img-preview {
     fill: #FFF;
 }
 .message-reference-preview .attached-file-preview .mdi-close,
-.message-reference-preview .preview-preloader-container .mdi-close,
 .message-reference-preview .link-message-reference .mdi-close{
     position: absolute;
     z-index: 1000;
@@ -9489,7 +9505,6 @@ img.fwd-img-preview {
 }
 
 .message-reference-preview .attached-file-preview .mdi-close polygon,
-.message-reference-preview .preview-preloader-container .mdi-close polygon,
 .message-reference-preview .link-message-reference .mdi-close polygon{
     fill: #9E9E9E;
 }
