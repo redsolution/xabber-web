@@ -346,14 +346,14 @@ input[type=checkbox].filled-in:checked + label:after {
     color: #9E9E9E !important;
 }
 
-input.input-glow {
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+.input-glow,
+.input-glow-account {
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
     background: rgb(255, 255, 255);
-    border-radius: 0.25rem;
-    border: 1px solid;
-    border-color: rgb(206, 212, 218);
+    border-radius: 0.25rem !important;
+    border: 1px solid rgb(206, 212, 218) !important;
     color: #212529;
-    height: calc(3rem - 2px);
+    height: calc(3rem - 2px) !important;
     padding: 0 8px!important;
     width: calc(100% - 16px) !important;
 }
@@ -1422,11 +1422,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=red] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=red] .group-settings .input-field input:focus,
 [data-main-color=red] .dialog-options-wrap input:focus,
-[data-main-color=red] input.input-glow:focus,
+[data-main-color=red] .input-glow:focus,
 [data-main-color=red] .web-address input.url:focus,
 [data-main-color=red] .login-panel-form .input-field input:focus{
     border-color: #F44336 !important;
-    box-shadow: 0px 0px 0px 0.25rem #FFCDD2 !important;
+    box-shadow: 0px 0px 0px 0.175rem #FFCDD2 !important;
 }
 [data-main-color=red] .login-panel-form .login-form-skip,
 [data-main-color=red] .login-buttons .btn-main{
@@ -1534,11 +1534,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=pink] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=pink] .group-settings .input-field input:focus,
 [data-main-color=pink] .dialog-options-wrap input:focus,
-[data-main-color=pink] input.input-glow:focus,
+[data-main-color=pink] .input-glow:focus,
 [data-main-color=pink] .web-address input.url:focus,
 [data-main-color=pink] .login-panel-form .input-field input:focus{
     border-color: #E91E63 !important;
-    box-shadow: 0px 0px 0px 0.25rem #F8BBD0 !important;
+    box-shadow: 0px 0px 0px 0.175rem #F8BBD0 !important;
 }
 [data-main-color=pink] .login-panel-form .login-form-skip,
 [data-main-color=pink] .login-buttons .btn-main{
@@ -1646,11 +1646,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=purple] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=purple] .group-settings .input-field input:focus,
 [data-main-color=purple] .dialog-options-wrap input:focus,
-[data-main-color=purple] input.input-glow:focus,
+[data-main-color=purple] .input-glow:focus,
 [data-main-color=purple] .web-address input.url:focus,
 [data-main-color=purple] .login-panel-form .input-field input:focus{
     border-color: #9C27B0 !important;
-    box-shadow: 0px 0px 0px 0.25rem #E1BEE7 !important;
+    box-shadow: 0px 0px 0px 0.175rem #E1BEE7 !important;
 }
 [data-main-color=purple] .login-panel-form .login-form-skip,
 [data-main-color=purple] .login-buttons .btn-main{
@@ -1757,11 +1757,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-purple] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=deep-purple] .group-settings .input-field input:focus,
 [data-main-color=deep-purple] .dialog-options-wrap input:focus,
-[data-main-color=deep-purple] input.input-glow:focus,
+[data-main-color=deep-purple] .input-glow:focus,
 [data-main-color=deep-purple] .web-address input.url:focus,
 [data-main-color=deep-purple] .login-panel-form .input-field input:focus{
     border-color: #673AB7 !important;
-    box-shadow: 0px 0px 0px 0.25rem #D1C4E9 !important;
+    box-shadow: 0px 0px 0px 0.175rem #D1C4E9 !important;
 }
 [data-main-color=deep-purple] .login-panel-form .login-form-skip,
 [data-main-color=deep-purple] .login-buttons .btn-main{
@@ -1869,11 +1869,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=indigo] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=indigo] .group-settings .input-field input:focus,
 [data-main-color=indigo] .dialog-options-wrap input:focus,
-[data-main-color=indigo] input.input-glow:focus,
+[data-main-color=indigo] .input-glow:focus,
 [data-main-color=indigo] .web-address input.url:focus,
 [data-main-color=indigo] .login-panel-form .input-field input:focus{
     border-color: #3F51B5 !important;
-    box-shadow: 0px 0px 0px 0.25rem #C5CAE9 !important;
+    box-shadow: 0px 0px 0px 0.175rem #C5CAE9 !important;
 }
 [data-main-color=indigo] .login-panel-form .login-form-skip,
 [data-main-color=indigo] .login-buttons .btn-main{
@@ -1981,11 +1981,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=blue] .group-settings .input-field input:focus,
 [data-main-color=blue] .dialog-options-wrap input:focus,
-[data-main-color=blue] input.input-glow:focus,
+[data-main-color=blue] .input-glow:focus,
 [data-main-color=blue] .web-address input.url:focus,
 [data-main-color=blue] .login-panel-form .input-field input:focus{
     border-color: #2196F3 !important;
-    box-shadow: 0px 0px 0px 0.25rem #BBDEFB !important;
+    box-shadow: 0px 0px 0px 0.175rem #BBDEFB !important;
 }
 [data-main-color=blue] .login-panel-form .login-form-skip,
 [data-main-color=blue] .login-buttons .btn-main{
@@ -2093,11 +2093,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-blue] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=light-blue] .group-settings .input-field input:focus,
 [data-main-color=light-blue] .dialog-options-wrap input:focus,
-[data-main-color=light-blue] input.input-glow:focus,
+[data-main-color=light-blue] .input-glow:focus,
 [data-main-color=light-blue] .web-address input.url:focus,
 [data-main-color=light-blue] .login-panel-form .input-field input:focus{
     border-color: #03A9F4 !important;
-    box-shadow: 0px 0px 0px 0.25rem #B3E5FC !important;
+    box-shadow: 0px 0px 0px 0.175rem #B3E5FC !important;
 }
 [data-main-color=light-blue] .login-panel-form .login-form-skip,
 [data-main-color=light-blue] .login-buttons .btn-main{
@@ -2205,11 +2205,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=cyan] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=cyan] .group-settings .input-field input:focus,
 [data-main-color=cyan] .dialog-options-wrap input:focus,
-[data-main-color=cyan] input.input-glow:focus,
+[data-main-color=cyan] .input-glow:focus,
 [data-main-color=cyan] .web-address input.url:focus,
 [data-main-color=cyan] .login-panel-form .input-field input:focus{
     border-color: #00BCD4 !important;
-    box-shadow: 0px 0px 0px 0.25rem #B2EBF2 !important;
+    box-shadow: 0px 0px 0px 0.175rem #B2EBF2 !important;
 }
 [data-main-color=cyan] .login-panel-form .login-form-skip,
 [data-main-color=cyan] .login-buttons .btn-main{
@@ -2317,11 +2317,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=teal] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=teal] .group-settings .input-field input:focus,
 [data-main-color=teal] .dialog-options-wrap input:focus,
-[data-main-color=teal] input.input-glow:focus,
+[data-main-color=teal] .input-glow:focus,
 [data-main-color=teal] .web-address input.url:focus,
 [data-main-color=teal] .login-panel-form .input-field input:focus{
     border-color: #009688 !important;
-    box-shadow: 0px 0px 0px 0.25rem #B2DFDB !important;
+    box-shadow: 0px 0px 0px 0.175rem #B2DFDB !important;
 }
 [data-main-color=teal] .login-panel-form .login-form-skip,
 [data-main-color=teal] .login-buttons .btn-main{
@@ -2429,11 +2429,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=green] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=green] .group-settings .input-field input:focus,
 [data-main-color=green] .dialog-options-wrap input:focus,
-[data-main-color=green] input.input-glow:focus,
+[data-main-color=green] .input-glow:focus,
 [data-main-color=green] .web-address input.url:focus,
 [data-main-color=green] .login-panel-form .input-field input:focus{
     border-color: #4CAF50 !important;
-    box-shadow: 0px 0px 0px 0.25rem #C8E6C9 !important;
+    box-shadow: 0px 0px 0px 0.175rem #C8E6C9 !important;
 }
 [data-main-color=green] .login-panel-form .login-form-skip,
 [data-main-color=green] .login-buttons .btn-main{
@@ -2541,11 +2541,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=light-green] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=light-green] .group-settings .input-field input:focus,
 [data-main-color=light-green] .dialog-options-wrap input:focus,
-[data-main-color=light-green] input.input-glow:focus,
+[data-main-color=light-green] .input-glow:focus,
 [data-main-color=light-green] .web-address input.url:focus,
 [data-main-color=light-green] .login-panel-form .input-field input:focus{
     border-color: #8BC34A !important;
-    box-shadow: 0px 0px 0px 0.25rem #DCEDC8 !important;
+    box-shadow: 0px 0px 0px 0.175rem #DCEDC8 !important;
 }
 [data-main-color=light-green] .login-panel-form .login-form-skip,
 [data-main-color=light-green] .login-buttons .btn-main{
@@ -2653,11 +2653,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=lime] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=lime] .group-settings .input-field input:focus,
 [data-main-color=lime] .dialog-options-wrap input:focus,
-[data-main-color=lime] input.input-glow:focus,
+[data-main-color=lime] .input-glow:focus,
 [data-main-color=lime] .web-address input.url:focus,
 [data-main-color=lime] .login-panel-form .input-field input:focus{
     border-color: #CDDC39 !important;
-    box-shadow: 0px 0px 0px 0.25rem #F0F4C3 !important;
+    box-shadow: 0px 0px 0px 0.175rem #F0F4C3 !important;
 }
 [data-main-color=lime] .login-panel-form .login-form-skip,
 [data-main-color=lime] .login-buttons .btn-main{
@@ -2765,11 +2765,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=amber] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=amber] .group-settings .input-field input:focus,
 [data-main-color=amber] .dialog-options-wrap input:focus,
-[data-main-color=amber] input.input-glow:focus,
+[data-main-color=amber] .input-glow:focus,
 [data-main-color=amber] .web-address input.url:focus,
 [data-main-color=amber] .login-panel-form .input-field input:focus{
     border-color: #FFC107 !important;
-    box-shadow: 0px 0px 0px 0.25rem #FFECB3 !important;
+    box-shadow: 0px 0px 0px 0.175rem #FFECB3 !important;
 }
 [data-main-color=amber] .login-panel-form .login-form-skip,
 [data-main-color=amber] .login-buttons .btn-main{
@@ -2877,11 +2877,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=orange] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=orange] .group-settings .input-field input:focus,
 [data-main-color=orange] .dialog-options-wrap input:focus,
-[data-main-color=orange] input.input-glow:focus,
+[data-main-color=orange] .input-glow:focus,
 [data-main-color=orange] .web-address input.url:focus,
 [data-main-color=orange] .login-panel-form .input-field input:focus{
     border-color: #FF9800 !important;
-    box-shadow: 0px 0px 0px 0.25rem #FFE0B2 !important;
+    box-shadow: 0px 0px 0px 0.175rem #FFE0B2 !important;
 }
 [data-main-color=orange] .login-panel-form .login-form-skip,
 [data-main-color=orange] .login-buttons .btn-main{
@@ -2989,11 +2989,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=deep-orange] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=deep-orange] .group-settings .input-field input:focus,
 [data-main-color=deep-orange] .dialog-options-wrap input:focus,
-[data-main-color=deep-orange] input.input-glow:focus,
+[data-main-color=deep-orange] .input-glow:focus,
 [data-main-color=deep-orange] .web-address input.url:focus,
 [data-main-color=deep-orange] .login-panel-form .input-field input:focus{
     border-color: #FF5722 !important;
-    box-shadow: 0px 0px 0px 0.25rem #FFCCBC !important;
+    box-shadow: 0px 0px 0px 0.175rem #FFCCBC !important;
 }
 [data-main-color=deep-orange] .login-panel-form .login-form-skip,
 [data-main-color=deep-orange] .login-buttons .btn-main{
@@ -3101,11 +3101,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=brown] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=brown] .group-settings .input-field input:focus,
 [data-main-color=brown] .dialog-options-wrap input:focus,
-[data-main-color=brown] input.input-glow:focus,
+[data-main-color=brown] .input-glow:focus,
 [data-main-color=brown] .web-address input.url:focus,
 [data-main-color=brown] .login-panel-form .input-field input:focus{
     border-color: #795548 !important;
-    box-shadow: 0px 0px 0px 0.25rem #D7CCC8 !important;
+    box-shadow: 0px 0px 0px 0.175rem #D7CCC8 !important;
 }
 [data-main-color=brown] .login-panel-form .login-form-skip,
 [data-main-color=brown] .login-buttons .btn-main{
@@ -3214,11 +3214,11 @@ body .lean-overlay + .client-body-wrap.hidden ~ #modals {
 [data-main-color=blue-grey] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=blue-grey] .group-settings .input-field input:focus,
 [data-main-color=blue-grey] .dialog-options-wrap input:focus,
-[data-main-color=blue-grey] input.input-glow:focus,
+[data-main-color=blue-grey] .input-glow:focus,
 [data-main-color=blue-grey] .web-address input.url:focus,
 [data-main-color=blue-grey] .login-panel-form .input-field input:focus{
     border-color: #607D8B !important;
-    box-shadow: 0px 0px 0px 0.25rem #CFD8DC !important;
+    box-shadow: 0px 0px 0px 0.175rem #CFD8DC !important;
 }
 [data-main-color=blue-grey] .login-panel-form .login-form-skip,
 [data-main-color=blue-grey] .login-buttons .btn-main{
@@ -4124,7 +4124,8 @@ input[type=text].simple-input-field:hover {
     border-radius: 4px 0px 0px 4px;
     width: 181px;
 }
-input.input-glow.invalid,
+.input-glow-account.invalid,
+.input-glow.invalid,
 .add-contact-modal .input-field input.invalid,
 .login-panel-form .input-field input.invalid{
     border: 1px solid rgb(220, 53, 69) !important;
@@ -8269,9 +8270,7 @@ input.input-glow.invalid,
     background-position: 0px 0, 2px 2px;
 }
 
-.chat-bottom-wrap[data-contact-trust=true] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-contact-trust=true],
-.chat-bottom-wrap[data-trust=true] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=true],
 .chat-day-indicator[data-trust=true],
 [data-trust=true].chat-content-wrap .load-history-feedback,
@@ -8341,9 +8340,7 @@ input.input-glow.invalid,
     margin: 0 auto;
 }
 
-.chat-bottom-wrap[data-trust=none] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=none],
-.chat-bottom-wrap[data-contact-trust=none] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-contact-trust=none],
 .chat-day-indicator[data-trust=untrusted],
 .chat-day-indicator[data-trust=none],
@@ -8357,10 +8354,32 @@ input.input-glow.invalid,
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
+.chat-bottom-wrap[data-contact-trust=none] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
+.chat-bottom-wrap[data-contact-trust=error] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
+.chat-bottom-wrap[data-contact-trust=true] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
+.chat-bottom-wrap[data-trust=none] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
+.chat-bottom-wrap[data-trust=error] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
+.chat-bottom-wrap[data-trust=true] .input-message .ql-editor{
+    background: rgb(0 0 0 / 5%) !important;
+    border-color: transparent !important;
+}
 
-.chat-bottom-wrap[data-contact-trust=error] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-contact-trust=error],
-.chat-bottom-wrap[data-trust=error] .input-message .scrollbar-cover,
 .chat-bottom-wrap[data-trust=error],
 .chat-day-indicator[data-trust=error],
 [data-trust=error].chat-content-wrap .load-history-feedback,
@@ -9300,7 +9319,6 @@ img.fwd-img-preview {
     max-width: 768px;
     left: 50%;
     transform: translate(-50%, 0);
-    border-top: 1px solid #f5f5f5;
 }
 
 .message-input-panel .circle-avatar {
@@ -9332,7 +9350,7 @@ img.fwd-img-preview {
 
 .message-input-panel .message-form {
     position: relative;
-    padding: 16px 64px 0 64px;
+    padding: 16px 64px 0 62px;
 }
 
 .message-input-panel .rich-textarea mention {
@@ -9345,11 +9363,16 @@ img.fwd-img-preview {
     position: relative;
     display: flex;
     flex-wrap: wrap;
+    margin-bottom: 2px;
+    max-height: 176px;
+    margin-left: 2px;
 }
 .fwd-messages-preview {
     position: relative;
     min-height: 40px;
     overflow: auto;
+    margin-left: 2px;
+    margin-bottom: 4px;
 }
 
 .fwd-messages-preview .msg-border {
@@ -9425,7 +9448,7 @@ img.fwd-img-preview {
     border: 1px solid rgb(158 158 158 / 25%);
     height: 80px;
     min-width: 64px;
-    margin: 4px 8px 4px 0;
+    margin: 0 8px 8px 0;
 }
 .message-reference-preview .attached-image-preview{
     max-width: 80%;
@@ -9751,6 +9774,16 @@ img.fwd-img-preview {
     -moz-block-height: 20px;
     z-index: 1;
 }
+.message-form .rich-textarea-wrap .rich-textarea.input-glow-account{
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
+    border-radius: 0.25rem !important;
+    border: 1px solid #F5F5F5 !important;
+    padding: 4px 40px 4px 2px !important;
+    width: 100% !important;
+    overflow: hidden;
+    min-height: 72px;
+    background: #F5F5F5;
+}
 
 .add-group-chat-modal .description-field .rich-textarea-wrap .rich-textarea {
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
@@ -9781,11 +9814,10 @@ img.fwd-img-preview {
 
 .message-form .input-message .scrollbar-cover {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 2px;
+    right: 2px;
     bottom: 1px;
     width: 40px;
-    background-color: #FFF;
     z-index: 1;
 }
 
