@@ -3480,7 +3480,7 @@ define("xabber-contacts", function () {
 
             updateMedia: function (is_loaded) {
                 if (!this.active)
-                    return
+                    return;
                 if (this.temporary_items.length){
                     this.temporary_items.reverse();
                     this.temporary_items.forEach((item) => {
@@ -3497,7 +3497,7 @@ define("xabber-contacts", function () {
 
             messagesFileRequest: function (query, callback) {
                 if (!this.active || this.loading_messages)
-                    return
+                    return;
                 let options = query || {},
                     queryid = uuid();
                 this.loading_messages = true;
@@ -3552,6 +3552,7 @@ define("xabber-contacts", function () {
                         if (!messages.length)
                             this.all_messages_loaded = true;
                         this.loading_messages = false;
+                        (this.filter_type === 'filter_files') && (this.temporary_items = this.temporary_items.filter(file => !(file.media_type && (file.media_type.includes('image') || (file.media_type.includes('video') && !file.has_encrypted_files)))));
                         if (!(this.temporary_items.length >= xabber.settings.mam_messages_limit) && this.filter_type === 'filter_files' && !this.all_messages_loaded) {
                             this.messagesFileRequest({[this.filter_type]: true, before: this.last_rsm_message}, callback);
                         }else
