@@ -9194,7 +9194,6 @@ define("xabber-chats", function () {
                 theme: 'snow'
             });
             this.quill.container.firstChild.classList.add('rich-textarea');
-            this.quill.container.firstChild.classList.add('input-glow-account');
             this.$('.ql-mention').prop('disabled', true);
             this.$('.ql-mention').append('<div class="chat-mention" ="">@</div>');
             this.contact = this.view.contact;

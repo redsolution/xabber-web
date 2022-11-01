@@ -160,6 +160,7 @@ input[type=checkbox].filled-in:checked + label:after {
 
 .ql-editor {
     padding: 0 40px 0 0 !important;
+    overflow: hidden !important;
 }
 
 .ql-editor.ql-blank::before {
@@ -9319,6 +9320,7 @@ img.fwd-img-preview {
     max-width: 768px;
     left: 50%;
     transform: translate(-50%, 0);
+    border-top: 1px solid #f5f5f5;
 }
 
 .message-input-panel .circle-avatar {
@@ -9350,7 +9352,7 @@ img.fwd-img-preview {
 
 .message-input-panel .message-form {
     position: relative;
-    padding: 16px 64px 0 62px;
+    padding: 16px 64px 0 64px;
 }
 
 .message-input-panel .rich-textarea mention {
@@ -9365,13 +9367,11 @@ img.fwd-img-preview {
     flex-wrap: wrap;
     margin-bottom: 2px;
     max-height: 176px;
-    margin-left: 2px;
 }
 .fwd-messages-preview {
     position: relative;
     min-height: 40px;
     overflow: auto;
-    margin-left: 2px;
     margin-bottom: 4px;
 }
 
