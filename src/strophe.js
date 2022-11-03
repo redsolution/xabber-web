@@ -694,6 +694,8 @@ define("xabber-strophe", function () {
                             if (this.socket && this.socket.readyState === 1){
                                 this.socket.send(rawStanza);
                             } else {
+                                console.log('data went to pending');
+                                console.log(this._conn._data.slice(i));
                                 this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
                                 this._conn._data = [];
                                 return;

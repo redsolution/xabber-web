@@ -144,6 +144,8 @@ define("xabber-accounts", function () {
                         this.connection.send(stanza);
                         callback && callback();
                     } else {
+                        console.log('message went to pending');
+                        console.log({stanza: stanza, callback: callback, is_msg: true});
                         this._pending_stanzas.push({stanza: stanza, callback: callback, is_msg: true});
                     }
                     return res;
@@ -291,7 +293,7 @@ define("xabber-accounts", function () {
                         }
                         this.connection.sendIQ.apply(this.connection, arguments);
                     } else {
-                        this._pending_stanzas.push({stanza: arguments});
+                        this._pending_stanzas.push({stanza: arguments, is_iq: true});
                     }
                     return res;
                 },
@@ -931,11 +933,14 @@ define("xabber-accounts", function () {
                 },
 
                 sendPendingStanzas: function () {
+                    console.log('pending stanzas');
+                    console.log(this._pending_stanzas);
                     _.each(this._pending_stanzas, (item) => {
+                        console.log(item);
                         if ((item.stanza instanceof Strophe.Builder) || item.is_msg) {
                             this.connection.send(item.stanza);
                             item.callback && item.callback();
-                        } else if (item && item.stanza && item.stanza.tree){
+                        } else if (item && item.stanza && item.is_iq){
                             this.connection.sendIQ.apply(this.connection, item.stanza);
                         }
                     });
@@ -943,12 +948,16 @@ define("xabber-accounts", function () {
                 },
 
                 sendPendingMessages: function () {
+                    console.log('pending messages');
+                    console.log(this._pending_messages);
                     _.each(this._pending_messages, (item) => {
+                        console.log(item)
                         let msg = this.messages.get(item.unique_id), $msg_iq;
                         msg && ($msg_iq = msg.get('xml'));
                         $msg_iq && this.sendMsg($msg_iq);
                     });
                     this._pending_messages = [];
+                    this.trigger('send_pending_messages');
                 },
 
                 _after_connected_plugins: [],
