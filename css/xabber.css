@@ -8512,7 +8512,7 @@ input[type=text].simple-input-field:hover {
 .chat-message .left-side .circle-avatar {
     position: absolute;
     top: 8px;
-    left: 16px;
+    left: 18px;
     width: 32px;
     height: 32px;
     display: none;
@@ -9327,7 +9327,7 @@ img.fwd-img-preview {
 .message-input-panel .circle-avatar {
     position: absolute;
     bottom: 56px;
-    left: 8px;
+    left: 10px;
     width: 48px;
     height: 48px;
 }
