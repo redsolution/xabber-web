@@ -124,8 +124,7 @@
 }
 
 [data-color=red] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #D32F2F;
-  box-shadow: 0 1px 0 0 #D32F2F;
+  border-bottom: 2px solid #D32F2F;
 }
 [data-color=red] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #D32F2F;
@@ -257,8 +256,7 @@
 }
 
 [data-color=pink] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #C2185B !important;
-  box-shadow: 0 1px 0 0 #C2185B !important;
+  border-bottom: 2px solid #C2185B !important;
 }
 [data-color=pink] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #C2185B !important;
@@ -390,8 +388,7 @@
 }
 
 [data-color=purple] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #7B1FA2 !important;
-  box-shadow: 0 1px 0 0 #7B1FA2 !important;
+  border-bottom: 2px solid #7B1FA2 !important;
 }
 
 [data-color=purple] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -524,8 +521,7 @@
 }
 
 [data-color=deep-purple] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #512DA8 !important;
-  box-shadow: 0 1px 0 0 #512DA8 !important;
+  border-bottom: 2px solid #512DA8 !important;
 }
 [data-color=deep-purple] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #512DA8 !important;
@@ -657,8 +653,7 @@
 }
 
 [data-color=indigo] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #303F9F !important;
-  box-shadow: 0 1px 0 0 #303F9F !important;
+  border-bottom: 2px solid #303F9F !important;
 }
 
 [data-color=indigo] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -791,8 +786,7 @@
 }
 
 [data-color=blue] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #1976D2 !important;
-  box-shadow: 0 1px 0 0 #1976D2 !important;
+  border-bottom: 2px solid #1976D2 !important;
 }
 
 [data-color=blue] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -925,8 +919,7 @@
 }
 
 [data-color=light-blue] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #0288D1 !important;
-  box-shadow: 0 1px 0 0 #0288D1 !important;
+  border-bottom: 2px solid #0288D1 !important;
 }
 [data-color=light-blue] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #0288D1 !important;
@@ -1058,8 +1051,7 @@
 }
 
 [data-color=cyan] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #0097A7 !important;
-  box-shadow: 0 1px 0 0 #0097A7 !important;
+  border-bottom: 2px solid #0097A7 !important;
 }
 [data-color=cyan] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #0097A7 !important;
@@ -1191,8 +1183,7 @@
 }
 
 [data-color=teal] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #00796B !important;
-  box-shadow: 0 1px 0 0 #00796B !important;
+  border-bottom: 2px solid #00796B !important;
 }
 
 [data-color=teal] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -1325,8 +1316,7 @@
 }
 
 [data-color=green] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #388E3C !important;
-  box-shadow: 0 1px 0 0 #388E3C !important;
+  border-bottom: 2px solid #388E3C !important;
 }
 
 [data-color=green] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -1459,8 +1449,7 @@
 }
 
 [data-color=light-green] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #689F38 !important;
-  box-shadow: 0 1px 0 0 #689F38 !important;
+  border-bottom: 2px solid #689F38 !important;
 }
 [data-color=light-green] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #689F38 !important;
@@ -1592,8 +1581,7 @@
 }
 
 [data-color=lime] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #AFB42B !important;
-  box-shadow: 0 1px 0 0 #AFB42B !important;
+  border-bottom: 2px solid #AFB42B !important;
 }
 
 [data-color=lime] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -1726,8 +1714,7 @@
 }
 
 [data-color=amber] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #FFA000 !important;
-  box-shadow: 0 1px 0 0 #FFA000 !important;
+  border-bottom: 2px solid #FFA000 !important;
 }
 [data-color=amber] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #FFA000 !important;
@@ -1859,8 +1846,7 @@
 }
 
 [data-color=orange] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #F57C00 !important;
-  box-shadow: 0 1px 0 0 #F57C00 !important;
+  border-bottom: 2px solid #F57C00 !important;
 }
 
 [data-color=orange] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
@@ -1993,8 +1979,7 @@
 }
 
 [data-color=deep-orange] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #E64A19 !important;
-  box-shadow: 0 1px 0 0 #E64A19 !important;
+  border-bottom: 2px solid #E64A19 !important;
 }
 [data-color=deep-orange] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #E64A19 !important;
@@ -2126,8 +2111,7 @@
 }
 
 [data-color=brown] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #5D4037 !important;
-  box-shadow: 0 1px 0 0 #5D4037 !important;
+  border-bottom: 2px solid #5D4037 !important;
 }
 [data-color=brown] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #5D4037 !important;
@@ -2259,8 +2243,7 @@
 }
 
 [data-color=blue-grey] .rich-textarea:focus:not([readonly]):not(.input-glow-account) {
-  border-bottom: 1px solid #455A64 !important;
-  box-shadow: 0 1px 0 0 #455A64 !important;
+  border-bottom: 2px solid #455A64 !important;
 }
 [data-color=blue-grey] .rich-textarea:focus:not([readonly]):not(.input-glow-account) + label {
   color: #455A64 !important;

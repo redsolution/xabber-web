@@ -159,7 +159,6 @@ input[type=checkbox].filled-in:checked + label:after {
 }
 
 .ql-editor {
-    padding: 0 40px 0 0 !important;
     overflow: hidden !important;
 }
 
@@ -171,6 +170,9 @@ input[type=checkbox].filled-in:checked + label:after {
 
 .ql-container.ql-snow {
     border: none !important;
+    background: #f5f5f5;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .ql-toolbar.ql-snow {
@@ -8522,7 +8524,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-message .msg-wrap {
     width: 100%;
-    padding: 0 112px 0 64px;
+    padding: 0 96px 0 70px;
 }
 
 .forwarded .msg-wrap {
@@ -8963,7 +8965,7 @@ img.fwd-img-preview {
 .chat-message .right-side .msg-time {
     position: absolute;
     top: 11px;
-    right: 32px;
+    left: 20px;
     max-width: 64px;
     font-size: 12px;
     line-height: 14px;
@@ -8972,7 +8974,7 @@ img.fwd-img-preview {
 
 .chat-message .msg-delivering-state {
     position: absolute;
-    left: 0;
+    left: 2px;
     top: 11px;
 }
 
@@ -9320,7 +9322,6 @@ img.fwd-img-preview {
     max-width: 768px;
     left: 50%;
     transform: translate(-50%, 0);
-    border-top: 1px solid #f5f5f5;
 }
 
 .message-input-panel .circle-avatar {
@@ -9339,20 +9340,20 @@ img.fwd-img-preview {
     position: absolute;
     top: 0;
     right: 0;
-    width: 64px;
+    width: 90px;
     height: 100%;
 }
 
 .message-input-panel .send-message {
     position: absolute;
-    bottom: 70px;
-    left: 18px;
+    bottom: 67px;
+    left: 14px;
     cursor: pointer;
 }
 
 .message-input-panel .message-form {
     position: relative;
-    padding: 16px 64px 0 64px;
+    padding: 8px 90px 0 64px;
 }
 
 .message-input-panel .rich-textarea mention {
@@ -9365,25 +9366,54 @@ img.fwd-img-preview {
     position: relative;
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 2px;
     max-height: 176px;
+    background: #f5f5f5;
+    border-radius: 4px 4px 0 0;
+    padding: 6px 30px 2px 6px;
+}
+
+.fwd-messages-preview:not(.hidden) + .message-reference-preview{
+    border-radius: 0;
+}
+.message-reference-preview:not(.hidden) + .input-message .rich-textarea-wrap .rich-textarea,
+.fwd-messages-preview:not(.hidden) + .input-message .rich-textarea-wrap .rich-textarea{
+    border-radius: 0 0 4px 4px;
 }
 .fwd-messages-preview {
     position: relative;
     min-height: 40px;
     overflow: auto;
-    margin-bottom: 4px;
+    background: #f5f5f5;
+    border-radius: 4px 4px 0 0;
+}
+.message-reference-preview:after,
+.fwd-messages-preview:after {
+    position: absolute;
+    content: '';
+    background-image: linear-gradient(to right, #E0E0E0 40%, rgba(255, 255, 255, 0) 20%);
+    background-position: top;
+    background-size: 3px 1px;
+    background-repeat: repeat-x;
+    height: 1px;
+    width: calc(100% - 12px);
+    bottom: 0;
+    left: 6px;
+}
+.fwd-messages-preview:after {
+    width: calc(100% - 20px);
+    left: 14px;
 }
 
 .fwd-messages-preview .msg-border {
     position: absolute;
-    left: 3px;
+    left: 6px;
     width: 2px;
-    height: 100%;
+    top: 6px;
+    height: calc(100% - 12px);
 }
 
 .fwd-messages-preview .msg-content {
-    padding: 0 30px 0 12px;
+    padding: 6px 30px 6px 15px;
     width: 100%;
 }
 
@@ -9401,15 +9431,17 @@ img.fwd-img-preview {
     line-height: 18px;
 }
 
+.message-reference-preview .close-attachments,
 .fwd-messages-preview .close-forward {
     position: absolute;
-    top: 0;
-    right: 3px;
+    top: 6px;
+    right: 8px;
 }
 
+.message-reference-preview .close-attachments i,
 .fwd-messages-preview .close-forward i {
     cursor: pointer;
-    color: #808080;
+    color: #BDBDBE;
 }
 
 .input-toolbar .preview-preloader-container {
@@ -9445,10 +9477,10 @@ img.fwd-img-preview {
 .message-reference-preview .link-message-reference{
     max-width: 120px;
     position: relative;
-    border: 1px solid rgb(158 158 158 / 25%);
     height: 80px;
     min-width: 64px;
-    margin: 0 8px 8px 0;
+    margin: 0 6px 6px 0;
+    background: #FFF;
 }
 .message-reference-preview .attached-image-preview{
     max-width: 80%;
@@ -9526,6 +9558,7 @@ img.fwd-img-preview {
 
 .message-reference-preview .attached-image-preview .attached-image{
     width: 100%;
+    object-fit: cover;
 }
 .message-reference-preview .attached-image-preview .attached-image,
 .message-reference-preview .link-message-reference .attached-image{
@@ -9634,9 +9667,9 @@ img.fwd-img-preview {
 
 .message-form .insert-emoticon {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    color: #9E9E9E;
+    top: 6px;
+    right: 6px;
+    color: #BDBDBE;
     cursor: pointer;
     z-index: 2;
 }
@@ -9759,19 +9792,19 @@ img.fwd-img-preview {
 .add-group-chat-modal .description-field .rich-textarea-wrap{
     position:relative;
 }
-.message-form .rich-textarea-wrap .rich-textarea,
-.add-group-chat-modal .description-field .rich-textarea-wrap .rich-textarea {
+.message-form .rich-textarea-wrap .rich-textarea {
     position: relative;
     width: 100%;
-    min-height: 64px;
+    min-height: 74px;
     max-height: 120px;
     margin: 0;
-    padding-right: 40px;
     font-size: 13px;
     overflow-y: auto;
     overflow-x: hidden;
     line-height: 20px;
     -moz-block-height: 20px;
+    padding: 6px 40px 6px 6px;
+    border-bottom: 2px solid #f5f5f5;
     z-index: 1;
 }
 .message-form .rich-textarea-wrap .rich-textarea.input-glow-account{
@@ -9796,6 +9829,7 @@ img.fwd-img-preview {
     margin: 0!important;
     font-size: 1rem;
     outline: 0;
+    max-height: 120px;
 }
 
 .message-form .rich-textarea-wrap .placeholder,
@@ -9906,7 +9940,7 @@ img.fwd-img-preview {
 .send-area .attach-voice-message {
     border-radius: 50%;
     position: absolute;
-    bottom: 60px;
+    bottom: 57px;
     left: 8px;
     width: 48px;
     height: 48px;
