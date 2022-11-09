@@ -7904,6 +7904,17 @@ input[type=text].simple-input-field:hover {
         opacity: 1.0;
     }
 }
+@-webkit-keyframes pulsate-reverse {
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1.0;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=search],
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=calling] {
     background-color: #81D4FA;
@@ -9463,7 +9474,8 @@ img.fwd-img-preview {
     right: 6px;
     cursor: pointer;
     z-index: 2;
-    -webkit-animation: pulsate 1.5s ease-out;
+    opacity: 0.5;
+    -webkit-animation: pulsate-reverse 1s ease-out;
     -webkit-animation-iteration-count: infinite;
 }
 
@@ -9472,7 +9484,7 @@ img.fwd-img-preview {
 }
 
 .input-field .preview-preloader-container .preview-cancel-preloader path{
-    fill: #BDBDBE;
+    fill: #757575;
 }
 
 .message-reference-preview .attached-image-preview,
