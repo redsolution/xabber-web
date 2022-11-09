@@ -195,6 +195,7 @@ define("xabber-templates", [
     "text!templates/svg/file.html",
     "text!templates/svg/file-pdf.html",
     "text!templates/svg/close.html",
+    "text!templates/svg/link.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
     "text!templates/svg/job-outline.html",
@@ -499,6 +500,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.file');
     addSvgTemplate('svg.file-pdf');
     addSvgTemplate('svg.close');
+    addSvgTemplate('svg.link');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');

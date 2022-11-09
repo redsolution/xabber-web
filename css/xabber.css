@@ -8357,27 +8357,39 @@ input[type=text].simple-input-field:hover {
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
-.chat-bottom-wrap[data-contact-trust=none] .input-message .ql-editor{
+.chat-bottom-wrap[data-contact-trust=none] .fwd-messages-preview,
+.chat-bottom-wrap[data-contact-trust=none] .message-reference-preview,
+.chat-bottom-wrap[data-contact-trust=none] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
-.chat-bottom-wrap[data-contact-trust=error] .input-message .ql-editor{
+.chat-bottom-wrap[data-contact-trust=error] .fwd-messages-preview,
+.chat-bottom-wrap[data-contact-trust=error] .message-reference-preview,
+.chat-bottom-wrap[data-contact-trust=error] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
-.chat-bottom-wrap[data-contact-trust=true] .input-message .ql-editor{
+.chat-bottom-wrap[data-contact-trust=true] .fwd-messages-preview,
+.chat-bottom-wrap[data-contact-trust=true] .message-reference-preview,
+.chat-bottom-wrap[data-contact-trust=true] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
-.chat-bottom-wrap[data-trust=none] .input-message .ql-editor{
+.chat-bottom-wrap[data-trust=none] .fwd-messages-preview,
+.chat-bottom-wrap[data-trust=none] .message-reference-preview,
+.chat-bottom-wrap[data-trust=none] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
-.chat-bottom-wrap[data-trust=error] .input-message .ql-editor{
+.chat-bottom-wrap[data-trust=error] .fwd-messages-preview,
+.chat-bottom-wrap[data-trust=error] .message-reference-preview,
+.chat-bottom-wrap[data-trust=error] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
-.chat-bottom-wrap[data-trust=true] .input-message .ql-editor{
+.chat-bottom-wrap[data-trust=true] .fwd-messages-preview,
+.chat-bottom-wrap[data-trust=true] .message-reference-preview,
+.chat-bottom-wrap[data-trust=true] .input-message .ql-container{
     background: rgb(0 0 0 / 5%) !important;
     border-color: transparent !important;
 }
@@ -9375,8 +9387,8 @@ img.fwd-img-preview {
 .fwd-messages-preview:not(.hidden) + .message-reference-preview{
     border-radius: 0;
 }
-.message-reference-preview:not(.hidden) + .input-message .rich-textarea-wrap .rich-textarea,
-.fwd-messages-preview:not(.hidden) + .input-message .rich-textarea-wrap .rich-textarea{
+.message-reference-preview:not(.hidden) + .input-message .rich-textarea-wrap,
+.fwd-messages-preview:not(.hidden) + .input-message .rich-textarea-wrap{
     border-radius: 0 0 4px 4px;
 }
 .fwd-messages-preview {
@@ -9444,33 +9456,23 @@ img.fwd-img-preview {
     color: #BDBDBE;
 }
 
-.input-toolbar .preview-preloader-container {
-    margin: 0 0 0 auto;
-    height: 100%;
-}
-
-.input-toolbar .preview-preloader-container .preview-cancel-preloader,
-.input-toolbar .preview-preloader-container .preview-preloader-text {
-    margin-left: 4px;
-    font-size: 12px;
-}
-.input-toolbar .preview-preloader-container .preview-cancel-preloader{
-    display: none;
+.input-field .preview-preloader-container {
+    position: absolute;
+    bottom: 12px;
+    height: 24px;
+    right: 6px;
     cursor: pointer;
-    text-decoration: underline;
-}
-.input-toolbar .preview-preloader-container:hover .preview-cancel-preloader{
-    display: block;
-}
-.input-toolbar .preview-preloader-container:hover .preview-preloader-text {
-    display: none;
+    z-index: 2;
+    -webkit-animation: pulsate 1.5s ease-out;
+    -webkit-animation-iteration-count: infinite;
 }
 
-.input-toolbar .preview-preloader-container .mdi-close {
-    line-height: 16px;
-    margin-left: 4px;
-    font-size: 12px;
-    display: inline-block;
+.input-field .preview-preloader-container .preview-cancel-preloader svg{
+    pointer-events: none;
+}
+
+.input-field .preview-preloader-container .preview-cancel-preloader path{
+    fill: #BDBDBE;
 }
 
 .message-reference-preview .attached-image-preview,
@@ -9549,6 +9551,11 @@ img.fwd-img-preview {
     font-size: 8px;
     line-height: 16px;
     text-align: center;
+}
+
+.message-reference-preview .attached-file-preview .mdi-close svg,
+.message-reference-preview .link-message-reference .mdi-close svg{
+    pointer-events: none;
 }
 
 .message-reference-preview .attached-file-preview .mdi-close polygon,

@@ -69,6 +69,7 @@ let badges_names = [
         'file',
         'file-pdf',
         'close',
+        'link',
     ],
     circle_icons = [,
         'task'

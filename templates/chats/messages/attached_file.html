@@ -1,5 +1,5 @@
 {[ if (blob) {]}
-<div class="attached-image-preview message-reference-preview-item-file" data-id="{{uid}}">
+<div class="attached-image-preview message-reference-preview-attached message-reference-preview-item-file" data-id="{{uid}}">
     <div class="attached-file-size one-line">{{filesize}}</div>
     <svg class="details-icon mdi mdi-18px mdi-close mdi-svg-template" data-svgname="close"></svg>
     {[ if (blob) {]}
@@ -7,7 +7,7 @@
     {[}]}
 </div>
 {[} else {]}
-<div class="attached-file-preview message-reference-preview-item-file" data-id="{{uid}}">
+<div class="attached-file-preview message-reference-preview-attached message-reference-preview-item-file" data-id="{{uid}}">
     <div class="attached-file-text">
         <div class="attached-file-name one-line">{{file.name}}</div>
         <div class="attached-file-size one-line">{{filetype}}, {{filesize}}</div>
