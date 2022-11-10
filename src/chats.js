@@ -5076,6 +5076,7 @@ define("xabber-chats", function () {
                                     image_prev.onload = function () {
                                         let height = this.height,
                                             width = this.width;
+                                        new_file.image_prev = image_prev;
                                         deferred.resolve({height: height, width: width, encrypted_file: new_file, key: key});
                                     };
                                     image_prev.src = e.target.result;
@@ -10053,15 +10054,16 @@ define("xabber-chats", function () {
             files.forEach((file) => {
                 let id = uuid();
                 file.uid = id;
-                this.attached_files = this.attached_files.concat([file]);
                 this.$('.message-reference-preview').append($(templates.messages.attached_file({
                     file: file,
                     uid: id,
-                    blob: utils.isImageType(file.type) ? window.URL.createObjectURL(new Blob([file])) : null,
+                    blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file])) : null,
                     filesize: utils.pretty_size(file.size),
                     typeicon: utils.file_type_icon(file.type),
                     filetype: utils.pretty_file_type(file.type),
                 })));
+                file.image_prev && (delete file.image_prev);
+                this.attached_files = this.attached_files.concat([file]);
                 xabber.chat_body.updateHeight();
                 this.scrollToBottom();
             });
