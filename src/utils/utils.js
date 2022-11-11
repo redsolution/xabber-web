@@ -75,7 +75,10 @@ define([
                         html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                     } else {
                         for (i = 0; i < list.length; i++) {
-                            x = x.split(list[i]).join(options.decode_uri ? decodeURI(list[i]) : getHyperLink(list[i]));
+                            if (options.decode_uri)
+                                x = x.replace(list[i], decodeURI(list[i]));
+                            else
+                                x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
                         }
                         html_concat += x;
                     }
@@ -170,6 +173,8 @@ define([
 
         getDomainFromUrl: function(url) {
             let a = document.createElement('a');
+            if (url && !/^https?:\/\//i.test(url))
+                url = 'http://' + url;
             a.href = url;
             return a.hostname;
         },

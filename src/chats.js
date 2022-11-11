@@ -4210,6 +4210,8 @@ define("xabber-chats", function () {
                 $(link_references_attrs).each((idx, link) => {
                     let copied_attrs = _.clone(link_references_attrs[idx]);
                     copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name;
+                    if (copied_attrs.original_text && !/^https?:\/\//i.test(copied_attrs.original_text))
+                        copied_attrs.original_text = 'http://' + copied_attrs.original_text;
                     if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
                         copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
                         copied_attrs.is_video = true;
@@ -4350,6 +4352,8 @@ define("xabber-chats", function () {
                         $(link_references_attrs).each((idx, link) => {
                             let copied_attrs = _.clone(link_references_attrs[idx]);
                             copied_attrs.domain = copied_attrs.url ? utils.getDomainFromUrl(copied_attrs.url) : copied_attrs.site_name;
+                            if (copied_attrs.original_text && !/^https?:\/\//i.test(copied_attrs.original_text))
+                                copied_attrs.original_text = 'http://' + copied_attrs.original_text;
                             if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
                                 copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
                                 copied_attrs.is_video = true;
@@ -4807,29 +4811,30 @@ define("xabber-chats", function () {
             }
 
             if (link_references && link_references.length) {
-                let link_reference = link_references[0];
-                if (link_reference.start === -1) {
-                    link_reference.start = Array.from(_.escape(body)).length;
-                    body = body + '\n' + link_reference.original_text;
-                    link_reference.end = link_reference.start + link_reference.original_text.length + 1;
-                }
-                stanza.c('reference', {
-                    xmlns: Strophe.NS.REFERENCE,
-                    begin: link_reference.start,
-                    end: link_reference.end,
-                    type: 'mutable',
-                }).c('ogp', { xmlns: Strophe.NS.OGP, url: link_reference.original_text });
-                link_reference.site && stanza.c('meta', { property: 'og:site_name', content: link_reference.site}).up();
-                link_reference.type && stanza.c('meta', { property: 'og:type', content: link_reference.type}).up();
-                link_reference.title && stanza.c('meta', { property: 'og:title', content: link_reference.title}).up();
-                link_reference.url && stanza.c('meta', { property: 'og:url', content: link_reference.url}).up();
-                link_reference.description && stanza.c('meta', { property: 'og:description', content: link_reference.description}).up();
-                link_reference.image && stanza.c('meta', { property: 'og:image', content: link_reference.image}).up();
-                link_reference.image_width && stanza.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
-                link_reference.image_height && stanza.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
-                link_reference.video_url && stanza.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
-                stanza.up().up();
-                mutable_content.push({start: link_reference.start, end: link_reference.end});
+                link_references.forEach((link_reference, idx) => {
+                    if (link_reference.start === -1) {
+                        link_reference.start = Array.from(_.escape(body)).length;
+                        body = body + '\n' + link_reference.original_text;
+                        link_reference.end = link_reference.start + link_reference.original_text.length + 1;
+                    }
+                    stanza.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        begin: link_reference.start,
+                        end: link_reference.end,
+                        type: 'mutable',
+                    }).c('ogp', { xmlns: Strophe.NS.OGP, url: link_reference.original_text });
+                    link_reference.site && stanza.c('meta', { property: 'og:site_name', content: link_reference.site}).up();
+                    link_reference.type && stanza.c('meta', { property: 'og:type', content: link_reference.type}).up();
+                    link_reference.title && stanza.c('meta', { property: 'og:title', content: link_reference.title}).up();
+                    link_reference.url && stanza.c('meta', { property: 'og:url', content: link_reference.url}).up();
+                    link_reference.description && stanza.c('meta', { property: 'og:description', content: link_reference.description}).up();
+                    link_reference.image && stanza.c('meta', { property: 'og:image', content: link_reference.image}).up();
+                    link_reference.image_width && stanza.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
+                    link_reference.image_height && stanza.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
+                    link_reference.video_url && stanza.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
+                    stanza.up().up();
+                    mutable_content.push({start: link_reference.start, end: link_reference.end});
+                });
             }
 
             mutable_content.length && message.set({mutable_content: mutable_content});
@@ -4961,7 +4966,7 @@ define("xabber-chats", function () {
                 blockquotes: options.blockquotes,
                 markups: options.markup_references,
                 files: options.attached_files,
-                link_references: options.link_reference ? [options.link_reference] : [],
+                link_references: options.link_references,
                 encrypted: this.model.get('encrypted'),
                 submitted_here: true,
                 forwarded_message: null
@@ -4990,7 +4995,7 @@ define("xabber-chats", function () {
                     attrs.type = 'file_upload';
                     this.account.server_features.get(Strophe.NS.HTTP_UPLOAD) && (attrs.upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD).get('from'));
                     this.model.messages.create(attrs);
-                } else if (text || attrs.link_references) {
+                } else if (text || (attrs.link_references && attrs.link_references.length)) {
                     let message = this.model.messages.create(attrs);
                     this.sendMessage(message);
                 }
@@ -9101,7 +9106,7 @@ define("xabber-chats", function () {
 
     xabber.ChatBottomView = xabber.BasicView.extend({
         className: 'chat-bottom-wrap',
-        ps_selector: '.message-reference-preview',
+        ps_selector: '.message-reference-preview-container',
         template: templates.chat_bottom,
         avatar_size: constants.AVATAR_SIZES.CHAT_BOTTOM,
         mention_avatar_size: constants.AVATAR_SIZES.MENTION_ITEM,
@@ -9132,7 +9137,7 @@ define("xabber-chats", function () {
             "click .mention-item": "inputMention",
             "click .format-text": "updateMarkupPanel",
             "click .link-message-reference .mdi-close": "removeLinkReference",
-            "click .preview-preloader-container .preview-cancel-preloader": "removeLinkReference",
+            "click .preview-preloader-container .preview-cancel-preloader": "stopLoadingLinkReference",
             "click .message-reference-preview-item-file .mdi-close": "removeFileSnippet",
             "click .btn-manage-devices": "openDevicesWindow"
         },
@@ -9244,8 +9249,10 @@ define("xabber-chats", function () {
             this.account = this.view.account;
             this.fwd_messages = [];
             this.edit_message = null;
-            this.link_reference = null;
+            this.stopped_loading_link_reference = false;
+            this.link_references = [];
             this.link_reference_exempted = [];
+            this.currently_loaded_link_references = [];
             this.attached_files = [];
             this.loading_link_reference = false;
             this.$('.account-jid').text(this.account.get('jid'));
@@ -9797,17 +9804,21 @@ define("xabber-chats", function () {
                     this.setEditedMessage(edit_msg);
                 }
             }
-            if ((!text || text == "\n") && !this.edit_message && !(this.attached_files && this.attached_files.length) && !this.link_reference)
+            if ((!text || text == "\n") && !this.edit_message && !(this.attached_files && this.attached_files.length) && !(this.link_references && this.link_references.length))
                 this.displayMicrophone();
             else
                 this.displaySend();
-            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
+            if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact') && !this.edit_message) {
                 ev.preventDefault();
                 this.unsetForwardedMessages();
-                if (this.$('.message-reference-preview').children('div.message-reference-preview-attached').length > 0) {
-                    let $elem = this.$('.message-reference-preview').children().last();
+                if (this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0) {
+                    let $elem = this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').last();
                     if ($elem.hasClass('link-message-reference')){
-                        this.removeLinkReference();
+                        let url = $elem.attr('data-original-url');
+                        if (url) {
+                            $elem.remove();
+                            this.removeLinkReferenceByUrl(url);
+                        }
                     } else {
                         let id = $elem.attr('data-id');
                         if (id) {
@@ -9826,7 +9837,7 @@ define("xabber-chats", function () {
                     this.$('.mentions-list').hide();
                     return;
                 }
-                if ((ev.keyCode === constants.KEY_BACKSPACE || ev.keyCode === constants.KEY_DELETE) && !this.edit_message && !(this.attached_files && this.attached_files.length) && !this.link_reference) {
+                if ((ev.keyCode === constants.KEY_BACKSPACE || ev.keyCode === constants.KEY_DELETE) && !this.edit_message && !(this.attached_files && this.attached_files.length) && !(this.link_references && this.link_references.length)) {
                     if (!text || text == "\n") {
                         if (this.$('.fwd-messages-preview').hasClass('hidden'))
                             this.displayMicrophone();
@@ -9960,88 +9971,122 @@ define("xabber-chats", function () {
         },
 
         updateOpenGraphReference: function (text) {
-            if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || this.link_reference || this.loading_link_reference)
+            if (!(this.account.get('gallery_token') && this.account.get('gallery_url')))
                 return;
             let url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g,
                 list = text && text.match(url_regexp);
             list = _.difference(list, this.link_reference_exempted)
+            list = _.difference(list, this.currently_loaded_link_references)
             if (list && list.length){
-                this.loading_link_reference = true;
+                this.stopped_loading_link_reference = false;
                 this.$('.preview-preloader-container').removeClass('hidden');
-                this.account.getOpenGraphData(list[0], (res) =>{
-                    if (!this.loading_link_reference)
-                        return;
-                    let dfd = new $.Deferred();
-                    dfd.done(() => {
-                        this.displaySend();
-                        this.$('.message-reference-preview').removeClass('hidden');
-                        this.$('.preview-preloader-container').addClass('hidden');
-                        this.$('.message-reference-preview').append($(templates.messages.link_reference({
-                            item: res,
-                            domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
-                            url: null
-                        })));
-                        this.$('.attached-image').magnificPopup({
-                            type: 'image',
-                            closeOnContentClick: true,
-                            fixedContentPos: true,
-                            mainClass: 'mfp-no-margins mfp-with-zoom',
-                            image: {
-                                verticalFit: true,
-                                titleSrc: function(item) {
-                                    return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                let request_count = 0;
+                this.link_reference_request_timestamp = Date.now();
+                let request_timestamp = this.link_reference_request_timestamp;
+                list.forEach((item, idx) => {
+                    this.account.getOpenGraphData(item, (res) => {
+                        if (this.stopped_loading_link_reference || !(request_timestamp === this.link_reference_request_timestamp))
+                            return;
+                        if (this.currently_loaded_link_references.includes(item)){
+                            request_count++;
+                            if (request_count === list.length)
+                                this.$('.preview-preloader-container').addClass('hidden');
+                            return;
+                        }
+                        let dfd = new $.Deferred();
+                        dfd.done(() => {
+                            request_count++;
+                            this.displaySend();
+                            this.$('.message-reference-preview').removeClass('hidden');
+                            if (request_count === list.length)
+                                this.$('.preview-preloader-container').addClass('hidden');
+                            res.original_text = item
+                            this.$('.message-reference-preview-container').append($(templates.messages.link_reference({
+                                item: res,
+                                domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
+                                url: null
+                            })));
+                            this.$('.attached-image').magnificPopup({
+                                type: 'image',
+                                closeOnContentClick: true,
+                                fixedContentPos: true,
+                                mainClass: 'mfp-no-margins mfp-with-zoom',
+                                image: {
+                                    verticalFit: true,
+                                    titleSrc: function(item) {
+                                        return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                                    }
+                                },
+                                zoom: {
+                                    enabled: true,
+                                    duration: 300
                                 }
-                            },
-                            zoom: {
-                                enabled: true,
-                                duration: 300
-                            }
+                            });
+                            this.link_references = this.link_references.concat(res);
+                            this.currently_loaded_link_references = this.currently_loaded_link_references.concat([item]);
+                            xabber.chat_body.updateHeight();
+                            this.scrollToBottom();
                         });
-                        this.link_reference = res;
-                        this.link_reference.original_text = list[0];
-                        this.loading_link_reference = false;
-                        xabber.chat_body.updateHeight();
-                        this.scrollToBottom();
-                    });
-                    if ((res.image_height && res.image_width) || !res.image){
-                        dfd.resolve()
-                    } else {
-                        let img = new Image();
-                        img.onload = (image) => {
-                            res.image_height = img.height;
-                            res.image_width = img.width;
+                        if ((res.image_height && res.image_width) || !res.image){
                             dfd.resolve()
-                        };
-                        img.onerror = img.onabort = (image) => {
-                            res.image = undefined;
-                            dfd.resolve()
-                        };
-                        img.src = res.image;
-                    }
-                }, (err) => {
-                    this.link_reference_exempted.push(list[0]);
-                    if (list.length > 1){
-                        this.loading_link_reference = false;
-                        this.updateOpenGraphReference(this.quill.getText());
-                    }
-                    else
-                        this.removeLinkReference();
-                })
+                        } else {
+                            let img = new Image();
+                            img.onload = (image) => {
+                                res.image_height = img.height;
+                                res.image_width = img.width;
+                                dfd.resolve()
+                            };
+                            img.onerror = img.onabort = (image) => {
+                                res.image = undefined;
+                                dfd.resolve()
+                            };
+                            img.src = res.image;
+                        }
+                    }, (err) => {
+                        this.link_reference_exempted = this.link_reference_exempted.concat([item]);
+                        request_count++;
+                        if (request_count === list.length)
+                            this.$('.preview-preloader-container').addClass('hidden');
+                    })
+
+                });
             }
         },
 
         removeAttachments: function () {
             this.removeAllFileSnippets();
-            this.removeLinkReference();
+            this.removeAllLinkReferences();
         },
 
-        removeLinkReference: function () {
+        stopLoadingLinkReference: function () {
             this.$('.preview-preloader-container').addClass('hidden');
-            this.$('.message-reference-preview .link-message-reference').remove();
-            if (!(this.$('.message-reference-preview').children('div.message-reference-preview-attached').length > 0))
+            this.stopped_loading_link_reference = true;
+        },
+
+        removeLinkReference: function (ev) {
+            let $elem = $(ev.target).closest('.link-message-reference'),
+                url = $elem.attr('data-original-url');
+            $elem.remove();
+            this.removeLinkReferenceByUrl(url);
+        },
+
+        removeLinkReferenceByUrl: function (url) {
+            if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
-            this.link_reference = null;
-            this.loading_link_reference = false;
+            this.link_references = this.link_references.filter(item => item.original_text != url);
+            this.currently_loaded_link_references = this.currently_loaded_link_references.filter(item => item != url);
+            this.link_reference_exempted = this.link_reference_exempted.concat([url]);
+            xabber.chat_body.updateHeight();
+            this.scrollToBottom();
+        },
+
+        removeAllLinkReferences: function () {
+            this.stopLoadingLinkReference();
+            this.$('.message-reference-preview-container .link-message-reference').remove();
+            if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
+                this.$('.message-reference-preview').addClass('hidden');
+            this.link_references = [];//
+            this.currently_loaded_link_references = [];//
             xabber.chat_body.updateHeight();
             this.scrollToBottom();
         },
@@ -10054,7 +10099,7 @@ define("xabber-chats", function () {
             files.forEach((file) => {
                 let id = uuid();
                 file.uid = id;
-                this.$('.message-reference-preview').append($(templates.messages.attached_file({
+                this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
                     file: file,
                     uid: id,
                     blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file])) : null,
@@ -10093,7 +10138,7 @@ define("xabber-chats", function () {
         },
 
         removeFileSnippetById: function (id) {
-            if (!(this.$('.message-reference-preview').children('div.message-reference-preview-attached').length > 0))
+            if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = this.attached_files.filter(item => item.uid != id);
             xabber.chat_body.updateHeight();
@@ -10102,7 +10147,7 @@ define("xabber-chats", function () {
 
         removeAllFileSnippets: function (ev) {
             this.$('.message-reference-preview .message-reference-preview-item-file').remove();
-            if (!(this.$('.message-reference-preview').children('div.message-reference-preview-attached').length > 0))
+            if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
                 this.$('.message-reference-preview').addClass('hidden');
             this.attached_files = [];
             xabber.chat_body.updateHeight();
@@ -10112,30 +10157,31 @@ define("xabber-chats", function () {
         setEditedMessageAttachments: function (edit_msg) {
             this.$('.attach-file input').attr('disabled', true);
             this.removeAllFileSnippets();
-            this.removeLinkReference();
+            this.removeAllLinkReferences();
             let files = edit_msg.get('files') || [],
                 images = edit_msg.get('images') || [],
                 videos = edit_msg.get('videos') || [],
                 link_references = edit_msg.get('link_references') || [];
             files = files.concat(images).concat(videos);
-            if (link_references && link_references.length || files && files.length) {
+            if ((link_references && link_references.length) || (files && files.length)) {
                 this.$('.message-reference-preview').removeClass('hidden');
                 this.displaySend();
             }
-            if (link_references && link_references.length) {
-                this.$('.message-reference-preview').prepend($(templates.messages.link_reference({
-                    item: link_references[0],
-                    domain: link_references[0].url ? utils.getDomainFromUrl(link_references[0].url) : link_references[0].site_name,
+            link_references.forEach((item) => {
+                this.link_references = this.link_references.concat([item]);
+                this.currently_loaded_link_references = this.currently_loaded_link_references.concat(item.original_text);
+                this.$('.message-reference-preview-container').prepend($(templates.messages.link_reference({
+                    item: item,
+                    domain: item.url ? utils.getDomainFromUrl(item.url) : item.site_name,
                     url: null
                 })));
-                this.link_reference = link_references[0];
                 xabber.chat_body.updateHeight();
-            }
+            });
             files.forEach((file) => {
                 let id = uuid();
                 file.uid = id;
-                this.attached_files.push(file);
-                this.$('.message-reference-preview').append($(templates.messages.attached_file({
+                this.attached_files = this.attached_files.concat([file]);
+                this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
                     file: file,
                     uid: id,
                     blob: file.sources.length && file.sources[0] && utils.isImageType(file.type) ? file.sources[0] : null,
@@ -10145,7 +10191,7 @@ define("xabber-chats", function () {
                 })));
                 xabber.chat_body.updateHeight();
             });
-            files && files.length && this.$('.attached-image').magnificPopup({
+            ((link_references && link_references.length) || (files && files.length)) && this.$('.attached-image').magnificPopup({
                 type: 'image',
                 closeOnContentClick: true,
                 fixedContentPos: true,
@@ -10350,7 +10396,7 @@ define("xabber-chats", function () {
                 mentions = [],
                 markup_references = [],
                 blockquotes = [],
-                link_reference = this.link_reference,
+                link_references = this.link_references,
                 attached_files = this.attached_files,
                 text = $rich_textarea.getTextFromRichTextarea();
             this.$('.mentions-list').html("").hide();
@@ -10454,36 +10500,37 @@ define("xabber-chats", function () {
                     blockquote.end -= delta;
                 });
             }
-            if (link_reference && link_reference.original_text){
-                this.link_reference_exempted = [];
-                this.removeLinkReference();
-                link_reference.start = text.indexOf(link_reference.original_text);
-                if (link_reference.start != -1) {
-                    link_reference.start = 0;
-                    link_reference.end = 0;
-                }
-            } else {
-                link_reference = null;
-                this.link_reference_exempted = [];
-                this.removeLinkReference();
+            if (link_references && link_references.length) {
+                link_references = link_references.filter(item => item.original_text);
+                link_references.forEach((link_reference) => {
+                    if (link_reference && link_reference.original_text) {
+                        link_reference.start = text.indexOf(link_reference.original_text);
+                        if (link_reference.start != -1) {
+                            link_reference.start = 0;
+                            link_reference.end = 0;
+                        }
+                    }
+                });
             }
-            attached_files && attached_files.length && this.removeAllFileSnippets();
+            this.removeAllLinkReferences();
+            this.link_reference_exempted = [];
+            this.removeAllFileSnippets();
             text = text.trimEnd();
             $rich_textarea.flushRichTextarea();
             this.quill.focus();
             this.displayMicrophone();
             if (this.edit_message) {
-                this.editMessage(text, {mentions: mentions, markup_references: markup_references, link_reference: link_reference, attached_files: attached_files, blockquotes: blockquotes});
+                this.editMessage(text, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
                 $rich_textarea.placeCaretAtEnd();
                 return;
             }
-            if (text || this.fwd_messages.length || (attached_files && attached_files.length) || link_reference) {
+            if (text || this.fwd_messages.length || (attached_files && attached_files.length) || (link_references && link_references.length)) {
                 if (this.model.get('saved') && this.fwd_messages.length && !text)
                     this.fwd_messages.forEach((message) => {
                         this.view.onSubmit("", [message]);
                     });
                 else
-                    this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, link_reference: link_reference, attached_files: attached_files, blockquotes: blockquotes});
+                    this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
             }
             this.unsetForwardedMessages();
             xabber.chats_view.clearSearch();
@@ -10607,7 +10654,7 @@ define("xabber-chats", function () {
             this.fwd_messages = [];
             if (this.edit_message) {
                 this.removeAllFileSnippets();
-                this.removeLinkReference();
+                this.removeAllLinkReferences();
                 this.$('.attach-file input').attr('disabled', false);
                 $rich_textarea.flushRichTextarea();
             }
@@ -10696,7 +10743,7 @@ define("xabber-chats", function () {
                 forward_ref = mutable_refs && mutable_refs.filter(item => item.type === 'forward'),
                 markups = text_markups.markup_references || [],
                 files = text_markups.attached_files || [],
-                link_references = text_markups.link_reference ? [text_markups.link_reference] : [],
+                link_references = text_markups.link_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
                 iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
@@ -10769,29 +10816,30 @@ define("xabber-chats", function () {
 
             if (link_references && link_references.length) {
                 mutable_refs = mutable_refs.filter(item => item.type !== 'link_reference')
-                let link_reference = link_references[0];
-                if (link_reference.start === -1) {
-                    link_reference.start = Array.from(_.escape(text)).length + Array.from(forwarded_body).length;
-                    text = text + '\n' + link_reference.original_text;
-                    link_reference.end = link_reference.start + link_reference.original_text.length + 1;
-                }
-                $message.c('reference', {
-                    xmlns: Strophe.NS.REFERENCE,
-                    begin: link_reference.start,
-                    end: link_reference.end,
-                    type: 'mutable',
-                }).c('ogp', { xmlns: Strophe.NS.OGP, url: link_reference.original_text });
-                link_reference.site && $message.c('meta', { property: 'og:site_name', content: link_reference.site}).up();
-                link_reference.type && $message.c('meta', { property: 'og:type', content: link_reference.type}).up();
-                link_reference.title && $message.c('meta', { property: 'og:title', content: link_reference.title}).up();
-                link_reference.url && $message.c('meta', { property: 'og:url', content: link_reference.url}).up();
-                link_reference.description && $message.c('meta', { property: 'og:description', content: link_reference.description}).up();
-                link_reference.image && $message.c('meta', { property: 'og:image', content: link_reference.image}).up();
-                link_reference.image_width && $message.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
-                link_reference.image_height && $message.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
-                link_reference.video_url && $message.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
-                $message.up().up();
-                mutable_refs.push({start: link_reference.start, end: link_reference.end});
+                link_references.forEach((link_reference, idx) => {
+                    if (link_reference.start === -1) {
+                        link_reference.start = Array.from(_.escape(text)).length + Array.from(forwarded_body).length;
+                        text = text + '\n' + link_reference.original_text;
+                        link_reference.end = link_reference.start + link_reference.original_text.length + 1;
+                    }
+                    $message.c('reference', {
+                        xmlns: Strophe.NS.REFERENCE,
+                        begin: link_reference.start,
+                        end: link_reference.end,
+                        type: 'mutable',
+                    }).c('ogp', { xmlns: Strophe.NS.OGP, url: link_reference.original_text });
+                    link_reference.site && $message.c('meta', { property: 'og:site_name', content: link_reference.site}).up();
+                    link_reference.type && $message.c('meta', { property: 'og:type', content: link_reference.type}).up();
+                    link_reference.title && $message.c('meta', { property: 'og:title', content: link_reference.title}).up();
+                    link_reference.url && $message.c('meta', { property: 'og:url', content: link_reference.url}).up();
+                    link_reference.description && $message.c('meta', { property: 'og:description', content: link_reference.description}).up();
+                    link_reference.image && $message.c('meta', { property: 'og:image', content: link_reference.image}).up();
+                    link_reference.image_width && $message.c('meta', { property: 'og:image:width', content: link_reference.image_width}).up();
+                    link_reference.image_height && $message.c('meta', { property: 'og:image:height', content: link_reference.image_height}).up();
+                    link_reference.video_url && $message.c('meta', { property: 'og:video:url', content: link_reference.video_url}).up();
+                    $message.up().up();
+                    mutable_refs.push({start: link_reference.start, end: link_reference.end});
+                });
             }
             mutable_refs && mutable_refs.length && this.edit_message.set({mutable_content: mutable_refs});
             if (!(Strophe.xmlunescape(forwarded_body) + text)){

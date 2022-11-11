@@ -6809,6 +6809,7 @@ input[type=text].simple-input-field:hover {
 
 .back-to-bottom {
     position: absolute;
+    padding: 2px 0 0;
     color: #9E9E9E;
     z-index: 1;
     cursor: pointer;
@@ -8632,6 +8633,10 @@ input[type=text].simple-input-field:hover {
     line-height: 20px;
     color: #212121;
 }
+
+.chat-message .chat-msg-media-content{
+    margin-top: 8px;
+}
 .chat-message .chat-msg-content {
     white-space: pre-wrap;
 }
@@ -9369,8 +9374,8 @@ img.fwd-img-preview {
 
 .message-input-panel .send-message {
     position: absolute;
-    bottom: 67px;
-    left: 14px;
+    bottom: 65px;
+    left: 15px;
     cursor: pointer;
 }
 
@@ -9382,16 +9387,21 @@ img.fwd-img-preview {
 .message-input-panel .rich-textarea mention {
     padding: 1px 4px;
     border-radius: 3px;
-    background-color: #EEE;
+    background-color: #E0E0E0;
 }
 
 .message-reference-preview{
     position: relative;
-    display: flex;
-    flex-wrap: wrap;
     max-height: 176px;
     background: #f5f5f5;
     border-radius: 4px 4px 0 0;
+}
+
+.message-reference-preview-container{
+    position: relative;
+    max-height: 176px;
+    display: flex;
+    flex-wrap: wrap;
     padding: 6px 30px 2px 6px;
 }
 
@@ -9475,7 +9485,7 @@ img.fwd-img-preview {
     cursor: pointer;
     z-index: 2;
     opacity: 0.5;
-    -webkit-animation: pulsate-reverse 1s ease-out;
+    -webkit-animation: pulsate-reverse 1.5s ease-out;
     -webkit-animation-iteration-count: infinite;
 }
 
@@ -9963,7 +9973,7 @@ img.fwd-img-preview {
     left: 8px;
     width: 48px;
     height: 48px;
-    padding: 10px;
+    padding: 8px;
     float: right;
 }
 
@@ -16167,6 +16177,7 @@ input[type='range'].voice-message-volume:focus {
     display: flex;
     background: #FFF;
     overflow: hidden;
+    margin-top: 8px;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference.message-reference-preview-item-big-image{
     height: unset !important;
