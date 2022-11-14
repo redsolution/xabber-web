@@ -293,7 +293,9 @@ define("xabber-accounts", function () {
                         }
                         this.connection.sendIQ.apply(this.connection, arguments);
                     } else {
-                        this._pending_stanzas.push({stanza: arguments, is_iq: true});
+                        if (!(arguments[0] && $(arguments[0].nodeTree).find('query[xmlns="' + Strophe.NS.MAM + '"]').length)) {
+                            this._pending_stanzas.push({stanza: arguments, is_iq: true});
+                        }
                     }
                     return res;
                 },

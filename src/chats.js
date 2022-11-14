@@ -3233,73 +3233,112 @@ define("xabber-chats", function () {
             let deferred = new $.Deferred();
             account.chats.onStartedMAMRequest(deferred);
             deferred.done(function () {
-                let handler = conn.addHandler(function (message) {
-                    if ((contact && is_groupchat == contact.get('group_chat')) || is_saved) {
-                        let $msg = $(message);
-                        if ($msg.find('result').attr('queryid') === queryid) {
-                            messages.push(message);
+                console.log(iq)
+                console.log(conn)
+                console.log(conn.connected)
+                let connected_deferred = new $.Deferred();
+                connected_deferred.done(function() {
+                    let handler = conn.addHandler(function (message) {
+                        if ((contact && is_groupchat == contact.get('group_chat')) || is_saved) {
+                            let $msg = $(message);
+                            if ($msg.find('result').attr('queryid') === queryid) {
+                                messages.push(message);
+                            }
                         }
-                    }
-                    else {
-                        messages = [];
-                        success = false;
-                    }
-                    return true;
-                }, Strophe.NS.MAM);
-                let callb = function (res) {
-                    console.log(messages);
-                    conn.deleteHandler(handler);
-                    handler = null;
-                    account.chats.onCompletedMAMRequest(deferred);
-                    let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
-                    if ($fin.length && $fin.attr('queryid') === queryid) {
-                        let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
-                        rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
-                        callback && callback(success, messages, rsm);
-                    }
-                },
-                errb = function (err) {
-                    conn.deleteHandler(handler);
-                    handler = null;
-                    xabber.error("MAM error");
-                    xabber.error(err);
-                    account.chats.onCompletedMAMRequest(deferred);
-                    errback && errback(err);
-                };
-                account.once('send_pending_messages', () => {
-                    console.log('send_pending_archive_iq');
-                    if (Boolean(handler)) {
-                        let pending_deferred = new $.Deferred();
-                        account.chats.onStartedMAMRequest(pending_deferred);
+                        else {
+                            messages = [];
+                            success = false;
+                        }
+                        return true;
+                    }, Strophe.NS.MAM);
+                    let callb = function (res) {
+                        console.log(iq);
+                        console.log(res);
+                        console.log(messages);
                         conn.deleteHandler(handler);
-                        conn = is_fast && account.fast_connection ? account.fast_connection : account.connection;
-                        pending_deferred.done(function() {
-                            console.log('initiated pending archive iq');
-                            console.log(conn.connected);
-                            handler = conn.addHandler(function (message) {
-                                if ((contact && is_groupchat == contact.get('group_chat')) || is_saved) {
-                                    let $msg = $(message);
-                                    if ($msg.find('result').attr('queryid') === queryid) {
-                                        messages.push(message);
-                                    }
-                                }
+                        handler = null;
+                        account.chats.onCompletedMAMRequest(deferred);
+                        let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
+                        if ($fin.length && $fin.attr('queryid') === queryid) {
+                            let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
+                            rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
+                            callback && callback(success, messages, rsm);
+                        }
+                    },
+                    errb = function (err) {
+                        conn.deleteHandler(handler);
+                        handler = null;
+                        xabber.error("MAM error");
+                        xabber.error(err);
+                        account.chats.onCompletedMAMRequest(deferred);
+                        errback && errback(err);
+                    };
+                    account.once('send_pending_messages', () => {
+                        console.log('send_pending_archive_iq');
+                        console.log(iq);
+                        if (Boolean(handler)) {
+                            let pending_deferred = new $.Deferred();
+                            account.chats.onStartedMAMRequest(pending_deferred);
+                            conn.deleteHandler(handler);
+                            conn = is_fast && account.fast_connection ? account.fast_connection : account.connection;
+                            pending_deferred.done(function() {
+                                console.log('initiated pending archive iq');
+                                console.log(iq)
+                                console.log(conn)
+                                console.log(conn.connected)
+                                let connected_pending_deferred = new $.Deferred();
+                                connected_pending_deferred.done(function() {
+                                    handler = conn.addHandler(function (message) {
+                                        if ((contact && is_groupchat == contact.get('group_chat')) || is_saved) {
+                                            let $msg = $(message);
+                                            if ($msg.find('result').attr('queryid') === queryid) {
+                                                messages.push(message);
+                                            }
+                                        }
+                                        else {
+                                            messages = [];
+                                            success = false;
+                                        }
+                                        return true;
+                                    }, Strophe.NS.MAM);
+                                    if (is_fast)
+                                        account.sendFast(iq, callb, errb);
+                                    else
+                                        account.sendIQ(iq, callb, errb);
+                                });
+                                if (conn.connected)
+                                    connected_pending_deferred.resolve();
                                 else {
-                                    messages = [];
-                                    success = false;
+                                    let _pending_time = 1,
+                                    _interval = setInterval(() => {
+                                        if (conn.connected || _pending_time >= 11){
+                                            clearInterval(_interval);
+                                            connected_pending_deferred.resolve();
+                                        }
+                                        _pending_time += 1;
+                                    }, 1000);
                                 }
-                                return true;
-                            }, Strophe.NS.MAM);
-                            if (is_fast)
-                                account.sendFast(iq, callb, errb);
-                            else
-                                account.sendIQ(iq, callb, errb);
-                        });
-                    }
-                })
-                if (is_fast)
-                    account.sendFast(iq, callb, errb);
-                else
-                    account.sendIQ(iq, callb, errb);
+                            });
+                        }
+                    })
+                    if (is_fast)
+                        account.sendFast(iq, callb, errb);
+                    else
+                        account.sendIQ(iq, callb, errb);
+
+                });
+                if (conn.connected)
+                    connected_deferred.resolve();
+                else {
+                    let _pending_time = 1,
+                    _interval = setInterval(() => {
+                        if (conn.connected || _pending_time >= 11){
+                            clearInterval(_interval);
+                            connected_deferred.resolve();
+                        }
+                        _pending_time += 1;
+                    }, 1000);
+                }
             });
         },
 

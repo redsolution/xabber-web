@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.151","version_description":"multiple link references in message, small chat redesign, fixed attachments scrolling, fixed hyperlinkifying links that include each other, fixed urls without protocol"}'
+'{"version_number":"2.3.2.152","version_description":"added interval checking that connection is connected for MAM query sending, logging for testing that"}'
 )});
