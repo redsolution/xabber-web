@@ -8595,10 +8595,13 @@ define("xabber-chats", function () {
             if (!xabber.current_plyr_player)
                 return;
             if (xabber.current_plyr_player.is_popup) {
-                let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index];
+                let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index],
+                    playing = xabber.current_plyr_player.playing;
                 player.currentTime = xabber.current_plyr_player.currentTime;
-                xabber.plyr_player_popup.closePopup();
                 player.play();
+                !playing && player.pause();
+                xabber.plyr_player_popup.$el.detach();
+                xabber.plyr_player_popup = null;
             } else {
                 xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
                 xabber.plyr_player_popup.show({});

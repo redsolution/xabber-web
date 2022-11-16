@@ -7991,7 +7991,7 @@ input[type=text].simple-input-field:hover {
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr .mdi-player-type-icon{
     padding: 4px;
     background: #e0e0e0;
-    border-radius: 3px;
+    border-radius: 4px;
 }
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr .mdi-player-type-icon path{
     fill: #9e9e9e;

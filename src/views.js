@@ -1414,6 +1414,7 @@ define("xabber-views", function () {
 
         events: {
             "click .mdi-close": "closePopup",
+            "click .mdi-minimize": "minimizePopup",
         },
 
         _initialize: function (options) {
@@ -1518,6 +1519,16 @@ define("xabber-views", function () {
             xabber.current_plyr_player = null;
             xabber.plyr_player_popup = null;
             xabber.trigger('plyr_player_updated');
+        },
+
+        minimizePopup: function () {
+            let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index],
+                playing = xabber.current_plyr_player.playing;
+            player.currentTime = xabber.current_plyr_player.currentTime;
+            player.play();
+            !playing && player.pause();
+            this.$el.detach();
+            xabber.plyr_player_popup = null;
         },
     });
 
