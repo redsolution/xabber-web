@@ -1363,6 +1363,17 @@ typeof navigator === "object" && (function (global, factory) {
 
     const exists = () => document.getElementById(id) !== null;
 
+
+    if (id === 'sprite-plyr') {
+        if (exists())
+          return;
+        const container = document.createElement('div');
+        container.setAttribute('id', id);
+        container.innerHTML = xabber.env.templates.svg['plyr']();
+        document.body.insertAdjacentElement('afterbegin', container);
+        return;
+    }
+
     const update = (container, data) => {
       // eslint-disable-next-line no-param-reassign
       container.innerHTML = data; // Check again incase of race condition
@@ -1454,7 +1465,7 @@ typeof navigator === "object" && (function (global, factory) {
     getIconUrl() {
       const url = new URL(this.config.iconUrl, window.location);
       const host = window.location.host ? window.location.host : window.top.location.host;
-      const cors = url.host !== host || browser.isIE && !window.svg4everybody;
+      const cors = url.host === host || browser.isIE && !window.svg4everybody;
       return {
         url: this.config.iconUrl,
         cors
@@ -3449,9 +3460,9 @@ typeof navigator === "object" && (function (global, factory) {
     // Sprite (for icons)
     loadSprite: true,
     iconPrefix: 'plyr',
-    iconUrl: 'https://cdn.plyr.io/3.7.2/plyr.svg',
+    iconUrl: '/templates/svg/plyr.html', //not really used since its loaded from templates
     // Blank video (used to prevent errors on source change)
-    blankVideo: 'https://cdn.plyr.io/static/blank.mp4',
+    blankVideo: constants.BLANK_VIDEO.MP4,
     // Quality default
     quality: {
       default: 576,

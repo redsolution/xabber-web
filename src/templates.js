@@ -196,6 +196,11 @@ define("xabber-templates", [
     "text!templates/svg/file-pdf.html",
     "text!templates/svg/close.html",
     "text!templates/svg/link.html",
+    "text!templates/svg/picture-in-picture-minimize.html",
+    "text!templates/svg/picture-in-picture-bottom-right.html",
+    "text!templates/svg/picture-in-picture-top-right.html",
+    "text!templates/svg/plyr.html",
+    "text!templates/svg/video.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
     "text!templates/svg/job-outline.html",
@@ -501,6 +506,11 @@ define("xabber-templates", [
     addSvgTemplate('svg.file-pdf');
     addSvgTemplate('svg.close');
     addSvgTemplate('svg.link');
+    addSvgTemplate('svg.picture-in-picture-minimize');
+    addSvgTemplate('svg.picture-in-picture-bottom-right');
+    addSvgTemplate('svg.picture-in-picture-top-right');
+    addSvgTemplate('svg.plyr');
+    addSvgTemplate('svg.video');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');

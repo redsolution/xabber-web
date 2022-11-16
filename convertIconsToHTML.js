@@ -70,6 +70,10 @@ let badges_names = [
         'file-pdf',
         'close',
         'link',
+        'picture-in-picture-minimize',
+        'picture-in-picture-bottom-right',
+        'picture-in-picture-top-right',
+        'video',
     ],
     circle_icons = [,
         'task'

@@ -8206,11 +8206,29 @@ define("xabber-chats", function () {
           },
 
           updatePlyrControls: function () {
-              this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
+              this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
               if (xabber.current_plyr_player) {
                   this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                   this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-                  this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
+                  this.$('.chat-head-player-title').text(
+                      xabber.current_plyr_player.config.title ?
+                          xabber.current_plyr_player.config.title :
+                          xabber.current_plyr_player.provider === 'html5' ?
+                              xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
+                              : xabber.getString("chat_message_video"));
+                  let poster = xabber.current_plyr_player.poster;
+                  if (poster){
+                      this.$('.mdi-player-type-icon').addClass('hidden');
+                      this.$('.player-poster').removeClass('hidden');
+                      this.$('.player-poster').attr("src", poster);
+                  } else {
+                      this.$('.mdi-player-type-icon').removeClass('hidden');
+                      this.$('.player-poster').addClass('hidden');
+                  }
+                  if (xabber.current_plyr_player.provider != 'html5')
+                      this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
+                  else
+                      this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                   let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);
@@ -8614,11 +8632,29 @@ define("xabber-chats", function () {
         },
 
         updatePlyrControls: function () {
-            this.$('.chat-tool-plyr-controls').showIf(xabber.current_plyr_player);
+            this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
             if (xabber.current_plyr_player) {
                 this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                 this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-                this.$('.chat-head-player-title').text(xabber.current_plyr_player.config.title ? xabber.current_plyr_player.config.title :xabber.getString("chat_message_video"));
+                this.$('.chat-head-player-title').text(
+                    xabber.current_plyr_player.config.title ?
+                        xabber.current_plyr_player.config.title :
+                        xabber.current_plyr_player.provider === 'html5' ?
+                            xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
+                            : xabber.getString("chat_message_video"));
+                let poster = xabber.current_plyr_player.poster;
+                if (poster){
+                    this.$('.mdi-player-type-icon').addClass('hidden');
+                    this.$('.player-poster').removeClass('hidden');
+                    this.$('.player-poster').attr("src", poster);
+                } else {
+                    this.$('.mdi-player-type-icon').removeClass('hidden');
+                    this.$('.player-poster').addClass('hidden');
+                }
+                if (xabber.current_plyr_player.provider != 'html5')
+                    this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
+                else
+                    this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
                 let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_players.indexOf(xabber.current_plyr_player);

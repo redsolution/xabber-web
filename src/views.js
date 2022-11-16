@@ -1431,15 +1431,20 @@ define("xabber-views", function () {
                     this.pos2 = 0;
                     this.pos3 = 0;
                     this.pos4 = 0;
-                    this.$('.plyr-player-header').mousedown((e) => {
+                    this.$('.plyr').mousedown((e) => {
                         e = e || window.event;
+                        if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length)
+                            return;
                         e.preventDefault();
                         // get the mouse cursor position at startup:
                         this.pos3 = e.clientX;
                         this.pos4 = e.clientY;
+                        let didDrag = false;
                         document.onmouseup = (e) => {
                             document.onmouseup = null;
                             document.onmousemove = null;
+                            if (!didDrag && !$(e.target).closest('.plyr__control--overlaid').length)
+                                this.$('.plyr__video-wrapper').click();
                         };
                         // call a function whenever the cursor moves:
                         document.onmousemove = (e) => {
@@ -1455,6 +1460,7 @@ define("xabber-views", function () {
                             this.$el.css('left', (this.$el.offset().left - this.pos1) + "px");
                             this.$el.css('transform', "none");
                             this.$el.css('right', "unset");
+                            didDrag = true;
                         };
                     });
                 },
@@ -1466,7 +1472,7 @@ define("xabber-views", function () {
             options = options || {};
             if (!this.player){
                 this.player = new Plyr('.plyr-player-popup', {controls: [
-                    'play-large', 'play', 'progress', 'duration', 'mute', 'volume', 'settings', 'fullscreen',
+                    'play-large', 'play', 'progress', 'duration', 'mute', 'fullscreen',
                 ]});
                 this.player.on('play',(event) => {
                     xabber.trigger('plyr_player_updated');
@@ -1500,6 +1506,9 @@ define("xabber-views", function () {
                 xabber.trigger('plyr_player_updated');
             });
             this.player.once('ready',(event) => {
+                let $minimize_element = $('<div class="mdi mdi-24px mdi-minimize mdi-svg-template" data-svgname="picture-in-picture-minimize"></div>')
+                $minimize_element.html(env.templates.svg['picture-in-picture-minimize']())
+                $minimize_element.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
                 this.player.play();
             });
         },
