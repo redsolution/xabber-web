@@ -1432,7 +1432,7 @@ define("xabber-views", function () {
                     this.pos2 = 0;
                     this.pos3 = 0;
                     this.pos4 = 0;
-                    this.$('.plyr').mousedown((e) => {
+                    this.$('.plyr-player-popup-container').mousedown((e) => {
                         e = e || window.event;
                         if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length)
                             return;
@@ -1476,6 +1476,13 @@ define("xabber-views", function () {
                     'play-large', 'play', 'progress', 'duration', 'mute', 'fullscreen',
                 ]});
                 this.player.on('play',(event) => {
+                    let other_players = xabber.plyr_players.filter(other => other != this.player);
+                    other_players.forEach(function(other) {
+                        if (other.$audio_elem){
+                            if (other.$audio_elem.voice_message)
+                                other.$audio_elem.voice_message.stop()
+                        }
+                    })
                     xabber.trigger('plyr_player_updated');
                 });
                 this.player.on('pause',(event) => {

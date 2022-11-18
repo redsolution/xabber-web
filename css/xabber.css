@@ -7996,6 +7996,13 @@ input[type=text].simple-input-field:hover {
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr .mdi-player-type-icon path{
     fill: #9e9e9e;
 }
+.chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr .voice-message-player-avatar{
+    position: static;
+    width: 32px;
+    height: 32px;
+    pointer-events: none;
+    cursor: auto;
+}
 
 .chat-tools-wrap .chat-tool-player .chat-tool i{
     color: #000;
@@ -8024,6 +8031,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-tools-wrap .chat-tool.chat-player-duration {
     margin: 0;
+    width: 200px;
     cursor: auto;
     display: flex;
     justify-content: flex-end;
@@ -8064,7 +8072,7 @@ input[type=text].simple-input-field:hover {
     color: #9E9E9E;
 }
 
-.chat-tools-wrap .chat-tool:hover i {
+.chat-tools-wrap .chat-tool:not(.chat-tool-player):hover i {
     color: #616161;
 }
 
@@ -16245,7 +16253,7 @@ input[type='range'].voice-message-volume:focus {
     width: 66%;
 }
 .chat-message .chat-msg-link-reference-content .link-message-reference {
-    border: 1px solid #E0E0E0;
+    border: 1px solid #4FC3F7;
     display: flex;
     background: #FFF;
     overflow: hidden;
@@ -16364,12 +16372,24 @@ input[type='range'].voice-message-volume:focus {
 .plyr-player-popup-view .plyr-player-popup-container{
     height: 100%;
 }
+.plyr-player-popup-view .plyr-player-popup-container{
+    cursor: grabbing;
+}
 .plyr-player-popup-view .plyr-player-popup-container .plyr{
     height: 100%;
-    cursor: grabbing;
+    pointer-events: none;
 }
 .plyr-player-popup-view .plyr__video-wrapper{
     pointer-events: none;
+}
+.plyr-player-popup-view .plyr__controls,
+.plyr-player-popup-view .plyr__control--overlaid{
+    pointer-events: auto;
+}
+.plyr-player-popup-view .plyr-player-popup-container:hover .plyr__controls{
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
 }
 /* ------------------ RECENT CHATS MODAL ------------------ */
 
