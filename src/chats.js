@@ -3975,13 +3975,14 @@ define("xabber-chats", function () {
             }
         },
 
-        renderVoiceMessage: function (element, file_url) {
+        renderVoiceMessage: function (element, file_url, chat) {
             let not_expanded_msg = element.innerHTML,
                 unique_id = 'waveform' + moment.now(),
                 $elem = $(element),
                 $msg_element = $elem.closest('.link-file');
+            chat = chat || this.model;
             $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
-            let aud = this.createAudio(file_url, unique_id);
+            let aud = this.createAudio(file_url, $elem.find('#' + unique_id));
 
             aud.on('ready', () => {
                 let duration = Math.round(aud.getDuration());
@@ -4001,9 +4002,9 @@ define("xabber-chats", function () {
                 $msg_element.addClass('playing');
                 let is_popup;
                 xabber.current_plyr_player && (is_popup = xabber.current_plyr_player.is_popup);
-                xabber.current_plyr_player = this.model.plyr_players.find(item => item.$audio_elem === $msg_element[0]);
-                xabber.current_plyr_player.chat_players = this.model.plyr_players;
-                xabber.current_plyr_player.chat_item = this.model.item_view;
+                xabber.current_plyr_player = chat.plyr_players.find(item => item.$audio_elem === $msg_element[0]);//переделать на выбор из всех
+                xabber.current_plyr_player.chat_players = chat.plyr_players;
+                xabber.current_plyr_player.chat_item = chat.item_view;
                 xabber.current_plyr_player.is_popup = is_popup;
                 let other_players = xabber.plyr_players.filter(other => other != xabber.current_plyr_player);
                 other_players.forEach(function(other) {
@@ -5549,9 +5550,9 @@ define("xabber-chats", function () {
             this.scrollToBottom();
         },
 
-        createAudio: function(file_url, unique_id) {
+        createAudio: function(file_url, $elem) {
             let audio = WaveSurfer.create({
-                container: "#" + unique_id,
+                container: $elem[0],
                 scrollParent: false,
                 barWidth: 3,
                 height: 48,
@@ -8300,7 +8301,7 @@ define("xabber-chats", function () {
                       if (!next_item.$audio_elem.voice_message){
                           let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
                           $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                          next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url);
+                          next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                       } else {
                           next_item.$audio_elem.voice_message.play()
                       }
@@ -8323,7 +8324,7 @@ define("xabber-chats", function () {
                       if (!prev_item.$audio_elem.voice_message){
                           let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
                           $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                          prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url);
+                          prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                       } else {
                           prev_item.$audio_elem.voice_message.play()
                       }
@@ -8379,6 +8380,7 @@ define("xabber-chats", function () {
                       this.$('.mdi-player-type-icon').removeClass('hidden');
                       this.$('.player-poster').addClass('hidden');
                   }
+                  this.$('.voice-message-player-avatar').addClass('hidden');
                   if (xabber.current_plyr_player.provider != 'html5')
                       this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
                   else
@@ -8794,7 +8796,7 @@ define("xabber-chats", function () {
                     if (!next_item.$audio_elem.voice_message){
                         let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
                         $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                        next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url);
+                        next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                     } else {
                         next_item.$audio_elem.voice_message.play()
                     }
@@ -8817,7 +8819,7 @@ define("xabber-chats", function () {
                     if (!prev_item.$audio_elem.voice_message){
                         let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
                         $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                        prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url);
+                        prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                     } else {
                         prev_item.$audio_elem.voice_message.play()
                     }
@@ -8873,6 +8875,7 @@ define("xabber-chats", function () {
                     this.$('.mdi-player-type-icon').removeClass('hidden');
                     this.$('.player-poster').addClass('hidden');
                 }
+                this.$('.voice-message-player-avatar').addClass('hidden');
                 if (xabber.current_plyr_player.provider != 'html5')
                     this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
                 else
