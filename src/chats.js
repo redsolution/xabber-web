@@ -2885,6 +2885,7 @@ define("xabber-chats", function () {
               this.scrollToBottom();
               this.onScroll();
               this.updateContactStatus();
+              this.updateWaveforms();
               if (this.contact) {
                   this.contact.get('group_chat') && this.updatePinnedMessage();
                   this.subscription_buttons.render();
@@ -2950,6 +2951,14 @@ define("xabber-chats", function () {
                     new_status = xabber.pretty_last_seen(seconds);
                 this.contact.set({status_message: new_status });
             }
+        },
+
+        updateWaveforms: function () {
+            this.model.plyr_players.forEach(function(item) {
+                if (item.$audio_elem)
+                    if (item.$audio_elem.voice_message)
+                        item.$audio_elem.voice_message.drawBuffer();
+            });
         },
 
         updatePinnedMessage: function () {
@@ -4010,7 +4019,7 @@ define("xabber-chats", function () {
                 other_players.forEach(function(other) {
                     if (other.$audio_elem){
                         if (other.$audio_elem.voice_message)
-                            other.$audio_elem.voice_message.stop()
+                            other.$audio_elem.voice_message.stopTime();
                     }
                     else
                         other.pause();
@@ -4033,6 +4042,11 @@ define("xabber-chats", function () {
                 $msg_element.removeClass('playing');
                 xabber.trigger('plyr_player_updated');
             });
+
+            aud.stopTime = () => {
+                aud.stop()
+                $elem.find('.voice-msg-current-time').text(utils.pretty_duration(0));
+            };
 
             $elem.find('.voice-message-volume')[0].onchange = () => {
                 aud.setVolume($elem.find('.voice-message-volume').val()/100);
@@ -4551,7 +4565,7 @@ define("xabber-chats", function () {
                         other_players.forEach(function(other) {
                             if (other.$audio_elem){
                                 if (other.$audio_elem.voice_message)
-                                    other.$audio_elem.voice_message.stop()
+                                    other.$audio_elem.voice_message.stopTime();
                             }
                             else
                                 other.pause();
@@ -5441,6 +5455,7 @@ define("xabber-chats", function () {
                     videos.push(file_new_format);
                 }
                 else {
+                    _.extend(file_new_format, { duration: file_.duration});
                     files_.push(file_new_format);
                 }
             });
@@ -8257,7 +8272,7 @@ define("xabber-chats", function () {
               xabber.plyr_players.forEach((item) => {
                   if (item.$audio_elem){
                       if (item.$audio_elem.voice_message)
-                          item.$audio_elem.voice_message.stop()
+                          item.$audio_elem.voice_message.stopTime()
                   }
                   else
                       item.stop();
@@ -8336,7 +8351,6 @@ define("xabber-chats", function () {
           updatePlyrControls: function () {
               this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
               if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-                  console.log(xabber.current_plyr_player.$audio_elem.voice_message)
                   if (xabber.current_plyr_player.$audio_elem.voice_message){
                       let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;
                       this.$('.chat-head-player-type').text(xabber.getString("chat_message_voice"))
@@ -8752,7 +8766,7 @@ define("xabber-chats", function () {
             xabber.plyr_players.forEach((item) => {
                 if (item.$audio_elem){
                     if (item.$audio_elem.voice_message)
-                        item.$audio_elem.voice_message.stop()
+                        item.$audio_elem.voice_message.stopTime()
                 }
                 else
                     item.stop();
@@ -8831,7 +8845,6 @@ define("xabber-chats", function () {
         updatePlyrControls: function () {
             this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
             if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-                console.log(xabber.current_plyr_player.$audio_elem.voice_message)
                 if (xabber.current_plyr_player.$audio_elem.voice_message){
                     let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;
                     this.$('.chat-head-player-type').text(xabber.getString("chat_message_voice"))
@@ -10995,6 +11008,8 @@ define("xabber-chats", function () {
                     if (this.contact && this.contact.my_info)
                         if ($selected_msgs.first().data('from') === this.contact.my_info.get('id'))
                             my_msg = true;
+                    if ($selected_msgs.first().find('.mdi-play').length)
+                        my_msg = false;
                 }
                 $message_actions.find('.pin-message-wrap').showIf(this.model.get('group_chat')).switchClass('non-active', ((length !== 1) && this.model.get('group_chat')));
                 $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
