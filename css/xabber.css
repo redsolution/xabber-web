@@ -7662,6 +7662,13 @@ input[type=text].simple-input-field:hover {
     position:static !important;
     margin-left: 4px;
 }
+.chat-item .chat-item-notifications-wrap .msg-incoming-subscription{
+    width: 14px;
+    padding: 1px !important;
+}
+.chat-item .chat-item-notifications-wrap .msg-incoming-subscription polygon{
+    fill: #FFF;
+}
 
 .chat-item .chat-item-notifications-wrap .msg-delivering-state {
     margin: 0 0 0 4px;
@@ -7699,6 +7706,11 @@ input[type=text].simple-input-field:hover {
     line-height: 12px;
     text-align: center;
     background-color: #388E3C;
+}
+
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription{
+    width: 18px;
+    padding: 3px !important;
 }
 
 .mention-item .msg-counter {
@@ -9624,12 +9636,12 @@ img.fwd-img-preview {
 .message-reference-preview .attached-image-preview .mdi-close{
     position: absolute;
     z-index: 1000;
-    padding: 1px 1px 2px 2px;
+    padding: 1px 1px 1px 1px;
     right: 0;
     top: 0;
     cursor: pointer;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     font-size: 8px;
     line-height: 16px;
     background: radial-gradient(circle, rgba(158,158,158,0.35) 35%, rgba(158,158,158,0.25) 70%);

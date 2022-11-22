@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.158","version_description":"fixed mediagallery feature catching from other than account domains, added mediagallery token clearing on token expire and feature not present, added proper handling for adding and removing player on message adding and removing, changed how popup and previous and next player are played, fixed mediagallery videos deletion on message deletion, fixed popup minimization for youtube videos"}'
+'{"version_number":"2.3.2.159","version_description":"changed invitation symbol in chat list, changed size of close button on attachments"}'
 )});
