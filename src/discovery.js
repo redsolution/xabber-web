@@ -135,7 +135,7 @@ define("xabber-discovery", function () {
             });
             $stanza.find('x').each(function () {
                 let form_type_val = $(this).find('field[var="FORM_TYPE"] value');
-                if (form_type_val.length && form_type_val.text() === Strophe.NS.URLDISCO){
+                if (form_type_val.length && form_type_val.text() === Strophe.NS.URLDISCO && self.account.domain === from){
                     let media_gallery_url = $(this).find('field[var="' + Strophe.NS.MEDIAGALLERY + '"] value');
                     if (media_gallery_url.length && media_gallery_url.text()){
                         self.create({

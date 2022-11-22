@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.156","version_description":"fixed waveform generation with closed chat, fixed voice message current time on stop, fixed last message voice messages duration, fixed voice messages editing"}'
+'{"version_number":"2.3.2.158","version_description":"fixed mediagallery feature catching from other than account domains, added mediagallery token clearing on token expire and feature not present, added proper handling for adding and removing player on message adding and removing, changed how popup and previous and next player are played, fixed mediagallery videos deletion on message deletion, fixed popup minimization for youtube videos"}'
 )});

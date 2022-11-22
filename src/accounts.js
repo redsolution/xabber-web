@@ -1289,6 +1289,12 @@ define("xabber-accounts", function () {
                         this.initGalleryAuth(this.server_features.get('media-gallery'))
                         this.once('gallery_token_authenticated', callback)
                     }
+                    else if (!this.server_features.get('media-gallery')){
+                        this.set('gallery_url', undefined);
+                        this.set('gallery_token', undefined);
+                        this.set('gallery_token_expires', undefined);
+                        callback && callback();
+                    }
                 },
 
                 initGalleryAuth: function(gallery_feature) {

@@ -1493,8 +1493,8 @@ define("xabber-views", function () {
                 });
             }
             let previous_player = (options.on_play && options.player) ? options.player : xabber.current_plyr_player;
-            this.player.chat_players =  (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? xabber.current_plyr_player.chat_players : previous_player.chat_players;
-            this.player.player_index = (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? options.new_player_index : this.player.chat_players.indexOf(previous_player);
+            this.player.chat_item = previous_player.chat_item
+            this.player.player_index = (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? options.new_player_index : this.player.chat_item.model.plyr_players.indexOf(previous_player);
             this.player.source = {
                 type: 'video',
                 sources: [
@@ -1529,13 +1529,28 @@ define("xabber-views", function () {
         },
 
         minimizePopup: function () {
-            let player = xabber.current_plyr_player.chat_players[xabber.current_plyr_player.player_index],
-                playing = xabber.current_plyr_player.playing;
-            player.currentTime = xabber.current_plyr_player.currentTime;
-            player.play();
-            !playing && player.pause();
+            let player = xabber.current_plyr_player.chat_item.model.plyr_players[xabber.current_plyr_player.player_index],
+                playing = xabber.current_plyr_player.playing,
+                currentTime = xabber.current_plyr_player.currentTime;
             this.$el.detach();
             xabber.plyr_player_popup = null;
+            xabber.current_plyr_player.is_popup = false;
+            player.play();
+            player.once('playing',() => {
+                player.currentTime = currentTime;
+            });
+            !playing && player.pause();
+            xabber.current_plyr_player = player;
+            let other_players = xabber.plyr_players.filter(other => other != player);
+            other_players.forEach(function(other) {
+                if (other.$audio_elem){
+                    if (other.$audio_elem.voice_message)
+                        other.$audio_elem.voice_message.stopTime();
+                }
+                else
+                    other.pause();
+            })
+            xabber.trigger('plyr_player_updated');
         },
     });
 

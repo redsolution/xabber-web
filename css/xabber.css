@@ -16271,6 +16271,9 @@ input[type='range'].voice-message-volume:focus {
     width: unset;
     max-width: 100%;
 }
+.chat-message .chat-msg-link-reference-content .link-message-reference .embed-video .plyr{
+    height: 216px;
+}
 .chat-message .chat-msg-link-reference-content .link-message-reference .attached-text-block {
     width: 100%;
     min-height: 80px;
