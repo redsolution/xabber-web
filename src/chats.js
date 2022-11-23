@@ -6224,6 +6224,7 @@ define("xabber-chats", function () {
             let $msg = $(ev.target).closest('.chat-message');
             this.removeMessage($msg);
             ev.preventDefault();
+            this.chat_item.updateChatError();
         }
     });
 

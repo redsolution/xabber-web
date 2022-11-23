@@ -11,31 +11,33 @@
 </div>
 <div class="chat-tools-wrap">
     <div class="chat-tool chat-tool-player">
-        <div class="chat-tool chat-tool-plyr-controls btn-previous-plyr">
-            <i class="mdi mdi-skip-previous mdi-24px"></i>
-        </div>
-        <div class="chat-tool chat-tool-plyr-controls btn-play-pause-plyr">
-            <i class="mdi mdi-play mdi-24px"></i>
-            <i class="mdi mdi-pause mdi-24px"></i>
-        </div>
-        <div class="chat-tool chat-tool-plyr-controls btn-next-plyr">
-            <i class="mdi mdi-skip-next mdi-24px"></i>
-        </div>
-        <div class="chat-tool chat-tool-plyr-controls btn-popup-plyr">
-            <img class="player-poster hidden">
-            <svg class="mdi mdi-32px mdi-player-type-icon mdi-svg-template" data-svgname="video"></svg>
-            <div class="voice-message-player-avatar circle-avatar hidden"/>
-        </div>
-        <div class="chat-tool chat-player-duration chat-tool-plyr-controls">
-            <div class="chat-head-player-title one-line">{[print(xabber.getString("chat_message_video"))]}</div>
-            <div class="chat-head-player-title-bottom-container">
-                <span class="chat-head-player-type one-line">{[print(xabber.getString("chat_message_video"))]}</span> •
-                <span class="chat-head-player-current-time">0:00</span> /
-                <span class="chat-head-player-total-time">0:00</span>
+        <div class="chat-tool-player-containter">
+            <div class="chat-tool chat-tool-plyr-controls btn-previous-plyr">
+                <i class="mdi mdi-skip-previous mdi-24px"></i>
             </div>
-        </div>
-        <div class="chat-tool chat-tool-plyr-controls btn-stop-plyr">
-            <i class="mdi mdi-close mdi-16px"></i>
+            <div class="chat-tool chat-tool-plyr-controls btn-play-pause-plyr">
+                <i class="mdi mdi-play mdi-24px"></i>
+                <i class="mdi mdi-pause mdi-24px"></i>
+            </div>
+            <div class="chat-tool chat-tool-plyr-controls btn-next-plyr">
+                <i class="mdi mdi-skip-next mdi-24px"></i>
+            </div>
+            <div class="chat-tool chat-tool-plyr-controls btn-popup-plyr">
+                <img class="player-poster hidden">
+                <svg class="mdi mdi-32px mdi-player-type-icon mdi-svg-template" data-svgname="video"></svg>
+                <div class="voice-message-player-avatar circle-avatar hidden"/>
+            </div>
+            <div class="chat-tool chat-player-duration chat-tool-plyr-controls">
+                <div class="chat-head-player-title one-line">{[print(xabber.getString("chat_message_video"))]}</div>
+                <div class="chat-head-player-title-bottom-container">
+                    <span class="chat-head-player-type one-line">{[print(xabber.getString("chat_message_video"))]}</span><span class="chat-head-player-type-dot"> •</span>
+                    <span class="chat-head-player-current-time">0:00</span> /
+                    <span class="chat-head-player-total-time">0:00</span>
+                </div>
+            </div>
+            <div class="chat-tool chat-tool-plyr-controls btn-stop-plyr">
+                <i class="mdi mdi-close mdi-16px"></i>
+            </div>
         </div>
     </div>
     <div class="chat-tool btn-show-fingerprints">

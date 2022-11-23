@@ -160,6 +160,14 @@ define("xabber-ui", function () {
                 panel_margin = toolbar_width + 0.75 * (left_gap + right_gap);
             }
             right_contact_panel_styles.width = right_contact_panel_width;
+            this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
+            this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
+            this.chat_head.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 750));
+            this.chat_head.$el.switchClass('chat-head-normal-wide', (right_panel_width < 1000 && right_panel_width >= 850));
+            this.chat_head.$el.switchClass('chat-head-wide', right_panel_width > 1000);
+            if (right_panel_width < 600) {
+                panel_margin = toolbar_width + 0.75 * (left_gap + right_gap);
+            }
             this.main_panel.setCustomCss({
                 width: panel_width,
                 'margin-left': panel_margin
