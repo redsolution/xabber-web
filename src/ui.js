@@ -91,7 +91,6 @@ define("xabber-ui", function () {
                 right_panel_width,
                 right_contact_panel_width,
                 chat_bottom_panel_width,
-                panel_margin = '',
                 toolbar_width = 50,
                 right_contact_panel_styles = {};
             if (is_wide || !(is_narrow || pinned)) {
@@ -103,7 +102,6 @@ define("xabber-ui", function () {
             } else {
                 panel_width = (width - toolbar_width - 20) * 7 / 9;
                 roster_width = (width - toolbar_width - 20) * 2 / 9;
-                panel_margin = toolbar_width + 10;
             }
             if (!expanded) {
                 roster_width = is_wide ? 48 : 44;
@@ -156,21 +154,14 @@ define("xabber-ui", function () {
                 right_gap = panel_gap - roster_width;
             this.roster_view.$('.expanded-wrap').switchClass('solid',
                     (!pinned && (!is_wide || right_gap < 0)));
-            if (pinned && !panel_margin && (3 * right_gap < left_gap)) {
-                panel_margin = toolbar_width + 0.75 * (left_gap + right_gap);
-            }
             right_contact_panel_styles.width = right_contact_panel_width;
             this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
             this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
             this.chat_head.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 750));
             this.chat_head.$el.switchClass('chat-head-normal-wide', (right_panel_width < 1000 && right_panel_width >= 850));
             this.chat_head.$el.switchClass('chat-head-wide', right_panel_width > 1000);
-            if (right_panel_width < 600) {
-                panel_margin = toolbar_width + 0.75 * (left_gap + right_gap);
-            }
             this.main_panel.setCustomCss({
                 width: panel_width,
-                'margin-left': panel_margin
             });
             this.left_panel.setCustomCss({
                 width: left_panel_width,

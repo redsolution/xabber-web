@@ -8410,6 +8410,7 @@ define("xabber-chats", function () {
 
           updatePlyrControls: function () {
               this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
+              this.$el.switchClass('chat-head-player-enabled', xabber.current_plyr_player);
               if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
                   if (xabber.current_plyr_player.$audio_elem.voice_message){
                       let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;
@@ -8919,6 +8920,7 @@ define("xabber-chats", function () {
 
         updatePlyrControls: function () {
             this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
+            this.$el.switchClass('chat-head-player-enabled', xabber.current_plyr_player);
             if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
                 if (xabber.current_plyr_player.$audio_elem.voice_message){
                     let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;

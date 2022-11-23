@@ -9299,7 +9299,7 @@ define("xabber-contacts", function () {
             account_roster_view: xabber.AccountRosterRightView,
 
             events: {
-                "mouseover .collapsed-wrap": "expand",
+                "click .collapsed-wrap": "expand",
                 "mouseleave .expanded-wrap": "collaps"
             },
 

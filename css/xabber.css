@@ -7844,13 +7844,16 @@ input[type=text].simple-input-field:hover {
     clear: left;
     margin: 0;
     margin-top: -1px;
-    max-width: 200px;
+    max-width: 100%;
 }
 
-.chat-head-wide .chat-head-wrap .contact-info p {
+.chat-head-wrap.chat-head-player-enabled  .contact-info p {
+    max-width: 200px;
+}
+.chat-head-wide .chat-head-wrap.chat-head-player-enabled .contact-info p {
     max-width: 275px;
 }
-.chat-head-ultra-narrow .chat-head-wrap .contact-info p {
+.chat-head-ultra-narrow .chat-head-wrap.chat-head-player-enabled .contact-info p {
     max-width: 100px;
 }
 
