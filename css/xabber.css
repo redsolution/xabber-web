@@ -7780,7 +7780,6 @@ input[type=text].simple-input-field:hover {
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 12px 256px 11px 88px;
 }
 
 .chat-head-wrap .circle-avatar {
@@ -7847,16 +7846,6 @@ input[type=text].simple-input-field:hover {
     max-width: 100%;
 }
 
-.chat-head-wrap.chat-head-player-enabled  .contact-info p {
-    max-width: 200px;
-}
-.chat-head-wide .chat-head-wrap.chat-head-player-enabled .contact-info p {
-    max-width: 275px;
-}
-.chat-head-ultra-narrow .chat-head-wrap.chat-head-player-enabled .contact-info p {
-    max-width: 100px;
-}
-
 .chat-head-wrap .contact-name {
         height: 25px;
     font-size: 22px;
@@ -7890,11 +7879,21 @@ input[type=text].simple-input-field:hover {
     color: #9e9e9e;
 }
 
+.chat-head-info-buttons-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chat-head-info-buttons-container .contact-info{
+    padding: 12px 0 11px 88px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
 .chat-tools-wrap {
-    position: absolute;
-    top: 0;
-    right: 14px;
     height: 100%;
+    margin-right: 14px;
+    flex-shrink: 0;
 }
 
 .chat-tools-wrap .chat-tool {
@@ -8064,28 +8063,27 @@ input[type=text].simple-input-field:hover {
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
+    max-width: calc(100% - 176px);
 }
 
 .chat-head-narrow .chat-tools-wrap .chat-tool.chat-player-duration {
     display: none;
 }
-.chat-head-normal .chat-tools-wrap .chat-tool.chat-player-duration {
-    width: 100px;
+.chat-head-narrow .chat-tools-wrap .chat-tool-player {
+    width: 209px;
 }
-.chat-head-normal .chat-tools-wrap .chat-tool.chat-player-duration {
-    width: 100px;
+.chat-head-normal .chat-tools-wrap .chat-tool-player {
+    width: 309px;
 }
 .chat-head-normal .chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-type,
 .chat-head-normal .chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-type-dot {
     display: none;
 }
-.chat-head-normal .chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-current-time {
+.chat-head-normal-wide .chat-tools-wrap .chat-tool-player {
+    width: 409px;
 }
-.chat-head-normal-wide .chat-tools-wrap .chat-tool.chat-player-duration {
-    width: 200px;
-}
-.chat-head-wide .chat-tools-wrap .chat-tool.chat-player-duration {
-    width: 300px;
+.chat-head-wide .chat-tools-wrap .chat-tool-player {
+    width: 509px;
 }
 
 .chat-tools-wrap .chat-tool.chat-player-duration span:first-of-type {
