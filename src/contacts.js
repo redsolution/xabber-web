@@ -3490,9 +3490,10 @@ define("xabber-contacts", function () {
                         $gallery_file.appendTo(this.$('.gallery-files'));
                     });
                 }
-                this.temporary_items = []
-                $(templates.media_items_empty()).appendTo(this.$('.gallery-files'))
-                this.$('.gallery-files .preloader-wrapper').remove()
+                this.temporary_items = [];
+                this.$('.gallery-files .gallery-empty').remove();
+                $(templates.media_items_empty()).appendTo(this.$('.gallery-files'));
+                this.$('.gallery-files .preloader-wrapper').remove();
             },
 
             messagesFileRequest: function (query, callback) {
