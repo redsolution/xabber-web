@@ -16380,6 +16380,10 @@ input[type='range'].voice-message-volume:focus {
 .chat-message .video-content .video-file-wrap .plyr{
     height: 100%;
 }
+.chat-message .plyr-video-container{
+    height: 216px;
+    background: #eeeeee;
+}
 .plyr .thumb.active{
     display:none;
 }
@@ -16396,6 +16400,24 @@ input[type='range'].voice-message-volume:focus {
     overflow: hidden;
     transform: translate(0, -50%);
 }
+.main-modal.plyr-player-popup-view.player-overlay {
+    top: 50% !important;
+    width: 80% !important;
+    left: 50% !important;
+    resize: none;
+    height: 80% !important;
+    overflow: hidden;
+    transform: translate(-50%, -50%) !important;
+}
+.main-modal.plyr-player-popup-view:not(.player-overlay) .plyr__volume{
+    min-width: unset;
+    width: unset;
+}
+.main-modal.plyr-player-popup-view:not(.player-overlay) .plyr__menu,
+.main-modal.plyr-player-popup-view:not(.player-overlay) .plyr__control[data-plyr=download],
+.main-modal.plyr-player-popup-view:not(.player-overlay) .plyr__volume input[type=range] {
+    display:none;
+}
 .plyr-player-popup-view .plyr-player-header{
     text-align: end;
     background: black;
@@ -16407,16 +16429,32 @@ input[type='range'].voice-message-volume:focus {
 .plyr-player-popup-view .mdi-close{
     cursor: pointer;
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 10px;
+    right: 10px;
     color: #FFF;
     z-index: 1000;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
+}
+.plyr-player-popup-view .mdi-close:hover{
+    background: #00b2ff;
+    border-radius: 3px;
+}
+.plyr-player-popup-view:hover .mdi-close,
+.plyr-player-popup-view:hover .plyr__controls{
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+}
+.plyr-player-popup-view .plyr--hide-controls + .mdi-close{
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-150%);
 }
 .plyr-player-popup-view .mdi-minimize{
     cursor: pointer;
-    position: absolute;
-    bottom: 10px;
-    right: 50px;
     padding: 4px;
     width: 32px;
     height: 32px;

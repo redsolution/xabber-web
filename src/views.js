@@ -885,11 +885,6 @@ define("xabber-views", function () {
         },
 
         setScreen: function (name, attrs, options) {
-            if ((xabber.current_plyr_player && xabber.current_plyr_player.playing && !xabber.current_plyr_player.is_popup)
-                && ((attrs && attrs.chat_item != xabber.current_plyr_player.chat_item) || !attrs)) {
-                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                xabber.plyr_player_popup.show({on_change: true});
-            }
             options = options || {};
             $(window).unbind("keydown.contact_panel");
             xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
@@ -1409,7 +1404,7 @@ define("xabber-views", function () {
     });
 
     xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
-        className: 'modal main-modal plyr-player-popup-view',
+        className: 'modal main-modal player-overlay plyr-player-popup-view',
         template: templates.plyr_player_popup,
 
         events: {
@@ -1418,6 +1413,8 @@ define("xabber-views", function () {
         },
 
         _initialize: function (options) {
+            this.data.set('visibility_state', 0);
+            this.data.on('change:visibility_state', this.onVisibilityChange, this);
         },
 
         render: function (options) {
@@ -1425,16 +1422,37 @@ define("xabber-views", function () {
             this.$el.openModal({
                 dismissible: false,
                 ready: () => {
-                    let $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
-                    $overlay.toggle();
+                    if (!this.player){
+                        this.player = new Plyr('.plyr-player-popup', {controls: [
+                                'play-large', 'play', 'progress', 'duration', 'mute', 'volume', 'settings', 'download', 'fullscreen',
+                            ]});
+                        this.player.on('play',(event) => {
+                            let other_players = xabber.plyr_players.filter(other => other != this.player);
+                            other_players.forEach(function(other) {
+                                if (other.$audio_elem){
+                                    if (other.$audio_elem.voice_message)
+                                        other.$audio_elem.voice_message.stopTime();
+                                }
+                            })
+                            xabber.trigger('plyr_player_updated');
+                        });
+                        this.player.on('pause',(event) => {
+                            xabber.trigger('plyr_player_updated');
+                        });
+                        this.player.on('timeupdate',(event) => {
+                            xabber.trigger('plyr_player_time_updated');
+                        });
+                    }
+                    this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId')).mousedown(() => {this.closePopup()});
                     this.showNewVideo(options);
+                    this.onVisibilityChange();
                     this.pos1 = 0;
                     this.pos2 = 0;
                     this.pos3 = 0;
                     this.pos4 = 0;
                     this.$('.plyr-player-popup-container').mousedown((e) => {
                         e = e || window.event;
-                        if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length)
+                        if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length || $(e.target).closest('.mdi-close').length)
                             return;
                         e.preventDefault();
                         // get the mouse cursor position at startup:
@@ -1471,57 +1489,29 @@ define("xabber-views", function () {
 
         showNewVideo: function (options) {
             options = options || {};
-            if (!this.player){
-                this.player = new Plyr('.plyr-player-popup', {controls: [
-                    'play-large', 'play', 'progress', 'duration', 'mute', 'fullscreen',
-                ]});
-                this.player.on('play',(event) => {
-                    let other_players = xabber.plyr_players.filter(other => other != this.player);
-                    other_players.forEach(function(other) {
-                        if (other.$audio_elem){
-                            if (other.$audio_elem.voice_message)
-                                other.$audio_elem.voice_message.stop()
-                        }
-                    })
-                    xabber.trigger('plyr_player_updated');
-                });
-                this.player.on('pause',(event) => {
-                    xabber.trigger('plyr_player_updated');
-                });
-                this.player.on('timeupdate',(event) => {
-                    xabber.trigger('plyr_player_time_updated');
-                });
-            }
-            let previous_player = (options.on_play && options.player) ? options.player : xabber.current_plyr_player;
-            this.player.chat_item = previous_player.chat_item
-            this.player.player_index = (options.on_controls && (options.new_player_index || options.new_player_index === 0)) ? options.new_player_index : this.player.chat_item.model.plyr_players.indexOf(previous_player);
+            this.player.chat_item = options.player.chat_item;
+            this.player.player_item = options.player;
             this.player.source = {
                 type: 'video',
                 sources: [
                     {
-                        src: previous_player.source,
-                        provider: previous_player.provider,
+                        src: options.player.video_src,
+                        provider: options.player.provider,
                     },
                 ],
             }
-            this.player.once('playing',(event) => {
-                this.player.currentTime = previous_player.currentTime;
-                !options.on_play && !options.on_change && !previous_player.playing && this.player.pause();
-                previous_player.stop();
-                xabber.plyr_players = xabber.plyr_players.concat([this.player])
-                xabber.current_plyr_player = this.player;
-                xabber.current_plyr_player.is_popup = true;
-                xabber.trigger('plyr_player_updated');
-            });
+            xabber.current_plyr_player = this.player;
             this.player.once('ready',(event) => {
                 let $minimize_element = $('<div class="mdi mdi-24px mdi-minimize mdi-svg-template" data-svgname="picture-in-picture-minimize"></div>')
                 $minimize_element.html(env.templates.svg['picture-in-picture-minimize']())
                 $minimize_element.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
                 this.player.play();
+                xabber.trigger('plyr_player_updated');
             });
         },
 
         closePopup: function () {
+            this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId')).detach();
             this.$el.detach();
             xabber.current_plyr_player = null;
             xabber.plyr_player_popup = null;
@@ -1529,28 +1519,20 @@ define("xabber-views", function () {
         },
 
         minimizePopup: function () {
-            let player = xabber.current_plyr_player.chat_item.model.plyr_players[xabber.current_plyr_player.player_index],
-                playing = xabber.current_plyr_player.playing,
-                currentTime = xabber.current_plyr_player.currentTime;
-            this.$el.detach();
-            xabber.plyr_player_popup = null;
-            xabber.current_plyr_player.is_popup = false;
-            player.play();
-            player.once('playing',() => {
-                player.currentTime = currentTime;
-            });
-            !playing && player.pause();
-            xabber.current_plyr_player = player;
-            let other_players = xabber.plyr_players.filter(other => other != player);
-            other_players.forEach(function(other) {
-                if (other.$audio_elem){
-                    if (other.$audio_elem.voice_message)
-                        other.$audio_elem.voice_message.stopTime();
-                }
-                else
-                    other.pause();
-            })
-            xabber.trigger('plyr_player_updated');
+            let visibility_state = this.data.get('visibility_state');
+            visibility_state = visibility_state + 1;
+            (visibility_state > 2) && (visibility_state = 0);
+            this.data.set('visibility_state', visibility_state);
+        },
+
+        onVisibilityChange: function () {
+            let visibility_state = this.data.get('visibility_state'),
+                $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
+            console.log(visibility_state)
+            console.log('123')
+            $overlay.switchClass('hidden', visibility_state != 0);
+            this.$el.switchClass('player-overlay', visibility_state === 0);
+            this.$el.switchClass('hidden', visibility_state === 2);
         },
     });
 

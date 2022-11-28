@@ -1,8 +1,7 @@
 {[ if (is_video) {]}
         <div class="link-message-reference message-reference-preview-item message-reference-preview-item-big-image">
             <div class="embed-video">
-                <div class="plyr-video-container">
-                    <iframe class="iframe-loading" src="{{video_url}}" frameborder="0"></iframe>
+                <div class="plyr-video-container" data-provider="{{provider}}" data-src="{{video_url}}">
                 </div>
             </div>
             <a href="{{original_text}}" target=”_blank” class="msg-hyperlink">

@@ -4054,9 +4054,8 @@ define("xabber-chats", function () {
                         if (other.$audio_elem.voice_message)
                             other.$audio_elem.voice_message.stopTime();
                     }
-                    else
-                        other.pause();
-                })
+                });
+                (xabber.plyr_player_popup && xabber.plyr_player_popup.player) && xabber.plyr_player_popup.player.stop();
                 let timerId = setInterval(function() {
                     let cur_time = Math.round(aud.getCurrentTime());
                     if (aud.isPlaying())
@@ -4352,6 +4351,8 @@ define("xabber-chats", function () {
                     if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
                         copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
                         copied_attrs.is_video = true;
+                        youtube_url_regexp.test(link_references_attrs[idx].video_url) && (copied_attrs.provider = 'youtube');
+                        vimeo_url_regexp.test(link_references_attrs[idx].video_url) && (copied_attrs.provider = 'vimeo');
                     } else
                         copied_attrs.is_video = false;
                     template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
@@ -4519,6 +4520,8 @@ define("xabber-chats", function () {
                             if (link_references_attrs[idx].type && link_references_attrs[idx].type.includes('video') && link_references_attrs[idx].video_url && (youtube_url_regexp.test(link_references_attrs[idx].video_url) || vimeo_url_regexp.test(link_references_attrs[idx].video_url))){
                                 copied_attrs.video_url = link_references_attrs[idx].video_url.replace("autoplay=1&", "");
                                 copied_attrs.is_video = true;
+                                youtube_url_regexp.test(link_references_attrs[idx].video_url) && (copied_attrs.provider = 'youtube');
+                                vimeo_url_regexp.test(link_references_attrs[idx].video_url) && (copied_attrs.provider = 'vimeo');
                             } else
                                 copied_attrs.is_video = false;
                             template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
@@ -4586,40 +4589,18 @@ define("xabber-chats", function () {
             let message = this.model.messages.get($msg.data('uniqueid')),
                 msg_players = [];
             $msg.find('.plyr-video-container:not(.no-load)').each((idx, item) => {
-                if ($(item).hasClass('plyr-loading'))
+                if ($(item).hasClass('no-load'))
                     return;
-                let player = new Plyr(item, {controls: [
-                        'play-large', 'play', 'progress', 'duration', 'mute', 'volume', 'settings', 'download', 'fullscreen',
-                    ]})
+                let player = {video_src: $(item).attr('data-src')}
+                player.provider = $(item).attr('data-provider');
                 player.msg_time = $msg.attr('data-time');
                 player.chat_item = this.model.item_view;
+                player.message_id = idx;
                 this.model.plyr_players = this.model.plyr_players.concat([player]).sort((a, b) => a.msg_time - b.msg_time);
                 xabber.plyr_players = xabber.plyr_players.concat([player]);
                 msg_players = msg_players.concat([player]);
-                player.on('play',(event) => {
-                    if (xabber.current_plyr_player && xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
-                        xabber.plyr_player_popup.showNewVideo({on_play: true, player: player});
-                    } else {
-                        xabber.current_plyr_player = player;
-                        let other_players = xabber.plyr_players.filter(other => other != player);
-                        other_players.forEach(function(other) {
-                            if (other.$audio_elem){
-                                if (other.$audio_elem.voice_message)
-                                    other.$audio_elem.voice_message.stopTime();
-                            }
-                            else
-                                other.pause();
-                        })
-                        xabber.trigger('plyr_player_updated');
-                    }
-                });
-                player.on('timeupdate',(event) => {
-                    xabber.trigger('plyr_player_time_updated');
-                });
-                player.on('pause',(event) => {
-                    xabber.trigger('plyr_player_updated');
-                });
-                $(item).addClass('plyr-loading')
+                $(item).attr('data-message-id', player.message_id);
+                $(item).addClass('no-load');
             });
             msg_players.length && message.set('msg_player_videos', msg_players);
             xabber.trigger('plyr_player_updated');
@@ -5658,16 +5639,7 @@ define("xabber-chats", function () {
 
         createVideo: function(video) {
             video.pretty_size = utils.pretty_size(video.size)
-            let video_el = document.createElement("video"),
-                $video_wrap_template = $(templates.messages.video({video: video}));
-            if (xabber.settings.load_media)
-                video_el.setAttribute("preload", "auto");
-            else
-                video_el.setAttribute("preload", "none");
-            video_el.controls = false;
-            video_el.src = video.sources[0]
-            $(video_el).addClass('plyr-video-container');
-            $video_wrap_template.html(video_el)
+            let $video_wrap_template = $(templates.messages.video({video_src: video.sources[0]}));
             return $video_wrap_template;
         },
 
@@ -5914,6 +5886,18 @@ define("xabber-chats", function () {
                     xabber.openWindow($elem.attr('href'));
             }
             if ($elem.hasClass('msg-delivering-state') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
+                return;
+            }
+            if ($elem.closest(".plyr-video-container").length > 0) {
+                let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    $plyr = $elem.closest(".plyr-video-container");
+                if (msg.get('msg_player_videos')){
+                    if (!xabber.plyr_player_popup){
+                        xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                        xabber.plyr_player_popup.show({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
+                    } else
+                        xabber.plyr_player_popup.showNewVideo({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
+                }
                 return;
             }
             if (!$elem.hasClass('mdi-link-variant') && !$elem.hasClass('msg-copy-location-content') && !$elem.hasClass('btn-retry-send-message') && !$elem.hasClass('btn-delete-message') && !$elem.hasClass('file-link-download') && !$elem.is('canvas') && !$elem.hasClass('voice-message-volume')) {
@@ -8312,99 +8296,67 @@ define("xabber-chats", function () {
           },
 
           stopPlyr: function () {
-              if (!xabber.current_plyr_player)
+              if (!xabber.current_plyr_player && xabber.plyr_player_popup)
                   return;
               xabber.plyr_players.forEach((item) => {
                   if (item.$audio_elem){
                       if (item.$audio_elem.voice_message)
                           item.$audio_elem.voice_message.stopTime()
                   }
-                  else
-                      item.stop();
               })
-              if(xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
-                  xabber.plyr_player_popup.closePopup();
-              } else {
-                  xabber.current_plyr_player = null;
-                  xabber.trigger('plyr_player_updated');
-              }
+              xabber.plyr_player_popup.closePopup();
           },
 
           popupPlyr: function () {
-              if (!xabber.current_plyr_player || (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem))
-                  return;
-              if (xabber.current_plyr_player.is_popup) {
-                  let player = xabber.current_plyr_player.chat_item.model.plyr_players[xabber.current_plyr_player.player_index],
-                      playing = xabber.current_plyr_player.playing,
-                      currentTime = xabber.current_plyr_player.currentTime;
-                  xabber.plyr_player_popup.$el.detach();
-                  xabber.plyr_player_popup = null;
-                  xabber.current_plyr_player.is_popup = false;
-                  player.play();
-                  player.once('playing',() => {
-                      player.currentTime = currentTime;
-                  });
-                  !playing && player.pause();
-                  xabber.current_plyr_player = player;
-                  let other_players = xabber.plyr_players.filter(other => other != player);
-                  other_players.forEach(function(other) {
-                      if (other.$audio_elem){
-                          if (other.$audio_elem.voice_message)
-                              other.$audio_elem.voice_message.stopTime();
-                      }
-                      else
-                          other.pause();
-                  })
-                  xabber.trigger('plyr_player_updated');
-              } else {
-                  xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                  xabber.plyr_player_popup.show({});
-              }
+              if (xabber.plyr_player_popup)
+                  xabber.plyr_player_popup.minimizePopup();
           },
 
           nextPlyr: function () {
               let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-              if (player_index === -1 && xabber.current_plyr_player.is_popup)
-                  player_index = xabber.current_plyr_player.player_index;
+              if (player_index === -1 && xabber.current_plyr_player.player_item)
+                  player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
               if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1))
                   return;
-              if (xabber.current_plyr_player.is_popup && !xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem) {
-                  xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index + 1, player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-              } else {
-                  if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
-                      let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
-                      if (!next_item.$audio_elem.voice_message){
-                          let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                          $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                          next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-                      } else {
-                          next_item.$audio_elem.voice_message.play()
-                      }
+              if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
+                  let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
+                  if (!next_item.$audio_elem.voice_message){
+                      let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
+                      $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                      next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                  } else {
+                      next_item.$audio_elem.voice_message.play()
+                  }
+              } else{
+                  if (!xabber.plyr_player_popup){
+                      xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                      xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
                   } else
-                      xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].play();
+                      xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
               }
           },
 
           previousPlyr: function () {
               let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-              if (player_index === -1 && xabber.current_plyr_player.is_popup)
-                  player_index = xabber.current_plyr_player.player_index;
+              if (player_index === -1 && xabber.current_plyr_player.player_item)
+                  player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
               if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0))
                   return;
-              if (xabber.current_plyr_player.is_popup && !xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem) {
-                  xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index - 1, player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-              } else {
-                  if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
-                      let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
-                      if (!prev_item.$audio_elem.voice_message){
-                          let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                          $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                          prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-                      } else {
-                          prev_item.$audio_elem.voice_message.play()
-                      }
+              if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
+                  let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
+                  if (!prev_item.$audio_elem.voice_message){
+                      let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
+                      $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                      prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                  } else {
+                      prev_item.$audio_elem.voice_message.play()
+                  }
+              } else{
+                  if (!xabber.plyr_player_popup){
+                      xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                      xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
                   } else
-                      xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].play();
+                      xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
               }
           },
 
@@ -8434,7 +8386,7 @@ define("xabber-chats", function () {
                           else
                               clearInterval(timerId);
                       }, 100);
-                      (xabber.current_plyr_player.is_popup && xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
+                      (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
                   }
               }
               else if (xabber.current_plyr_player) {
@@ -8462,10 +8414,10 @@ define("xabber-chats", function () {
                       this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
-                  let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
+                  let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                   this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                   this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                  (xabber.current_plyr_player.is_popup && xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
+                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
               }
           },
 
@@ -8822,99 +8774,67 @@ define("xabber-chats", function () {
         },
 
         stopPlyr: function () {
-            if (!xabber.current_plyr_player)
+            if (!xabber.current_plyr_player && xabber.plyr_player_popup)
                 return;
             xabber.plyr_players.forEach((item) => {
                 if (item.$audio_elem){
                     if (item.$audio_elem.voice_message)
                         item.$audio_elem.voice_message.stopTime()
                 }
-                else
-                    item.stop();
             })
-            if(xabber.current_plyr_player.is_popup && xabber.plyr_player_popup){
-                xabber.plyr_player_popup.closePopup();
-            } else {
-                xabber.current_plyr_player = null;
-                xabber.trigger('plyr_player_updated');
-            }
+            xabber.plyr_player_popup.closePopup();
         },
 
         popupPlyr: function () {
-            if (!xabber.current_plyr_player || (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem))
-                return;
-            if (xabber.current_plyr_player.is_popup) {
-                let player = xabber.current_plyr_player.chat_item.model.plyr_players[xabber.current_plyr_player.player_index],
-                    playing = xabber.current_plyr_player.playing,
-                    currentTime = xabber.current_plyr_player.currentTime;
-                xabber.plyr_player_popup.$el.detach();
-                xabber.plyr_player_popup = null;
-                xabber.current_plyr_player.is_popup = false;
-                player.play();
-                player.once('playing',() => {
-                    player.currentTime = currentTime;
-                });
-                !playing && player.pause();
-                xabber.current_plyr_player = player;
-                let other_players = xabber.plyr_players.filter(other => other != player);
-                other_players.forEach(function(other) {
-                    if (other.$audio_elem){
-                        if (other.$audio_elem.voice_message)
-                            other.$audio_elem.voice_message.stopTime();
-                    }
-                    else
-                        other.pause();
-                })
-                xabber.trigger('plyr_player_updated');
-            } else {
-                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                xabber.plyr_player_popup.show({});
-            }
+            if (xabber.plyr_player_popup)
+                xabber.plyr_player_popup.minimizePopup();
         },
 
         nextPlyr: function () {
             let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-            if (player_index === -1 && xabber.current_plyr_player.is_popup)
-                player_index = xabber.current_plyr_player.player_index;
+            if (player_index === -1 && xabber.current_plyr_player.player_item)
+                player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
             if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1))
                 return;
-            if (xabber.current_plyr_player.is_popup && !xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem) {
-                xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index + 1, player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-            } else {
-                if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
-                    let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
-                    if (!next_item.$audio_elem.voice_message){
-                        let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                        $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                        next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-                    } else {
-                        next_item.$audio_elem.voice_message.play()
-                    }
+            if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
+                let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
+                if (!next_item.$audio_elem.voice_message){
+                    let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
+                    $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                    next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                } else {
+                    next_item.$audio_elem.voice_message.play()
+                }
+            } else{
+                if (!xabber.plyr_player_popup){
+                    xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                    xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
                 } else
-                    xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].play();
+                    xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
             }
         },
 
         previousPlyr: function () {
             let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-            if (player_index === -1 && xabber.current_plyr_player.is_popup)
-                player_index = xabber.current_plyr_player.player_index;
+            if (player_index === -1 && xabber.current_plyr_player.player_item)
+                player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
             if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0))
                 return;
-            if (xabber.current_plyr_player.is_popup && !xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem) {
-                xabber.plyr_player_popup.showNewVideo({on_play: true, on_controls: true, new_player_index: player_index - 1, player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-            } else {
-                if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
-                    let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
-                    if (!prev_item.$audio_elem.voice_message){
-                        let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                        $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                        prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-                    } else {
-                        prev_item.$audio_elem.voice_message.play()
-                    }
+            if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
+                let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
+                if (!prev_item.$audio_elem.voice_message){
+                    let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
+                    $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                    prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                } else {
+                    prev_item.$audio_elem.voice_message.play()
+                }
+            } else{
+                if (!xabber.plyr_player_popup){
+                    xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                    xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
                 } else
-                    xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].play();
+                    xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
             }
         },
 
@@ -8944,7 +8864,7 @@ define("xabber-chats", function () {
                         else
                             clearInterval(timerId);
                     }, 100);
-                    (xabber.current_plyr_player.is_popup && xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
+                    (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
                 }
             }
             else if (xabber.current_plyr_player) {
@@ -8972,10 +8892,10 @@ define("xabber-chats", function () {
                     this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing)
-                let player_index = xabber.current_plyr_player.is_popup ? xabber.current_plyr_player.player_index : xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
+                let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                 this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                (xabber.current_plyr_player.is_popup && xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
+                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
             }
         },
 
