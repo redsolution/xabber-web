@@ -2,6 +2,12 @@
         <div class="link-message-reference message-reference-preview-item message-reference-preview-item-big-image">
             <div class="embed-video">
                 <div class="plyr-video-container" data-provider="{{provider}}" data-src="{{video_url}}">
+                    <div class="plyr-video-play">
+                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="play"></svg>
+                    </div>
+                    {[ if (image) {]}
+                    <img class="plyr-video-poster" src="{{image}}">
+                    {[}]}
                 </div>
             </div>
             <a href="{{original_text}}" target=”_blank” class="msg-hyperlink">

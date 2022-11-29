@@ -324,6 +324,7 @@ define("xabber-chats", function () {
                             description: $file.children('desc').text(),
                             height: $file.children('height').text(),
                             width: $file.children('width').text(),
+                            thumbnail: $file.children('thumbnail-uri').text(),
                             id: $file.children('gallery-id').text(),
                             voice: type === 'voice',
                             sources: sources
@@ -4940,7 +4941,7 @@ define("xabber-chats", function () {
                     stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
                     file['id'] && stanza.c('gallery-id').t(file['id']).up();
-                    file['thumbnail-uri'] && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
+                    file.thumbnail && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
                     file.created && stanza.c('created').t(file.created).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();
@@ -5410,7 +5411,7 @@ define("xabber-chats", function () {
                         let response = JSON.parse(this.response)
                         message.get('files')[idx].id = response.id;
                         message.get('files')[idx].created_at = response.created_at;
-                        response.thumbnail && (message.get('files')[idx].thumbnail = response.thumbnail.url);
+                        (response.thumbnail && response.thumbnail.url) && (message.get('files')[idx].thumbnail = response.thumbnail.url);
                         message.get('files')[idx].url = response.file;
                         files_count++;
                         if (files_count == message.get('files').length) {
@@ -5467,7 +5468,7 @@ define("xabber-chats", function () {
                 file_.key && (file_new_format.key = file_.key);
                 file_.voice && (file_new_format.voice = true);
                 if (this.account.get('gallery_token') && this.account.get('gallery_url')){
-                    _.extend(file_new_format, { id: file_.id, created: file_.created_at, 'thumbnail-uri': file_.thumbnail });
+                    _.extend(file_new_format, { id: file_.id, created: file_.created_at, thumbnail: file_.thumbnail });
                 }
                 if (utils.isImageType(file_.type)) {
                     _.extend(file_new_format, { width: file_.width, height: file_.height });
@@ -5505,7 +5506,7 @@ define("xabber-chats", function () {
                     $message.removeClass('file-upload noselect');
                     $message.find('.chat-msg-media-content .chat-file-info').remove();
                     $message.find('.chat-msg-media-content.chat-main-upload-media').append(template_for_images);
-                    !xabber.settings.load_media && $message.find('.img-content-template').first().append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
+                    !xabber.settings.load_media && $message.find('.chat-msg-media-content.chat-main-upload-media .img-content-template').first().append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
                 }
                 else {
                     let img = this.createImage(images[0]),
@@ -5516,8 +5517,8 @@ define("xabber-chats", function () {
                     $message.removeClass('file-upload noselect');
                     $message.find('.chat-msg-media-content .chat-file-info').remove();
                     $message.find('.chat-msg-media-content.chat-main-upload-media').append(img_content);
-                    $message.find('.img-content').html(img);
-                    !xabber.settings.load_media && $message.find('.img-content').append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
+                    $message.find('.chat-msg-media-content.chat-main-upload-media .img-content').html(img);
+                    !xabber.settings.load_media && $message.find('.chat-msg-media-content.chat-main-upload-media .img-content').append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
                 }
             }
             if (videos.length > 0) {
@@ -5639,7 +5640,7 @@ define("xabber-chats", function () {
 
         createVideo: function(video) {
             video.pretty_size = utils.pretty_size(video.size)
-            let $video_wrap_template = $(templates.messages.video({video_src: video.sources[0]}));
+            let $video_wrap_template = $(templates.messages.video({video_src: video.sources[0], thumbnail: video.thumbnail}));
             return $video_wrap_template;
         },
 
@@ -8322,8 +8323,8 @@ define("xabber-chats", function () {
                   let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
                   if (!next_item.$audio_elem.voice_message){
                       let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                      $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                      next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                      $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                      next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                   } else {
                       next_item.$audio_elem.voice_message.play()
                   }
@@ -8346,8 +8347,8 @@ define("xabber-chats", function () {
                   let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
                   if (!prev_item.$audio_elem.voice_message){
                       let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                      $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                      prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                      $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                      prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                   } else {
                       prev_item.$audio_elem.voice_message.play()
                   }
@@ -8386,7 +8387,8 @@ define("xabber-chats", function () {
                           else
                               clearInterval(timerId);
                       }, 100);
-                      (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
+                      (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden2');
+                      (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).addClass('hidden2');
                   }
               }
               else if (xabber.current_plyr_player) {
@@ -8417,7 +8419,8 @@ define("xabber-chats", function () {
                   let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                   this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                   this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
+                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden2');
+                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).removeClass('hidden2');
               }
           },
 
@@ -8800,8 +8803,8 @@ define("xabber-chats", function () {
                 let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
                 if (!next_item.$audio_elem.voice_message){
                     let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                    $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                    next_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                    $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                    next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                 } else {
                     next_item.$audio_elem.voice_message.play()
                 }
@@ -8824,8 +8827,8 @@ define("xabber-chats", function () {
                 let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
                 if (!prev_item.$audio_elem.voice_message){
                     let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                    $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                    prev_item.$audio_elem.voice_message = this.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                    $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                    prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
                 } else {
                     prev_item.$audio_elem.voice_message.play()
                 }
@@ -8864,7 +8867,8 @@ define("xabber-chats", function () {
                         else
                             clearInterval(timerId);
                     }, 100);
-                    (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden');
+                    (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden2');
+                    (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).addClass('hidden2');
                 }
             }
             else if (xabber.current_plyr_player) {
@@ -8895,7 +8899,8 @@ define("xabber-chats", function () {
                 let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                 this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden');
+                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden2');
+                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).removeClass('hidden2');
             }
         },
 
@@ -11109,7 +11114,7 @@ define("xabber-chats", function () {
                     $message.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && $message.c('media-type').t(file.type).up();
                     file['id'] && $message.c('gallery-id').t(file['id']).up();
-                    file['thumbnail-uri'] && $message.c('thumbnail-uri').t(file['thumbnail-uri']).up();
+                    file.thumbnail && $message.c('thumbnail-uri').t(file.thumbnail).up();
                     file.created && $message.c('created').t(file.created).up();
                     file.name && $message.c('name').t(file.name).up();
                     file.size && $message.c('size').t(file.size).up();

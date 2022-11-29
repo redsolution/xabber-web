@@ -201,6 +201,7 @@ define("xabber-templates", [
     "text!templates/svg/picture-in-picture-top-right.html",
     "text!templates/svg/plyr.html",
     "text!templates/svg/plus.html",
+    "text!templates/svg/play.html",
     "text!templates/svg/video.html",
     "text!templates/svg/status-outline.html",
     "text!templates/svg/birthday-outline.html",
@@ -512,6 +513,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.picture-in-picture-top-right');
     addSvgTemplate('svg.plyr');
     addSvgTemplate('svg.plus');
+    addSvgTemplate('svg.play');
     addSvgTemplate('svg.video');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status-outline');

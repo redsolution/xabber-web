@@ -75,6 +75,7 @@ let badges_names = [
         'picture-in-picture-top-right',
         'video',
         'plus',
+        'play',
     ],
     circle_icons = [,
         'task'
