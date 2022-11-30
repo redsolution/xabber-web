@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.166","version_description":"fixed image changing in forward on uploading new image, added image poster and visuals for video initiation in message, fixed chat context in prev-next buttons in media player, fixed switching between video and voice in media player, added prev-next buttons to popup player, fixed dragging of big popup player"}'
+'{"version_number":"2.3.2.167","version_description":"fixed thumbnail poster sending for videos, changed hiding to disabling in next-previous buttons in player"}'
 )});

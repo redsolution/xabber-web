@@ -4941,7 +4941,7 @@ define("xabber-chats", function () {
                     stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                     file.type && stanza.c('media-type').t(file.type).up();
                     file['id'] && stanza.c('gallery-id').t(file['id']).up();
-                    file.thumbnail && stanza.c('thumbnail-uri').t(file['thumbnail-uri']).up();
+                    file.thumbnail && stanza.c('thumbnail-uri').t(file.thumbnail).up();
                     file.created && stanza.c('created').t(file.created).up();
                     file.name && stanza.c('name').t(file.name).up();
                     file.size && stanza.c('size').t(file.size).up();

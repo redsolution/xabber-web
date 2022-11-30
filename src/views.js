@@ -1601,8 +1601,8 @@ define("xabber-views", function () {
         updatePlyrControls: function () {
             if (xabber.current_plyr_player) {
                 let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-                this.$('.btn-next-plyr').switchClass('hidden', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
-                this.$('.btn-previous-plyr').switchClass('hidden', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
+                this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
+                this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
             }
         },
     });

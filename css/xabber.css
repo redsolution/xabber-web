@@ -16497,6 +16497,12 @@ input[type='range'].voice-message-volume:focus {
 .plyr-player-popup-view .mdi-minimize path{
     fill: #FFF;
 }
+.main-modal.plyr-player-popup-view.player-overlay .btn-next-plyr.disabled,
+.main-modal.plyr-player-popup-view.player-overlay .btn-previous-plyr.disabled{
+    cursor: auto;
+    pointer-events: none;
+    color: #9E9E9E;
+}
 .plyr-player-popup-view .plyr-player-popup-container{
     height: 100%;
 }
