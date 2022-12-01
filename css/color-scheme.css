@@ -56,6 +56,15 @@
 [data-color=red] .hover-fill-color-500:hover {
   fill: #F44336 !important;
 }
+[data-color=red] .plyr__control--overlaid,
+[data-color=red] .plyr--video .plyr__control:hover,
+[data-color=red] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=red] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=red] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=red] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=red] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #EF5350 !important;
+}
 
 .ground-color-red-300,
 .hover-ground-color-red-300:hover,
@@ -188,6 +197,15 @@
 [data-color=pink] .hover-fill-color-500:hover {
   fill: #E91E63 !important;
 }
+[data-color=pink] .plyr__control--overlaid,
+[data-color=pink] .plyr--video .plyr__control:hover,
+[data-color=pink] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=pink] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=pink] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=pink] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=pink] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #EC407A !important;
+}
 
 .ground-color-pink-300,
 .hover-ground-color-pink-300:hover,
@@ -319,6 +337,15 @@
 [data-color=purple] .fill-color-500 use,
 [data-color=purple] .hover-fill-color-500:hover {
   fill: #9C27B0 !important;
+}
+[data-color=purple] .plyr__control--overlaid,
+[data-color=purple] .plyr--video .plyr__control:hover,
+[data-color=purple] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=purple] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=purple] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=purple] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=purple] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #AB47BC !important;
 }
 
 .ground-color-purple-300,
@@ -453,6 +480,15 @@
 [data-color=deep-purple] .hover-fill-color-500:hover {
   fill: #673AB7 !important;
 }
+[data-color=deep-purple] .plyr__control--overlaid,
+[data-color=deep-purple] .plyr--video .plyr__control:hover,
+[data-color=deep-purple] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=deep-purple] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=deep-purple] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=deep-purple] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=deep-purple] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #7E57C2 !important;
+}
 
 .ground-color-deep-purple-300,
 .hover-ground-color-deep-purple-300:hover,
@@ -584,6 +620,15 @@
 [data-color=indigo] .fill-color-500 use,
 [data-color=indigo] .hover-fill-color-500:hover {
   fill: #3F51B5 !important;
+}
+[data-color=indigo] .plyr__control--overlaid,
+[data-color=indigo] .plyr--video .plyr__control:hover,
+[data-color=indigo] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=indigo] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=indigo] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=indigo] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=indigo] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #5C6BC0 !important;
 }
 
 .ground-color-indigo-300,
@@ -718,6 +763,15 @@
 [data-color=blue] .hover-fill-color-500:hover {
   fill: #2196F3 !important;
 }
+[data-color=blue] .plyr__control--overlaid,
+[data-color=blue] .plyr--video .plyr__control:hover,
+[data-color=blue] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=blue] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=blue] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=blue] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=blue] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #42A5F5 !important;
+}
 
 .ground-color-blue-300,
 .hover-ground-color-blue-300:hover,
@@ -851,6 +905,15 @@
 [data-color=light-blue] .hover-fill-color-500:hover {
   fill: #03A9F4 !important;
 }
+[data-color=light-blue] .plyr__control--overlaid,
+[data-color=light-blue] .plyr--video .plyr__control:hover,
+[data-color=light-blue] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=light-blue] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=light-blue] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=light-blue] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=light-blue] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #29B6F6 !important;
+}
 
 .ground-color-light-blue-300,
 .hover-ground-color-light-blue-300:hover,
@@ -983,6 +1046,15 @@
 [data-color=cyan] .hover-fill-color-500:hover {
   fill: #00BCD4 !important;
 }
+[data-color=cyan] .plyr__control--overlaid,
+[data-color=cyan] .plyr--video .plyr__control:hover,
+[data-color=cyan] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=cyan] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=cyan] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=cyan] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=cyan] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #26C6DA !important;
+}
 
 .ground-color-cyan-300,
 .hover-ground-color-cyan-300:hover,
@@ -1114,6 +1186,15 @@
 [data-color=teal] .fill-color-500 use,
 [data-color=teal] .hover-fill-color-500:hover {
   fill: #009688 !important;
+}
+[data-color=teal] .plyr__control--overlaid,
+[data-color=teal] .plyr--video .plyr__control:hover,
+[data-color=teal] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=teal] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=teal] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=teal] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=teal] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #26A69A !important;
 }
 
 .ground-color-teal-300,
@@ -1248,6 +1329,15 @@
 [data-color=green] .hover-fill-color-500:hover {
   fill: #4CAF50 !important;
 }
+[data-color=green] .plyr__control--overlaid,
+[data-color=green] .plyr--video .plyr__control:hover,
+[data-color=green] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=green] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=green] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=green] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=green] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #66BB6A !important;
+}
 
 .ground-color-green-300,
 .hover-ground-color-green-300:hover,
@@ -1381,6 +1471,15 @@
 [data-color=light-green] .hover-fill-color-500:hover {
   fill: #8BC34A !important;
 }
+[data-color=light-green] .plyr__control--overlaid,
+[data-color=light-green] .plyr--video .plyr__control:hover,
+[data-color=light-green] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=light-green] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=light-green] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=light-green] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=light-green] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #9CCC65 !important;
+}
 
 .ground-color-light-green-300,
 .hover-ground-color-light-green-300:hover,
@@ -1512,6 +1611,15 @@
 [data-color=lime] .fill-color-500 use,
 [data-color=lime] .hover-fill-color-500:hover {
   fill: #CDDC39 !important;
+}
+[data-color=lime] .plyr__control--overlaid,
+[data-color=lime] .plyr--video .plyr__control:hover,
+[data-color=lime] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=lime] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=lime] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=lime] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=lime] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #D4E157 !important;
 }
 
 .ground-color-lime-300,
@@ -1646,6 +1754,15 @@
 [data-color=amber] .hover-fill-color-500:hover {
   fill: #FFC107 !important;
 }
+[data-color=amber] .plyr__control--overlaid,
+[data-color=amber] .plyr--video .plyr__control:hover,
+[data-color=amber] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=amber] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=amber] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=amber] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=amber] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #FFCA28 !important;
+}
 
 .ground-color-amber-300,
 .hover-ground-color-amber-300:hover,
@@ -1777,6 +1894,15 @@
 [data-color=orange] .fill-color-500 use,
 [data-color=orange] .hover-fill-color-500:hover {
   fill: #FF9800 !important;
+}
+[data-color=orange] .plyr__control--overlaid,
+[data-color=orange] .plyr--video .plyr__control:hover,
+[data-color=orange] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=orange] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=orange] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=orange] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=orange] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #FFA726 !important;
 }
 
 .ground-color-orange-300,
@@ -1911,6 +2037,15 @@
 [data-color=deep-orange] .hover-fill-color-500:hover {
   fill: #FF5722 !important;
 }
+[data-color=deep-orange] .plyr__control--overlaid,
+[data-color=deep-orange] .plyr--video .plyr__control:hover,
+[data-color=deep-orange] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=deep-orange] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=deep-orange] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=deep-orange] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=deep-orange] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #FF7043 !important;
+}
 
 .ground-color-deep-orange-300,
 .hover-ground-color-deep-orange-300:hover,
@@ -2043,6 +2178,15 @@
 [data-color=brown] .hover-fill-color-500:hover {
   fill: #795548 !important;
 }
+[data-color=brown] .plyr__control--overlaid,
+[data-color=brown] .plyr--video .plyr__control:hover,
+[data-color=brown] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=brown] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=brown] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=brown] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=brown] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #8D6E63 !important;
+}
 
 .ground-color-brown-300,
 .hover-ground-color-brown-300:hover,
@@ -2174,6 +2318,15 @@
 [data-color=blue-grey] .fill-color-500 use,
 [data-color=blue-grey] .hover-fill-color-500:hover {
   fill: #607D8B !important;
+}
+[data-color=blue-grey] .plyr__control--overlaid,
+[data-color=blue-grey] .plyr--video .plyr__control:hover,
+[data-color=blue-grey] .plyr-player-popup-container .btn-next-plyr:hover,
+[data-color=blue-grey] .plyr-player-popup-container .btn-previous-plyr:hover,
+[data-color=blue-grey] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=blue-grey] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
+[data-color=blue-grey] .plyr-player-control-tab .mdi-close:hover{
+  background-color: #78909C !important;
 }
 
 .ground-color-blue-grey-300,

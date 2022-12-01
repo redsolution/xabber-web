@@ -4287,6 +4287,7 @@ define("xabber-chats", function () {
                             let audio_player = {$audio_elem : $message.find('.link-file')[0]};
                             audio_player.msg_time = $message.attr('data-time');
                             audio_player.author = username;
+                            audio_player.message_unique_id = $message.attr('data-uniqueid');
                             if (attrs.from_jid === this.account.get('jid')) {
                                 if (this.model.get('group_chat')) {
                                     if (this.contact.my_info) {
@@ -4466,6 +4467,7 @@ define("xabber-chats", function () {
                                     let audio_player = {$audio_elem : $f_message.find('.link-file')[0]};
                                     audio_player.msg_time = $message.attr('data-time');
                                     audio_player.author = username;
+                                    audio_player.message_unique_id = $message.attr('data-uniqueid');
                                     if (is_sender) {
                                         if (this.model.get('group_chat')) {
                                             if (this.contact.my_info) {
@@ -4597,6 +4599,7 @@ define("xabber-chats", function () {
                 player.msg_time = $msg.attr('data-time');
                 player.chat_item = this.model.item_view;
                 player.message_id = idx;
+                player.message_unique_id = $msg.attr('data-uniqueid');
                 this.model.plyr_players = this.model.plyr_players.concat([player]).sort((a, b) => a.msg_time - b.msg_time);
                 xabber.plyr_players = xabber.plyr_players.concat([player]);
                 msg_players = msg_players.concat([player]);
@@ -5560,6 +5563,7 @@ define("xabber-chats", function () {
                         let audio_player = {$audio_elem : $message.find('.link-file')[0]};
                         audio_player.msg_time = $message.attr('data-time');
                         audio_player.author = $message.find('.chat-msg-author').text();
+                        audio_player.message_unique_id = $message.attr('data-uniqueid');
                         if (this.model.get('group_chat')) {
                             if (this.contact.my_info) {
                                 audio_player.contact_avatar = this.contact.my_info.get('b64_avatar');

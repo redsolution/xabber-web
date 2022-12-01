@@ -1414,6 +1414,7 @@ define("xabber-views", function () {
             "click .mdi-plyr-hide": "hidePopup",
             "click .btn-next-plyr": "nextPlyr",
             "click .btn-previous-plyr": "previousPlyr",
+            "click .mdi-open-message": "openMessage",
         },
 
         _initialize: function (options) {
@@ -1500,8 +1501,11 @@ define("xabber-views", function () {
 
         showNewVideo: function (options) {
             options = options || {};
+            this.account = options.player.chat_item.account;
+            this.updateColorScheme();
             this.player.chat_item = options.player.chat_item;
             this.player.player_item = options.player;
+            this.player.message_unique_id = options.player.message_unique_id;
             this.player.source = {
                 type: 'video',
                 sources: [
@@ -1631,6 +1635,26 @@ define("xabber-views", function () {
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                 this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
             }
+        },
+
+        openMessage: function () {
+            if (!(this.player && this.player.chat_item && this.player.message_unique_id))
+                return;
+            let chat = this.player.chat_item.model;
+            xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
+            xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', model: chat });
+            if (xabber.right_contact_panel_saveable && xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context') {
+                if (xabber.right_contact_panel_saveable)
+                    chat.contact.showDetailsRight('all-chats', {right_saved: true});
+                else
+                    chat.contact.showDetailsRight('all-chats', {right_saved: false});
+            }
+            chat.getMessageContext(this.player.message_unique_id, {message: true});
+        },
+
+        updateColorScheme: function () {
+            this.$el.attr('data-color', this.account.settings.get('color'));
+            this.account.settings.once("change:color", this.updateColorScheme, this);
         },
     });
 

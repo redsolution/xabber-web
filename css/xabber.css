@@ -16456,7 +16456,7 @@ input[type='range'].voice-message-volume:focus {
     height: 100%;
     width: 100%;
 }
-.plyr-player-popup-view .mdi-plyr-hide,
+.plyr-player-popup-view .mdi-plyr-toolbar-item,
 .plyr-player-popup-view .mdi-close{
     cursor: pointer;
     color: #999;
@@ -16465,20 +16465,23 @@ input[type='range'].voice-message-volume:focus {
     padding: 4px;
     transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
 }
-.plyr-player-popup-view .mdi-plyr-hide:hover,
+.plyr-player-popup-view .mdi-plyr-toolbar-item:hover,
 .plyr-player-popup-view .mdi-close:hover{
     background: #00b2ff;
     border-radius: 3px;
     color: #FFF;
 }
-.plyr-player-popup-view .mdi-plyr-hide path{
+.plyr-player-popup-view .mdi-plyr-toolbar-item svg{
+    pointer-events: none;
+}
+.plyr-player-popup-view .mdi-plyr-toolbar-item path{
     fill: #999;
     transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
 }
-.plyr-player-popup-view .mdi-plyr-hide:hover path{
+.plyr-player-popup-view .mdi-plyr-toolbar-item:hover path{
     fill: #FFF;
 }
-.plyr-player-popup-view.player-overlay .mdi-plyr-hide path,
+.plyr-player-popup-view.player-overlay .mdi-plyr-toolbar-item path,
 .plyr-player-popup-view.player-overlay .mdi-close{
     color: #FFF;
     fill: #FFF;
@@ -16515,6 +16518,9 @@ input[type='range'].voice-message-volume:focus {
 .plyr-player-popup-view .mdi-minimize:hover{
     background: #00b2ff;
     border-radius: 3px;
+}
+.plyr-player-popup-view .mdi-minimize svg{
+    pointer-events: none;
 }
 .plyr-player-popup-view .mdi-minimize path{
     fill: #FFF;
