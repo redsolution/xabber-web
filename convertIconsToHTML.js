@@ -76,6 +76,10 @@ let badges_names = [
         'video',
         'plus',
         'play',
+        'player-float',
+        'player-full',
+        'player-mini-variant',
+        'player-mini',
     ],
     circle_icons = [,
         'task'

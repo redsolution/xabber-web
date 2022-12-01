@@ -5943,7 +5943,7 @@ define("xabber-chats", function () {
                     else if (from_jid === this.account.get('jid')) {
                         this.account.showSettings();
                     } else if (from_jid === this.model.get('jid')) {
-                        this.contact.showDetails('all-chats');
+                        this.contact && this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                     } else {
                         if (from_jid == from_id)
                             return;
@@ -5966,7 +5966,7 @@ define("xabber-chats", function () {
                     else if (from_jid === this.account.get('jid')) {
                         this.account.showSettings();
                     } else if (from_jid === this.model.get('jid')) {
-                        this.contact && this.contact.showDetails('all-chats');
+                        this.contact && this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                     } else {
                         let contact = this.account.contacts.mergeContact(from_jid);
                         contact.showDetails();
@@ -5987,7 +5987,7 @@ define("xabber-chats", function () {
                         if (member_id === this.account.get('jid'))
                             this.account.showSettings();
                         else if (member_id === this.model.get('jid')) {
-                            this.contact.showDetails('all-chats');
+                            this.contact && this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                         } else {
                             let contact = this.account.contacts.mergeContact(member_id);
                             contact.showDetails();

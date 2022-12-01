@@ -201,6 +201,10 @@ define("xabber-templates", [
     "text!templates/svg/picture-in-picture-top-right.html",
     "text!templates/svg/plyr.html",
     "text!templates/svg/plus.html",
+    "text!templates/svg/player-float.html",
+    "text!templates/svg/player-full.html",
+    "text!templates/svg/player-mini-variant.html",
+    "text!templates/svg/player-mini.html",
     "text!templates/svg/play.html",
     "text!templates/svg/video.html",
     "text!templates/svg/status-outline.html",
@@ -513,6 +517,10 @@ define("xabber-templates", [
     addSvgTemplate('svg.picture-in-picture-top-right');
     addSvgTemplate('svg.plyr');
     addSvgTemplate('svg.plus');
+    addSvgTemplate('svg.player-float');
+    addSvgTemplate('svg.player-full');
+    addSvgTemplate('svg.player-mini-variant');
+    addSvgTemplate('svg.player-mini');
     addSvgTemplate('svg.play');
     addSvgTemplate('svg.video');
     addSvgTemplate('svg.cancel');

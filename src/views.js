@@ -1409,7 +1409,9 @@ define("xabber-views", function () {
 
         events: {
             "click .mdi-close": "closePopup",
-            "click .mdi-minimize": "minimizePopup",
+            "click .mdi-minimize-float": "floatPopup",
+            "click .mdi-minimize-full": "fullPopup",
+            "click .mdi-plyr-hide": "hidePopup",
             "click .btn-next-plyr": "nextPlyr",
             "click .btn-previous-plyr": "previousPlyr",
         },
@@ -1457,7 +1459,7 @@ define("xabber-views", function () {
                     this.pos2 = 0;
                     this.pos3 = 0;
                     this.pos4 = 0;
-                    this.$('.plyr-player-popup-container').mousedown((e) => {
+                    this.$('.plyr-player-popup-draggable').mousedown((e) => {
                         e = e || window.event;
                         if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length || $(e.target).closest('.mdi-close').length)
                             return;
@@ -1511,9 +1513,12 @@ define("xabber-views", function () {
             }
             xabber.current_plyr_player = this.player;
             this.player.once('ready',(event) => {
-                let $minimize_element = $('<div class="mdi mdi-24px mdi-minimize mdi-svg-template" data-svgname="picture-in-picture-minimize"></div>')
-                $minimize_element.html(env.templates.svg['picture-in-picture-minimize']())
-                $minimize_element.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
+                let $minimize_element_float = $('<div class="mdi mdi-24px mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></div>')
+                $minimize_element_float.append(env.templates.svg['player-float']())
+                $minimize_element_float.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
+                let $minimize_element_full = $('<div class="mdi mdi-24px mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></div>')
+                $minimize_element_full.append(env.templates.svg['player-full']())
+                $minimize_element_full.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
                 let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>')
                 $previous_element.insertBefore(this.$('.plyr__controls__item[data-plyr="play"]'));
                 let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>')
@@ -1540,6 +1545,24 @@ define("xabber-views", function () {
             this.data.set('visibility_state', visibility_state);
         },
 
+        hidePopup: function () {
+            if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
+                return;
+            this.data.set('visibility_state', 2);
+        },
+
+        floatPopup: function () {
+            if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
+                return;
+            this.data.set('visibility_state', 1);
+        },
+
+        fullPopup: function () {
+            if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
+                return;
+            this.data.set('visibility_state', 0);
+        },
+
         onVisibilityChange: function () {
             let visibility_state = this.data.get('visibility_state'),
                 $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
@@ -1548,6 +1571,10 @@ define("xabber-views", function () {
             $overlay.switchClass('hidden', visibility_state != 0);
             this.$el.switchClass('player-overlay', visibility_state === 0);
             this.$el.switchClass('hidden', visibility_state === 2);
+            //randomize icon for hiding(temporary)
+            let random_value = Math.round(Math.random());
+            this.$('.plyr-hide-1').switchClass('hidden', random_value);
+            this.$('.plyr-hide-2').switchClass('hidden', !random_value);
         },
 
         nextPlyr: function () {

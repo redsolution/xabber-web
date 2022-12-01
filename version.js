@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.167","version_description":"fixed thumbnail poster sending for videos, changed hiding to disabling in next-previous buttons in player"}'
+'{"version_number":"2.3.2.168","version_description":"changed popup minimization and visuals, fixed contact details opening on avatar and mentions"}'
 )});
