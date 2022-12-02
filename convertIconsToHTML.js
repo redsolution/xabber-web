@@ -80,6 +80,7 @@ let badges_names = [
         'player-full',
         'player-mini-variant',
         'player-mini',
+        'message-bookmark-outline',
     ],
     circle_icons = [,
         'task'

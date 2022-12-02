@@ -1,9 +1,12 @@
 <div class="plyr-video-container"  data-provider="html5" data-src="{{video_src}}">
     <div class="plyr-video-play">
-        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="play"></svg>
+        <svg class="mdi mdi-32px mdi-svg-template" data-svgname="play"></svg>
+    </div>
+    <div class="plyr-video-playing">
+        <svg class="mdi mdi-48px mdi-svg-template" data-svgname="player-float"></svg>
+        <div class="plyr-video-playing-hint">{[print(xabber.getString("chat_message_video_playing_hint"))]}</div>
     </div>
     {[ if (thumbnail) {]}
-        <img class="plyr-video-poster" src="{{thumbnail}}">
-    {[} else {]}
+        <img class="plyr-video-poster" src="{{thumbnail}}" onerror="this.style.display='none'">
     {[}]}
 </div>

@@ -3,10 +3,14 @@
             <div class="embed-video">
                 <div class="plyr-video-container" data-provider="{{provider}}" data-src="{{video_url}}">
                     <div class="plyr-video-play">
-                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="play"></svg>
+                        <svg class="mdi mdi-32px mdi-svg-template" data-svgname="play"></svg>
+                    </div>
+                    <div class="plyr-video-playing">
+                        <svg class="mdi mdi-48px mdi-svg-template" data-svgname="player-float"></svg>
+                        <div class="plyr-video-playing-hint">{[print(xabber.getString("chat_message_video_playing_hint"))]}</div>
                     </div>
                     {[ if (image) {]}
-                    <img class="plyr-video-poster" src="{{image}}">
+                    <img class="plyr-video-poster" src="{{image}}" onerror="this.style.display='none'">
                     {[}]}
                 </div>
             </div>

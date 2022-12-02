@@ -2257,10 +2257,12 @@ define("xabber-chats", function () {
               this.account.context_messages = new xabber.Messages(null, {account: this.account});
               this.account.context_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
               this.account.context_messages.on("add", this.addMessage, this);
+              xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
           },
 
           render: function () {
               this.scrollToTop();
+              this.onUpdatePlyr();
               this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
               this.encrypted && this.$el.attr('data-trust', true)
           },
@@ -2364,7 +2366,17 @@ define("xabber-chats", function () {
                   }, 3000);
               }
               this.addMessageHTML($message, index, this.account.context_messages.findLastIndex());
-          }
+          },
+
+          onUpdatePlyr: function (ev) {
+              this.$('.plyr-video-container').removeClass('active-plyr-container');
+              if (xabber.current_plyr_player) {
+                  let $message = this.$(`.chat-message[data-uniqueid="${xabber.current_plyr_player.message_unique_id}"]`);
+                  if ($message.length) {
+                      $message.find(`.plyr-video-container[data-message-id="${xabber.current_plyr_player.player_item.message_id}"]`).addClass('active-plyr-container');
+                  }
+              }
+          },
       });
 
       xabber.SearchedMessagesView = xabber.MessagesView.extend({
@@ -2909,6 +2921,7 @@ define("xabber-chats", function () {
             }
             this.account.on("change", this.updateMyInfo, this);
             this.account.settings.on("change:color", this.updateContentColorScheme, this);
+            xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
             this.account.dfd_presence.done(() => {
                 !this.account.connection.do_synchronization && this.loadLastHistory();
             });
@@ -2921,6 +2934,7 @@ define("xabber-chats", function () {
               this.onScroll();
               this.updateContactStatus();
               this.updateWaveforms();
+              this.onUpdatePlyr();
               if (this.contact) {
                   this.contact.get('group_chat') && this.updatePinnedMessage();
                   this.subscription_buttons.render();
@@ -6214,7 +6228,17 @@ define("xabber-chats", function () {
             this.removeMessage($msg);
             ev.preventDefault();
             this.chat_item.updateChatError();
-        }
+        },
+
+        onUpdatePlyr: function (ev) {
+            this.$('.plyr-video-container').removeClass('active-plyr-container');
+            if (xabber.current_plyr_player) {
+                let $message = this.$(`.chat-message[data-uniqueid="${xabber.current_plyr_player.message_unique_id}"]`);
+                if ($message.length) {
+                    $message.find(`.plyr-video-container[data-message-id="${xabber.current_plyr_player.player_item.message_id}"]`).addClass('active-plyr-container');
+                }
+            }
+        },
     });
 
     xabber.ExpandedMessagePanel = xabber.BasicView.extend({

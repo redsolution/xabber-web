@@ -205,6 +205,7 @@ define("xabber-templates", [
     "text!templates/svg/player-full.html",
     "text!templates/svg/player-mini-variant.html",
     "text!templates/svg/player-mini.html",
+    "text!templates/svg/message-bookmark-outline.html",
     "text!templates/svg/play.html",
     "text!templates/svg/video.html",
     "text!templates/svg/status-outline.html",
@@ -521,6 +522,7 @@ define("xabber-templates", [
     addSvgTemplate('svg.player-full');
     addSvgTemplate('svg.player-mini-variant');
     addSvgTemplate('svg.player-mini');
+    addSvgTemplate('svg.message-bookmark-outline');
     addSvgTemplate('svg.play');
     addSvgTemplate('svg.video');
     addSvgTemplate('svg.cancel');

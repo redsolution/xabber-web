@@ -1640,6 +1640,7 @@ define("xabber-views", function () {
         openMessage: function () {
             if (!(this.player && this.player.chat_item && this.player.message_unique_id))
                 return;
+            this.floatPopup();
             let chat = this.player.chat_item.model;
             xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
             xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', model: chat });
