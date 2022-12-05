@@ -1415,6 +1415,8 @@ define("xabber-views", function () {
             "click .btn-next-plyr": "nextPlyr",
             "click .btn-previous-plyr": "previousPlyr",
             "click .mdi-open-message": "openMessage",
+            "click .mdi-toggle-play": "togglePlay",
+            "click .mdi-toggle-mute": "toggleMute",
         },
 
         _initialize: function (options) {
@@ -1451,6 +1453,9 @@ define("xabber-views", function () {
                         this.player.on('timeupdate',(event) => {
                             xabber.trigger('plyr_player_time_updated');
                         });
+                        this.player.on('volumechange',(event) => {
+                            xabber.trigger('plyr_player_updated');
+                        });
                     }
                     this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId')).mousedown(() => {this.minimizePopup()});
                     this.showNewVideo(options);
@@ -1460,9 +1465,9 @@ define("xabber-views", function () {
                     this.pos2 = 0;
                     this.pos3 = 0;
                     this.pos4 = 0;
-                    this.$('.plyr-player-popup-draggable').mousedown((e) => {
+                    this.$('.plyr-player-min-controls-tab').mousedown((e) => {
                         e = e || window.event;
-                        if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length || $(e.target).closest('.mdi-close').length)
+                        if ($(e.target).closest('.plyr__control--overlaid').length || $(e.target).closest('.plyr__controls').length || $(e.target).closest('.mdi-close').length || $(e.target).closest('.plyr-player-min-controls-buttons').length)
                             return;
                         e.preventDefault();
                         // get the mouse cursor position at startup:
@@ -1517,12 +1522,15 @@ define("xabber-views", function () {
             }
             xabber.current_plyr_player = this.player;
             this.player.once('ready',(event) => {
-                let $minimize_element_float = $('<div class="mdi mdi-24px mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></div>')
+                let $minimize_element_float = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></svg>')
                 $minimize_element_float.append(env.templates.svg['player-float']())
                 $minimize_element_float.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
-                let $minimize_element_full = $('<div class="mdi mdi-24px mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></div>')
+                let $minimize_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></svg>')
                 $minimize_element_full.append(env.templates.svg['player-full']())
                 $minimize_element_full.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
+                let $show_message_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-open-message mdi-svg-template" data-svgname="message-bookmark-outline"></svg>')
+                $show_message_element_full.append(env.templates.svg['message-bookmark-outline']())
+                $show_message_element_full.insertAfter(this.$('.plyr__controls__item[data-plyr="download"]'));
                 let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>')
                 $previous_element.insertBefore(this.$('.plyr__controls__item[data-plyr="play"]'));
                 let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>')
@@ -1575,10 +1583,6 @@ define("xabber-views", function () {
             $overlay.switchClass('hidden', visibility_state != 0);
             this.$el.switchClass('player-overlay', visibility_state === 0);
             this.$el.switchClass('hidden', visibility_state === 2);
-            //randomize icon for hiding(temporary)
-            let random_value = Math.round(Math.random());
-            this.$('.plyr-hide-1').switchClass('hidden', random_value);
-            this.$('.plyr-hide-2').switchClass('hidden', !random_value);
         },
 
         nextPlyr: function () {
@@ -1634,6 +1638,10 @@ define("xabber-views", function () {
                 let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
                 this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
+                this.$('.mdi-plyr-play').switchClass('hidden', xabber.current_plyr_player.playing);
+                this.$('.mdi-plyr-pause').switchClass('hidden', !xabber.current_plyr_player.playing);
+                this.$('.mdi-mute-plyr').switchClass('hidden', !xabber.current_plyr_player.muted);
+                this.$('.mdi-unmute-plyr').switchClass('hidden', xabber.current_plyr_player.muted);
             }
         },
 
@@ -1651,6 +1659,27 @@ define("xabber-views", function () {
                     chat.contact.showDetailsRight('all-chats', {right_saved: false});
             }
             chat.getMessageContext(this.player.message_unique_id, {message: true});
+        },
+
+        togglePlay: function () {
+            if (!xabber.current_plyr_player)
+                return;
+            if (xabber.current_plyr_player.$audio_elem){
+                if (!xabber.current_plyr_player.$audio_elem.voice_message){
+                    let f_url = $(xabber.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
+                    $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                    xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
+                } else {
+                    xabber.current_plyr_player.$audio_elem.voice_message.playPause()
+                }
+            } else
+                xabber.current_plyr_player.togglePlay();
+        },
+
+        toggleMute: function () {
+            if (!xabber.current_plyr_player)
+                return;
+            xabber.current_plyr_player.muted = !xabber.current_plyr_player.muted;
         },
 
         updateColorScheme: function () {

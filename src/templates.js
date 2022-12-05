@@ -199,6 +199,9 @@ define("xabber-templates", [
     "text!templates/svg/picture-in-picture-minimize.html",
     "text!templates/svg/picture-in-picture-bottom-right.html",
     "text!templates/svg/picture-in-picture-top-right.html",
+    "text!templates/svg/pause.html",
+    "text!templates/svg/volume-off.html",
+    "text!templates/svg/volume-high.html",
     "text!templates/svg/plyr.html",
     "text!templates/svg/plus.html",
     "text!templates/svg/player-float.html",
@@ -516,6 +519,9 @@ define("xabber-templates", [
     addSvgTemplate('svg.picture-in-picture-minimize');
     addSvgTemplate('svg.picture-in-picture-bottom-right');
     addSvgTemplate('svg.picture-in-picture-top-right');
+    addSvgTemplate('svg.pause');
+    addSvgTemplate('svg.volume-off');
+    addSvgTemplate('svg.volume-high');
     addSvgTemplate('svg.plyr');
     addSvgTemplate('svg.plus');
     addSvgTemplate('svg.player-float');

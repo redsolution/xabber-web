@@ -6232,7 +6232,7 @@ define("xabber-chats", function () {
 
         onUpdatePlyr: function (ev) {
             this.$('.plyr-video-container').removeClass('active-plyr-container');
-            if (xabber.current_plyr_player) {
+            if (xabber.current_plyr_player && xabber.current_plyr_player.player_item) {
                 let $message = this.$(`.chat-message[data-uniqueid="${xabber.current_plyr_player.message_unique_id}"]`);
                 if ($message.length) {
                     $message.find(`.plyr-video-container[data-message-id="${xabber.current_plyr_player.player_item.message_id}"]`).addClass('active-plyr-container');

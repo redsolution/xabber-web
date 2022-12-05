@@ -16430,6 +16430,7 @@ input[type='range'].voice-message-volume:focus {
     background: #BDBDBD;
     border-radius: 50%;
     opacity: 0.9;
+    transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
 }
 .chat-message .plyr-video-container .plyr-video-play polygon{
     fill: #fff;
@@ -16489,6 +16490,49 @@ input[type='range'].voice-message-volume:focus {
     height: 100%;
     width: 100%;
 }
+.plyr-player-popup-view:not(.player-overlay) .plyr__control--overlaid,
+.plyr-player-popup-view:not(.player-overlay) .plyr__controls{
+    display: none;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    transition: all .3s ease;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    flex-direction: row;
+    transform: translate(-50%, -50%);
+    justify-content: center;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized{
+    cursor: pointer;
+    color: #999;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
+    background: #999;
+    margin-left: 8px;
+    border-radius: 50%;
+    opacity: 0.9;
+    overflow: visible;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized svg{
+    pointer-events: none;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized:hover{
+    opacity: 1;
+}
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized path,
+.plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized polygon{
+    fill: #fff
+}
 .plyr-player-popup-view .mdi-plyr-toolbar-item,
 .plyr-player-popup-view .mdi-close{
     cursor: pointer;
@@ -16519,6 +16563,7 @@ input[type='range'].voice-message-volume:focus {
     color: #FFF;
     fill: #FFF;
 }
+.plyr-player-popup-view:hover .plyr-player-min-controls-tab,
 .plyr-player-popup-view:hover .plyr-player-control-tab,
 .plyr-player-popup-view:hover .mdi-close,
 .plyr-player-popup-view:hover .plyr__controls{
@@ -16531,13 +16576,20 @@ input[type='range'].voice-message-volume:focus {
     pointer-events: none;
     transform: translateX(-100%);
 }
+.plyr-player-popup-view .plyr-player-min-controls-tab{
+    opacity: 0;
+    pointer-events: none;
+}
+.plyr-player-popup-view.player-overlay .plyr-player-min-controls-tab{
+    display: none;
+}
 .main-modal.plyr-player-popup-view:not(.player-overlay) .btn-next-plyr,
 .main-modal.plyr-player-popup-view:not(.player-overlay) .btn-previous-plyr {
     display: none;
 }
 .main-modal.plyr-player-popup-view.player-overlay .btn-next-plyr,
 .main-modal.plyr-player-popup-view.player-overlay .btn-previous-plyr,
-.plyr-player-popup-view .mdi-minimize{
+.plyr-player-popup-view .mdi-plyr-custom-controls{
     cursor: pointer;
     padding: 4px;
     width: 32px;
@@ -16548,18 +16600,18 @@ input[type='range'].voice-message-volume:focus {
 }
 .main-modal.plyr-player-popup-view.player-overlay .btn-next-plyr:hover,
 .main-modal.plyr-player-popup-view.player-overlay .btn-previous-plyr:hover,
-.plyr-player-popup-view .mdi-minimize:hover{
+.plyr-player-popup-view .mdi-plyr-custom-controls:hover{
     background: #00b2ff;
     border-radius: 3px;
 }
-.plyr-player-popup-view .mdi-minimize svg{
+.plyr-player-popup-view .mdi-plyr-custom-controls svg{
     pointer-events: none;
 }
-.plyr-player-popup-view .mdi-minimize path{
+.plyr-player-popup-view .mdi-plyr-custom-controls path{
     fill: #FFF;
 }
-.plyr-player-popup-view:not(.player-overlay) .mdi-minimize.mdi-minimize-float,
-.plyr-player-popup-view.player-overlay .mdi-minimize.mdi-minimize-full{
+.plyr-player-popup-view:not(.player-overlay) .mdi-plyr-custom-controls.mdi-minimize-float,
+.plyr-player-popup-view.player-overlay .mdi-plyr-custom-controls.mdi-minimize-full{
     display:none;
 }
 .main-modal.plyr-player-popup-view.player-overlay .btn-next-plyr.disabled,
@@ -16585,10 +16637,6 @@ input[type='range'].voice-message-volume:focus {
 }
 .plyr-player-popup-view .plyr-player-popup-container .plyr{
     height: 100%;
-    pointer-events: none;
-}
-.plyr-player-popup-view .plyr__video-wrapper{
-    pointer-events: none;
 }
 .plyr-player-popup-view .plyr__controls,
 .plyr-player-popup-view .plyr__control--overlaid{

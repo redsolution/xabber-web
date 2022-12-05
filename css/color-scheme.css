@@ -57,11 +57,12 @@
   fill: #F44336 !important;
 }
 [data-color=red] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=red] .mdi-plyr-button-minimized,
 [data-color=red] .plyr__control--overlaid,
 [data-color=red] .plyr--video .plyr__control:hover,
 [data-color=red] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=red] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=red] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=red] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=red] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=red] .plyr-player-control-tab .mdi-close:hover{
   background-color: #EF5350 !important;
@@ -199,11 +200,12 @@
   fill: #E91E63 !important;
 }
 [data-color=pink] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=pink] .mdi-plyr-button-minimized,
 [data-color=pink] .plyr__control--overlaid,
 [data-color=pink] .plyr--video .plyr__control:hover,
 [data-color=pink] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=pink] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=pink] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=pink] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=pink] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=pink] .plyr-player-control-tab .mdi-close:hover{
   background-color: #EC407A !important;
@@ -341,11 +343,12 @@
   fill: #9C27B0 !important;
 }
 [data-color=purple] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=purple] .mdi-plyr-button-minimized,
 [data-color=purple] .plyr__control--overlaid,
 [data-color=purple] .plyr--video .plyr__control:hover,
 [data-color=purple] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=purple] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=purple] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=purple] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=purple] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=purple] .plyr-player-control-tab .mdi-close:hover{
   background-color: #AB47BC !important;
@@ -484,11 +487,12 @@
   fill: #673AB7 !important;
 }
 [data-color=deep-purple] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=deep-purple] .mdi-plyr-button-minimized,
 [data-color=deep-purple] .plyr__control--overlaid,
 [data-color=deep-purple] .plyr--video .plyr__control:hover,
 [data-color=deep-purple] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=deep-purple] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=deep-purple] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=deep-purple] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=deep-purple] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=deep-purple] .plyr-player-control-tab .mdi-close:hover{
   background-color: #7E57C2 !important;
@@ -626,11 +630,12 @@
   fill: #3F51B5 !important;
 }
 [data-color=indigo] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=indigo] .mdi-plyr-button-minimized,
 [data-color=indigo] .plyr__control--overlaid,
 [data-color=indigo] .plyr--video .plyr__control:hover,
 [data-color=indigo] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=indigo] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=indigo] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=indigo] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=indigo] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=indigo] .plyr-player-control-tab .mdi-close:hover{
   background-color: #5C6BC0 !important;
@@ -769,11 +774,12 @@
   fill: #2196F3 !important;
 }
 [data-color=blue] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=blue] .mdi-plyr-button-minimized,
 [data-color=blue] .plyr__control--overlaid,
 [data-color=blue] .plyr--video .plyr__control:hover,
 [data-color=blue] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=blue] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=blue] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=blue] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=blue] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=blue] .plyr-player-control-tab .mdi-close:hover{
   background-color: #42A5F5 !important;
@@ -912,11 +918,12 @@
   fill: #03A9F4 !important;
 }
 [data-color=light-blue] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=light-blue] .mdi-plyr-button-minimized,
 [data-color=light-blue] .plyr__control--overlaid,
 [data-color=light-blue] .plyr--video .plyr__control:hover,
 [data-color=light-blue] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=light-blue] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=light-blue] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=light-blue] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=light-blue] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=light-blue] .plyr-player-control-tab .mdi-close:hover{
   background-color: #29B6F6 !important;
@@ -1054,11 +1061,12 @@
   fill: #00BCD4 !important;
 }
 [data-color=cyan] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=cyan] .mdi-plyr-button-minimized,
 [data-color=cyan] .plyr__control--overlaid,
 [data-color=cyan] .plyr--video .plyr__control:hover,
 [data-color=cyan] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=cyan] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=cyan] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=cyan] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=cyan] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=cyan] .plyr-player-control-tab .mdi-close:hover{
   background-color: #26C6DA !important;
@@ -1196,11 +1204,12 @@
   fill: #009688 !important;
 }
 [data-color=teal] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=teal] .mdi-plyr-button-minimized,
 [data-color=teal] .plyr__control--overlaid,
 [data-color=teal] .plyr--video .plyr__control:hover,
 [data-color=teal] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=teal] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=teal] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=teal] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=teal] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=teal] .plyr-player-control-tab .mdi-close:hover{
   background-color: #26A69A !important;
@@ -1339,11 +1348,12 @@
   fill: #4CAF50 !important;
 }
 [data-color=green] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=green] .mdi-plyr-button-minimized,
 [data-color=green] .plyr__control--overlaid,
 [data-color=green] .plyr--video .plyr__control:hover,
 [data-color=green] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=green] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=green] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=green] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=green] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=green] .plyr-player-control-tab .mdi-close:hover{
   background-color: #66BB6A !important;
@@ -1482,11 +1492,12 @@
   fill: #8BC34A !important;
 }
 [data-color=light-green] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=light-green] .mdi-plyr-button-minimized,
 [data-color=light-green] .plyr__control--overlaid,
 [data-color=light-green] .plyr--video .plyr__control:hover,
 [data-color=light-green] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=light-green] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=light-green] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=light-green] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=light-green] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=light-green] .plyr-player-control-tab .mdi-close:hover{
   background-color: #9CCC65 !important;
@@ -1624,11 +1635,12 @@
   fill: #CDDC39 !important;
 }
 [data-color=lime] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=lime] .mdi-plyr-button-minimized,
 [data-color=lime] .plyr__control--overlaid,
 [data-color=lime] .plyr--video .plyr__control:hover,
 [data-color=lime] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=lime] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=lime] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=lime] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=lime] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=lime] .plyr-player-control-tab .mdi-close:hover{
   background-color: #D4E157 !important;
@@ -1767,11 +1779,12 @@
   fill: #FFC107 !important;
 }
 [data-color=amber] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=amber] .mdi-plyr-button-minimized,
 [data-color=amber] .plyr__control--overlaid,
 [data-color=amber] .plyr--video .plyr__control:hover,
 [data-color=amber] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=amber] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=amber] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=amber] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=amber] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=amber] .plyr-player-control-tab .mdi-close:hover{
   background-color: #FFCA28 !important;
@@ -1909,11 +1922,12 @@
   fill: #FF9800 !important;
 }
 [data-color=orange] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=orange] .mdi-plyr-button-minimized,
 [data-color=orange] .plyr__control--overlaid,
 [data-color=orange] .plyr--video .plyr__control:hover,
 [data-color=orange] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=orange] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=orange] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=orange] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=orange] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=orange] .plyr-player-control-tab .mdi-close:hover{
   background-color: #FFA726 !important;
@@ -2052,11 +2066,12 @@
   fill: #FF5722 !important;
 }
 [data-color=deep-orange] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=deep-orange] .mdi-plyr-button-minimized,
 [data-color=deep-orange] .plyr__control--overlaid,
 [data-color=deep-orange] .plyr--video .plyr__control:hover,
 [data-color=deep-orange] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=deep-orange] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=deep-orange] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=deep-orange] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=deep-orange] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=deep-orange] .plyr-player-control-tab .mdi-close:hover{
   background-color: #FF7043 !important;
@@ -2194,11 +2209,12 @@
   fill: #795548 !important;
 }
 [data-color=brown] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=brown] .mdi-plyr-button-minimized,
 [data-color=brown] .plyr__control--overlaid,
 [data-color=brown] .plyr--video .plyr__control:hover,
 [data-color=brown] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=brown] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=brown] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=brown] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=brown] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=brown] .plyr-player-control-tab .mdi-close:hover{
   background-color: #8D6E63 !important;
@@ -2336,11 +2352,12 @@
   fill: #607D8B !important;
 }
 [data-color=blue-grey] .chat-message .plyr-video-container .plyr-video-play,
+[data-color=blue-grey] .mdi-plyr-button-minimized,
 [data-color=blue-grey] .plyr__control--overlaid,
 [data-color=blue-grey] .plyr--video .plyr__control:hover,
 [data-color=blue-grey] .plyr-player-popup-container .btn-next-plyr:hover,
 [data-color=blue-grey] .plyr-player-popup-container .btn-previous-plyr:hover,
-[data-color=blue-grey] .plyr-player-popup-container .mdi-minimize:hover,
+[data-color=blue-grey] .plyr-player-popup-container .mdi-plyr-custom-controls:hover,
 [data-color=blue-grey] .plyr-player-control-tab .mdi-plyr-toolbar-item:hover,
 [data-color=blue-grey] .plyr-player-control-tab .mdi-close:hover{
   background-color: #78909C !important;
