@@ -1456,6 +1456,9 @@ define("xabber-views", function () {
                         this.player.on('volumechange',(event) => {
                             xabber.trigger('plyr_player_updated');
                         });
+                        this.player.on('statechange',(event) => {
+                            xabber.trigger('plyr_player_updated');
+                        });
                     }
                     this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId')).mousedown(() => {this.minimizePopup()});
                     this.showNewVideo(options);
@@ -1578,8 +1581,6 @@ define("xabber-views", function () {
         onVisibilityChange: function () {
             let visibility_state = this.data.get('visibility_state'),
                 $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
-            console.log(visibility_state)
-            console.log('123')
             $overlay.switchClass('hidden', visibility_state != 0);
             this.$el.switchClass('player-overlay', visibility_state === 0);
             this.$el.switchClass('hidden', visibility_state === 2);
