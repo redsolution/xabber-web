@@ -8026,6 +8026,10 @@ input[type=text].simple-input-field:hover {
     margin-right: 8px;
 }
 
+.chat-tools-wrap .chat-tool-player .chat-tool.active-plyr i{
+    color: #FFF;
+}
+
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr{
     margin-top: 1px;
 }
@@ -8080,7 +8084,7 @@ input[type=text].simple-input-field:hover {
     display: flex;
     justify-content: flex-end;
     flex-direction: column;
-    max-width: calc(100% - 176px);
+    width: calc(100% - 176px);
 }
 
 .chat-head-narrow .chat-tools-wrap .chat-tool.chat-player-duration {
@@ -8121,6 +8125,26 @@ input[type=text].simple-input-field:hover {
     margin-bottom: 2px;
 }
 
+.chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-title span{
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    min-width: 100%;
+    animation: 5s linear 0s infinite slide-left;
+}
+
+@keyframes slide-left {
+    0%,
+    25% {
+        transform: translateX(0%);
+        margin-left: 0%;
+    }
+    75%,
+    100% {
+        transform: translateX(-100%);
+        margin-left: 100%;
+    }
+}
 .chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-title-bottom-container{
     color: #616161;
     font-size: 12px;
@@ -16530,9 +16554,9 @@ input[type='range'].voice-message-volume:focus {
 .plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized{
     cursor: pointer;
     color: #999;
-    width: 32px;
-    height: 32px;
-    padding: 4px;
+    width: 40px;
+    height: 40px;
+    padding: 8px;
     transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
     background: #999;
     margin-left: 8px;
