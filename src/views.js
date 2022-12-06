@@ -1457,6 +1457,13 @@ define("xabber-views", function () {
                             xabber.trigger('plyr_player_updated');
                         });
                         this.player.on('statechange',(event) => {
+                            if (event.detail.code === 3) {
+                                this.$('.plyr-player-popup-draggable').removeClass('hidden');
+                                this.$('.plyr-player-popup-draggable').css({
+                                    width: '',
+                                    height: '',
+                                });
+                            }
                             xabber.trigger('plyr_player_updated');
                         });
                     }
@@ -1509,6 +1516,13 @@ define("xabber-views", function () {
 
         showNewVideo: function (options) {
             options = options || {};
+            if (options.player.provider === 'youtube'){
+                this.$('.plyr-player-popup-draggable').addClass('hidden');
+                this.$('.plyr-player-popup-draggable').css({
+                    width: 400,
+                    height: 200,
+                });
+            }
             this.account = options.player.chat_item.account;
             this.updateColorScheme();
             this.player.chat_item = options.player.chat_item;

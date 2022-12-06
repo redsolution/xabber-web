@@ -16670,11 +16670,13 @@ input[type='range'].voice-message-volume:focus {
     overflow: hidden;
     min-height: 150px;
     min-width: 200px;
+    background: #000;
 }
 .plyr-player-popup-view.player-overlay .plyr-player-popup-container{
     height: 100% !important;
     width: 100% !important;
     resize: none;
+    cursor: auto;
 }
 .plyr-player-popup-view .plyr-player-popup-container .plyr{
     height: 100%;
