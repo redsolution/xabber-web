@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.172","version_description":"added trigger for youtube state update, added playing indication in media player, fixed dot in saved chat media player"}'
+'{"version_number":"2.3.2.173","version_description":"changed retract-all chat history clearing for group-chats"}'
 )});

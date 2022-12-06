@@ -4002,7 +4002,8 @@ define("xabber-chats", function () {
 
         clearHistory: function () {
             let dialog_options = [],
-                dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message");
+                dialog_message = this.contact.get('group_chat') ? xabber.getString("clear_group_chat_history_dialog_message") : xabber.getString("clear_chat_history_dialog_message"),
+                is_group_chat = this.contact.get('group_chat') ? true : false;
             this._clearing_history = true;
             if (this.account.server_features.get(Strophe.NS.REWRITE)) {
                 utils.dialogs.ask(xabber.getString("clear_history"), dialog_message,
@@ -4011,7 +4012,7 @@ define("xabber-chats", function () {
                         this._clearing_history = false;
                         return;
                     }
-                    this.model.retractAllMessages(false, () => {
+                    this.model.retractAllMessages(is_group_chat, () => {
                         this._clearing_history = false;
                         this.chat_item.updateLastMessage();
                         this.updateScrollBar();
