@@ -425,6 +425,10 @@ define([
             return os;
         },
 
+        isOverflown: function(element) {
+            return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+        },
+
         render_data_form: function (data_form) {
             let $data_form = $('<div class="data-form"/>');
             data_form.fields.forEach(function (field) {

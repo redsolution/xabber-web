@@ -8027,7 +8027,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-tools-wrap .chat-tool-player .chat-tool.active-plyr i{
-    color: #FFF;
+    color: #FFF !important;
 }
 
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr{
@@ -8124,25 +8124,16 @@ input[type=text].simple-input-field:hover {
     height: 16px;
     margin-bottom: 2px;
 }
-
-.chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-title span{
+.chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-title .chat-head-player-title-text.active-animation-player-title{
     display: inline-block;
     position: relative;
-    margin: 0;
-    min-width: 100%;
-    animation: 5s linear 0s infinite slide-left;
+    transform: translateX(calc(-50% - 35px));
+    animation: 10s linear infinite reverse slide-left-reverse;
 }
 
-@keyframes slide-left {
-    0%,
-    25% {
-        transform: translateX(0%);
-        margin-left: 0%;
-    }
-    75%,
-    100% {
-        transform: translateX(-100%);
-        margin-left: 100%;
+@keyframes slide-left-reverse {
+    to {
+        transform: translateX(0);
     }
 }
 .chat-tools-wrap .chat-tool.chat-player-duration .chat-head-player-title-bottom-container{
@@ -16544,11 +16535,11 @@ input[type='range'].voice-message-volume:focus {
 }
 .plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons{
     position: absolute;
-    top: 50%;
+    bottom: 10%;
     left: 50%;
     display: flex;
     flex-direction: row;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0);
     justify-content: center;
 }
 .plyr-player-popup-view .plyr-player-min-controls-tab .plyr-player-min-controls-buttons .mdi-plyr-button-minimized{

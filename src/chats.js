@@ -8243,6 +8243,7 @@ define("xabber-chats", function () {
               this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
               this.model.on("close_chat", this.closeChat, this);
               xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+              xabber.on('update_layout', this.updatePlyrTitle, this);
               xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
               xabber.on("update_jingle_button", this.updateJingleButton, this);
           },
@@ -8421,7 +8422,7 @@ define("xabber-chats", function () {
                       this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                       this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                       this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                      this.$('.btn-play-pause-plyr').switchClass('ground-color-300', voice_message.isPlaying());
+                      this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
                       this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
                       let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
                       this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -8430,7 +8431,7 @@ define("xabber-chats", function () {
                       this.$('.player-poster').addClass('hidden');
                       this.$('.voice-message-player-avatar').removeClass('hidden');
                       this.$('.voice-message-player-avatar').setAvatar(xabber.current_plyr_player.contact_avatar, 32);
-                      this.$('.chat-head-player-title span').text(xabber.current_plyr_player.author);
+                      this.updatePlyrTitle();
                       let duration = Math.round(voice_message.getDuration());
                       this.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));
                       let timerId = setInterval(function() {
@@ -8447,12 +8448,7 @@ define("xabber-chats", function () {
               else if (xabber.current_plyr_player) {
                   this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                   this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-                  this.$('.chat-head-player-title span').text(
-                      xabber.current_plyr_player.config.title ?
-                          xabber.current_plyr_player.config.title :
-                          xabber.current_plyr_player.provider === 'html5' ?
-                              xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
-                              : xabber.getString("chat_message_video"));
+                  this.updatePlyrTitle();
                   let poster = xabber.current_plyr_player.poster;
                   if (poster){
                       this.$('.mdi-player-type-icon').addClass('hidden');
@@ -8470,7 +8466,7 @@ define("xabber-chats", function () {
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-                  this.$('.btn-play-pause-plyr').switchClass('ground-color-300', xabber.current_plyr_player.playing);
+                  this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
                   this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
                   let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                   this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -8487,6 +8483,29 @@ define("xabber-chats", function () {
                   else if (!isNaN(xabber.current_plyr_player.currentTime))
                       this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
               }
+          },
+
+          updatePlyrTitle: function () {
+              if (!xabber.current_plyr_player)
+                  return
+              let $title_elem = this.$('.chat-head-player-title .chat-head-player-title-text'),
+                  title;
+              if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
+                  title = xabber.current_plyr_player.author;
+              else if (xabber.current_plyr_player)
+                  title = xabber.current_plyr_player.config.title ?
+                      xabber.current_plyr_player.config.title :
+                      xabber.current_plyr_player.provider === 'html5' ?
+                          xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
+                          : xabber.getString("chat_message_video");
+              $title_elem.text(title);
+              console.log(utils.isOverflown(this.$('.chat-head-player-title')[0]))
+              if (this.$('.chat-head-player-title')[0] && utils.isOverflown(this.$('.chat-head-player-title')[0])){
+                  $title_elem.addClass('active-animation-player-title');
+                  $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
+              } else
+                  $title_elem.removeClass('active-animation-player-title');
+
           },
 
           updateJingleButton: function () {
@@ -8583,6 +8602,7 @@ define("xabber-chats", function () {
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
             xabber.on('change:audio', this.updateGroupChatHead, this);
             xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+            xabber.on('update_layout', this.updatePlyrTitle, this);
             xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
             xabber.on("update_jingle_button", this.updateJingleButton, this);
         },
@@ -8907,7 +8927,7 @@ define("xabber-chats", function () {
                     this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                     this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                     this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                    this.$('.btn-play-pause-plyr').switchClass('ground-color-300', voice_message.isPlaying());
+                    this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
                     this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
                     let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
                     this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -8916,7 +8936,7 @@ define("xabber-chats", function () {
                     this.$('.player-poster').addClass('hidden');
                     this.$('.voice-message-player-avatar').removeClass('hidden');
                     this.$('.voice-message-player-avatar').setAvatar(xabber.current_plyr_player.contact_avatar, 32);
-                    this.$('.chat-head-player-title span').text(xabber.current_plyr_player.author);
+                    this.updatePlyrTitle();
                     let duration = Math.round(voice_message.getDuration());
                     this.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));
                     let timerId = setInterval(function() {
@@ -8933,12 +8953,7 @@ define("xabber-chats", function () {
             else if (xabber.current_plyr_player) {
                 this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
                 this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-                this.$('.chat-head-player-title span').text(
-                    xabber.current_plyr_player.config.title ?
-                        xabber.current_plyr_player.config.title :
-                        xabber.current_plyr_player.provider === 'html5' ?
-                            xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
-                            : xabber.getString("chat_message_video"));
+                this.updatePlyrTitle();
                 let poster = xabber.current_plyr_player.poster;
                 if (poster){
                     this.$('.mdi-player-type-icon').addClass('hidden');
@@ -8956,7 +8971,7 @@ define("xabber-chats", function () {
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-                this.$('.btn-play-pause-plyr').switchClass('ground-color-300', xabber.current_plyr_player.playing);
+                this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
                 this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
                 let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -8973,6 +8988,29 @@ define("xabber-chats", function () {
                 else if (!isNaN(xabber.current_plyr_player.currentTime))
                     this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
             }
+        },
+
+        updatePlyrTitle: function () {
+            if (!xabber.current_plyr_player)
+                return
+            let $title_elem = this.$('.chat-head-player-title .chat-head-player-title-text'),
+                title;
+            if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
+                title = xabber.current_plyr_player.author;
+            else if (xabber.current_plyr_player)
+                title = xabber.current_plyr_player.config.title ?
+                    xabber.current_plyr_player.config.title :
+                    xabber.current_plyr_player.provider === 'html5' ?
+                        xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
+                        : xabber.getString("chat_message_video");
+            $title_elem.text(title);
+            console.log(utils.isOverflown(this.$('.chat-head-player-title')[0]))
+            if (this.$('.chat-head-player-title')[0] && utils.isOverflown(this.$('.chat-head-player-title')[0])){
+                $title_elem.addClass('active-animation-player-title');
+                $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
+            } else
+                $title_elem.removeClass('active-animation-player-title');
+
         },
 
 
