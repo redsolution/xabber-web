@@ -136,7 +136,9 @@ define("xabber-templates", [
     "text!templates/chats/messages/forwarded.html",
     "text!templates/chats/messages/system.html",
     "text!templates/chats/messages/file_upload.html",
+    "text!templates/chats/messages/loading_circle.html",
     "text!templates/chats/messages/file.html",
+    "text!templates/chats/messages/file_loading.html",
     "text!templates/chats/messages/link_reference.html",
     "text!templates/chats/messages/link_reference_chat.html",
     "text!templates/chats/messages/attached_file.html",
@@ -455,7 +457,9 @@ define("xabber-templates", [
     addTemplate('chats.messages.forwarded');
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
+    addTemplate('chats.messages.loading_circle');
     addTemplate('chats.messages.file');
+    addTemplate('chats.messages.file_loading');
     addTemplate('chats.messages.link_reference');
     addTemplate('chats.messages.link_reference_chat');
     addTemplate('chats.messages.attached_file');

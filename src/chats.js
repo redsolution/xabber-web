@@ -4340,6 +4340,82 @@ define("xabber-chats", function () {
                     });
                 }
             }
+
+            if (is_file && attrs.type === 'file_upload') {
+                let images = [];
+                $(files).each((idx, file_) => {
+                    file_.upload_id = idx;
+                    if (utils.isImageType(file_.type)) {
+                        file_.sources = [null];
+                        images.push(file_);
+                    }
+                });
+                if (images.length > 0) {
+                    if (images.length > 1) {
+                        let template_for_images;
+                        if (images.length > 6) {
+                            let tpl_name = 'template-for-6',
+                                hidden_images = images.length - 5;
+                            template_for_images = $(templates.messages[tpl_name]({images}));
+                            template_for_images.find('.last-image').addClass('hidden-images');
+                            template_for_images.find('.image-counter').text('+' + hidden_images);
+                        }
+                        else {
+                            let tpl_name = 'template-for-' + images.length;
+                            template_for_images = $(templates.messages[tpl_name]({images}));
+                        }
+                        template_for_images.addClass('unuploaded-images');
+                        template_for_images.find('img').replaceWith(templates.messages.loading_circle());
+                        $message.find('.chat-msg-media-content.chat-main-upload-media').prepend(template_for_images);
+                    }
+                    else {
+                        let img_content = this.createImageContainer(images[0]),
+                            maxHeight = 400,
+                            maxWidth = (xabber.main_panel.$el.width() * 0.715 - 176) * 0.7,
+                            imgHeight = images[0].height,
+                            imgWidth = images[0].width;
+                        maxWidth = maxWidth > 400 ? 400 : maxWidth;
+                        if (imgHeight && imgWidth) {
+                            if (imgWidth > maxWidth) {
+                                imgHeight = imgHeight * (maxWidth/imgWidth);
+                                imgWidth = maxWidth;
+                            }
+                            if (imgHeight > maxHeight) {
+                                imgWidth = imgWidth * (maxHeight/imgHeight);
+                                imgHeight = maxHeight;
+                            }
+                        }
+                        imgWidth = imgWidth ? imgWidth : 200;
+                        imgHeight = imgHeight ? imgHeight : 200;
+                        $(img_content).addClass('unuploaded-images');
+                        $(img_content).attr('data-upload-file-id', images[0].upload_id);
+                        $(img_content).css({
+                            width: imgWidth,
+                            height: imgHeight,
+                            'max-height': maxHeight,
+                            'max-width': maxWidth,
+                        });
+                        $(img_content).html(templates.messages.loading_circle());
+                        $message.find('.chat-msg-media-content.chat-main-upload-media').prepend(img_content);
+                    }
+                }
+                if (files.length > 0) {
+                    $(files).each((idx, item) => {
+                        if (images.includes(item))
+                            return;
+                        let file_attrs = {
+                                name: item.name,
+                                type: item.type,
+                                upload_id: item.upload_id,
+                            },
+                            template_for_file_content;
+                        _.extend(file_attrs, {size: utils.pretty_size(item.size)});
+                        template_for_file_content = $(templates.messages.file_loading(file_attrs));
+                        template_for_file_content.find('.file-loading-container').html(templates.messages.loading_circle());
+                        $message.find('.chat-msg-media-content.chat-main-upload-media').append(template_for_file_content);
+                    });
+                }
+            }
             if (is_location) {
                 if (locations.length > 0) {
                     let location_attrs = _.clone(locations),
@@ -5363,7 +5439,7 @@ define("xabber-chats", function () {
                     clearInterval(_interval);
                     let xhr = new XMLHttpRequest(),
                         $bar = $message.find('.progress');
-                    $message.find('.cancel-upload').click(() => {
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-wrap .mdi-close').click(() => {
                         xhr.abort();
                     });
                     xhr.onabort = () => {
@@ -5371,9 +5447,11 @@ define("xabber-chats", function () {
                     };
                     xhr.upload.onprogress = (event) => {
                         let percentage = event.loaded / event.total;
-                        $bar.find('.determinate').attr('style', 'width: ' + (100 * percentage) + '%');
-                        $message.find('.filesize')
-                            .text(xabber.getString("file_upload__text_progress", [utils.pretty_size(event.loaded), utils.pretty_size(event.total)]));
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-percent-text').text(parseInt((100 * percentage)) + '%');
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mask.full').css({ WebkitTransform: 'rotate(' + (180 * percentage) + 'deg)'});
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mask.full').css({ '-moz-transform': 'rotate(' + (180 * percentage) + 'deg)'});
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle .fill').css({ WebkitTransform: 'rotate(' + (180 * percentage) + 'deg)'});
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle .fill').css({ '-moz-transform': 'rotate(' + (180 * percentage) + 'deg)'});
                     };
                     xhr.onload = xhr.onerror = function () {
                         if (this.status === 201) {
@@ -5403,6 +5481,7 @@ define("xabber-chats", function () {
             $message.find('.status').hide();
             $message.find('.progress').show();
             let files_count = 0,
+                cancelled_files_count = 0,
                 self = this,
                 msg_files_count = message.get('files').length;
             $(message.get('files')).each((idx, file) => {
@@ -5431,20 +5510,21 @@ define("xabber-chats", function () {
                 clearInterval(_interval);
                 let xhr = new XMLHttpRequest(),
                     $bar = $message.find('.progress');
-                $message.find('.cancel-upload').click(() => {
+                $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-wrap .mdi-close').click(() => {
+                    cancelled_files_count++;
                     xhr.abort();
                 });
-                xhr.onabort = () => {
-                    this.removeMessage($message);
-                };
                 xhr.upload.onprogress = (event) => {
                     let percentage = event.loaded / event.total;
-                    $bar.find('.determinate').attr('style', 'width: ' + (100 * percentage) + '%');
-                    $message.find('.filesize')
-                        .text(xabber.getString("file_upload__text_progress", [utils.pretty_size(event.loaded), utils.pretty_size(event.total)]));
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-percent-text').text(parseInt((100 * percentage)) + '%');
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mask.full').css({ WebkitTransform: 'rotate(' + (180 * percentage) + 'deg)'});
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mask.full').css({ '-moz-transform': 'rotate(' + (180 * percentage) + 'deg)'});
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle .fill').css({ WebkitTransform: 'rotate(' + (180 * percentage) + 'deg)'});
+                    $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle .fill').css({ '-moz-transform': 'rotate(' + (180 * percentage) + 'deg)'});
                 };
-                xhr.onload = xhr.onerror = function () {
+                xhr.onload = xhr.onerror = xhr.onabort = function () {
                     if (this.status === 200) {
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-close').addClass('hidden');
                         let response = JSON.parse(this.response)
                         message.get('files')[idx].id = response.id;
                         message.get('files')[idx].created_at = response.created_at;
@@ -5455,19 +5535,36 @@ define("xabber-chats", function () {
                             self.onFileUploaded(message, $message);
                         }
                     } else {
-                        let response_text;
-                        self.account.handleCommonGalleryErrors(this.response)
-                        if (this.status === 500)
-                            response_text = this.statusText;
-                        else if (this.status === 400)
-                            response_text = JSON.parse(this.response).error
-                        message.get('files')[idx] = null;
-                        files_count++;
-                        if (files_count == msg_files_count && msg_files_count == 1) {
-                            self.onFileNotUploaded(message, $message, response_text);
-                        }
-                        else if (files_count == msg_files_count) {
-                            self.onFileUploaded(message, $message);
+                        if ((msg_files_count - cancelled_files_count) == 0 && this.status === 0){
+                            message.set('files', []);
+                            self.bottom.setEditedMessageAttachments(message, true);
+                            self.bottom.setRedactedUploadMessage(message);
+                            self.removeMessage($message);
+                        } else {
+                            let response_text;
+                            self.account.handleCommonGalleryErrors(this.response)
+                            if (this.status === 500)
+                                response_text = this.statusText;
+                            else if (this.status === 400)
+                                response_text = JSON.parse(this.response).error
+                            else if (this.status === 0) {
+                                $message.find('.unuploaded-file[data-upload-file-id="' + file.upload_id + '"]').remove();
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-wrap').remove();
+                            };
+                            (this.status === 0) && (message.get('files')[idx] = null);
+                            files_count++;
+                            if (files_count == msg_files_count && this.status != 0) {
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-percent-text').text(response_text);
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').removeClass('hidden');
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').prop('title', response_text);
+                                $message.find('.mdi-close').addClass('hidden');
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"]').addClass('upload-error');
+                                $message.find('div[data-upload-file-id="' + file.upload_id + '"]').css({ 'border-color': '#EF9A9A'});
+                                self.onFileNotUploaded(message, $message, response_text);
+                            }
+                            else if (files_count == msg_files_count) {
+                                self.onFileUploaded(message, $message);
+                            }
                         }
                     }
                 };
@@ -5520,6 +5617,8 @@ define("xabber-chats", function () {
                     files_.push(file_new_format);
                 }
             });
+            $message.find('.unuploaded-images').remove();
+            $message.find('.unuploaded-file').remove();
             //  loaded and send image
             if (images.length > 0) {
                 if (images.length > 1) {
@@ -5703,7 +5802,12 @@ define("xabber-chats", function () {
                 });
             }
             else {
-                $message.find('.btn-retry-send-message').hide();
+                $message.find('.repeat-upload').show();
+                $message.find('.repeat-upload').click(() => {
+                    this.bottom.setEditedMessageAttachments(message, true);
+                    this.bottom.setRedactedUploadMessage(message);
+                    this.removeMessage($message);
+                });
             }
             $message.find('.status').text(error_message).show();
             $message.find('.progress').hide();
@@ -6133,7 +6237,7 @@ define("xabber-chats", function () {
                 }
 
                 if ($elem.hasClass('last-image')) {
-                    $elem.find('img')[0].click();
+                    $elem.find('img').length && $elem.find('img')[0].click();
                     return;
                 }
 
@@ -10573,8 +10677,8 @@ define("xabber-chats", function () {
             this.scrollToBottom();
         },
 
-        setEditedMessageAttachments: function (edit_msg) {
-            this.$('.attach-file input').attr('disabled', true);
+        setEditedMessageAttachments: function (edit_msg, is_upload) {
+            !is_upload && this.$('.attach-file input').attr('disabled', true);
             this.removeAllFileSnippets();
             this.removeAllLinkReferences();
             let files = edit_msg.get('files') || [],
@@ -10597,17 +10701,30 @@ define("xabber-chats", function () {
                 xabber.chat_body.updateHeight();
             });
             files.forEach((file) => {
+                if (!file)
+                    return;
                 let id = uuid();
                 file.uid = id;
                 this.attached_files = this.attached_files.concat([file]);
-                this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
-                    file: file,
-                    uid: id,
-                    blob: file.sources.length && file.sources[0] && utils.isImageType(file.type) ? file.sources[0] : null,
-                    filesize: utils.pretty_size(file.size),
-                    typeicon: utils.file_type_icon(file.type),
-                    filetype: utils.pretty_file_type(file.type),
-                })));
+                if (is_upload){
+                    this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
+                        file: file,
+                        uid: id,
+                        blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file])) : null,
+                        filesize: utils.pretty_size(file.size),
+                        typeicon: utils.file_type_icon(file.type),
+                        filetype: utils.pretty_file_type(file.type),
+                    })));
+                } else{
+                    this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
+                        file: file,
+                        uid: id,
+                        blob: file.sources.length && file.sources[0] && utils.isImageType(file.type) ? file.sources[0] : null,
+                        filesize: utils.pretty_size(file.size),
+                        typeicon: utils.file_type_icon(file.type),
+                        filetype: utils.pretty_file_type(file.type),
+                    })));
+                }
                 xabber.chat_body.updateHeight();
             });
             ((link_references && link_references.length) || (files && files.length)) && this.$('.attached-image').magnificPopup({
@@ -10967,6 +11084,26 @@ define("xabber-chats", function () {
             this.$('.fwd-messages-preview .msg-author').text(xabber.getString("edit_message__header"));
             this.$('.fwd-messages-preview .msg-text').html(Strophe.xmlescape(msg_text));
             this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
+            this.displaySend();
+            xabber.chat_body.updateHeight();
+            let markup_body = utils.markupBodyMessage(message, 'mention'),
+                emoji_node = markup_body.emojify({tag_name: 'div'}),
+                arr_text = emoji_node.split('\n');
+            arr_text.forEach((item, idx) => {
+                if (!item.includes('</blockquote>'))
+                    arr_text[idx] = '<p>' + arr_text[idx] + '</p>';
+            });
+            emoji_node = arr_text.join("");
+            this.quill.setText("");
+            this.quill.root.innerHTML = emoji_node;
+            this.moveCursorToEnd();
+            this.focusOnInput();
+        },
+
+        setRedactedUploadMessage: function (message) {
+            this.click_counter = 0;
+            this.setDefaultPlaceholder();
+            let msg_text = message.get('message') || "";
             this.displaySend();
             xabber.chat_body.updateHeight();
             let markup_body = utils.markupBodyMessage(message, 'mention'),

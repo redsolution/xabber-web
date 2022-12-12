@@ -8860,8 +8860,8 @@ input[type=text].simple-input-field:hover {
     background-image: url(../images/loading.png);
     background-position: center center;
     background-repeat: no-repeat;
-    min-height: 48px;
-    min-width: 48px;
+    min-height: 80px;
+    min-width: 120px;
     position: relative;
     margin: 1px;
     display: inline-flex !important;
@@ -8870,6 +8870,16 @@ input[type=text].simple-input-field:hover {
     overflow: hidden;
     max-width: 100%;
     max-height: 400px;
+}
+
+.chat-message .unuploaded-images .img-content-template,
+.chat-message .img-content.unuploaded-images {
+    background-image: none;
+}
+.chat-message .unuploaded-images .img-content-template .circle-wrap{
+    position: absolute;
+    top: calc(50% - 16px);
+    left: calc(50% - 16px);
 }
 
 .chat-message .img-content .unloaded-img {
@@ -9109,6 +9119,10 @@ img.fwd-img-preview {
 .image-collection {
     display: flex;
     white-space: initial;
+}
+
+.image-collection.unuploaded-images {
+    width: 100%;
 }
 
 .chat-message.auth-request {
@@ -9424,24 +9438,132 @@ img.fwd-img-preview {
 .chat-message.file-upload .progress .determinate {
 }
 
-.chat-message.file-upload .cancel-upload,
 .chat-message.file-upload .repeat-upload {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-left: 15px;
-    width: 45px;
-}
-
-.chat-message.file-upload .cancel-upload:hover,
-.chat-message.file-upload .repeat-upload:hover {
-    text-decoration: underline;
-    cursor: pointer;
+    text-transform: capitalize;
 }
 
 .chat-message.file-upload .filename:hover {
     text-decoration: none !important;
 }
+/* ---------------- LOADING CIRCLE -------------------- */
+
+.chat-message.file-upload .hidden-images .circle-wrap {
+    display: none;
+}
+
+.chat-message.file-upload .file-loading-container {
+    padding: 8px;
+    height: 48px;
+    width: 48px;
+    background-color: #E0E0E0;
+    border-radius: 100%;
+    margin-right: 15px;
+}
+
+.chat-message.file-upload .circle-wrap {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+}
+
+.chat-message.file-upload .circle-wrap .circle .mask,
+.chat-message.file-upload .circle-wrap .circle .fill {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    border-radius: 50%;
+}
+
+.chat-message.file-upload .circle-wrap .circle .mask {
+    clip: rect(0px, 32px, 32px, 16px);
+}
+
+.chat-message.file-upload .circle-wrap .inside-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #FFF;
+    line-height: 25px;
+    text-align: center;
+    margin: 4px;
+    position: absolute;
+    z-index: 100;
+    font-weight: 400;
+    font-size: 8px;
+    color: #9E9E9E;
+    padding: 2px;
+}
+.chat-message.file-upload .file-loading-container .inside-circle {
+    background-color: #E0E0E0;
+}
+
+.chat-message.file-upload .circle-wrap .inside-circle .mdi-close {
+    display: none;
+}
+
+.chat-message.file-upload .file-loading-container:hover .circle-wrap .inside-circle .mdi-close,
+.chat-message.file-upload .unuploaded-images:hover .circle-wrap .inside-circle .mdi-close {
+    display: block;
+}
+
+.chat-message.file-upload .circle-wrap .circle-percent-text {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translate(-50%, 0);
+    text-align: center;
+    color: #9E9E9E;
+    font-size: 14px;
+    width: fit-content;
+    white-space: nowrap;
+}
+
+.chat-message.file-upload .file-loading-container .circle-wrap .circle-percent-text {
+    display: none;
+}
+
+.chat-message.file-upload .file-container .circle-percent-text {
+    height: 20px;
+    color: #9E9E9E;
+    font-size: 14px;
+}
+
+.chat-message.file-upload .upload-error .circle-percent-text {
+    color: #E53935;
+}
+.chat-message.file-upload .upload-error .circle-wrap .circle-percent-text{
+    display: none;
+}
+
+.chat-message.file-upload .upload-error .inside-circle {
+    margin: 0;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.chat-message.file-upload .upload-error .mdi-alert-circle {
+    color: #D32F2F;
+}
+
+/* color animation */
+
+/* 3rd progress bar */
+.chat-message.file-upload .mask .fill {
+    clip: rect(0px, 16px, 32px, 0px);
+    background-color: #EEEEEE;
+}
+.chat-message.file-upload .upload-error .mask .fill {
+    display: none;
+}
+
+.chat-message.file-upload .mask.full,
+.chat-message.file-upload .circle .fill {
+    transform: rotate(00deg);
+    transition: all 0.1s;
+}
+
 /* ---------------- FORWARDED MESSAGES -------------------- */
 
 .fwd-message {
