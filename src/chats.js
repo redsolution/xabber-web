@@ -5553,7 +5553,7 @@ define("xabber-chats", function () {
                             };
                             (this.status === 0) && (message.get('files')[idx] = null);
                             files_count++;
-                            if (files_count == msg_files_count && this.status != 0) {
+                            if (this.status != 0) {
                                 $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-percent-text').text(response_text);
                                 $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').removeClass('hidden');
                                 $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').prop('title', response_text);
