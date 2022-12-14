@@ -8603,8 +8603,7 @@ define("xabber-chats", function () {
                           xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
                           : xabber.getString("chat_message_video");
               $title_elem.text(title);
-              console.log(utils.isOverflown(this.$('.chat-head-player-title')[0]))
-              if (this.$('.chat-head-player-title')[0] && utils.isOverflown(this.$('.chat-head-player-title')[0])){
+              if (this.$('.chat-head-player-title')[0] && utils.isOverflownWidth(this.$('.chat-head-player-title')[0])){
                   $title_elem.addClass('active-animation-player-title');
                   $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
               } else
@@ -9108,8 +9107,7 @@ define("xabber-chats", function () {
                         xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
                         : xabber.getString("chat_message_video");
             $title_elem.text(title);
-            console.log(utils.isOverflown(this.$('.chat-head-player-title')[0]))
-            if (this.$('.chat-head-player-title')[0] && utils.isOverflown(this.$('.chat-head-player-title')[0])){
+            if (this.$('.chat-head-player-title')[0] && utils.isOverflownWidth(this.$('.chat-head-player-title')[0])){
                 $title_elem.addClass('active-animation-player-title');
                 $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
             } else

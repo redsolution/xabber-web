@@ -425,8 +425,12 @@ define([
             return os;
         },
 
-        isOverflown: function(element) {
-            return element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth;
+        isOverflownWidth: function(element) {
+            return element.scrollWidth > element.clientWidth;
+        },
+
+        isOverflownHeight: function(element) {
+            return element.scrollHeight > element.clientHeight;
         },
 
         render_data_form: function (data_form) {

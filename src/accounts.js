@@ -954,9 +954,10 @@ define("xabber-accounts", function () {
                     console.log(this._pending_messages);
                     _.each(this._pending_messages, (item) => {
                         console.log(item)
-                        let msg = this.messages.get(item.unique_id), $msg_iq;
-                        msg && ($msg_iq = msg.get('xml'));
-                        $msg_iq && this.sendMsg($msg_iq);
+                        let msg = this.messages.get(item.unique_id), msg_iq;
+                        msg && (msg_iq = msg.get('xml'));
+                        $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>")
+                        msg_iq && this.sendMsg(msg_iq);
                     });
                     this._pending_messages = [];
                     this.trigger('send_pending_messages');
