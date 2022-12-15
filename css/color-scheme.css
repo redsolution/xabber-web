@@ -26,6 +26,14 @@
   color: #D32F2F !important;
 }
 
+.ground-color-red-600,
+.hover-ground-color-red-600:hover,
+[data-color=red] .ground-color-600,
+[data-color=red] .hover-ground-color-600:hover,
+[data-color=red] .active-ground-color-600:active {
+  background-color: #E53935 !important;
+}
+
 .outline-color-red-500{
   outline-color: #F44336 !important;
 }
@@ -169,6 +177,14 @@
   color: #C2185B !important;
 }
 
+.ground-color-pink-600,
+.hover-ground-color-pink-600:hover,
+[data-color=pink] .ground-color-600,
+[data-color=pink] .hover-ground-color-600:hover,
+[data-color=pink] .active-ground-color-600:active {
+  background-color: #D81B60 !important;
+}
+
 .outline-color-pink-500{
   outline-color: #E91E63 !important;
 }
@@ -310,6 +326,14 @@
 [data-color=purple] .text-color-700,
 [data-color=purple] .hover-text-color-700:hover {
   color: #7B1FA2 !important;
+}
+
+.ground-color-purple-600,
+.hover-ground-color-purple-600:hover,
+[data-color=purple] .ground-color-600,
+[data-color=purple] .hover-ground-color-600:hover,
+[data-color=purple] .active-ground-color-600:active {
+  background-color: #8E24AA !important;
 }
 
 .outline-color-purple-500{
@@ -456,6 +480,14 @@
   color: #512DA8 !important;
 }
 
+.ground-color-deep-purple-600,
+.hover-ground-color-deep-purple-600:hover,
+[data-color=deep-purple] .ground-color-600,
+[data-color=deep-purple] .hover-ground-color-600:hover,
+[data-color=deep-purple] .active-ground-color-600:active {
+  background-color: #5E35B1 !important;
+}
+
 .outline-color-deep-purple-500{
   outline-color: #673AB7 !important;
 }
@@ -597,6 +629,14 @@
 [data-color=indigo] .text-color-700,
 [data-color=indigo] .hover-text-color-700:hover {
   color: #303F9F !important;
+}
+
+.ground-color-indigo-600,
+.hover-ground-color-indigo-600:hover,
+[data-color=indigo] .ground-color-600,
+[data-color=indigo] .hover-ground-color-600:hover,
+[data-color=indigo] .active-ground-color-600:active {
+  background-color: #3949AB !important;
 }
 
 .outline-color-indigo-500{
@@ -743,6 +783,14 @@
   color: #1976D2 !important;
 }
 
+.ground-color-blue-600,
+.hover-ground-color-blue-600:hover,
+[data-color=blue] .ground-color-600,
+[data-color=blue] .hover-ground-color-600:hover,
+[data-color=blue] .active-ground-color-600:active {
+  background-color: #1E88E5 !important;
+}
+
 .outline-color-blue-500{
   outline-color: #2196F3 !important;
 }
@@ -885,6 +933,14 @@
 [data-color=light-blue] .text-color-700,
 [data-color=light-blue] .hover-text-color-700:hover {
   color: #0288D1 !important;
+}
+
+.ground-color-light-blue-600,
+.hover-ground-color-light-blue-600:hover,
+[data-color=light-blue] .ground-color-600,
+[data-color=light-blue] .hover-ground-color-600:hover,
+[data-color=light-blue] .active-ground-color-600:active {
+  background-color: #039BE5 !important;
 }
 
 .outline-color-light-blue-500{
@@ -1030,6 +1086,14 @@
   color: #0097A7 !important;
 }
 
+.ground-color-cyan-600,
+.hover-ground-color-cyan-600:hover,
+[data-color=cyan] .ground-color-600,
+[data-color=cyan] .hover-ground-color-600:hover,
+[data-color=cyan] .active-ground-color-600:active {
+  background-color: #00ACC1 !important;
+}
+
 .outline-color-cyan-500{
   outline-color: #00BCD4 !important;
 }
@@ -1171,6 +1235,14 @@
 [data-color=teal] .text-color-700,
 [data-color=teal] .hover-text-color-700:hover {
   color: #00796B !important;
+}
+
+.ground-color-teal-600,
+.hover-ground-color-teal-600:hover,
+[data-color=teal] .ground-color-600,
+[data-color=teal] .hover-ground-color-600:hover,
+[data-color=teal] .active-ground-color-600:active {
+  background-color: #00897B !important;
 }
 
 .outline-color-teal-500{
@@ -1317,6 +1389,14 @@
   color: #388E3C !important;
 }
 
+.ground-color-green-600,
+.hover-ground-color-green-600:hover,
+[data-color=green] .ground-color-600,
+[data-color=green] .hover-ground-color-600:hover,
+[data-color=green] .active-ground-color-600:active {
+  background-color: #43A047 !important;
+}
+
 .outline-color-green-500{
   outline-color: #4CAF50 !important;
 }
@@ -1461,6 +1541,14 @@
   color: #689F38 !important;
 }
 
+.ground-color-light-green-600,
+.hover-ground-color-light-green-600:hover,
+[data-color=light-green] .ground-color-600,
+[data-color=light-green] .hover-ground-color-600:hover,
+[data-color=light-green] .active-ground-color-600:active {
+  background-color: #7CB342 !important;
+}
+
 .outline-color-light-green-500{
   outline-color: #8BC34A !important;
 }
@@ -1602,6 +1690,14 @@
 [data-color=lime] .text-color-700,
 [data-color=lime] .hover-text-color-700:hover {
   color: #AFB42B !important;
+}
+
+.ground-color-lime-600,
+.hover-ground-color-lime-600:hover,
+[data-color=lime] .ground-color-600,
+[data-color=lime] .hover-ground-color-600:hover,
+[data-color=lime] .active-ground-color-600:active {
+  background-color: #C0CA33 !important;
 }
 
 .outline-color-lime-500{
@@ -1748,6 +1844,14 @@
   color: #FFA000 !important;
 }
 
+.ground-color-amber-600,
+.hover-ground-color-amber-600:hover,
+[data-color=amber] .ground-color-600,
+[data-color=amber] .hover-ground-color-600:hover,
+[data-color=amber] .active-ground-color-600:active {
+  background-color: #FFB300 !important;
+}
+
 .outline-color-amber-500{
   outline-color: #FFC107 !important;
 }
@@ -1889,6 +1993,14 @@
 [data-color=orange] .text-color-700,
 [data-color=orange] .hover-text-color-700:hover {
   color: #F57C00 !important;
+}
+
+.ground-color-orange-600,
+.hover-ground-color-orange-600:hover,
+[data-color=orange] .ground-color-600,
+[data-color=orange] .hover-ground-color-600:hover,
+[data-color=orange] .active-ground-color-600:active {
+  background-color: #FB8C00 !important;
 }
 
 .outline-color-orange-500{
@@ -2035,6 +2147,14 @@
   color: #E64A19 !important;
 }
 
+.ground-color-deep-orange-600,
+.hover-ground-color-deep-orange-600:hover,
+[data-color=deep-orange] .ground-color-600,
+[data-color=deep-orange] .hover-ground-color-600:hover,
+[data-color=deep-orange] .active-ground-color-600:active {
+  background-color: #F4511E !important;
+}
+
 .outline-color-deep-orange-500{
   outline-color: #FF5722 !important;
 }
@@ -2178,6 +2298,14 @@
   color: #5D4037 !important;
 }
 
+.ground-color-brown-600,
+.hover-ground-color-brown-600:hover,
+[data-color=brown] .ground-color-600,
+[data-color=brown] .hover-ground-color-600:hover,
+[data-color=brown] .active-ground-color-600:active {
+  background-color: #6D4C41 !important;
+}
+
 .outline-color-brown-500{
   outline-color: #795548 !important;
 }
@@ -2319,6 +2447,14 @@
 [data-color=blue-grey] .text-color-700,
 [data-color=blue-grey] .hover-text-color-700:hover {
   color: #455A64 !important;
+}
+
+.ground-color-blue-grey-600,
+.hover-ground-color-blue-grey-600:hover,
+[data-color=blue-grey] .ground-color-600,
+[data-color=blue-grey] .hover-ground-color-600:hover,
+[data-color=blue-grey] .active-ground-color-600:active {
+  background-color: #546E7A !important;
 }
 
 .outline-color-blue-grey-500{

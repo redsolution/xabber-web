@@ -22,7 +22,11 @@
         <div class="edited-info one-line hidden"></div>
         {[ if (is_sender) { ]}
         <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
-        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect"><div class="repeat-upload" style="display: none;">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div><div class="btn-delete-message">{[print(xabber.getString("delete"))]}</div></div>
+        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect">
+            <div class="msg-retry-dropdown-btn active-ground-color-600 repeat-upload">{[print(xabber.getString("resend"))]}</div>
+            <div class="msg-retry-dropdown-btn active-ground-color-600 edit-upload">{[print(xabber.getString("edit"))]}</div>
+            <div class="msg-retry-dropdown-btn active-ground-color-600 btn-delete-message">{[print(xabber.getString("delete"))]}</div>
+        </div>
         {[ } ]}
         <div class="msg-copy-link" title='{[print(xabber.getString("action_copy_link"))]}'><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>
         <div class="msg-copy-location"  title='{[print(xabber.getString("action_copy_location"))]}'><div class="msg-copy-location-content" data-location="false"></div></div>

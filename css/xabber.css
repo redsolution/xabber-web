@@ -338,6 +338,10 @@ input[type=checkbox].filled-in:checked + label:after {
     clear: both;
 }
 
+.no-click {
+    pointer-events: none;
+}
+
 .overflow-visible {
     overflow: visible !important;
     height: calc(100% - 200px) !important;
@@ -7673,6 +7677,10 @@ input[type=text].simple-input-field:hover {
 .chat-item .chat-item-notifications-wrap .msg-delivering-state {
     margin: 0 0 0 4px;
 }
+
+.chat-item .chat-item-notifications-wrap .msg-delivering-state[data-state=error] {
+    display: none;
+}
 .chat-item .msg-counter,
 .chat-item .msg-incoming-subscription,
 .chat-item .msg-chat-error,
@@ -8876,10 +8884,15 @@ input[type=text].simple-input-field:hover {
 .chat-message .img-content.unuploaded-images {
     background-image: none;
 }
+.chat-message .img-content.unuploaded-images .circle-wrap,
 .chat-message .unuploaded-images .img-content-template .circle-wrap{
     position: absolute;
-    top: calc(50% - 16px);
-    left: calc(50% - 16px);
+    top: calc(50% - 24px);
+    left: calc(50% - 24px);
+    background: rgb(66 66 66 / 50%);
+    width: 48px;
+    height: 48px;
+    padding: 8px;
 }
 
 .chat-message .img-content .unloaded-img {
@@ -9181,10 +9194,39 @@ img.fwd-img-preview {
 }
 
 .chat-message .retry-send-message {
+    width: fit-content !important;
     min-width: 64px !important;
-    top: -14px !important;
+    top: -10px !important;
     z-index: 0;
-    padding: 8px;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+}
+
+.chat-message .retry-send-message .msg-retry-dropdown-btn {
+    text-transform: capitalize;
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    line-height: unset;
+}
+
+.chat-message .retry-send-message .msg-retry-dropdown-btn:active {
+    color: #FFF;
 }
 
 .chat-message .retry-send-message div:hover {
@@ -9438,10 +9480,6 @@ img.fwd-img-preview {
 .chat-message.file-upload .progress .determinate {
 }
 
-.chat-message.file-upload .repeat-upload {
-    text-transform: capitalize;
-}
-
 .chat-message.file-upload .filename:hover {
     text-decoration: none !important;
 }
@@ -9467,39 +9505,40 @@ img.fwd-img-preview {
     position: relative;
 }
 
-.chat-message.file-upload .circle-wrap .circle .mask,
-.chat-message.file-upload .circle-wrap .circle .fill {
-    width: 32px;
-    height: 32px;
-    position: absolute;
-    border-radius: 50%;
+.chat-message.file-upload .circle-wrap .preloader-path-new {
+    stroke-width: 2.5;
+    stroke-dashoffset: 0;
+    stroke-linecap: round;
+    stroke-width: 6px;
+    stroke: #EEEEEE;
+    stroke-dasharray: 0, 149.825;
 }
 
-.chat-message.file-upload .circle-wrap .circle .mask {
-    clip: rect(0px, 32px, 32px, 16px);
-}
 
 .chat-message.file-upload .circle-wrap .inside-circle {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #FFF;
     line-height: 25px;
     text-align: center;
     margin: 4px;
-    position: absolute;
     z-index: 100;
     font-weight: 400;
     font-size: 8px;
-    color: #9E9E9E;
+    color: #FFF;
     padding: 2px;
+    position: absolute;
+    top: calc(50% - 16px);
+    left: calc(50% - 16px);
+}
+.chat-message.file-upload .circle-wrap .inside-circle .mdi-center-loading-indicator:before {
+    transition: transform .1s ease-out;
+}
+.chat-message.file-upload .circle-wrap .inside-circle .mdi-close:before {
+    transform: rotate( 270deg);
 }
 .chat-message.file-upload .file-loading-container .inside-circle {
     background-color: #E0E0E0;
-}
-
-.chat-message.file-upload .circle-wrap .inside-circle .mdi-close {
-    display: none;
 }
 
 .chat-message.file-upload .file-loading-container:hover .circle-wrap .inside-circle .mdi-close,
@@ -9517,6 +9556,7 @@ img.fwd-img-preview {
     font-size: 14px;
     width: fit-content;
     white-space: nowrap;
+    display: none;
 }
 
 .chat-message.file-upload .file-loading-container .circle-wrap .circle-percent-text {
