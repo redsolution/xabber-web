@@ -9106,6 +9106,10 @@ input[type=text].simple-input-field:hover {
     z-index: 10;
 }
 
+.image-collection.template-for-6 .last-image.upload-error span.image-counter {
+    display: none;
+}
+
 .image-collection.template-for-6 .img-content-template.hidden{
     position: absolute;
     top: 0;
@@ -9418,7 +9422,7 @@ img.fwd-img-preview {
 
 .msg-delivering-state[data-state=not-allowed]:before,
 .msg-delivering-state[data-state=error]:before {
-    content: "\F156";
+    content: "\F028";
 }
 .mdi-link-variant[data-image='false'],
 .msg-copy-location div[data-location='false'] {
@@ -9485,8 +9489,18 @@ img.fwd-img-preview {
 }
 /* ---------------- LOADING CIRCLE -------------------- */
 
+.chat-message.file-upload .upload-error .preloader-circular,
+.chat-message.file-upload .uploaded-file .preloader-circular{
+    opacity: 0;
+}
+.chat-message.file-upload .preloader-circular{
+    transition: all 0.1s;
+}
 .chat-message.file-upload .hidden-images .circle-wrap {
     display: none;
+}
+.chat-message.file-upload .hidden-images.upload-error .circle-wrap {
+    display: block;
 }
 
 .chat-message.file-upload .file-loading-container {
@@ -9577,6 +9591,13 @@ img.fwd-img-preview {
 }
 
 .chat-message.file-upload .upload-error .inside-circle {
+    margin: 0;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.chat-message.file-upload .upload-error .preloader-circular {
     margin: 0;
     padding: 0;
     width: 32px;
@@ -9947,6 +9968,13 @@ img.fwd-img-preview {
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.message-reference-preview .attached-errored{
+    outline: 1px solid #F44336;
+}
+.message-reference-preview .attached-errored .mdi-close polygon{
+    fill: #F44336;
 }
 
 .message-reference-preview .attached-file-preview{
