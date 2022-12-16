@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.181","version_description":"added mediagallery files deletion on file uploading error, added uploads cancelling on upload error, fixed upload error visuals for when there is hidden images in template, added upload error indication on attached file, changed msg error icon, changed upload indicator visuals"}'
+'{"version_number":"2.3.2.182","version_description":"changed mediagallery uploading to sequential uploading, fixed resend loading indicator visuals, fixed resend cancel click event duplication, added non abort cancelling for files, added checks that file was cancelled"}'
 )});
