@@ -157,36 +157,12 @@ define("xabber-discovery", function () {
                 client_feature = this.account.client_features.get(_var);
             client_feature && client_feature.set('supports', true);
 
-            let prefs = feature.get('preferences') || {};
-            if (_var === Strophe.NS.MAM && prefs.default !== 'always') {
-                this.account.sendIQ(
-                    $iq({type: 'get'}).c('prefs', {xmlns: Strophe.NS.MAM}),
-                    _.bind(this.receiveMAMPreferences, this, feature)
-                );
-            }
             if (_var === 'media-gallery') {
                 this.account.set('gallery_auth', false)
                 if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))
                     this.account.initGalleryAuth(feature);
             }
         },
-
-        receiveMAMPreferences: function (feature, iq) {
-            let $prefs = $(iq).find('prefs[xmlns="'+Strophe.NS.MAM+'"]');
-            let default_pref = $prefs.attr('default');
-            if (default_pref !== 'always') {
-                let stanza = $iq({'type': 'set'})
-                    .c('prefs', {xmlns: Strophe.NS.MAM, 'default': 'always'});
-                $prefs.children().each(function (idx, child) {
-                    stanza.cnode(child).up();
-                });
-                this.account.sendIQ(stanza, function (iq) {
-                    feature.set('preferences', {'default': 'always'});
-                });
-            } else {
-                feature.set('preferences', {'default': 'always'});
-            }
-        }
     });
 
     xabber.Account.addInitPlugin(function () {
