@@ -10701,6 +10701,10 @@ define("xabber-chats", function () {
         },
 
         addFileSnippets: function (files) {
+            if (files && (this.attached_files.length + files.length) > 10){
+                utils.dialogs.error(xabber.getString("too_many_files_at_once"));
+                return;
+            }
             if (this.edit_message)
                 return;
             files && files.length && this.$('.message-reference-preview').removeClass('hidden');
