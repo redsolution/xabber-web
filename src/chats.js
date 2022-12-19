@@ -11552,25 +11552,49 @@ define("xabber-chats", function () {
                 item.isSenderMe() && my_msgs++;
             });
             if (this.account.server_features.get(Strophe.NS.REWRITE) || this.model.get('group_chat')) {
-                (!this.model.get('group_chat') && !this.model.get('saved') && my_msgs == $msgs.length && this.contact && xabber.servers.get(this.contact.domain).server_features.get(Strophe.NS.REWRITE)) && (dialog_options = [{
-                    name: 'symmetric_deletion',
-                    checked: false,
-                    text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
-                }]);
-                utils.dialogs.ask(xabber.getString("dialog_delete_messages__header"), xabber.getQuantityString("delete_message_question", msgs.length),
-                    dialog_options, {ok_button_text: xabber.getString("delete")}).done((res) => {
-                    if (!res) {
-                        this._clearing_history = false;
-                        messages && messages.length && this.focusOnInput();
-                        return;
-                    }
-                    let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
-                    this.resetSelectedMessages();
-                    if (this.account.get('gallery_token') && this.account.get('gallery_url'))
-                        this.deleteFilesFromMessages(msgs);
-                    this.model.retractMessages(msgs, this.model.get('group_chat'), symmetric);
-                    messages && messages.length && this.unsetForwardedMessages();
+                let dfd = new $.Deferred();
+                dfd.done(() => {
+                    utils.dialogs.ask(xabber.getString("dialog_delete_messages__header"), xabber.getQuantityString("delete_message_question", msgs.length),
+                        dialog_options, {ok_button_text: xabber.getString("delete")}).done((res) => {
+                        if (!res) {
+                            this._clearing_history = false;
+                            messages && messages.length && this.focusOnInput();
+                            return;
+                        }
+                        let symmetric = (this.model.get('group_chat')) ? true : (res.symmetric_deletion ? true : false);
+                        this.resetSelectedMessages();
+                        if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                            this.deleteFilesFromMessages(msgs);
+                        this.model.retractMessages(msgs, this.model.get('group_chat'), symmetric);
+                        messages && messages.length && this.unsetForwardedMessages();
+                    });
                 });
+                if (!this.model.get('group_chat') && !this.model.get('saved') && my_msgs == $msgs.length && this.contact && this.contact.domain){
+                    if (this.contact.get('server_has_rewrite')){
+                        dialog_options = [{
+                            name: 'symmetric_deletion',
+                            checked: false,
+                            text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
+                        }];
+                        dfd.resolve();
+                    } else {
+                        this.account.connection.disco.info(this.contact.domain, null, (iq) => {
+                            let $rewrite = $(iq).find('feature[var="' + Strophe.NS.REWRITE + '"]');
+                            if ($rewrite.length) {
+                                dialog_options = [{
+                                    name: 'symmetric_deletion',
+                                    checked: false,
+                                    text: xabber.getString("dialog_clear_chat_history__option_delete_for_all")
+                                }];
+                                this.contact.set('server_has_rewrite', true);
+                                dfd.resolve();
+                            } else {
+                                dfd.resolve();
+                            }
+                        });
+                    }
+                } else
+                    dfd.resolve();
             }
             else {
                 utils.dialogs.ask(xabber.getString("dialog_delete_messages__header"), `${xabber.getQuantityString("delete_message_question", msgs.length)}\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')}`,

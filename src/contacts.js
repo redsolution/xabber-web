@@ -59,7 +59,6 @@ define("xabber-contacts", function () {
                 this.on("update_avatar", this.updateAvatar, this);
                 this.on("change:full_jid", this.updateCachedInfo, this);
                 this.on("change:roster_name", this.updateName, this);
-                !xabber.servers.get(this.domain) && xabber.servers.create({domain: this.domain, account: this.account});
                 this.account.dfd_presence.done(() => {
                     if (!this.get('blocked') && !this.get('vcard_updated'))
                         this.getVCard();
@@ -1377,7 +1376,6 @@ define("xabber-contacts", function () {
             className: 'modal main-modal resource-modal',
 
             _initialize: function () {
-                this.model.on("add", this.onResourceAdded, this);
                 this.model.on("remove", this.onResourceRemoved, this);
                 this.model.on("reset", this.onReset, this);
                 this.model.on("change:priority", this.onPriorityChanged, this);

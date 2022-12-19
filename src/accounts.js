@@ -5281,8 +5281,6 @@ define("xabber-accounts", function () {
                 let login_screen = options.login_screen || constants.DEFAULT_LOGIN_SCREEN;
                 return login_screen === 'xmpp' ? { xmpp_login: null } : { xabber_login: null };
             };
-
-            this.servers = new xabber.Servers();
         }, xabber);
 
         return xabber;
