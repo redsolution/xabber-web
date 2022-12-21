@@ -7661,7 +7661,12 @@ define("xabber-chats", function () {
                 if (index === 0) {
                     this.$('.pinned-chat-list').prepend(view.$el);
                 } else {
-                    this.$('.pinned-chat-list .chat-item').eq(index - 1).after(view.$el);
+                    let $chat_item = this.$('.pinned-chat-list .chat-item').eq(index - 1);
+                    while (!$chat_item.length && index > 0) {
+                        index--;
+                        $chat_item = this.$('.pinned-chat-list .chat-item').eq(index - 1);
+                    }
+                    $chat_item.after(view.$el);
                 }
             }
             else if (view && (item.get('timestamp') || item.get('saved'))) {

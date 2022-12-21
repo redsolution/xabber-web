@@ -2769,11 +2769,9 @@ define("xabber-contacts", function () {
                         contact.removeFromRoster();
                         let chat = this.account.chats.getChat(contact);
                         chat.deleteFromSynchronization(() => {
-                            this.model.showDetailsRight('all-chats');
                             chat.trigger("close_chat");
                             xabber.body.setScreen('all-chats', {right: undefined});
                         }, () => {
-                            this.model.showDetailsRight('all-chats');
                             chat.trigger("close_chat");
                             xabber.body.setScreen('all-chats', {right: undefined});
                         });
@@ -8877,7 +8875,6 @@ define("xabber-contacts", function () {
                 });
                 if (is_first_sync)
                     this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
-                        console.log(res.length);
                         let synced_conversations = $(iq).find('conversation').map(function () {
                             return $(this).attr('jid') +  '/' + $(this).attr('type');
                         }).toArray();
