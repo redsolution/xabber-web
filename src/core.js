@@ -231,6 +231,7 @@
             } else {
                 this.accounts.forEach((acc) => {
                     indexedDB.deleteDatabase(acc.cached_roster.database.name);
+                    indexedDB.deleteDatabase(acc.cached_sync_conversations.database.name);
                 });
             }
             let full_storage_name = xabber.getStorageName();

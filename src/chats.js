@@ -1627,6 +1627,7 @@ define("xabber-chats", function () {
 
         deleteFromSynchronization: function (callback, errback) {
             let conversation_options = {jid: this.get('jid'), status: 'deleted', type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this) };
+            this.account.cached_sync_conversations.removeFromCachedConversations(conversation_options.jid +  '/' + conversation_options.type);
             let iq = $iq({type: 'set', to: this.account.get('jid')})
                 .c('query', {xmlns: Strophe.NS.SYNCHRONIZATION})
                 .c('conversation', conversation_options);

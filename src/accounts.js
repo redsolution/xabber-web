@@ -1209,6 +1209,7 @@ define("xabber-accounts", function () {
                         if (this.fast_conn_manager) this.fast_connection.disconnect();
                         if (this.background_conn_manager) this.background_connection.disconnect();
                     }
+                    this.cached_sync_conversations.clearDataBase();
                     this.trigger('remove_saved_chat');
                 },
 

@@ -8678,141 +8678,161 @@ define("xabber-contacts", function () {
                 });
             },
 
-            syncConversations: function (iq, request_with_stamp, is_last_sync) {
+            syncCachedConversations: function (conv_list, request_with_stamp) {
+                $(conv_list).each((idx, item) => {
+                    this.syncConversation(null, null, item.conversation);
+                });
+            },
+
+            syncConversations: function (iq, request_with_stamp) {
                 $(iq).find('conversation').each((idx, item) => {
-                    let $item = $(item),
-                        jid = $item.attr('jid'), saved = false;
-                    if (jid === this.account.get('jid'))
-                        saved = true;
-                    if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
-                        return true;
-                    let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
-                        type = $item.attr('type'),
-                        presence = $item.children('presence'),
-                        $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
-                        is_incognito =  type === Strophe.NS.GROUP_CHAT && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('privacy').text() === 'incognito',
-                        is_private = is_incognito && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('parent').text(),
-                        is_group_chat =  type === Strophe.NS.GROUP_CHAT || is_private || is_incognito,
-                        encrypted = type === Strophe.NS.SYNCHRONIZATION_OMEMO,
-                        contact = !saved && this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
-                        chat = saved ? this.account.chats.getSavedChat() : this.account.chats.getChat(contact, encrypted && 'encrypted', true),
-                        message = $sync_metadata.children('last-message').children('message'),
-                        current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
-                        $unread_messages = $sync_metadata.children('unread'),
-                        chat_timestamp = Math.trunc(Number($item.attr('stamp'))/1000),
-                        last_read_msg = $unread_messages.attr('after'),
-                        last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
-                        last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
-                        unread_msgs_count = Number($unread_messages.attr('count')) || 0,
-                        is_invite =  message.find('invite').length,
-                        msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-                        msg, options = {synced_msg: true,};
-                    if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
+                    this.syncConversation(iq, request_with_stamp, item);
+                });
+            },
+
+            syncConversation: function (iq, request_with_stamp, item) {
+                if (!$(item).length){
+                    return;
+                }
+                if (!iq)
+                    item = $($.parseXML(item)).find('conversation')[0];
+                let $item = $(item),
+                    jid = $item.attr('jid'), saved = false;
+                if (jid === this.account.get('jid'))
+                    saved = true;
+                if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
+                    return true;
+                let $sync_metadata = $item.children('metadata[node="' + Strophe.NS.SYNCHRONIZATION + '"]'),
+                    type = $item.attr('type'),
+                    presence = $item.children('presence'),
+                    $group_metadata = $item.children('metadata[node="' + Strophe.NS.GROUP_CHAT + '"]'),
+                    is_incognito =  type === Strophe.NS.GROUP_CHAT && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('privacy').text() === 'incognito',
+                    is_private = is_incognito && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('parent').text(),
+                    is_group_chat =  type === Strophe.NS.GROUP_CHAT || is_private || is_incognito,
+                    encrypted = type === Strophe.NS.SYNCHRONIZATION_OMEMO,
+                    contact = !saved && this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
+                    chat = saved ? this.account.chats.getSavedChat() : this.account.chats.getChat(contact, encrypted && 'encrypted', true),
+                    message = $sync_metadata.children('last-message').children('message'),
+                    current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
+                    $unread_messages = $sync_metadata.children('unread'),
+                    chat_timestamp = Math.trunc(Number($item.attr('stamp'))/1000),
+                    last_read_msg = $unread_messages.attr('after'),
+                    last_delivered_msg = $sync_metadata.children('delivered').attr('id'),
+                    last_displayed_msg = $sync_metadata.children('displayed').attr('id'),
+                    unread_msgs_count = Number($unread_messages.attr('count')) || 0,
+                    is_invite =  message.find('invite').length,
+                    msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
+                    msg, options = {synced_msg: true,};
+                (iq && !($item.attr('status') === 'deleted')) && this.account.cached_sync_conversations.putInCachedConversations({
+                    account_conversation_type: $(item).attr('jid') +  '/' + $(item).attr('type'),
+                    conversation: item.outerHTML,
+                });
+                if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
+                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                }
+                if ($item.attr('pinned') || $item.attr('pinned') === '0'){
+                    chat.set('pinned', $item.attr('pinned'));
+                }
+                if (encrypted && this.account.omemo) {
+                    chat.set('timestamp', chat_timestamp);
+                    chat.set('opened', true);
+                    if (iq && $(iq).attr('type') != 'set')
+                        chat.item_view.updateEncryptedChat();
+                }
+                if (!saved) {
+                    if ($item.attr('mute') || $item.attr('mute') === '0') {
+                        if ($item.attr('mute') < (Date.now() / 1000))
+                            chat.set('muted', false);
+                        else
+                            chat.set('muted', $item.attr('mute'));
+                        this.account.chat_settings.updateMutedList(contact.get('jid'), $item.attr('mute'));
+                        if (contact.details_view_right)
+                            contact.details_view_right.updateNotifications();
+                    }
+                    else{
+                        chat.set('muted', false);
+                    }
+                }
+                if ($item.attr('status') === 'archived')
+                    chat.set('archived', true);
+                else if ($item.attr('status') === 'active' && !saved)
+                    chat.set('archived', false);
+                if ($item.attr('status') === 'deleted') {
+                    contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
+                    chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
+                    chat.set('opened', false);
+                    chat.set('const_unread', 0);
+                    this.account.cached_sync_conversations.removeFromCachedConversations($(item).attr('jid') +  '/' + $(item).attr('type'));
+                    this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
+                    xabber.toolbar_view.recountAllMessageCounter();
+                    xabber.chats_view.clearSearch();
+                    contact && contact.set('sync_deleted', true);
+                }
+                else
+                    contact && contact.set('sync_deleted', false);
+                if ($group_metadata.length) {
+                    contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
+                }
+                if (current_call.length) {
+                    let $jingle_message = current_call.children('message'),
+                        full_jid = $jingle_message.attr('from'),
+                        session_id = $jingle_message.children('propose').attr('id');
+                    chat.initIncomingCall(full_jid, session_id);
+                }
+                chat.set('last_delivered_id', last_delivered_msg);
+                chat.set('last_displayed_id', last_displayed_msg);
+                chat.set('last_read_msg', last_read_msg);
+                chat.set('sync_type', type);
+                if (!message.length) {
+                    chat.set('timestamp', chat_timestamp);
+                    if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
+                        && !chat.item_view.content && !chat.get('group_chat')){
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                     }
-                    if ($item.attr('pinned') || $item.attr('pinned') === '0'){
-                        chat.set('pinned', $item.attr('pinned'));
-                    }
-                    if (encrypted && this.account.omemo) {
-                        chat.set('timestamp', chat_timestamp);
-                        chat.set('opened', true);
-                        if ($(iq).attr('type') != 'set')
-                            chat.item_view.updateEncryptedChat();
-                    }
-                    if (!saved) {
-                        if ($item.attr('mute') || $item.attr('mute') === '0') {
-                            if ($item.attr('mute') < (Date.now() / 1000))
-                                chat.set('muted', false);
-                            else
-                                chat.set('muted', $item.attr('mute'));
-                            this.account.chat_settings.updateMutedList(contact.get('jid'), $item.attr('mute'));
-                            if (contact.details_view_right)
-                                contact.details_view_right.updateNotifications();
+                    chat.item_view.updateEmptyChat();
+                }
+                if (is_group_chat) {
+                    if (request_with_stamp) {
+                        if (chat.retraction_version < msg_retraction_version)
+                            chat.trigger("get_retractions_list");
+                    } else
+                        chat.retraction_version = msg_retraction_version;
+                }
+                if (request_with_stamp && chat.item_view && chat.item_view.content) {
+                    chat.trigger('get_missed_history', request_with_stamp/1000);
+                }
+                unread_msgs_count && (options.is_unread = true);
+                options.delay = message.children('time');
+                if (encrypted && this.account.omemo)
+                    unread_msgs_count && unread_msgs_count--;
+                message.length && (msg = this.account.chats.receiveChatMessage(message, options));
+                if (!(encrypted && !this.account.omemo)){
+                    chat.messages_unread.reset();
+                    chat.set('unread', 0);
+                    chat.set('const_unread', unread_msgs_count);
+                }
+                if (msg) {
+                    if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
+                        msg.set('is_unread', true);
+                    if(!(is_invite || encrypted && this.account.omemo)) {
+                        if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
+                            msg.set('state', constants.MSG_DISPLAYED);
+                        else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)
+                            msg.set('state', constants.MSG_DELIVERED);
+                        this.account.messages.add(msg);
+                        if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
+                            chat.last_message = msg;
+                            chat.item_view.updateLastMessage(msg);
                         }
-                        else{
-                            chat.set('muted', false);
-                        }
                     }
-                    if ($item.attr('status') === 'archived')
-                        chat.set('archived', true);
-                    else if ($item.attr('status') === 'active' && !saved)
-                        chat.set('archived', false);
-                    if ($item.attr('status') === 'deleted') {
-                        contact && contact.details_view && contact.details_view.isVisible() && xabber.body.setScreen(xabber.body.screen.get('name'), {right: undefined});
-                        chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
-                        chat.set('opened', false);
-                        chat.set('const_unread', 0);
-                        this.account.chat_settings.updateGroupChatsList(contact.get('jid'), false);
-                        xabber.toolbar_view.recountAllMessageCounter();
-                        xabber.chats_view.clearSearch();
-                        contact && contact.set('sync_deleted', true);
-                    }
-                    else
-                        contact && contact.set('sync_deleted', false);
-                    if ($group_metadata.length) {
-                        contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
-                    }
-                    if (current_call.length) {
-                        let $jingle_message = current_call.children('message'),
-                            full_jid = $jingle_message.attr('from'),
-                            session_id = $jingle_message.children('propose').attr('id');
-                        chat.initIncomingCall(full_jid, session_id);
-                    }
-                    chat.set('last_delivered_id', last_delivered_msg);
-                    chat.set('last_displayed_id', last_displayed_msg);
-                    chat.set('last_read_msg', last_read_msg);
-                    chat.set('sync_type', type);
-                    if (!message.length) {
-                        chat.set('timestamp', chat_timestamp);
-                        if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
-                            && !chat.item_view.content && !chat.get('group_chat')){
-                            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-                        }
-                        chat.item_view.updateEmptyChat();
-                    }
-                    if (is_group_chat) {
-                        if (request_with_stamp) {
-                            if (chat.retraction_version < msg_retraction_version)
-                                chat.trigger("get_retractions_list");
-                        } else
-                            chat.retraction_version = msg_retraction_version;
-                    }
-                    if (request_with_stamp && chat.item_view && chat.item_view.content) {
-                        chat.trigger('get_missed_history', request_with_stamp/1000);
-                    }
-                    unread_msgs_count && (options.is_unread = true);
-                    options.delay = message.children('time');
-                    if (encrypted && this.account.omemo)
-                        unread_msgs_count && unread_msgs_count--;
-                    message.length && (msg = this.account.chats.receiveChatMessage(message, options));
-                    if (!(encrypted && !this.account.omemo)){
-                        chat.messages_unread.reset();
-                        chat.set('unread', 0);
-                        chat.set('const_unread', unread_msgs_count);
-                    }
-                    if (msg) {
-                        if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
-                            msg.set('is_unread', true);
-                        if(!(is_invite || encrypted && this.account.omemo)) {
-                            if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
-                                msg.set('state', constants.MSG_DISPLAYED);
-                            else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)
-                                msg.set('state', constants.MSG_DELIVERED);
-                            this.account.messages.add(msg);
-                            if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
-                                chat.last_message = msg;
-                                chat.item_view.updateLastMessage(msg);
-                            }
-                        }
-                        chat.set('first_archive_id', msg.get('stanza_id'));
-                    }
-                    if (presence.length)
-                        contact && contact.handlePresence(presence[0]);
-                    else {
-                        contact && contact.set('subscription_request_in', false)
-                    }
-                    xabber.toolbar_view.recountAllMessageCounter();
-                });
+                    chat.set('first_archive_id', msg.get('stanza_id'));
+                }
+                if (presence.length)
+                    contact && contact.handlePresence(presence[0]);
+                else {
+                    contact && contact.set('subscription_request_in', false)
+                }
+                xabber.toolbar_view.recountAllMessageCounter();
             },
 
             onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync) {
@@ -8832,25 +8852,43 @@ define("xabber-contacts", function () {
                 } else {
                     this.account.retraction_version = retract_version;
                 }
-                this.syncConversations(iq, request_with_stamp, is_last_sync);
-                xabber.chats_view.hideChatsFeedback();
-                if (!request_with_stamp)
-                    this.account.chats.getSavedChat();
                 this.account.set('last_sync', sync_timestamp);
+                this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
+                let dfd = new $.Deferred();
+                dfd.done((is_cached) => {
+                    xabber.chats_view.hideChatsFeedback();
+                    if (!request_with_stamp)
+                        this.account.chats.getSavedChat();
+                    if (is_first_sync)
+                        this.account.set('first_sync', sync_timestamp);
+                    if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
+                        if (is_first_sync) {
+                            this.getRoster();
+                        }
+                    }
+                    else if ($(iq).find('conversation').length) {
+                        if (!synchronization_with_stamp) {
+                            this.syncFromServer({max: constants.SYNCHRONIZATION_RSM_MAX, after: sync_rsm_after});
+                        }
+                        else {
+                            this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
+                        }
+                    }
+                });
                 if (is_first_sync)
-                    this.account.set('first_sync', sync_timestamp);
-                if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
-                    if (!synchronization_with_stamp) {
-                        this.getRoster();
-                    }
-                }
-                else if ($(iq).find('conversation').length) {
-                    if (!synchronization_with_stamp) {
-                        this.syncFromServer({max: constants.SYNCHRONIZATION_RSM_MAX, after: sync_rsm_after});
-                    }
-                    else {
-                        this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
-                    }
+                    this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
+                        console.log(res.length);
+                        let synced_conversations = $(iq).find('conversation').map(function () {
+                            return $(this).attr('jid') +  '/' + $(this).attr('type');
+                        }).toArray();
+                        res = res.filter(item => !synced_conversations.includes(item.account_conversation_type))
+                        this.syncCachedConversations(res, request_with_stamp);
+                        this.syncConversations(iq, request_with_stamp);
+                        dfd.resolve(true);
+                    });
+                else{
+                    this.syncConversations(iq, request_with_stamp);
+                    dfd.resolve();
                 }
             },
 
@@ -9815,6 +9853,36 @@ define("xabber-contacts", function () {
             }
         });
 
+        xabber.CachedSyncСonversations = Backbone.ModelWithDataBase.extend({
+            putInCachedConversations: function (value, callback) {
+                this.database.put('conversation_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            getFromCachedConversations: function (value, callback) {
+                this.database.get('conversation_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            getAllFromCachedConversations: function (callback) {
+                this.database.get_all('conversation_items', null, function (response_value) {
+                    callback && callback(response_value || []);
+                });
+            },
+
+            removeFromCachedConversations: function (value, callback) {
+                this.database.remove('conversation_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            clearDataBase: function () {
+                this.database.clear_database('conversation_items');
+            }
+        });
+
         xabber.Account.addInitPlugin(function () {
             this.groups_settings = new xabber.GroupsSettings(null, {
                 account: this,
@@ -9824,6 +9892,11 @@ define("xabber-contacts", function () {
                 name:'cached-roster-list-' + this.get('jid'),
                 objStoreName: 'roster_items',
                 primKey: 'jid'
+            });
+            this.cached_sync_conversations = new xabber.CachedSyncСonversations(null, {
+                name:'cached-conversation-list-' + this.get('jid'),
+                objStoreName: 'conversation_items',
+                primKey: 'account_conversation_type'
             });
 
             this.groupchat_settings = new xabber.GroupChatSettings({id: 'group-chat-settings'}, {
@@ -9849,9 +9922,11 @@ define("xabber-contacts", function () {
                         this.contacts.mergeContact(roster_item);
                     });
                     if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
-                        let options = {};
+                        let options = {},
+                            last_sync_timestamp = this.settings && this.settings.get('last_sync_timestamp') ? this.settings.get('last_sync_timestamp') : null
                         !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
-                        this.roster.syncFromServer(options, false, true);
+                        last_sync_timestamp && (options.stamp = last_sync_timestamp);
+                        this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
                     }
                     else {
                         this.roster.getRoster();
