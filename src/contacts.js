@@ -8676,19 +8676,19 @@ define("xabber-contacts", function () {
                 });
             },
 
-            syncCachedConversations: function (conv_list, request_with_stamp) {
+            syncCachedConversations: function (conv_list, request_with_stamp, is_first_sync) {
                 $(conv_list).each((idx, item) => {
-                    this.syncConversation(null, null, item.conversation);
+                    this.syncConversation(null, null, item.conversation, is_first_sync);
                 });
             },
 
-            syncConversations: function (iq, request_with_stamp) {
+            syncConversations: function (iq, request_with_stamp, is_first_sync) {
                 $(iq).find('conversation').each((idx, item) => {
-                    this.syncConversation(iq, request_with_stamp, item);
+                    this.syncConversation(iq, request_with_stamp, item, is_first_sync);
                 });
             },
 
-            syncConversation: function (iq, request_with_stamp, item) {
+            syncConversation: function (iq, request_with_stamp, item, is_first_sync) {
                 if (!$(item).length){
                     return;
                 }
@@ -8790,7 +8790,7 @@ define("xabber-contacts", function () {
                     chat.item_view.updateEmptyChat();
                 }
                 if (is_group_chat) {
-                    if (request_with_stamp) {
+                    if (request_with_stamp && !is_first_sync) {
                         if (chat.retraction_version < msg_retraction_version)
                             chat.trigger("get_retractions_list");
                     } else
@@ -8879,8 +8879,8 @@ define("xabber-contacts", function () {
                             return $(this).attr('jid') +  '/' + $(this).attr('type');
                         }).toArray();
                         res = res.filter(item => !synced_conversations.includes(item.account_conversation_type))
-                        this.syncCachedConversations(res, request_with_stamp);
-                        this.syncConversations(iq, request_with_stamp);
+                        this.syncCachedConversations(res, request_with_stamp, is_first_sync);
+                        this.syncConversations(iq, request_with_stamp, is_first_sync);
                         dfd.resolve(true);
                     });
                 else{
