@@ -6893,6 +6893,14 @@ define("xabber-chats", function () {
             }
 
             if ($echo_msg.length) {
+                console.log(this.account._pending_messages);
+                console.log(this.account._pending_messages.length);
+                let origin_msg_id = $echo_msg.children('origin-id').first().attr('id'),
+                    pending_message = this.account._pending_messages.find(msg => msg.unique_id == origin_msg_id);
+                if (pending_message) {
+                    this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
+                }
+                console.log(this.account._pending_messages.length);
                 return this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
             }
 
