@@ -410,6 +410,14 @@ define("xabber-accounts", function () {
                         this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.background_connection = this.background_conn_manager.connection;
                         this.background_connection.account = this;
+                        this.background_connection.xmlInput = function (xml) {
+                            xabber.info('input');
+                            xabber.info(xml);
+                        };
+                        this.background_connection.xmlOutput = function (xml) {
+                            xabber.info('output');
+                            xabber.info(xml);
+                        };
                     } else{
                         this.background_connection.disconnect();
                         return this.createBackgroundConnection();
@@ -446,6 +454,14 @@ define("xabber-accounts", function () {
                         this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
                         this.fast_connection = this.fast_conn_manager.connection;
                         this.fast_connection.account = this;
+                        this.fast_connection.xmlInput = function (xml) {
+                            xabber.info('input');
+                            xabber.info(xml);
+                        };
+                        this.fast_connection.xmlOutput = function (xml) {
+                            xabber.info('output');
+                            xabber.info(xml);
+                        };
                     } else{
                         this.fast_connection.disconnect();
                         return this.createFastConnection();
