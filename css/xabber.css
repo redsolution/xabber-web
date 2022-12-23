@@ -8022,9 +8022,6 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-tools-wrap .chat-tool-player .chat-tool.active-plyr{
-    -webkit-animation: pulsate 1.5s ease-out;
-    -webkit-animation-iteration-count: infinite;
-    background: #EF5350;
     width: 32px;
     padding: 4px;
     height: 32px;
@@ -8035,7 +8032,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-tools-wrap .chat-tool-player .chat-tool.active-plyr i{
-    color: #FFF !important;
+    /*color: #FFF !important;*/
 }
 
 .chat-tools-wrap .chat-tool-player .chat-tool.btn-popup-plyr{

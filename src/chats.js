@@ -1141,6 +1141,8 @@ define("xabber-chats", function () {
             xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id, call_initiator: this.contact.get('jid')}, {contact: this.contact, });
             xabber.current_voip_call.modal_view.show({status: 'in'});
             xabber.trigger('update_jingle_button');
+            if (xabber.body.screen.get('name') === 'all-chats' && !xabber.body.screen.get('right') && this.item_view)
+                this.item_view.open();
         },
 
         endCall: function (status) {
@@ -8628,7 +8630,7 @@ define("xabber-chats", function () {
                       this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                       this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                       this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                      this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
+                      // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
                       this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
                       let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
                       this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -8672,7 +8674,7 @@ define("xabber-chats", function () {
                   this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
                   this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-                  this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
+                  // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
                   this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
                   let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                   this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -9132,7 +9134,7 @@ define("xabber-chats", function () {
                     this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                     this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                     this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                    this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
+                    // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
                     this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
                     let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
                     this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -9176,7 +9178,7 @@ define("xabber-chats", function () {
                 this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
                 this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-                this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
+                // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
                 this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
                 let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
                 this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
