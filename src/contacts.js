@@ -8765,6 +8765,12 @@ define("xabber-contacts", function () {
                     xabber.toolbar_view.recountAllMessageCounter();
                     xabber.chats_view.clearSearch();
                     contact && contact.set('sync_deleted', true);
+                    if (is_group_chat) {
+                        contact && contact.set('in_roster', false);
+                        contact && contact.set('known', false);
+                        contact && contact.set('removed', true);
+                        this.account.cached_roster.removeFromRoster(jid);
+                    }
                 }
                 else
                     contact && contact.set('sync_deleted', false);
