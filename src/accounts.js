@@ -83,12 +83,6 @@ define("xabber-accounts", function () {
                     this._pending_stanzas = [];
                     this._pending_messages = [];
                     this.dfd_presence = new $.Deferred();
-                    this.dfd_presence.done(() => {
-                        this.sendPendingStanzas();
-                        setTimeout(() => {
-                            this.sendPendingMessages();
-                        }, 2500);
-                    });
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
@@ -939,6 +933,12 @@ define("xabber-accounts", function () {
                 },
 
                 afterConnected: function () {
+                    this.dfd_presence.done(() => {
+                        this.sendPendingStanzas();
+                        setTimeout(() => {
+                            this.sendPendingMessages();
+                        }, 2500);
+                    });
                     this.registerPresenceHandler();
                     this.enableCarbons();
                     this.getVCard();
