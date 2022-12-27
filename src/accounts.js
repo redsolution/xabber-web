@@ -83,6 +83,12 @@ define("xabber-accounts", function () {
                     this._pending_stanzas = [];
                     this._pending_messages = [];
                     this.dfd_presence = new $.Deferred();
+                    this.dfd_presence.done(() => {
+                        this.sendPendingStanzas();
+                        setTimeout(() => {
+                            this.sendPendingMessages();
+                        }, 2500);
+                    });
                     this.resources = new xabber.AccountResources(null, {account: this});
                     this.password_view = new xabber.ChangePasswordView({model: this});
                     this.vcard_edit = new xabber.VCardEditView({model: this});
@@ -152,14 +158,14 @@ define("xabber-accounts", function () {
                 },
 
                 sendMsgFast: function (stanza, callback) {
-                    let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-                    if (res) {
-                        this.fast_connection.send(stanza);
-                        callback && callback();
-                        return res;
-                    } else {
-                        return this.sendMsg(stanza, callback);
-                    }
+                    // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    // if (res) {
+                    //     this.fast_connection.send(stanza);
+                    //     callback && callback();
+                    //     return res;
+                    // } else {
+                    return this.sendMsg(stanza, callback);
+                    // }
                 },
 
                 sendIQFast: function () {
@@ -936,10 +942,6 @@ define("xabber-accounts", function () {
                     this.registerPresenceHandler();
                     this.enableCarbons();
                     this.getVCard();
-                    this.sendPendingStanzas();
-                    setTimeout(() => {
-                        this.sendPendingMessages();
-                    }, 5000);
                 },
 
                 getAllMessageRetractions: function (encrypted, callback) {
