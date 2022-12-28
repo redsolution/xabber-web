@@ -234,7 +234,7 @@ define("xabber-contacts", function () {
             getVCard: function (callback) {
                 let jid = this.get('jid'),
                     is_callback = _.isFunction(callback);
-                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid,
+                this.account.getConnectionForIQ().vcard.get(jid,
                      (vcard) => {
                         if (vcard.group_info) {
                             let group_info = this.get('group_info') || {};
@@ -323,7 +323,7 @@ define("xabber-contacts", function () {
                         return;
                     }
                     let iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
-                    this.account.sendIQ(iq, (iq) => {
+                    this.account.sendIQFast(iq, (iq) => {
                         let last_seen = this.getLastSeenStatus(iq);
                         if (this.get('status') == 'offline')
                             this.set({status_message: last_seen});
@@ -354,7 +354,7 @@ define("xabber-contacts", function () {
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
-                this.account.sendIQinBackground(iq_request_avatar, (iq) => {
+                this.account.sendIQFast(iq_request_avatar, (iq) => {
                     let pubsub_avatar = $(iq).find('data').text();
                     if (pubsub_avatar == "")
                         errback && errback(xabber.getString("pubsub__error__text_empty_node"));
@@ -376,8 +376,8 @@ define("xabber-contacts", function () {
                         .c('item', {id: avatar_hash})
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                this.account.sendIQinBackground(iq_pub_data, () => {
-                        this.account.sendIQinBackground(iq_pub_metadata, () => {
+                this.account.sendIQFast(iq_pub_data, () => {
+                        this.account.sendIQFast(iq_pub_metadata, () => {
                                 callback && callback(avatar_hash);
                             },
                             function (data_error) {
@@ -411,7 +411,7 @@ define("xabber-contacts", function () {
                 _.each(groups, function (group) {
                     iq.c('group').t(group).up();
                 });
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendIQFast(iq, callback, errback);
                 this.set('known', true);
                 this.set('removed', false);
                 return this;
@@ -423,7 +423,7 @@ define("xabber-contacts", function () {
                         .c('query', {xmlns: Strophe.NS.ROSTER})
                         .c('item', {jid: this.get('jid'), subscription: "remove"});
                     this.account.cached_roster.removeFromRoster(this.get('jid'));
-                    this.account.sendIQ(iq, callback, errback);
+                    this.account.sendIQFast(iq, callback, errback);
                     this.set('known', false);
                     this.set('removed', true);
                 }
@@ -471,7 +471,7 @@ define("xabber-contacts", function () {
                                 localpart = Strophe.getNodeFromJid(this.get('jid')),
                                 iq = $iq({to: domain, type: 'set'})
                                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#delete`}).t(localpart);
-                            this.account.sendIQ(iq, () => {
+                            this.account.sendIQFast(iq, () => {
                                 this.declineSubscription();
                                 this.removeFromRoster();
                                 let chat = this.account.chats.getChat(this);
@@ -534,7 +534,7 @@ define("xabber-contacts", function () {
             block: function (callback, errback) {
                 let iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendIQFast(iq, callback, errback);
                 this.set('blocked', true);
                 this.set('known', false);
             },
@@ -542,7 +542,7 @@ define("xabber-contacts", function () {
             unblock: function (callback, errback) {
                 let iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.get('jid')});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendIQFast(iq, callback, errback);
                 this.set('blocked', false);
             },
 
@@ -706,7 +706,7 @@ define("xabber-contacts", function () {
             getAllRights: function (callback) {
                 let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('full_jid') || this.get('jid') })
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights` });
-                this.account.sendIQ(iq_get_rights, (iq_all_rights) => {
+                this.account.sendIQFast(iq_get_rights, (iq_all_rights) => {
                     let all_permissions = $(iq_all_rights).find('permission'),
                         all_restrictions = $(iq_all_rights).find('restriction');
                     this.all_rights = {permissions: all_permissions, restrictions: all_restrictions};
@@ -729,7 +729,7 @@ define("xabber-contacts", function () {
                         callback && callback($msg);
                     return true;
                 }, Strophe.NS.MAM);
-                this.account.sendIQ(iq, () => {
+                this.account.sendIQFast(iq, () => {
                         this.account.connection.deleteHandler(handler);
                     }, () => {
                         this.account.connection.deleteHandler(handler);
@@ -2304,7 +2304,7 @@ define("xabber-contacts", function () {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
                         let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-                        this.account.sendIQ(iq_get_properties, (properties) => {
+                        this.account.sendIQFast(iq_get_properties, (properties) => {
                             let data_form = this.account.parseDataForm($(properties).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                             this.group_chat_properties_edit.open(data_form);
                         }, () => {
@@ -2750,7 +2750,7 @@ define("xabber-contacts", function () {
                 if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
                         let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                             .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
-                        this.account.sendIQ(iq_get_properties, (properties) => {
+                        this.account.sendIQFast(iq_get_properties, (properties) => {
                             let data_form = this.account.parseDataForm($(properties).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                             this.group_chat_properties_edit.open(data_form);
                         }, () => {
@@ -3269,7 +3269,7 @@ define("xabber-contacts", function () {
 
                 if (has_changes) {
                     iq = this.account.addDataFormToStanza(iq, this.data_form);
-                    this.account.sendIQ(iq, (result) => {
+                    this.account.sendIQFast(iq, (result) => {
                         let $result  = $(result),
                             group_info = _.clone(this.contact.get('group_info')),
                             attrs = {
@@ -3361,7 +3361,7 @@ define("xabber-contacts", function () {
                     iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                         .c('jid').t(member_jid);
-                this.account.sendIQ(iq, () => {
+                this.account.sendIQFast(iq, () => {
                     $member_item.remove();
                     if (this.parent.contact_edit_view)
                         this.parent.contact_edit_view.updateRemoveParticipantButton();
@@ -3374,7 +3374,7 @@ define("xabber-contacts", function () {
                     iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                         .c('jid').t(member_jid);
-                this.account.sendIQ(iq, () => {
+                this.account.sendIQFast(iq, () => {
                     $member_item.remove();
                     !this.$el.children().length && this.$el.html(this.$error.text(xabber.getString("group_settings__invitations__no_pending_invitations")));
                 });
@@ -3907,7 +3907,7 @@ define("xabber-contacts", function () {
                             iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                                 .c('block', {xmlns: `${Strophe.NS.GROUP_CHAT}#block`})
                                 .c(tag).t(result);
-                        this.account.sendIQ(iq, () => {
+                        this.account.sendIQFast(iq, () => {
                             this.updateBlockedParticipants()
                         }, function (err) {
                             utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
@@ -4726,7 +4726,7 @@ define("xabber-contacts", function () {
                     let iq = $iq({to: this.contact.domain, type: 'set'})
                         .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#create`})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
-                    this.account.sendIQ(iq, (iq_response) => {
+                    this.account.sendIQFast(iq, (iq_response) => {
                         let group_jid = $(iq_response).find('query localpart').text() + '@' + this.contact.domain,
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
@@ -4856,7 +4856,7 @@ define("xabber-contacts", function () {
                         !has_changes && utils.dialogs.error(error_text);
                     });
                 if (has_changes)
-                    this.account.sendIQ(iq_changes,
+                    this.account.sendIQFast(iq_changes,
                         () => {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.participant.set('nickname', nickname_value);
@@ -4873,7 +4873,7 @@ define("xabber-contacts", function () {
                     let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
-                    this.account.sendIQ(iq_rights_changes, () => {
+                    this.account.sendIQFast(iq_rights_changes, () => {
                             this.close();
                         },
                         (error) => {
@@ -5489,7 +5489,7 @@ define("xabber-contacts", function () {
                     let iq = $iq({to: this.contact.domain, type: 'set'})
                         .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#create`})
                         .c('peer-to-peer', { jid: this.contact.get('jid'),  id: this.participant.get('id')});
-                    this.account.sendIQ(iq, (iq_response) => {
+                    this.account.sendIQFast(iq, (iq_response) => {
                         let group_jid = $(iq_response).find('query localpart').text() + '@' + this.contact.domain,
                             contact = this.account.contacts.mergeContact(group_jid);
                         contact.set('group_chat', true);
@@ -5628,7 +5628,7 @@ define("xabber-contacts", function () {
                         this.close();
                     });
                 if (has_changes)
-                    this.account.sendIQ(iq_changes,
+                    this.account.sendIQFast(iq_changes,
                         () => {
                             this.$('.buttons-wrap button').removeClass('non-active');
                             this.participant.set('nickname', nickname_value);
@@ -5644,7 +5644,7 @@ define("xabber-contacts", function () {
                     let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
-                    this.account.sendIQ(iq_rights_changes, () => {
+                    this.account.sendIQFast(iq_rights_changes, () => {
                             this.close();
                         },
                         (error) => {
@@ -5758,7 +5758,7 @@ define("xabber-contacts", function () {
                             .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`})
                             .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
-                        this.account.sendIQ(iq_changes, () => {
+                        this.account.sendIQFast(iq_changes, () => {
                             this.model.updateBadge(new_badge);
                             this.close();
                         }, () => {
@@ -5963,7 +5963,7 @@ define("xabber-contacts", function () {
 
                 if (has_new_default_restrictions) {
                     this.account.addDataFormToStanza(iq_change_default_rights, data_form);
-                    this.account.sendIQ(iq_change_default_rights, () => {
+                    this.account.sendIQFast(iq_change_default_rights, () => {
                         this.close();
                     }, (error) => {
                         let err_text = $(error).find('error text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
@@ -6201,7 +6201,7 @@ define("xabber-contacts", function () {
 
                 if (has_new_default_restrictions) {
                     this.account.addDataFormToStanza(iq_change_default_rights, data_form);
-                    this.account.sendIQ(iq_change_default_rights, () => {
+                    this.account.sendIQFast(iq_change_default_rights, () => {
                         this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                         this.hideRestrictions();
                     }, (error) => {
@@ -6278,7 +6278,7 @@ define("xabber-contacts", function () {
                     iq.c('jid').t(jid);
                 else
                     iq.c('id').t(id);
-                this.account.sendIQ(iq, () => {
+                this.account.sendIQFast(iq, () => {
                     callback && callback();
                 }, (err) => {
                     errback && errback(err);
@@ -6290,7 +6290,7 @@ define("xabber-contacts", function () {
                     iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('block', {xmlns: `${Strophe.NS.GROUP_CHAT}#block`})
                         .c('id').t(id);
-                this.account.sendIQ(iq, () => {
+                this.account.sendIQFast(iq, () => {
                     callback && callback();
                 }, function (err) {
                     errback && errback(err);
@@ -6614,7 +6614,7 @@ define("xabber-contacts", function () {
                     iq_unblocking = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING}),
                     iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: this.model.get('jid') + '/' + moment.now()});
-                this.account.sendIQ(iq_get_blocking, (iq_blocking_items) => {
+                this.account.sendIQFast(iq_get_blocking, (iq_blocking_items) => {
                     let items = $(iq_blocking_items).find('item');
                     if (items.length > 0) {
                         items.each(function (idx, item) {
@@ -6624,11 +6624,11 @@ define("xabber-contacts", function () {
                         });
                     }
                     if ($(iq_unblocking.nodeTree).find('item').length)
-                        this.account.sendIQ(iq_unblocking, () => {
-                            this.account.sendIQ(iq_set_blocking);
+                        this.account.sendIQFast(iq_unblocking, () => {
+                            this.account.sendIQFast(iq_set_blocking);
                         });
                     else
-                        this.account.sendIQ(iq_set_blocking);
+                        this.account.sendIQFast(iq_set_blocking);
                 });
             },
 
@@ -7911,7 +7911,7 @@ define("xabber-contacts", function () {
                 let iq = $iq({type: 'set', to: this.model.get('full_jid') || this.model.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 iq = this.account.addDataFormToStanza(iq, this.data_form);
-                this.account.sendIQ(iq, (result) => {
+                this.account.sendIQFast(iq, (result) => {
                     let $result  = $(result),
                         group_info = _.clone(this.model.get('group_info')),
                         attrs = {
@@ -7943,7 +7943,7 @@ define("xabber-contacts", function () {
                 let iq_get_properties = $iq({to: this.model.get('full_jid') || this.model.get('jid'), type: 'get'})
                     .c('query', {xmlns: Strophe.NS.GROUP_CHAT});
                 this.parent.$('.group-edit-preloader').html(env.templates.contacts.preloader())
-                this.account.sendIQ(iq_get_properties, (properties) => {
+                this.account.sendIQFast(iq_get_properties, (properties) => {
                     this.data_form = this.account.parseDataForm($(properties).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                     this.original_data_form_values = {}
                     this.model.set('edit_hidden', false);
@@ -8480,13 +8480,13 @@ define("xabber-contacts", function () {
             blockContact: function (jid, callback, errback) {
                 let iq = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: jid});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendIQFast(iq, callback, errback);
             },
 
             unblockContact: function (jid, callback, errback) {
                 let iq = $iq({type: 'set'}).c('unblock', {xmlns: Strophe.NS.BLOCKING})
                     .c('item', {jid: jid});
-                this.account.sendIQ(iq, callback, errback);
+                this.account.sendIQFast(iq, callback, errback);
             },
 
             removeAllContacts: function () {
@@ -8537,7 +8537,7 @@ define("xabber-contacts", function () {
 
             getFromServer: function () {
                 let iq = $iq({type: 'get'}).c('blocklist', {xmlns: Strophe.NS.BLOCKING});
-                this.account.sendIQ(iq, this.onBlockingIQ.bind(this));
+                this.account.sendIQFast(iq, this.onBlockingIQ.bind(this));
             },
 
             onBlockingIQ: function (iq) {
@@ -8910,7 +8910,7 @@ define("xabber-contacts", function () {
 
             getFromServer: function () {
                 let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
-                this.account.sendIQ(iq, (iq) => {
+                this.account.sendIQFast(iq, (iq) => {
                     this.onRosterIQ(iq);
                     this.account.sendPresence();
                     this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
@@ -8921,7 +8921,7 @@ define("xabber-contacts", function () {
             onRosterIQ: function (iq) {
                 let new_roster_version = $(iq).children('query').attr('ver');
                 if (iq.getAttribute('type') === 'set') {
-                    this.account.sendIQ($iq({
+                    this.account.sendIQFast($iq({
                         type: 'result', id: iq.getAttribute('id'),
                         from: this.account.jid
                     }));
@@ -9626,7 +9626,7 @@ define("xabber-contacts", function () {
                 this.$('.btn-add').addClass('hidden-disabled')
                 this.$('input[name=contact_name]').val('');
                 if (this.account.connection && this.account.connection.connected) {
-                    ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).vcard.get(jid, (vcard) => {
+                    this.account.getConnectionForIQ().vcard.get(jid, (vcard) => {
                             let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : ''
                             username && this.$('input[name=contact_name]').val(username);
                             this.$('.preloader-wrapper').remove();

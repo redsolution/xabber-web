@@ -136,7 +136,7 @@ define("xabber-searching", function () {
             getGroupchatFeatures: function (jid) {
                 let iq = $iq({type: 'get', to: jid})
                     .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
-                this.account.sendIQ(iq, this.getServerInfo.bind(this), this.onDiscoveringError.bind(this));
+                this.account.sendIQFast(iq, this.getServerInfo.bind(this), this.onDiscoveringError.bind(this));
             },
 
             getServerInfo: function (stanza) {
@@ -151,7 +151,7 @@ define("xabber-searching", function () {
 
             getChatsFromSever: function (jid) {
                 let iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
-                this.account.sendIQ(iq, (stanza) => {
+                this.account.sendIQFast(iq, (stanza) => {
                     this.$('.chats-list').html("");
                     $(stanza).find('query item').each((idx, item) => {
                         let $item = $(item),
@@ -190,7 +190,7 @@ define("xabber-searching", function () {
                     name = $target.data('name'),
                     request_iq = $iq({type: 'get', to: jid})
                         .c('query', {xmlns: Strophe.NS.DISCO_INFO});
-                this.account.sendIQ(request_iq, (iq_response) => {
+                this.account.sendIQFast(request_iq, (iq_response) => {
                     let $iq_response = $(iq_response),
                         description = $iq_response.find('field[var="description"] value').text(),
                         privacy = $iq_response.find('field[var="anonymous"] value').text(),
@@ -242,7 +242,7 @@ define("xabber-searching", function () {
             getSearchingFields: function () {
                 let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
                     iq_get = $iq({from: this.account.get('jid'), type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
-                this.account.sendIQ(iq_get, this.parseSearchingFields);
+                this.account.sendIQFast(iq_get, this.parseSearchingFields);
             },
 
             parseSearchingFields: function (iq_result) {
@@ -313,7 +313,7 @@ define("xabber-searching", function () {
                 if (query.anywhere)
                     iq_search.c('field', {var: 'anywhere'})
                         .c('value').t(query.anywhere).up().up();
-                this.account.sendIQ(iq_search, this.onSearched.bind(this));
+                this.account.sendIQFast(iq_search, this.onSearched.bind(this));
             },
 
             onSearched: function (result) {

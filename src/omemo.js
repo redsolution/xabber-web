@@ -48,8 +48,8 @@ define("xabber-omemo", function () {
                     this._pending_devices = true;
                     this._dfd_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getDevicesNode(this.get('jid'), (cb) => {
-                            this.updateDevices(this.account.connection.omemo.parseUserDevices($(cb)));
+                        this.account.getConnectionForIQ().omemo.getDevicesNode(this.get('jid'), (cb) => {
+                            this.updateDevices(this.account.getConnectionForIQ().omemo.parseUserDevices($(cb)));
                             this._pending_devices = false;
                             this._dfd_devices.resolve();
                             resolve();
@@ -229,7 +229,7 @@ define("xabber-omemo", function () {
                 if (label == this.account.settings.get('device_label_text'))
                     return;
                 this.account.settings.save('device_label_text', label);
-                this.account.connection.omemo.publishDevice(this.omemo.get('device_id'), label, () => {
+                this.account.getConnectionForIQ().omemo.publishDevice(this.omemo.get('device_id'), label, () => {
                     this.updateOwnFingerprint();
                 });
             },
@@ -275,7 +275,7 @@ define("xabber-omemo", function () {
                             dfd.resolve($container.find('div.row').length);
                     }
                     else {
-                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
+                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {//34
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
@@ -414,7 +414,7 @@ define("xabber-omemo", function () {
                     if (result) {
                         $target.detach();
                         delete this.model.own_devices[device_id];
-                        let conn = this.account.connection;
+                        let conn = this.account.getConnectionForIQ();
                         if (conn && conn.omemo) {
                             delete conn.omemo.devices[device_id];
                             conn.omemo.publishDevice(null, null, () => {
@@ -620,7 +620,7 @@ define("xabber-omemo", function () {
             },
 
             closeSession: function (reason) {
-                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.sendOptOut({
+                this.account.getConnectionForIQ().omemo.sendOptOut({
                     to: this.jid,
                     reason: reason
                 }, () => {});
@@ -631,7 +631,7 @@ define("xabber-omemo", function () {
                     this._pending_bundle = true;
                     this._dfd_bundle = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.jid, id: this.id}, (iq) => {
+                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.jid, id: this.id}, (iq) => {//34
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 $spk = $bundle.find('spk'),
@@ -836,7 +836,7 @@ define("xabber-omemo", function () {
             deleteOwnDevice: function () {
                 let device_id = this.get('device_id');
                 delete this.own_devices[device_id];
-                let conn = this.account.connection;
+                let conn = this.account.getConnectionForIQ();
                 if (conn && conn.omemo) {
                     delete conn.omemo.devices[device_id];
                     conn.omemo.publishDevice(null, null, () => {});
@@ -864,7 +864,7 @@ define("xabber-omemo", function () {
                     this._pending_own_devices = true;
                     this._dfd_own_devices = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        let conn = this.account.connection;
+                        let conn = this.account.getConnectionForIQ();
                         if (conn) {
                             if (conn.omemo) {
                                 conn.omemo.getDevicesNode(null, (cb) => {
@@ -934,7 +934,7 @@ define("xabber-omemo", function () {
             addDevice: function () {
                 let device_id = this.get('device_id');
                 if (this.connection) {
-                    let omemo = this.account.connection.omemo;
+                    let omemo = this.account.getConnectionForIQ().omemo;
                     if (Object.keys(omemo.devices).length) {
                         let device = omemo.devices[device_id];
                         if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
@@ -948,8 +948,8 @@ define("xabber-omemo", function () {
                     }
                     else
                         omemo.getDevicesNode(null, (cb) => {
-                            this.account.connection.omemo.devices = omemo.parseUserDevices($(cb));
-                            for (let dev_id in this.account.connection.omemo.devices) {
+                            this.account.getConnectionForIQ().omemo.devices = omemo.parseUserDevices($(cb));
+                            for (let dev_id in this.account.getConnectionForIQ().omemo.devices) {
                                 if (!this.own_devices[dev_id])
                                     this.own_devices[dev_id] = new xabber.Device({jid: this.account.get('jid'), id: dev_id}, { account: this.account, store: this.store});
                             }
@@ -1064,13 +1064,13 @@ define("xabber-omemo", function () {
                     node = $message.find('items').attr('node');
                 if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
                     if (node == `${Strophe.NS.OMEMO}:devices`) {
-                        let devices = this.account.connection.omemo.parseUserDevices($message);
+                        let devices = this.account.getConnectionForIQ().omemo.parseUserDevices($message);
                         if (from_jid === this.account.get('jid')) {
                             let has_devices = this.own_devices && Object.keys(this.own_devices).length,
                                 has_changes = this.hasChanges(this.own_devices, devices);
-                            this.account.connection.omemo.devices = devices;
+                            this.account.getConnectionForIQ().omemo.devices = devices;
                             let device_id = this.get('device_id'),
-                                device = this.account.connection.omemo.devices[device_id];
+                                device = this.account.getConnectionForIQ().omemo.devices[device_id];
                             if (has_changes) {
                                 this.account.trigger("devices_updated");
                             }
@@ -1094,7 +1094,8 @@ define("xabber-omemo", function () {
                             device_id = $item.attr('id'),
                             $bundle = $item.children(`bundle[xmlns="${Strophe.NS.OMEMO}"]`), device;
                         if (from_jid === this.account.get('jid')) {
-                            if (this.account.connection.omemo.devices && this.account.connection.omemo.devices[device_id]) {
+                            let devices = this.account.getConnectionForIQ().omemo.devices
+                            if (devices && devices[device_id]) {
                                 if (!this.own_devices[device_id])
                                     this.own_devices[device_id] = new xabber.Device({jid: this.account.get('jid'), id: device_id}, { account: this.account, store: this.store});
                                 device = this.own_devices[device_id];
@@ -1517,7 +1518,7 @@ define("xabber-omemo", function () {
             publish: function (spk, ik, pks) {
                 if (!this.account.connection)
                     return;
-                let conn_omemo = ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo,
+                let conn_omemo = this.account.getConnectionForIQ().omemo,
                     prekeys = [];
                 pks.forEach((pk) => {
                     let id = pk.keyId,
@@ -1596,11 +1597,11 @@ define("xabber-omemo", function () {
                     this.set('resend_bundle', true);
                     return;
                 }
-                ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, () => {
+                this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, () => {
                         this.publish(spk, ik.pubKey, pks);
                     }, (err) => {
                         if (($(err).find('error').attr('code') == 404))
-                            ((this.account.background_connection && this.account.background_connection.connected) ? this.account.background_connection : this.account.connection).omemo.createBundleNode(() => {
+                            this.account.getConnectionForIQ().omemo.createBundleNode(() => {
                                 this.publish(spk, ik.pubKey, pks);
                             });
                     });
@@ -1608,7 +1609,7 @@ define("xabber-omemo", function () {
 
             onOwnDevicesUpdated: async function () {
                 return new Promise((resolve, reject) => {
-                    let conn = this.account.connection;
+                    let conn = this.account.getConnectionForIQ();
                     if (conn && conn.omemo && conn.omemo.devices) {
                         for (let d in this.own_devices) {
                             if (!conn.omemo.devices[d]) {

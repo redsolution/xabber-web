@@ -676,7 +676,7 @@ define("xabber-views", function () {
                       }
                       return true;
                   }, env.Strophe.NS.MAM);
-              account.sendIQ(iq,
+              account.sendIQFast(iq,
                   function (res) {
                       account.connection.deleteHandler(handler);
                       let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);

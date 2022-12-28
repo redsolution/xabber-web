@@ -205,39 +205,6 @@ define("xabber-discovery", function () {
         this.server_features.request();
     }, true, true);
 
-    xabber.Account.addBackgroundConnPlugin(function () {
-        this.last_background_stanza_timestamp = moment.now();
-
-        this.background_connection.deleteHandler(this._last_background_stanza_handler);
-        this._last_background_stanza_handler = this.background_connection.addHandler(() => {
-            this.last_background_stanza_timestamp = moment.now();
-            return true;
-        });
-
-        this.background_connection.deleteHandler(this._background_pong_handler);
-        this._background_pong_handler = this.background_connection.ping.addPingHandler((ping) => {
-            this.last_background_stanza_timestamp = moment.now();
-            this.background_connection.ping.pong(ping);
-            return true;
-        });
-
-        this.background_connection.deleteTimedHandler(this._background_ping_handler);
-        this._background_ping_handler = this.background_connection.addTimedHandler(30000, () => {
-            let downtime = moment.now() - this.last_background_stanza_timestamp;
-            if (downtime / 1000 > (xabber.settings.reconnect_interval || 90)) {
-                if (this.background_connection.connected)
-                    this.background_connection.disconnect();
-                else
-                    this.background_connection.connect('password', this.background_connection.jid, this.background_connection.pass);
-                return false;
-            }
-            if (downtime / 1000 > (xabber.settings.ping_interval || 60)) {
-                this.background_connection.ping.ping(this.background_connection.jid);
-            }
-            return true;
-        });
-    }, true, true);
-
     xabber.Account.addFastConnPlugin(function () {
         this.last_fast_stanza_timestamp = moment.now();
 

@@ -93,11 +93,11 @@ define("xabber-accounts", function () {
                         plugin.call(this);
                     });
                     this.connection.xmlInput = function (xml) {
-                        xabber.info('input');
+                        xabber.info('input main connection');
                         xabber.info(xml);
                     };
                     this.connection.xmlOutput = function (xml) {
-                        xabber.info('output');
+                        xabber.info('output main connection');
                         xabber.info(xml);
                     };
                     this.once("start", this.start, this);
@@ -162,6 +162,14 @@ define("xabber-accounts", function () {
                     // }
                 },
 
+                getConnectionForIQ: function () {
+                    let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+                    if (res) {
+                        return this.fast_connection;
+                    } else
+                        return this.connection;
+                },
+
                 sendIQFast: function () {
                     let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
                     if (res) {
@@ -203,7 +211,7 @@ define("xabber-accounts", function () {
                                     height: thumbnail.height,
                                 }).up()
                             })
-                            this.sendIQinBackground(iq_pub_metadata, () => {
+                            this.sendIQFast(iq_pub_metadata, () => {
                                     callback && callback(avatar_hash);
                                 },
                                 function (data_error) {
@@ -223,8 +231,8 @@ define("xabber-accounts", function () {
                                     .c('item', {id: avatar_hash})
                                     .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                                     .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-                            this.sendIQinBackground(iq_pub_data, () => {
-                                    this.sendIQinBackground(iq_pub_metadata, () => {
+                            this.sendIQFast(iq_pub_data, () => {
+                                    this.sendIQFast(iq_pub_metadata, () => {
                                             callback && callback(avatar_hash);
                                         },
                                         function (data_error) {
@@ -260,7 +268,7 @@ define("xabber-accounts", function () {
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('item')
                         .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA});
-                    this.sendIQinBackground(iq_pub_metadata, () => {
+                    this.sendIQFast(iq_pub_metadata, () => {
                             callback && callback();
                         },
                         function () {
@@ -273,7 +281,7 @@ define("xabber-accounts", function () {
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
                         .c('item', {id: avatar});
-                    this.sendIQinBackground(iq_request_avatar, (iq) => {
+                    this.sendIQFast(iq_request_avatar, (iq) => {
                         let pubsub_avatar = $(iq).find('data').text();
                         if (pubsub_avatar == "")
                             errback && errback(xabber.getString("pubsub__error__text_empty_node"));
@@ -298,15 +306,6 @@ define("xabber-accounts", function () {
                         }
                     }
                     return res;
-                },
-
-                sendIQinBackground: function () {
-                    let res = this.background_connection && !this.background_connection.disconnecting && this.background_connection.authenticated && this.background_connection.connected && this.get('status') !== 'offline';
-                    if (res) {
-                        this.background_connection.sendIQ.apply(this.background_connection, arguments);
-                        return res;
-                    } else
-                        return this.sendIQ.apply(this, arguments);
                 },
 
                 parseDataForm: function ($dataform, options) {
@@ -386,50 +385,6 @@ define("xabber-accounts", function () {
                     $.ajax(request);
                 },
 
-                createBackgroundConnection: function () {
-                    let jid = this.get('jid'),
-                        auth_type = this.fast_conn_manager.auth_type,
-                        password;
-                    if (auth_type === 'token') {
-                        password = this.settings.get('token');
-                    } else if (auth_type === 'x-token') {
-                        if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
-                            password = this.get('x_token').token;
-                        else
-                            password = undefined;
-                    } else {
-                        password = this.getPassword();
-                    }
-                    if (!password) {
-                        let attrs = {login: true};
-                        options.token_invalidated && (attrs.token_invalidated = true);
-                        this.password_view.show(attrs);
-                        return;
-                    }
-                    if (!this.background_conn_manager) {
-                        this.background_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                        this.background_connection = this.background_conn_manager.connection;
-                        this.background_connection.account = this;
-                        this.background_connection.xmlInput = function (xml) {
-                            xabber.info('input');
-                            xabber.info(xml);
-                        };
-                        this.background_connection.xmlOutput = function (xml) {
-                            xabber.info('output');
-                            xabber.info(xml);
-                        };
-                    } else{
-                        this.background_connection.disconnect();
-                        return this.createBackgroundConnection();
-                    }
-                    if (auth_type === 'x-token' && this.background_connection) {
-                        this.background_connection.x_token = this.get('x_token');
-                        this.background_connection.counter = this.get('hotp_counter');
-                        this.background_connection.x_token_auth = true;
-                    }
-                    this.background_conn_manager.connect(auth_type, jid, password, this.onBackgroundConnected.bind(this));
-                },
-
                 createFastConnection: function () {
                     let jid = this.get('jid'),
                         auth_type = this.conn_manager.auth_type,
@@ -455,11 +410,11 @@ define("xabber-accounts", function () {
                         this.fast_connection = this.fast_conn_manager.connection;
                         this.fast_connection.account = this;
                         this.fast_connection.xmlInput = function (xml) {
-                            xabber.info('input');
+                            xabber.info('input fast connection');
                             xabber.info(xml);
                         };
                         this.fast_connection.xmlOutput = function (xml) {
-                            xabber.info('output');
+                            xabber.info('output fast connection');
                             xabber.info(xml);
                         };
                     } else{
@@ -594,7 +549,7 @@ define("xabber-accounts", function () {
 
                 connectXabberAccount: function () {
                     let iq_private_storage = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE}).c('storage', {xmlns:'xabber:options'});
-                    this.sendIQ(iq_private_storage, (iq) => {
+                    this.sendIQFast(iq_private_storage, (iq) => {
                         if (($(iq).find('option').attr('type') == 'bind') && ($(iq).find('option').text() == 1)) {
                             this.authXabberAccount();
                         }
@@ -619,7 +574,7 @@ define("xabber-accounts", function () {
                                         xabber.api_account.save('token', data);
                                         xabber.api_account.login_by_token();
                                     }
-                                    this.sendIQ(iq_send_auth_mark);
+                                    this.sendIQFast(iq_send_auth_mark);
                                     callback && callback();
                                 });
                             }
@@ -820,7 +775,7 @@ define("xabber-accounts", function () {
                             type: 'get',
                             to: this.connection.domain
                         }).c('query', {xmlns: `${Strophe.NS.AUTH_DEVICES}#items`});
-                    this.sendIQ(iq, (tokens) => {
+                    this.sendIQFast(iq, (tokens) => {
                         $(tokens).find('device').each((idx, token) => {
                             let $token = $(token),
                                 client = $token.find('client').text(),
@@ -879,29 +834,6 @@ define("xabber-accounts", function () {
                     });
                 },
 
-                onBackgroundConnected: function (status) {
-                    if (status === Strophe.Status.CONNECTED) {
-                        if (this.background_connection.x_token) {
-                            this.save({
-                                x_token: this.background_connection.x_token,
-                                hotp_counter: this.background_connection.counter,
-                            });
-                            this.background_conn_manager.auth_type = 'x-token';
-                            this.background_connection.x_token_auth = true;
-                            if (this.fast_connection && this.fast_connection.pass)
-                                this.background_connection.pass = this.fast_connection.pass;
-                            else if (this.connection && this.connection.pass)
-                                this.background_connection.pass = this.connection.pass;
-                        }
-                        _.each(this._after_background_connected_plugins, (plugin) => {
-                            plugin.call(this);
-                        });
-                    } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
-                        this.background_conn_manager = undefined;
-                        this.background_connection = undefined;
-                    }
-                },
-
                 onFastConnected: function (status) {
                     if (status === Strophe.Status.CONNECTED) {
                         if (this.fast_connection.x_token) {
@@ -914,7 +846,6 @@ define("xabber-accounts", function () {
                             if (this.connection && this.connection.pass)
                                 this.fast_connection.pass = this.connection.pass;
                         }
-                        this.createBackgroundConnection();
                         _.each(this._after_fast_connected_plugins, (plugin) => {
                             plugin.call(this);
                         });
@@ -949,7 +880,7 @@ define("xabber-accounts", function () {
                     encrypted && (query_options.type = 'encrypted');
                     let retractions_query = $iq({type: 'get'})
                         .c('query', query_options);
-                    this.sendIQ(retractions_query, callback);
+                    this.sendIQFast(retractions_query, callback);
                 },
 
                 sendPendingStanzas: function () {
@@ -983,7 +914,6 @@ define("xabber-accounts", function () {
 
                 _after_connected_plugins: [],
                 _after_reconnected_plugins: [],
-                _after_background_connected_plugins: [],
                 _after_fast_connected_plugins: [],
 
                 onDisconnected: function () {
@@ -1004,7 +934,6 @@ define("xabber-accounts", function () {
                             this.session.set('no_reconnect', false);
                         } else {
                             this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
-                            this.background_connection && this.background_connection.connected && this.background_connection.disconnect();
                             this.reconnect();
                         }
                     }
@@ -1016,14 +945,14 @@ define("xabber-accounts", function () {
 
                 enableCarbons: function () {
                     let iq = $iq({type: 'set'}).c('enable', {xmlns: Strophe.NS.CARBONS});
-                    this.sendIQ(iq);
+                    this.sendIQFast(iq);
                 },
 
                 getVCard: function (callback) {
                     let jid = this.get('jid'),
                         is_callback = _.isFunction(callback);
                     if (this.connection && this.connection.connected) {
-                        ((this.background_connection && this.background_connection.connected) ? this.background_connection : this.connection).vcard.get(jid,
+                        this.getConnectionForIQ().vcard.get(jid,
                             (vcard) => {
                                 let attrs = {
                                     vcard: vcard,
@@ -1168,7 +1097,7 @@ define("xabber-accounts", function () {
                     }).c('revoke', {xmlns:Strophe.NS.AUTH_DEVICES});
                     for (let token_num = 0; token_num < token_uid.length; token_num++)
                         iq.c('device', {id: token_uid[token_num]}).up();
-                    this.sendIQ(iq, () => {
+                    this.sendIQFast(iq, () => {
                         callback && callback();
                     });
                 },
@@ -1179,7 +1108,7 @@ define("xabber-accounts", function () {
                         type: 'set',
                         to: this.connection.domain
                     }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
-                    this.sendIQ(iq, (success) => {
+                    this.sendIQFast(iq, (success) => {
                             callback & callback(success);
                         },
                         function (error) {
@@ -1211,7 +1140,6 @@ define("xabber-accounts", function () {
                         this.sendPresence('offline');
                         this.connection.disconnect();
                         if (this.fast_conn_manager) this.fast_connection.disconnect();
-                        if (this.background_conn_manager) this.background_connection.disconnect();
                     } else {
                         this.onDisconnected();
                     }
@@ -1225,7 +1153,6 @@ define("xabber-accounts", function () {
                     if (this.isConnected()) {
                         this.connection.disconnect();
                         if (this.fast_conn_manager) this.fast_connection.disconnect();
-                        if (this.background_conn_manager) this.background_connection.disconnect();
                     }
                     this.cached_sync_conversations.clearDataBase();
                     this.trigger('remove_saved_chat');
@@ -1292,7 +1219,7 @@ define("xabber-accounts", function () {
                                 .c('error', {xmlns: Strophe.NS.JINGLE_MSG});
 
                         }
-                        this.sendIQ($session_availability_response);
+                        this.sendIQFast($session_availability_response);
                     }
                 },
 
@@ -1610,10 +1537,6 @@ define("xabber-accounts", function () {
                 addConnPlugin: function (func, conn, reconn) {
                     conn && this.prototype._after_connected_plugins.push(func);
                     reconn && this.prototype._after_reconnected_plugins.push(func);
-                },
-
-                addBackgroundConnPlugin: function (func, conn, reconn) {
-                    conn && this.prototype._after_background_connected_plugins.push(func);
                 },
 
                 addFastConnPlugin: function (func, conn, reconn) {
@@ -2998,7 +2921,7 @@ define("xabber-accounts", function () {
                                 this.model.omemo.own_devices[device_id].preKeys = [];
                                 this.model.omemo.own_devices[device_id].set({ik: null, fingerprint: null});
                             }
-                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
+                            this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
                         } else {
                             let omemo = new xabber.Omemo({id: 'omemo'}, {
                                 account: this.model,
@@ -3006,7 +2929,7 @@ define("xabber-accounts", function () {
                                 fetch: 'before'
                             });
                             omemo.save('prekeys', {});
-                            this.model.connection.omemo && this.model.connection.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
+                            this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
                             omemo.destroy();
                         }
                         this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', true);
