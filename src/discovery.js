@@ -98,8 +98,20 @@ define("xabber-discovery", function () {
         },
 
         request: function () {
-            this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
-            this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
+            this.account.cached_server_features.getAllFromCachedFeatures((res) => {
+                if (res && res.length){
+                    res.forEach((item) => {
+                        this.create({
+                            'var': item.var,
+                            from: item.from
+                        });
+                    });
+                    this.is_cached = true;
+                } else {
+                    this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
+                }
+                this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
+            });
         },
 
         onItems: function (stanza) {
@@ -113,7 +125,7 @@ define("xabber-discovery", function () {
                     this.account.set('groupchat_servers_list', groupchat_servers_list);
                 }
                 this.connection.disco.addItem(jid, name, node, () => {});
-                this.connection.disco.info(
+                (!this.is_cached) && this.connection.disco.info(
                     jid,
                     null,
                     this.onInfo.bind(this));
@@ -156,6 +168,10 @@ define("xabber-discovery", function () {
             let _var = feature.get('var'),
                 client_feature = this.account.client_features.get(_var);
             client_feature && client_feature.set('supports', true);
+            (_var != Strophe.NS.SUBSCRIPTION_PREAPPROVAL && _var != Strophe.NS.SYNCHRONIZATION) && this.account.cached_server_features.putInCachedFeatures({
+                var: _var,
+                from: feature.get('from'),
+            })
 
             if (_var === 'media-gallery') {
                 this.account.set('gallery_auth', false)

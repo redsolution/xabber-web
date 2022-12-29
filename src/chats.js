@@ -3262,7 +3262,7 @@ define("xabber-chats", function () {
 
         MAMRequest: function (options, callback, errback) {
             let account = this.account,
-                is_fast = options.fast && account.fast_connection && account.fast_connection.connected,
+                is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
                 conn = is_fast ? account.fast_connection : account.connection,
                 contact = this.contact,
                 is_saved = this.model.get('saved'),
@@ -7214,7 +7214,8 @@ define("xabber-chats", function () {
                             }
                         });
                     }
-                    contact.trigger('update_participants');
+                    if (contact.details_view && contact.details_view.isVisible())
+                        contact.trigger('update_participants');
                 }
             }
 

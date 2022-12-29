@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.2.197","version_description":"removed background connection, changed connections to main with presences and messages and technical with iqs"}'
+'{"version_number":"2.3.2.198","version_description":"added server features caching, removed participants updating from sync message when chat details is not opened, changed connection setting in mam requests"}'
 )});

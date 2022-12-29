@@ -739,7 +739,7 @@ define("xabber-contacts", function () {
 
             MAMRequest: function (options, callback, errback) {
                 let account = this.account,
-                    is_fast = options.fast && account.fast_connection && account.fast_connection.connected,
+                    is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
                     conn = is_fast ? account.fast_connection : account.connection,
                     contact = this,
                     messages = [], queryid = uuid(),
@@ -9886,6 +9886,36 @@ define("xabber-contacts", function () {
             }
         });
 
+        xabber.CachedServerFeatures = Backbone.ModelWithDataBase.extend({
+            putInCachedFeatures: function (value, callback) {
+                this.database.put('server_features_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            getFromCachedFeatures: function (value, callback) {
+                this.database.get('server_features_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            getAllFromCachedFeatures: function (callback) {
+                this.database.get_all('server_features_items', null, function (response_value) {
+                    callback && callback(response_value || []);
+                });
+            },
+
+            removeFromCachedFeatures: function (value, callback) {
+                this.database.remove('server_features_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            },
+
+            clearDataBase: function () {
+                this.database.clear_database('server_features_items');
+            }
+        });
+
         xabber.Account.addInitPlugin(function () {
             this.groups_settings = new xabber.GroupsSettings(null, {
                 account: this,
@@ -9900,6 +9930,11 @@ define("xabber-contacts", function () {
                 name:'cached-conversation-list-' + this.get('jid'),
                 objStoreName: 'conversation_items',
                 primKey: 'account_conversation_type'
+            });
+            this.cached_server_features = new xabber.CachedServerFeatures(null, {
+                name:'cached-features-list-' + this.get('jid'),
+                objStoreName: 'server_features_items',
+                primKey: 'var'
             });
 
             this.groupchat_settings = new xabber.GroupChatSettings({id: 'group-chat-settings'}, {
