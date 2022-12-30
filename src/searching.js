@@ -241,7 +241,7 @@ define("xabber-searching", function () {
 
             getSearchingFields: function () {
                 let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
-                    iq_get = $iq({from: this.account.get('jid'), type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
+                    iq_get = $iq({type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
                 this.account.sendIQFast(iq_get, this.parseSearchingFields);
             },
 
@@ -296,7 +296,7 @@ define("xabber-searching", function () {
 
             search: function (query) {
                 this.indexed_chats = [];
-                let iq_search = $iq({to:'index.xabber.com', type: 'set', from: this.account.get('jid')})
+                let iq_search = $iq({to:'index.xabber.com', type: 'set'})
                     .c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'})
                     .c('x', {xmlns: Strophe.NS.XDATA, type: 'form'})
                     .c('field', {var: 'FORM_TYPE', type:'hidden'})

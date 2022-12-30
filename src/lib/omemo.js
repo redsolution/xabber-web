@@ -29,7 +29,7 @@
         };
 
         var getDevicesNode = function (jid, callback, errback) {
-            let attrs = {from: this._connection.jid, type: 'get'};
+            let attrs = {type: 'get'};
             jid && (attrs.to = jid);
             let iq = $iq(attrs)
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
@@ -56,7 +56,7 @@
         };
 
         var removeItemFromNode = function (node, iid, callback) {
-            let iq = $iq({from:this._connection.jid, type:'set'})
+            let iq = $iq({type:'set'})
                 .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
                 .c('retract',{node:node})
                 .c('item', {id: iid});
@@ -68,7 +68,7 @@
         };
 
         var createNode = function(node, options, callback) {
-            let iq = $iq({from:this._connection.jid, type:'set'})
+            let iq = $iq({type:'set'})
                 .c('pubsub', {xmlns:Strophe.NS.PUBSUB})
                 .c('create',{node:node});
             if (options) {
@@ -81,7 +81,7 @@
             !this.devices && (this.devices = {});
             if (id)
                 this.devices[id] = {id, label};
-            let stanza = $iq({from: this._connection.jid, type: 'set'})
+            let stanza = $iq({type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('publish', {node: Strophe.NS.OMEMO + ':devices'})
                 .c('item', {id: 'current'})
@@ -98,7 +98,7 @@
         };
 
         var configNode = function (callback) {
-            let iq = $iq({from: this._connection.jid, type: 'set'})
+            let iq = $iq({type: 'set'})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB + '#owner'})
                 .c('configure', {node: `${Strophe.NS.OMEMO}:bundles`})
                 .form(Strophe.NS.PUBSUB_NODE_CONFIG, {
@@ -110,7 +110,7 @@
         var publishBundle = function (attrs, callback, errback) {
             let preKeys = attrs.pks,
                 spk = attrs.spk,
-                stanza = $iq({from: this._connection.jid, type: 'set'})
+                stanza = $iq({type: 'set'})
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('publish', {node: `${Strophe.NS.OMEMO}:bundles`})
                     .c('item', {id: attrs.device_id})
@@ -127,7 +127,7 @@
         };
 
         var getBundleInfo = function (attrs, callback, errback) {
-            let iq = $iq({type: 'get', from: this._connection.jid, to: attrs.jid})
+            let iq = $iq({type: 'get', to: attrs.jid})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
             if (attrs.id)

@@ -275,7 +275,7 @@ define("xabber-omemo", function () {
                             dfd.resolve($container.find('div.row').length);
                     }
                     else {
-                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {//34
+                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 ik = $bundle.find(`ik`).text();
@@ -631,7 +631,7 @@ define("xabber-omemo", function () {
                     this._pending_bundle = true;
                     this._dfd_bundle = new $.Deferred();
                     return new Promise((resolve, reject) => {
-                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.jid, id: this.id}, (iq) => {//34
+                        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.jid, id: this.id}, (iq) => {
                             let $iq = $(iq),
                                 $bundle = $iq.find(`item[id="${this.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
                                 $spk = $bundle.find('spk'),

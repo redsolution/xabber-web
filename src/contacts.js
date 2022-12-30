@@ -322,7 +322,7 @@ define("xabber-contacts", function () {
                         this.set({status_message: 'Server'});
                         return;
                     }
-                    let iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
+                    let iq = $iq({type: 'get', to: this.get('jid') }).c('query', {xmlns: Strophe.NS.LAST});
                     this.account.sendIQFast(iq, (iq) => {
                         let last_seen = this.getLastSeenStatus(iq);
                         if (this.get('status') == 'offline')
@@ -350,7 +350,7 @@ define("xabber-contacts", function () {
 
             getAvatar: function (avatar, node, callback, errback) {
                 let jid = this.get('group_chat') ? this.get('full_jid') : this.get('jid'),
-                    iq_request_avatar = $iq({from: this.account.get('jid'), type: 'get', to: jid})
+                    iq_request_avatar = $iq({type: 'get', to: jid})
                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                     .c('items', {node: node})
                     .c('item', {id: avatar});
@@ -365,12 +365,12 @@ define("xabber-contacts", function () {
 
             pubAvatar: function (image, node, callback, errback) {
                 let avatar_hash = sha1(image.base64),
-                    iq_pub_data = $iq({from: this.account.get('jid'), type: 'set', to: this.get('jid') })
+                    iq_pub_data = $iq({type: 'set', to: this.get('jid') })
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA + node})
                         .c('item', {id: avatar_hash})
                         .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
-                    iq_pub_metadata = $iq({from: this.account.get('jid'), type: 'set', to: this.get('jid') })
+                    iq_pub_metadata = $iq({type: 'set', to: this.get('jid') })
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA + node})
                         .c('item', {id: avatar_hash})
@@ -396,7 +396,7 @@ define("xabber-contacts", function () {
             },
 
             pres: function (type) {
-                let pres = $pres({to: this.get('jid'), from: this.account.jid, type: type});
+                let pres = $pres({to: this.get('jid'), type: type});
                 this.account.sendPres(pres);
                 return this;
             },
@@ -547,7 +547,7 @@ define("xabber-contacts", function () {
             },
 
             sendPresent: function () {
-                let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
+                let pres = $pres({to: this.get('jid')})
                     .c('x', {xmlns: `${Strophe.NS.GROUP_CHAT}#present`});
                 this.account.sendPres(pres);
                 clearInterval(this._sending_present_interval);
@@ -557,7 +557,7 @@ define("xabber-contacts", function () {
             },
 
             sendNotPresent: function () {
-                let pres = $pres({from: this.account.connection.jid, to: this.get('jid')})
+                let pres = $pres({to: this.get('jid')})
                     .c('x', {xmlns: `${Strophe.NS.GROUP_CHAT}#not-present`});
                 this.account.sendPres(pres);
                 clearInterval(this._sending_present_interval);
@@ -704,7 +704,7 @@ define("xabber-contacts", function () {
             },
 
             getAllRights: function (callback) {
-                let iq_get_rights = iq = $iq({from: this.account.get('jid'), type: 'get', to: this.get('full_jid') || this.get('jid') })
+                let iq_get_rights = iq = $iq({type: 'get', to: this.get('full_jid') || this.get('jid') })
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights` });
                 this.account.sendIQFast(iq_get_rights, (iq_all_rights) => {
                     let all_permissions = $(iq_all_rights).find('permission'),
@@ -3358,7 +3358,7 @@ define("xabber-contacts", function () {
             revokeInvitation: function (ev) {
                 let $member_item = $(ev.target).closest('.invitations-user'),
                     member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
+                    iq = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                         .c('jid').t(member_jid);
                 this.account.sendIQFast(iq, () => {
@@ -3371,7 +3371,7 @@ define("xabber-contacts", function () {
 
             revokeInvitationByElement: function ($member_item) {
                 let member_jid = $member_item.data('jid'),
-                    iq = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
+                    iq = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('revoke', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                         .c('jid').t(member_jid);
                 this.account.sendIQFast(iq, () => {
@@ -4810,7 +4810,7 @@ define("xabber-contacts", function () {
                     changed_avatar = this.new_avatar,
                     rights_changed = false,
                     has_changes = false,
-                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                    iq_changes = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                         .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
                 this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
@@ -4870,7 +4870,7 @@ define("xabber-contacts", function () {
                                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
                         });
                 if (rights_changed) {
-                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                    let iq_rights_changes = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
                     this.account.sendIQFast(iq_rights_changes, () => {
@@ -5574,7 +5574,7 @@ define("xabber-contacts", function () {
                     changed_avatar = this.new_avatar,
                     rights_changed = false,
                     has_changes = false,
-                    iq_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                    iq_changes = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + "#members"})
                         .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: member_id});
                 this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
@@ -5641,7 +5641,7 @@ define("xabber-contacts", function () {
                                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
                         });
                 if (rights_changed) {
-                    let iq_rights_changes = $iq({from: jid, type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                    let iq_rights_changes = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#rights'});
                     iq_rights_changes = this.account.addDataFormToStanza(iq_rights_changes, this.data_form);
                     this.account.sendIQFast(iq_rights_changes, () => {
@@ -5754,7 +5754,7 @@ define("xabber-contacts", function () {
                     this.$('.modal-content .error').text(xabber.getString("groupchat__set_badge__error_length"));
                 else {
                     if (new_badge != this.participant.get('badge')) {
-                        let iq_changes = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                        let iq_changes = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                             .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`})
                             .c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')})
                             .c('badge').t(new_badge);
@@ -5836,7 +5836,7 @@ define("xabber-contacts", function () {
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
                 this.$('button').blur();
-                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                let iq_get_rights = $iq({type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`});
                 this.account.sendFast(iq_get_rights, (iq_all_rights) => {
                     this.showDefaultRestrictions(iq_all_rights);
@@ -5934,7 +5934,7 @@ define("xabber-contacts", function () {
                 if (this.$('.btn-default-restrictions-save').hasClass('non-active'))
                     return;
                 this.$('button').blur();
-                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
+                let iq_change_default_rights = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`}),
                     has_new_default_restrictions = false,
                     data_form = _.clone(this.default_restrictions);
@@ -6058,7 +6058,7 @@ define("xabber-contacts", function () {
                 this.default_restrictions = [];
                 this.actual_default_restrictions = [];
                 this.$('button').blur();
-                let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
+                let iq_get_rights = $iq({type: 'get', to: this.contact.get('full_jid') || this.contact.get('jid')})
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`});
                 this.account.sendFast(iq_get_rights, (iq_all_rights) => {
                     this.showDefaultRestrictions(iq_all_rights);
@@ -6172,7 +6172,7 @@ define("xabber-contacts", function () {
                 this.$('.btn-default-restrictions-save').addClass('fade-out')
                 this.$('.edit-save-preloader.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
                 this.$('button').blur();
-                let iq_change_default_rights = $iq({from: this.account.get('jid'), to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
+                let iq_change_default_rights = $iq({to: this.contact.get('full_jid') || this.contact.get('jid'), type: 'set'})
                         .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`}),
                     has_new_default_restrictions = false,
                     data_form = _.clone(this.default_restrictions);
@@ -7624,7 +7624,7 @@ define("xabber-contacts", function () {
                 this.$('.btn-save').switchClass('fade-out', true);
                 let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'owner' && permission.values);
                 if (is_owner){
-                    let iq_get_rights = $iq({from: this.account.get('jid'), type: 'get', to: this.model.get('full_jid') || this.model.get('jid')})
+                    let iq_get_rights = $iq({type: 'get', to: this.model.get('full_jid') || this.model.get('jid')})
                         .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`});
                     this.account.sendFast(iq_get_rights, (iq_all_rights) => {
                         let data_form = this.account.parseDataForm($(iq_all_rights).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`)),
@@ -8912,7 +8912,6 @@ define("xabber-contacts", function () {
                 let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
                 this.account.sendIQFast(iq, (iq) => {
                     this.onRosterIQ(iq);
-                    this.account.sendPresence();
                     this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
                     this.account.dfd_presence.resolve();
                 });
@@ -8921,10 +8920,7 @@ define("xabber-contacts", function () {
             onRosterIQ: function (iq) {
                 let new_roster_version = $(iq).children('query').attr('ver');
                 if (iq.getAttribute('type') === 'set') {
-                    this.account.sendIQFast($iq({
-                        type: 'result', id: iq.getAttribute('id'),
-                        from: this.account.jid
-                    }));
+                    this.account.onSetIQResult(iq);
                 }
                 else {
                     new_roster_version && (this.roster_version != new_roster_version) && this.account.cached_roster.clearDataBase();

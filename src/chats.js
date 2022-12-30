@@ -738,7 +738,7 @@ define("xabber-chats", function () {
           },
 
           sendVideoStreamState: function (state) {
-              let $iq_video = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+              let $iq_video = $iq({to: this.get('contact_full_jid'), type: 'set'})
                   .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
                   .c('video', {state: state, id: this.get('session_id')});
               this.account.sendIQFast($iq_video);
@@ -751,7 +751,7 @@ define("xabber-chats", function () {
                   $jingle_info = $incoming_iq.find('jingle[action="session-info"]'),
                   $jingle_video = $incoming_iq.find(`query[xmlns="${Strophe.NS.JINGLE_MSG}"] video`),
                   from_jid = $incoming_iq.attr('from'),
-                  $result_iq = $iq({from: this.account.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')});
+                  $result_iq = $iq({to: from_jid, type: 'result', id: $incoming_iq.attr('id')});
               if ($jingle_initiate.length) {
                   if ($jingle_initiate.attr('sid') !== this.get('session_id'))
                       return;
@@ -825,7 +825,7 @@ define("xabber-chats", function () {
 
           propose: function () {
               this.updateStatus(xabber.getString("dialog_jingle_message__status_search"));
-              let $propose_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.contact.get('jid')})
+              let $propose_msg = $msg({type: 'chat', to: this.contact.get('jid')})
                   .c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')})
                   .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
@@ -836,7 +836,7 @@ define("xabber-chats", function () {
           },
 
           accept: function () {
-              let $accept_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+              let $accept_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
                   .c('store', {xmlns: Strophe.NS.HINTS}).up()
                   .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
@@ -853,7 +853,7 @@ define("xabber-chats", function () {
           reject: function (reason) {
               if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
                   return;
-              let $reject_msg = $msg({from: this.account.get('jid'), type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+              let $reject_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
                   .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
               if (this.get('jingle_start')) {
                   let end = moment.now(),
@@ -924,7 +924,7 @@ define("xabber-chats", function () {
                       this.set('session_initiator', this.account.get('jid'));
                       this.conn.setLocalDescription(offer).then(() => {
                           let offer_sdp = offer.sdp,
-                              $iq_offer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                              $iq_offer_sdp = $iq({to: this.get('contact_full_jid'), type: 'set'})
                               .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-initiate', initiator: this.account.get('jid'), sid: this.get('session_id')})
                               .c('content', {creator: 'initiator', name: 'voice'})
                               .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
@@ -936,7 +936,7 @@ define("xabber-chats", function () {
           },
 
           sendCandidate: function (candidate) {
-              let $iq_candidate = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+              let $iq_candidate = $iq({to: this.get('contact_full_jid'), type: 'set'})
                   .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-info', initiator: this.get('session_initiator'), sid: this.get('session_id')})
                   .c('content', {creator: 'initiator', name: 'voice'})
                   .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up()
@@ -950,7 +950,7 @@ define("xabber-chats", function () {
               this.conn.createAnswer().then((answer) => {
                   this.conn.setLocalDescription(answer).then(() => {
                       let answer_sdp = answer.sdp,
-                          $iq_answer_sdp = $iq({from: this.account.get('jid'), to: this.get('contact_full_jid'), type: 'set'})
+                          $iq_answer_sdp = $iq({to: this.get('contact_full_jid'), type: 'set'})
                               .c('jingle', {xmlns: Strophe.NS.JINGLE, action: 'session-accept', initiator: this.contact.get('jid'), sid: this.get('session_id')})
                               .c('content', {creator: 'initiator', name: 'voice'})
                               .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
@@ -1109,7 +1109,7 @@ define("xabber-chats", function () {
         },
 
         getCallingAvailability: function (to, session_id, callback) {
-            let iq = $iq({from: this.account.get('jid'), to: to, type: 'get'})
+            let iq = $iq({to: to, type: 'get'})
                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
                 .c('session', {id: session_id});
             this.account.sendIQFast(iq, callback);
@@ -1381,7 +1381,7 @@ define("xabber-chats", function () {
         },
 
         sendDeliveryReceipt: function ($message) {
-            let $delivery_msg = $msg({from: this.account.get('jid'),
+            let $delivery_msg = $msg({
                 to: this.contact.get('jid'),
                 type: 'chat',
                 id: uuid()})
@@ -1392,7 +1392,6 @@ define("xabber-chats", function () {
         sendMarker: function (msg_id, status, stanza_id, contact_stanza_id) {
             status || (status = 'displayed');
             let stanza = $msg({
-                from: this.account.jid,
                 to: this.get('jid'),
                 type: 'chat',
                 id: uuid()
@@ -1543,7 +1542,7 @@ define("xabber-chats", function () {
                 let stanza_id = item.get('stanza_id'),
                     contact_stanza_id = item.get('contact_stanza_id');
                 if (stanza_id || contact_stanza_id) {
-                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
+                    let iq_retraction = $iq({type: 'set', to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
                         .c('retract-message', {id: (this.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
                     this.account.sendIQFast(iq_retraction, (success) => {
                             this.item_view.content.removeMessage(item);
@@ -1575,7 +1574,7 @@ define("xabber-chats", function () {
 
         retractAllMessages: function (symmetric, callback, errback) {
             let is_group_chat = this.get('group_chat'),
-                iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
+                iq_retraction = $iq({type: 'set', to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
                 retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
             !is_group_chat && (retract_attrs.conversation = this.get('jid'));
             this.get('encrypted') && (retract_attrs.type = 'encrypted');
@@ -2092,7 +2091,7 @@ define("xabber-chats", function () {
             this.model.set({'last_archive_id': undefined, 'first_archive_id': undefined});
             msgs.forEach((item) => {
                 if (item.get('invite')) {
-                    let iq_retraction = $iq({type: 'set', from: this.account.get('jid'), to: this.account.get('jid')})
+                    let iq_retraction = $iq({type: 'set', to: this.account.get('jid')})
                         .c('retract-message', {
                             id: item.get('stanza_id'),
                             xmlns: Strophe.NS.REWRITE,
@@ -3563,7 +3562,7 @@ define("xabber-chats", function () {
         },
 
         unpinMessage: function () {
-            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+            let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('pinned-message');
             this.account.sendIQFast(iq, () => {}, (error) => {
@@ -7420,15 +7419,14 @@ define("xabber-chats", function () {
         },
 
         createGroupChat: function () {
-            let my_jid = this.account.resources.connection.jid,
-                name = this.$('input[name=chat_name]').val(),
+            let name = this.$('input[name=chat_name]').val(),
                 chat_jid = this.$('input[name=chat_jid]').val() ? this.$('input[name=chat_jid]').val() : undefined,
                 privacy = this.$('.incognito-field .property-wrap:not(.hidden) .property-value').attr('data-value'),
                 domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
                 searchable = this.$('input[name="group_index"]:checked').attr('data-value'),
                 description = this.$('.description-field .rich-textarea').text() || "",
                 model = this.$('input[name="group_membership"]:checked').attr('data-value'),
-                iq = $iq({from: my_jid, type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
+                iq = $iq({type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
                     .c('name').t(name).up()
                     .c('privacy').t(privacy).up()
                     .c('index').t(searchable).up()
@@ -8278,7 +8276,7 @@ define("xabber-chats", function () {
         },
 
         sendInvite: function (contact_jid, callback, errback) {
-            let iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
+            let iq = $iq({type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                     .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                     .c('jid').t(contact_jid).up()
                     .c('send').t('false').up()
@@ -8307,7 +8305,6 @@ define("xabber-chats", function () {
         sendInviteMessage: function(jid_to) {
             let body = xabber.getString("groupchat_legacy_invitation_body", [this.contact.get('jid')]),
                 stanza = $msg({
-                    from: this.account.get('jid'),
                     to: jid_to,
                     type: 'chat',
                     id: uuid()
@@ -11368,7 +11365,7 @@ define("xabber-chats", function () {
                 pinned_msg = this.messages_arr.get($msg.data('uniqueid')),
                 msg_id = pinned_msg.get('stanza_id');
             this.resetSelectedMessages();
-            let iq = $iq({from: this.account.get('jid'), type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
+            let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                 .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('pinned-message').t(msg_id);
             this.account.sendIQFast(iq, () => {},
@@ -11403,7 +11400,7 @@ define("xabber-chats", function () {
                 link_references = text_markups.link_references || [],
                 blockquotes = text_markups.blockquotes || [],
                 mentions = text_markups.mentions || [],
-                iq = $iq({from: this.account.get('jid'), type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+                iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
                 $message = $build('message').attrs({xmlns: undefined});
             forward_ref && forward_ref.forEach((fwd, idx) => {
                 let fwd_msg = this.edit_message.get('forwarded_message')[idx],
@@ -11971,7 +11968,7 @@ define("xabber-chats", function () {
             }
         });
         if (!(this.auth_view && this.auth_view.data.get('authentication')))
-            this.trigger('ready_to_get_roster');
+            this.sendPresence();
 
         this.connection.deleteTimedHandler(this._get_msg_handler);
         this._get_msg_handler = this.connection.addTimedHandler(60000, () => {
@@ -11988,6 +11985,9 @@ define("xabber-chats", function () {
     }, true, true);
 
     xabber.Account.addFastConnPlugin(function () {
+        this.getVCard();
+        if (!(this.auth_view && this.auth_view.data.get('authentication')))
+            this.trigger('ready_to_get_roster');
     }, true, true);
 
     xabber.once("start", function () {

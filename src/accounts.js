@@ -197,7 +197,7 @@ define("xabber-accounts", function () {
                     dfd.done((data, http_avatar) => {
                         if (http_avatar) {
                             let avatar_hash = data.hash || image.hash || sha1(image.base64),
-                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                iq_pub_metadata = $iq({type: 'set'})
                                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                                     .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                                     .c('item', {id: avatar_hash})
@@ -220,12 +220,12 @@ define("xabber-accounts", function () {
                         }
                         else {
                             let avatar_hash = image.hash || sha1(image.base64),
-                                iq_pub_data = $iq({from: this.get('jid'), type: 'set'})
+                                iq_pub_data = $iq({type: 'set'})
                                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                                     .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
                                     .c('item', {id: avatar_hash})
                                     .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(data),
-                                iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                                iq_pub_metadata = $iq({type: 'set'})
                                     .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                                     .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                                     .c('item', {id: avatar_hash})
@@ -263,7 +263,7 @@ define("xabber-accounts", function () {
                 },
 
                 removeAvatar: function (callback, errback) {
-                    let iq_pub_metadata = $iq({from: this.get('jid'), type: 'set'})
+                    let iq_pub_metadata = $iq({type: 'set'})
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA})
                         .c('item')
@@ -277,7 +277,7 @@ define("xabber-accounts", function () {
                 },
 
                 getAvatar: function (avatar, callback, errback) {
-                    let iq_request_avatar = $iq({from: this.get('jid'), type: 'get', to: this.get('jid')})
+                    let iq_request_avatar = $iq({type: 'get', to: this.get('jid')})
                         .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                         .c('items', {node: Strophe.NS.PUBSUB_AVATAR_DATA})
                         .c('item', {id: avatar});
@@ -528,8 +528,6 @@ define("xabber-accounts", function () {
                         }
                         this.createFastConnection();
                         this.session.set({connected: true, reconnected: false});
-                        if (xabber.api_account && !xabber.api_account.get('connected') && this.get('auto_login_xa') && !xabber.api_account.get('token') && constants.ENABLE_XABBER_ACCOUNT)
-                            this.connectXabberAccount();
                     } else if (status === Strophe.Status.AUTHFAIL) {
                         if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
                             if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
@@ -771,7 +769,6 @@ define("xabber-accounts", function () {
                 getAllXTokens: function () {
                     let tokens_list = [],
                         iq = $iq({
-                            from: this.get('jid'),
                             type: 'get',
                             to: this.connection.domain
                         }).c('query', {xmlns: `${Strophe.NS.AUTH_DEVICES}#items`});
@@ -872,7 +869,6 @@ define("xabber-accounts", function () {
                     });
                     this.registerPresenceHandler();
                     this.enableCarbons();
-                    this.getVCard();
                 },
 
                 getAllMessageRetractions: function (encrypted, callback) {
@@ -1091,7 +1087,6 @@ define("xabber-accounts", function () {
 
                 revokeXToken: function (token_uid, callback) {
                     let iq = $iq({
-                        from: this.get('jid'),
                         type: 'set',
                         to: this.connection.domain
                     }).c('revoke', {xmlns:Strophe.NS.AUTH_DEVICES});
@@ -1104,7 +1099,6 @@ define("xabber-accounts", function () {
 
                 revokeAllXTokens: function (callback, errback) {
                     let iq = $iq({
-                        from: this.get('jid'),
                         type: 'set',
                         to: this.connection.domain
                     }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
@@ -1183,7 +1177,24 @@ define("xabber-accounts", function () {
                         }, null, 'presence', null);
                 },
 
+                onSetIQResult: function (iq) {
+                    let to = $(iq).attr('to');
+                    if (this.fast_connection && this.fast_connection.jid === to
+                        && !this.fast_connection.disconnecting && this.fast_connection.authenticated
+                        && this.fast_connection.connected && this.get('status') !== 'offline'){
+                        this.sendIQFast($iq({
+                            type: 'result', id: iq.getAttribute('id'),
+                        }));
+                    } else if (this.connection && this.connection.jid === to && this.connection.authenticated
+                        && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline') {
+                        this.sendIQ($iq({
+                            type: 'result', id: iq.getAttribute('id'),
+                        }));
+                    }
+                },
+
                 onSyncedIQ: function (iq) {
+                    this.onSetIQResult(iq);
                     this.roster.syncConversations(iq);
                     return true;
                 },
@@ -1209,13 +1220,13 @@ define("xabber-accounts", function () {
                     if ($session_availability.length) {
                         let session_id = $session_availability.children('session').attr('id'), $session_availability_response;
                         if (session_id && xabber.current_voip_call && session_id === xabber.current_voip_call.get('session_id') && !xabber.current_voip_call.get('state')) {
-                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
+                            $session_availability_response = $iq({to: from_jid, type: 'result', id: $incoming_iq.attr('id')})
                                 .c('query', {xmlns: Strophe.NS.JINGLE_MSG})
                                 .c('session', {id: session_id});
                             xabber.current_voip_call.updateStatus(xabber.getString("dialog_jingle_message__status_calling"));
                         }
                         else {
-                            $session_availability_response = $iq({from: this.get('jid'), to: from_jid, type: 'error', id: $incoming_iq.attr('id')})
+                            $session_availability_response = $iq({to: from_jid, type: 'error', id: $incoming_iq.attr('id')})
                                 .c('error', {xmlns: Strophe.NS.JINGLE_MSG});
 
                         }

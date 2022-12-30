@@ -662,7 +662,7 @@ define("xabber-views", function () {
               let messages = [],
                   account = options.account,
                   queryid = uuid(),
-                  iq = $iq({from: account.get('jid'), type: 'set'})
+                  iq = $iq({type: 'set'})
                       .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                       .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                       .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
