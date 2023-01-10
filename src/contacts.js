@@ -716,6 +716,9 @@ define("xabber-contacts", function () {
 
             getMessageByStanzaId: function (stanza_id, callback) {
                 let queryid = uuid(),
+                    account = this.account,
+                    is_fast = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+                    conn = is_fast ? account.fast_connection : account.connection,
                     iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
                         .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                         .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
@@ -723,16 +726,16 @@ define("xabber-contacts", function () {
                         .c('value').t(Strophe.NS.MAM).up().up()
                         .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})
                         .c('value').t(stanza_id);
-                let handler = this.account.connection.addHandler((message) => {
+                let handler = conn.addHandler((message) => {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid)
                         callback && callback($msg);
                     return true;
                 }, Strophe.NS.MAM);
                 this.account.sendIQFast(iq, () => {
-                        this.account.connection.deleteHandler(handler);
+                        conn.deleteHandler(handler);
                     }, () => {
-                        this.account.connection.deleteHandler(handler);
+                        conn.deleteHandler(handler);
                     }
                 );
             },

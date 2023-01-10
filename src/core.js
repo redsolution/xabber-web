@@ -59,6 +59,9 @@
             this.on("change:actual_version_number", this.throwNewVersion, this);
             this.on("quit", this.onQuit, this);
             this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
+            setInterval(function() {
+                console.log(new Date());
+            }, 1000)
         },
 
         initDefaultLanguage: function () {
