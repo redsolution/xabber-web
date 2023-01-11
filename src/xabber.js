@@ -14,6 +14,8 @@ define("xabber", [
     "xabber-omemo"
 ], function (xabber, views, api_service, strophe, vcard,
              accounts, discovery, contacts, chats, searching, mentions, ui, omemo) {
-    return xabber.extendWith(views, api_service, strophe, vcard,
-                             accounts, discovery, contacts, chats, searching, mentions, ui, omemo);
+    xabber.extendWith(views, api_service, strophe, vcard,
+        accounts, discovery, contacts, chats, searching, mentions, ui, omemo)
+    global.xabber = xabber;
+    return xabber;
 });

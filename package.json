@@ -10,6 +10,13 @@
     "web",
     "javascript"
   ],
+  "scripts": {
+    "watch": "webpack --watch --mode development",
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production",
+    "clear-wp": "rm node_modules/.cache",
+    "preinstall": "npx npm-force-resolutions"
+  },
   "bugs": {
     "url": ""
   },
@@ -31,10 +38,13 @@
     "i18next": "^19.8.9",
     "jquery": "~3.0.0",
     "js-sha256": "~0.9.0",
+    "json-loader": "^0.5.7",
     "magnific-popup": ">0.0.0",
-    "moment": ">2.19.3",
+    "moment": "2.24.0",
     "npm": "^6.14.0",
+    "npm-force-resolutions": "0.0.10",
     "perfect-scrollbar": "~0.6.16",
+    "raw-loader": "^4.0.2",
     "requirejs": "~2.3.3",
     "requirejs-text": "~2.0.15",
     "slug": ">0.0.0",
@@ -42,6 +52,12 @@
     "strophejs-plugins": "0.0.7",
     "underscore": "~1.8.3",
     "unzip": "^0.1.11",
-    "wavesurfer": ">0.0.0"
+    "wavesurfer": ">0.0.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "resolutions": {
+    "moment": "2.24.0"
   }
 }

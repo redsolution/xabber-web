@@ -27,6 +27,7 @@ define([
     return _.extend({
         $: $,
         _: _,
+        ol: ol,
         moment: moment,
         WaveSurfer: WaveSurfer,
         Plyr: plyr,

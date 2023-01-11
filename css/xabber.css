@@ -16127,7 +16127,7 @@ input[type='range'].voice-message-volume:focus {
 /* ------------------ CHAT LOCATION -------------------- */
 
 .main-modal.chat-location {
-    width: 800px;
+    width: fit-content !important;
 }
 .main-modal.chat-location .modal-header {
     width: 100%;

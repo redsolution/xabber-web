@@ -811,7 +811,7 @@ define("xabber-views", function () {
             this.updateBackground();
             this.updateMainColor();
             this.updateAvatarShape();
-            $('#modals').insertAfter(this.$el);
+            $('<div id="modals"></div>').insertAfter(this.$el);
             xabber.on('update_main_color', this.updateMainColor, this);
             xabber.on('update_avatar_shape', this.updateAvatarShape, this);
         },

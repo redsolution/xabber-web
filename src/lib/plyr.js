@@ -1369,7 +1369,7 @@ typeof navigator === "object" && (function (global, factory) {
           return;
         const container = document.createElement('div');
         container.setAttribute('id', id);
-        container.innerHTML = xabber.env.templates.svg['plyr']();
+        container.innerHTML = templates.svg['plyr']();
         document.body.insertAdjacentElement('afterbegin', container);
         return;
     }
@@ -3418,6 +3418,7 @@ typeof navigator === "object" && (function (global, factory) {
   // ==========================================================================
   // Plyr default config
   // ==========================================================================
+  let constants = require('xabber-constants');
   const defaults = {
     // Disable
     enabled: true,

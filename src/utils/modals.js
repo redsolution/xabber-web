@@ -40,7 +40,7 @@ define(["xabber-dependencies", "xabber-templates"], function (deps, templates) {
         },
 
         throw: function () {
-            this.$modal.appendTo($modal_container).prop('modal', this);
+            this.$modal.appendTo($('#modals')).prop('modal', this);
             var modal_options = _.omit(this.options, ['use_queue']);
             _.extend(modal_options, {
                 is_default_complete: true,

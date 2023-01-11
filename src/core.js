@@ -80,7 +80,7 @@
                     resolve(language);
                     return;
                 }
-                require([`./translations/${language.lang.replace(/-/g, "-r")}.js`], (translation) => {
+                require([`~/translations/${language.lang.replace(/-/g, "-r")}.js`], (translation) => {
                     language.translation  = translation;
                     resolve(language)
                 }, () => {
@@ -106,7 +106,7 @@
             });
             if (lang) {
                 xabber_i18next.changeLanguage(lang);
-                env.moment.locale(lang);
+                moment.locale(lang);
             }
             xabber_i18next.default_lang = xabber_i18next.getFixedT(default_lang);
         },
