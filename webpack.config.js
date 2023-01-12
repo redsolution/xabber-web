@@ -20,6 +20,7 @@ module.exports = {
             "strophe.disco": "~/node_modules/strophejs-plugins/disco/strophe.disco",
             "strophe.ping": "~/node_modules/strophejs-plugins/ping/strophe.ping",
             "strophe.rsm": "~/node_modules/strophejs-plugins/rsm/strophe.rsm",
+            "Quill": "~/node_modules/quill/quill",
             "wavesurfer": "~/node_modules/wavesurfer/dist/wavesurfer",
             "slug": "~/node_modules/slug/slug",
             "sha256": "~/node_modules/js-sha256/src/sha256",
@@ -73,7 +74,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.txt$/i,
+                test: /\.txt|\.svg$/i,
                 exclude: /\.json$/,
                 use: [
                     {
@@ -103,6 +104,7 @@ module.exports = {
             sha256: 'sha256',
             magnificPopup: 'magnific-popup',
             Strophe: 'strophe',
+            Quill: [ 'Quill', 'default'],
             xabber: 'xabber'
         })
     ],

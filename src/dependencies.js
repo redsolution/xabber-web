@@ -12,6 +12,7 @@ define([
     "i18next-post",
     "strophe",
     "Plyr",
+    "Quill",
     "strophe.disco",
     "strophe.ping",
     "strophe.rsm",
@@ -23,7 +24,7 @@ define([
     "materialize",
     "qrcode",
     "perfectScrollbarJQuery"
-], function(Backbone, _, $, moment, WaveSurfer, slug, sha256, magnificPopup, i18next, i18next_sprintf, Strophe, plyr) {
+], function(Backbone, _, $, moment, WaveSurfer, slug, sha256, magnificPopup, i18next, i18next_sprintf, Strophe, plyr, Quill) {
     return _.extend({
         $: $,
         _: _,
@@ -31,6 +32,7 @@ define([
         moment: moment,
         WaveSurfer: WaveSurfer,
         Plyr: plyr,
+        Quill: Quill,
         slug: slug,
         xabber_i18next: i18next,
         xabber_i18next_sprintf: i18next_sprintf,
