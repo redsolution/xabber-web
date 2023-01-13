@@ -13,6 +13,7 @@ define([
     "strophe",
     "Plyr",
     "Quill",
+    "libsignal-protocol",
     "strophe.disco",
     "strophe.ping",
     "strophe.rsm",
@@ -24,7 +25,7 @@ define([
     "materialize",
     "qrcode",
     "perfectScrollbarJQuery"
-], function(Backbone, _, $, moment, WaveSurfer, slug, sha256, magnificPopup, i18next, i18next_sprintf, Strophe, plyr, Quill) {
+], function(Backbone, _, $, moment, WaveSurfer, slug, sha256, magnificPopup, i18next, i18next_sprintf, Strophe, plyr, Quill, libsignal) {
     return _.extend({
         $: $,
         _: _,
@@ -33,6 +34,7 @@ define([
         WaveSurfer: WaveSurfer,
         Plyr: plyr,
         Quill: Quill,
+        libsignal: libsignal,
         slug: slug,
         xabber_i18next: i18next,
         xabber_i18next_sprintf: i18next_sprintf,

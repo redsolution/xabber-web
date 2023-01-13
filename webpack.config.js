@@ -1,6 +1,7 @@
-var webpack = require('webpack');
+const webpack = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
 const path = require('path');
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 module.exports = {
     entry: './src/xabber.js',
     output: {
@@ -29,6 +30,7 @@ module.exports = {
 
             // modified libs and plugins
             "Plyr": "./lib/plyr",
+            "libsignal-protocol": "~/src/lib/libsignal-protocol",
             "backbone.localsync": "./lib/backbone.localsync",
             "hammerjs": "~/src/lib/hammer.min",
             "materialize": "./lib/materialize",
@@ -69,7 +71,12 @@ module.exports = {
 
             // main file
             "xabber": "~/src/xabber",
-        }
+        },
+        fallback: {
+            "fs": false,
+            "Long": false,
+            "bytebuffer": false,
+        },
     },
     module: {
         rules: [
@@ -105,8 +112,10 @@ module.exports = {
             magnificPopup: 'magnific-popup',
             Strophe: 'strophe',
             Quill: [ 'Quill', 'default'],
+            libsignal: 'libsignal-protocol',
             xabber: 'xabber'
-        })
+        }),
+        new NodePolyfillPlugin()
     ],
     optimization: {
         minimize: true,

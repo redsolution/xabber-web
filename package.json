@@ -41,6 +41,7 @@
     "json-loader": "^0.5.7",
     "magnific-popup": ">0.0.0",
     "moment": "2.24.0",
+    "node-polyfill-webpack-plugin": "^2.0.1",
     "npm": "^6.14.0",
     "npm-force-resolutions": "0.0.10",
     "perfect-scrollbar": "~0.6.16",
