@@ -25373,17 +25373,17 @@ Curve25519Worker.prototype = {
  * Released under the Apache License, Version 2.0
  * see: https://github.com/dcodeIO/long.js for details
  */
-(function(global, factory) {
-
-    /* AMD */ if (typeof define === 'function' && define["amd"])
-        define([], factory);
-    /* CommonJS */ else if (typeof require === 'function' && typeof module === "object" && module && module["exports"])
-        module["exports"] = factory();
-    /* Global */ else
-        (global["dcodeIO"] = global["dcodeIO"] || {})["Long"] = factory();
-
-})(this, function() {
-    "use strict";
+// (function(global, factory) {
+//
+//     /* AMD */ if (typeof define === 'function' && define["amd"])
+//         define([], factory);
+//     /* CommonJS */ else if (typeof require === 'function' && typeof module === "object" && module && module["exports"])
+//         module["exports"] = factory();
+//     /* Global */ else
+//         (global["dcodeIO"] = global["dcodeIO"] || {})["Long"] = factory();
+//
+// })(this, function() {
+//     "use strict";
 
     /**
      * Constructs a 64 bit two's-complement integer, given its low and high 32 bit values as *signed* integers.
@@ -26558,8 +26558,8 @@ Curve25519Worker.prototype = {
         ];
     }
 
-    return Long;
-});
+//     return Long;
+// });
 
 /*
  Copyright 2013-2014 Daniel Wirtz <dcode@dcode.io>
@@ -26584,15 +26584,15 @@ Curve25519Worker.prototype = {
  * Released under the Apache License, Version 2.0
  * see: https://github.com/dcodeIO/ByteBuffer.js for details
  */ //
-(function(global) {
-    "use strict";
-
-    /**
-     * @param {function(new: Long, number, number, boolean=)=} Long
-     * @returns {function(new: ByteBuffer, number=, boolean=, boolean=)}}
-     * @inner
-     */
-    function loadByteBuffer(Long) {
+// (function(global) {
+//     "use strict";
+//
+//     /**
+//      * @param {function(new: Long, number, number, boolean=)=} Long
+//      * @returns {function(new: ByteBuffer, number=, boolean=, boolean=)}}
+//      * @inner
+//      */
+//     function loadByteBuffer(Long) {
 
         /**
          * Constructs a new ByteBuffer.
@@ -29840,20 +29840,20 @@ Curve25519Worker.prototype = {
         };
 
 
-        return ByteBuffer;
-    }
-
-    /* CommonJS */ if (typeof require === 'function' && typeof module === 'object' && module && typeof exports === 'object' && exports)
-        module['exports'] = (function() {
-            var Long; try { Long = require("long"); } catch (e) {}
-            return loadByteBuffer(Long);
-        })();
-    /* AMD */ else if (typeof define === 'function' && define["amd"])
-        define("ByteBuffer", ["Long"], function(Long) { return loadByteBuffer(Long); });
-    /* Global */ else
-        (global["dcodeIO"] = global["dcodeIO"] || {})["ByteBuffer"] = loadByteBuffer(global["dcodeIO"]["Long"]);
-
-})(this);
+        // return ByteBuffer;
+//     }
+//
+//     /* CommonJS */ if (typeof require === 'function' && typeof module === 'object' && module && typeof exports === 'object' && exports)
+//         module['exports'] = (function() {
+//             var Long; try { Long = require("long"); } catch (e) {}
+//             return loadByteBuffer(Long);
+//         })();
+//     /* AMD */ else if (typeof define === 'function' && define["amd"])
+//         define("ByteBuffer", ["Long"], function(Long) { return loadByteBuffer(Long); });
+//     /* Global */ else
+//         (global["dcodeIO"] = global["dcodeIO"] || {})["ByteBuffer"] = loadByteBuffer(global["dcodeIO"]["Long"]);
+//
+// })(this);
 
 /*
  Copyright 2013 Daniel Wirtz <dcode@dcode.io>
@@ -35338,7 +35338,7 @@ var util = (function() {
             if (typeof thing == 'string') {
                 return thing;
             }
-            return new dcodeIO.ByteBuffer.wrap(thing).toString('binary');
+            return new ByteBuffer.wrap(thing).toString('binary');
         },
         toArrayBuffer: function(thing) {
             if (thing === undefined) {
@@ -35356,7 +35356,7 @@ var util = (function() {
             } else {
                 throw new Error("Tried to convert a non-string of type " + typeof thing + " to an array buffer");
             }
-            return new dcodeIO.ByteBuffer.wrap(thing, 'binary').toArrayBuffer();
+            return new ByteBuffer.wrap(thing, 'binary').toArrayBuffer();
         },
         isEqual: function(a, b) {
             // TODO: Special-case arraybuffers, etc
@@ -35466,7 +35466,7 @@ Internal.protobuf = function() {
     'use strict';
 
     function loadProtoBufs(filename) {
-        return dcodeIO.ProtoBuf.loadProto(Internal.protoText['protos/' + filename]).build('textsecure');
+        return ProtoBuf.loadProto(Internal.protoText['protos/' + filename]).build('textsecure');
     }
 
     var protocolMessages = loadProtoBufs('WhisperTextProtocol.proto');
@@ -35498,7 +35498,7 @@ Internal.SessionRecord = function() {
     var OLD_RATCHETS_MAX_LENGTH = 10;
     var SESSION_RECORD_VERSION = 'v1';
 
-    var StaticByteBufferProto = new dcodeIO.ByteBuffer().__proto__;
+    var StaticByteBufferProto = new ByteBuffer().__proto__;
     var StaticArrayBufferProto = new ArrayBuffer().__proto__;
     var StaticUint8ArrayProto = new Uint8Array().__proto__;
 
@@ -36031,7 +36031,7 @@ SessionCipher.prototype = {
       });
   },
   encrypt: function(buffer, encoding) {
-    buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
+    buffer = ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
     return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
       if (!(buffer instanceof ArrayBuffer)) {
           throw new Error("Expected buffer to be an ArrayBuffer");
@@ -36161,7 +36161,7 @@ SessionCipher.prototype = {
     }.bind(this));
   },
   decryptWhisperMessage: function(buffer, encoding) {
-      buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
+      buffer = ByteBuffer.wrap(buffer, encoding).toArrayBuffer();
       return Internal.SessionLock.queueJobForNumber(this.remoteAddress.toString(), function() {
         var address = this.remoteAddress.toString();
         return this.getRecord(address).then(function(record) {
@@ -36196,7 +36196,7 @@ SessionCipher.prototype = {
       }.bind(this));
   },
   decryptPreKeyWhisperMessage: function(buffer, encoding) {
-      buffer = dcodeIO.ByteBuffer.wrap(buffer, encoding);
+      buffer = ByteBuffer.wrap(buffer, encoding);
       var version = buffer.readUint8();
       if ((version & 0xF) > 3 || (version >> 4) < 3) {  // min version > 3 or max version < 3
           throw new Error("Incompatible version number on PreKeyWhisperMessage");
@@ -36472,7 +36472,7 @@ Internal.SessionLock.queueJobForNumber = function queueJobForNumber(number, runJ
     var VERSION = 0;
 
     function iterateHash(data, key, count) {
-        data = dcodeIO.ByteBuffer.concat([data, key]).toArrayBuffer();
+        data = ByteBuffer.concat([data, key]).toArrayBuffer();
         return Internal.crypto.hash(data).then(function(result) {
             if (--count === 0) {
                 return result;
@@ -36500,7 +36500,7 @@ Internal.SessionLock.queueJobForNumber = function queueJobForNumber(number, runJ
     }
 
     function getDisplayStringFor(identifier, key, iterations) {
-        var bytes = dcodeIO.ByteBuffer.concat([
+        var bytes = ByteBuffer.concat([
             shortToArrayBuffer(VERSION), key, identifier
         ]).toArrayBuffer();
         return iterateHash(bytes, key, iterations).then(function(output) {

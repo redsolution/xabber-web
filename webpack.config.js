@@ -74,8 +74,6 @@ module.exports = {
         },
         fallback: {
             "fs": false,
-            "Long": false,
-            "bytebuffer": false,
         },
     },
     module: {
