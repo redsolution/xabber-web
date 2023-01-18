@@ -5,7 +5,7 @@ const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 module.exports = {
     entry: './src/xabber.js',
     output: {
-        filename: 'xabber.bundle.js',
+        filename: 'xabber.[name].js',
     },
     resolve: {
         alias: {
@@ -118,5 +118,16 @@ module.exports = {
     optimization: {
         minimize: true,
         minimizer: [new TerserPlugin()],
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]|[\\/]src[\\/]lib[\\/]/,
+                    name(module) {
+                        return `vendors`;
+                    },
+                },
+            },
+        },
     },
 };
