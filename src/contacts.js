@@ -8784,7 +8784,9 @@ define("xabber-contacts", function () {
                     let $jingle_message = current_call.children('message'),
                         full_jid = $jingle_message.attr('from'),
                         session_id = $jingle_message.children('propose').attr('id');
-                    chat.initIncomingCall(full_jid, session_id);
+                    chat.getCallingAvailability(full_jid, session_id, () => {
+                        chat.initIncomingCall(full_jid, session_id);
+                    });
                 }
                 chat.set('last_delivered_id', last_delivered_msg);
                 chat.set('last_displayed_id', last_displayed_msg);
