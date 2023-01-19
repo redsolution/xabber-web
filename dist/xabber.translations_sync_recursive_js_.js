@@ -1,3 +1,0 @@
-/*! For license information please see xabber.translations_sync_recursive_js_.js.LICENSE.txt */
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["translations_sync_recursive_js_"],{"./translations sync recursive ^\\.\\/.*\\.js$":(r,s,n)=>{var e={"./translation_progress.js":"./translations/translation_progress.js"};function t(r){var s=a(r);return n(s)}function a(r){if(!n.o(e,r)){var s=new Error("Cannot find module '"+r+"'");throw s.code="MODULE_NOT_FOUND",s}return e[r]}t.keys=function(){return Object.keys(e)},t.resolve=a,r.exports=t,t.id="./translations sync recursive ^\\.\\/.*\\.js$"}}]);
-//# sourceMappingURL=xabber.translations_sync_recursive_js_.js.map

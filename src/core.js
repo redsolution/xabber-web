@@ -446,14 +446,8 @@
 
                 this.requestNotifications().done(function (granted) {
                     self._cache.save('notifications', granted);
-                    if (granted && 'serviceWorker' in navigator && 'PushManager' in window) {
-                        self.setUpPushNotifications().done(function (res) {
-                            self.check_config.resolve(true);
-                        });
-                    } else {
-                        self._cache.save('endpoint_key', undefined);
-                        self.check_config.resolve(true);
-                    }
+                    self._cache.save('endpoint_key', undefined);
+                    self.check_config.resolve(true);
                 });
             });
         },
@@ -509,57 +503,6 @@
                     self.notifications_placeholder = new self.NotificationsPlaceholder();
                 result.resolve(false);
             }
-            return result.promise();
-        },
-
-        setUpPushNotifications: function () {
-            let result = new $.Deferred(),
-                self = this;
-
-            firebase.initializeApp({
-                apiKey: constants.GCM_API_KEY,
-                messagingSenderId: constants.GCM_SENDER_ID
-            });
-
-            navigator.serviceWorker.register('./firebase-messaging-sw.js').then((registration) => {
-                firebase.messaging().useServiceWorker(registration);
-
-                self.messaging = firebase.messaging();
-                self.messaging.requestPermission().then(function () {
-                    self.messaging.getToken().then(function (currentToken) {
-                        self._cache.save('endpoint_key', currentToken || undefined);
-                        result.resolve(currentToken ? true : 'No Instance ID token available.');
-                    }).catch(function (err) {
-                        result.resolve(err);
-                    });
-
-                    self.messaging.onTokenRefresh(function () {
-                        self.messaging.getToken().then(function (refreshedToken) {
-                            self._cache.save('endpoint_key', refreshedToken);
-                        }).catch(function (err) {
-                            // TODO
-                        });
-                    });
-
-                    navigator.serviceWorker.addEventListener('message', function (event) {
-                        let data = event.data;
-                        if (data['firebase-messaging-msg-type'] === 'push-msg-received') {
-                            let message = data['firebase-messaging-msg-data'];
-                            if (message && message.data && message.from === constants.GCM_SENDER_ID) {
-                                let payload;
-                                try {
-                                    payload = JSON.parse(atob(message.data.body));
-                                } catch (e) {
-                                    payload = message.data;
-                                }
-                                self.trigger('push_message', payload);
-                            }
-                        }
-                    });
-                }).catch(function (err) {
-                    result.resolve({'error': err});
-                });
-            });
             return result.promise();
         },
 

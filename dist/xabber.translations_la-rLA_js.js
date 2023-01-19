@@ -1,3 +1,0 @@
-/*! For license information please see xabber.translations_la-rLA_js.js.LICENSE.txt */
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["translations_la-rLA_js"],{"./translations/la-rLA.js":(a,o,r)=>{var s;void 0===(s=(()=>({account_compression:"Comprime",account_host:"Hospes",account_password:"Signum",confirm_password:"Signum confirma",account_port:"Porta",account_priority:"Prioritas"})).call(o,r,o,a))||(a.exports=s)}}]);
-//# sourceMappingURL=xabber.translations_la-rLA_js.js.map
