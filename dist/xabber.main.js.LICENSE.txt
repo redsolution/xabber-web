@@ -1,3 +1,605 @@
+/*! ./node_modules/console-browserify/index.js */
+
+/*! Plyr */
+
+/*! Quill */
+
+/*! backbone */
+
+/*! backbone.localsync */
+
+/*! i18next */
+
+/*! i18next-post */
+
+/*! jquery */
+
+/*! libsignal-protocol */
+
+/*! magnific-popup */
+
+/*! materialize */
+
+/*! moment */
+
+/*! omemo */
+
+/*! perfectScrollbarJQuery */
+
+/*! qrcode */
+
+/*! raw-loader!~/templates/accounts/add_account.html */
+
+/*! raw-loader!~/templates/accounts/audio_file_waveform.html */
+
+/*! raw-loader!~/templates/accounts/avatars_gallery.html */
+
+/*! raw-loader!~/templates/accounts/change_password.html */
+
+/*! raw-loader!~/templates/accounts/change_status.html */
+
+/*! raw-loader!~/templates/accounts/current_token_item.html */
+
+/*! raw-loader!~/templates/accounts/emoji_panel.html */
+
+/*! raw-loader!~/templates/accounts/emoji_picker.html */
+
+/*! raw-loader!~/templates/accounts/emoji_picker_tabs.html */
+
+/*! raw-loader!~/templates/accounts/emojis.txt */
+
+/*! raw-loader!~/templates/accounts/existing_groupchat_item.html */
+
+/*! raw-loader!~/templates/accounts/global_settings_item.html */
+
+/*! raw-loader!~/templates/accounts/media_gallery_account.html */
+
+/*! raw-loader!~/templates/accounts/media_gallery_account_file.html */
+
+/*! raw-loader!~/templates/accounts/resource.html */
+
+/*! raw-loader!~/templates/accounts/resource_right.html */
+
+/*! raw-loader!~/templates/accounts/settings_left.html */
+
+/*! raw-loader!~/templates/accounts/settings_right.html */
+
+/*! raw-loader!~/templates/accounts/token_item.html */
+
+/*! raw-loader!~/templates/accounts/toolbar_item.html */
+
+/*! raw-loader!~/templates/accounts/webcam_panel.html */
+
+/*! raw-loader!~/templates/accounts/xmpp_login.html */
+
+/*! raw-loader!~/templates/api_service/add_xabber_account.html */
+
+/*! raw-loader!~/templates/api_service/linked_email_item.html */
+
+/*! raw-loader!~/templates/api_service/sync_settings.html */
+
+/*! raw-loader!~/templates/api_service/sync_settings_account_item.html */
+
+/*! raw-loader!~/templates/api_service/xabber_account.html */
+
+/*! raw-loader!~/templates/api_service/xabber_login.html */
+
+/*! raw-loader!~/templates/api_service/xabber_login_by_email.html */
+
+/*! raw-loader!~/templates/base/about.html */
+
+/*! raw-loader!~/templates/base/backgrounds_gallery.html */
+
+/*! raw-loader!~/templates/base/color_picker.html */
+
+/*! raw-loader!~/templates/base/color_scheme.html */
+
+/*! raw-loader!~/templates/base/dialog.html */
+
+/*! raw-loader!~/templates/base/fingerprint_item.html */
+
+/*! raw-loader!~/templates/base/fingerprints.html */
+
+/*! raw-loader!~/templates/base/input_widget.html */
+
+/*! raw-loader!~/templates/base/jingle_message_calling.html */
+
+/*! raw-loader!~/templates/base/omemo_enable.html */
+
+/*! raw-loader!~/templates/base/plyr_player_popup.html */
+
+/*! raw-loader!~/templates/base/settings.html */
+
+/*! raw-loader!~/templates/base/toolbar.html */
+
+/*! raw-loader!~/templates/chats/add_chat_account_item.html */
+
+/*! raw-loader!~/templates/chats/chat_bottom.html */
+
+/*! raw-loader!~/templates/chats/chat_content.html */
+
+/*! raw-loader!~/templates/chats/chat_content_contact.html */
+
+/*! raw-loader!~/templates/chats/chat_head.html */
+
+/*! raw-loader!~/templates/chats/chat_item.html */
+
+/*! raw-loader!~/templates/chats/chat_placeholder.html */
+
+/*! raw-loader!~/templates/chats/chats_panel.html */
+
+/*! raw-loader!~/templates/chats/content_encryption_warning.html */
+
+/*! raw-loader!~/templates/chats/encryption_warning.html */
+
+/*! raw-loader!~/templates/chats/forward_panel.html */
+
+/*! raw-loader!~/templates/chats/group_chats/add_group_chat.html */
+
+/*! raw-loader!~/templates/chats/group_chats/invitation_panel_view.html */
+
+/*! raw-loader!~/templates/chats/group_chats/mention_item.html */
+
+/*! raw-loader!~/templates/chats/group_chats/pinned_message_panel.html */
+
+/*! raw-loader!~/templates/chats/location_popup.html */
+
+/*! raw-loader!~/templates/chats/message_item.html */
+
+/*! raw-loader!~/templates/chats/messages/attached_file.html */
+
+/*! raw-loader!~/templates/chats/messages/audio_file.html */
+
+/*! raw-loader!~/templates/chats/messages/audio_file_waveform.html */
+
+/*! raw-loader!~/templates/chats/messages/auth_request.html */
+
+/*! raw-loader!~/templates/chats/messages/file.html */
+
+/*! raw-loader!~/templates/chats/messages/file_loading.html */
+
+/*! raw-loader!~/templates/chats/messages/file_upload.html */
+
+/*! raw-loader!~/templates/chats/messages/forwarded.html */
+
+/*! raw-loader!~/templates/chats/messages/group_request.html */
+
+/*! raw-loader!~/templates/chats/messages/hidden-template-for-2.html */
+
+/*! raw-loader!~/templates/chats/messages/hidden-template-for-3.html */
+
+/*! raw-loader!~/templates/chats/messages/hidden-template-for-4.html */
+
+/*! raw-loader!~/templates/chats/messages/hidden-template-for-5.html */
+
+/*! raw-loader!~/templates/chats/messages/hidden-template-for-6.html */
+
+/*! raw-loader!~/templates/chats/messages/images_details.html */
+
+/*! raw-loader!~/templates/chats/messages/link_reference.html */
+
+/*! raw-loader!~/templates/chats/messages/link_reference_chat.html */
+
+/*! raw-loader!~/templates/chats/messages/loading_circle.html */
+
+/*! raw-loader!~/templates/chats/messages/location.html */
+
+/*! raw-loader!~/templates/chats/messages/main.html */
+
+/*! raw-loader!~/templates/chats/messages/saved_main.html */
+
+/*! raw-loader!~/templates/chats/messages/searched.html */
+
+/*! raw-loader!~/templates/chats/messages/system.html */
+
+/*! raw-loader!~/templates/chats/messages/template-for-2.html */
+
+/*! raw-loader!~/templates/chats/messages/template-for-3.html */
+
+/*! raw-loader!~/templates/chats/messages/template-for-4.html */
+
+/*! raw-loader!~/templates/chats/messages/template-for-5.html */
+
+/*! raw-loader!~/templates/chats/messages/template-for-6.html */
+
+/*! raw-loader!~/templates/chats/messages/video.html */
+
+/*! raw-loader!~/templates/chats/saved_chat_head.html */
+
+/*! raw-loader!~/templates/chats/send_media.html */
+
+/*! raw-loader!~/templates/chats/subscription_buttons.html */
+
+/*! raw-loader!~/templates/contacts/account_roster_left.html */
+
+/*! raw-loader!~/templates/contacts/account_roster_right.html */
+
+/*! raw-loader!~/templates/contacts/add_contact.html */
+
+/*! raw-loader!~/templates/contacts/add_contact_account_item.html */
+
+/*! raw-loader!~/templates/contacts/audio_file_waveform.html */
+
+/*! raw-loader!~/templates/contacts/contact_blocked_item.html */
+
+/*! raw-loader!~/templates/contacts/contact_details.html */
+
+/*! raw-loader!~/templates/contacts/contact_details_right.html */
+
+/*! raw-loader!~/templates/contacts/contact_left_item.html */
+
+/*! raw-loader!~/templates/contacts/contact_placeholder.html */
+
+/*! raw-loader!~/templates/contacts/contact_right_item.html */
+
+/*! raw-loader!~/templates/contacts/edit_contact.html */
+
+/*! raw-loader!~/templates/contacts/edit_group.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/add_blocked_participant_form.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/badge_edit_view.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/default_restrictions.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/default_restrictions_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/description_input_widget.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/file_item.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_chat_details.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_chat_details_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_chat_properties.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_chat_properties_edit.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_chat_properties_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_member_item.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_member_item_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_name_input_widget.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_status.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/group_status_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/invitation.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/invited_member_item.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participant_badge_input_widget.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participant_details_item.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participant_details_item_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participant_details_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participant_rights.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participants.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/participants_right_panel.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/pinned_message.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/private_participant_details.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/private_participant_details_item_right.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/restriction_item.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/right_expire_variants.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/set_status.html */
+
+/*! raw-loader!~/templates/contacts/group_chats/status_item.html */
+
+/*! raw-loader!~/templates/contacts/group_left.html */
+
+/*! raw-loader!~/templates/contacts/group_right.html */
+
+/*! raw-loader!~/templates/contacts/group_settings.html */
+
+/*! raw-loader!~/templates/contacts/groups.html */
+
+/*! raw-loader!~/templates/contacts/groups_checkbox_list.html */
+
+/*! raw-loader!~/templates/contacts/groups_checkbox_list_contact.html */
+
+/*! raw-loader!~/templates/contacts/groups_list.html */
+
+/*! raw-loader!~/templates/contacts/groups_new_group.html */
+
+/*! raw-loader!~/templates/contacts/media_item.html */
+
+/*! raw-loader!~/templates/contacts/media_items_empty.html */
+
+/*! raw-loader!~/templates/contacts/preloader.html */
+
+/*! raw-loader!~/templates/contacts/roster_left.html */
+
+/*! raw-loader!~/templates/contacts/roster_right.html */
+
+/*! raw-loader!~/templates/contacts/roster_settings.html */
+
+/*! raw-loader!~/templates/mentions/mention_item.html */
+
+/*! raw-loader!~/templates/mentions/mentions_panel.html */
+
+/*! raw-loader!~/templates/mentions/mentions_placeholder.html */
+
+/*! raw-loader!~/templates/searching/existing_groupchat_details_view.html */
+
+/*! raw-loader!~/templates/searching/existing_groupchat_item.html */
+
+/*! raw-loader!~/templates/searching/searching_account_item.html */
+
+/*! raw-loader!~/templates/searching/searching_wide.html */
+
+/*! raw-loader!~/templates/svg/account-outline.html */
+
+/*! raw-loader!~/templates/svg/address-outline.html */
+
+/*! raw-loader!~/templates/svg/bell-off.html */
+
+/*! raw-loader!~/templates/svg/bell-sleep.html */
+
+/*! raw-loader!~/templates/svg/bell.html */
+
+/*! raw-loader!~/templates/svg/birthday-outline.html */
+
+/*! raw-loader!~/templates/svg/blocked-add.html */
+
+/*! raw-loader!~/templates/svg/blocked.html */
+
+/*! raw-loader!~/templates/svg/bot-variant.html */
+
+/*! raw-loader!~/templates/svg/bot.html */
+
+/*! raw-loader!~/templates/svg/call-outline.html */
+
+/*! raw-loader!~/templates/svg/call.html */
+
+/*! raw-loader!~/templates/svg/camera-retake.html */
+
+/*! raw-loader!~/templates/svg/cancel.html */
+
+/*! raw-loader!~/templates/svg/channel.html */
+
+/*! raw-loader!~/templates/svg/chevron-down.html */
+
+/*! raw-loader!~/templates/svg/chevron-left-variant.html */
+
+/*! raw-loader!~/templates/svg/chevron-right-variant.html */
+
+/*! raw-loader!~/templates/svg/circles.html */
+
+/*! raw-loader!~/templates/svg/clock-outline.html */
+
+/*! raw-loader!~/templates/svg/close.html */
+
+/*! raw-loader!~/templates/svg/crosshairs-gps.html */
+
+/*! raw-loader!~/templates/svg/crosshairs-question.html */
+
+/*! raw-loader!~/templates/svg/crosshairs.html */
+
+/*! raw-loader!~/templates/svg/description-outline.html */
+
+/*! raw-loader!~/templates/svg/devices.html */
+
+/*! raw-loader!~/templates/svg/edit-outline.html */
+
+/*! raw-loader!~/templates/svg/edit.html */
+
+/*! raw-loader!~/templates/svg/email-outline.html */
+
+/*! raw-loader!~/templates/svg/file-audio.html */
+
+/*! raw-loader!~/templates/svg/file-document.html */
+
+/*! raw-loader!~/templates/svg/file-pdf.html */
+
+/*! raw-loader!~/templates/svg/file-presentation.html */
+
+/*! raw-loader!~/templates/svg/file-video.html */
+
+/*! raw-loader!~/templates/svg/file-zip.html */
+
+/*! raw-loader!~/templates/svg/file.html */
+
+/*! raw-loader!~/templates/svg/fullname-outline.html */
+
+/*! raw-loader!~/templates/svg/fullname.html */
+
+/*! raw-loader!~/templates/svg/group-incognito.html */
+
+/*! raw-loader!~/templates/svg/group-invite.html */
+
+/*! raw-loader!~/templates/svg/group-private.html */
+
+/*! raw-loader!~/templates/svg/group-public.html */
+
+/*! raw-loader!~/templates/svg/history.html */
+
+/*! raw-loader!~/templates/svg/ic-at.html */
+
+/*! raw-loader!~/templates/svg/ic-jabber.html */
+
+/*! raw-loader!~/templates/svg/ic-searching.html */
+
+/*! raw-loader!~/templates/svg/id-outline.html */
+
+/*! raw-loader!~/templates/svg/image.html */
+
+/*! raw-loader!~/templates/svg/index.html */
+
+/*! raw-loader!~/templates/svg/information-outline.html */
+
+/*! raw-loader!~/templates/svg/invite-outline.html */
+
+/*! raw-loader!~/templates/svg/job-outline.html */
+
+/*! raw-loader!~/templates/svg/link.html */
+
+/*! raw-loader!~/templates/svg/map-marker-outline.html */
+
+/*! raw-loader!~/templates/svg/map-marker.html */
+
+/*! raw-loader!~/templates/svg/membership-outline.html */
+
+/*! raw-loader!~/templates/svg/message-bookmark-outline.html */
+
+/*! raw-loader!~/templates/svg/message-group.html */
+
+/*! raw-loader!~/templates/svg/minus.html */
+
+/*! raw-loader!~/templates/svg/palette.html */
+
+/*! raw-loader!~/templates/svg/pause.html */
+
+/*! raw-loader!~/templates/svg/picture-in-picture-bottom-right.html */
+
+/*! raw-loader!~/templates/svg/picture-in-picture-minimize.html */
+
+/*! raw-loader!~/templates/svg/picture-in-picture-top-right.html */
+
+/*! raw-loader!~/templates/svg/play.html */
+
+/*! raw-loader!~/templates/svg/player-float.html */
+
+/*! raw-loader!~/templates/svg/player-full.html */
+
+/*! raw-loader!~/templates/svg/player-mini-variant.html */
+
+/*! raw-loader!~/templates/svg/player-mini.html */
+
+/*! raw-loader!~/templates/svg/plus.html */
+
+/*! raw-loader!~/templates/svg/plyr.html */
+
+/*! raw-loader!~/templates/svg/qrcode.html */
+
+/*! raw-loader!~/templates/svg/restrictions-outline.html */
+
+/*! raw-loader!~/templates/svg/rss-variant.html */
+
+/*! raw-loader!~/templates/svg/rss.html */
+
+/*! raw-loader!~/templates/svg/saved-messages.html */
+
+/*! raw-loader!~/templates/svg/search.html */
+
+/*! raw-loader!~/templates/svg/server.html */
+
+/*! raw-loader!~/templates/svg/status-outline.html */
+
+/*! raw-loader!~/templates/svg/subscription-from.html */
+
+/*! raw-loader!~/templates/svg/subscription-to.html */
+
+/*! raw-loader!~/templates/svg/task.html */
+
+/*! raw-loader!~/templates/svg/translate.html */
+
+/*! raw-loader!~/templates/svg/video.html */
+
+/*! raw-loader!~/templates/svg/volume-high.html */
+
+/*! raw-loader!~/templates/svg/volume-off-variant.html */
+
+/*! raw-loader!~/templates/svg/volume-off.html */
+
+/*! raw-loader!~/templates/svg/xabber-offline.html */
+
+/*! raw-loader!~/templates/svg/xabber-online.html */
+
+/*! raw-loader!~/templates/svg/xmpp.html */
+
+/*! raw-loader!~/templates/vcard/vcard.html */
+
+/*! raw-loader!~/templates/vcard/vcard_edit.html */
+
+/*! raw-loader!~/templates/vcard/vcard_right.html */
+
+/*! sha1_hasher */
+
+/*! sha256 */
+
+/*! slug */
+
+/*! strophe */
+
+/*! strophe.caps */
+
+/*! strophe.disco */
+
+/*! strophe.ping */
+
+/*! strophe.pubsub */
+
+/*! strophe.rsm */
+
+/*! underscore */
+
+/*! wavesurfer */
+
+/*! xabber */
+
+/*! xabber-accounts */
+
+/*! xabber-api-service */
+
+/*! xabber-chats */
+
+/*! xabber-constants */
+
+/*! xabber-contacts */
+
+/*! xabber-core */
+
+/*! xabber-dependencies */
+
+/*! xabber-discovery */
+
+/*! xabber-emoji-utils */
+
+/*! xabber-environment */
+
+/*! xabber-image-utils */
+
+/*! xabber-mentions */
+
+/*! xabber-modal-utils */
+
+/*! xabber-omemo */
+
+/*! xabber-searching */
+
+/*! xabber-strophe */
+
+/*! xabber-templates */
+
+/*! xabber-textarea-utils */
+
+/*! xabber-translations-info */
+
+/*! xabber-ui */
+
+/*! xabber-utils */
+
+/*! xabber-vcard */
+
+/*! xabber-version */
+
+/*! xabber-views */
+
 /*!*******************!*\
   !*** ./src/ui.js ***!
   \*******************/
@@ -113,6 +715,10 @@
 /*!**********************************************!*\
   !*** ./translations/translation_progress.js ***!
   \**********************************************/
+
+/*!**********************************************************!*\
+  !*** ./translations/ lazy ^\.\/.*\.js$ namespace object ***!
+  \**********************************************************/
 
 /*!**********************************************************************!*\
   !*** ./node_modules/raw-loader/dist/cjs.js!./templates/svg/bot.html ***!

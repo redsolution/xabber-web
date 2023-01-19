@@ -80,10 +80,8 @@
                     resolve(language);
                     return;
                 }
-                require([`~/translations/${language.lang.replace(/-/g, "-r")}.js`], (translation) => {
+                import(`~/translations/${language.lang.replace(/-/g, "-r")}.js`).then(translation => {
                     language.translation  = translation;
-                    resolve(language)
-                }, () => {
                     resolve(language)
                 });
             });

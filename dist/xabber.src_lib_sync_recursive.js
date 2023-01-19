@@ -1,2 +1,3 @@
 /*! For license information please see xabber.src_lib_sync_recursive.js.LICENSE.txt */
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["src_lib_sync_recursive"],{"./src/lib sync recursive":module=>{eval('function webpackEmptyContext(req) {\n\tvar e = new Error("Cannot find module \'" + req + "\'");\n\te.code = \'MODULE_NOT_FOUND\';\n\tthrow e;\n}\nwebpackEmptyContext.keys = () => ([]);\nwebpackEmptyContext.resolve = webpackEmptyContext;\nwebpackEmptyContext.id = "./src/lib sync recursive";\nmodule.exports = webpackEmptyContext;\n\n//# sourceURL=webpack://xabber.web/./src/lib/_sync?')}}]);
+(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["src_lib_sync_recursive"],{"./src/lib sync recursive":e=>{function r(e){var r=new Error("Cannot find module '"+e+"'");throw r.code="MODULE_NOT_FOUND",r}r.keys=()=>[],r.resolve=r,r.id="./src/lib sync recursive",e.exports=r}}]);
+//# sourceMappingURL=xabber.src_lib_sync_recursive.js.map

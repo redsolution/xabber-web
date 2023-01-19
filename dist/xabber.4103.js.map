@@ -1,0 +1,1 @@
+{"version":3,"file":"xabber.4103.js","mappings":"4FAAA,WAA0D,KAA1B,QAAsB,CAAC,IAAG,6B","sources":["webpack://xabber.web/./translations/et-rEE.js"],"sourcesContent":["typeof define === \"function\" && define(() => { return {};});"],"names":[],"sourceRoot":""}

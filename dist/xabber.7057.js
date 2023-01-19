@@ -1,0 +1,2 @@
+(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[7057],{57057:(a,o,r)=>{var c;void 0===(c=(()=>({account_host:"Host",account_password:"Pêborîn",confirm_password:"Pêborîna rastandinê",account_port:"Port",account_priority:"Pêşikî",account_resource:"Çavkanî",account_server_name:"Rajekar"})).call(o,r,o,a))||(a.exports=c)}}]);
+//# sourceMappingURL=xabber.7057.js.map
