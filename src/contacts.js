@@ -8785,7 +8785,16 @@ define("xabber-contacts", function () {
                         full_jid = $jingle_message.attr('from'),
                         session_id = $jingle_message.children('propose').attr('id');
                     chat.getCallingAvailability(full_jid, session_id, () => {
-                        chat.initIncomingCall(full_jid, session_id);
+                        if (xabber.current_voip_call) {
+                            let reason = Strophe.getBareJidFromJid(full_jid) === Strophe.getBareJidFromJid(xabber.current_voip_call.get('contact_full_jid')) ? 'device_busy' : 'busy';
+                            chat.sendReject({session_id: session_id, reason: reason});
+                            chat.messages.createSystemMessage({
+                                from_jid: this.account.get('jid'),
+                                message: xabber.getString("jingle__system_message__cancelled_call")
+                            });
+                        } else {
+                            chat.initIncomingCall(full_jid, session_id);
+                        }
                     });
                 }
                 chat.set('last_delivered_id', last_delivered_msg);
