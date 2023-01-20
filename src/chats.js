@@ -9939,7 +9939,7 @@ define("xabber-chats", function () {
                     onloaded_sprites++;
                     (onloaded_sprites === all_sprites) && $emoji_panel_wrap.find('.uploading-emoticons').detach();
                 };
-                img.src = './images/emoji/spritesheet' + i++ + '.png';
+                img.src = './assets/images/emoji/spritesheet' + i++ + '.png';
             }
             let window_onclick = function (ev) {
                 if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)

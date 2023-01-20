@@ -57,7 +57,7 @@ define(["jquery", "underscore"], function ($, _) {
                 emoji_code = data && Number(data.code).toString(16);
             if (data) {
                 (emoji_code.length < 4) && (emoji_code = "0".repeat(4 - emoji_code.length) + emoji_code);
-                let img_src = tag_name === 'img' ? (sprite ? ' src="images/emoji/blank.gif"' : '  src="images/emoji/svg32/emoji_u' + emoji_code + '.svg"') : '';
+                let img_src = tag_name === 'img' ? (sprite ? ' src="assets/images/emoji/blank.gif"' : '  src="assets/images/emoji/svg32/emoji_u' + emoji_code + '.svg"') : '';
                 return '<' + tag_name + img_src + href + title + ' class="emoji emoji-w' + emoji_size +
                     (sprite ? (' sprite-' + sprite + '" style="background-position: ' + '-' + (emoji_size * data.x) + 'px ' + '-' + (emoji_size * data.y) + 'px;" ') : '" ') +
                     'alt="' + emoji + '" ' +

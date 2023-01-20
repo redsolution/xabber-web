@@ -807,7 +807,7 @@ define("xabber-views", function () {
             this.screen_map = new Backbone.Model();
             this.screen.on("change", this.update, this);
             this.screen_map.on("change", this.onScreenMapChanged, this);
-            $('body').append(this.$el);
+            $('#xabber-container').append(this.$el);
             this.updateBackground();
             this.updateMainColor();
             this.updateAvatarShape();
@@ -828,13 +828,13 @@ define("xabber-views", function () {
 
         updateAvatarShape: function () {
             let shape = xabber.settings.avatar_shape;
-            $('body').switchClass('non-circle-avatars', shape != 'circle');
-            $('body').switchClass('octagon-avatars', shape === 'octagon');
-            $('body').switchClass('hexagon-avatars', shape === 'hexagon');
-            $('body').switchClass('pentagon-avatars', shape === 'pentagon');
-            $('body').switchClass('rounded-avatars', shape === 'rounded');
-            $('body').switchClass('star-avatars', shape === 'star');
-            $('body').switchClass('squircle-avatars', shape === 'squircle');
+            $('#xabber-container').switchClass('non-circle-avatars', shape != 'circle');
+            $('#xabber-container').switchClass('octagon-avatars', shape === 'octagon');
+            $('#xabber-container').switchClass('hexagon-avatars', shape === 'hexagon');
+            $('#xabber-container').switchClass('pentagon-avatars', shape === 'pentagon');
+            $('#xabber-container').switchClass('rounded-avatars', shape === 'rounded');
+            $('#xabber-container').switchClass('star-avatars', shape === 'star');
+            $('#xabber-container').switchClass('squircle-avatars', shape === 'squircle');
         },
 
         updateBackground: function () {
@@ -888,8 +888,8 @@ define("xabber-views", function () {
             options = options || {};
             $(window).unbind("keydown.contact_panel");
             xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
-            $('body').switchClass('xabber-login', name === 'login');
-            $('body').switchClass('on-xabber-login', name !== 'login');
+            $('#xabber-container').switchClass('xabber-login', name === 'login');
+            $('#xabber-container').switchClass('on-xabber-login', name !== 'login');
             let new_attrs = {stamp: _.uniqueId()};
             if (name && !this.isScreen(name)) {
                 new_attrs.name = name;

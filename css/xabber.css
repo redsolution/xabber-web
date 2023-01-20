@@ -447,7 +447,7 @@ button.btn-float-left {
     background-position: center center;
     background-repeat: no-repeat no-repeat;
 }
-body:not(.non-circle-avatars) .circle-avatar-wrap{
+#xabber-container:not(.non-circle-avatars) .circle-avatar-wrap{
     background: none !important;
 }
 .non-circle-avatars .circle-avatar{
@@ -460,33 +460,33 @@ body:not(.non-circle-avatars) .circle-avatar-wrap{
 }
 .octagon-avatars .circle-avatar,
 .octagon-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/octagon/octagon176.png);
-    mask-image: url(../images/masks/octagon/octagon176.png);
+    -webkit-mask-image: url(../assets/images/masks/octagon/octagon176.png);
+    mask-image: url(../assets/images/masks/octagon/octagon176.png);
 }
 .hexagon-avatars .circle-avatar,
 .hexagon-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/hexagon/hexagon176.png);
-    mask-image: url(../images/masks/hexagon/hexagon176.png);
+    -webkit-mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
+    mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
 }
 .pentagon-avatars .circle-avatar,
 .pentagon-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/pentagon/pentagon176.png);
-    mask-image: url(../images/masks/pentagon/pentagon176.png);
+    -webkit-mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
+    mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
 }
 .rounded-avatars .circle-avatar,
 .rounded-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/rounded/rounded176.png);
-    mask-image: url(../images/masks/rounded/rounded176.png);
+    -webkit-mask-image: url(../assets/images/masks/rounded/rounded176.png);
+    mask-image: url(../assets/images/masks/rounded/rounded176.png);
 }
 .star-avatars .circle-avatar,
 .star-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/star/star176.png);
-    mask-image: url(../images/masks/star/star176.png);
+    -webkit-mask-image: url(../assets/images/masks/star/star176.png);
+    mask-image: url(../assets/images/masks/star/star176.png);
 }
 .squircle-avatars .circle-avatar,
 .squircle-avatars .circle-avatar-wrap {
-    -webkit-mask-image: url(../images/masks/squircle/squircle176.png);
-    mask-image: url(../images/masks/squircle/squircle176.png);
+    -webkit-mask-image: url(../assets/images/masks/squircle/squircle176.png);
+    mask-image: url(../assets/images/masks/squircle/squircle176.png);
 }
 
 .circle-avatar.circle-image-fix {
@@ -999,18 +999,33 @@ html {
 }
 
 body {
+    position: relative;
+}
+
+#xabber-container {
     min-width: 814px;
     min-height: 450px;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    line-height: 1.5;
+    font-family: Roboto,sans-serif;
+    font-weight: 400;
+    color: rgba(0,0,0,.87);
 }
 
-body.on-xabber-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
+#xabber-container p {
+    line-height: unset;
+    font-family: unset;
+    font-weight: unset;
+    color: unset;
+}
+
+#xabber-container.on-xabber-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
     display: none;
 }
 
-body.xabber-login > div.login-container {
+#xabber-container.xabber-login > div.login-container {
     display: block;
 }
 
@@ -1024,7 +1039,7 @@ body.xabber-login > div.login-container {
 
 .client-body-wrap {
     position: relative;
-    background-image: url(../images/background.png);
+    background-image: url(../assets/images/background.png);
     z-index: 1001;
     width: 100%;
     height: 100%;
@@ -1033,19 +1048,19 @@ body.xabber-login > div.login-container {
     margin: 0;
 }
 
-body .client-body-wrap.hidden + #modals {
+#xabber-container .client-body-wrap.hidden + #modals {
     z-index: -1;
 }
 
-body .client-body-wrap.hidden + #modals:not(:empty) {
+#xabber-container .client-body-wrap.hidden + #modals:not(:empty) {
     z-index: unset !important;
 }
 
-body #modals.login-modals{
+#xabber-container #modals.login-modals{
     z-index: unset !important;
 }
 
-body .lean-overlay + .client-body-wrap.hidden ~ #modals {
+#xabber-container .lean-overlay + .client-body-wrap.hidden ~ #modals {
     z-index: 1500;
 }
 
@@ -7343,7 +7358,7 @@ input[type=text].simple-input-field:hover {
     width: 40px;
     height: 40px;
     background-color: #E0E0E0;
-    background-image: url(../images/loading.png);
+    background-image: url(../assets/images/loading.png);
     background-size: 50%;
 }
 .chat-list-wrap.left-panel-list-wrap .chat-item .circle-avatar {
@@ -7353,7 +7368,7 @@ input[type=text].simple-input-field:hover {
     width: 48px;
     height: 48px;
     background-color: #E0E0E0;
-    background-image: url(../images/loading.png);
+    background-image: url(../assets/images/loading.png);
     background-size: 50%;
 }
 
@@ -8862,7 +8877,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-message .img-content {
     border: 1px solid rgb(158 158 158 / 25%);
-    background-image: url(../images/loading.png);
+    background-image: url(../assets/images/loading.png);
     background-position: center center;
     background-repeat: no-repeat;
     min-height: 80px;
@@ -8921,7 +8936,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-message .img-content-template {
-    background-image: url(../images/loading.png);
+    background-image: url(../assets/images/loading.png);
     background-position: center center;
     background-repeat: no-repeat;
     position: relative;
@@ -17638,49 +17653,49 @@ ul.restrictions-list-content>li {
 /* -------------- EMOJI ------------- */
 
 .sprite-smiles_and_people {
-    background-image: url(../images/emoji/spritesheet0.png);
+    background-image: url(../assets/images/emoji/spritesheet0.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-body_and_clothes {
-    background-image: url(../images/emoji/spritesheet1.png);
+    background-image: url(../assets/images/emoji/spritesheet1.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-animals_and_nature {
-    background-image: url(../images/emoji/spritesheet2.png);
+    background-image: url(../assets/images/emoji/spritesheet2.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-food_and_drinks {
-    background-image: url(../images/emoji/spritesheet3.png);
+    background-image: url(../assets/images/emoji/spritesheet3.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-travel_and_places {
-    background-image: url(../images/emoji/spritesheet4.png);
+    background-image: url(../assets/images/emoji/spritesheet4.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-events {
-    background-image: url(../images/emoji/spritesheet5.png);
+    background-image: url(../assets/images/emoji/spritesheet5.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-objects {
-    background-image: url(../images/emoji/spritesheet6.png);
+    background-image: url(../assets/images/emoji/spritesheet6.png);
     background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-signs {
-    background-image: url(../images/emoji/spritesheet7.png);
+    background-image: url(../assets/images/emoji/spritesheet7.png);
     background-repeat: no-repeat;
     display: block;
 }

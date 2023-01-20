@@ -36,7 +36,7 @@ module.exports = {
             "materialize": "./lib/materialize",
             "strophe.caps": "./lib/strophe.caps",
             "strophe.pubsub": "~/src/lib/strophe.pubsub",
-            "sha1_hasher": "./lib/sha1.min",
+            "sha1_hasher": "~/src/lib/sha1.min",
             "omemo": "./lib/omemo",
             "qrcode": "./lib/VanillaQR.min",
             "i18next-post": "./lib/i18nextSprintfPostProcessor.min",
@@ -112,6 +112,7 @@ module.exports = {
             Strophe: 'strophe',
             Quill: [ 'Quill', 'default'],
             libsignal: 'libsignal-protocol',
+            sha1: 'sha1_hasher',
             xabber: 'xabber'
         }),
         new NodePolyfillPlugin()
