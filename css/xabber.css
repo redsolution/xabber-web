@@ -447,6 +447,7 @@ button.btn-float-left {
     background-position: center center;
     background-repeat: no-repeat no-repeat;
 }
+
 #xabber-container:not(.non-circle-avatars) .circle-avatar-wrap{
     background: none !important;
 }
@@ -1008,17 +1009,17 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    line-height: 1.5;
-    font-family: Roboto,sans-serif;
-    font-weight: 400;
-    color: rgba(0,0,0,.87);
+    /*line-height: 1.5;*/
+    /*font-family: Roboto,sans-serif;*/
+    /*font-weight: 400;*/
+    /*color: rgba(0,0,0,.87);*/
 }
 
 #xabber-container p {
-    line-height: unset;
-    font-family: unset;
-    font-weight: unset;
-    color: unset;
+    /*line-height: unset;*/
+    /*font-family: unset;*/
+    /*font-weight: unset;*/
+    /*color: unset;*/
 }
 
 #xabber-container.on-xabber-login > div:not(.client-body-wrap):not(#modals):not(.mfp-wrap):not(.mfp-bg):not(.callback-popup-message) {
