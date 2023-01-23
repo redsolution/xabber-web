@@ -7,6 +7,7 @@ let env = xabber.env,
     $ = env.$,
     $iq = env.$iq,
     $msg = env.$msg,
+    ol = env.ol,
     Strophe = env.Strophe,
     _ = env._,
     moment = env.moment,
@@ -3574,6 +3575,74 @@ xabber.ChatItemView = xabber.BasicView.extend({
         });
     },
 
+    loadLocationInChat: function ($message, attrs) {
+        let $map_element = $message.find(`#${attrs.id}`);
+        if (!$map_element.length)
+            return;
+        let map = new ol.Map({
+            target: $map_element[0],
+            view: new ol.View
+            ({	zoom: 15,
+                center: ol.proj.transform([attrs.lon, attrs.lat], 'EPSG:4326', 'EPSG:3857')
+            }),
+            interactions: ol.interaction_defaults({
+                altShiftDragRotate:false,
+                doubleClickZoom:false,
+                keyboard:false,
+                mouseWheelZoom:false,
+                shiftDragZoom:false,
+                dragPan:false,
+                pinchRotate:false,
+                pinchZoom:false
+            }),
+            layers: [ new ol.layer.Tile({ source: new ol.source.OSM() }) ],
+        });
+
+        map.once('rendercomplete', function(event) {
+            let mapCanvas = document.createElement('canvas');
+            let size = map.getSize();
+            mapCanvas.width = size[0];
+            mapCanvas.height = size[1];
+            let mapContext = mapCanvas.getContext('2d');
+            Array.prototype.forEach.call(
+                document.querySelectorAll(`#${attrs.id} .ol-layer canvas`),
+                function (canvas) {
+                    if (canvas.width > 0) {
+                        let opacity = canvas.parentNode.style.opacity;
+                        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+                        let transform = canvas.style.transform;
+                        // Get the transform parameters from the style's transform matrix
+                        let matrix = transform
+                          .match(/^matrix\(([^\(]*)\)$/)[1]
+                          .split(',')
+                          .map(Number);
+                        // Apply the transform to the export map context
+                        CanvasRenderingContext2D.prototype.setTransform.apply(
+                            mapContext,
+                            matrix
+                        );
+                        let path = new Path2D('M 18 17.25 C 15.9289 17.25 14.25 15.5711 14.25 13.5 C 14.25 12.5054 14.6451 11.5516 15.3483 10.8483 C 16.0516 10.1451 17.0054 9.75 18 9.75 C 20.0711 9.75 21.75 11.4289 21.75 13.5 C 21.75 14.4946 21.3549 15.4484 20.6517 16.1517 C 19.9484 16.8549 18.9946 17.25 18 17.25 M 18 3 C 12.201 3 7.5 7.701 7.5 13.5 C 7.5 21.375 18 33 18 33 C 18 33 28.5 21.375 28.5 13.5 C 28.5 7.701 23.799 3 18 3 Z');
+                        mapContext.fillStyle = getComputedStyle(document.querySelector(`#${attrs.id}`)).color;
+                        mapContext.drawImage(canvas, 0, 0);
+                        mapContext.translate(157, 117);
+
+                        mapContext.fill(path);
+                    }
+                }
+            );
+            if (navigator.msSaveBlob) {
+                // link download attribute does not work on MS browsers
+                navigator.msSaveBlob(mapCanvas.msToBlob(), 'map.png');
+            } else {
+                let img = document.getElementById(`img_${attrs.id}`),
+                    dataURL = mapCanvas.toDataURL('image/png');
+                map.setTarget(null)
+                map = null;
+                img.src= dataURL
+            }
+        });
+    },
+
     hideHistoryFeedback: function () {
         this.$history_feedback.addClass('hidden');
     },
@@ -4434,6 +4503,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                         $message.find('.chat-msg-location-content').attr('lon', copied_attrs.lon);
                         $message.find('.chat-msg-location-content').attr('lat', copied_attrs.lat);
                         $message.find('.chat-msg-location-content').append(template_for_location_content);
+                        this.loadLocationInChat($message, copied_attrs);
                         this.locationOnload($message);
                     } else {
                         $message.find('.chat-msg-content').append('<a class="location-link" href="geo:' + copied_attrs.lat + ',' + copied_attrs.lon + '">' + xabber.getString("recent_chat__last_message__locations_plural_0") + '</a>');
@@ -4610,6 +4680,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                                 $f_message.find('.chat-msg-location-content').attr('lon', copied_attrs.lon);
                                 $f_message.find('.chat-msg-location-content').attr('lat', copied_attrs.lat);
                                 $f_message.find('.chat-msg-location-content').append(template_for_location_content);
+                                this.loadLocationInChat($message, copied_attrs);
                             } else {
                                 $f_message.find('.chat-msg-content').append('<a class="location-link" href="geo:' + copied_attrs.lat + ',' + copied_attrs.lon + '">' + xabber.getString("recent_chat__last_message__locations_plural_0") + '</a>');
                             }
@@ -6407,15 +6478,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
             lat = $(ev.target).attr('lat'),
             location_name = $(ev.target).attr('title');
         if (lon && lat){
-            window.popup_coordinates = [lon, lat];
-            window.location_name = location_name;
+            xabber.popup_coordinates = [lon, lat];
+            xabber.location_name = location_name;
             new xabber.ChatLocationView({content: this}).show(ev);
         }
     },
 
     onHoverLocation: function (ev) {
-        let lon = $(ev.target).attr('lon')
-            lat = $(ev.target).attr('lat')
+        let lon = $(ev.target).attr('lon'),
+            lat = $(ev.target).attr('lat');
 
         fetch('https://nominatim.openstreetmap.org/reverse?format=json&lon=' + lon + '&lat=' + lat).then(function(response) {
             return response.json();
@@ -6523,8 +6594,8 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
             lat = $(ev.target).attr('lat'),
             location_name = $(ev.target).attr('title');
         if (lon && lat){
-            window.popup_coordinates = [lon, lat];
-            window.location_name = location_name;
+            xabber.popup_coordinates = [lon, lat];
+            xabber.location_name = location_name;
             new xabber.ChatLocationView({content: this}).show(ev);
         }
     },
@@ -9617,11 +9688,262 @@ xabber.ChatLocationView = xabber.BasicView.extend({
 
     render: function () {
         this.$el.openModal({
-            ready: function () {
+            ready: () => {
+                this.initMap();
                 Materialize.updateTextFields();
             },
             complete: this.hide.bind(this)
         });
+    },
+
+    initMap: function () {
+        this.$el.find('.modal-content').switchClass('popup', xabber.popup_coordinates);
+
+        let layers = [ new ol.layer.Tile({ source: new ol.source.OSM() }) ],
+            coordinates = xabber.popup_coordinates ? ol.proj.transform(xabber.popup_coordinates, 'EPSG:4326', 'EPSG:3857') : [-9639318.435625363, 1667475.03690917],
+            zoom = xabber.popup_coordinates ? 15 : 0,
+            placemark = new ol.Overlay.Placemark ({
+                // backgroundColor : 'yellow',
+                contentColor: '#000',
+                autoPan: true,
+                html: '<?xml version="1.0" encoding="UTF-8"?><svg width="48px" height="48px" viewBox="0 0 24 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#000000" fill-rule="nonzero"></path></g></svg>',
+                anchor: false,
+                autoPanAnimation: { duration: 250 }
+            }),
+            placemark_my_location = new ol.Overlay.Placemark ({
+                // backgroundColor : 'yellow',
+                contentColor: '#000',
+                autoPan: true,
+                html: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="36px" height="36px"><circle class="outer" cx="20" cy="20" r="16" stroke="none" stroke-width="1.5" fill="none" style="opacity: 0.6;"></circle><circle class="inner" cx="20" cy="20" r="8" stroke="white" stroke-width="1.5" fill="none"></circle></svg>',
+                anchor: false,
+                autoPanAnimation: { duration: 250 }
+            });
+
+        let map = new ol.Map
+        ({	target: 'map',
+            view: new ol.View
+            ({	zoom: zoom,
+                center: coordinates
+            }),
+            interactions: ol.interaction_defaults({ altShiftDragRotate:false, pinchRotate:false }),
+            layers: layers,
+            overlays: [placemark, placemark_my_location]
+        });
+
+        let getCurrentPositionControl = function (e) {
+            navigator.geolocation.getCurrentPosition(success, error, options);
+        };
+
+        let options = {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        };
+
+        function success(pos) {
+            let crd = pos.coords;
+            map.getView().setCenter(ol.proj.transform([crd.longitude, crd.latitude], 'EPSG:4326', 'EPSG:3857'));
+            placemark_my_location.show(ol.proj.transform([crd.longitude, crd.latitude], 'EPSG:4326', 'EPSG:3857'));
+            map.getView().setZoom(17);
+            button_geoposition.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-gps" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M12,8 C14.209139,8 16,9.790861 16,12 C16,14.209139 14.209139,16 12,16 C9.790861,16 8,14.209139 8,12 C8,9.790861 9.790861,8 12,8 M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13400675,5 5,8.13400675 5,12 C5,15.8659932 8.13400675,19 12,19 C15.8659932,19 19,15.8659932 19,12 C19,8.13400675 15.8659932,5 12,5 L12,5 Z" id="mdi:crosshairs-gps" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>';
+        };
+
+        function error(err) {
+            console.warn(`ERROR(${err.code}): ${err.message}`);
+        };
+
+        let button_geoposition = document.createElement('button');
+        button_geoposition.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/crosshairs-question" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="22" height="22"></rect><path d="M3.05,13 L1,13 L1,11 L3.05,11 C3.5,6.83 6.83,3.5 11,3.05 L11,1 L13,1 L13,3.05 C17.17,3.5 20.5,6.83 20.95,11 L23,11 L23,13 L20.95,13 C20.5,17.17 17.17,20.5 13,20.95 L13,23 L11,23 L11,20.95 C6.83,20.5 3.5,17.17 3.05,13 M12,5 C8.13,5 5,8.13 5,12 C5,15.87 8.13,19 12,19 C15.87,19 19,15.87 19,12 C19,8.13 15.87,5 12,5 M11.13,17.25 L12.88,17.25 L12.88,15.5 L11.13,15.5 L11.13,17.25 M12,6.75 C10.07,6.75 8.5,8.32 8.5,10.25 L10.25,10.25 C10.25,9.28 11.03,8.5 12,8.5 C12.97,8.5 13.75,9.28 13.75,10.25 C13.75,12 11.13,11.78 11.13,14.63 L12.88,14.63 C12.88,12.66 15.5,12.44 15.5,10.25 C15.5,8.32 13.93,6.75 12,6.75 Z" id="mdi:crosshairs-question" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>';
+
+
+        button_geoposition.addEventListener('click', getCurrentPositionControl, false);
+
+        let custom_element_position = document.createElement('div');
+
+        if (xabber.popup_coordinates) {
+            custom_element_position.className = 'geoposition placemark-exist ol-control ol-unselectable';
+        }
+        else {
+            custom_element_position.className = 'geoposition ol-control ol-unselectable';
+        }
+        custom_element_position.appendChild(button_geoposition);
+
+        let geoposition = new ol.control.Control({
+            className: 'myControl',
+            element: custom_element_position,
+            target: document.getElementById("myCustomControl")
+        });
+
+        map.addControl(geoposition);
+
+        if (xabber.popup_coordinates) {
+            placemark.show(ol.proj.transform(xabber.popup_coordinates, 'EPSG:4326', 'EPSG:3857'));
+            $('.ol-zoom.ol-unselectable.ol-control').addClass('placemark-exist');
+            let getPlacemarkPositionControl = function (e) {
+                map.getView().setCenter(ol.proj.transform(xabber.popup_coordinates, 'EPSG:4326', 'EPSG:3857'));
+                map.getView().setZoom(15);
+                $('.ol-location').show()
+
+            };
+
+            let button_placemark_position = document.createElement('button');
+            button_placemark_position.innerHTML = '<?xml version="1.0" encoding="UTF-8"?><svg width="22px" height="22px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g id="icon/material/map-marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect id="ViewBox" fill-rule="nonzero" x="0" y="0" width="36" height="36"></rect><path d="M12,11.5 C10.6192881,11.5 9.5,10.3807119 9.5,9 C9.5,8.33695878 9.7633921,7.70107399 10.232233,7.23223305 C10.701074,6.7633921 11.3369588,6.5 12,6.5 C13.3807119,6.5 14.5,7.61928813 14.5,9 C14.5,9.66304122 14.2366079,10.298926 13.767767,10.767767 C13.298926,11.2366079 12.6630412,11.5 12,11.5 M12,2 C8.13400675,2 5,5.13400675 5,9 C5,14.25 12,22 12,22 C12,22 19,14.25 19,9 C19,5.13400675 15.8659932,2 12,2 Z" id="mdi:map-marker" fill="#9E9E9E" fill-rule="nonzero"></path></g></svg>';
+
+
+            button_placemark_position.addEventListener('click', getPlacemarkPositionControl, false);
+
+            let custom_element_placemark_position = document.createElement('div');
+            custom_element_placemark_position.className = 'placemark-position ol-control ol-unselectable';
+            custom_element_placemark_position.appendChild(button_placemark_position);
+
+            let placemark_position = new ol.control.Control({
+                className: 'myControl',
+                element: custom_element_placemark_position,
+                target: document.getElementById("myCustomControl")
+            });
+
+            map.addControl(placemark_position);
+
+            let custom_element_show_location_name = document.createElement('div');
+            custom_element_show_location_name.innerHTML = xabber.location_name || '';
+
+
+            custom_element_show_location_name.className = 'ol-location ol-control ol-unselectable';
+
+            let show_location_name = new ol.control.Control({
+                className: 'myControl',
+                element: custom_element_show_location_name,
+                target: document.getElementById("myCustomControl")
+            });
+
+            map.addControl(show_location_name);
+
+        }
+
+        if (!xabber.popup_coordinates) {
+
+            let send_buttom = document.createElement('button');
+            send_buttom.className = 'btn-apply mdi mdi-28px mdi-send';
+
+            let send_address_div = document.createElement('div');
+            send_address_div.setAttribute("id", "send_address");
+            send_address_div.className = 'ol-send-address';
+
+            let send_div = document.createElement('div');
+            send_div.setAttribute("id", "send_text");
+            send_div.className = 'ol-send-text';
+
+            let custom_element_send = document.createElement('div');
+            custom_element_send.className = 'ol-send ol-control ol-unselectable';
+            custom_element_send.appendChild(send_address_div);
+            custom_element_send.appendChild(send_div);
+            custom_element_send.appendChild(send_buttom);
+
+            let send = new ol.control.Control({
+                className: 'myControl',
+                element: custom_element_send,
+                target: document.getElementById("myCustomControl")
+            });
+
+            map.addControl(send);
+
+            let sLayer = new ol.layer.Vector({
+                source: new ol.source.Vector(),
+                style: new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 5,
+                        stroke: new ol.style.Stroke ({
+                            color: 'rgb(255,165,0)',
+                            width: 3
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(255,165,0,.3)'
+                        })
+                    }),
+                    stroke: new ol.style.Stroke ({
+                        color: 'rgb(255,165,0)',
+                        width: 3
+                    }),
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255,165,0,.3)'
+                    })
+                })
+            });
+
+            map.addLayer(sLayer);
+
+            let search = new ol.control.SearchNominatim (
+                {	//target: $(".options").get(0),
+                    polygon: $("#polygon").prop("checked"),
+                    reverse: true,
+                    position: true	// Search, with priority to geo position
+                });
+
+            map.addControl (search);
+
+            search.on('select', function(e){
+                sLayer.getSource().clear();
+                // Check if we get a geojson to describe the search
+                if (e.search.geojson) {
+                    let format = new ol.format.GeoJSON();
+                    let f = format.readFeature(e.search.geojson, { dataProjection: "EPSG:4326", featureProjection: map.getView().getProjection() });
+                    sLayer.getSource().addFeature(f);
+                    let view = map.getView();
+                    let resolution = view.getResolutionForExtent(f.getGeometry().getExtent(), map.getSize());
+                    let zoom = view.getZoomForResolution(resolution);
+                    let center = ol.extent.getCenter(f.getGeometry().getExtent());
+                    // redraw before zoom
+                    setTimeout(function(){
+                        view.animate({
+                            center: center,
+                            zoom: Math.min (zoom, 16)
+                        });
+                    }, 100);
+                }
+                else {
+                    map.getView().animate({
+                        center:e.coordinate,
+                        zoom: Math.max (map.getView().getZoom(),16)
+                    });
+                }
+            });
+
+            function reverseGeocode(json) {
+                if (!json[0].error) {
+                    let house_number = json[0].address.house_number ? ' ' + json[0].address.house_number : '',
+                        road = json[0].address.road ? json[0].address.road + house_number + ', ' : '',
+                        state = json[0].address.state ? json[0].address.state + ', ' : '',
+                        neighbourhood = json[0].address.neighbourhood ? json[0].address.neighbourhood + ', ' : '',
+                        allotments = json[0].address.allotments ? json[0].address.allotments + ', ' : '',
+                        village = json[0].address.village ? json[0].address.village + ', ' : '',
+                        city = json[0].address.city ? json[0].address.city + ', ' : '',
+                        country = json[0].address.country ? state + json[0].address.country : '',
+                        final_text = ''
+                    if ( !road ){
+                        final_text = neighbourhood + allotments + village + city + country
+                    }
+                    else {
+                        final_text = road + neighbourhood + allotments + village + city + state.replace(', ','')
+                    }
+                    $('#send_address').text(final_text);
+                }
+                else {
+                    $('#send_address').text(xabber.getString("location_fragment__address_error__title"));
+                }
+            }
+
+            map.on('click', function(e) {
+                placemark.show(e.coordinate);
+                search.reverseGeocode(e.coordinate, reverseGeocode);
+                let coordinates = ol.proj.transform(e.coordinate, map.getView().getProjection(), 'EPSG:4326');
+                $('.ol-control.ol-send').show();
+                $('#send_text').text(coordinates[1].toFixed(6) + ':' + coordinates[0].toFixed(6));
+                $('#output').text('geo:' + coordinates[1] + ',' + coordinates[0]);
+                $('#lat').text(coordinates[1]);
+                $('#lon').text(coordinates[0]);
+            });
+        }
+        window.setTimeout(function () { map.updateSize(); }, 200)
     },
 
     sendLocation: function (e) {
@@ -9698,7 +10020,7 @@ xabber.ChatLocationView = xabber.BasicView.extend({
     },
 
     closeLocationName: function (e) {
-        $('.ol-location').hide()
+        this.$el.find('.ol-location').hide()
     },
 
     onHide: function () {
@@ -10846,9 +11168,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
     showLocationPopup: function (ev) {
         if (!xabber.settings.mapping_service)
-            return;
-        window.popup_coordinates = undefined;
-        window.location_name = undefined;
+            return;xabber
+        xabber.popup_coordinates = undefined;
+        xabber.location_name = undefined;
         new xabber.ChatLocationView({content: this}).show(ev);
     },
 
