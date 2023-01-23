@@ -157,6 +157,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         let contact = this.account.contacts.mergeContact({jid: Strophe.getBareJidFromJid(from_jid), group_chat: true}),
             chat = this.account.chats.getChat(contact);
+
+        !chat.item_view.content && (chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view}));
+
         contact.set('in_roster', false);
         contact.getVCard();
         if ($group_info.length) {

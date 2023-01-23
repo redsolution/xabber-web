@@ -704,7 +704,7 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     getAllRights: function (callback) {
-        let iq_get_rights = iq = $iq({type: 'get', to: this.get('full_jid') || this.get('jid') })
+        let iq_get_rights = $iq({type: 'get', to: this.get('full_jid') || this.get('jid') })
             .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights` });
         this.account.sendIQFast(iq_get_rights, (iq_all_rights) => {
             let all_permissions = $(iq_all_rights).find('permission'),
@@ -2770,10 +2770,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
                 let chat = this.account.chats.getChat(contact);
                 chat.deleteFromSynchronization(() => {
                     chat.trigger("close_chat");
-                    xabber.body.setScreen('all-chats', {right: undefined});
+                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
                 }, () => {
                     chat.trigger("close_chat");
-                    xabber.body.setScreen('all-chats', {right: undefined});
+                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
                 });
             }
         });
