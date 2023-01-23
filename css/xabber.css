@@ -1026,6 +1026,10 @@ body {
     display: none;
 }
 
+#sprite-plyr {
+    display: none;
+}
+
 #xabber-container.xabber-login > div.login-container {
     display: block;
 }

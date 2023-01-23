@@ -5,7 +5,9 @@
  */
 // Check for jQuery.
 
-define (['jquery', 'hammerjs'], function (jQuery, Hammer) {
+define (['jquery', 'hammerjs', 'xabber-constants'], function (jQuery, Hammer, constants) {
+
+constants = constants.default ? constants.default : constants;
 
 window.$ = window.jQuery = $ = jQuery;
 
@@ -540,7 +542,7 @@ if ($) {
       // Check for scrolling positioned container.
       var scrollOffset = 0;
       var wrapper = origin.parent();
-      if (!wrapper.is('body') && wrapper[0].scrollHeight > wrapper[0].clientHeight) {
+      if (!wrapper.is(constants.CONTAINER_ELEMENT) && wrapper[0].scrollHeight > wrapper[0].clientHeight) {
           scrollOffset = wrapper[0].scrollTop;
       }
 
@@ -703,7 +705,7 @@ if ($) {
   $.fn.extend({
     openModal: function(options) {
 
-      var $body = $('body');
+      var $body = $(constants.CONTAINER_ELEMENT);
       var oldWidth = $body.innerWidth();
       //$body.css('overflow', 'hidden');
       //$body.width(oldWidth);
@@ -732,7 +734,7 @@ if ($) {
       $modal.data('overlay-id', overlayID).css('z-index', 1000 + lStack * 2 + 1);
       $modal.addClass('open');
 
-      $("body").append($overlay);
+      $(constants.CONTAINER_ELEMENT).append($overlay);
 
       // Override defaults
       options = $.extend(defaults, options);
@@ -993,7 +995,7 @@ if ($) {
         if (origin.data('caption') !== "") {
           var $photo_caption = $('<div class="materialbox-caption"></div>');
           $photo_caption.text(origin.data('caption'));
-          $('body').append($photo_caption);
+          $(constants.CONTAINER_ELEMENT).append($photo_caption);
           $photo_caption.css({ "display": "inline" });
           $photo_caption.velocity({opacity: 1}, {duration: inDuration, queue: false, easing: 'easeOutQuad'});
         }
@@ -1386,7 +1388,7 @@ $(document).ready(function(){
         // Create tooltip
         var newTooltip = $('<div></div>');
         newTooltip.addClass('material-tooltip').append(tooltip_text)
-          .appendTo($('body'))
+          .appendTo($(constants.CONTAINER_ELEMENT))
           .attr('id', tooltipId);
 
         var backdrop = $('<div></div>').addClass('backdrop');
@@ -2052,7 +2054,7 @@ $(document).ready(function(){
 
         // Add Touch Area
         var dragTarget = $('<div class="drag-target"></div>');
-        $('body').append(dragTarget);
+        $(constants.CONTAINER_ELEMENT).append(dragTarget);
 
         if (options.edge == 'left') {
           menu_id.css('transform', 'translateX(-100%)');
@@ -2177,7 +2179,7 @@ $(document).ready(function(){
             var velocityX = e.gesture.velocityX;
 
             // Disable Scrolling
-            var $body = $('body');
+            var $body = $(constants.CONTAINER_ELEMENT);
             var oldWidth = $body.innerWidth();
             //$body.css('overflow', 'hidden');
             //$body.width(oldWidth);
@@ -2188,7 +2190,7 @@ $(document).ready(function(){
               overlay.css('opacity', 0).click( function(){
                 removeMenu();
               });
-              $('body').append(overlay);
+              $(constants.CONTAINER_ELEMENT).append(overlay);
             }
 
             // Keep within boundaries
@@ -2310,13 +2312,13 @@ $(document).ready(function(){
             else {
 
               // Disable Scrolling
-              var $body = $('body');
+              var $body = $(constants.CONTAINER_ELEMENT);
               var oldWidth = $body.innerWidth();
               //$body.css('overflow', 'hidden');
               //$body.width(oldWidth);
 
               // Push current drag target on top of DOM tree
-              $('body').append(dragTarget);
+              $(constants.CONTAINER_ELEMENT).append(dragTarget);
 
               if (options.edge === 'left') {
                 dragTarget.css({width: '50%', right: 0, left: ''});
@@ -2339,7 +2341,7 @@ $(document).ready(function(){
                   } });
 
               });
-              $('body').append(overlay);
+              $(constants.CONTAINER_ELEMENT).append(overlay);
               overlay.velocity({opacity: 1}, {duration: 300, queue: false, easing: 'easeOutQuad',
                 complete: function () {
                   menuOut = true;
@@ -2771,7 +2773,7 @@ $(document).ready(function(){
     var hiddenDiv = $('.hiddendiv').first();
     if (!hiddenDiv.length) {
       hiddenDiv = $('<div class="hiddendiv common"></div>');
-      $('body').append(hiddenDiv);
+      $(constants.CONTAINER_ELEMENT).append(hiddenDiv);
     }
     var text_area_selector = '.materialize-textarea';
 
@@ -2814,7 +2816,7 @@ $(document).ready(function(){
       }
     });
 
-    $('body').on('keyup keydown autoresize', text_area_selector, function () {
+    $(constants.CONTAINER_ELEMENT).on('keyup keydown autoresize', text_area_selector, function () {
       textareaAutoResize($(this));
     });
 
@@ -4864,7 +4866,7 @@ function getScrollbarWidth() {
     }
 
     var $outer = $( '<div style="visibility:hidden;width:100px" />' ).
-        appendTo( 'body' )
+        appendTo( constants.CONTAINER_ELEMENT )
 
     // Get the width without scrollbars.
     var widthWithoutScroll = $outer[0].offsetWidth

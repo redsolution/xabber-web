@@ -1,4 +1,3 @@
-define('libsignal', [], function(){
 var Internal = {};
 var libsignal = {};
 // window.libsignal = {};
@@ -36539,5 +36538,4 @@ Internal.SessionLock.queueJobForNumber = function queueJobForNumber(number, runJ
 
 })();
 
-return libsignal;
-});
+export default libsignal;

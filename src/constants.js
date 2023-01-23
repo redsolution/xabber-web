@@ -3,6 +3,8 @@ var constants = {
     STORAGE_NAME: 'xabber-storage',
     STORAGE_VERSION: 'v8',
 
+    CONTAINER_ELEMENT: "#xabber-container",
+
     FAVICON_DEFAULT: "assets/images/favicon.png",
     FAVICON_MESSAGE: "assets/images/favicon-message.png",
     BACKGROUND_IMAGE: "assets/images/background.png",
@@ -479,9 +481,4 @@ constants.MSG_VERBOSE_STATE[constants.MSG_ARCHIVED] = 'message__delivering_state
 constants.MSG_VERBOSE_STATE[constants.MSG_BLOCKED] = 'message__delivering_state__error';
 constants.MSG_VERBOSE_STATE[constants.MSG_SAVED] = 'message__delivering_state__saved';
 
-
-if (typeof define === "function") {
-    define(function () {
-        return constants;
-    });
-}
+export default constants;

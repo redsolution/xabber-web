@@ -100,23 +100,6 @@ module.exports = {
     plugins: [
         new webpack.ProvidePlugin({
             constants: 'xabber-constants',
-            templates: 'xabber-templates',
-            client_translation_progress: 'xabber-translations-info',
-            utils: 'xabber-utils',
-            $: 'jquery',
-            _: 'underscore',
-            moment: 'moment',
-            WaveSurfer: 'wavesurfer',
-            Plyr: 'Plyr',
-            slug: 'slug',
-            xabber_i18next: 'i18next',
-            xabber_i18next_sprintf: 'i18next-post',
-            sha256: 'sha256',
-            magnificPopup: 'magnific-popup',
-            Strophe: 'strophe',
-            Quill: [ 'Quill', 'default'],
-            libsignal: 'libsignal-protocol',
-            sha1: 'sha1_hasher',
             xabber: 'xabber'
         }),
         new NodePolyfillPlugin()

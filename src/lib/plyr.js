@@ -1,8 +1,4 @@
-typeof navigator === "object" && (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define('Plyr', factory) :
-  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Plyr = factory());
-})(this, (function () { 'use strict';
+  import constants from 'xabber-constants';
 
   function _defineProperty$1(obj, key, value) {
     if (key in obj) {
@@ -3418,7 +3414,6 @@ typeof navigator === "object" && (function (global, factory) {
   // ==========================================================================
   // Plyr default config
   // ==========================================================================
-  let constants = require('xabber-constants');
   const defaults = {
     // Disable
     enabled: true,
@@ -8771,6 +8766,5 @@ typeof navigator === "object" && (function (global, factory) {
 
   Plyr.defaults = cloneDeep(defaults);
 
-  return Plyr;
+  export default Plyr;
 
-}));

@@ -1,21 +1,19 @@
-define("xabber", [
-    "xabber-core",
-    "xabber-views",
-    "xabber-api-service",
-    "xabber-strophe",
-    "xabber-vcard",
-    "xabber-accounts",
-    "xabber-discovery",
-    "xabber-contacts",
-    "xabber-chats",
-    "xabber-searching",
-    "xabber-mentions",
-    "xabber-ui",
-    "xabber-omemo"
-], function (xabber, views, api_service, strophe, vcard,
-             accounts, discovery, contacts, chats, searching, mentions, ui, omemo) {
-    xabber.extendWith(views, api_service, strophe, vcard,
-        accounts, discovery, contacts, chats, searching, mentions, ui, omemo)
-    global.xabber = xabber;
-    return xabber;
-});
+import xabber from "xabber-core";
+import views from "xabber-views";
+import api_service from "xabber-api-service";
+import strophe from "xabber-strophe";
+import vcard from "xabber-vcard";
+import accounts from "xabber-accounts";
+import discovery from "xabber-discovery";
+import contacts from "xabber-contacts";
+import chats from "xabber-chats";
+import searching from "xabber-searching";
+import mentions from "xabber-mentions";
+import ui from "xabber-ui";
+import omemo from "xabber-omemo";
+
+xabber.extendWith(views, api_service, strophe, vcard,
+    accounts, discovery, contacts, chats, searching, mentions, ui, omemo);
+global.xabber = xabber;
+
+export default xabber;
