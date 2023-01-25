@@ -1,11 +1,11 @@
 import deps from "xabber-dependencies"
 import templates from "xabber-templates";
+import constants from "xabber-constants";
 
 var _ = deps._,
     $ = deps.$;
 
-var $modal_container = $('<div>').attr('id', 'modals').appendTo('body');
-
+var $modal_container = $('<div>').attr('id', 'modals').appendTo(constants.CONTAINER_ELEMENT);
 var modal_queue = [];
 
 var Modal = function (modal_constructor, options) {

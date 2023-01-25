@@ -6,6 +6,7 @@ module.exports = {
     entry: './src/xabber.js',
     output: {
         filename: 'xabber.[name].js',
+        clean: true,
     },
     resolve: {
         alias: {
@@ -99,7 +100,6 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
         new webpack.ProvidePlugin({
-            constants: 'xabber-constants',
             xabber: 'xabber'
         }),
         new NodePolyfillPlugin()

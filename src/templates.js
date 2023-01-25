@@ -1,7 +1,5 @@
-define("xabber-templates", [
-    "underscore",
-    "jquery",
-], function (_, $) {
+    import _ from "underscore";
+    import $ from "jquery";
 
     _.templateSettings = {
         evaluate : /\{\[([\s\S]+?)\]\}/g,
@@ -326,5 +324,4 @@ define("xabber-templates", [
 
     addJSONTemplate('accounts.emojis');
 
-    return templates;
-});
+    export default templates;

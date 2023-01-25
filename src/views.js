@@ -811,7 +811,7 @@ xabber.Body = xabber.NodeView.extend({
         this.updateBackground();
         this.updateMainColor();
         this.updateAvatarShape();
-        $('<div id="modals"></div>').insertAfter(this.$el);
+        $('#modals').insertAfter(this.$el);
         xabber.on('update_main_color', this.updateMainColor, this);
         xabber.on('update_avatar_shape', this.updateAvatarShape, this);
     },

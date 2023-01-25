@@ -334,6 +334,7 @@ let Xabber = Backbone.Model.extend({
                 'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'SYNCHRONIZATION_RSM_MAX',
+                'CONTAINER_ELEMENT',
                 'XABBER_ACCOUNT_URL',
                 'REGISTER_XMPP_ACCOUNT',
                 'REGISTER_XMPP_ACCOUNT_URL',
@@ -378,6 +379,8 @@ let Xabber = Backbone.Model.extend({
             _.extend(window, env);
             if (config.SYNCHRONIZATION_RSM_MAX)
                 constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
+            if (config.CONTAINER_ELEMENT)
+                constants.CONTAINER_ELEMENT = config.CONTAINER_ELEMENT;
             if (config.REGISTRATION_DOMAINS)
                 constants.REGISTRATION_DOMAINS = config.REGISTRATION_DOMAINS;
             if (config.LOGIN_DOMAINS)

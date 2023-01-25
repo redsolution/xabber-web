@@ -1,43 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Xabber Web</title>
-    <meta charset="utf-8">
-    <link rel="shortcut icon" type="image/png" href="assets/images/favicon.png"/>
-    <link rel="manifest" href="manifest.json">
-    <script src="./dist/firebase.js"></script>
-    <script src="./dist/firebase-app.js"></script>
-    <script src="./dist/firebase-messaging.js"></script>
-    <script src="./dist/libsignal-protocol.js"></script>
-    <link rel="stylesheet" href="css/materialdesignicons.css"/>
-    <link rel="stylesheet" href="node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.css"/>
-    <link rel="stylesheet" href="css/materialize.css"/>
-    <link rel="stylesheet" href="css/color-scheme.css"/>
-    <link rel="stylesheet" href="css/xabber.css"/>
-    <link href="./dist/quill.snow.css" rel="stylesheet">
-    <script src="./dist/quill.min.js"></script>
-    <script type="text/javascript" src="./dist/ol.js"></script>
-    <script type="text/javascript" src="./dist/ol-ext.js"></script>
-    <script src="node_modules/requirejs/require.js"></script>
-    <script src="config.js"></script>
-    <script>
-        require(["xabber"], function (xabber) {
-            xabber.configure({
-                // Please specify location of xabber-websocket service,
-                // e.g. 'wss://web.xabber.com/websocket
-                // To run your own server visit https://github.com/redsolution/xabber-websocket
-                CONNECTION_URL: '',
-                LOG_LEVEL: 'INFO',
-                DEBUG: true,
-                STORAGE_NAME_ENDING: 'dev'
+    <head>
+        <title>Xabber Web</title>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" type="image/png" href="assets/images/favicon.png"/>
+        <link rel="manifest" href="manifest.json">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                let js = document.createElement('script'),
+                    js_vendors = document.createElement('script');
+                js.src='./dist/xabber.main.js';
+                js.onload = () => {
+                    xabber.configure({
+                        // Please specify location of xabber-websocket service,
+                        // e.g. 'wss://web.xabber.com/websocket
+                        // To run your own server visit https://github.com/redsolution/xabber-websocket
+                        CONNECTION_URL: '',
+                        LOG_LEVEL: 'INFO',
+                        DEBUG: true,
+                        STORAGE_NAME_ENDING: 'dev'
+                    });
+                    xabber.start();
+                };
+                js_vendors.src='./dist/xabber.vendors.js';
+                document.head.appendChild(js_vendors);
+                js_vendors.onload = () => {
+                    document.head.appendChild(js);
+                };
             });
-            xabber.start();
-        });
-    </script>
-</head>
-
-<body>
-<div class="login-container"></div>
-</body>
-
+        </script>
+    </head>
+    <body style="height: 100%; width: 100%;">
+        <div id="xabber-container" style="height: 100%; width: 100%;">
+            <div class="login-container"></div>
+        </div>
+    </body>
 </html>
