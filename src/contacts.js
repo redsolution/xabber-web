@@ -6363,7 +6363,7 @@ define("xabber-contacts", function () {
             updateParticipants: function () {
                 this.participantsRequest({version: this.version}, () => {
                     this.trigger("participants_updated");
-                    chat = this.account.chats.getChat(this.contact);
+                    let chat = this.account.chats.getChat(this.contact);
                     if (chat.item_view) {
                         if (!chat.item_view.content)
                             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
@@ -8898,7 +8898,7 @@ define("xabber-contacts", function () {
                         let synced_conversations = $(iq).find('conversation').map(function () {
                             return $(this).attr('jid') +  '/' + $(this).attr('type');
                         }).toArray();
-                        res = res.filter(item => !synced_conversations.includes(item.account_conversation_type))
+                        res = res.filter(item => !synced_conversations.includes(item.account_conversation_type));
                         this.syncCachedConversations(res, request_with_stamp, is_first_sync);
                         this.syncConversations(iq, request_with_stamp, is_first_sync);
                         dfd.resolve(true);

@@ -3735,7 +3735,7 @@ define("xabber-chats", function () {
             }
 
             if (message.isSenderMe()) {
-                if (!message.get('is_archived') && !message.get('missed_msg'))
+                if (!message.get('is_archived') && !message.get('missed_msg') && message.get('type') != 'system')
                     this.readMessages(message.get('timestamp'));
                 if (this.model.get('last_displayed_id') >= message.get('stanza_id') && message.get('stanza_id') !== message.get('origin_id'))
                     message.set('state', constants.MSG_DISPLAYED);
