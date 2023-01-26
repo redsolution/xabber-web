@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[2813],{58114:(e,n,r)=>{r.r(n),r.d(n,{default:()=>i});const i='{[ for (var i = 0; i < groups.length; i++) { var name = groups[i].name, checked = groups[i].checked, group_id = groups[i].id; ]}\n    {[ if (checked) {]}\n        <div data-groupname="{{name}}" title="{[print(xabber.getString(\'contact_tooltip_remove_by_click\'))]}" class="group ground-color-50">\n            <div>{{name}}</div>\n        </div>\n    {[}]}\n\n{[ } ]}\n'}}]);
-//# sourceMappingURL=xabber.2813.js.map

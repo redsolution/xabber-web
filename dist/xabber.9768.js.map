@@ -1,1 +1,0 @@
-{"version":3,"file":"xabber.9768.js","mappings":"uIAAA,4F","sources":["webpack://xabber.web/./templates/contacts/contact_placeholder.html"],"sourcesContent":["export default \"<div class=\\\"text\\\">{[print(xabber.getString(\\\"contact_list__placeholder\\\"))]}</div>\\n\";"],"names":[],"sourceRoot":""}

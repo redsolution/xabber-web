@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[3795],{43795:(e,s,a)=>{a.r(s),a.d(s,{default:()=>b});const b='<div class="chat-message"> {[alert({file_url})]} </div>'}}]);
-//# sourceMappingURL=xabber.3795.js.map

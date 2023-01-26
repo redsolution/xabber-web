@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[5046],{85046:(e,t,s)=>{s.r(t),s.d(t,{default:()=>a});const a='<div class="chat-message system"  data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" data-from="{{from_jid}}">\n    <div class="msg-wrap">\n        <div class="chat-msg-content chat-text-content">{{message}}</div>\n    </div>\n\n    <div class="right-side noselect">\n        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>\n    </div>\n</div>\n'}}]);
-//# sourceMappingURL=xabber.5046.js.map

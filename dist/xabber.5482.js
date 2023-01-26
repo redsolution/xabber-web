@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[5482],{25482:(e,a,n)=>{n.r(a),n.d(a,{default:()=>i});const i='<div class="modal-content-wrap">\n    <div class="modal-header">\n        <span>{[print(xabber.getString("account_emoji_profile_image_header"))]}</span>\n        <i class="close-modal mdi mdi-close mdi-24px"></i>\n    </div>\n    <div class="emoji-picker-wrap no-select">\n\n    </div>\n</div>\n'}}]);
-//# sourceMappingURL=xabber.5482.js.map

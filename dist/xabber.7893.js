@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[7893],{27893:(s,a,t)=>{t.r(a),t.d(a,{default:()=>e});const e='<li data-value="{{status.value}}">\n    <span class="status-value one-line">{{status.label}}</span>\n    <span class="status-bulb" data-status="{{status.show}}"></span>\n</li>'}}]);
-//# sourceMappingURL=xabber.7893.js.map

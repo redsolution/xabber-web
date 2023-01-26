@@ -1,1 +1,0 @@
-{"version":3,"file":"xabber.5127.js","mappings":"uIAAA,0J","sources":["webpack://xabber.web/./templates/chats/messages/location.html"],"sourcesContent":["export default \"<div id=\\\"{{id}}\\\" class=\\\"text-color-700\\\" style=\\\"width:350px; height:300px;pointer-events: none;\\\" data-type='map'><img id=\\\"img_{{ id }}\\\" ></div>\";"],"names":[],"sourceRoot":""}

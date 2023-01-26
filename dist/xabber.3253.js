@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[3253],{73253:(d,e,i)=>{i.r(e),i.d(e,{default:()=>c});const c='<div data-jid="{{jid}}" class="blocked-contact">\n    <div class="input-field checkbox-field">\n        <input type="checkbox" class="filled-in" id="blocked-jid-switch-{{jid}}"/>\n        <label for="blocked-jid-switch-{{jid}}">{{jid}}</label>\n    </div>\n</div>'}}]);
-//# sourceMappingURL=xabber.3253.js.map

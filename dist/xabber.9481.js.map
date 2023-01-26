@@ -1,1 +1,0 @@
-{"version":3,"file":"xabber.9481.js","mappings":"uIAAA,0C","sources":["webpack://xabber.web/./templates/contacts/group_chats/file_item.html"],"sourcesContent":["export default \"<div class=\\\"media-item\\\">\\n</div>\";"],"names":[],"sourceRoot":""}

@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[8096],{68096:(e,s,a)=>{a.r(s),a.d(s,{default:()=>b});const b='<div class="modal-content full-pinned-message"></div>\n'}}]);
-//# sourceMappingURL=xabber.8096.js.map

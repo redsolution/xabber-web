@@ -1,1 +1,0 @@
-{"version":3,"file":"xabber.6252.js","mappings":"uIAAA,wH","sources":["webpack://xabber.web/./templates/contacts/group_chats/participant_rights.html"],"sourcesContent":["export default \"<div class=\\\"header\\\">\\n</div>\\n<div class=\\\"modal-content\\\">\\n    <div class=\\\"rights-wrap\\\">\\n    </div>\\n</div>\\n\";"],"names":[],"sourceRoot":""}

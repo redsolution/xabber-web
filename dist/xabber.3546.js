@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[3546],{23546:(e,a,i)=>{i.r(a),i.d(a,{default:()=>l});const l='<div class="gallery-empty">\n    <div class="gallery-empty-icon-wrap">\n        <i class="gallery-empty-icon mdi mdi-24px mdi-package-variant"></i>\n    </div>\n    <div class="gallery-empty-text">{[print(xabber.getString("no_files"))]}</div>\n</div>'}}]);
-//# sourceMappingURL=xabber.3546.js.map

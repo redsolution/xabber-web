@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[7973],{57973:(n,s,i)=>{i.r(s),i.d(s,{default:()=>a});const a='<div class="account-indicator ground-color-700"></div>\n<div class="group-head">\n    <i class="arrow mdi mdi-20px"></i>\n    <div class="group-title">\n        <span class="group-name one-line"></span>\n        <span class="member-counter one-line"></span>\n    </div>\n    <i class="group-icon mdi mdi-20px hidden"></i>\n</div>\n'}}]);
-//# sourceMappingURL=xabber.7973.js.map

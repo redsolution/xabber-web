@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[7050],{87050:(e,i,n)=>{n.r(i),n.d(i,{default:()=>t});const t='<div class="right-item restriction restriction-{{name}}">\n    <div class="right-name">{{pretty_name}}</div>\n    <div class="field clickable-field restriction-{{name}}-state switch normal">\n        <input type="checkbox" {[if (type === \'fixed\') {]} onclick="return false;" {[}]} class="filled-in" id="{{name}}">\n        <label for="{{name}}"></label>\n    </div>\n</div>'}}]);
-//# sourceMappingURL=xabber.7050.js.map

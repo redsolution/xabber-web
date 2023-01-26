@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[2605],{62605:(s,i,a)=>{a.r(i),a.d(i,{default:()=>d});const d='<div class="groups-list-wrap">\n    <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg></div>\n    <div class="groups">\n    </div>\n    </div>\n</div>\n<div class="groups-wrap">\n    <div class="checkbox-list">\n    </div>\n</div>'}}]);
-//# sourceMappingURL=xabber.2605.js.map
