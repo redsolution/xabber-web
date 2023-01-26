@@ -23,8 +23,8 @@ function parseChildren (elem) {
 }
 
 function convertStringsToJSON () {
-    fs.readdirSync('./values').forEach(file => {
-        let xml = fs.readFileSync(`./values/${file}`, 'utf-8'),
+    fs.readdirSync('./translations/values').forEach(file => {
+        let xml = fs.readFileSync(`./translations/values/${file}`, 'utf-8'),
             document = DOMParser.parseFromString(xml),
             strings = document.getElementsByTagName('string'),
             plurals = document.getElementsByTagName('plurals');
@@ -44,11 +44,11 @@ function convertStringsToJSON () {
 }
 
 function convertTranslationsToJSON () {
-    let all_languages = fs.readdirSync('./languages').filter(file => file.indexOf('values-') == 0);
+    let all_languages = fs.readdirSync('./translations/languages').filter(file => file.indexOf('values-') == 0);
     all_languages.forEach((f_name) =>{
         let translations = {};
-        fs.readdirSync(`./languages/${f_name}`).forEach(file => {
-            let xml = fs.readFileSync(`./languages/${f_name}/${file}`, 'utf-8'),
+        fs.readdirSync(`./translations/languages/${f_name}`).forEach(file => {
+            let xml = fs.readFileSync(`./translations/languages/${f_name}/${file}`, 'utf-8'),
                 document = DOMParser.parseFromString(xml),
                 strings = document.getElementsByTagName('string'),
                 plurals = document.getElementsByTagName('plurals');
@@ -65,7 +65,7 @@ function convertTranslationsToJSON () {
                 }
             }
         });
-        fs.writeFileSync(`${f_name.slice(7)}.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(translations)};});`);
+        fs.writeFileSync(`translations/${f_name.slice(7)}.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(translations)};});`);
     });
 }
 
@@ -74,4 +74,4 @@ console.log('Translations converted.....');
 convertStringsToJSON();
 console.log('Strings converted.....');
 
-fs.writeFileSync(`en.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(json)};});`);
+fs.writeFileSync(`translations/en.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(json)};});`);

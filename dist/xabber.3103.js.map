@@ -1,0 +1,1 @@
+{"version":3,"file":"xabber.3103.js","mappings":"sIAAA,kH","sources":["webpack://xabber.web/./templates/searching/searching_account_item.html"],"sourcesContent":["export default \"<div class=\\\"account-item-wrap\\\" data-jid=\\\"{{jid}}\\\">\\n    <div class=\\\"name one-line\\\">{{jid}}</div>\\n</div>\";"],"names":[],"sourceRoot":""}

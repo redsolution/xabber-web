@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[1655],{71655:(i,a,n)=>{n.r(a),n.d(a,{default:()=>d});const d='<div class="existing-chat-wrap" data-name="{{name}}" data-jid="{{jid}}">\n    <div class="account-indicator ground-color-{{color}}-500"></div>\n    <div class="circle-avatar">\n        <img>\n    </div>\n    <div class="existing-chat-item">\n        <div class="name one-line">{{name}}</div>\n        <div class="jid one-line">{{jid}}</div>\n    </div>\n</div>'}}]);
+//# sourceMappingURL=xabber.1655.js.map

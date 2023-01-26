@@ -1,0 +1,1 @@
+{"version":3,"file":"xabber.3795.js","mappings":"uIAAA,iE","sources":["webpack://xabber.web/./templates/chats/messages/voice_message.html"],"sourcesContent":["export default \"<div class=\\\"chat-message\\\"> {[alert({file_url})]} </div>\";"],"names":[],"sourceRoot":""}

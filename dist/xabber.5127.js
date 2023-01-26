@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[5127],{55127:(e,t,i)=>{i.r(t),i.d(t,{default:()=>d});const d='<div id="{{id}}" class="text-color-700" style="width:350px; height:300px;pointer-events: none;" data-type=\'map\'><img id="img_{{ id }}" ></div>'}}]);
+//# sourceMappingURL=xabber.5127.js.map

@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[7639],{37639:(t,e,n)=>{n.r(e),n.d(e,{default:()=>b});const b='<div class="block-form">\n    <div class="input-field">\n        <input id="blocking_id" class="rich-textarea field-input" placeholder="{[print(xabber.getString(\'vcard_jabber_id\'))]}" type="text" name="title">\n    </div>\n    <button class="btn-block-id btn btn-main-filled ground-color-700">{[print(xabber.getString("contact_bar_block"))]}</button>\n</div>'}}]);
+//# sourceMappingURL=xabber.7639.js.map

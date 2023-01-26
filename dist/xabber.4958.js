@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[4958],{24958:(e,s,n)=>{n.r(s),n.d(s,{default:()=>a});const a='<div class="circle-avatar noselect"></div>\n<div class="text-info-wrap">\n    <div class="name-wrap">\n        <p class="name one-line"></p>\n    </div>\n    <p class="jid one-line"></p>\n</div>\n<div class="status hide-offline"></div>\n<div class="chat-icon hidden"></div>'}}]);
+//# sourceMappingURL=xabber.4958.js.map

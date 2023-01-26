@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[3318],{53318:(e,n,a)=>{a.r(n),a.d(n,{default:()=>r});const r='<div class="warning-wrap">\n    <p class="warning-message">{{message}}</p>\n    <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-{{color}}-100 hover-ground-color-{{color}}-300">{[print(xabber.getString("omemo__alert_new_device__button_manage_devices"))]}</button>\n</div>'}}]);
+//# sourceMappingURL=xabber.3318.js.map

@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[6252],{76252:(e,s,a)=>{a.r(s),a.d(s,{default:()=>n});const n='<div class="header">\n</div>\n<div class="modal-content">\n    <div class="rights-wrap">\n    </div>\n</div>\n'}}]);
+//# sourceMappingURL=xabber.6252.js.map

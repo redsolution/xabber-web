@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[9481],{79481:(e,b,s)=>{s.r(b),s.d(b,{default:()=>a});const a='<div class="media-item">\n</div>'}}]);
+//# sourceMappingURL=xabber.9481.js.map

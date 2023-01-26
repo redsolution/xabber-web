@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[103],{20103:(e,t,b)=>{b.r(t),b.d(t,{default:()=>s});const s='<div class="text">{[print(xabber.getString("mentions_list__placeholder"))]}</div>'}}]);
+//# sourceMappingURL=xabber.103.js.map

@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[5696],{5696:(e,t,b)=>{b.r(t),b.d(t,{default:()=>a});const a='<div class="text">{[print(xabber.getString("chat_list__placeholder"))]}</div>\n'}}]);
+//# sourceMappingURL=xabber.5696.js.map

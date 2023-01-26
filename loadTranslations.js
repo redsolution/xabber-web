@@ -1,7 +1,7 @@
 //todo: change pathings
 let fs = require('fs'),
     http = require('https'),
-    unzip = require('unzip'),
+    unzip = require('unzipper'),
     args = process.argv.slice(2),
     token = args[0],
     _pending_finished,
@@ -74,9 +74,9 @@ function downloadFile (file_id, file_name) {
                     });
                     response.on('end', () => {
                         let path = file_name.slice(0, file_name.lastIndexOf("/"));
-                        if (!fs.existsSync(`.${path}`))
-                            require('child_process').execSync(`mkdir -p -m 755 ".${path}"`);
-                        fs.writeFileSync(`.${file_name}`, rawData, {encoding: 'utf8'});
+                        if (!fs.existsSync(`./translations${path}`))
+                            require('child_process').execSync(`mkdir -p -m 755 "./translations${path}"`);
+                        fs.writeFileSync(`./translations${file_name}`, rawData, {encoding: 'utf8'});
                         resolve();
                     });
                 });
@@ -139,7 +139,7 @@ function checkBuildProgress (buildId) {
 function downloadArchive (url) {
     return new Promise((resolve, reject) => {
         http.get(url, (response) => {
-            let pipe = response.pipe(unzip.Extract({path:'./languages'}));
+            let pipe = response.pipe(unzip.Extract({path:'./translations/languages'}));
             pipe.on('finish', () => {
                 resolve();
             });
@@ -157,5 +157,5 @@ loadTranslationsProgress().then(() => {
     return downloadStrings();
 }).then(() => {
     console.log('Strings loaded.....');
-    fs.writeFileSync(`translation_progress.js`, `let client_translation_progress = ${JSON.stringify(translation_progress)}; typeof define === "function" && define(() => { return client_translation_progress;});`);
+    fs.writeFileSync(`translations/translation_progress.js`, `let client_translation_progress = ${JSON.stringify(translation_progress)}; typeof define === "function" && define(() => { return client_translation_progress;});`);
 });

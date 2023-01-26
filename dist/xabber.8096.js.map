@@ -1,0 +1,1 @@
+{"version":3,"file":"xabber.8096.js","mappings":"uIAAA,iE","sources":["webpack://xabber.web/./templates/chats/group_chats/pinned_message_panel.html"],"sourcesContent":["export default \"<div class=\\\"modal-content full-pinned-message\\\"></div>\\n\";"],"names":[],"sourceRoot":""}

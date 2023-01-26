@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[3103],{3103:(e,a,d)=>{d.r(a),d.d(a,{default:()=>i});const i='<div class="account-item-wrap" data-jid="{{jid}}">\n    <div class="name one-line">{{jid}}</div>\n</div>'}}]);
+//# sourceMappingURL=xabber.3103.js.map
