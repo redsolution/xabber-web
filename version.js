@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.3","version_description":"removed cached chats, fixed presence not being sent on login, fixed image from buffer pasting,"}'
+'{"version_number":"2.3.3.4","version_description":"fixed magnific popup when there is no element to apply"}'
 )});

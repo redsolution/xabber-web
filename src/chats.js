@@ -3952,7 +3952,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     initMagnificPopup: function ($elem) {
         let self = this;
-        $elem.magnificPopup({
+        $elem.length && $elem.magnificPopup({
             type: 'image',
             closeOnContentClick: true,
             fixedContentPos: true,
@@ -3972,7 +3972,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     initZoomGallery: function ($message) {
         let self = this;
-        $message.find('.zoom-gallery').magnificPopup({
+        $message.find('.zoom-gallery').length && $message.find('.zoom-gallery').magnificPopup({
             delegate: 'img',
             type: 'image',
             closeOnContentClick: false,
@@ -10928,7 +10928,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                             domain: res.url ? utils.getDomainFromUrl(res.url) : res.site_name,
                             url: null
                         })));
-                        this.$('.attached-image').magnificPopup({
+                        this.$('.attached-image').length && this.$('.attached-image').magnificPopup({
                             type: 'image',
                             closeOnContentClick: true,
                             fixedContentPos: true,
@@ -11038,7 +11038,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             xabber.chat_body.updateHeight();
             this.scrollToBottom();
         });
-        files && files.length && this.$('.attached-image').magnificPopup({
+        files && files.length && this.$('.attached-image').length && this.$('.attached-image').magnificPopup({
             type: 'image',
             closeOnContentClick: true,
             fixedContentPos: true,
@@ -11130,7 +11130,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             }
             xabber.chat_body.updateHeight();
         });
-        ((link_references && link_references.length) || (files && files.length)) && this.$('.attached-image').magnificPopup({
+        ((link_references && link_references.length) || (files && files.length)) && this.$('.attached-image').length && this.$('.attached-image').magnificPopup({
             type: 'image',
             closeOnContentClick: true,
             fixedContentPos: true,

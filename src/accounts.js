@@ -2325,7 +2325,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
                 (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
                 $gallery_file.appendTo(this.$('.gallery-files'));
-                $gallery_file.find('.uploaded-img').magnificPopup({
+                $gallery_file.find('.uploaded-img').length && $gallery_file.find('.uploaded-img').magnificPopup({
                     type: 'image',
                     closeOnContentClick: true,
                     fixedContentPos: true,
