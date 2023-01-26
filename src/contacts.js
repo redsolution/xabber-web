@@ -714,28 +714,31 @@ xabber.Contact = Backbone.Model.extend({
         });
     },
 
-    getMessageByStanzaId: function (stanza_id, callback) {
-        let queryid = uuid(),
-            iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
-                .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.MAM).up().up()
-                .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})
-                .c('value').t(stanza_id);
-        let handler = this.account.connection.addHandler((message) => {
-            let $msg = $(message);
-            if ($msg.find('result').attr('queryid') === queryid)
-                callback && callback($msg);
-            return true;
-        }, Strophe.NS.MAM);
-        this.account.sendIQFast(iq, () => {
-                this.account.connection.deleteHandler(handler);
-            }, () => {
-                this.account.connection.deleteHandler(handler);
-            }
-        );
-    },
+        getMessageByStanzaId: function (stanza_id, callback) {
+            let queryid = uuid(),
+                account = this.account,
+                is_fast = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+                conn = is_fast ? account.fast_connection : account.connection,
+                iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
+                    .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
+                    .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                    .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+                    .c('value').t(Strophe.NS.MAM).up().up()
+                    .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})
+                    .c('value').t(stanza_id);
+            let handler = conn.addHandler((message) => {
+                let $msg = $(message);
+                if ($msg.find('result').attr('queryid') === queryid)
+                    callback && callback($msg);
+                return true;
+            }, Strophe.NS.MAM);
+            this.account.sendIQFast(iq, () => {
+                    conn.deleteHandler(handler);
+                }, () => {
+                    conn.deleteHandler(handler);
+                }
+            );
+        },
 
     MAMRequest: function (options, callback, errback) {
         let account = this.account,
@@ -6357,17 +6360,17 @@ xabber.Participants = Backbone.Collection.extend({
         return pretty_rights;
     },
 
-    updateParticipants: function () {
-        this.participantsRequest({version: this.version}, () => {
-            this.trigger("participants_updated");
-            let chat = this.account.chats.getChat(this.contact);
-            if (chat.item_view) {
-                if (!chat.item_view.content)
-                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-                chat.item_view.content.updatePinnedMessage()
-            }
-        });
-    },
+        updateParticipants: function () {
+            this.participantsRequest({version: this.version}, () => {
+                this.trigger("participants_updated");
+                let chat = this.account.chats.getChat(this.contact);
+                if (chat.item_view) {
+                    if (!chat.item_view.content)
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                    chat.item_view.content.updatePinnedMessage()
+                }
+            });
+        },
 
     participantsRequest: function (options, callback, errback) {
         options = options || {};
@@ -8781,7 +8784,18 @@ xabber.Roster = xabber.ContactsBase.extend({
             let $jingle_message = current_call.children('message'),
                 full_jid = $jingle_message.attr('from'),
                 session_id = $jingle_message.children('propose').attr('id');
-            chat.initIncomingCall(full_jid, session_id);
+            chat.getCallingAvailability(full_jid, session_id, () => {
+                if (xabber.current_voip_call) {
+                    let reason = Strophe.getBareJidFromJid(full_jid) === Strophe.getBareJidFromJid(xabber.current_voip_call.get('contact_full_jid')) ? 'device_busy' : 'busy';
+                    chat.sendReject({session_id: session_id, reason: reason});
+                    chat.messages.createSystemMessage({
+                        from_jid: this.account.get('jid'),
+                        message: xabber.getString("jingle__system_message__cancelled_call")
+                    });
+                } else {
+                    chat.initIncomingCall(full_jid, session_id);
+                }
+            });
         }
         chat.set('last_delivered_id', last_delivered_msg);
         chat.set('last_displayed_id', last_displayed_msg);
@@ -8884,7 +8898,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 let synced_conversations = $(iq).find('conversation').map(function () {
                     return $(this).attr('jid') +  '/' + $(this).attr('type');
                 }).toArray();
-                res = res.filter(item => !synced_conversations.includes(item.account_conversation_type))
+                res = res.filter(item => !synced_conversations.includes(item.account_conversation_type));
                 this.syncCachedConversations(res, request_with_stamp, is_first_sync);
                 this.syncConversations(iq, request_with_stamp, is_first_sync);
                 dfd.resolve(true);
