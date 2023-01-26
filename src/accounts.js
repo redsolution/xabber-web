@@ -4902,6 +4902,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.data.set('registration', false);
         this.data.set('authentication', false);
         xabber.body.setScreen('all-chats', {right: null});
+        this.account.sendPresence();
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
     },
@@ -5104,6 +5105,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         this.account.save('is_new', undefined);
         this.data.set('authentication', false);
         xabber.body.setScreen('all-chats', {right: null});
+        this.account.sendPresence();
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
         this.closeModal();

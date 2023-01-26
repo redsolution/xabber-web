@@ -1011,8 +1011,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
     },
 
     onChangedTimestamp: function () {
-        if (this.get('timestamp') != this.get('cached_timestamp'))
-            this.cacheChat();
     },
 
 
@@ -1020,21 +1018,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
           if (this.get('muted') && (this.get('muted') < (Date.now() / 1000)))
               this.set('muted', false)
           return this.get('muted')
-    },
-
-    cacheChat: function () {
-        let jid = this.get('jid'),
-            last_message = this.last_message ? _.clone(this.last_message).get('xml') : null;
-        if (_.isUndefined(last_message))
-            return;
-        let attrs = {
-            jid: this.get('encrypted') ? `${jid}:encrypted` : jid,
-            timestamp: this.get('timestamp'),
-            last_displayed_id: this.get('last_displayed_id'),
-            last_delivered_id: this.get('last_delivered_id'),
-            last_message: last_message ? last_message.outerHTML : null
-        };
-        this.account.cached_chats.putChat(attrs);
     },
 
       onChangedContact: function () {
@@ -10847,7 +10830,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 let image_from_clipboard = clipboard_data.files[clipboard_data.files.length - 1],
                     blob_image = window.URL.createObjectURL(new Blob([image_from_clipboard])),
                     options = { blob_image_from_clipboard: blob_image};
-                image_from_clipboard.name = 'clipboard.png';
                 this.view.addFileMessage([image_from_clipboard]);
                 this.focusOnInput();
             }
@@ -12210,36 +12192,6 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
     }
 });
 
-xabber.CachedChats = Backbone.ModelWithDataBase.extend({
-    putChat: function (value, callback) {
-        this.database.put('chats_items', value, function (response_value) {
-            callback && callback(response_value);
-        });
-    },
-
-    getChat: function (value, callback) {
-        this.database.get('chats_items', value, function (response_value) {
-            callback && callback(response_value);
-        });
-    },
-
-    getAllChats: function (callback) {
-        this.database.get_all('chats_items', null, function (response_value) {
-            callback && callback(response_value || []);
-        });
-    },
-
-    removeChat: function (value, callback) {
-        this.database.remove('chats_items', value, function (response_value) {
-            callback && callback(response_value);
-        });
-    },
-
-    clearDataBase: function () {
-        this.database.clear_database('roster_items');
-    }
-});
-
 xabber.Account.addInitPlugin(function () {
     this.chat_settings = new xabber.ChatSettings({id: 'chat-settings'}, {
         account: this,
@@ -12254,34 +12206,6 @@ xabber.Account.addInitPlugin(function () {
 });
 
 xabber.Account.addConnPlugin(function () {
-    this.cached_chats = new xabber.CachedChats(null, {
-        name:'cached-chats-list-' + this.get('jid'),
-        objStoreName: 'chats_items',
-        primKey: 'jid'
-    });
-
-    this.cached_chats.on("database_opened", () => {
-        /*this.cached_chats.getAllChats((chats) => {
-            chats.forEach((chat) => {
-                let is_encrypted = chat.jid.indexOf(':encrypted') == chat.jid.length - ':encrypted'.length,
-                    jid = is_encrypted ? (chat.jid.slice(0, chat.jid.length - ':encrypted'.length)) : chat.jid,
-                    contact = this.contacts.mergeContact(jid);
-                if (this.chats.get(contact.hash_id))
-                    return;
-                let created_chat = this.chats.getChat(contact, is_encrypted && 'encrypted'),
-                    last_message = chat.last_message;
-                if (typeof(last_message) !== 'string')
-                    return;
-                created_chat.set({'cached_timestamp': chat.timestamp, 'timestamp': chat.timestamp, last_displayed_id: chat.last_displayed_id, last_delivered_id: chat.last_delivered_id});
-                if (last_message) {
-                    this.chats.receiveMessage(Strophe.xmlHtmlNode(last_message).documentElement);
-                } else {
-                    created_chat.item_view.updateEmptyChat();
-                }
-            });
-        });*/
-    });
-
     let timestamp = this.last_msg_timestamp || this.disconnected_timestamp;
     this.chats.registerMessageHandler();
     this.chats.each((chat) => {

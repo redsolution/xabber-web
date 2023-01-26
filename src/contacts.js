@@ -9892,6 +9892,20 @@ xabber.CachedSyncСonversations = Backbone.ModelWithDataBase.extend({
     },
 
     clearDataBase: function () {
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
+        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
         this.database.clear_database('conversation_items');
     }
 });
