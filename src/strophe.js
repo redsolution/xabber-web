@@ -652,7 +652,7 @@ _.extend(Strophe.Connection.prototype, {
                 .c('client').t(xabber.get('client_name')).up()
                 .c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
         }
-        handler = function (stanza) {
+        let handler = function (stanza) {
             let iqtype = stanza.getAttribute('type');
             if (iqtype == 'result') {
                 if (callback) {

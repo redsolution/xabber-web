@@ -234,7 +234,7 @@ let Xabber = Backbone.Model.extend({
                 indexedDB.deleteDatabase(acc.cached_sync_conversations.database.name);
             });
         }
-        let full_storage_name = xabber.getStorageName();
+        let full_storage_name = this.getStorageName();
         for (let key in window.localStorage) {
             if (key.startsWith(full_storage_name) || key.startsWith(constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION + '-' + this.cache.id)) {
                 window.localStorage.removeItem(key);
