@@ -542,7 +542,7 @@ button.btn-float-left {
 }
 
 .main-modal.add-account-modal {
-    width: 480px;
+    width: 480px !important;
     height: 400px;
 }
 

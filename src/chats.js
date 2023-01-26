@@ -9082,6 +9082,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             xabber.current_voip_call.modal_view.collapse();
             return;
         }
+        xabber.chats_view.scrollToTop();
+        xabber.chats_view.clearSearch();
         !this.contact.get('group_chat') && this.content.initJingleMessage();
     },
 
