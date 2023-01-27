@@ -2,6 +2,8 @@ const webpack = require('webpack');
 const TerserPlugin = require("terser-webpack-plugin");
 const path = require('path');
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 module.exports = {
     entry: './src/xabber.js',
     output: {
@@ -41,6 +43,7 @@ module.exports = {
             "omemo": "./lib/omemo",
             "qrcode": "./lib/VanillaQR.min",
             "i18next-post": "./lib/i18nextSprintfPostProcessor.min",
+            "ol-local": "~/src/utils/ol-local",
 
             // Xabber sources
             "xabber-version": "~/version",
@@ -93,7 +96,7 @@ module.exports = {
             },
             {
                 test: /\.css$/i,
-                use: ["style-loader", "css-loader"],
+                use: [MiniCssExtractPlugin.loader, "css-loader"],
             },
         ],
     },
@@ -102,11 +105,15 @@ module.exports = {
         new webpack.ProvidePlugin({
             xabber: 'xabber'
         }),
-        new NodePolyfillPlugin()
+        new MiniCssExtractPlugin(),
+        new NodePolyfillPlugin(),
     ],
     optimization: {
         minimize: true,
-        minimizer: [new TerserPlugin()],
+        minimizer: [
+            new CssMinimizerPlugin(),
+            new TerserPlugin(),
+        ],
         splitChunks: {
             chunks: 'all',
             cacheGroups: {

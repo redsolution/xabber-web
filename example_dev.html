@@ -8,7 +8,8 @@
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 let js = document.createElement('script'),
-                    js_vendors = document.createElement('script');
+                    js_vendors = document.createElement('script'),
+                    css = document.createElement('link');
                 js.src='./dist/xabber.main.js';
                 js.onload = () => {
                     xabber.configure({
@@ -24,6 +25,9 @@
                 };
                 js_vendors.src='./dist/xabber.vendors.js';
                 document.head.appendChild(js_vendors);
+                css.href='./dist/main.css';
+                css.rel='stylesheet';
+                document.head.appendChild(css);
                 js_vendors.onload = () => {
                     document.head.appendChild(js);
                 };
