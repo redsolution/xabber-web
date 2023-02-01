@@ -7,6 +7,7 @@ let env = xabber.env,
     $ = env.$,
     $iq = env.$iq,
     $pres = env.$pres,
+    uuid = env.uuid,
     Strophe = env.Strophe,
     _ = env._,
     moment = env.moment,
@@ -17,14 +18,17 @@ let env = xabber.env,
 xabber.Account = Backbone.Model.extend({
         idAttribute: 'jid',
 
-        defaults: {
-            enabled: true,
-            auth_type: "password",
-            status: "online",
-            status_message: "",
-            priority: 67,
-            auto_login_xa: true,
-            groupchat_servers_list: []
+        defaults: () => {
+            return {
+                enabled: true,
+                auth_type: "password",
+                status: "online",
+                status_message: "",
+                priority: 67,
+                auto_login_xa: false,
+                account_unique_id: uuid().substring(0, 8),
+                groupchat_servers_list: []
+            }
         },
 
         initialize: function (_attrs, options) {
@@ -1148,7 +1152,9 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.disconnect();
                 if (this.fast_conn_manager) this.fast_connection.disconnect();
             }
-            this.cached_sync_conversations.clearDataBase();
+            this.cached_sync_conversations.deleteDataBase();
+            this.cached_roster.deleteDataBase();
+            this.cached_server_features.deleteDataBase();
             this.trigger('remove_saved_chat');
         },
 

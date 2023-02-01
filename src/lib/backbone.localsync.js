@@ -125,6 +125,21 @@
             request.onerror = function () {
                 callback && callback(false);
             }.bind(this);
+        },
+
+        delete_database: function (objStoreName, callback) {
+            if (!this.db) {
+                callback && callback(false);
+                return;
+            }
+            this.db.close();
+            let db_deleter = indexedDB.deleteDatabase(this.name);
+            db_deleter.onsuccess = function () {
+                callback && callback(true);
+            }.bind(this);
+            db_deleter.onerror = function () {
+                callback && callback(false);
+            }.bind(this);
         }
     });
 
@@ -247,8 +262,12 @@
             this.database.clear_database(name);
         },
 
+        deleteDataBase: function (name) {
+            this.database.delete_database(name);
+        },
+
         onQuit: function () {
-            this.clearDataBase();
+            this.deleteDataBase();
         }
     });
 

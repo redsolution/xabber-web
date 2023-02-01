@@ -9863,6 +9863,10 @@ xabber.CachedRoster = Backbone.ModelWithDataBase.extend({
 
     clearDataBase: function () {
         this.database.clear_database('roster_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('roster_items');
     }
 });
 
@@ -9892,21 +9896,11 @@ xabber.CachedSyncСonversations = Backbone.ModelWithDataBase.extend({
     },
 
     clearDataBase: function () {
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
-        console.log('conversation database cleared!!!!!!!!!!!!!!!!!!!');
         this.database.clear_database('conversation_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('conversation_items');
     }
 });
 
@@ -9937,6 +9931,10 @@ xabber.CachedServerFeatures = Backbone.ModelWithDataBase.extend({
 
     clearDataBase: function () {
         this.database.clear_database('server_features_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('server_features_items');
     }
 });
 
@@ -9946,17 +9944,17 @@ xabber.Account.addInitPlugin(function () {
         storage_name: xabber.getStorageName() + '-groups-settings-' + this.get('jid')
     });
     this.cached_roster = new xabber.CachedRoster(null, {
-        name:'cached-roster-list-' + this.get('jid'),
+        name:'cached-roster-list-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'roster_items',
         primKey: 'jid'
     });
     this.cached_sync_conversations = new xabber.CachedSyncСonversations(null, {
-        name:'cached-conversation-list-' + this.get('jid'),
+        name:'cached-conversation-list-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'conversation_items',
         primKey: 'account_conversation_type'
     });
     this.cached_server_features = new xabber.CachedServerFeatures(null, {
-        name:'cached-features-list-' + this.get('jid'),
+        name:'cached-features-list-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'server_features_items',
         primKey: 'var'
     });
