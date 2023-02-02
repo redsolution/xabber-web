@@ -25,7 +25,7 @@ module.exports = {
             "strophe.ping": "~/node_modules/strophejs-plugins/ping/strophe.ping",
             "strophe.rsm": "~/node_modules/strophejs-plugins/rsm/strophe.rsm",
             "Quill": "~/node_modules/quill/quill",
-            "wavesurfer": "~/node_modules/wavesurfer/dist/wavesurfer",
+            "wavesurfer": "~/node_modules/wavesurfer.js/dist/wavesurfer",
             "slug": "~/node_modules/slug/slug",
             "sha256": "~/node_modules/js-sha256/src/sha256",
             "magnific-popup": "~/node_modules/magnific-popup/dist/jquery.magnific-popup",

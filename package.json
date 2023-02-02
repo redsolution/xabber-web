@@ -64,7 +64,7 @@
     "style-loader": "^3.3.1",
     "underscore": "~1.8.3",
     "unzipper": "^0.10.11",
-    "wavesurfer": ">0.0.0",
+    "wavesurfer.js": "^6.4.0",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"

@@ -8525,7 +8525,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               this.updateOneLiner();
           }, 1000*60*2);
           this.account = this.model.account;
-          this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
+          this.$el.find('.circle-avatar:not(.voice-message-player-avatar)').html(env.templates.svg['saved-messages']());
           this.model.on("close_chat", this.closeChat, this);
           xabber.on('plyr_player_updated', this.updatePlyrControls, this);
           xabber.on('update_layout', this.updatePlyrTitle, this);
@@ -8638,10 +8638,15 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           xabber.plyr_players.forEach((item) => {
               if (item.$audio_elem){
                   if (item.$audio_elem.voice_message)
-                      item.$audio_elem.voice_message.stopTime()
+                      item.$audio_elem.voice_message.stopTime();
               }
           });
-          (xabber.plyr_player_popup) && xabber.plyr_player_popup.closePopup();
+          if (xabber.plyr_player_popup)
+              xabber.plyr_player_popup.closePopup();
+          else {
+              xabber.current_plyr_player = null;
+              xabber.trigger('plyr_player_updated');
+          }
       },
 
       popupPlyr: function () {
@@ -9144,10 +9149,15 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         xabber.plyr_players.forEach((item) => {
             if (item.$audio_elem){
                 if (item.$audio_elem.voice_message)
-                    item.$audio_elem.voice_message.stopTime()
+                    item.$audio_elem.voice_message.stopTime();
             }
         });
-        (xabber.plyr_player_popup) && xabber.plyr_player_popup.closePopup();
+        if (xabber.plyr_player_popup)
+            xabber.plyr_player_popup.closePopup();
+        else {
+            xabber.current_plyr_player = null;
+            xabber.trigger('plyr_player_updated');
+        }
     },
 
     popupPlyr: function () {
