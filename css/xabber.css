@@ -9348,6 +9348,10 @@ img.fwd-img-preview {
     overflow: hidden;
 }
 
+.link-file.wave-cursor-hidden .waveform wave wave{
+    border-right: none !important;
+}
+
 .mdi-account-multiple {
     float: left;
     color: #616161;

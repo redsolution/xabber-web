@@ -4101,8 +4101,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
         $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
         let aud = this.createAudio(file_url, $elem.find('#' + unique_id));
 
+        let hideShowCursor = () => {
+            let current_time = aud.getCurrentTime(),
+                duration = aud.getDuration();
+            if (current_time === 0 || current_time === duration)
+                $msg_element.addClass('wave-cursor-hidden');
+            else
+                $msg_element.removeClass('wave-cursor-hidden');
+        };
+
         aud.on('ready', () => {
             let duration = Math.round(aud.getDuration());
+            hideShowCursor();
             $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
         });
 
@@ -4116,6 +4126,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
         aud.on('play', () => {
             $msg_element.addClass('playing');
+            $msg_element.removeClass('wave-cursor-hidden');
             let is_popup;
             xabber.current_plyr_player && (is_popup = xabber.current_plyr_player.is_popup);
             xabber.current_plyr_player = chat.plyr_players.find(item => item.$audio_elem === $msg_element[0]);//переделать на выбор из всех
@@ -4141,12 +4152,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
         });
 
         aud.on('finish', () => {
+            hideShowCursor();
             $msg_element.removeClass('playing');
         });
 
         aud.on('pause', () => {
             $msg_element.removeClass('playing');
+            hideShowCursor();
             xabber.trigger('plyr_player_updated');
+        });
+
+        aud.on('seek', () => {
+            hideShowCursor();
         });
 
         aud.stopTime = () => {
