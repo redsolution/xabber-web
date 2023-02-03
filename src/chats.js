@@ -10717,7 +10717,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         (mention_text.length && mention_text[0].match(/\s/)) && mention_position++;
         mention_text = mention_text.replace(/\s?(@|[+])/, "");
         this.$('.mentions-list').hide();
-        this.quill.deleteText(mention_position, ++mention_text.length);
+        this.quill.deleteText(mention_position, (mention_text.length + 1));
         if (!nickname.length) {
             if (id.length)
                 nickname = id;
