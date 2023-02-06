@@ -3503,7 +3503,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         else {
             let pinned_message = this.contact.get('pinned_message'),
                 msg = this.buildMessageHtml(pinned_message),
-                pinned_msg_modal = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this});
+                pinned_msg_modal = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this, message: pinned_message});
             pinned_msg_modal.$el.attr('data-color', this.account.settings.get('color'));
             this.updateMessageInChat(msg);
             this.initPopup(msg);
@@ -3520,13 +3520,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
         });
     },
 
-    videoOnload: function ($message) {
+    videoOnload: function ($message, message) {
         let $image_container = $message.find('.img-content'),
             $copy_link_icon = $message.find('.mdi-link-variant');
         $copy_link_icon.attr({
             'data-image': 'true'
         });
-        this.initPlyrEmbedPlayer($message);
+        this.initPlyrEmbedPlayer($message, message);
     },
 
     locationOnload: function ($message) {
@@ -4343,7 +4343,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 let video_el = this.createVideo(video);
                 $message.find('.video-content').append(video_el);
             });
-            this.videoOnload($message);
+            this.videoOnload($message, message);
             $message.removeClass('file-upload noselect');
         }
 
@@ -4610,7 +4610,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                         let video_el = this.createVideo(video);
                         $f_message.find('.video-content').append(video_el);
                     });
-                    this.videoOnload($message);
+                    this.videoOnload($message, message);
                     $f_message.removeClass('file-upload noselect');
                 }
 
@@ -4764,8 +4764,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
             day_date.format('x')+'">'+pretty_date(day_date)+'</div>');
     },
 
-    initPlyrEmbedPlayer: function ($msg) {
-        let message = this.model.messages.get($msg.data('uniqueid')),
+    initPlyrEmbedPlayer: function ($msg, msg) {
+        let message = this.model.messages.get($msg.data('uniqueid')) || msg,
             msg_players = [];
         $msg.find('.plyr-video-container:not(.no-load)').each((idx, item) => {
             if ($(item).hasClass('no-load'))
@@ -5815,7 +5815,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 let video_el = this.createVideo(video);
                 $message.find('.video-content').append(video_el);
             });
-            this.videoOnload($message);
+            this.videoOnload($message, message);
             $message.removeClass('file-upload noselect');
         }
         if (files_.length > 0) {
@@ -6551,6 +6551,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
     _initialize: function (options) {
         this.account = options.account;
         this.chat_content = options.chat_content;
+        this.message = options.message;
     },
 
     open: function ($message) {
@@ -6560,7 +6561,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                 this.updateScrollBar();
                 this.$('.modal-content').css('height', this.$el.height() - 12);
                 if ($message.find('.plyr-video-container').length) {
-                    this.chat_content.initPlyrEmbedPlayer($message);
+                    this.chat_content.initPlyrEmbedPlayer($message, this.message);
                 }
             },
             complete: () => {
@@ -6589,6 +6590,43 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                 if (result)
                     utils.openWindow(link);
             });
+            return;
+        }
+        if ($elem.closest(".plyr-video-container").length > 0) {
+            let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                $plyr = $elem.closest(".plyr-video-container");
+            if (msg.get('msg_player_videos')){
+                if (!xabber.plyr_player_popup){
+                    xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
+                    xabber.plyr_player_popup.show({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
+                } else
+                    xabber.plyr_player_popup.showNewVideo({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
+            }
+            return;
+        }
+        if ($elem.hasClass('voice-message-play') || $elem.hasClass('no-uploaded')) {
+            let $audio_elem = $elem.closest('.link-file'),
+                f_url = $audio_elem.find('.file-link-download').attr('href');
+            $audio_elem.find('.mdi-play').removeClass('no-uploaded');
+            if ($elem.closest('.chat-message').hasClass('encrypted')) {
+                let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] == uri);
+                if (file && file.key) {
+                    this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => {
+                        if (result === null)
+                            return;
+                        $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
+                    });
+                }
+            } else {
+                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+            }
+            return;
+        }
+        if ($elem.hasClass('mdi-play') && !($elem.closest(".video-file-wrap").length > 0)) {
+            let $audio_elem = $elem.closest('.link-file');
+            $audio_elem[0].voice_message.play();
             return;
         }
     },

@@ -5,7 +5,7 @@
         <div class="file-info one-line">
             <span class="file-name">{{name}}</span>{[ if (duration) { ]}, {{duration}}{[ } ]},  <span class="file-size">{{size}}</span>
         </div>
-        <a href="{{sources[0]}}" class="file-link-download">{[print(xabber.getString("action_download"))]}</a>
+        <a target="_blank" rel="noopener noreferrer" href="{{sources[0]}}" class="file-link-download">{[print(xabber.getString("action_download"))]}</a>
         <a class="voice-message-play">Play</a>
     </div>
 </div>

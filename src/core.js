@@ -60,7 +60,7 @@ let Xabber = Backbone.Model.extend({
         this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
         setInterval(function() {
             console.log(new Date());
-        }, 1000)
+        }, 5000)
     },
 
     initDefaultLanguage: function () {
