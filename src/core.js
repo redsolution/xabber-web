@@ -232,6 +232,7 @@ let Xabber = Backbone.Model.extend({
             this.accounts.forEach((acc) => {
                 indexedDB.deleteDatabase(acc.cached_roster.database.name);
                 indexedDB.deleteDatabase(acc.cached_sync_conversations.database.name);
+                indexedDB.deleteDatabase(acc.cached_server_features.database.name);
             });
         }
         let full_storage_name = this.getStorageName();

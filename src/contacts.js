@@ -8871,6 +8871,10 @@ xabber.Roster = xabber.ContactsBase.extend({
             this.account.retraction_version = retract_version;
         }
         this.account.set('last_sync', sync_timestamp);
+        this.account.cached_sync_conversations.putInCachedConversations({
+            account_conversation_type: 'last_sync_timestamp',
+            timestamp: sync_timestamp,
+        });
         this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
         let dfd = new $.Deferred();
         dfd.done((is_cached) => {
@@ -9982,11 +9986,13 @@ xabber.Account.addInitPlugin(function () {
                 this.contacts.mergeContact(roster_item);
             });
             if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
-                let options = {},
-                    last_sync_timestamp = this.settings && this.settings.get('last_sync_timestamp') ? this.settings.get('last_sync_timestamp') : null
-                !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
-                last_sync_timestamp && (options.stamp = last_sync_timestamp);
-                this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
+                let options = {};
+                this.cached_sync_conversations.getFromCachedConversations('last_sync_timestamp', (res) => {
+                    let last_sync_timestamp = res && res.timestamp ? res.timestamp : null;
+                    !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
+                    last_sync_timestamp && (options.stamp = last_sync_timestamp);
+                    this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
+                });
             }
             else {
                 this.roster.getRoster();

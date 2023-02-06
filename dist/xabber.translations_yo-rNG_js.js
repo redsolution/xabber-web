@@ -1,0 +1,3 @@
+/*! For license information please see xabber.translations_yo-rNG_js.js.LICENSE.txt */
+(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["translations_yo-rNG_js"],{"./translations/yo-rNG.js":(n,o,r)=>{var a;void 0===(a=(()=>({account_compression:"Ló iparowa",account_host:"Olùgbàlà jọ ",account_password:"Ohùn ìgbà ní wọlé ",confirm_password:"Jẹri sí ohùn ìgbà ní wọlé ",account_port:"Porti ",account_priority:"Ohun ìṣáájú ",account_server_name:"A pé ranse",account_xmpp_register_warning:"O gbodo ni ohun ìgbà ní wọlé lórí XMPP kò tó fi sì Xabber "})).call(o,r,o,n))||(n.exports=a)}}]);
+//# sourceMappingURL=xabber.translations_yo-rNG_js.js.map
