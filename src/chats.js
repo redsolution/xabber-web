@@ -5181,7 +5181,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
         mutable_content.length && message.set({mutable_content: mutable_content});
 
-        this.account._pending_messages.push({chat_hash_id: this.model.id, unique_id: unique_id});
+        this.account._pending_messages.push({chat_hash_id: this.model.id, unique_id: unique_id, timestamp: moment.now()});
 
         message.set('original_message', body);
         body && stanza.c('body').t(body).up();

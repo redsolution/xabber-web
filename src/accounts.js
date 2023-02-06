@@ -901,6 +901,7 @@ xabber.Account = Backbone.Model.extend({
         sendPendingMessages: function () {
             console.log('pending messages');
             console.log(this._pending_messages);
+            this._pending_messages.sort((a,b) => (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0));
             _.each(this._pending_messages, (item) => {
                 console.log(item)
                 let msg = this.messages.get(item.unique_id), msg_iq;
