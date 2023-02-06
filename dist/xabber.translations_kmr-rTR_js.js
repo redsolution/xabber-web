@@ -1,3 +1,0 @@
-/*! For license information please see xabber.translations_kmr-rTR_js.js.LICENSE.txt */
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([["translations_kmr-rTR_js"],{"./translations/kmr-rTR.js":(a,r,o)=>{var n;void 0===(n=(()=>({account_host:"Host",account_password:"Pêborîn",confirm_password:"Pêborîna rastandinê",account_port:"Port",account_priority:"Pêşikî",account_resource:"Çavkanî",account_server_name:"Rajekar"})).call(r,o,r,a))||(a.exports=n)}}]);
-//# sourceMappingURL=xabber.translations_kmr-rTR_js.js.map
