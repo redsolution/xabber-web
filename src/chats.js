@@ -1691,7 +1691,16 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateChatCard: function (msg) {
-
+        if (this.content){
+            return;
+        }
+        if (this.message_counter == 0 ){
+            this.message_counter++;
+            return
+        }
+        this.content = new xabber.ChatContentView({ chat_item: this, new_message: msg });
+        this.updateLastMessage(msg);
+        return;
     },
 
     onChangedMessageState: function (message) {
