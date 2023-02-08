@@ -65,6 +65,7 @@ xabber.Account = Backbone.Model.extend({
             this.session = new Backbone.Model({
                 connected: false,
                 reconnected: false,
+                ready_to_send: false,
                 conn_retries: 0,
                 conn_feedback: xabber.getString("connection__error__text_disconnected")
             });
@@ -143,27 +144,24 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendMsg: function (stanza, callback) {
+            let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.session.get('ready_to_send') && this.get('status') !== 'offline';
+            if (res) {
+                this.connection.send(stanza);
+            }
+            callback && callback();
+            return res;
+        },
+
+        sendMsgPending: function (stanza) {
             let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline';
             if (res) {
                 this.connection.send(stanza);
-                callback && callback();
-            } else {
-                console.log('message went to pending');
-                console.log({stanza: stanza, callback: callback, is_msg: true});
-                this._pending_stanzas.push({stanza: stanza, callback: callback, is_msg: true});
             }
             return res;
         },
 
         sendMsgFast: function (stanza, callback) {
-            // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-            // if (res) {
-            //     this.fast_connection.send(stanza);
-            //     callback && callback();
-            //     return res;
-            // } else {
             return this.sendMsg(stanza, callback);
-            // }
         },
 
         getConnectionForIQ: function () {
@@ -464,6 +462,7 @@ xabber.Account = Backbone.Model.extend({
                 connected: false,
                 reconnected: false,
                 reconnecting: false,
+                ready_to_send: false,
                 conn_retries: 0,
                 conn_feedback: xabber.getString("application_state_connecting"),
                 auth_failed: false
@@ -479,6 +478,7 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({
                 connected: false,
                 reconnected: false,
+                ready_to_send: false,
                 reconnecting: true,
                 conn_retries: ++conn_retries,
                 conn_feedback:  xabber.getString("application_state_reconnect_after_some_seconds", [timeout/1000]),
@@ -545,7 +545,10 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
-                this.session.set({connected: false});
+                this.session.set({
+                    connected: false,
+                    ready_to_send: false,
+                });
             }
         },
 
@@ -752,6 +755,7 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({
                 auth_failed: true,
                 connected: false,
+                ready_to_send: false,
                 no_reconnect: true
             });
             this.save({old_device_token: this.get('x_token'), auth_type: 'password', password: null, x_token: null});
@@ -867,9 +871,10 @@ xabber.Account = Backbone.Model.extend({
         afterConnected: function () {
             this.dfd_presence.done(() => {
                 this.sendPendingStanzas();
-                setTimeout(() => {
-                    this.sendPendingMessages();
-                }, 2500);
+                this.sendPendingMessages();
+                this.session.set({
+                    ready_to_send: true
+                })
             });
             this.registerPresenceHandler();
             this.enableCarbons();
@@ -907,9 +912,8 @@ xabber.Account = Backbone.Model.extend({
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
                 $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>")
-                msg_iq && this.sendMsg(msg_iq);
+                msg_iq && this.sendMsgPending(msg_iq);
             });
-            this._pending_messages = [];
             this.trigger('send_pending_messages');
         },
 

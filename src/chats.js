@@ -5255,6 +5255,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
           }
           else {
               let _pending_time = 5, was_reconnecting;
+              if (!(this.account.connection.authenticated && !this.account.connection.disconnecting && this.account.session.get('connected') && this.account.session.get('ready_to_send') && this.account.get('status') !== 'offline'))
+                  was_reconnecting = true;
+              if (this.account.session.get('reconnecting'))
+                  was_reconnecting = true;
               this.account.session.once('change:reconnecting', () => {
                   console.log('change reconnecting');
                   console.log(this.account.session.get('reconnecting'));
