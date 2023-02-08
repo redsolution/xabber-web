@@ -43,6 +43,11 @@
                 {[ if (is_myself) {]}
                 <div class="my-flag one-line">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
                 {[}]}
+                {[ if (kicked && blocked) {]}
+                <div class="my-flag one-line">{[print(xabber.getString("groupchat_blocked"))]}</div>
+                {[} else if (kicked) {]}
+                <div class="my-flag one-line">{[print(xabber.getString("groupchat_kicked"))]}</div>
+                {[}]}
 
             </div>
         </div>
@@ -109,16 +114,16 @@
         </div>
         {[}]}
         <div class="info-wrap present-info-wrap">
-            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" {[if (blocked) {]}data-svgname="cancel"{[}else if (!present) {]}data-svgname="status-outline"{[} else {]}data-svgname="clock-outline"{[}]}></svg></div>
+            <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" {[if (!present) {]}data-svgname="status-outline"{[} else {]}data-svgname="clock-outline"{[}]}></svg></div>
             <div>
                 <div class="info jabber-id">
                     <div class="value one-line">
                         <span>
-                            {[if (blocked) {]}
-                                {[print(xabber.getString("groupchat_blocked"))]}
-                            {[}else if (!present) {]}
+                            {[if (!present) {]}
                                 {[print(xabber.getString("group_settings__members__status_online"))]}
-                            {[} else {]}{{pretty_present}}{[}]}
+                            {[} else {]}
+                            {{pretty_present}}
+                            {[}]}
                         </span>
                     </div>
                     <div class="label">{[if (!present) {]}{[print(xabber.getString("groupchat_status"))]}{[} else {]}{[print(xabber.getString("group_settings__members__label_last_seen"))]}{[}]}</div>

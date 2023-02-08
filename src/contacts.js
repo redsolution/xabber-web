@@ -4966,6 +4966,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let attrs = _.clone(this.participant.attributes);
         attrs.nickname = _.escape(attrs.nickname);
         attrs.blocked = attrs.blocked;
+        attrs.kicked = !Boolean(this.contact.participants.get(this.participant.get('id')));
         attrs.pretty_present = attrs.present ? (moment(attrs.present).isValid() ? moment(attrs.present).fromNow() : moment(attrs.present.substr(0, attrs.present.length - 1)).fromNow()) : "";
         attrs.subscription = attrs.subscription === null ? null : 'both';
         attrs.badge = _.escape(attrs.badge);
