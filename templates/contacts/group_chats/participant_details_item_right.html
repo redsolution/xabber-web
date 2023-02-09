@@ -43,9 +43,9 @@
                 {[ if (is_myself) {]}
                 <div class="my-flag one-line">{[print(xabber.getString("groupchat_this_is_you"))]}</div>
                 {[}]}
-                {[ if (kicked && blocked) {]}
+                {[ if (subscription === null && blocked) {]}
                 <div class="my-flag one-line">{[print(xabber.getString("groupchat_blocked"))]}</div>
-                {[} else if (kicked) {]}
+                {[} else if (subscription === null) {]}
                 <div class="my-flag one-line">{[print(xabber.getString("groupchat_kicked"))]}</div>
                 {[}]}
 
