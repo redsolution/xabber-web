@@ -6694,10 +6694,15 @@ xabber.Chats = xabber.ChatsBase.extend({
 
         class Mention extends Inline {
             static create(paramValue) {
-                let node = super.create(),
-                    data = JSON.parse(paramValue),
+                let node = super.create(), data, target;
+                if (paramValue.on_format){
+                    data = paramValue.data;
+                    target = paramValue.target;
+                } else {
+                    data = JSON.parse(paramValue);
                     target = data.jid ? ('?jid=' + data.jid) : (data.id ?  ('?id=' + data.id) : "");
-                node.innerHTML = data.nickname;
+                    node.innerHTML = data.nickname;
+                }
                 data.is_me && node.classList.add('ground-color-100');
                 node.setAttribute('data-target', target);
                 return node;
@@ -6705,6 +6710,17 @@ xabber.Chats = xabber.ChatsBase.extend({
 
             static value(node) {
                 return node.innerHTML;
+            }
+
+            static formats(node) {
+                return {
+                    on_format: true,
+                    data: {
+                        nickname: node.innerHTML,
+                        is_me: node.classList.contains("ground-color-100")
+                    },
+                    target: node.getAttribute('data-target')
+                };
             }
         }
         Mention.blotName = 'mention';
