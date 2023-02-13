@@ -7771,7 +7771,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     onChatRemoved: function (chat, options) {
         if (this.active_chat === this.child(chat.id)) {
             this.active_chat = null;
-            xabber.body.setScreen(null, {chat_item: null},
+            xabber.body.setScreen(null, {chat_item: null, right: undefined},
                     {silent: !xabber.body.isScreen('all-chats')});
         }
         this.removeChild(chat.id, options);

@@ -1709,7 +1709,7 @@ xabber.SettingsView = xabber.BasicView.extend({
     ps_selector: '.panel-content',
 
     events: {
-        "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
+        "click .settings-tabs-wrap .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
         "click .btn-add-account": "showAddAccountView",
         "click .setting.notifications label": "setNotifications",
         "click .setting.private-notifications label": "setPrivateNotifications",
