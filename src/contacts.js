@@ -8871,13 +8871,13 @@ xabber.Roster = xabber.ContactsBase.extend({
             this.account.retraction_version = retract_version;
         }
         this.account.set('last_sync', sync_timestamp);
-        this.account.cached_sync_conversations.putInCachedConversations({
-            account_conversation_type: 'last_sync_timestamp',
-            timestamp: sync_timestamp,
-        });
         this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
         let dfd = new $.Deferred();
         dfd.done((is_cached) => {
+            this.account.cached_sync_conversations.putInCachedConversations({
+                account_conversation_type: 'last_sync_timestamp',
+                timestamp: sync_timestamp,
+            });
             xabber.chats_view.hideChatsFeedback();
             if (!request_with_stamp)
                 this.account.chats.getSavedChat();
@@ -8937,6 +8937,9 @@ xabber.Roster = xabber.ContactsBase.extend({
 
     onRosterIQ: function (iq) {
         let new_roster_version = $(iq).children('query').attr('ver');
+        $(iq).children('query').find('item').each((idx, item) => {
+            this.onRosterItem(item);
+        });
         if (iq.getAttribute('type') === 'set') {
             this.account.onSetIQResult(iq);
         }
@@ -8947,9 +8950,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                 this.account.save('roster_version', this.roster_version);
             }
         }
-        $(iq).children('query').find('item').each((idx, item) => {
-            this.onRosterItem(item);
-        });
         return true;
     },
 
