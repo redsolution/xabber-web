@@ -7123,14 +7123,27 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                 return;
             let $retracted_msg = $message.find('retract-message'),
                 retracted_msg_id = $retracted_msg.attr('id'),
-                retract_version = $retracted_msg.attr('version'),
-                msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
+                retract_version = $retracted_msg.attr('version');
+            let msg_item = chat.messages.find(msg => msg.get('stanza_id') == retracted_msg_id || msg.get('contact_stanza_id') == retracted_msg_id);
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             if (msg_item) {
                 msg_item.set('is_unread', false);
-                if (!chat.item_view.content)
-                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                 chat.item_view.content.removeMessage(msg_item);
                 chat.item_view.updateLastMessage(chat.last_message);
+            } else {
+                chat.get('last_read_msg') && chat.item_view.content.MAMRequest({
+                    var: [
+                        {
+                            var: 'after-id',
+                            value: chat.get('last_read_msg')
+                        },
+                    ],
+                    max: 0,
+                }, (success, messages, rsm) => {
+                    chat.set('const_unread', Number(rsm.count));
+                }, (err) => {
+                });
             }
             if (retract_version > this.account.retraction_version) {
                 if (chat.get('encrypted') && this.account.omemo)
