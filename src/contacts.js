@@ -8724,6 +8724,11 @@ xabber.Roster = xabber.ContactsBase.extend({
             is_invite =  message.find('invite').length,
             msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
             msg, options = {synced_msg: true,};
+        if (message.children('stanza-id').length
+            && message.children('stanza-id').attr('id')
+            && chat.retracted_msg_id_list.includes(message.children('stanza-id').attr('id'))){
+            return;
+        };
         (iq && !($item.attr('status') === 'deleted')) && this.account.cached_sync_conversations.putInCachedConversations({
             account_conversation_type: $(item).attr('jid') +  '/' + $(item).attr('type'),
             conversation: item.outerHTML,
