@@ -8570,7 +8570,7 @@ xabber.BlockList = Backbone.Model.extend({
 xabber.Roster = xabber.ContactsBase.extend({
     initialize: function (models, options) {
         this.account = options.account;
-        this.roster_version = this.account.get('roster_version') || 0;
+        this.roster_version = options.roster_version || 0;
         this.groups = this.account.groups;
         this.contacts = this.account.contacts;
         this.contacts.on("add_to_roster", this.onContactAdded, this);
@@ -8949,10 +8949,13 @@ xabber.Roster = xabber.ContactsBase.extend({
             this.account.onSetIQResult(iq);
         }
         else {
-            new_roster_version && (this.roster_version != new_roster_version) && this.account.cached_roster.clearDataBase();
             if (iq.getAttribute('type') === 'result') {
                 new_roster_version && (this.roster_version = new_roster_version);
-                this.account.save('roster_version', this.roster_version);
+                this.account.cached_roster.putInRoster({
+                    jid: 'roster_version',
+                    is_version: true,
+                    version: this.roster_version
+                });
             }
         }
         return true;
@@ -9975,7 +9978,14 @@ xabber.Account.addInitPlugin(function () {
     });
     this.groups = new xabber.Groups(null, {account: this});
     this.contacts = new xabber.Contacts(null, {account: this});
-    this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this}));
+
+    this.cached_roster.on("database_opened", () => {
+        this.cached_roster.getFromRoster('roster_version', (res) => {
+            let roster_version = res && res.version ? res.version : 0;
+            this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this, roster_version: roster_version}));
+        });
+    });
+
     this.blocklist = new xabber.BlockList(null, {account: this});
 
     this._added_pres_handlers.push(this.contacts.handlePresence.bind(this.contacts));
@@ -9988,6 +9998,9 @@ xabber.Account.addInitPlugin(function () {
         });
         this.cached_roster.getAllFromRoster((roster_items) => {
             $(roster_items).each((idx, roster_item) => {
+                if (roster_item.jid === 'roster_version'){
+                    return;
+                }
                 this.contacts.mergeContact(roster_item);
             });
             if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
