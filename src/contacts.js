@@ -60,7 +60,7 @@ xabber.Contact = Backbone.Model.extend({
         this.on("change:full_jid", this.updateCachedInfo, this);
         this.on("change:roster_name", this.updateName, this);
         this.account.dfd_presence.done(() => {
-            if (!this.get('blocked') && !this.get('vcard_updated'))
+            if (!this.get('blocked') && !this.get('vcard_updated') && !attrs.is_deleted)
                 this.getVCard();
         });
     },
@@ -8711,7 +8711,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             is_private = is_incognito && $group_metadata.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').children('parent').text(),
             is_group_chat =  type === Strophe.NS.GROUP_CHAT || is_private || is_incognito,
             encrypted = type === Strophe.NS.SYNCHRONIZATION_OMEMO,
-            contact = !saved && this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito}),
+            contact = !saved && this.contacts.mergeContact({jid: jid, group_chat: is_group_chat, private_chat: is_private, incognito_chat: is_incognito, is_deleted: $item.attr('status') === 'deleted'}),
             chat = saved ? this.account.chats.getSavedChat() : this.account.chats.getChat(contact, encrypted && 'encrypted', true),
             message = $sync_metadata.children('last-message').children('message'),
             current_call = $item.children('metadata[node="' + Strophe.NS.JINGLE_MSG + '"]').children('call'),
@@ -8821,7 +8821,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             } else
                 chat.retraction_version = msg_retraction_version;
         }
-        if (request_with_stamp && chat.item_view && chat.item_view.content) {
+        if (request_with_stamp && chat.item_view && chat.item_view.content && !is_invite) {
             chat.trigger('get_missed_history', request_with_stamp/1000);
         }
         unread_msgs_count && (options.is_unread = true);
