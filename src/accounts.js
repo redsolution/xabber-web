@@ -911,7 +911,10 @@ xabber.Account = Backbone.Model.extend({
                 console.log(item)
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
-                $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>")
+                if (msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
+                    $(msg_iq).append("<retry to='" + msg.collection.chat.get('jid') + "' xmlns='" + Strophe.NS.DELIVERY + "'/>");
+                else
+                    $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>");
                 msg_iq && this.sendMsgPending(msg_iq);
             });
             this.trigger('send_pending_messages');

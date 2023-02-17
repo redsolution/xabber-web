@@ -110,6 +110,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
     comparator: 'timestamp',
 
     initialize: function (models, options) {
+        this.chat = options.chat;
         this.account = options.account;
     },
 
@@ -1001,7 +1002,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         } else {
             this.set({'group_chat': false, 'name': attrs.name});
         }
-        this.messages = new xabber.Messages(null, {account: this.account});
+        this.messages = new xabber.Messages(null, {account: this.account, chat: this});
         this.messages_unread = new xabber.Messages(null, {account: this.account});
         this.item_view = new xabber.ChatItemView({model: this});
         this.plyr_players = [];
