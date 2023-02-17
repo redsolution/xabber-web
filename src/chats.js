@@ -3532,12 +3532,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     videoOnload: function ($message, message) {
-        let $image_container = $message.find('.img-content'),
-            $copy_link_icon = $message.find('.mdi-link-variant');
+        let $copy_link_icon = $message.find('.mdi-link-variant');
         $copy_link_icon.attr({
             'data-image': 'true'
         });
         this.initPlyrEmbedPlayer($message, message);
+    },
+
+    OGPLinkOnload: function ($message, message) {
+        let $copy_link_icon = $message.find('.mdi-link-variant');
+        $copy_link_icon.attr({
+            'data-image': 'true'
+        });
     },
 
     locationOnload: function ($message) {
@@ -4539,6 +4545,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
                 $message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
             });
+            this.OGPLinkOnload($message, message);
         }
 
         if (message.get('data_form')) {
@@ -4717,6 +4724,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                         template_for_link_reference_content = $(templates.messages.link_reference_chat(copied_attrs));
                         $f_message.find('.chat-msg-link-reference-content').append(template_for_link_reference_content);
                     });
+                    this.OGPLinkOnload($message, message);
                 }
                 if (fwd_msg.get('data_form')) {
                     let data_form = utils.render_data_form(fwd_msg.get('data_form'));
@@ -6105,12 +6113,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let files = msg.get('files'),
             videos = msg.get('videos'),
             images = msg.get('images'),
+            link_references = msg.get('link_references'),
             fwd_messages = [],
+            fwd_link_references = [],
             files_links = '';
         if (msg.get('forwarded_message')) {
             msg.get('forwarded_message').forEach((message) => {
                 message.get('images') && fwd_messages.push(message.get('images'));
                 message.get('videos') && fwd_messages.push(message.get('videos'));
+                message.get('link_references') && fwd_link_references.push(message.get('link_references'));
             });
         }
         $(files).each(function(idx, file) {
@@ -6128,11 +6139,23 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 files_links += '\n';
             files_links += image.sources[0];
         });
+        $(link_references).each(function(idx, link_reference) {
+            if (files_links != "")
+                files_links += '\n';
+            files_links += link_reference.url;
+        });
         $(fwd_messages).each(function (idx, message) {
             $(message).each(function (i, file) {
                 if (files_links != "")
                     files_links += '\n';
                 files_links += file.sources[0];
+            });
+        });
+        $(fwd_link_references).each(function (idx, message) {
+            $(message).each(function (i, link_reference) {
+                if (files_links != "")
+                    files_links += '\n';
+                files_links += link_reference.url;
             });
         });
         utils.copyTextToClipboard(files_links, xabber.getString("toast_link_copied"), xabber.getString("toast__not_copied_in_clipboard"));
