@@ -10722,7 +10722,16 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     onChangedText: function () {
-        let current_height = this.$el.height();
+        let current_height = this.$el.height(),
+            quill_textarea = $(this.quill.container).find('.rich-textarea'),
+            quill_current_height = quill_textarea.prop('scrollHeight');
+        if (quill_current_height !== this.text_input_height) {
+            if (this.text_input_height < quill_current_height){
+                quill_textarea.scrollTop(quill_current_height);
+            }
+            this.text_input_height = quill_current_height;
+        }
+
         if (current_height !== this.bottom_height) {
             this.bottom_height = current_height;
             this.view.scrolled_to_bottom = this.view.isScrolledToBottom();
