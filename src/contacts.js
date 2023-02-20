@@ -8889,9 +8889,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             if (is_first_sync)
                 this.account.set('first_sync', sync_timestamp);
             if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
-                if (is_first_sync) {
-                    this.getRoster();
-                }
+                //
             }
             else if ($(iq).find('conversation').length) {
                 if (!synchronization_with_stamp) {
@@ -10010,6 +10008,7 @@ xabber.Account.addInitPlugin(function () {
                     !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
                     last_sync_timestamp && (options.stamp = last_sync_timestamp);
                     this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
+                    this.roster.getRoster();
                 });
             }
             else {

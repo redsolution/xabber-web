@@ -12364,6 +12364,7 @@ xabber.Account.addConnPlugin(function () {
             let last_msg_timestamp = this.last_msg_timestamp;
             this.chats.registerMessageHandler();
             this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000}, false, true);
+            this.roster && this.roster.getRoster();
         }
         return true;
     });

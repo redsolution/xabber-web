@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.29","version_description":"added fix to scroll quill textarea on new line"}'
+'{"version_number":"2.3.3.30","version_description":"fixed roster query request sending"}'
 )});
