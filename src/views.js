@@ -1516,45 +1516,58 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
 
     showNewVideo: function (options) {
         options = options || {};
-        if (options.player.provider === 'youtube'){
-            this.$('.plyr-player-popup-draggable').addClass('hidden');
-            this.$('.plyr-player-popup-draggable').css({
-                width: 400,
-                height: 200,
+        let dfd = new $.Deferred();
+        dfd.done(() => {
+            if (options.player.provider === 'youtube'){
+                this.$('.plyr-player-popup-draggable').addClass('hidden');
+                this.$('.plyr-player-popup-draggable').css({
+                    width: 400,
+                    height: 200,
+                });
+            }
+            this.account = options.player.chat_item.account;
+            this.updateColorScheme();
+            this.player.chat_item = options.player.chat_item;
+            this.player.player_item = options.player;
+            this.player.message_unique_id = options.player.message_unique_id;
+            let video_sources = {
+                src: options.player.video_src,
+                provider: options.player.provider,
+            };
+            options.player.type && (video_sources.type = options.player.type);
+            this.player.source = {
+                type: 'video',
+                sources: [
+                    video_sources,
+                ],
+            }
+            xabber.current_plyr_player = this.player;
+            this.player.once('ready',(event) => {
+                let $minimize_element_float = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></svg>')
+                $minimize_element_float.append(env.templates.svg['player-float']())
+                $minimize_element_float.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
+                let $minimize_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></svg>')
+                $minimize_element_full.append(env.templates.svg['player-full']())
+                $minimize_element_full.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
+                let $show_message_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-open-message mdi-svg-template" data-svgname="message-bookmark-outline"></svg>')
+                $show_message_element_full.append(env.templates.svg['message-bookmark-outline']())
+                $show_message_element_full.insertAfter(this.$('.plyr__controls__item[data-plyr="download"]'));
+                let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>')
+                $previous_element.insertBefore(this.$('.plyr__controls__item[data-plyr="play"]'));
+                let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>')
+                $next_element.insertAfter(this.$('.plyr__controls__item[data-plyr="play"]'));
+                this.player.play();
+                xabber.trigger('plyr_player_updated');
             });
-        }
-        this.account = options.player.chat_item.account;
-        this.updateColorScheme();
-        this.player.chat_item = options.player.chat_item;
-        this.player.player_item = options.player;
-        this.player.message_unique_id = options.player.message_unique_id;
-        this.player.source = {
-            type: 'video',
-            sources: [
-                {
-                    src: options.player.video_src,
-                    provider: options.player.provider,
-                },
-            ],
-        }
-        xabber.current_plyr_player = this.player;
-        this.player.once('ready',(event) => {
-            let $minimize_element_float = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></svg>')
-            $minimize_element_float.append(env.templates.svg['player-float']())
-            $minimize_element_float.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
-            let $minimize_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></svg>')
-            $minimize_element_full.append(env.templates.svg['player-full']())
-            $minimize_element_full.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
-            let $show_message_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-open-message mdi-svg-template" data-svgname="message-bookmark-outline"></svg>')
-            $show_message_element_full.append(env.templates.svg['message-bookmark-outline']())
-            $show_message_element_full.insertAfter(this.$('.plyr__controls__item[data-plyr="download"]'));
-            let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>')
-            $previous_element.insertBefore(this.$('.plyr__controls__item[data-plyr="play"]'));
-            let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>')
-            $next_element.insertAfter(this.$('.plyr__controls__item[data-plyr="play"]'));
-            this.player.play();
-            xabber.trigger('plyr_player_updated');
         });
+
+        if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src){
+            options.player.chat_item.model.messages.decryptFile(options.player.video_src, options.player.key).then((result) => {
+                options.player.video_src = result;
+                dfd.resolve();
+            });
+        } else
+            dfd.resolve();
     },
 
     closePopup: function () {

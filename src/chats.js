@@ -4356,8 +4356,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (is_video) {
             let video_content = this.createVideoContainer();
             $message.find('.chat-msg-media-content').append(video_content);
-            videos.forEach((video) => {
-                let video_el = this.createVideo(video);
+            videos.forEach((video, idx) => {
+                let video_el = this.createVideo(video, idx);
                 $message.find('.video-content').append(video_el);
             });
             this.videoOnload($message, message);
@@ -4433,7 +4433,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             $(files).each((idx, file_) => {
                 file_.upload_id = idx;
                 if (utils.isImageType(file_.type)) {
-                    file_.sources = [utils.isImageType(file_.type) ? file_.key ? file_.image_prev.src : window.URL.createObjectURL(new Blob([file_])) : null,];
+                    file_.sources = [file_.key ? file_.image_prev.src : window.URL.createObjectURL(new Blob([file_])),];
                     images.push(file_);
                 }
             });
@@ -4624,8 +4624,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 if (is_forward_video) {
                     let video_content = this.createVideoContainer();
                     $f_message.find('.chat-msg-media-content').append(video_content);
-                    attrs.videos.forEach((video) => {
-                        let video_el = this.createVideo(video);
+                    attrs.videos.forEach((video, idx) => {
+                        let video_el = this.createVideo(video, idx);
                         $f_message.find('.video-content').append(video_el);
                     });
                     this.videoOnload($message, message);
@@ -4785,7 +4785,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     initPlyrEmbedPlayer: function ($msg, msg) {
         let message = this.model.messages.get($msg.data('uniqueid')) || msg,
-            msg_players = [];
+            msg_players = [],
+            msg_videos = message && message.get('videos') && message.get('videos').length ? message.get('videos') : null;
         $msg.find('.plyr-video-container:not(.no-load)').each((idx, item) => {
             if ($(item).hasClass('no-load'))
                 return;
@@ -4797,10 +4798,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
             } else {
                 player = {video_src: $(item).attr('data-src')}
                 player.provider = $(item).attr('data-provider');
+                player.video_id = $(item).attr('data-msg-video-id');
                 player.msg_time = $msg.attr('data-time');
                 player.chat_item = this.model.item_view;
                 player.message_id = idx;
                 player.message_unique_id = $msg.attr('data-uniqueid');
+                if (msg_videos && msg_videos.length && player.video_id >= 0) {
+                    let video_file = msg_videos[player.video_id];
+                    if (video_file.key){
+                        player.key = video_file.key;
+                        video_file.type && (player.type = video_file.type);
+                    }
+                }
                 this.model.plyr_players = this.model.plyr_players.concat([player]).sort((a, b) => a.msg_time - b.msg_time);
                 xabber.plyr_players = xabber.plyr_players.concat([player]);
                 msg_players = msg_players.concat([player]);
@@ -5834,8 +5843,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
             let video_content = this.createVideoContainer();
             $message.find('.chat-msg-media-content.chat-main-upload-media').find('.chat-file-info').remove();
             $message.find('.chat-msg-media-content.chat-main-upload-media').append(video_content);
-            videos.forEach((video) => {
-                let video_el = this.createVideo(video);
+            videos.forEach((video, idx) => {
+                let video_el = this.createVideo(video, idx);
                 $message.find('.video-content').append(video_el);
             });
             this.videoOnload($message, message);
@@ -5955,9 +5964,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
         return imgContent;
     },
 
-    createVideo: function(video) {
+    createVideo: function(video, idx) {
         video.pretty_size = utils.pretty_size(video.size)
-        let $video_wrap_template = $(templates.messages.video({video_src: video.sources[0], thumbnail: video.thumbnail}));
+        let video_attrs = {video_src: video.sources[0], thumbnail: video.thumbnail, video_id: idx},
+            $video_wrap_template = $(templates.messages.video(video_attrs));
         return $video_wrap_template;
     },
 
@@ -11172,7 +11182,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 typeicon: utils.file_type_icon(file.type),
                 filetype: utils.pretty_file_type(file.type),
             })));
-            file.image_prev && (delete file.image_prev);
             this.attached_files = this.attached_files.concat([file]);
             xabber.chat_body.updateHeight();
             this.scrollToBottom();
