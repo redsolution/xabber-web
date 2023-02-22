@@ -162,7 +162,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
         !chat.item_view.content && (chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view}));
 
         contact.set('in_roster', false);
-        contact.getVCard();
         if ($group_info.length) {
             let name = $group_info.find('name').text(),
                 model = $group_info.find('membership').text(),
@@ -3017,7 +3016,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     onChangedActiveStatus: function () {
         let active = this.model.get('active');
         this.sendChatState(active ? 'active' : 'inactive');
-        if (this.model.get('group_chat')) {
+        if (this.model.get('group_chat') && !this.contact.get('invitation')) {
             if (active)
                 this.contact.sendPresent();
             else
