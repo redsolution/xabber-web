@@ -431,6 +431,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
         }
         (options.context_message || options.participant_message || options.searched_message || options.is_searched) && (attrs.state = constants.MSG_ARCHIVED);
 
+        if (this.chat && this.chat.item_view && !this.chat.item_view.content)
+            this.chat.item_view.content = new xabber.ChatContentView({chat_item: this.chat.item_view});
+
         if (options.pinned_message)
             return this.account.pinned_messages.create(attrs);
 
@@ -831,7 +834,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
           let $propose_msg = $msg({type: 'chat', to: this.contact.get('jid')})
               .c('propose', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')})
               .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up().up()
-              .c('store', {xmlns: Strophe.NS.HINTS}).up()
+              .c('no-store', {xmlns: Strophe.NS.HINTS}).up()
               .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
               .c('body').t(xabber.getString("jingle__text_body_message")).up()
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
@@ -841,7 +844,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
       accept: function () {
           let $accept_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
               .c('accept', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')}).up()
-              .c('store', {xmlns: Strophe.NS.HINTS}).up()
+              .c('no-store', {xmlns: Strophe.NS.HINTS}).up()
               .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
           this.set('jingle_start', moment.now());
@@ -1162,7 +1165,18 @@ xabber.MessagesBase = Backbone.Collection.extend({
             if (carbon_copied && (from_bare_jid == this.account.get('jid'))) {
                 return;
             }
-            if (options.is_archived || options.synced_msg)
+            if (options.synced_msg){
+                if (this.get('saved'))
+                    return;
+                let view = xabber.chats_view.child(this.contact.hash_id);
+                $message.find('time').attr('stamp') && this.set('timestamp', $message.find('time').attr('stamp'));
+                if (!view.content)
+                    view.content = new xabber.ChatContentView({chat_item: view});
+                if (view && view.content)
+                    view.content.receiveNoTextMessage($message, carbon_copied);
+                return;
+            }
+            if (options.is_archived)
                 return;
             else {
                 let session_id = $jingle_msg_propose.attr('id'),
@@ -5242,6 +5256,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 if (msg) {
                     stanza = msg.message;
                     message.set('trusted', msg.is_trusted);
+                    message.set({xml: $(stanza.tree()).clone()[0]});
                 }
                 let msg_sending_timestamp = moment.now();
                 this.account.sendFast(stanza, this.msgCallback.bind(this, msg_sending_timestamp, message));
