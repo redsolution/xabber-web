@@ -413,6 +413,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
         utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done((result) => {
             if (result) {
                 $target.detach();
+                let f_count = this.$('div.fingerprints-content').find('div.row').length;
+                if (!f_count)
+                    this.$('div.fingerprints-content').html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
+                this.jid == this.account.get('jid') && f_count++;
+                this.$('.additional-info').text(xabber.getQuantityString("omemo__dialog_fingerprints__text_devices_count", f_count, [this.jid, f_count]));
                 delete this.model.own_devices[device_id];
                 let conn = this.account.getConnectionForIQ();
                 if (conn && conn.omemo) {
