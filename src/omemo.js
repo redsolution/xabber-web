@@ -704,7 +704,7 @@ xabber.Device = Backbone.Model.extend({
             return plainText;
         }
         catch (e) {
-            return null;
+            throw e;
         }
     },
 
@@ -1222,7 +1222,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     else if (options.gallery && deferred)
                         deferred.reject();
                     this.account.chats.receiveChatMessage($message[0], options);
-                }).catch(() => {
+                }).catch((e) => {
+                    if (e.name === 'MessageCounterError')//for capturing double decryption of same message
+                        return;
                     if (options.synced_msg && !options.decryption_retry) {
                         this.receiveChatMessage($message[0], _.extend(options, {decryption_retry: true}));
                         return;
@@ -1507,7 +1509,13 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (!ownPreKey)
             return null;
         let peer = this.getPeer(from_jid),
+            exportedKey;
+        try {
             exportedKey = await peer.decrypt(encryptedData.sid, ownPreKey.ciphertext, ownPreKey.preKey);
+        }
+        catch (e) {
+            throw e;
+        }
         if (!exportedKey)
             return;
         let exportedMasterKey = exportedKey.slice(0, 32),

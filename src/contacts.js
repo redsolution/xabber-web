@@ -8742,8 +8742,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (encrypted && this.account.omemo) {
             chat.set('timestamp', chat_timestamp);
             chat.set('opened', true);
-            if (iq && $(iq).attr('type') != 'set')
-                chat.item_view.updateEncryptedChat();
+            chat.item_view.updateEncryptedChat();
         }
         if (!saved) {
             if ($item.attr('mute') || $item.attr('mute') === '0') {
@@ -8826,8 +8825,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         }
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
-        if (encrypted && this.account.omemo)
-            unread_msgs_count && unread_msgs_count--;
         message.length && (msg = this.account.chats.receiveChatMessage(message, options));
         if (!(encrypted && !this.account.omemo)){
             chat.messages_unread.reset();
