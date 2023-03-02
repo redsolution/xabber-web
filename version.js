@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.36","version_description":"fixed wrong unread msg counter for encrypted chats, fixed double decryption of same message error"}'
+'{"version_number":"2.3.3.37","version_description":"updated plyr version to 3.7.3 with fixes"}'
 )});

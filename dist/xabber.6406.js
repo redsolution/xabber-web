@@ -1,2 +1,0 @@
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[6406],{66406:e=>{function r(e){var r=new Error("Cannot find module '"+e+"'");throw r.code="MODULE_NOT_FOUND",r}r.keys=()=>[],r.resolve=r,r.id=66406,e.exports=r}}]);
-//# sourceMappingURL=xabber.6406.js.map
