@@ -880,6 +880,7 @@ input[type=file] {
     transition: background-color 500ms linear;
     position: fixed;
     width: inherit;
+    z-index: 1000;
     height: 64px;
 }
 
@@ -1174,7 +1175,7 @@ body {
     width: inherit !important;
 }
 .details-panel-right .panel-content-wrap .ps-scrollbar-y-rail{
-    z-index: 5;
+    z-index: 1005;
 }
 
 .right-contact-panel-wrap.background-click .details-panel-right .panel-background-clickable{
@@ -14956,13 +14957,6 @@ input[type='range'].voice-message-volume:focus {
     display: none !important;
 }
 
-.details-panel-right .main-info.fixed-scroll {
-    position: fixed;
-    z-index: 4;
-    top: 0;
-    background: #ffffff;
-}
-
 .details-panel-right .bottom-block .tabs.fixed-scroll {
     position: fixed;
     z-index: 4;
@@ -14971,19 +14965,14 @@ input[type='range'].voice-message-volume:focus {
     width: inherit !important;
 }
 
-.details-panel-right .main-info.fixed-scroll .circle-avatar{
-    display: none !important;
+.details-panel-right .main-info .buttons-wrap.fixed-scroll{
+    margin-top: 0;
+    position: fixed;
+    top: 64px;
+    width: inherit;
+    z-index: 4;
 }
 
-.details-panel-right .main-info.fixed-scroll .text-info{
-    display: none !important;
-}
-
-.details-panel-right .main-info.fixed-scroll .buttons-wrap{
-    margin-top: 4px;
-}
-
-.details-panel-right .main-info:not(.fixed-scroll) .block-name,
 .details-panel-right .main-info:not(.fixed-scroll) .block-name{
     opacity: 0;
     transition: opacity 0.1s ease-in;
@@ -15206,9 +15195,9 @@ input[type='range'].voice-message-volume:focus {
     width: 176px !important;
     margin-top: 69px;
 }
-.details-panel-right .main-info.fixed-scroll .buttons-wrap .contact-mute-dropdown {
+.details-panel-right .main-info .buttons-wrap.fixed-scroll .contact-mute-dropdown {
     margin-top: 0 !important;
-    top: 128px !important;
+    top: 64px !important;
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,

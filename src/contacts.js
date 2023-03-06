@@ -1461,7 +1461,7 @@ xabber.ContactRightVCardView = xabber.VCardRightView.extend({
             this.updateName()
             this.update();
         });
-        this.parent.$('.main-info').removeClass('fixed-scroll');
+        this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
         this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
         this.parent.scrollToTop();
         if (this.parent.ps_container.length) {
@@ -1864,6 +1864,17 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
     },
 
     scrollToTopSmooth: function () {
+        this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
+        this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
+        this.$('.main-info').removeClass('fixed-scroll');
+        this.$('.main-info .block-name').addClass('fade-out');
+        this.$('.btn-escape').removeClass('btn-top');
+        this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
+        this.$('.bottom-block:not(.edit-bottom-block) .tabs').removeClass('fixed-scroll');
+        this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').removeClass('fixed-scroll');
+        this.$('.buttons-wrap').hideIf(false);
+        this.$('.btn-edit').hideIf(false);
+        this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
             {scrollTop: 0},
             400,
@@ -1918,24 +1929,24 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
         if (this.$('.bottom-block:not(.edit-bottom-block)'))
             bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block)').get(0).getBoundingClientRect().top;
 
-        if(this.ps_container[0].scrollTop >= 200) {
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,1)'});
+        if(this.ps_container[0].scrollTop >= 250) {
+            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
+            this.$('.buttons-wrap.fixed-scroll').removeClass('hidden2');
             this.$('.main-info').addClass('fixed-scroll');
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
-            this.$('.block-wrap.vcard').css({'padding-top': '340px'})
             this.$('.main-info .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.main-info .block-name.second-text').addClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,0.5)'});
+            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
             this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.block-wrap.vcard').css({'padding-top': '0'});
+            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
             this.$('.main-info .block-name').addClass('fade-out');
         }
         else{
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,0)'});
+            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
+            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
             this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.block-wrap.vcard').css({'padding-top': '0'});
             this.$('.main-info .block-name').addClass('fade-out');
         }
         if (bottom_block_scroll && bottom_block_scroll < 150) {
@@ -2691,24 +2702,24 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         if (this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)'))
             bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').get(0).getBoundingClientRect().top;
 
-        if(this.ps_container[0].scrollTop >= 200) {
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,1)'});
+        if(this.ps_container[0].scrollTop >= 250) {
+            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
+            this.$('.buttons-wrap.fixed-scroll').removeClass('hidden2');
             this.$('.main-info').addClass('fixed-scroll');
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
-            this.$('.block-wrap.vcard').css({'padding-top': '340px'})
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,0.5)'});
+            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0.5) !important;');
             this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.block-wrap.vcard').css({'padding-top': '0'});
+            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
         else{
-            this.$('.header-buttons').css({'background-color': 'rgba(255,255,255,0)'});
+            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
+            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
             this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.block-wrap.vcard').css({'padding-top': '0'});
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
         if (bottom_block_scroll && bottom_block_scroll < 150) {
@@ -2791,6 +2802,17 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     scrollToTopSmooth: function () {
+        this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
+        this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
+        this.$('.main-info').removeClass('fixed-scroll');
+        this.$('.header-buttons .block-name').addClass('fade-out');
+        this.$('.btn-escape').removeClass('btn-top');
+        this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
+        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').removeClass('fixed-scroll');
+        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
+        this.$('.main-info .buttons-wrap').hideIf(false);
+        this.$('.btn-edit').hideIf(false);
+        this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
             {scrollTop: 0},
             400,
@@ -3111,15 +3133,15 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
     onScroll: function () {
         if(this.ps_container[0].scrollTop >= 170) {
             this.$('.vcard-header-title').addClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,1)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0.5)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
         }
         else {
             this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0) !important;');
         }
 
     },
@@ -3139,7 +3161,7 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
             this.updateName()
             this.update();
         });
-        this.parent.$('.main-info').removeClass('fixed-scroll');
+        this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
         this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
         this.parent.scrollToTop();
         if (this.parent.ps_container.length) {
@@ -5036,7 +5058,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.btn-edit-participant').hideIf(true)
         this.$('.parent-btn').hideIf(true)
         this.$('.child-btn').hideIf(false)
-        this.$('.block-header').css({'background-color': 'rgba(255,255,255,0)'});
+        this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,0) !important;');
         this.$('.block-name.second-text').text('');
         this.$('.block-name:not(.second-text)').text(xabber.getString("groupchat_member_edit"));
         this.$('.block-name:not(.second-text)').hideIf(false);
@@ -5144,6 +5166,17 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     scrollToTopSmooth: function () {
+        this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,0) !important;');
+        this.$('.block-name.second-text').text('');
+        this.$('.block-name.second-text').addClass('fade-out');
+        this.$('.block-name:not(.second-text)').removeClass('fade-out');
+        this.$('.btn-back').removeClass('btn-top');
+        this.$('.btn-back i').addClass('mdi-close').removeClass('mdi-arrow-right');
+        this.$('.bottom-block .tabs').removeClass('fixed-scroll');
+        this.$('.bottom-block .participants-search-form').removeClass('fixed-scroll');
+        this.$('.buttons-wrap').hideIf(false);
+        this.$('.btn-edit').hideIf(false);
+        this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
             {scrollTop: 0},
             400,
@@ -5154,23 +5187,23 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
 
     onScroll: function () {
         if(this.ps_container[0].scrollTop >= 220) {
-            this.$('.block-header').css({'background-color': 'rgba(255,255,255,1)'});
+            this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
             this.$('.block-name.second-text').text(this.participant.get('nickname'));
             this.$('.block-name.second-text').removeClass('fade-out');
             this.$('.block-name:not(.second-text)').addClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 170) {
-            this.$('.block-header').css({'background-color': 'rgba(255,255,255,1)'});
+            this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
             this.$('.block-name.second-text').addClass('fade-out');
             this.$('.block-name:not(.second-text)').removeClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 1) {
-            this.$('.block-header').css({'background-color': 'rgba(255,255,255,0.5)'});
+            this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
             this.$('.block-name.second-text').addClass('fade-out');
             this.$('.block-name:not(.second-text)').removeClass('fade-out');
         }
         else {
-            this.$('.block-header').css({'background-color': 'rgba(255,255,255,0)'});
+            this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,0) !important;');
             this.$('.block-name.second-text').text('');
             this.$('.block-name.second-text').addClass('fade-out');
             this.$('.block-name:not(.second-text)').removeClass('fade-out');

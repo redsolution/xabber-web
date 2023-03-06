@@ -444,15 +444,15 @@ xabber.VCardRightView = xabber.VCardView.extend({
     onScroll: function () {
         if(this.ps_container[0].scrollTop >= 170) {
             this.$('.vcard-header-title').addClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,1)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0.5)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
         }
         else {
             this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').css({'background-color': 'rgba(255,255,255,0)'});
+            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0) !important;');
         }
 
     },
