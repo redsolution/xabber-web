@@ -9822,7 +9822,7 @@ xabber.AddContactView = xabber.BasicView.extend({
             contact.pushInRoster({name: name, groups: groups}, () => {
                 contact.pres('subscribe');
                 contact.trigger('presence', contact, 'subscribe_from');
-                contact.trigger("open_chat", contact);
+                contact.trigger("open_chat", contact, {right_force_close: true});
             }, function () {
                 contact.destroy();
             });

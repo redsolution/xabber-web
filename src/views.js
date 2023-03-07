@@ -894,7 +894,7 @@ xabber.Body = xabber.NodeView.extend({
         if (name && !this.isScreen(name)) {
             new_attrs.name = name;
         }
-        if ((attrs && attrs.right && attrs.right === 'group_invitation') || (name === 'settings' || name ==='account_settings'))
+        if ((attrs && attrs.right && attrs.right === 'group_invitation') || (name === 'settings' || name ==='account_settings') || options.right_force_close)
             new_attrs.right_contact = null;
         else {
             new_attrs.right_contact = xabber.body.screen.get('right_contact');
@@ -3677,6 +3677,8 @@ _.extend(xabber, {
                 if (chat.contact && !chat.isMuted())
                     count_msg += chat.get('unread') + chat.get('const_unread');
             });
+            let incoming_subscriptions = account.contacts.filter(item => item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
+            count_msg += incoming_subscriptions;
         });
         return count_msg;
     },

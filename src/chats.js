@@ -6889,7 +6889,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         options = options || {};
         _.isUndefined(options.clear_search) && (options.clear_search = true);
         let chat = this.getChat(contact, options.encrypted && 'encrypted');
-        chat.trigger('open', {clear_search: options.clear_search});
+        chat.trigger('open', {clear_search: options.clear_search, right_force_close: options.right_force_close});
     },
 
     openMention: function (contact, unique_id) {
@@ -7946,7 +7946,9 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         view.model.set('displayed_sent', true);
                     }
             }
-            if (xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' )) {
+            if (!options.right_force_close && (
+                xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' )
+            )) {
                 if (view.model.get('saved'))
                     xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
                 else if(xabber.right_contact_panel_saveable)
@@ -7959,7 +7961,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 clear_search: options.clear_search,
                 chat_item: view,
                 blocked: view.model.get('blocked')
-            },{right_contact_save: options.right_contact_save} );
+            },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
             if (view.contact && (!view.contact.get('vcard_updated') || (view.contact.get('group_chat') && !view.contact.get('group_info')) || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour'))))) {
                 view.contact.getVCard();
             }
