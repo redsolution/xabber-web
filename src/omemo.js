@@ -457,6 +457,7 @@ xabber.Bundle = Backbone.Model.extend({
                 registrationId = result[1];
             this.store.put('identityKey', identityKey);
             this.store.put('registrationId', registrationId);
+            this.model.account.trigger('update_omemo_devices');
             this.cacheIdentity(identityKey, registrationId);
         });
     },

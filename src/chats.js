@@ -2945,6 +2945,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
       },
 
       openDevicesWindow: function () {
+          if (!this.account.omemo)
+              return;
           let peer = this.account.omemo.getPeer(this.contact.get('jid'));
           peer.fingerprints.open();
       },

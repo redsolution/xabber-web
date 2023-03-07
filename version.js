@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.38","version_description":"changed how elements stick to head on scrolling in contact details, improved functioning of scrolltotop button in contact details, improvements on scrolling in contact details"}'
+'{"version_number":"2.3.3.39","version_description":"added that device button for omemo appears when there is available identityKey, changed circles input appearance in contact details, added min height for contact details tabs content"}'
 )});

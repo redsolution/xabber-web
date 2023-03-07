@@ -2679,6 +2679,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
         xabber.api_account && xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
         this.model.on("change:enabled", this.updateEnabled, this);
+        this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
         this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
         this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
         this.model.on("change:status_updated", this.updateStatus, this);
@@ -2730,6 +2731,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
             );
         }
+        this.updateOmemoDevices;
         return this;
     },
 
@@ -2739,6 +2741,21 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             status_message = account.getStatusMessage();
         this.$('.main-resource .status').attr('data-status', status);
         this.$('.main-resource .status-message').text(status_message);
+    },
+
+    updateOmemoDevices: function () {
+        if (this.model.omemo && this.model.omemo.store){
+            let identity_key = this.model.omemo.store.get('identityKey');
+            if (identity_key){
+                this.$('.omemo-settings-wrap .setting-wrap.manage-devices').removeClass('hidden2');
+            } else {
+                this.model.omemo.store.once('change:identityKey', () => {
+                    this.$('.omemo-settings-wrap .setting-wrap.manage-devices').removeClass('hidden2');
+                }, this);
+            }
+        }
+        else
+            this.$('.omemo-settings-wrap .setting-wrap.manage-devices').addClass('hidden2');
     },
 
     updateView: function () {
@@ -2877,6 +2894,9 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
         this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
         this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', !has_keys);
+        if (!this.model.omemo){
+            this.$('.omemo-settings-wrap .setting-wrap.manage-devices').addClass('hidden2');
+        }
     },
 
     updateEncryptedChatstates: function () {
