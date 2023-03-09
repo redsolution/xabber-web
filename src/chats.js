@@ -2213,7 +2213,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.model.item_view.open({right_contact_save: true, clear_search: false});
       },
 
-      addMessageHTML: function ($message, index, last_index) {
+      addMessageHTML: function ($message, msg, index, last_index) {
           let scrolled_from_top,
               scrolled_from_bottom = this.getScrollBottom();
           if (index === 0)
@@ -2223,7 +2223,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           if (index === last_index)
               scrolled_from_top = this.getScrollTop();
           let $next_message = $message.nextAll('.chat-message').first();
-          this.chat_content.updateMessageInChat($message[0]);
+          this.chat_content.updateMessageInChat($message[0], msg);
           if ($next_message.length) {
               this.chat_content.updateMessageInChat($next_message[0]);
           }
@@ -2368,7 +2368,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   $message.removeClass('message-from-context')
               }, 3000);
           }
-          this.addMessageHTML($message, index, this.account.context_messages.findLastIndex());
+          this.addMessageHTML($message, message, index, this.account.context_messages.findLastIndex());
       },
 
       onUpdatePlyr: function (ev) {
@@ -2453,7 +2453,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           message.set('is_archived', true);
           let $message = this.chat_content.buildMessageHtml(message).addClass('searched-message'),
               index = this.account.searched_messages.indexOf(message);
-          this.addMessageHTML($message, index);
+          this.addMessageHTML($message, message, index);
       }
   });
 
@@ -2620,7 +2620,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           );
       },
 
-      addMessageHTML: function ($message, index, last_index) {
+      addMessageHTML: function ($message, msg, index, last_index) {
           $message.prependTo(this.$('.chat-content'));
           if (index === last_index)
               scrolled_from_top = this.getScrollTop();
@@ -2642,7 +2642,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               let $message = this.chat_content.buildMessageHtml(message).addClass('searched-message'),
                   index = this.account.searched_messages.indexOf(message);
               this.chat_content.showMessageAuthor($message);
-              this.addMessageHTML($message, index);
+              this.addMessageHTML($message, message, index);
           }
       },
 
@@ -2762,7 +2762,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           message.set('is_archived', true);
           let $message = this.chat_content.buildMessageHtml(message).addClass('participant-message'),
               index = this.account.participant_messages.indexOf(message);
-          this.addMessageHTML($message, index);
+          this.addMessageHTML($message, message, index);
       }
   });
 
@@ -3531,7 +3531,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 msg = this.buildMessageHtml(pinned_message),
                 pinned_msg_modal = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this, message: pinned_message});
             pinned_msg_modal.$el.attr('data-color', this.account.settings.get('color'));
-            this.updateMessageInChat(msg);
+            this.updateMessageInChat(msg, pinned_message);
             this.initPopup(msg);
             pinned_msg_modal.open(msg);
         }
@@ -3937,7 +3937,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             $message.insertAfter(this.$('.chat-message').eq(index - 1));
         }
         let $next_message = $message.nextAll('.chat-message').first();
-        this.updateMessageInChat($message[0]);
+        this.updateMessageInChat($message[0], message);
         if ($next_message.length) {
             this.updateMessageInChat($next_message[0]);
         }
@@ -4033,7 +4033,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             return;
         $message.replaceWith($new_message)
         $message = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
-        this.updateMessageInChat($message[0]);
+        this.updateMessageInChat($message[0], item);
         this.initPopup($message);
         this.bottom.showChatNotification();
 
@@ -4835,7 +4835,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 if (xabber.current_plyr_player.player_item.message_id === player.message_id && xabber.current_plyr_player.player_item.message_unique_id === player.message_unique_id)
                     $(item).addClass('active-plyr-container');
         });
-        msg_players.length && message.set('msg_player_videos', msg_players);
+        msg_players.length && message && message.set('msg_player_videos', msg_players);
         xabber.trigger('plyr_player_updated');
     },
 
@@ -4962,11 +4962,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
     },
 
-    updateMessageInChat: function (msg_elem) {
+    updateMessageInChat: function (msg_elem, msg) {
         let $msg = $(msg_elem);
         $msg.prev('.chat-day-indicator').remove();
         if ($msg.find('.plyr-video-container').length) {
-            this.initPlyrEmbedPlayer($msg);
+            this.initPlyrEmbedPlayer($msg, msg);
         }
         let $prev_msg = $msg.prevAll('.chat-message').first();
         if (!$prev_msg.length) {
@@ -6268,7 +6268,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if ($elem.closest(".plyr-video-container").length > 0) {
             let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                 $plyr = $elem.closest(".plyr-video-container");
-            if (msg.get('msg_player_videos')){
+            !msg && (msg = this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')));
+            if (msg && msg.get('msg_player_videos')){
                 if (!xabber.plyr_player_popup){
                     xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
                     xabber.plyr_player_popup.show({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
@@ -6299,7 +6300,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 let msg = this.buildMessageHtml(this.account.forwarded_messages.get($elem.data('uniqueid'))),
                     expanded_fwd_message = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this});
                 expanded_fwd_message.$el.attr('data-color', this.account.settings.get('color'));
-                this.updateMessageInChat(msg);
+                this.updateMessageInChat(msg, this.account.forwarded_messages.get($elem.data('uniqueid')));
                 this.initPopup(msg);
                 expanded_fwd_message.open(msg);
                 return;
@@ -6712,7 +6713,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
             msg = this.chat_content.buildMessageHtml(this.account.forwarded_messages.get(unique_id)),
             expanded_fwd_message = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this.chat_content});
         expanded_fwd_message.$el.attr('data-color', this.account.settings.get('color'));
-        this.chat_content.updateMessageInChat(msg);
+        this.chat_content.updateMessageInChat(msg, this.account.forwarded_messages.get(unique_id));
         this.chat_content.initPopup(msg);
         expanded_fwd_message.open(msg);
     }

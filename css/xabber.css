@@ -5946,12 +5946,14 @@ input[type=text].simple-input-field:hover {
 }
 .details-panel-right .groups-block-wrap .new-group-field-wrap{
     width: 181px;
+    height: 32px;
 }
 .details-panel-right .groups-block-wrap .new-group-checkbox{
     display: none;
 }
 .details-panel-right .groups-block-wrap .new-group-name{
     margin: 0;
+    height: 32px;
 }
 .details-panel-right .groups-block-wrap .new-group-name input{
     display: none;

@@ -3635,7 +3635,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             $elem.removeClass('voice-message-rendering');
             element.innerHTML = not_expanded_msg;
             aud.unAll();
-            $elem.find('.voice-message-play').get(0).remove();
+            $elem.find('.voice-message-play').length && $elem.find('.voice-message-play').get(0).remove();
             utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
         });
 
@@ -6620,7 +6620,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
 
     closeChat: function () {
         let chat = this.account.chats.getChat(this.model);
-        chat.set({'opened': false, 'display': false, 'active': false});
+        chat.set({'opened': false, 'display': false, 'active': false, 'is_accepted': undefined});
         xabber.body.setScreen('all-chats', { right: undefined });
         chat.item_view.content.readMessages();
     },

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.40","version_description":"added force close option for contact details when chat is opened through add contact, fixed window title message counter to include invites in subscriptions"}'
+'{"version_number":"2.3.3.41","version_description":"fixed invitation window after add contact, fixed videos not working in message context view, fixed audio error in contact details voice messages, fixed opening messages from contact details media, returned previous circle design in contact details"}'
 )});
