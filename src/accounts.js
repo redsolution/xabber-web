@@ -2653,6 +2653,9 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
         "click .btn-delete-files": "deleteFilesFiltered",
+        'click .btn-trust': "trustDevice",
+        'click .btn-ignore': "ignoreDevice",
+        'click .btn-delete': "deleteDevice",
         "click .omemo-info .btn-purge-keys": "purgeKeys"
     },
 
@@ -2783,6 +2786,34 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$(`.token-resource-wrap`).hideIf(true)
     },
 
+    trustDevice: function (ev) {
+        if (this.model.omemo){
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.trustDevice(ev);
+        }
+    },
+
+    ignoreDevice: function (ev) {
+        if (this.model.omemo){
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.ignoreDevice(ev);
+        }
+    },
+
+    ignoreDevice: function (ev) {
+        if (this.model.omemo){
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.ignoreDevice(ev);
+        }
+    },
+
+    deleteDevice: function (ev) {
+        if (this.model.omemo){
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.deleteDevice(ev);
+        }
+    },
+
     renderAllXTokens: function () {
         this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
         $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
@@ -2808,6 +2839,10 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             let $token_html = $(templates.token_item(pretty_token));
             this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
         });
+        if (this.model.omemo){
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.renderOwnDevices(this.$('.panel-content-wrap .tokens .tokens-wrap'));
+        }
         if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
             this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
         else

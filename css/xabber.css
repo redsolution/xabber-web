@@ -4764,20 +4764,24 @@ input[type=text].simple-input-field:hover {
     padding: 0 9px;
 }
 
+.account-settings-panel .token-wrap .buttons[data-trust="trust"],
 .fingerprints-wrap .buttons[data-trust="trust"] {
-    color: #388E3C;
+    color: #388E3C !important;
 }
 
+.account-settings-panel .token-wrap .buttons[data-trust="ignore"],
 .fingerprints-wrap .buttons[data-trust="ignore"] {
-    color: #9E9E9E;
+    color: #9E9E9E !important;
 }
 
+.account-settings-panel .token-wrap .buttons[data-trust="unknown"],
 .fingerprints-wrap .buttons[data-trust="unknown"] {
-    color: #FFA000;
+    color: #FFA000 !important;
 }
 
+.account-settings-panel .token-wrap .buttons[data-trust="error"],
 .fingerprints-wrap .buttons[data-trust="error"] {
-    color: #f44336;
+    color: #f44336 !important;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap>div {
@@ -12062,6 +12066,71 @@ input[type='range'].voice-message-volume:focus {
     top: 16px;
 }
 
+.account-settings-panel .token-wrap .device-wrap,
+.account-settings-panel .token-wrap .fingerprint-wrap,
+.account-settings-panel .token-wrap .buttons {
+    height: unset;
+}
+
+.account-settings-panel .token-wrap .device-id,
+.account-settings-panel .token-wrap .fingerprint {
+    display: flex;
+}
+
+.account-settings-panel .token-wrap .device-id .label,
+.account-settings-panel .token-wrap .fingerprint .label {
+    text-transform: capitalize;
+    font-weight: 500;
+    font-size: 14px;
+    color: #212121;
+    margin-right: 8px;
+    width: 96px;
+}
+.account-settings-panel .token-wrap .device-id .value{
+    color: #757575;
+    font-size: 12px;
+
+}
+.account-settings-panel .token-wrap .fingerprint .value {
+    color: #757575;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: justify;
+    text-align-last: justify;
+    white-space: pre-wrap;
+    width: 280px;
+}
+.account-settings-panel .token-wrap .buttons{
+    position: absolute;
+    right: 72px;
+    bottom: 13px;
+}
+.account-settings-panel .token-wrap .buttons .dropdown-button{
+    height: unset;
+    color: inherit;
+}
+.account-settings-panel .token-wrap .buttons .dropdown-button .trust-item-wrap{
+    color: inherit;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    box-sizing: border-box;
+    line-height: 34px;
+    padding: 0 9px;
+}
+.account-settings-panel .token-wrap .buttons .dropdown-button .trust-item-wrap:hover{
+    border: 1px solid #e0e0e0;
+}
+.account-settings-panel .token-wrap .buttons .dropdown-content{
+    top: unset !important;
+}
+.account-settings-panel .token-wrap .buttons .dropdown-content .btn-main{
+    display: block!important;
+    line-height: 36px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .account-settings-panel .readonly-setting .setting-wrap .label {
     height: 14px;
     margin-top: 3px;
@@ -12376,6 +12445,7 @@ input[type='range'].voice-message-volume:focus {
 .details-panel .token-wrap {
     margin-bottom: 6px;
     padding-right: 128px;
+    border-bottom: 1px solid lightgray;
 }
 
 .details-panel .capabilities-wrap,

@@ -539,7 +539,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                       urls: "stun:stun.l.google.com:19302"
                   },
                   {
-                      urls: "stun:stun01.pool-01.fckrkn202102.cyou:3478"
+                      urls: "stun:stun01.pool-01.xabber.org:3478"
                   },
               ].concat(constants.TURN_SERVERS_LIST),
               sdpSemantics: 'unified-plan'
