@@ -489,16 +489,28 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         $container.find('.all-sessions .token-wrap').each((idx, item) => {
             device_tokens_id_list.push({device_id: Number($(item).attr('data-token-uid').slice(0,8)), $elem: $(item)});
         });
-        device_tokens_id_list.forEach((device_id) => {
-            let device = devices[device_id.device_id];
-            if (!device)
-                return;
-            let $device_container = device_id.$elem;
+        $container.find('.orphaned-fingerprints').addClass("hidden");
+        for (let device_id in devices) {
+            let device = devices[device_id],
+                device_token_id = device_tokens_id_list.find(obj => {
+                    return obj.device_id == device_id;
+                }),
+                $device_container;
+            if (device_id == this.omemo.get('device_id'));
+                continue;
+            if (device_token_id)
+                $device_container = device_token_id.$elem;
+            else {
+                $device_container = $('<div class="token-wrap"></div>')
+                $container.find('.orphaned-fingerprints .orphaned-fingerprints-wrap').append($device_container);
+                $container.find('.orphaned-fingerprints').removeClass("hidden");
+            }
             if (device.get('ik')) {
                 let options = {},
                     f = device.generateFingerprint(),
-                    fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id.device_id],
+                    fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
                     is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                options.show_label = !device_token_id ? true : false;
                 is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
                 $device_container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
                 $device_container.find('.dropdown-button').dropdown({
@@ -521,6 +533,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                             f = device.generateFingerprint(),
                             fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
                             is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                        options.show_label = !device_token_id ? true : false;
                         is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
                         $device_container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
                         $device_container.find('.dropdown-button').dropdown({
@@ -535,7 +548,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                 }, () => {
                 });
             }
-        });
+        };
     },
 
     updateOwnFingerprint: async function ($elem) {
@@ -614,6 +627,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         let delete_button = true,
             edit_setting = id == this.omemo.get('device_id'),
             old_fingerprint = options.old_fingerprint,
+            show_label = options.show_label,
             error;
         if (fingerprint.match(/.{1,8}/g))
             fingerprint = fingerprint.match(/.{1,8}/g).join(" ");
@@ -631,7 +645,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             }
         }
         old_fingerprint && (old_fingerprint = old_fingerprint.match(/.{1,8}/g).join(" "));
-        let $row = templates.fingerprint_devices_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint, error});
+        let $row = templates.fingerprint_devices_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint, error, show_label});
         return $row;
     },
 

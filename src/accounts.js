@@ -2816,6 +2816,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
 
     renderAllXTokens: function () {
         this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+        this.$('.panel-content-wrap .tokens .orphaned-fingerprints-wrap').html("");
         $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
             let pretty_token = {
                 resource_obj: undefined,
@@ -2842,7 +2843,8 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         if (this.model.omemo){
             !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
             this.omemo_own_devices.renderOwnDevices(this.$('.panel-content-wrap .tokens .tokens-wrap'));
-        }
+        } else
+            this.$('.panel-content-wrap .tokens .orphaned-fingerprints').addClass("hidden");
         if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
             this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
         else

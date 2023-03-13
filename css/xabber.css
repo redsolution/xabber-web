@@ -12073,10 +12073,12 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .account-settings-panel .token-wrap .device-id,
+.account-settings-panel .token-wrap .fingerprint-label,
 .account-settings-panel .token-wrap .fingerprint {
     display: flex;
 }
 
+.account-settings-panel .token-wrap .fingerprint-label .label,
 .account-settings-panel .token-wrap .device-id .label,
 .account-settings-panel .token-wrap .fingerprint .label {
     text-transform: capitalize;
@@ -12086,6 +12088,7 @@ input[type='range'].voice-message-volume:focus {
     margin-right: 8px;
     width: 96px;
 }
+.account-settings-panel .token-wrap .fingerprint-label .value,
 .account-settings-panel .token-wrap .device-id .value{
     color: #757575;
     font-size: 12px;
@@ -12129,6 +12132,13 @@ input[type='range'].voice-message-volume:focus {
     line-height: 36px;
     font-size: 13px;
     font-weight: 700;
+}
+.account-settings-panel .tokens-wrap .orphaned-fingerprints-label{
+    color: #212121;
+    font-size: 34px;
+    line-height: 34px;
+    max-width: 100%;
+    padding: 16px 24px;
 }
 
 .account-settings-panel .readonly-setting .setting-wrap .label {
