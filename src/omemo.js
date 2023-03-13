@@ -493,10 +493,10 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         for (let device_id in devices) {
             let device = devices[device_id],
                 device_token_id = device_tokens_id_list.find(obj => {
-                    return obj.device_id == device_id;
+                    return obj.device_id == Number(device_id);
                 }),
                 $device_container;
-            if (device_id == this.omemo.get('device_id'));
+            if (device_id == this.omemo.get('device_id'))
                 continue;
             if (device_token_id)
                 $device_container = device_token_id.$elem;
