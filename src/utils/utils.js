@@ -414,7 +414,7 @@ var utils = {
             os = null;
 
         if (macosPlatforms.indexOf(platform) !== -1) {
-            os = 'Mac OS';
+            os = 'mac OS';
         } else if (windowsPlatforms.indexOf(platform) !== -1) {
             os = 'Windows';
         } else if (!os && /Linux/.test(platform)) {

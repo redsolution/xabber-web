@@ -269,7 +269,7 @@ xabber.Container = xabber.BasicView.extend({
 
 xabber.SearchView = xabber.BasicView.extend({
     events: {
-        "keydown .search-input": "keyUpOnSearch",
+        "keyup .search-input": "keyUpOnSearch",
         "focusout .search-input": "clearSearchSelection",
         "click .close-search-icon": "clearSearch",
         "click .list-item": "onClickItem"

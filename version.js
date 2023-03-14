@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.44","version_description":"fixed fingerprints in device list"}'
+'{"version_number":"2.3.3.45","version_description":"changed mac device label, fixed no matches appearing in forward search"}'
 )});

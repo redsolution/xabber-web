@@ -8343,6 +8343,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     onEmptyQuery: function () {
         this.$('.roster-contact.list-item').remove();
         this.$('.contacts-title').addClass('hidden');
+        this.$('.modal-content .error').addClass('hidden');
         this.$('.recent-chats-title').addClass('hidden');
     },
 
