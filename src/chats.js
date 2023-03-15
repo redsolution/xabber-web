@@ -41,11 +41,18 @@ xabber.Message = Backbone.Model.extend({
             (this.isSenderMe() && !this.get('synced_from_server') && !this.get('carbon_copied') && !this.get('is_archived')) && this.set('origin_id', this.get('msgid'));
         this.updateUniqueId();
         this.set(attrs);
-        this.on("change:origin_id stanza_id archived_id", this.updateUniqueId, this);
+        this.on("change:origin_id change:stanza_id change:archived_id", this.updateUniqueId, this);
     },
 
     updateUniqueId: function () {
-        this.set('unique_id', this.get('origin_id') || this.get('stanza_id') || this.get('archived_id') || this.get('msgid'));
+        this.set('unique_id',  this.get('stanza_id') || this.get('archived_id') || this.get('origin_id') || this.get('msgid'));
+    },
+
+    destroyOnEcho: function () {
+        if (this.collection && this.collection.chat && this.collection.chat.item_view && this.collection.chat.item_view.content)
+            this.collection.chat.item_view.content.removeMessage(this);//34
+        else
+            this.destroy();
     },
 
     getText: function () {
@@ -125,11 +132,17 @@ xabber.MessagesBase = Backbone.Collection.extend({
             msgid = $message.attr('id'),
             archive_id = $message.children('archived').attr('id'),
             origin_id = $message.children('origin-id').attr('id'),
-            unique_id = origin_id || options.stanza_id || archive_id || msgid,
+            unique_id = options.stanza_id || archive_id || origin_id || msgid,
             message = unique_id && this.get(unique_id),
             $group_info = $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]'),
             is_private_invitation,
             group_info_attributes = {};
+
+
+        if (!message && unique_id){
+            unique_id = origin_id || options.stanza_id || archive_id || msgid;
+            message = this.get(unique_id);
+        }
 
         if (message)
             return message;
@@ -204,9 +217,13 @@ xabber.MessagesBase = Backbone.Collection.extend({
             archive_id = $message.children('archived').attr('id'),
             origin_id = $message.children('origin-id').attr('id'),
             msgid = $message.attr('id'),
-            unique_id = origin_id || options.stanza_id || archive_id || msgid,
+            unique_id = options.stanza_id || archive_id || origin_id || msgid,
             message = unique_id && this.get(unique_id);
 
+        if (!message && unique_id){
+            unique_id = origin_id || options.stanza_id || archive_id || msgid;
+            message = this.get(unique_id);
+        }
         if (options.replaced) {
             let conversation = $message.children('replace').attr('conversation');
             if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
@@ -449,10 +466,12 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.context_message)
             return this.account.context_messages.create(attrs);
 
-        if ((options.echo_msg || options.replaced) && message) {
+        if (options.echo_msg && message) {
+            message.destroyOnEcho();
+        }
+        if (options.replaced && message) {
             message.set(attrs);
-            if (options.replaced)
-                return;
+            return;
         }
 
         if (options.is_searched) {
@@ -1091,9 +1110,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
     setStanzaId: function (unique_id, stanza_id) {
         let message = this.messages.get(unique_id),
             origin_id = message.get('origin_id');
+        if (this.item_view && this.item_view.content && stanza_id)
+            this.item_view.content.$(`.chat-message[data-uniqueid="${unique_id}"]`).data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id);
         message.set('stanza_id', stanza_id);
-        if (!message.get('origin_id'))
-            this.item_view.content.$(`.chat-message[data-uniqueid="${stanza_id}"]`).data('uniqueid', stanza_id)[0].setAttribute('data-uniqueid', stanza_id);
         if (this.get('encrypted'))
             this.account.omemo && this.account.omemo.updateMessage({stanza_id, origin_id}, this.contact);
     },
@@ -7069,15 +7088,17 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     delivered_time = $stanza_received.children('time').attr('stamp') || moment(stanza_id/1000).format();
                 if (!msg)
                     return;
+                let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
+                if (!pending_message)
+                    return;
+                let chat = this.account.chats.get(pending_message.chat_hash_id);
+                if (chat && chat.get('group_chat'))
+                    return;
                 if (!msg.get('stanza_id') && msg.get('locations'))
                     msg.set({'stanza_id': stanza_id})
                 msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
-                let pending_message = this.account._pending_messages.find(msg => msg.unique_id == (origin_msg_id || stanza_id));
-                if (pending_message) {
-                    let chat = this.account.chats.get(pending_message.chat_hash_id);
-                    chat && chat.setStanzaId(pending_message.unique_id, stanza_id);
-                    this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
-                }
+                chat.setStanzaId(pending_message.unique_id, stanza_id);
+                this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
             }
             return;
         }
