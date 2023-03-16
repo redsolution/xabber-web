@@ -5449,10 +5449,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             if (result) {
                 if (result === 'block'){
                     this.participant.block(() => {
-                        this.close();
+                            this.close();
+                            this.parent.participants._render();
                         },
-                        function (error) {
-
+                        (error) => {
                             if ($(error).find('not-allowed').length)
                                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
                         });
@@ -5460,6 +5460,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 else{
                     this.participant.kick(() => {
                         this.close();
+                        this.parent.participants._render();
                     }, (error) => {
 
                         if ($(error).find('not-allowed').length)
