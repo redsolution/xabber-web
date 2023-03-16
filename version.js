@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.48","version_description":"added participants update on participant kick and block, added russian transliteration for chats view search"}'
+'{"version_number":"2.3.3.49","version_description":"added transliteration module and removed cyrillic only transliteration, fixed pinned icon width to align it with unread icon"}'
 )});

@@ -1,4 +1,5 @@
 import xabber from "xabber-core";
+import { transliterate as query_transliterate } from 'transliteration';
 
 let env = xabber.env,
     constants = env.constants,
@@ -534,25 +535,13 @@ xabber.SearchView = xabber.BasicView.extend({
           this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
       },
 
-      transliterateRussian: function (word) {
-          let a = {"Ё":"YO","Й":"I","Ц":"TS","У":"U","К":"K","Е":"E","Н":"N","Г":"G","Ш":"SH","Щ":"SCH","З":"Z","Х":"H",
-              "Ъ":"'","ё":"yo","й":"i","ц":"ts","у":"u","к":"k","е":"e","н":"n","г":"g","ш":"sh","щ":"sch","з":"z",
-              "х":"h","ъ":"'","Ф":"F","Ы":"I","В":"V","А":"А","П":"P","Р":"R","О":"O","Л":"L","Д":"D","Ж":"ZH","Э":"E",
-              "ф":"f","ы":"i","в":"v","а":"a","п":"p","р":"r","о":"o","л":"l","д":"d","ж":"zh","э":"e","Я":"Ya",
-              "Ч":"CH","С":"S","М":"M","И":"I","Т":"T","Ь":"'","Б":"B","Ю":"YU","я":"ya","ч":"ch","с":"s","м":"m",
-              "и":"i","т":"t","ь":"'","б":"b","ю":"yu"};
-          return word.split('').map((char) => {
-              return a[char] || char;
-          }).join("");
-      },
-
       search: function (query) {
           this.$(this.main_container).addClass('hidden');
           clearTimeout(this.keyup_timeout);
           this.keyup_timeout = null;
           this.query_text = query;
-          let query_transliterate_russian = this.transliterateRussian(query);
-          console.log(query_transliterate_russian);
+          let query_transliterated = query_transliterate(query);
+          console.log(query_transliterated);
           this.$('.contacts-list').html("");
           this.$('.chats-list').html("");
           xabber.accounts.connected.forEach((acc) => {
@@ -568,9 +557,9 @@ xabber.SearchView = xabber.BasicView.extend({
               name && (name = name.toLowerCase());
               if (chat.get('timestamp') || chat.get('saved')) {
                   if (name.indexOf(query) > -1 || jid.indexOf(query) > -1
-                      || name.indexOf(query_transliterate_russian) > -1 || jid.indexOf(query_transliterate_russian) > -1
+                      || name.indexOf(query_transliterated) > -1 || jid.indexOf(query_transliterated) > -1
                       || (chat.get('saved') && query.includes('saved'))) {
-                      let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterate_russian) > -1 ? 'by-name' : 'by-jid',
+                      let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterated) > -1 ? 'by-name' : 'by-jid',
                           chat_item = xabber.chats_view.child(chat.get('id'));
                       chat_item && (chat_item = chat_item.$el.clone().addClass(searched_by));
                       if (chat_item) {
@@ -599,8 +588,8 @@ xabber.SearchView = xabber.BasicView.extend({
                   name && (name = name.toLowerCase());
                   if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
                       if (name.indexOf(query) > -1 || jid.indexOf(query) > -1
-                          || name.indexOf(query_transliterate_russian) > -1 || jid.indexOf(query_transliterate_russian) > -1) {
-                          let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterate_russian) > -1 ? 'by-name' : 'by-jid',
+                          || name.indexOf(query_transliterated) > -1 || jid.indexOf(query_transliterated) > -1) {
+                          let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterated) > -1 ? 'by-name' : 'by-jid',
                               item_list = xabber.contacts_view.$(`.account-roster-wrap[data-jid="${account.get('jid')}"] .list-item[data-jid="${jid}"]`).first().clone().data('account-jid', account.get('jid'));
                           item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).addClass(searched_by).prepend($('<div class="account-indicator ground-color-700"/>'));
                           if (searched_by === 'by-name')

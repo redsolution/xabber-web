@@ -62,6 +62,7 @@
     "strophe.js": "~1.2.13",
     "strophejs-plugins": "0.0.7",
     "style-loader": "^3.3.1",
+    "transliteration": "^2.3.5",
     "underscore": "~1.8.3",
     "unzipper": "^0.10.11",
     "wavesurfer.js": "^6.4.0",
