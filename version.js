@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.46","version_description":"fixed on change event for unique id update on message, added old message destruction on echo msg receiving, changed id priority to stanza id in message unique id and added html data-uniqueid updating on getting received marker in non group chats, added ignoring when receiving the received marker inside group chats"}'
+'{"version_number":"2.3.3.47","version_description":"fixed private incognito chat participant view width, fixed stuck unread on private incognito chat invite"}'
 )});

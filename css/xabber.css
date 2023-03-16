@@ -17144,18 +17144,6 @@ input[type='range'].voice-message-volume:focus {
     box-shadow: 0 1px 5px -1px rgba(0,0,0,0.4);
 }
 
-.edit-rights-private {
-    width: 320px !important;
-}
-
-.edit-rights-private .participant-details-item {
-    padding: 28px 0 32px 0;
-}
-
-.edit-rights .modal-content {
-    position: relative;
-}
-
 /* ----------------- MODAL PERMISSIONS AND RESTRICTIONS VIEW ---------------- */
 
 /* -------------------------------------------------------------------- */
