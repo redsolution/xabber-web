@@ -7182,6 +7182,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
 
         if ($message.find(`replace[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
             !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+            if ($message.find('replace').attr('conversation') === this.account.get('jid'))
+                chat = this.getSavedChat();
             if (!chat)
                 return;
             let stanza_id = $message.find('replace').attr('id'),
@@ -7195,7 +7197,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             }
             if (msg_item) {
                 msg_item.set('last_replace_time', $message.find('replaced').last().attr('stamp'));
-                if (contact.get('pinned_message'))
+                if (contact && contact.get('pinned_message'))
                     if (contact.get('pinned_message').get('unique_id') === msg_item.get('unique_id')) {
                         contact.get('pinned_message').set('message', msg_item.get('message'));
                         if (!chat.item_view.content)

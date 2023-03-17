@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.51","version_description":"fixed double messages in saved messages chat where there is no stanza id"}'
+'{"version_number":"2.3.3.52","version_description":"added handling for replace tag in saved messages chat"}'
 )});
