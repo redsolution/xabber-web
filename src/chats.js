@@ -224,6 +224,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
             unique_id = origin_id || options.stanza_id || archive_id || msgid;
             message = this.get(unique_id);
         }
+        if (!message){
+            message = this.findWhere({'origin_id': origin_id});
+        }
         if (options.replaced) {
             let conversation = $message.children('replace').attr('conversation');
             if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
