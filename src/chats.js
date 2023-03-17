@@ -5720,12 +5720,27 @@ xabber.ChatItemView = xabber.BasicView.extend({
                         self.bottom.setRedactedUploadMessage(message);
                         self.removeMessage($message);
                     } else {
-                        let response_text;
+                        let response_text, error_status;
                         self.account.handleCommonGalleryErrors(this.response)
                         if (this.status === 500)
                             response_text = this.statusText;
-                        else if (this.status === 400)
+                        else if (this.status === 400){
                             response_text = JSON.parse(this.response).error;
+                            error_status = JSON.parse(this.response).status;
+                            if (error_status && error_status == 429){
+                                setTimeout(() => {
+                                    self.account.testGalleryTokenExpire(() => {
+                                        if (!is_error) {
+                                            xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
+                                            xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'))
+                                            xhr_requests[files_count].is_uploading = true;
+                                            xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                        }
+                                    });
+                                }, 1000);
+                                return;
+                            }
+                        }
                         else if (this.status === 0) {
                             $message.find('.unuploaded-file[data-upload-file-id="' + file.upload_id + '"]').remove();
                             $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-wrap').remove();
