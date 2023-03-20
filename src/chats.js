@@ -1786,6 +1786,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     updateActiveStatus: function () {
         this.$el.switchClass('active', this.model.get('active'));
+        this.updateLastMessage();
     },
 
     updateAcceptedStatus: function () {
@@ -1951,6 +1952,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
+        if (!this.model.get('active') && this.model.item_view && this.model.item_view.content && this.model.item_view.content.bottom && this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea().trim()){
+            let draft_message = this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea();
+            this.$('.last-msg').html(draft_message).prepend($(`<span class="text-color-700">${xabber.getString("draft")}: </span>`));
+            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
+            return;
+        }
         msg || (msg = this.model.last_message);
         if (!msg) {
             !this.model.messages.length && this.updateEmptyChat();
