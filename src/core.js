@@ -316,8 +316,6 @@ let Xabber = Backbone.Model.extend({
             mam_requests_limit: 200,
             mam_messages_limit_start: 1,
             mam_messages_limit: 20,
-            ping_interval: 60,
-            reconnect_interval: 90
         }
     }),
 
@@ -393,6 +391,10 @@ let Xabber = Backbone.Model.extend({
                 constants.TRUSTED_DOMAINS = config.TRUSTED_DOMAINS;
             if (config.RECOMMENDED_DOMAIN)
                 constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
+            if (config.DOWNTIME_RECONNECTION_TIMEOUT)
+                constants.DOWNTIME_RECONNECTION_TIMEOUT = config.DOWNTIME_RECONNECTION_TIMEOUT;
+            if (config.PING_SENDING_INTERVAL)
+                constants.PING_SENDING_INTERVAL = config.PING_SENDING_INTERVAL;
             if (config.REGISTRATION_BUTTON != null)
                 constants.REGISTRATION_BUTTON = config.REGISTRATION_BUTTON;
             if (config.REGISTRATION_CUSTOM_DOMAIN != null)
