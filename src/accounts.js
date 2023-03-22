@@ -139,6 +139,10 @@ xabber.Account = Backbone.Model.extend({
             return this.session && this.session.get('connected');
         },
 
+        isReconnecting: function () {
+            return this.session && this.session.get('reconnecting');
+        },
+
         isOnline: function () {
             return this.get('status') !== 'offline';
         },

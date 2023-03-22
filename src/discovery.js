@@ -205,7 +205,11 @@ xabber.Account.addConnPlugin(function () {
     this.connection.deleteTimedHandler(this._ping_handler);
     this._ping_handler = this.connection.addTimedHandler(1000, () => {
         let downtime = (moment.now() - this.last_stanza_timestamp) / 1000;
-        if (downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+            if (!navigator.onLine){
+                console.log('navigator: ' + navigator.onLine)
+                console.log('this.connection.connected: ' + this.connection.connected)
+            }
             if (this.connection.connected)
                 this.connection.disconnect();
             else
@@ -240,7 +244,11 @@ xabber.Account.addFastConnPlugin(function () {
     this.fast_connection.deleteTimedHandler(this._fast_ping_handler);
     this._fast_ping_handler = this.fast_connection.addTimedHandler(1000, () => {
         let downtime = (moment.now() - this.last_fast_stanza_timestamp) / 1000;
-        if (downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+            if (!navigator.onLine){
+                console.log('navigator: ' + navigator.onLine)
+                console.log('this.connection.connected: ' + this.connection.connected)
+            }
             if (this.fast_connection.connected)
                 this.fast_connection.disconnect();
             else
