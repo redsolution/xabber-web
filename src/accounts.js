@@ -2655,7 +2655,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         "click .btn-delete-files": "deleteFilesFiltered",
         'click .btn-trust': "trustDevice",
         'click .btn-ignore': "ignoreDevice",
-        'click .btn-delete': "deleteDevice",
+        'click .btn-delete-fingerprint': "deleteDevice",
         "click .omemo-info .btn-purge-keys": "purgeKeys"
     },
 

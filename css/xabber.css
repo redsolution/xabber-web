@@ -16694,9 +16694,12 @@ input[type='range'].voice-message-volume:focus {
 }
 .chat-message .plyr-video-container{
     height: 216px;
-    background: #000;
+    background: #000 content-box;
     position: relative;
     margin-bottom: 8px;
+}
+.chat-message .video-content .plyr-video-container{
+    border: 1px solid hsla(0,0%,62%,.25);
 }
 .chat-message .plyr-video-container:not(.active-plyr-container) .plyr-video-playing{
     display:none;
