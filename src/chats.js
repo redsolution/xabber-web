@@ -7588,6 +7588,7 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
         this.$('.account-dropdown-wrap .dropdown-button .account-item-wrap')
                 .replaceWith(this.renderAccountItem(account));
         let all_servers = this.account.get('groupchat_servers_list');
+        all_servers = all_servers.sort((x,y) => { return x == this.account.domain ? -1 : y == this.account.domain ? 1 : 0; })
         if (all_servers.length){
             this.$('.xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
             this.$('.select-xmpp-server .caret').removeClass('hidden')

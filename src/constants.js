@@ -6,6 +6,7 @@ var constants = {
     CONTAINER_ELEMENT: "#xabber-container",
 
     FAVICON_DEFAULT: "assets/images/favicon.png",
+    FAVICON_DEFAULT_GREY: "assets/images/favicon-grey.png",
     FAVICON_MESSAGE: "assets/images/favicon-message.png",
     BACKGROUND_IMAGE: "assets/images/background.png",
 

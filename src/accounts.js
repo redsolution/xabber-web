@@ -1738,10 +1738,12 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
 
     updateConnected: function () {
         this.$el.switchClass('disconnected', !this.model.isConnected());
+        xabber.updateFaviconConnected();
     },
 
     updateAuthState: function () {
         let auth_failed = this.model.session.get('auth_failed');
+        xabber.updateFaviconConnected();
         this.$('.status').hideIf(auth_failed);
         this.$('.auth-failed').showIf(auth_failed);
     },

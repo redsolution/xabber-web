@@ -3644,24 +3644,25 @@ _.extend(xabber, {
         wheelSpeed: 0.5
     },
 
-    startBlinkingFavicon: function () {
-        if (this._blink_interval)
+    startBlinkingFavicon: function (is_disconnected) {
+        if (this._blink_interval && is_disconnected === undefined)
             return;
+        clearInterval(this._blink_interval);
         this._blink_interval = setInterval(() => {
             let $icon = $("link[rel='shortcut icon']"), url;
-            if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1)
+            if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1 || $icon.attr('href').indexOf(this.cache.favicon_gray) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT_GREY) > -1)
                 url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
             else
-                url = this.cache.favicon || constants.FAVICON_DEFAULT;
+                url = is_disconnected ? this.cache.favicon_gray || constants.FAVICON_DEFAULT_GREY : this.cache.favicon || constants.FAVICON_DEFAULT;
             $icon.attr('href', url);
         }, 1000);
     },
 
-    stopBlinkingFavicon: function () {
-        if (this._blink_interval) {
+    stopBlinkingFavicon: function (is_disconnected) {
+        if (this._blink_interval || is_disconnected !== undefined) {
             clearInterval(this._blink_interval);
             this._blink_interval = null;
-            let url = this.cache.favicon || constants.FAVICON_DEFAULT;
+            let url = is_disconnected ? this.cache.favicon_gray || constants.FAVICON_DEFAULT_GREY : this.cache.favicon || constants.FAVICON_DEFAULT;
             $("link[rel='shortcut icon']").attr("href", url);
         }
     },
@@ -3672,6 +3673,16 @@ _.extend(xabber, {
             window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter')]);
         } else {
             this.stopBlinkingFavicon();
+            window.document.title = constants.CLIENT_NAME;
+        }
+    },
+
+    updateAllMessageCounterOnDisconnect: function (is_disconnected) {
+        if (this.get('all_msg_counter')) {
+            this.startBlinkingFavicon(is_disconnected);
+            window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter')]);
+        } else {
+            this.stopBlinkingFavicon(is_disconnected);
             window.document.title = constants.CLIENT_NAME;
         }
     },

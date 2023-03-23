@@ -245,6 +245,7 @@ let Xabber = Backbone.Model.extend({
 
     cacheFavicons: async function () {
         this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
+        this._cache.save('favicon_gray', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT_GREY).then(r => r.blob())));
         this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
     },
 
@@ -512,6 +513,18 @@ let Xabber = Backbone.Model.extend({
             result.resolve(false);
         }
         return result.promise();
+    },
+
+    updateFaviconConnected: function () {
+        let is_disconnected = false;
+        this.accounts.each((account) => {
+            account.session && console.log(account.session.get('auth_failed'));
+            if (account.get('enabled') && (!account.isConnected() || (account.session && account.session.get('auth_failed')))){
+                is_disconnected = true;
+                return;
+            }
+        });
+        this.updateAllMessageCounterOnDisconnect(is_disconnected);
     },
 
     extendWith: function () {
