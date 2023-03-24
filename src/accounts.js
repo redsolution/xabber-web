@@ -3877,7 +3877,7 @@ xabber.EmojiPickerView = xabber.BasicView.extend({
     },
 
     readEmojisJSON: function () {
-        this.emojis = JSON.parse(templates.emojis());
+        this.emojis = templates.emojis;
 
         if (this.emojis.length) {
             this.$('.emoji-picker-wrap').html(templates.emoji_picker_tabs({

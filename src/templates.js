@@ -41,16 +41,14 @@
 
     let addJSONTemplate = function (name, ) {
         let path = name.split('.'),
-            tpl = _.template(require('~/templates/'+path.join('/')+'.txt')),
+            tpl = require('~/templates/'+path.join('/')+'.json'),
             tpl_name = path.pop(),
             res = templates;
         _.each(path, function (attr) {
             res[attr] || (res[attr] = {});
             res = res[attr];
         });
-        res[tpl_name] = function (data) {
-            return insertSvg(tpl(data));
-        };
+        res[tpl_name] = tpl;
     };
 
     let addTemplate = function (name) {
