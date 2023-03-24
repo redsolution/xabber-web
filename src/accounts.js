@@ -3557,6 +3557,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
         dfd.done((img, img_from_gallery) => {
             if (img_from_gallery){
+                image.type = image.media_type;
                 this.model.pubAvatar(image, () => {
                     this.current_items = [];
                     this.close();

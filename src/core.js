@@ -518,7 +518,6 @@ let Xabber = Backbone.Model.extend({
     updateFaviconConnected: function () {
         let is_disconnected = false;
         this.accounts.each((account) => {
-            account.session && console.log(account.session.get('auth_failed'));
             if (account.get('enabled') && (!account.isConnected() || (account.session && account.session.get('auth_failed')))){
                 is_disconnected = true;
                 return;
