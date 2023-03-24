@@ -41,7 +41,7 @@
 
     let addJSONTemplate = function (name, ) {
         let path = name.split('.'),
-            tpl = _.template(require('raw-loader!~/templates/'+path.join('/')+'.txt').default),//todo fix json import
+            tpl = _.template(require('~/templates/'+path.join('/')+'.txt')),
             tpl_name = path.pop(),
             res = templates;
         _.each(path, function (attr) {
