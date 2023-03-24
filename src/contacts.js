@@ -8787,8 +8787,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 this.account.chat_settings.updateMutedList(contact.get('jid'), $item.attr('mute'));
                 if (contact.details_view_right)
                     contact.details_view_right.updateNotifications();
-            }
-            else{
+            } else {
                 chat.set('muted', false);
             }
         }
