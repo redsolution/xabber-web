@@ -8713,19 +8713,19 @@ xabber.Roster = xabber.ContactsBase.extend({
         });
     },
 
-    syncCachedConversations: function (conv_list, request_with_stamp, is_first_sync) {
-        $(conv_list).each((idx, item) => {
+    syncCachedConversations: function (iq, request_with_stamp, is_first_sync, cached_conversations) {
+        $(cached_conversations).each((idx, item) => {
             this.syncConversation(null, null, item.conversation, is_first_sync);
         });
     },
 
-    syncConversations: function (iq, request_with_stamp, is_first_sync) {
+    syncConversations: function (iq, request_with_stamp, is_first_sync, cached_conversations) {
         $(iq).find('conversation').each((idx, item) => {
-            this.syncConversation(iq, request_with_stamp, item, is_first_sync);
+            this.syncConversation(iq, request_with_stamp, item, is_first_sync, cached_conversations);
         });
     },
 
-    syncConversation: function (iq, request_with_stamp, item, is_first_sync) {
+    syncConversation: function (iq, request_with_stamp, item, is_first_sync, cached_conversations) {
         if (!$(item).length){
             return;
         }
@@ -8733,6 +8733,15 @@ xabber.Roster = xabber.ContactsBase.extend({
             item = $($.parseXML(item)).find('conversation')[0];
         let $item = $(item),
             jid = $item.attr('jid'), saved = false;
+        if (cached_conversations){
+            $(cached_conversations).each((idx, conv) => {
+                if (conv.account_conversation_type.includes(jid) && (conv.account_conversation_type !== ($(item).attr('jid') +  '/' + $(item).attr('type')))){
+                    if ($item.attr('type') === Strophe.NS.GROUP_CHAT || conv.account_conversation_type.includes(Strophe.NS.GROUP_CHAT)){
+                        this.account.cached_sync_conversations.removeFromCachedConversations(conv.account_conversation_type);
+                    }
+                };
+            });
+        }
         if (jid === this.account.get('jid'))
             saved = true;
         if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
@@ -8936,8 +8945,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                     return $(this).attr('jid') +  '/' + $(this).attr('type');
                 }).toArray();
                 res = res.filter(item => !synced_conversations.includes(item.account_conversation_type));
-                this.syncCachedConversations(res, request_with_stamp, is_first_sync);
-                this.syncConversations(iq, request_with_stamp, is_first_sync);
+                this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                this.syncConversations(iq, request_with_stamp, is_first_sync, res);
                 dfd.resolve(true);
             });
         else{
