@@ -37,6 +37,9 @@
             callback && callback();
             options.model.trigger("database_opened");
         }.bind(this);
+        request.onerror = function(e) {
+            options.model.trigger("database_open_failed");
+        }.bind(this);
 
         this.createStore = function (db) {
             db.createObjectStore(options.objStoreName, { keyPath: options.primKey });

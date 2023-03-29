@@ -8704,7 +8704,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (!options.after) {
             if (options.stamp)
                 request_attrs.stamp = options.stamp;
-            else if (this.account.last_msg_timestamp)
+            else if (this.account.last_msg_timestamp && !is_first_sync)
                 request_attrs.stamp = this.account.last_msg_timestamp * 1000;
         }
         delete(options.stamp);
@@ -10016,6 +10016,10 @@ xabber.Account.addInitPlugin(function () {
     });
     this.groups = new xabber.Groups(null, {account: this});
     this.contacts = new xabber.Contacts(null, {account: this});
+
+    this.cached_roster.on("database_open_failed", () => {
+        this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this, roster_version: 0}));
+    });
 
     this.cached_roster.on("database_opened", () => {
         this.cached_roster.getFromRoster('roster_version', (res) => {

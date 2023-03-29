@@ -217,7 +217,7 @@ xabber.Account.addConnPlugin(function () {
             return false;
         }
         if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
-            this.connection.ping.ping(this.get('jid'));
+            this.connection.ping.ping(this.get('domain'));
         }
         return true;
     });
@@ -256,7 +256,7 @@ xabber.Account.addFastConnPlugin(function () {
             return false;
         }
         if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
-            this.fast_connection.ping.ping(this.fast_connection.jid);
+            this.fast_connection.ping.ping(this.get('domain'));
         }
         return true;
     });

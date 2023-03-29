@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.62","version_description":"fixed vanillaqr lib import, fixed doubling of fingerprints in devices, fixed opacity of emoji on avatar"}'
+'{"version_number":"2.3.3.63","version_description":"added handler if indexedDB open is failed, fixed mam request interval occuring when connection doesnt exist, fixed first sync being send with timestamp from last message, changed that pings were send to account own jid"}'
 )});

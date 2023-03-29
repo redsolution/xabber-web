@@ -3388,6 +3388,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 console.log('interval');
                 console.log(is_fast);
                 conn && console.log(conn.connected);
+                if (!conn){
+                    clearInterval(_interval);
+                    return;
+                }
                 if (conn.connected){
                     sendMAMRequest(conn);
                 }
