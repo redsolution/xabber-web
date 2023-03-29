@@ -1,19 +1,19 @@
 {[if (show_label) {]}
-    <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap">
+    <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap device-fingerprints-part">
         <div class="fingerprint-label">
             <div class="label">{[print(xabber.getString("omemo__dialog_fingerprints__label"))]}:</div>
             <div class="value">{{label}}</div>
         </div>
     </div>
 {[}]}
-<div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap">
+<div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap device-fingerprints-part">
     <div class="device-id">
         <div class="label">{[print(xabber.getString("omemo__dialog_fingerprints__label_device_id"))]}:</div>
         <div class="value">{{id}}</div>
     </div>
 </div>
 <div class="fingerprint-wrap">
-    <div title="Device fingerprint" class="fingerprint">
+    <div title="Device fingerprint" class="fingerprint device-fingerprints-part">
         <div class="label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}:</div>
         <div class="value">{{fingerprint}}</div>
     </div>
@@ -22,7 +22,7 @@
     {[}]}
     {[if (old_fingerprint){]}<div title="Old device fingerprint" class="old-fingerprint">{{old_fingerprint}}</div>{[}]}
 </div>
-<div data-trust="{{trust}}" class="buttons">
+<div data-trust="{{trust}}" class="buttons device-fingerprints-part">
     {[if (trust !== null && !error) {]}
     <div class="dropdown-button" data-activates="select-status-{{id}}">
         <div class="trust-item-wrap btn-main btn-flat">

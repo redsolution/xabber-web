@@ -15,6 +15,7 @@ import plyr from "Plyr";
 import Quill from "Quill";
 import libsignal from "libsignal-protocol";
 import sha1 from "sha1_hasher";
+import VanillaQR from "VanillaQR";
 import "~/css/color-scheme.css";
 import "~/css/materialdesignicons.css";
 import "~/css/materialize.css";
@@ -31,7 +32,6 @@ import "strophe.pubsub";
 import "omemo";
 import "backbone.localsync";
 import "materialize";
-import "qrcode";
 import "perfectScrollbarJQuery";
 
 export default _.extend({
@@ -47,6 +47,7 @@ export default _.extend({
     xabber_i18next: i18next,
     xabber_i18next_sprintf: i18next_sprintf,
     sha256: sha256,
+    VanillaQR: VanillaQR,
     magnificPopup: magnificPopup,
     Strophe: Strophe
 }, Strophe);

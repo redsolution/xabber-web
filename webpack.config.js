@@ -30,6 +30,7 @@ module.exports = {
             "sha256": "~/node_modules/js-sha256/src/sha256",
             "magnific-popup": "~/node_modules/magnific-popup/dist/jquery.magnific-popup",
             "i18next": "~/node_modules/i18next/i18next.min",
+            "VanillaQR": "~/node_modules/vanillaqr/VanillaQR.module",
 
             // modified libs and plugins
             "Plyr": "./lib/plyr",

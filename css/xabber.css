@@ -11607,6 +11607,7 @@ input[type='range'].voice-message-volume:focus {
     height: 176px;
     width: 176px;
     text-align: center;
+    color: #000000;
 }
 .main-modal.emoji-panel .emoji-profile-image .circle-icon {
     bottom: 4px;
