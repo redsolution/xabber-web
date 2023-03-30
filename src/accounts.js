@@ -549,6 +549,8 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                if (this._main_interval_worker)
+                    this._main_interval_worker.terminate();
                 this.session.set({
                     connected: false,
                     ready_to_send: false,
@@ -648,6 +650,8 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                if (this._main_interval_worker)
+                    this._main_interval_worker.terminate();
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
                     this.reconnect();
@@ -859,6 +863,8 @@ xabber.Account = Backbone.Model.extend({
                     plugin.call(this);
                 });
             } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
+                if (this._fast_interval_worker)
+                    this._fast_interval_worker.terminate();
                 this.fast_conn_manager = undefined;
                 this.fast_connection = undefined;
             }
