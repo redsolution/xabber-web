@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.64","version_description":"changed how pings and reconnection are working from strophe timed handler to interval in webworker"}'
+'{"version_number":"2.3.3.65","version_description":"added xep-0380 for omemo messages, fixed example_index html"}'
 )});

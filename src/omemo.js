@@ -1284,6 +1284,10 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             $(message.tree()).find('envelope').remove();
 
             message.cnode(encryptedElement.tree());
+            message.up().c('encryption', {
+                xmlns: Strophe.NS.EXPLICIT_MESSAGE_ENCRYPTION,
+                namespace: Strophe.NS.OMEMO
+            });
             message.up().c('store', {
                 xmlns: 'urn:xmpp:hints'
             }).up()
