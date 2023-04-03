@@ -58,6 +58,10 @@ let Xabber = Backbone.Model.extend({
         this.on("change:actual_version_number", this.throwNewVersion, this);
         this.on("quit", this.onQuit, this);
         this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
+
+        window.ononline = () => {
+            this.disconnectWhenConnecting();
+        };
         // setInterval(function() {
         //     console.log(new Date());
         // }, 5000)
@@ -524,6 +528,14 @@ let Xabber = Backbone.Model.extend({
             }
         });
         this.updateAllMessageCounterOnDisconnect(is_disconnected);
+    },
+
+    disconnectWhenConnecting: function (is_fast) {
+        this.accounts.each((account) => {
+            if (account.session && account.connection && account.get('enabled') && !account.session.get('reconnecting') && !account.session.get('connected')){
+                account.activate();
+            }
+        });
     },
 
     extendWith: function () {

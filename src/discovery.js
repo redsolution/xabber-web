@@ -207,30 +207,28 @@ xabber.Account.addConnPlugin(function () {
 
     this._main_interval_worker = new Worker(new URL('./worker.js', import.meta.url));
 
-    this._main_interval_worker.onmessage = (res) => {
-        if (res.data.is_main){
-            let downtime = (moment.now() - this.last_stanza_timestamp) / 1000;
-            if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
-                if (!navigator.onLine){
-                    console.log('navigator: ' + navigator.onLine)
-                    console.log('this.connection.connected: ' + this.connection.connected)
-                }
-                console.log('downtime main to disconnect: ' + downtime);
-                console.log(this.connection.connected);
-                if (this.connection.connected)
-                    this.connection.disconnect();
-                else
-                    this.connect();
-                this._main_interval_worker.terminate();
+    this._main_interval_worker.onmessage = () => {
+        let downtime = (moment.now() - this.last_stanza_timestamp) / 1000;
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+            if (!navigator.onLine){
+                console.log('navigator: ' + navigator.onLine)
+                console.log('this.connection.connected: ' + this.connection.connected)
             }
-            if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
-                console.log('downtime main to ping: ' + downtime);
-                this.connection.ping.ping(this.get('domain'));
-            }
+            console.log('downtime main to disconnect: ' + downtime);
+            console.log(this.connection.connected);
+            if (this.connection.connected)
+                this.connection.disconnect();
+            else
+                this.connect();
+            this._main_interval_worker.terminate();
+        }
+        if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
+            console.log('downtime main to ping: ' + downtime);
+            this.connection.ping.ping(this.get('domain'));
         }
     };
 
-    this._main_interval_worker.postMessage({is_main: true});
+    this._main_interval_worker.postMessage({});
 
     this.server_features.request();
 }, true, true);
@@ -256,29 +254,27 @@ xabber.Account.addFastConnPlugin(function () {
 
     this._fast_interval_worker = new Worker(new URL('./worker.js', import.meta.url));
 
-    this._fast_interval_worker.onmessage = (res) => {
-        if (res.data.is_fast){
-            let downtime = (moment.now() - this.last_fast_stanza_timestamp) / 1000;
-            if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
-                if (!navigator.onLine){
-                    console.log('navigator: ' + navigator.onLine)
-                    console.log('this.connection.connected: ' + this.connection.connected)
-                }
-                console.log('downtime fast to disconnect: ' + downtime);
-                console.log(this.connection.connected);
-                if (this.fast_connection.connected)
-                    this.fast_connection.disconnect();
-                else
-                    this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
-                this._fast_interval_worker.terminate();
+    this._fast_interval_worker.onmessage = () => {
+        let downtime = (moment.now() - this.last_fast_stanza_timestamp) / 1000;
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+            if (!navigator.onLine){
+                console.log('navigator: ' + navigator.onLine)
+                console.log('this.connection.connected: ' + this.connection.connected)
             }
-            if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
-                console.log('downtime fast to ping: ' + downtime);
-                this.fast_connection.ping.ping(this.get('domain'));
-            }
+            console.log('downtime fast to disconnect: ' + downtime);
+            console.log(this.connection.connected);
+            if (this.fast_connection.connected)
+                this.fast_connection.disconnect();
+            else
+                this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
+            this._fast_interval_worker.terminate();
+        }
+        if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
+            console.log('downtime fast to ping: ' + downtime);
+            this.fast_connection.ping.ping(this.get('domain'));
         }
     };
-    this._fast_interval_worker.postMessage({is_fast: true});
+    this._fast_interval_worker.postMessage({});
 }, true, true);
 
 xabber.Account.addConnPlugin(function () {

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.65","version_description":"added xep-0380 for omemo messages, fixed example_index html"}'
+'{"version_number":"2.3.3.66","version_description":"added ononline event for reconnecting stuck accounts, changed worker interval behaviour"}'
 )});
