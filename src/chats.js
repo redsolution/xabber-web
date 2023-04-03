@@ -10918,7 +10918,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.displaySend();
         if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact') && !this.edit_message) {
             ev.preventDefault();
-            this.unsetForwardedMessages();
             if (this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0) {
                 let $elem = this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').last();
                 if ($elem.hasClass('link-message-reference')){
@@ -10934,8 +10933,11 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         this.removeFileSnippetById(id);
                     }
                 }
-
+            } else {
+                this.unsetForwardedMessages();
             }
+        } else if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
+            ev.preventDefault();
             this.unsetForwardedMessages();
         } else {
             if (ev.keyCode === constants.KEY_ARROW_UP || ev.keyCode === constants.KEY_ARROW_DOWN) {
@@ -11882,7 +11884,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     editMessage: function (text, text_markups) {
         let original_body = Array.from(Strophe.xmlescape(this.edit_message.get('original_message') || "")),
             forwarded_body = "",
-            mutable_refs = this.edit_message.get('mutable_content'),
+            mutable_refs = this.edit_message.get('mutable_content') || [],
             groupchat_ref = mutable_refs && mutable_refs.find(item => item.type === 'groupchat'),
             stanza_id = this.edit_message.get('stanza_id'),
             forward_ref = mutable_refs && mutable_refs.filter(item => item.type === 'forward'),
