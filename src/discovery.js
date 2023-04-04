@@ -142,8 +142,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 'var': namespace,
                 from: from
             });
-            if (namespace === Strophe.NS.AUTH_DEVICES)
-                self.account.getAllXTokens();
         });
         $stanza.find('x').each(function () {
             let form_type_val = $(this).find('field[var="FORM_TYPE"] value');
@@ -171,8 +169,9 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         (_var != Strophe.NS.SUBSCRIPTION_PREAPPROVAL && _var != Strophe.NS.SYNCHRONIZATION) && this.account.cached_server_features.putInCachedFeatures({
             var: _var,
             from: feature.get('from'),
-        })
-
+        });
+        if (_var === Strophe.NS.AUTH_DEVICES)
+            this.account.getAllXTokens();
         if (_var === 'media-gallery') {
             this.account.set('gallery_auth', false)
             if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))
