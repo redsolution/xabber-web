@@ -10907,6 +10907,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 let $msg = this.view.$(`.chat-message[data-from="${this.account.get('jid')}"]`).last();
                 (!$msg.length && this.contact.participants) && ($msg = this.view.$(`.chat-message[data-from="${this.contact.participants.find(m => m.get('jid') === this.account.get('jid')).get('id')}"]`).last());
                 let edit_msg = this.messages_arr.get($msg.data('uniqueid'));
+                if (!edit_msg)
+                    return;
                 this.edit_message = edit_msg;
                 this.setEditedMessageAttachments(edit_msg);
                 this.setEditedMessage(edit_msg);
