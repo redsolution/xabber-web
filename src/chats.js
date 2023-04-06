@@ -7431,11 +7431,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     contact.trigger('update_participants');
             }
         }
-
-        if ($message.find('device[xmlns="' + Strophe.NS.AUTH_DEVICES + '"]').length && !options.is_archived) {
-            this.account.getAllXTokens();
-        }
-
         if (chat.contact.get('group_chat') && options.carbon_direction === 'sent' && !$message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`).length)
             return;
 

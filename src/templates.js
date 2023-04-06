@@ -62,6 +62,7 @@
 
     addTemplate('base.dialog');
     addTemplate('base.fingerprints');
+    addTemplate('base.fingerprints_devices');
     addTemplate('base.fingerprint_item');
     addTemplate('base.fingerprint_devices_item');
     addTemplate('base.jingle_message_calling');

@@ -4765,21 +4765,25 @@ input[type=text].simple-input-field:hover {
 }
 
 .account-settings-panel .token-wrap .buttons[data-trust="trust"],
+.device-encryption[data-trust="trust"],
 .fingerprints-wrap .buttons[data-trust="trust"] {
     color: #388E3C !important;
 }
 
 .account-settings-panel .token-wrap .buttons[data-trust="ignore"],
+.device-encryption[data-trust="ignore"],
 .fingerprints-wrap .buttons[data-trust="ignore"] {
     color: #9E9E9E !important;
 }
 
 .account-settings-panel .token-wrap .buttons[data-trust="unknown"],
+.device-encryption[data-trust="unknown"],
 .fingerprints-wrap .buttons[data-trust="unknown"] {
     color: #FFA000 !important;
 }
 
 .account-settings-panel .token-wrap .buttons[data-trust="error"],
+.device-encryption[data-trust="error"],
 .fingerprints-wrap .buttons[data-trust="error"] {
     color: #f44336 !important;
 }
@@ -12048,16 +12052,31 @@ input[type='range'].voice-message-volume:focus {
     line-height: 44px;
 }
 
-.account-settings-panel .token-wrap>div {
-    height: 16px;
-    font-size: 14px;
-    line-height: 16px;
-    color: #212121;
-    margin: 4px 0;
+.account-settings-panel .token-wrap{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    height: 60px;
+    padding: 14px 26px !important;
+}
+.account-settings-panel .token-wrap:hover{
+    background-color: #f8f8f8;
+}
+
+.account-settings-panel .token-wrap .token-client-wrap {
+    width: 30%;
 }
 
 .account-settings-panel .token-wrap .client {
+    color: #212121;
+    font-size: 16px;
     font-weight: 500;
+    height: 16px;
+    line-height: 16px;
+}
+.account-settings-panel .token-wrap .device {
+    font-size: 12px;
+    color: #9e9e9e;
 }
 
 .account-settings-panel .token-wrap .token-indicator {
@@ -12151,7 +12170,8 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .account-settings-panel .tokens .buttons-wrap {
-    padding: 0 0 9px 36px;
+    padding: 0 0 9px 26px;
+    margin-top: 9px;
 }
 
 .account-settings-panel .tokens-wrap .tokens-error {
@@ -12159,16 +12179,27 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
+.account-settings-panel .token-wrap .ip-address{
+    color: #9e9e9e;
+}
 .account-settings-panel .token-wrap .ip-address,
 .account-settings-panel .token-wrap .last-auth {
-    color: #9E9E9E;
+    font-size: 14px;
+    line-height: 17px;
+    font-weight: 400;
+    text-transform: capitalize;
+    width: 20%;
 }
 
-.account-settings-panel .token-wrap .last-auth {
-    position: absolute;
-    right: 36px;
-    top: 0;
-    margin: 0;
+.account-settings-panel .token-wrap .device-encryption{
+    height: 18px;
+    line-height: 14px;
+    text-transform: capitalize;
+    color: #9e9e9e;
+}
+
+.account-settings-panel .token-wrap .device-encryption.active{
+    cursor: pointer;
 }
 
 .account-settings-panel .token-wrap .last-auth.resource {
@@ -12450,13 +12481,6 @@ input[type='range'].voice-message-volume:focus {
 .details-panel-right .subscription-info-wrap .input-field,
 .details-panel .subscription-info-wrap .input-field {
     margin-top: 0 !important;
-}
-
-.details-panel-right .token-wrap,
-.details-panel .token-wrap {
-    margin-bottom: 6px;
-    padding-right: 128px;
-    border-bottom: 1px solid lightgray;
 }
 
 .details-panel .capabilities-wrap,
@@ -15560,11 +15584,21 @@ input[type='range'].voice-message-volume:focus {
     color: #9E9E9E;
     cursor: pointer;
 }
+.details-panel .btn-revoke-token {
+    display: none;
+    height: 18px;
+    right: 24px;
+}
+.details-panel .token-wrap:hover .btn-revoke-token {
+    display: block;
+}
 
-.details-panel-right .btn-revoke-all-tokens,
-.details-panel .btn-revoke-all-tokens {
+.details-panel-right .btn-revoke-all-tokens{
     cursor: pointer;
     margin: 0 8px;
+}
+.details-panel .btn-revoke-all-tokens {
+    cursor: pointer;
 }
 
 .panel-footer {

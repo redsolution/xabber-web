@@ -170,8 +170,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             var: _var,
             from: feature.get('from'),
         });
-        if (_var === Strophe.NS.AUTH_DEVICES)
-            this.account.getAllXTokens();
         if (_var === 'media-gallery') {
             this.account.set('gallery_auth', false)
             if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))

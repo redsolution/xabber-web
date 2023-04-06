@@ -29,6 +29,7 @@ import "strophe.ping";
 import "strophe.rsm";
 import "strophe.caps";
 import "strophe.pubsub";
+import "strophe.stream-management";
 import "omemo";
 import "backbone.localsync";
 import "materialize";

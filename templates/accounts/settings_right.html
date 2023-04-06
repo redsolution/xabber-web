@@ -6,6 +6,17 @@
             <button class="btn-deselect-blocked btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("cancel"))]}</button>
             <button class="btn-unblock-selected btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("unblock_selected"))]}</button>
         </div>
+        <div class="btn-more device-more-button dropdown-button" data-activates="device-omemo-actions">
+            <i class="mdi mdi-24px mdi-dots-vertical"></i>
+        </div>
+        <ul id="device-omemo-actions" class="dropdown-content noselect">
+            <div class="property-variant btn-manage-devices">
+                <span class="one-line">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</span>
+            </div>
+            <div class="property-variant btn-purge-keys">
+                <span class="one-line">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</span>
+            </div>
+        </ul>
         <div class="btn-more media-gallery-button dropdown-button" data-activates="storage-actions">
             <i class="mdi mdi-24px mdi-dots-vertical"></i>
         </div>
@@ -192,26 +203,7 @@
                 </div>
             </div>
 
-            <div data-header='{[print(xabber.getString("account_settings_devices"))]}' class="settings-block-wrap tokens">
-                <div class="tokens-wrap">
-                    <div class="current-token-wrap">
-                        <div class="sessions-wrap current-session selectable-text"></div>
-                        <div class="buttons-wrap">
-                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>
-                        </div>
-                    </div>
-                    <div class="all-sessions-wrap">
-                        <div class="sessions-wrap all-sessions selectable-text"></div>
-                    </div>
-                    <div class="orphaned-fingerprints">
-                        <div class="orphaned-fingerprints-label">{[print(xabber.getString("omemo__dialog_fingerprints__legacy_encryption_label"))]}</div>
-                        <div class="orphaned-fingerprints-wrap selectable-text"></div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div data-header='{[print(xabber.getString("account_settings_encryption"))]}' class="settings-block-wrap omemo-info">
+            <div data-header='{[print(xabber.getString("account_settings_devices_and_encryption"))]}' class="settings-block-wrap tokens">
                 <div class="omemo-settings-wrap">
                     <div class="settings">
                         <div class="setting-wrap omemo-enable">
@@ -232,12 +224,27 @@
                                 </label>
                             </div>
                         </div>
-                        <div class="setting-wrap manage-devices">
-                            <button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>
+                        <!--<div class="setting-wrap manage-devices">-->
+                            <!--<button class="btn-manage-devices btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</button>-->
+                        <!--</div>-->
+                        <!--<div class="setting-wrap purge-keys">-->
+                            <!--<button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+                <div class="tokens-wrap">
+                    <div class="current-token-wrap">
+                        <div class="sessions-wrap current-session selectable-text"></div>
+                        <div class="buttons-wrap">
+                            <p class="btn-revoke-all-tokens hover-text-color-500 text-color-700">{[print(xabber.getString("account_terminate_all_sessions"))]}</p>
                         </div>
-                        <div class="setting-wrap purge-keys">
-                            <button class="btn-purge-keys btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("omemo__settings__button_purge_keys"))]}</button>
-                        </div>
+                    </div>
+                    <div class="all-sessions-wrap">
+                        <div class="sessions-wrap all-sessions selectable-text"></div>
+                    </div>
+                    <div class="orphaned-fingerprints">
+                        <div class="orphaned-fingerprints-label">{[print(xabber.getString("omemo__dialog_fingerprints__legacy_encryption_label"))]}</div>
+                        <div class="orphaned-fingerprints-wrap selectable-text"></div>
                     </div>
                 </div>
             </div>

@@ -12,7 +12,8 @@ let env = xabber.env,
     _ = env._,
     moment = env.moment,
     Images = utils.images,
-    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
+    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
+    pretty_datetime_date = (timestamp) => { return utils.pretty_datetime(timestamp, 'MMM DD, YYYY')};
 
 
 xabber.Account = Backbone.Model.extend({
@@ -535,6 +536,7 @@ xabber.Account = Backbone.Model.extend({
                     );
                 }
                 this.createFastConnection();
+                this.connection.streamManagement.enable();
                 this.session.set({connected: true, reconnected: false});
             } else if (status === Strophe.Status.AUTHFAIL) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
@@ -632,6 +634,7 @@ xabber.Account = Backbone.Model.extend({
                     });
                 }
                 this.createFastConnection();
+                this.connection.streamManagement.enable();
                 this.connection.connect_callback = this.connectionCallback.bind(this);
                 this.session.set({connected: true, reconnected: true,
                     reconnecting: false, conn_retries: 0});
@@ -782,7 +785,7 @@ xabber.Account = Backbone.Model.extend({
             this.connFeedback(xabber.getString("connection__error__text_connection_conflict_short"));
         },
 
-        getAllXTokens: function () {
+        getAllXTokens: function (callback) {
             let tokens_list = [],
                 iq = $iq({
                     type: 'get',
@@ -801,7 +804,7 @@ xabber.Account = Backbone.Model.extend({
                     tokens_list.push({client: client, device: device, description: description, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
                 });
                 this.x_tokens_list = tokens_list;
-                this.settings_right && this.settings_right.updateXTokens();
+                callback && callback();
             });
         },
 
@@ -859,6 +862,7 @@ xabber.Account = Backbone.Model.extend({
                     if (this.connection && this.connection.pass)
                         this.fast_connection.pass = this.connection.pass;
                 }
+                this.fast_connection.streamManagement.enable();
                 _.each(this._after_fast_connected_plugins, (plugin) => {
                     plugin.call(this);
                 });
@@ -2654,21 +2658,18 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         "click .btn-change-password": "showPasswordView",
         "click .btn-reconnect": "reconnect",
         "click": "hideResources",
-        "click .last-auth.resource": "showResources",
         "change .sync-account": "changeSyncSetting",
         "click .btn-delete-settings": "deleteSettings",
         "change .color-scheme input[type=radio][name=account_color]": "changeColor",
         "click .token-wrap .btn-revoke-token": "revokeXToken",
         "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
-        "click .omemo-info .btn-manage-devices": "openDevicesWindow",
+        "click .btn-manage-devices": "openDevicesWindow",
         "click .btn-block": "openBlockWindow",
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
         "click .btn-delete-files": "deleteFilesFiltered",
-        'click .btn-trust': "trustDevice",
-        'click .btn-ignore': "ignoreDevice",
-        'click .btn-delete-fingerprint': "deleteDevice",
-        "click .omemo-info .btn-purge-keys": "purgeKeys"
+        "click .device-encryption.active": "openFingerprint",
+        "click .btn-purge-keys": "purgeKeys"
     },
 
     _initialize: function () {
@@ -2721,16 +2722,16 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$('.settings-panel-head span.settings-panel-head-title').text(this.$('.settings-block-wrap.'+options.block_name).attr('data-header'));
             this.$('.btn-block').switchClass('hidden2', options.block_name != 'blocklist-info');
             this.$('.media-gallery-button.btn-more').hideIf(options.block_name != 'media-gallery');
+            this.$('.device-more-button.btn-more').hideIf(options.block_name != 'tokens' || !this.model.settings.get('omemo'));
+            let dropdown_settings = {
+                inDuration: 100,
+                outDuration: 100,
+                constrainWidth: false,
+                hover: false,
+                alignment: 'right'
+            };
+            this.$('.dropdown-button').dropdown(dropdown_settings);
             if (options.block_name === 'media-gallery') {
-                let dropdown_settings = {
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    alignment: 'right'
-                };
-                this.$('.media-gallery-button.dropdown-button').dropdown(dropdown_settings);
-
                 this.$('.btn-delete-files-variants').dropdown({
                     inDuration: 100,
                     outDuration: 100,
@@ -2762,15 +2763,15 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         if (this.model.omemo && this.model.omemo.store){
             let identity_key = this.model.omemo.store.get('identityKey');
             if (identity_key){
-                this.$('.omemo-settings-wrap .setting-wrap.manage-devices').removeClass('hidden2');
+                this.$('.btn-manage-devices').removeClass('hidden2');
             } else {
                 this.model.omemo.store.once('change:identityKey', () => {
-                    this.$('.omemo-settings-wrap .setting-wrap.manage-devices').removeClass('hidden2');
+                    this.$('.btn-manage-devices').removeClass('hidden2');
                 }, this);
             }
         }
         else
-            this.$('.omemo-settings-wrap .setting-wrap.manage-devices').addClass('hidden2');
+            this.$('.btn-manage-devices').addClass('hidden2');
     },
 
     updateView: function () {
@@ -2798,45 +2799,17 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$(`.token-resource-wrap`).hideIf(true)
     },
 
-    trustDevice: function (ev) {
-        if (this.model.omemo){
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.trustDevice(ev);
-        }
-    },
-
-    ignoreDevice: function (ev) {
-        if (this.model.omemo){
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.ignoreDevice(ev);
-        }
-    },
-
-    ignoreDevice: function (ev) {
-        if (this.model.omemo){
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.ignoreDevice(ev);
-        }
-    },
-
-    deleteDevice: function (ev) {
-        if (this.model.omemo){
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.deleteDevice(ev);
-        }
-    },
-
     renderAllXTokens: function () {
         this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
         this.$('.panel-content-wrap .tokens .orphaned-fingerprints-wrap').html("");
-        $(_.sortBy(this.model.x_tokens_list), 'last_auth').each((idx, token) => {
+        $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
             let pretty_token = {
                 resource_obj: undefined,
                 client: token.client,
                 device: token.device,
                 token_uid: token.token_uid,
                 ip: token.ip,
-                last_auth: pretty_datetime(token.last_auth),
+                last_auth: pretty_datetime_date(token.last_auth),
                 expire: pretty_datetime(token.expire)
             };
             let resource_obj = this.model.resources.findWhere({ token_uid: token.token_uid });
@@ -2844,6 +2817,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
                 pretty_token.resource_obj = resource_obj.toJSON();
             if (this.model.get('x_token')) {
                 if (this.model.get('x_token').token_uid == token.token_uid) {
+                    pretty_token.is_omemo = this.model.omemo ? true : false
                     let $cur_token_html = $(templates.current_token_item(pretty_token));
                     this.$('.panel-content-wrap .tokens .current-session').append($cur_token_html);
                     return;
@@ -2851,16 +2825,24 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             }
             let $token_html = $(templates.token_item(pretty_token));
             this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
+            if (this.model.omemo) {
+                !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+                this.omemo_own_devices.updateTrustDevice(Number(pretty_token.token_uid.slice(0,8)), $token_html);
+            }
         });
-        if (this.model.omemo){
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.renderOwnDevices(this.$('.panel-content-wrap .tokens .tokens-wrap'));
-        } else
-            this.$('.panel-content-wrap .tokens .orphaned-fingerprints').addClass("hidden");
         if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
             this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
         else
             this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
+    },
+
+    openFingerprint: function (ev) {
+        if (this.model.omemo){
+            let $target = $(ev.target).closest('.device-encryption'),
+                is_own = $target.hasClass('is-own');
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            this.omemo_own_devices.open(Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8)), is_own);
+        }
     },
 
     updateXTokens: function () {
@@ -2869,10 +2851,12 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$('.panel-content-wrap .tokens .sessions-wrap').children().html("");
             return;
         }
-        this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-        if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-            this.renderAllXTokens();
-        }
+        this.model.getAllXTokens(() => {
+            this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+            if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                this.renderAllXTokens();
+            }
+        });
     },
 
     revokeXToken: function (ev) {
@@ -2925,26 +2909,15 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
 
     updateEnabledOmemo: function () {
         let enabled = this.model.settings.get('omemo'), has_keys = false;
-        if (this.model.omemo) {
-            has_keys = Object.keys(this.model.omemo.get('prekeys')).length;
-        } else {
-            let omemo = new xabber.Omemo({id: 'omemo'}, {
-                account: this.model,
-                storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
-                fetch: 'before'
-            });
-            has_keys = Object.keys(omemo.get('prekeys')).length;
-            omemo.destroy();
-        }
         if (_.isUndefined(enabled))
             enabled = false;
         if (enabled && this.model.omemo_enable_view)
             this.model.omemo_enable_view.close();
         this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
         this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
-        this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', !has_keys);
+        this.$('.device-more-button').switchClass('hidden', !enabled);
         if (!this.model.omemo){
-            this.$('.omemo-settings-wrap .setting-wrap.manage-devices').addClass('hidden2');
+            this.$('.btn-manage-devices').addClass('hidden2');
         }
     },
 
@@ -2986,12 +2959,14 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         });
         setTimeout(() => {
             this.model.omemo.onConnected();
+            this.updateXTokens();
         }, 1000);
     },
 
     destroyOmemo: function () {
         this.model.omemo.destroy();
         this.model.omemo = undefined;
+        this.updateXTokens();
     },
 
     openDevicesWindow: function () {
@@ -3026,7 +3001,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
                     this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
                     omemo.destroy();
                 }
-                this.$('.omemo-settings-wrap .setting-wrap.purge-keys').switchClass('hidden', true);
             }
         });
     },

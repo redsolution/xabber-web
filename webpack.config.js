@@ -40,6 +40,7 @@ module.exports = {
             "materialize": "./lib/materialize",
             "strophe.caps": "./lib/strophe.caps",
             "strophe.pubsub": "~/src/lib/strophe.pubsub",
+            "strophe.stream-management": "~/src/lib/strophe.stream-management",
             "sha1_hasher": "~/src/lib/sha1.min",
             "omemo": "./lib/omemo",
             "qrcode": "./lib/VanillaQR.min",
