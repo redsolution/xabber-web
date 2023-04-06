@@ -694,8 +694,10 @@ _.extend(Strophe.Websocket.prototype, {
                     this._conn.rawOutput(rawStanza);
                     if (this.socket && this.socket.readyState === 1){
                         this.socket.send(rawStanza);
-                        !this._conn._reconnect_timeout && !rawStanza.includes('urn:xmpp:sm:3') && (this._conn._reconnect_timeout = setTimeout(() => {
-                            console.log(rawStanza);
+                        !this._conn._reconnect_timeout &&
+                        !rawStanza.includes('urn:xmpp:sm:3') &&
+                        (this._conn._reconnect_timeout = setTimeout(() => {
+                            console.log(rawStanza);'r'
                             console.log(this._conn);
                             console.log('disc');
                             this._conn.disconnect();

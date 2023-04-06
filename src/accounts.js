@@ -551,6 +551,8 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                clearTimeout(this.connection._reconnect_timeout);
+                this.connection._reconnect_timeout = null;
                 if (this._main_interval_worker)
                     this._main_interval_worker.terminate();
                 this.session.set({
@@ -653,6 +655,8 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                clearTimeout(this.connection._reconnect_timeout);
+                this.connection._reconnect_timeout = null;
                 if (this._main_interval_worker)
                     this._main_interval_worker.terminate();
                 let max_retries = xabber.settings.max_connection_retries;
@@ -869,6 +873,8 @@ xabber.Account = Backbone.Model.extend({
             } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
                 if (this._fast_interval_worker)
                     this._fast_interval_worker.terminate();
+                clearTimeout(this.fast_connection._reconnect_timeout);
+                this.fast_connection._reconnect_timeout = null;
                 this.fast_conn_manager = undefined;
                 this.fast_connection = undefined;
             }
@@ -2863,12 +2869,18 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         let $target = $(ev.target).closest('.token-wrap'),
             token_uid = $target.data('token-uid');
         this.model.revokeXToken([token_uid], () => {
-            if (this.model.get('x_token'))
+            if (this.model.get('x_token')){
                 if (this.model.get('x_token').token_uid === token_uid) {
                     this.model.deleteAccount();
                     return;
                 }
-            this.model.getAllXTokens();
+                this.model.getAllXTokens(() => {
+                    this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+                    if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                        this.renderAllXTokens();
+                    }
+                });
+            }
         });
     },
 
@@ -2876,7 +2888,12 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         utils.dialogs.ask(xabber.getString("settings_account__dialog_terminate_sessions__header"), xabber.getString("terminate_all_sessions_title"), null, { ok_button_text: xabber.getString("button_terminate")}).done((result) => {
             if (result && this.model.x_tokens_list)
                 this.model.revokeAllXTokens(() => {
-                    this.model.getAllXTokens();
+                    this.model.getAllXTokens(() => {
+                        this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
+                        if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                            this.renderAllXTokens();
+                        }
+                    });
                 });
         });
     },
