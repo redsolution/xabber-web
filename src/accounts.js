@@ -536,7 +536,9 @@ xabber.Account = Backbone.Model.extend({
                     );
                 }
                 this.createFastConnection();
-                this.connection.streamManagement.enable();
+                this.connection._enable_sm_timeout = setTimeout(() => {
+                    this.connection.streamManagement.enable();
+                }, 10000)
                 this.session.set({connected: true, reconnected: false});
             } else if (status === Strophe.Status.AUTHFAIL) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
@@ -551,6 +553,7 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                clearTimeout(this.connection._enable_sm_timeout);
                 clearTimeout(this.connection._reconnect_timeout);
                 this.connection._reconnect_timeout = null;
                 if (this._main_interval_worker)
@@ -636,7 +639,9 @@ xabber.Account = Backbone.Model.extend({
                     });
                 }
                 this.createFastConnection();
-                this.connection.streamManagement.enable();
+                this.connection._enable_sm_timeout = setTimeout(() => {
+                    this.connection.streamManagement.enable();
+                }, 10000)
                 this.connection.connect_callback = this.connectionCallback.bind(this);
                 this.session.set({connected: true, reconnected: true,
                     reconnecting: false, conn_retries: 0});
@@ -655,6 +660,7 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
+                clearTimeout(this.connection._enable_sm_timeout);
                 clearTimeout(this.connection._reconnect_timeout);
                 this.connection._reconnect_timeout = null;
                 if (this._main_interval_worker)
@@ -866,13 +872,16 @@ xabber.Account = Backbone.Model.extend({
                     if (this.connection && this.connection.pass)
                         this.fast_connection.pass = this.connection.pass;
                 }
-                this.fast_connection.streamManagement.enable();
+                this.fast_connection._enable_sm_timeout = setTimeout(() => {
+                    this.fast_connection.streamManagement.enable();
+                }, 10000)
                 _.each(this._after_fast_connected_plugins, (plugin) => {
                     plugin.call(this);
                 });
             } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
                 if (this._fast_interval_worker)
                     this._fast_interval_worker.terminate();
+                clearTimeout(this.fast_connection._enable_sm_timeout);
                 clearTimeout(this.fast_connection._reconnect_timeout);
                 this.fast_connection._reconnect_timeout = null;
                 this.fast_conn_manager = undefined;
