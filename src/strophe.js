@@ -694,14 +694,17 @@ _.extend(Strophe.Websocket.prototype, {
                     this._conn.rawOutput(rawStanza);
                     if (this.socket && this.socket.readyState === 1){
                         this.socket.send(rawStanza);
-                        !this._conn._reconnect_timeout &&
-                        !rawStanza.includes('urn:xmpp:sm:3') &&
-                        (this._conn._reconnect_timeout = setTimeout(() => {
-                            console.log(rawStanza);'r'
-                            console.log(this._conn);
-                            console.log('disc');
-                            this._conn.disconnect();
-                        }, 5000));
+                        if (!this._conn._reconnect_timeout && !rawStanza.includes('urn:xmpp:sm:3') && !this._conn.disconnecting
+                            && this._conn.streamManagement && this._conn.streamManagement._isStreamManagementEnabled){
+                            this._conn._reconnect_timeout = setTimeout(() => {
+                                console.log(rawStanza);
+                                console.log(this._conn);
+                                this._conn.streamManagement && console.log(this._conn.streamManagement._isStreamManagementEnabled);
+                                console.log('disc');
+                                if (this._conn.streamManagement && this._conn.streamManagement._isStreamManagementEnabled)
+                                    this._conn.disconnect();
+                            }, 5000);
+                        }
                     } else {
                         console.log('data went to pending');
                         console.log(this._conn._data.slice(i));
