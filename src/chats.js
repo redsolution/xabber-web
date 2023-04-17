@@ -6242,6 +6242,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.showDetailsRight('all-chats', {type: 'participant'});
                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
+            }, (err) => {
+                _.extend(options, {present: null, subscription: null});
+                participant = new xabber.Participant(options, {contact: this.contact});
+                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
             });
             return;
         }
@@ -6257,7 +6262,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let $elem = $(ev.target);
         if ($elem.hasClass('file-link-download')) {
             ev.preventDefault();
-            let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+            let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')),
                 uri = $elem.attr('href'),
                 file = (msg.get('files') || []).find(f => f.sources[0] == uri);
             if (file && file.key) {
@@ -6346,7 +6351,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 if (this.model.get('group_chat')) {
                     let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id'),
                         unique_id = (is_forwarded) ? $fwd_message.attr('data-uniqueid') : $msg.attr('data-uniqueid'),
-                        msg = this.model.messages.get(unique_id),
+                        msg = this.model.messages.get(unique_id) || this.account.context_messages.get(unique_id) || this.account.searched_messages.get(unique_id),
                         user_info = msg && msg.get('user_info');
                     member_id && this.showParticipantProperties(member_id, user_info);
                     return;
