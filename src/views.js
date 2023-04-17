@@ -1508,9 +1508,15 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                         this.pos2 = this.pos4 - e.clientY;
                         this.pos3 = e.clientX;
                         this.pos4 = e.clientY;
+
+                        let xPercent = (((this.$el.offset().left - this.pos1)/window.innerWidth) * 100),
+                            // uses height from parent element because of appearing in bottom scrollbar on low width
+                            yPercent = (((this.$el.offset().top - this.pos2)/this.$el.offsetParent().height()) * 100);
+
+
                         // set the element's new position:
-                        this.$el.css('top', (this.$el.offset().top - this.pos2) + "px");
-                        this.$el.css('left', (this.$el.offset().left - this.pos1) + "px");
+                        this.$el.css('left', xPercent + '%');
+                        this.$el.css('top', yPercent + '%');
                         this.$el.css('transform', "none");
                         this.$el.css('right', "unset");
                     };

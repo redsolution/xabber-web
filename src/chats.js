@@ -6680,7 +6680,8 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
         if ($elem.closest(".plyr-video-container").length > 0) {
             let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                 $plyr = $elem.closest(".plyr-video-container");
-            if (msg.get('msg_player_videos')){
+            !msg && (msg = this.account.forwarded_messages.get($elem.closest('.chat-message').data('uniqueid')));
+            if (msg && msg.get('msg_player_videos')){
                 if (!xabber.plyr_player_popup){
                     xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
                     xabber.plyr_player_popup.show({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
