@@ -2612,8 +2612,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   if (messages.length < options.max)
                       this.history_loaded = true;
                   loaded_messages = loaded_messages.concat(messages)
-                  if (messages.length == options.max)
-                      this.messagesRequest(query, timestamp, rsm, loaded_messages, (messages, rsm) => {});
+                  if (messages.length == options.max){
+                      if (this.parent &&  this.parent.data && !this.parent.data.get('visible') || this.parent.model.get('search_hidden'))
+                          return;
+                      else
+                          this.messagesRequest(query, timestamp, rsm, loaded_messages, (messages, rsm) => {});
+                  }
                   else if (loaded_messages.length == rsm.count) {
                       if (rsm.count != 0) {
                           let message_count = rsm.count;
