@@ -12414,11 +12414,18 @@ xabber.Account.addConnPlugin(function () {
 
     this.connection.deleteTimedHandler(this._get_msg_handler);
     this._get_msg_handler = this.connection.addTimedHandler(60000, () => {
+        //readds msg handler if it somehow dissapears
         if (this.connection && !this.connection.handlers.find(h => !h.ns && !h.options.encrypted && h.name === 'message')) {
             let last_msg_timestamp = this.last_msg_timestamp;
             this.chats.registerMessageHandler();
-            this.roster && this.roster.syncFromServer({stamp: last_msg_timestamp * 1000}, false, true);
-            this.roster && this.roster.getRoster();
+            let options = {};
+            this.cached_sync_conversations.getFromCachedConversations('last_sync_timestamp', (res) => {
+                let last_sync_timestamp = res && res.timestamp ? res.timestamp : null;
+                !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
+                last_sync_timestamp && (options.stamp = last_sync_timestamp);
+                this.roster && this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
+                this.roster && this.roster.getRoster();
+            });
         }
         return true;
     });
