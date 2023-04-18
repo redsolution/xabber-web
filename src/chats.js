@@ -7327,6 +7327,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if ($forwarded.length && !options.xml) {
             let $mam = $message.find(`result[xmlns="${Strophe.NS.MAM}"]`);
             if ($mam.length) {
+                if (!Object.keys(options).length)
+                    return;
                 $forwarded = $mam.children('forwarded');
                 if ($forwarded.length) {
                     $message = $forwarded.children('message');
@@ -7379,6 +7381,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                 });
                 forwarded_msgs.push(forwarded_message);
             });
+            if (!Object.keys(options).length && !forwarded_msgs.length)
+                return;
             return this.receiveChatMessage($message[0], _.extend({
                 forwarded_message: forwarded_msgs.length ? forwarded_msgs : null,
                 xml: $message[0]
