@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.80","version_description":"added ignoring of mam messages without options and messages with forwarded tag but no reference or mam or carbons"}'
+'{"version_number":"2.3.3.81","version_description":"changed timings for after message pings, added reconnection timeout for iq sending"}'
 )});

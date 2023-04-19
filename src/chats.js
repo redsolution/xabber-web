@@ -5301,13 +5301,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
               })
               let _interval = setInterval(() => {
                   console.log(was_reconnecting);
-                  if (_pending_time >= 10 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
+                  if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
                       console.log('ping on message pending');
                       this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
                           console.log('message initiated reconnection');
                           console.log(message);
                           this.account.connection.disconnect();
-                      }, 5000);
+                      }, 2000);
                   }
                   if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
                       message.set('state', constants.MSG_ERROR);
@@ -5315,8 +5315,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   }
                   else if (message.get('state') !== constants.MSG_PENDING)
                       clearInterval(_interval);
-                  _pending_time += 10;
-              }, 10000);
+                  _pending_time += 3;
+              }, 3000);
           }
       },
 

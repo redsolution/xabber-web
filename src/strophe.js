@@ -513,6 +513,65 @@ Strophe.ConnectionManager.prototype = {
 
 _.extend(Strophe.Connection.prototype, {
 
+    /** Function: sendIQ
+     *  Helper function to send IQ stanzas. Customized to reconnect on 5 second timeout.
+     *
+     *  Parameters:
+     *    (XMLElement) elem - The stanza to send.
+     *    (Function) callback - The callback function for a successful request.
+     *    (Function) errback - The callback function for a failed or timed
+     *      out request.  On timeout, the stanza will be null.
+     *    (Integer) timeout - The time specified in milliseconds for a
+     *      timeout to occur.
+     *
+     *  Returns:
+     *    The id used to send the IQ.
+     */
+    sendIQ: function(elem, callback, errback, timeout) {
+        timeout = timeout || 5000;
+        var timeoutHandler = null;
+        var that = this;
+        if (typeof(elem.tree) === "function") {
+            elem = elem.tree();
+        }
+        var id = elem.getAttribute('id');
+        if (!id) { // inject id if not found
+            id = this.getUniqueId("sendIQ");
+            elem.setAttribute("id", id);
+        }
+
+        timeoutHandler = setTimeout(() => {
+            console.log(this)
+            console.log(this.connected);
+            console.log('DISCONNEEEEECT');
+            if (this.connected)
+                this.disconnect();
+
+        }, timeout);
+
+        var handler = this.addHandler(function (stanza) {
+            clearTimeout(timeoutHandler)
+            var iqtype = stanza.getAttribute('type');
+            if (iqtype === 'result') {
+                if (callback) {
+                    callback(stanza);
+                }
+            } else if (iqtype === 'error') {
+                if (errback) {
+                    errback(stanza);
+                }
+            } else {
+                throw {
+                    name: "StropheError",
+                    message: "Got bad IQ type of " + iqtype
+                };
+            }
+        }, null, 'iq', ['error', 'result'], id);
+
+        this.send(elem);
+        return id;
+    },
+
     _attemptSASLAuth: function (mechanisms) {
         mechanisms = this.sortMechanismsByPriority(mechanisms || []);
         var i = 0, mechanism_found = false;
