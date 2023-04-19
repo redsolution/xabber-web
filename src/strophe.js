@@ -528,7 +528,7 @@ _.extend(Strophe.Connection.prototype, {
      *    The id used to send the IQ.
      */
     sendIQ: function(elem, callback, errback, timeout) {
-        timeout = timeout || 5000;
+        timeout = timeout || 10000;
         var timeoutHandler = null;
         var that = this;
         if (typeof(elem.tree) === "function") {
