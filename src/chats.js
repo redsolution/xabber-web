@@ -5301,6 +5301,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
               })
               let _interval = setInterval(() => {
                   console.log(was_reconnecting);
+                  if (was_reconnecting)
+                      clearInterval(_interval);
                   if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
                       console.log('ping on message pending');
                       this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {

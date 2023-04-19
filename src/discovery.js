@@ -206,7 +206,7 @@ xabber.Account.addConnPlugin(function () {
 
     this._main_interval_worker.onmessage = () => {
         let downtime = (moment.now() - this.last_stanza_timestamp) / 1000;
-        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15)) {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.connection.connected)
@@ -219,9 +219,9 @@ xabber.Account.addConnPlugin(function () {
                 this.connect();
             this._main_interval_worker.terminate();
         }
-        if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
+        if (downtime > (constants.PING_SENDING_INTERVAL || 10)) {
             console.log('downtime main to ping: ' + downtime);
-            this.connection.ping.ping(this.get('domain'));
+            this.connection && this.connection.ping.ping(this.get('domain'));
         }
     };
 
@@ -253,7 +253,7 @@ xabber.Account.addFastConnPlugin(function () {
 
     this._fast_interval_worker.onmessage = () => {
         let downtime = (moment.now() - this.last_fast_stanza_timestamp) / 1000;
-        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 25)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15)) {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.connection.connected)
@@ -266,9 +266,9 @@ xabber.Account.addFastConnPlugin(function () {
                 this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
             this._fast_interval_worker.terminate();
         }
-        if (downtime > (constants.PING_SENDING_INTERVAL || 20)) {
+        if (downtime > (constants.PING_SENDING_INTERVAL || 10)) {
             console.log('downtime fast to ping: ' + downtime);
-            this.fast_connection.ping.ping(this.get('domain'));
+            this.fast_connection && this.fast_connection.ping.ping(this.get('domain'));
         }
     };
     this._fast_interval_worker.postMessage({});
