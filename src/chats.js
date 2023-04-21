@@ -5306,9 +5306,14 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
                       console.log('ping on message pending');
                       this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
-                          console.log('message initiated reconnection');
-                          console.log(message);
-                          this.account.connection.disconnect();
+                          let downtime = (moment.now() - this.account.last_stanza_timestamp) / 1000;
+                          if (downtime >= 2){
+                              console.log('message initiated reconnection');
+                              console.log(message);
+                              this.account.connection.disconnect();
+                          } else {
+                              console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
+                          }
                       }, 2000);
                   }
                   if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
