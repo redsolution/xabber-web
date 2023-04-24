@@ -49,8 +49,9 @@ xabber.Message = Backbone.Model.extend({
     },
 
     destroyOnEcho: function () {
+        this.set('state', constants.MSG_DELIVERED);
         if (this.collection && this.collection.chat && this.collection.chat.item_view && this.collection.chat.item_view.content)
-            this.collection.chat.item_view.content.removeMessage(this);//34
+            this.collection.chat.item_view.content.removeMessage(this);
         else
             this.destroy();
     },
