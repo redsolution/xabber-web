@@ -8606,6 +8606,7 @@ xabber.Roster = xabber.ContactsBase.extend({
     initialize: function (models, options) {
         this.account = options.account;
         this.roster_version = options.roster_version || 0;
+        this.handled_roster_versions = options.roster_version ? [options.roster_version] : [];
         this.groups = this.account.groups;
         this.contacts = this.account.contacts;
         this.contacts.on("add_to_roster", this.onContactAdded, this);
@@ -8767,7 +8768,16 @@ xabber.Roster = xabber.ContactsBase.extend({
             unread_msgs_count = Number($unread_messages.attr('count')) || 0,
             is_invite =  message.find('invite').length,
             msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-            msg, options = {synced_msg: true,};
+            msg, options = {synced_msg: true,},
+            current_chat_timestamp = chat.get('timestamp');
+        current_chat_timestamp && console.log(current_chat_timestamp);
+        current_chat_timestamp && console.log(chat_timestamp);
+        current_chat_timestamp && console.log(current_chat_timestamp > chat_timestamp);
+        current_chat_timestamp && console.log($(item).attr('jid') +  '/' + $(item).attr('type'));
+        if (current_chat_timestamp && current_chat_timestamp > chat_timestamp){
+            console.log('old_sync_conv');
+            return;
+        }
         if (message.children('stanza-id').length
             && message.children('stanza-id').attr('id')
             && chat.retracted_msg_id_list.includes(message.children('stanza-id').attr('id'))){
@@ -8980,6 +8990,16 @@ xabber.Roster = xabber.ContactsBase.extend({
 
     onRosterIQ: function (iq) {
         let new_roster_version = $(iq).children('query').attr('ver');
+        console.log(iq)
+        console.log(this.handled_roster_versions.includes(new_roster_version))
+        console.log(this.roster_version);
+        console.log(new_roster_version);
+        console.log(this.handled_roster_versions);
+        console.log(this.handled_roster_versions.length);
+        if (this.handled_roster_versions.includes(new_roster_version))
+            return true;
+        new_roster_version && (this.handled_roster_versions = this.handled_roster_versions.concat([new_roster_version]));
+        console.log(this.handled_roster_versions.length);
         $(iq).children('query').find('item').each((idx, item) => {
             this.onRosterItem(item);
         });
