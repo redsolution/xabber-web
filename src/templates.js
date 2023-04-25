@@ -282,6 +282,11 @@
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.search');
+    addSvgTemplate('svg.device-cellphone');
+    addSvgTemplate('svg.device-console');
+    addSvgTemplate('svg.device-desktop');
+    addSvgTemplate('svg.device-tablet');
+    addSvgTemplate('svg.device-web');
     addSvgTemplate('svg.devices');
     addSvgTemplate('svg.bell');
     addSvgTemplate('svg.bell-sleep');

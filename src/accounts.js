@@ -2665,7 +2665,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
         "click .btn-delete-files": "deleteFilesFiltered",
-        "click .device-encryption.active": "openFingerprint",
+        "click .all-sessions .device-encryption.active": "openFingerprint",
         "click .btn-purge-keys": "purgeKeys"
     },
 
@@ -2693,6 +2693,8 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         xabber.api_account && xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
         this.model.on("change:enabled", this.updateEnabled, this);
         this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
+        this.model.on('trusting_updated', this.updateOmemoDevices, this);
+        this.model.on('trusting_updated', this.updateXTokens, this);
         this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
         this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
         this.model.on("change:status_updated", this.updateStatus, this);
