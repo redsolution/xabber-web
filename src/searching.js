@@ -227,7 +227,6 @@ xabber.MoreInfoView = xabber.BasicView.extend({
         contact.pushInRoster(null, () => {
             contact.askRequest();
             contact.getMyInfo();
-            contact.sendPresent();
         });
         contact.trigger("open_chat", contact);
     }

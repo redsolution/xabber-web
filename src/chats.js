@@ -3067,10 +3067,22 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let active = this.model.get('active');
         this.sendChatState(active ? 'active' : 'inactive');
         if (this.model.get('group_chat') && !this.contact.get('invitation')) {
-            if (active)
-                this.contact.sendPresent();
-            else
-                this.contact.sendNotPresent();
+            if (active){
+                if (this.contact.get('status') === 'offline'){
+                    this.contact.once('change:status', () => {
+                        let active_now = this.model.get('active');
+                        if (active_now){
+                            this.sendChatState('active');
+                            this.contact.setActiveStateSendInterval();
+                        }
+                    });
+                } else
+                    this.contact.setActiveStateSendInterval();
+            }
+            else{
+                clearTimeout(this.contact._sending_active_chatstate_timeout);
+                clearInterval(this.contact._sending_active_chatstate_interval);
+            }
         }
     },
 
@@ -7667,28 +7679,29 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
             if (chat_jid)
                 iq.c('localpart').t(chat_jid);
         this.account.sendIQFast(iq, (iq) => {
-                let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
-                    contact = this.account.contacts.mergeContact(group_jid);
-                contact.set('group_chat', true);
-                contact.set('subscription_preapproved', true);
-                contact.pres('subscribed');
-                contact.pushInRoster(null, () => {
-                    contact.pres('subscribe');
-                    contact.getMyInfo();
-                    this.close();
-                    xabber.chats_view.updateScreenAllChats();
-                    contact.sendPresent();
-                    contact.trigger("open_chat", contact);
-                    if (!(this.account.connection && this.account.connection.do_synchronization)) {
-                        let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
-                            .c('item', {jid: group_jid + '/' + moment.now()});
-                        this.account.sendIQFast(iq_set_blocking);
-                    }
-                });
-            }, () => {
-                this.$('span.errors').removeClass('hidden').text(xabber.getString("groupchat_jid_already_exists"));
-                this.$('input[name="chat_jid"]').addClass('invalid');
-            });
+            let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
+                contact = this.account.contacts.mergeContact(group_jid);
+            contact.set('group_chat', true);
+            contact.set('subscription_preapproved', true);//34
+            contact.pres('subscribed');
+            contact.set('known', true);
+            contact.set('removed', false);
+            setTimeout(() => {
+                contact.pres('subscribe');
+            }, 500);
+            this.close();
+            xabber.chats_view.updateScreenAllChats();
+            contact.trigger("open_chat", contact);
+            if (!(this.account.connection && this.account.connection.do_synchronization)) {
+                let iq_set_blocking = $iq({type: 'set'}).c('block', {xmlns: Strophe.NS.BLOCKING})
+                    .c('item', {jid: group_jid + '/' + moment.now()});
+                this.account.sendIQFast(iq_set_blocking);
+            }
+
+        }, () => {
+            this.$('span.errors').removeClass('hidden').text(xabber.getString("groupchat_jid_already_exists"));
+            this.$('input[name="chat_jid"]').addClass('invalid');
+        });
     },
 
     addGroupChat: function (ev) {

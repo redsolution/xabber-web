@@ -547,21 +547,15 @@ xabber.Contact = Backbone.Model.extend({
         this.set('blocked', false);
     },
 
-    sendPresent: function () {
-        let pres = $pres({to: this.get('jid')})
-            .c('x', {xmlns: `${Strophe.NS.GROUP_CHAT}#present`});
-        this.account.sendPres(pres);
-        clearInterval(this._sending_present_interval);
-        this._sending_present_interval = setInterval(() => {
-            this.account.sendPres(pres);
-        }, constants.PRESENT_INTERVAL);
-    },
-
-    sendNotPresent: function () {
-        let pres = $pres({to: this.get('jid')})
-            .c('x', {xmlns: `${Strophe.NS.GROUP_CHAT}#not-present`});
-        this.account.sendPres(pres);
-        clearInterval(this._sending_present_interval);
+    setActiveStateSendInterval: function () {
+        let stanza = $msg({to: this.get('jid'), type: 'chat'}).c('active', {xmlns: Strophe.NS.CHATSTATES});
+        clearTimeout(this._sending_active_chatstate_timeout);
+        clearInterval(this._sending_active_chatstate_interval);
+        this._sending_active_chatstate_timeout = setTimeout(() => {
+            this._sending_active_chatstate_interval = setInterval(() => {
+                this.account.sendMsg(stanza);
+            }, constants.PRESENT_INTERVAL);
+        }, constants.PRESENT_INTERVAL)
     },
 
     handlePresence: function (presence) {
@@ -4758,17 +4752,17 @@ xabber.ParticipantPropertiesView = xabber.BasicView.extend({
                 contact.set('group_chat', true);
                 contact.set('subscription_preapproved', true);
                 contact.pres('subscribed');
-                contact.pushInRoster(null, () => {
+                contact.set('known', true);
+                contact.set('removed', false);
+                setTimeout(() => {
                     contact.pres('subscribe');
-                    contact.getMyInfo();
-                    this.close();
-                    contact.sendPresent();
-                    this.account.chats.openChat(contact);
-                    let chat = this.account.chats.getChat(contact);
-                    chat.messages.createSystemMessage({
-                        from_jid: group_jid,
-                        message: xabber.getString("groupchat__private_chat__text_message_init", [this.participant.get('nickname'), this.contact.get('jid')])
-                    });
+                }, 500);
+                this.close();
+                this.account.chats.openChat(contact);
+                let chat = this.account.chats.getChat(contact);
+                chat.messages.createSystemMessage({
+                    from_jid: group_jid,
+                    message: xabber.getString("groupchat__private_chat__text_message_init", [this.participant.get('nickname'), this.contact.get('jid')])
                 });
             }, (error) => {
                 let $error = $(error),
@@ -5533,17 +5527,17 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 contact.set('group_chat', true);
                 contact.set('subscription_preapproved', true);
                 contact.pres('subscribed');
-                contact.pushInRoster(null, () => {
+                contact.set('known', true);
+                contact.set('removed', false);
+                setTimeout(() => {
                     contact.pres('subscribe');
-                    contact.getMyInfo();
-                    this.close();
-                    contact.sendPresent();
-                    this.account.chats.openChat(contact);
-                    let chat = this.account.chats.getChat(contact);
-                    chat.messages.createSystemMessage({
-                        from_jid: group_jid,
-                        message: xabber.getString("groupchat__private_chat__text_message_init", [this.participant.get('nickname'), this.contact.get('jid')])
-                    });
+                }, 500);
+                this.close();
+                this.account.chats.openChat(contact);
+                let chat = this.account.chats.getChat(contact);
+                chat.messages.createSystemMessage({
+                    from_jid: group_jid,
+                    message: xabber.getString("groupchat__private_chat__text_message_init", [this.participant.get('nickname'), this.contact.get('jid')])
                 });
             }, (error) => {
                 let $error = $(error),
@@ -6678,7 +6672,6 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
             contact.askRequest();
             this.blockInvitation();
             contact.getMyInfo();
-            contact.sendPresent();
             this.openChat();
         });
         contact.trigger('remove_invite', contact);
@@ -7657,8 +7650,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.$('.index-property span').text(searchable);
         this.$('.edit-group-name').text(info.name);
         this.$('.edit-group-description').text(info.description);
-        this.group_name_field.updateValue(true);
-        this.group_description_field.updateValue(true);
+        this.group_name_field && this.group_name_field.updateValue(true);
+        this.group_description_field && this.group_description_field.updateValue(true);
         this.$('.btn-save').switchClass('fade-out', true);
         let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'owner' && permission.values);
         if (is_owner){
