@@ -439,7 +439,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     events: {
         'click .btn-trust': "trustDevice",
         'click .btn-ignore': "ignoreDevice",
-        'click .btn-delete-fingerprint': "deleteDevice",
         'click .btn-cancel': "close"
     },
 
@@ -642,8 +641,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
     addRow: function (id, label, trust, fingerprint, options) {
         options = options || {};
-        let delete_button = true,
-            edit_setting = id == this.omemo.get('device_id'),
+        let edit_setting = id == this.omemo.get('device_id'),
             old_fingerprint = options.old_fingerprint,
             device_icons = [
                 'device-cellphone',
@@ -670,7 +668,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         }
         old_fingerprint && (old_fingerprint = old_fingerprint.match(/.{1,4}/g).join(" "));
         svg_icon = edit_setting ? 'device-web' : device_icons[Math.floor(Math.random()*device_icons.length)]
-        let $row = templates.fingerprint_devices_item({id,label,trust, svg_icon, fingerprint, delete_button, edit_setting, old_fingerprint, error});
+        let $row = templates.fingerprint_devices_item({id,label,trust, svg_icon, fingerprint, edit_setting, old_fingerprint, error});
         return $row;
     },
 

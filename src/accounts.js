@@ -1165,6 +1165,10 @@ xabber.Account = Backbone.Model.extend({
         onDestroy: function () {
             if (this.connection && !this.connection.register._registering)
                 this.connection.connect_callback = null;
+            if (this.omemo){
+                this.omemo.destroy();
+                this.omemo = undefined;
+            }
             if (this.settings)
                 this.settings.destroy();
             if (this.isConnected()) {
