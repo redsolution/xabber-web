@@ -10705,16 +10705,17 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     moveCursorToEnd: function () {
+        this.quill.root.focus();
         let range = document.createRange(),
             sel = window.getSelection(),
-            target = this.quill.root;
+            target = this.quill.root.lastElementChild
+            && this.quill.root.lastElementChild.lastChild ? this.quill.root.lastElementChild.lastChild : this.quill.root.lastElementChild;
         range.selectNodeContents(target);
         range.collapse(false);
         sel.removeAllRanges();
         sel.addRange(range);
-        target.focus();
         range.detach(); // optimization
-        target.scrollTop = target.scrollHeight;
+        this.quill.root.scrollTop = this.quill.root.scrollHeight;
     },
 
     keyDown: function (ev) {
