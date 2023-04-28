@@ -3974,15 +3974,6 @@ xabber.ParticipantsView = xabber.BasicView.extend({
         this.model.participants.participantsRequest({version: this.participants.version }, (response) => {
             let $response = $(response),
                 version = $response.find('query').attr('version');
-            if (this.model.get('group_info')) {
-                (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
-                if (this.participants.length != this.model.get('group_info').members_num) {
-                    this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
-                    this.participants.resetParticipants();
-                    this.updateParticipants();
-                    return;
-                }
-            }
             if (this.participants.version > version)
                 return;
             version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
@@ -4048,6 +4039,11 @@ xabber.ParticipantsView = xabber.BasicView.extend({
     },
 
     renderMemberItem: function (participant) {
+        if (!participant || !participant.attributes || !participant.attributes.id){
+            participant && participant.destroy();
+            participant && participant.attributes && this.account.groupchat_settings.removeParticipantFromList(this.model.get('jid'), participant.attributes.id);
+            return;
+        }
         let attrs = _.clone(participant.attributes);
         attrs.nickname = _.escape(attrs.nickname);
         attrs.badge = _.escape(attrs.badge);
@@ -4183,15 +4179,6 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.model.participants.participantsRequest({version: this.participants.version }, (response) => {
             let $response = $(response),
                 version = $response.find('query').attr('version');
-            if (this.model.get('group_info')) {
-                (this.participants.version === 0) && (this.model.get('group_info').members_num = this.participants.length);
-                if (this.participants.length != this.model.get('group_info').members_num) {
-                    this.account.groupchat_settings.resetParticipantsList(this.model.get('jid'));
-                    this.participants.resetParticipants();
-                    this.updateParticipants();
-                    return;
-                }
-            }
             if (this.participants.version > version)
                 return;
             version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
@@ -4295,6 +4282,11 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     },
 
     renderMemberItem: function (participant) {
+        if (!participant || !participant.attributes || !participant.attributes.id){
+            participant && participant.destroy();
+            participant && participant.attributes && this.account.groupchat_settings.removeParticipantFromList(this.model.get('jid'), participant.attributes.id);
+            return;
+        }
         let attrs = _.clone(participant.attributes);
         attrs.nickname = _.escape(attrs.nickname);
         attrs.badge = _.escape(attrs.badge);
@@ -8827,9 +8819,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         }
         else
             contact && contact.set('sync_deleted', false);
-        if ($group_metadata.length) {
-            contact.participants && contact.participants.createFromStanza($group_metadata.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`));
-        }
         if (current_call.length) {
             let $jingle_message = current_call.children('message'),
                 full_jid = $jingle_message.attr('from'),

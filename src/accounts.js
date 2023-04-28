@@ -1169,6 +1169,18 @@ xabber.Account = Backbone.Model.extend({
                 this.omemo.destroy();
                 this.omemo = undefined;
             }
+            this.groups_settings
+            if (this.groups_settings){
+                this.groups_settings.clearStorage();
+            }
+            if (this.groupchat_settings){
+                this.groupchat_settings.destroy();
+                this.groupchat_settings = undefined;
+            }
+            if (this.chat_settings){
+                this.chat_settings.destroy();
+                this.chat_settings = undefined;
+            }
             if (this.settings)
                 this.settings.destroy();
             if (this.isConnected()) {

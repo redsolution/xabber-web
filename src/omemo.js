@@ -1101,6 +1101,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
     onOmemoDestroyed: function () {
         if (this.own_devices && Object.keys(this.own_devices).length != 0)
             this.deleteOwnDevice();
+        this.cached_messages && this.cached_messages.destroy();
         this.account.connection.deleteHandler(this._msg_handler);
     },
 
