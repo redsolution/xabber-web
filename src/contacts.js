@@ -3992,7 +3992,8 @@ xabber.ParticipantsView = xabber.BasicView.extend({
     },
 
     onParticipantsUpdated: function () {
-        this.isVisible() && this.renderParticipants();
+        this.$el.html(this.template()).addClass('request-waiting');
+        this.renderParticipants();
     },
 
     renderParticipants: function () {
@@ -4196,7 +4197,8 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     },
 
     onParticipantsUpdated: function () {
-        this.isVisible() && this.renderParticipants();
+        this.$el.html(this.template()).addClass('request-waiting');
+        this.renderParticipants();
     },
 
     onParticipantsChanged: function () {
@@ -6413,10 +6415,11 @@ xabber.Participants = Backbone.Collection.extend({
             $response.find(`query user`).each((idx, item) => {
                 let $item = $(item),
                     subscription = $item.find('subscription').text(),
-                    id = $item.find('id').text();
+                    id = $item.attr('id');
                 if (subscription === 'none') {
                     this.get(id) && this.get(id).destroy();
-                    this.account.groupchat_settings.removeParticipantFromList(this.get('jid'), id);
+                    this.account.groupchat_settings.removeParticipantFromList(this.contact.get('jid'), id);
+                    this.trigger("participants_updated");
                 }
                 else
                     this.createFromStanza($item);
@@ -8591,7 +8594,6 @@ xabber.Roster = xabber.ContactsBase.extend({
     initialize: function (models, options) {
         this.account = options.account;
         this.roster_version = options.roster_version || 0;
-        this.handled_roster_versions = options.roster_version ? [options.roster_version] : [];
         this.groups = this.account.groups;
         this.contacts = this.account.contacts;
         this.contacts.on("add_to_roster", this.onContactAdded, this);
@@ -8972,16 +8974,6 @@ xabber.Roster = xabber.ContactsBase.extend({
 
     onRosterIQ: function (iq) {
         let new_roster_version = $(iq).children('query').attr('ver');
-        console.log(iq)
-        console.log(this.handled_roster_versions.includes(new_roster_version))
-        console.log(this.roster_version);
-        console.log(new_roster_version);
-        console.log(this.handled_roster_versions);
-        console.log(this.handled_roster_versions.length);
-        if (this.handled_roster_versions.includes(new_roster_version))
-            return true;
-        new_roster_version && (this.handled_roster_versions = this.handled_roster_versions.concat([new_roster_version]));
-        console.log(this.handled_roster_versions.length);
         $(iq).children('query').find('item').each((idx, item) => {
             this.onRosterItem(item);
         });
