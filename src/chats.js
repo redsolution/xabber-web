@@ -452,7 +452,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         }
         (options.context_message || options.participant_message || options.searched_message || options.is_searched) && (attrs.state = constants.MSG_ARCHIVED);
 
-        if (this.chat && this.chat.item_view && !this.chat.item_view.content)
+        if (options.carbon_copied && options.encrypted && this.chat && this.chat.item_view && !this.chat.item_view.content)
             this.chat.item_view.content = new xabber.ChatContentView({chat_item: this.chat.item_view});
 
         if (options.pinned_message)

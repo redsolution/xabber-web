@@ -337,7 +337,7 @@ xabber.Contact = Backbone.Model.extend({
         this.participants.participantsRequest({id: '', properties: true}, (response) => {
             let $item = $($(response).find('query user')),
                 cached_avatar = this.account.chat_settings.getAvatarInfoById($item.find('id').text());
-            $item.length && this.participants && this.participants.createFromStanza($item);
+            $item.length && this.participants && this.participants.createFromStanza($item, {my_info: true});
             cached_avatar && (cached_avatar.avatar_hash == this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
             this.trigger('update_my_info');
             this.participants.participantsRequest({id: ''}, (response) => {
@@ -6445,7 +6445,7 @@ xabber.Participants = Backbone.Collection.extend({
         return list;
     },
 
-    createFromStanza: function ($item) {
+    createFromStanza: function ($item, options) {
         let jid = $item.find('jid').text(),
             nickname = $item.find('nickname').text(),
             id = $item.attr('id'),
@@ -6466,6 +6466,7 @@ xabber.Participants = Backbone.Collection.extend({
             present: present,
             role: role
         };
+        (this.contact.get('incognito_chat') && options && options.my_info === true) && (attrs.jid = this.account.get('jid'));
 
         let participant = this.mergeParticipant(attrs);
         (this.account.get('jid') === participant.get('jid')) && (this.contact.my_info = participant) && this.contact.trigger('update_my_info');
@@ -8757,10 +8758,6 @@ xabber.Roster = xabber.ContactsBase.extend({
             msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
             msg, options = {synced_msg: true,},
             current_chat_timestamp = chat.get('timestamp');
-        current_chat_timestamp && console.log(current_chat_timestamp);
-        current_chat_timestamp && console.log(chat_timestamp);
-        current_chat_timestamp && console.log(current_chat_timestamp > chat_timestamp);
-        current_chat_timestamp && console.log($(item).attr('jid') +  '/' + $(item).attr('type'));
         if (current_chat_timestamp && current_chat_timestamp > chat_timestamp){
             console.log('old_sync_conv');
             return;

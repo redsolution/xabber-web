@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.92","version_description":"removed roster version checking, fixed deletion of participants in groupchats, fixed members list updating on participant deletion"}'
+'{"version_number":"2.3.3.93","version_description":"fixed chat content creation for all created messages in this chat, fixed incognito chat my info not parsing on request response"}'
 )});
