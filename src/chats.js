@@ -8289,33 +8289,60 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     template: templates.forward_panel,
     ps_selector: '.chat-list-wrap',
     ps_settings: {theme: 'item-list'},
+      events: {
+          "keyup .search-input": "keyUpOnSearch",
+          "focusout .search-input": "clearSearchSelection",
+          "click .close-search-icon": "clearSearch",
+          "click .list-item": "onClickItem"
+      },
 
     open: function (messages, account) {
         this.messages = messages;
         this.account = account;
-        this.$('.chat-list-wrap').html("");
+        this.$('.chat-list-wrap .pinned-chat-list').html("");
+        this.$('.chat-list-wrap .chat-list').html("");
+        this.$('.chat-list-wrap .contact-list').html("");
         this.saved_chat = false;
-        xabber.chats_view.$('.chat-list-wrap .chat-item').each((idx, item) => {
-            let id = $(item).data('id'),
-                chat = this.account.chats.get(id);
-            if (chat) {
-                if (id == `${this.account.get('jid')}:saved`) {
-                    let $cloned_item = $(item).clone().removeClass('hidden');
+        let chats = xabber.chats_view.model,
+            all_chats = [],
+            all_chats_pinned = [];
+        if (!all_chats.length && !all_chats_pinned.length) {
+            all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
+            all_chats_pinned = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned'));
+        }
+        if (all_chats_pinned) {
+            all_chats_pinned = all_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
+            all_chats_pinned.forEach((chat) => {
+                if (chat.account.get('jid') === this.account.get('jid')) {
+                    if (chat.id == `${this.account.get('jid')}:saved`) {
+                        let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
+                        $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
+                        this.saved_chat = true;
+                        this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
+                    } else
+                        this.$('.chat-list-wrap .pinned-chat-list').append(chat.item_view.$el.clone().removeClass('hidden'));
+                }
+            });
+        }
+        all_chats.forEach((chat) => {
+            if (chat.account.get('jid') === this.account.get('jid')) {
+                if (chat.id == `${this.account.get('jid')}:saved`) {
+                    let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                     $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
                     this.saved_chat = true;
-                    this.$('.chat-list-wrap').prepend($cloned_item);
+                    this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
                 } else
-                    this.$('.chat-list-wrap').append($(item).clone().removeClass('hidden'));
+                    this.$('.chat-list-wrap .chat-list').append(chat.item_view.$el.clone().removeClass('hidden'));
             }
         });
         if (!this.saved_chat) {
             let saved_chat = this.account.chats.getSavedChat(),
                 $cloned_item = saved_chat.item_view.$el.clone();
             $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
-            this.$('.chat-list-wrap').prepend($cloned_item);
+            this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
         }
-        this.$('.chat-list-wrap').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text(xabber.getString("category_recent_chats")));
-        this.$('.chat-list-wrap').append($('<div/>', { class: 'forward-panel-list-title contacts-title hidden'}).text(xabber.getString("category_title_contacts")));
+        this.$('.chat-list-wrap .pinned-chat-list').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text(xabber.getString("category_recent_chats")));
+        this.$('.chat-list-wrap .chat-list').append($('<div/>', { class: 'forward-panel-list-title contacts-title hidden'}).text(xabber.getString("category_title_contacts")));
         this.$('.chat-item').removeClass('active');
         this.clearSearch();
         this.data.set('visible', true);
@@ -8359,7 +8386,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 if (!this.$('.chat-list-wrap .chat-item[data-id="' + chat_id + '"]').length) {
                     let contact_list_item = xabber.contacts_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-contact[data-jid="${jid}"]`).first().clone();
                     contact_list_item.find('.muted-icon').hide();
-                    this.$('.chat-list-wrap').append(contact_list_item);
+                    this.$('.chat-list-wrap .contact-list').append(contact_list_item);
                 }
                 else
                     is_match = true;

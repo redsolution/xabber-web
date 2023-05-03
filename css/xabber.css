@@ -7149,7 +7149,7 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
 }
 
-.pinned-chat-list .chat-item{
+.pinned-chat-list:not(.forward-chats-list) .chat-item{
     background-color: #f5f5f5;
 
 }
