@@ -6663,14 +6663,18 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
     join: function () {
         let contact = this.model;
         contact.set('subscription_preapproved', true);
-        contact.acceptRequest();
-        contact.pushInRoster(null, () => {
-            contact.askRequest();
-            this.blockInvitation();
-            contact.getMyInfo();
-            this.openChat();
-        });
+        contact.pres('subscribed');
+        contact.set('known', true);
+        contact.set('removed', false);
+        setTimeout(() => {
+            contact.pres('subscribe');
+        }, 500);
+        this.blockInvitation();
+        contact.getMyInfo();
+        this.openChat();
         contact.trigger('remove_invite', contact);
+        let chat = this.account.chats.getChat(this.model);
+        chat.item_view && chat.item_view.content && chat.item_view.content.onChangedActiveStatus();
     },
 
     reject: function () {
@@ -9820,13 +9824,13 @@ xabber.AddContactView = xabber.BasicView.extend({
         } else {
             !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && contact.set('subscription_preapproved', true);
             contact.pres('subscribed');
-            contact.pushInRoster({name: name, groups: groups}, () => {
+            contact.set('known', true);
+            contact.set('removed', false);
+            setTimeout(() => {
                 contact.pres('subscribe');
-                contact.trigger('presence', contact, 'subscribe_from');
-                contact.trigger("open_chat", contact, {right_force_close: true});
-            }, function () {
-                contact.destroy();
-            });
+            }, 500);
+            contact.trigger('presence', contact, 'subscribe_from');
+            contact.trigger("open_chat", contact, {right_force_close: true});
             this.close();
         }
     },
