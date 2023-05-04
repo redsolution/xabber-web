@@ -3947,7 +3947,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (index === 0) {
             $message.prependTo(this.$('.chat-content'));
         } else {
-            $message.insertAfter(this.$('.chat-message').eq(index - 1));
+            let $prev_message = this.$(`.chat-message[data-uniqueid="${this.model.messages.models[index - 1].get('unique_id')}"]`);
+            if (!$prev_message.length) {
+                $prev_message = this.addMessage(this.model.messages.models[index - 1]);
+            }
+            $message.insertAfter($prev_message);
         }
         let $next_message = $message.nextAll('.chat-message').first();
         this.updateMessageInChat($message[0], message);
