@@ -8984,6 +8984,9 @@ input[type=text].simple-input-field:hover {
 .chat-message .chat-msg-content {
     white-space: pre-wrap;
 }
+.chat-message .chat-msg-content:empty {
+    min-height: 20px;
+}
 
 .chat-message .chat-msg-content .quote {
     border-left: 2px solid #E0E0E0;
