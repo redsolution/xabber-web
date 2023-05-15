@@ -1394,6 +1394,7 @@ body {
 /* ------------- MAIN COLORS SETTING -------------- */
 [data-main-color=red] .fwd-message.selected,
 [data-main-color=red] .chat-message.selected,
+[data-main-color=red] .chat-message.unread-message,
 [data-main-color=red] .roster-left-container .roster-account-info.active,
 [data-main-color=red] .roster-left-container .group-head.active,
 [data-main-color=red] .roster-left-container .roster-contact.active,
@@ -1507,6 +1508,7 @@ body {
 
 [data-main-color=pink] .fwd-message.selected,
 [data-main-color=pink] .chat-message.selected,
+[data-main-color=pink] .chat-message.unread-message,
 [data-main-color=pink] .roster-left-container .roster-account-info.active,
 [data-main-color=pink] .roster-left-container .group-head.active,
 [data-main-color=pink] .roster-left-container .roster-contact.active,
@@ -1619,6 +1621,7 @@ body {
 
 [data-main-color=purple] .fwd-message.selected,
 [data-main-color=purple] .chat-message.selected,
+[data-main-color=purple] .chat-message.unread-message,
 [data-main-color=purple] .roster-left-container .roster-account-info.active,
 [data-main-color=purple] .roster-left-container .group-head.active,
 [data-main-color=purple] .roster-left-container .roster-contact.active,
@@ -1731,6 +1734,7 @@ body {
 
 [data-main-color=deep-purple] .fwd-message.selected,
 [data-main-color=deep-purple] .chat-message.selected,
+[data-main-color=deep-purple] .chat-message.unread-message,
 [data-main-color=deep-purple] .roster-left-container .roster-account-info.active,
 [data-main-color=deep-purple] .roster-left-container .group-head.active,
 [data-main-color=deep-purple] .roster-left-container .roster-contact.active,
@@ -1842,6 +1846,7 @@ body {
 
 [data-main-color=indigo] .fwd-message.selected,
 [data-main-color=indigo] .chat-message.selected,
+[data-main-color=indigo] .chat-message.unread-message,
 [data-main-color=indigo] .roster-left-container .roster-account-info.active,
 [data-main-color=indigo] .roster-left-container .group-head.active,
 [data-main-color=indigo] .roster-left-container .roster-contact.active,
@@ -1954,6 +1959,7 @@ body {
 
 [data-main-color=blue] .fwd-message.selected,
 [data-main-color=blue] .chat-message.selected,
+[data-main-color=blue] .chat-message.unread-message,
 [data-main-color=blue] .roster-left-container .roster-account-info.active,
 [data-main-color=blue] .roster-left-container .group-head.active,
 [data-main-color=blue] .roster-left-container .roster-contact.active,
@@ -2066,6 +2072,7 @@ body {
 
 [data-main-color=light-blue] .fwd-message.selected,
 [data-main-color=light-blue] .chat-message.selected,
+[data-main-color=light-blue] .chat-message.unread-message,
 [data-main-color=light-blue] .roster-left-container .roster-account-info.active,
 [data-main-color=light-blue] .roster-left-container .group-head.active,
 [data-main-color=light-blue] .roster-left-container .roster-contact.active,
@@ -2178,6 +2185,7 @@ body {
 
 [data-main-color=cyan] .fwd-message.selected,
 [data-main-color=cyan] .chat-message.selected,
+[data-main-color=cyan] .chat-message.unread-message,
 [data-main-color=cyan] .roster-left-container .roster-account-info.active,
 [data-main-color=cyan] .roster-left-container .group-head.active,
 [data-main-color=cyan] .roster-left-container .roster-contact.active,
@@ -2290,6 +2298,7 @@ body {
 
 [data-main-color=teal] .fwd-message.selected,
 [data-main-color=teal] .chat-message.selected,
+[data-main-color=teal] .chat-message.unread-message,
 [data-main-color=teal] .roster-left-container .roster-account-info.active,
 [data-main-color=teal] .roster-left-container .group-head.active,
 [data-main-color=teal] .roster-left-container .roster-contact.active,
@@ -2402,6 +2411,7 @@ body {
 
 [data-main-color=green] .fwd-message.selected,
 [data-main-color=green] .chat-message.selected,
+[data-main-color=green] .chat-message.unread-message,
 [data-main-color=green] .roster-left-container .roster-account-info.active,
 [data-main-color=green] .roster-left-container .group-head.active,
 [data-main-color=green] .roster-left-container .roster-contact.active,
@@ -2514,6 +2524,7 @@ body {
 
 [data-main-color=light-green] .fwd-message.selected,
 [data-main-color=light-green] .chat-message.selected,
+[data-main-color=light-green] .chat-message.unread-message,
 [data-main-color=light-green] .roster-left-container .roster-account-info.active,
 [data-main-color=light-green] .roster-left-container .group-head.active,
 [data-main-color=light-green] .roster-left-container .roster-contact.active,
@@ -2626,6 +2637,7 @@ body {
 
 [data-main-color=lime] .fwd-message.selected,
 [data-main-color=lime] .chat-message.selected,
+[data-main-color=lime] .chat-message.unread-message,
 [data-main-color=lime] .roster-left-container .roster-account-info.active,
 [data-main-color=lime] .roster-left-container .group-head.active,
 [data-main-color=lime] .roster-left-container .roster-contact.active,
@@ -2738,6 +2750,7 @@ body {
 
 [data-main-color=amber] .fwd-message.selected,
 [data-main-color=amber] .chat-message.selected,
+[data-main-color=amber] .chat-message.unread-message,
 [data-main-color=amber] .roster-left-container .roster-account-info.active,
 [data-main-color=amber] .roster-left-container .group-head.active,
 [data-main-color=amber] .roster-left-container .roster-contact.active,
@@ -2850,6 +2863,7 @@ body {
 
 [data-main-color=orange] .fwd-message.selected,
 [data-main-color=orange] .chat-message.selected,
+[data-main-color=orange] .chat-message.unread-message,
 [data-main-color=orange] .roster-left-container .roster-account-info.active,
 [data-main-color=orange] .roster-left-container .group-head.active,
 [data-main-color=orange] .roster-left-container .roster-contact.active,
@@ -2962,6 +2976,7 @@ body {
 
 [data-main-color=deep-orange] .fwd-message.selected,
 [data-main-color=deep-orange] .chat-message.selected,
+[data-main-color=deep-orange] .chat-message.unread-message,
 [data-main-color=deep-orange] .roster-left-container .roster-account-info.active,
 [data-main-color=deep-orange] .roster-left-container .group-head.active,
 [data-main-color=deep-orange] .roster-left-container .roster-contact.active,
@@ -3074,6 +3089,7 @@ body {
 
 [data-main-color=brown] .fwd-message.selected,
 [data-main-color=brown] .chat-message.selected,
+[data-main-color=brown] .chat-message.unread-message,
 [data-main-color=brown] .roster-left-container .roster-account-info.active,
 [data-main-color=brown] .roster-left-container .group-head.active,
 [data-main-color=brown] .roster-left-container .roster-contact.active,
@@ -3186,6 +3202,7 @@ body {
 
 [data-main-color=blue-grey] .fwd-message.selected,
 [data-main-color=blue-grey] .chat-message.selected,
+[data-main-color=blue-grey] .chat-message.unread-message,
 [data-main-color=blue-grey]  .group-chat-participant.active,
 [data-main-color=blue-grey] .roster-left-container .roster-account-info.active,
 [data-main-color=blue-grey] .roster-left-container .group-head.active,

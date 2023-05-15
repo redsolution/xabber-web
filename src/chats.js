@@ -3157,6 +3157,20 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
     },
 
+    readMessage: function (last_visible_msg) {
+        let unread_messages = _.clone(this.model.messages_unread.models);
+
+        if (last_visible_msg.get('is_unread')){
+            last_visible_msg.set('is_unread', false);
+            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'));
+        }
+        _.each(unread_messages, (msg) => {
+            if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
+                msg.set('is_unread', false);
+            }
+        });
+    },
+
     readMessages: function (timestamp) {
         let unread_messages = _.clone(this.model.messages_unread.models);
         if (unread_messages.length) {
@@ -3297,6 +3311,21 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (this.current_day_indicator !== null) {
             this.showDayIndicator(this.current_day_indicator);
         }
+        clearTimeout(this._onscroll_read_messages_timeout);
+        this._onscroll_read_messages_timeout = setTimeout(() => {
+            if (this.$('.chat-message.unread-message').length && xabber.get('focused')){
+                let last_visible_unread_msg;
+                this.$('.chat-message.unread-message').each((idx, msg) => {
+                    if ($(msg).isFullyVisibleInContainer(this.$('.chat-content'))) {
+                        last_visible_unread_msg = msg;
+                    }
+                });
+                if (last_visible_unread_msg){
+                    last_visible_unread_msg = this.model.messages.get($(last_visible_unread_msg).data('uniqueid'));
+                    this.readMessage(last_visible_unread_msg);
+                }
+            }
+        }, 1000)
         if (this._scrolltop < this._prev_scrolltop &&
             (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
             this.loadPreviousHistory();
@@ -3789,7 +3818,6 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 this.scrollToBottom();
             } else {
                 this.updateScrollBar();
-                this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
             }
         }
 
@@ -6139,12 +6167,17 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     onChangedReadState: function (message) {
         let is_unread = message.get('is_unread'),
-            is_synced = message.get('synced_from_server');
+            is_synced = message.get('synced_from_server'),
+            $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
         if (is_unread && !is_synced) {
             this.model.messages_unread.add(message);
+            $msg.addClass('unread-message');
             this.model.recountUnread();
         } else {
             this.model.messages_unread.remove(message);
+            setTimeout(() => {
+                $msg.removeClass('unread-message');
+            }, 3000);
             this.model.recountUnread();
             if (!message.get('muted')) {
                 xabber.recountAllMessageCounter();
@@ -12538,7 +12571,7 @@ xabber.once("start", function () {
         if (this.get('focused')) {
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
-                view.content.readMessages();
+                view.content.onScroll();
                 if (view.model.get('is_accepted') !== false)
                     view.content.bottom.focusOnInput();
             }

@@ -30,6 +30,49 @@ $.fn.hideIf = function (condition) {
     return this.switchClass('hidden', condition);
 };
 
+$.fn.isVisibleInViewport = function() {
+    let elementTop = $(this).offset().top,
+        elementBottom = elementTop + $(this).outerHeight();
+
+    let viewportTop = $(window).scrollTop(),
+        viewportBottom = viewportTop + $(window).height();
+
+    return elementBottom > viewportTop && elementTop < viewportBottom;
+};
+
+$.fn.isVisibleInContainer = function(container) {
+    if (!this.length || !container.length)
+        return;
+    container = container[0];
+    let eleTop = this[0].offsetTop,
+        eleBottom = eleTop + this[0].clientHeight;
+
+    let containerTop = container.scrollTop,
+        containerBottom = containerTop + container.clientHeight;
+
+    return (
+        (eleTop >= containerTop && eleBottom <= containerBottom) ||
+        // Some part of the element is visible in the container
+        (eleTop < containerTop && containerTop < eleBottom) ||
+        (eleTop < containerBottom && containerBottom < eleBottom)
+    );
+};
+
+$.fn.isFullyVisibleInContainer = function(container) {
+    if (!this.length || !container.length)
+        return;
+    container = container[0];
+    let eleTop = this[0].offsetTop,
+        eleBottom = eleTop + this[0].clientHeight;
+
+    let containerTop = container.scrollTop,
+        containerBottom = containerTop + container.clientHeight;
+
+    return (
+        eleTop >= containerTop && eleBottom <= containerBottom
+    );
+};
+
 var getHyperLink = function (url) {
     var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
         escaped_url = "";
