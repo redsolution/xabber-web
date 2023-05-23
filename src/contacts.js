@@ -8842,6 +8842,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         chat.set('last_delivered_id', last_delivered_msg);
         chat.set('last_displayed_id', last_displayed_msg);
         chat.set('last_read_msg', last_read_msg);
+        chat.trigger('update_last_read_msg', {sync_update: true});
         chat.set('sync_type', type);
         if (!message.length) {
             chat.set('timestamp', chat_timestamp);
