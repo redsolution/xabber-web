@@ -3965,8 +3965,6 @@ xabber.ParticipantsView = xabber.BasicView.extend({
         this.participant_properties_panel = new xabber.ParticipantPropertiesView({model: this.model});
         this.updateParticipants();
         this.$('.members-list-wrap').perfectScrollbar({theme: 'item-list'});
-        if (!this.model.all_rights)
-            this.model.getAllRights();
         return this;
     },
 
@@ -3987,8 +3985,6 @@ xabber.ParticipantsView = xabber.BasicView.extend({
     updateParticipantsList: function () {
         this.$el.find('.members-list-wrap tbody').html('');
         this.updateParticipants();
-        if (!this.model.all_rights)
-            this.model.getAllRights();
     },
 
     onParticipantsUpdated: function () {
@@ -4171,8 +4167,6 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     _render: function () {
         this.$el.html(this.template()).addClass('request-waiting');
         this.updateParticipants();
-        if (!this.model.all_rights)
-            this.model.getAllRights();
         return this;
     },
 
@@ -4192,8 +4186,6 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
 
     updateParticipantsList: function () {
         this.updateParticipants();
-        if (!this.model.all_rights)
-            this.model.getAllRights();
     },
 
     onParticipantsUpdated: function () {
