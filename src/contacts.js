@@ -264,9 +264,6 @@ xabber.Contact = Backbone.Model.extend({
                     this.cached_image = Images.getCachedImage(attrs.image);
                 }
                 this.set(attrs);
-                if (this.get('in_roster')) {
-                    this.updateCachedInfo();
-                }
                 is_callback && callback(vcard);
             },
             function () {
@@ -8753,11 +8750,13 @@ xabber.Roster = xabber.ContactsBase.extend({
             is_invite =  message.find('invite').length,
             msg_retraction_version = $item.children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
             msg, options = {synced_msg: true,},
-            current_chat_timestamp = chat.get('timestamp');
+            current_chat_timestamp = chat.get('last_sync_timestamp');
         if (current_chat_timestamp && current_chat_timestamp > chat_timestamp){
             console.log('old_sync_conv');
+            console.log(item);
             return;
         }
+        chat.set('last_sync_timestamp', chat_timestamp);
         if (message.children('stanza-id').length
             && message.children('stanza-id').attr('id')
             && chat.retracted_msg_id_list.includes(message.children('stanza-id').attr('id'))){
@@ -8844,7 +8843,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             }
             chat.item_view.updateEmptyChat();
         }
-        if (request_with_stamp && chat.retraction_version < msg_retraction_version)
+        if (request_with_stamp && chat.retraction_version !== 0 && chat.retraction_version < msg_retraction_version)
             chat.trigger("get_retractions_list");
         msg_retraction_version && (chat.retraction_version = msg_retraction_version);
         if (request_with_stamp && chat.item_view && chat.item_view.content && !is_invite) {
