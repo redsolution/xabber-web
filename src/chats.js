@@ -250,7 +250,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             options.forwarded_message = message.get('forwarded_message');
         }
 
-        if (message && !options.replaced && !options.context_message && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
+        if (message && !options.replaced && !options.context_message && !options.is_unread_archived && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
             return message;
 
         let attrs = {
@@ -273,7 +273,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
         let references = $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`).length ?
             $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`) :
-            $message.children('envelope').children('content').children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`)
+            $message.children('envelope').children('content').children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`);
 
         references.each((idx, reference) => {
             let $reference = $(reference),
@@ -476,7 +476,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.echo_msg && message) {
             message.destroyOnEcho();
         }
-        if (options.replaced && message) {
+        if ((options.replaced || options.encrypted && options.is_unread_archived) && message) {
             message.set(attrs);
             return;
         }
@@ -1044,7 +1044,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
     },
 
     onChangedLastReadMsg: function (options) {
-        if (this.get('prev_last_read_msg') && this.get('prev_last_read_msg') !== this.get('last_read_msg')){
+        if (this.get('prev_last_read_msg') && this.get('last_read_msg') && this.get('prev_last_read_msg') !== this.get('last_read_msg')){
             console.log(options);
             console.log(this.get('last_read_msg'));
             console.log(this.get('prev_last_read_msg'));
@@ -3480,7 +3480,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.removeAllMessagesExceptLast();
         this.readMessages();
         this.model.resetUnread();
-        this.model.set('last_sync_unread_id', undefined)
+        this.model.set('last_sync_unread_id', undefined);
         this.model.item_view.open({right_contact_save: true, clear_search: false, force_bottom: true});
         this._no_scrolling_event = false;
         this.scrollToBottom();
@@ -3501,7 +3501,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                 .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.MAM).up().up();
-        if (this.account.server_features.get(Strophe.NS.ARCHIVE) && this.model.get('encrypted'))    {
+        if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
             iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
                 .c('value').t(this.model.get('encrypted')).up().up();
         }
@@ -3646,7 +3646,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 let loaded_message = account.chats.receiveChatMessage(message,
                     _.extend({
                         is_archived: true,
-                        is_unread_archived: options.unread_history ? true : undefined
+                        is_unread_archived: options.unread_history ? true : undefined,
                     }, options)
                 );
                 if (loaded_message) counter++;
@@ -3658,7 +3658,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 }), {previous_history: true});
             }
             if (options.unread_history_before){
-                this.model._wait_load_unread_history.resolve();
+                if (this.model.get('encrypted')){
+                    //TODO: make async func to start opening chat after all messages been handled in enc chat
+                    setTimeout(() => {
+                        this.model._wait_load_unread_history.resolve();
+                    }, 1000);
+                } else
+                    this.model._wait_load_unread_history.resolve();
             }
         }, (err) => {
             if (options.previous_history) {
@@ -6377,7 +6383,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             $msg.addClass('unread-message');
             this.model.recountUnread();
         } else {
-            if (!is_unread_archived && !is_synced)
+            if ((!is_unread_archived && !is_synced) || this.model.messages_unread.indexOf(message) > -1)
                 this.model.messages_unread.remove(message);
             setTimeout(() => {
                 $msg.removeClass('unread-message');
@@ -8230,6 +8236,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     && !view.model.get('loading_unread_history') && !options.force_bottom
                 ){
                     view.model._wait_load_unread_history = new $.Deferred();
+                    view.content._no_scrolling_event = true;
                     view.content.loadUnreadHistory();
                 } else if ((view.model.messages.length < 20))
                     view.content.loadPreviousHistory();
@@ -8262,8 +8269,9 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         blocked: view.model.get('blocked')
                     },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
                     let $last_read_msg = view.content.$(`.chat-message[data-uniqueid="${view.model.get('last_read_msg')}"]`);
-                    view.content.scrollTo(view.content.getScrollTop()
-                        - view.content.$el.height() + $last_read_msg.offset().top);
+                    $last_read_msg.length && (view.content.scrollTo(view.content.getScrollTop()
+                        - view.content.$el.height() + $last_read_msg.offset().top));
+                    view.content._no_scrolling_event = false;
                 });
             }
             if (view.contact && (!view.contact.get('vcard_updated') || (view.contact.get('group_chat') && !view.contact.get('group_info')) || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour'))))) {
