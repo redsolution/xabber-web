@@ -1253,7 +1253,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             return;
         let retractions_query = $iq({type: 'get', to: this.contact.get('jid')})
             .c('query', {xmlns: Strophe.NS.REWRITE, version: this.retraction_version});
-        this.account.sendIQFast(retractions_query);
+        this.account.sendIQ(retractions_query);
     },
 
     receiveMessage: function ($message, options) {

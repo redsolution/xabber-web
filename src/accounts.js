@@ -896,7 +896,7 @@ xabber.Account = Backbone.Model.extend({
             encrypted && (query_options.type = 'encrypted');
             let retractions_query = $iq({type: 'get'})
                 .c('query', query_options);
-            this.sendIQFast(retractions_query, callback);
+            this.sendIQ(retractions_query, callback);
         },
 
         sendPendingStanzas: function () {

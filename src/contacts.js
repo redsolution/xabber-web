@@ -8844,13 +8844,9 @@ xabber.Roster = xabber.ContactsBase.extend({
             }
             chat.item_view.updateEmptyChat();
         }
-        if (is_group_chat) {
-            if (request_with_stamp && !is_first_sync) {
-                if (chat.retraction_version < msg_retraction_version)
-                    chat.trigger("get_retractions_list");
-            } else
-                chat.retraction_version = msg_retraction_version;
-        }
+        if (request_with_stamp && chat.retraction_version < msg_retraction_version)
+            chat.trigger("get_retractions_list");
+        msg_retraction_version && (chat.retraction_version = msg_retraction_version);
         if (request_with_stamp && chat.item_view && chat.item_view.content && !is_invite) {
             chat.trigger('get_missed_history', request_with_stamp/1000);
         }
