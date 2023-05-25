@@ -273,26 +273,28 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     updateCachedInfo: function () {
-        let roster_info = {
-            jid: this.get('jid'),
-            in_roster: this.get('in_roster'),
-            groups: this.get('groups'),
-            subscription: this.get('subscription'),
-            roster_name: this.get('roster_name'),
-            subscription_request_out: this.get('subscription_request_out'),
-            subscription_request_in: this.get('subscription_request_in'),
-            name: this.get('name'),
-            vcard_updated: this.get('vcard_updated')
-        }, full_jid = this.get('full_jid');
-        if (this.get('photo_hash') || this.get('image'))
-            _.extend(roster_info, {
-                photo_hash: (this.get('photo_hash') || this.account.getAvatarHash(this.get('image'))),
-                avatar_priority: this.get('avatar_priority'),
-                avatar: this.get('image')
-            });
-        if (full_jid)
-            roster_info.resource = Strophe.getResourceFromJid(full_jid);
-        this.account.cached_roster.putInRoster(roster_info);
+        this.account.cached_roster.getFromRoster(this.get('jid'), (cached_info) => {
+            let roster_info = {
+                jid: this.get('jid'),
+                in_roster: !_.isUndefined(this.get('in_roster')) ? this.get('in_roster') : cached_info.in_roster,
+                groups: this.get('groups'),
+                subscription: !_.isUndefined(this.get('subscription')) ? this.get('subscription') : cached_info.subscription,
+                roster_name: !_.isUndefined(this.get('roster_name')) ? this.get('roster_name') : cached_info.roster_name,
+                subscription_request_out: this.get('subscription_request_out'),
+                subscription_request_in: this.get('subscription_request_in'),
+                name: this.get('name'),
+                vcard_updated: this.get('vcard_updated')
+            }, full_jid = this.get('full_jid');
+            if (this.get('photo_hash') || this.get('image'))
+                _.extend(roster_info, {
+                    photo_hash: (this.get('photo_hash') || this.account.getAvatarHash(this.get('image'))),
+                    avatar_priority: this.get('avatar_priority'),
+                    avatar: this.get('image')
+                });
+            if (full_jid)
+                roster_info.resource = Strophe.getResourceFromJid(full_jid);
+            this.account.cached_roster.putInRoster(roster_info);
+        });
     },
 
     onChangedGroupchat: function () {
@@ -8858,7 +8860,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.set('const_unread', unread_msgs_count);
         }
         if (msg) {
-            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
+            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))
                 msg.set('is_unread', true);
             if(!(is_invite || encrypted && this.account.omemo)) {
                 if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)

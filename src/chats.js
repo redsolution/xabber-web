@@ -447,7 +447,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
         options.synced_msg && (attrs.synced_from_server = true);
         options.missed_history && (attrs.missed_msg = true);
-        options.is_unread_archived && (attrs.is_unread = true);
+        (options.is_unread_archived && (attrs.type !== 'system')) && (attrs.is_unread = true);
         if (options.echo_msg) {
             attrs.state = constants.MSG_DELIVERED;
             attrs.timestamp = Number(moment(attrs.time));
