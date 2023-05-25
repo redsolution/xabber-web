@@ -274,6 +274,7 @@ xabber.Contact = Backbone.Model.extend({
 
     updateCachedInfo: function () {
         this.account.cached_roster.getFromRoster(this.get('jid'), (cached_info) => {
+            cached_info = cached_info || {};
             let roster_info = {
                 jid: this.get('jid'),
                 in_roster: !_.isUndefined(this.get('in_roster')) ? this.get('in_roster') : cached_info.in_roster,
