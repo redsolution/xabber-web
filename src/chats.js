@@ -3994,16 +3994,41 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 this.startUploadFile(message, $message);
         }
 
-        if (!(message.get('synced_from_server') || message.get('is_archived'))) {
-            if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
-                message.set('is_unread', true);
-                if (!xabber.get('focused')) {
-                    if (this.model.get('saved') || this.model.isMuted())
-                        message.set('muted', true);
-                    else if (!message.get('synced_invitation_from_server'))
-                        this.notifyMessage(message);
+        if (!(message.get('synced_from_server') || (message.get('is_archived') && !message.get('missed_msg')))) {
+            if (message.get('missed_msg')){
+                let last_read_msg = this.model.messages.find(m => this.model.get('last_read_msg') && (m.get('stanza_id') === this.model.get('last_read_msg') || m.get('contact_stanza_id') === this.model.get('last_read_msg'))),
+                    deferred = new $.Deferred();
+                deferred.done(() => {
+                    if (last_read_msg && message.get('timestamp') > last_read_msg.get('timestamp')){
+                        message.set('is_unread', true);
+                        if (!xabber.get('focused')) {
+                            if (this.model.get('saved') || this.model.isMuted())
+                                message.set('muted', true);
+                            else if (!message.get('synced_invitation_from_server'))
+                                this.notifyMessage(message);
+                        }
+                        this.model.setMessagesDisplayed(message.get('timestamp'));
+                    }
+                });
+                if (!last_read_msg){
+                    this.contact.getMessageByStanzaId(this.get('last_read_msg'), ($message) => {
+                        last_read_msg = this.account.chats.receiveChatMessage($message, {is_archived: true});
+                        deferred.resolve();
+                    });
+                } else {
+                    deferred.resolve();
                 }
-                this.model.setMessagesDisplayed(message.get('timestamp'));
+            } else {
+                if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
+                    message.set('is_unread', true);
+                    if (!xabber.get('focused')) {
+                        if (this.model.get('saved') || this.model.isMuted())
+                            message.set('muted', true);
+                        else if (!message.get('synced_invitation_from_server'))
+                            this.notifyMessage(message);
+                    }
+                    this.model.setMessagesDisplayed(message.get('timestamp'));
+                }
             }
             if (this.contact && this.model.get('archived'))
                 if (this.model.isMuted())
@@ -6376,14 +6401,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let is_unread = message.get('is_unread'),
             is_synced = message.get('synced_from_server'),
             is_unread_archived = message.get('is_unread_archived'),
+            is_missed_msg = message.get('missed_msg'),
             $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
         if (is_unread) {
-            if (!is_unread_archived && !is_synced)
+            if (!is_unread_archived && !is_synced && !is_missed_msg)
                 this.model.messages_unread.add(message);
             $msg.addClass('unread-message');
             this.model.recountUnread();
         } else {
-            if ((!is_unread_archived && !is_synced) || this.model.messages_unread.indexOf(message) > -1)
+            if ((!is_unread_archived && !is_synced && !is_missed_msg) || this.model.messages_unread.indexOf(message) > -1)
                 this.model.messages_unread.remove(message);
             setTimeout(() => {
                 $msg.removeClass('unread-message');
