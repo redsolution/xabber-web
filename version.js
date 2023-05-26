@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.107","version_description":"fixed missed messages notifications, changed presence sending after first sync is completed, fixed 2nd sync sending, now it sends after 1st is completed, fixed that only sync without stamp had rsm paging, fixed sync rsm paging, changed cached sync workings, now it excludes all handled conversations from this sync on last rsm page "}'
+'{"version_number":"2.3.3.108","version_description":"changed how chat is scrolled when opened with unread messages, fixed scrolltobottom button to load proper history, removed timeout for removing unread-message class"}'
 )});
