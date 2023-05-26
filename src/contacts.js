@@ -8685,17 +8685,15 @@ xabber.Roster = xabber.ContactsBase.extend({
 
     syncFromServer: function (options, synchronization_with_stamp, is_first_sync) {
         options = options || {};
-        let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION};
-        if (!options.after) {
-            if (options.stamp)
-                request_attrs.stamp = options.stamp;
-            else if (this.account.last_msg_timestamp && !is_first_sync)
-                request_attrs.stamp = this.account.last_msg_timestamp * 1000;
-        }
+        let request_attrs = {xmlns: Strophe.NS.SYNCHRONIZATION},
+            cached_conversations_exclude = options.cached_conversations_exclude || [];
+        if (options.stamp)
+            request_attrs.stamp = options.stamp;
         delete(options.stamp);
+        delete(options.cached_conversations_exclude);
         let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
         this.account.sendFast(iq, (response) => {
-            this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync);
+            this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync, cached_conversations_exclude);
         });
     },
 
@@ -8884,7 +8882,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         xabber.toolbar_view.recountAllMessageCounter();
     },
 
-    onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync) {
+    onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync, cached_conversations_exclude) {
         let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
             sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
         this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
@@ -8903,42 +8901,44 @@ xabber.Roster = xabber.ContactsBase.extend({
         }
         this.account.set('last_sync', sync_timestamp);
         this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
-        let dfd = new $.Deferred();
-        dfd.done((is_cached) => {
+        xabber.chats_view.hideChatsFeedback();
+        if (!request_with_stamp)
+            this.account.chats.getSavedChat();
+        if (is_first_sync)
+            this.account.set('first_sync', sync_timestamp);
+        if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
+            this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
+                cached_conversations_exclude = cached_conversations_exclude.concat($(iq).find('conversation').map(function () {
+                    return $(this).attr('jid') +  '/' + $(this).attr('type');
+                }).toArray());
+                res = res.filter(item => !cached_conversations_exclude.includes(item.account_conversation_type));
+                this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                this.syncConversations(iq, request_with_stamp, is_first_sync, res);
+            });
             this.account.cached_sync_conversations.putInCachedConversations({
                 account_conversation_type: 'last_sync_timestamp',
                 timestamp: sync_timestamp,
             });
-            xabber.chats_view.hideChatsFeedback();
-            if (!request_with_stamp)
-                this.account.chats.getSavedChat();
-            if (is_first_sync)
-                this.account.set('first_sync', sync_timestamp);
-            if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
-                //
+            if (!is_last_sync){
+                this.account.sendPresence();
+                this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
             }
-            else if ($(iq).find('conversation').length) {
-                if (!synchronization_with_stamp) {
-                    this.syncFromServer({max: constants.SYNCHRONIZATION_RSM_MAX, after: sync_rsm_after});
-                }
-                else {
-                    this.account.get('last_sync') && this.syncFromServer({stamp: this.account.get('last_sync'), max: constants.SYNCHRONIZATION_RSM_MAX}, true);
-                }
-            }
-        });
-        if (is_first_sync)
+        }
+        else if ($(iq).find('conversation').length) {
             this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
-                let synced_conversations = $(iq).find('conversation').map(function () {
+                cached_conversations_exclude = cached_conversations_exclude.concat($(iq).find('conversation').map(function () {
                     return $(this).attr('jid') +  '/' + $(this).attr('type');
-                }).toArray();
-                res = res.filter(item => !synced_conversations.includes(item.account_conversation_type));
-                this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                }).toArray());
                 this.syncConversations(iq, request_with_stamp, is_first_sync, res);
-                dfd.resolve(true);
+                let sync_options = {max: constants.SYNCHRONIZATION_RSM_MAX, after: sync_rsm_after};
+                if (request_with_stamp)
+                    sync_options.stamp = request_with_stamp;
+                if (is_last_sync)
+                    sync_options.last_version_sync = true;
+                if (cached_conversations_exclude && cached_conversations_exclude.length)
+                    sync_options.cached_conversations_exclude = cached_conversations_exclude;
+                this.syncFromServer(sync_options);
             });
-        else{
-            this.syncConversations(iq, request_with_stamp);
-            dfd.resolve();
         }
     },
 
@@ -8959,7 +8959,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
         this.account.sendIQFast(iq, (iq) => {
             this.onRosterIQ(iq);
-            this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
             this.account.dfd_presence.resolve();
         });
     },

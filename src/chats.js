@@ -4004,8 +4004,6 @@ xabber.ChatItemView = xabber.BasicView.extend({
                         if (!xabber.get('focused')) {
                             if (this.model.get('saved') || this.model.isMuted())
                                 message.set('muted', true);
-                            else if (!message.get('synced_invitation_from_server'))
-                                this.notifyMessage(message);
                         }
                         this.model.setMessagesDisplayed(message.get('timestamp'));
                     }
@@ -12753,8 +12751,6 @@ xabber.Account.addConnPlugin(function () {
                 chat.trigger('load_last_history');
         }
     });
-    if (!(this.auth_view && this.auth_view.data.get('authentication')))
-        this.sendPresence();
 
     this.connection.deleteTimedHandler(this._get_msg_handler);
     this._get_msg_handler = this.connection.addTimedHandler(60000, () => {
