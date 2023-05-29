@@ -9144,6 +9144,8 @@ xabber.AccountRosterRightView = xabber.AccountRosterView.extend({
     },
 
     updateCounter: function () {
+        if (!this.roster)
+            this.roster = this.account.roster;
         let all = this.roster.length,
             online = all - this.roster.where({status: 'offline'}).length;
         this.$info.find('.counter').text(online + '/' + all);
@@ -9437,7 +9439,8 @@ xabber.RosterRightView = xabber.RosterView.extend({
     updateCounter: function () {
         this.$('.all-contacts-counter').text(
             _.reduce(this.children, function (counter, view) {
-                return counter + view.roster.length;
+                let roster_length = view.roster ? view.roster.length : 0;
+                return counter + roster_length;
             }, 0)
         );
     },
@@ -10004,12 +10007,14 @@ xabber.Account.addInitPlugin(function () {
 
     this.cached_roster.on("database_open_failed", () => {
         this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this, roster_version: 0}));
+        this.trigger('roster_created');
     });
 
     this.cached_roster.on("database_opened", () => {
         this.cached_roster.getFromRoster('roster_version', (res) => {
             let roster_version = res && res.version ? res.version : 0;
             this.contacts.addCollection(this.roster = new xabber.Roster(null, {account: this, roster_version: roster_version}));
+            this.trigger('roster_created');
         });
     });
 
@@ -10018,40 +10023,57 @@ xabber.Account.addInitPlugin(function () {
     this._added_pres_handlers.push(this.contacts.handlePresence.bind(this.contacts));
 
     this.on("ready_to_get_roster", function () {
-        this.resources.reset();
-        this.contacts.each(function (contact) {
-            contact.resources.reset();
-            contact.resetStatus();
-        });
-        this.cached_roster.getAllFromRoster((roster_items) => {
-            $(roster_items).each((idx, roster_item) => {
-                if (roster_item.jid === 'roster_version'){
-                    return;
-                }
-                this.contacts.mergeContact(roster_item);
+        let dfd = new $.Deferred();
+        dfd.done(() => {
+            this.resources.reset();
+            this.contacts.each(function (contact) {
+                contact.resources.reset();
+                contact.resetStatus();
             });
-            if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
-                let options = {};
-                this.cached_sync_conversations.getFromCachedConversations('last_sync_timestamp', (res) => {
-                    let last_sync_timestamp = res && res.timestamp ? res.timestamp : null;
-                    !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
-                    last_sync_timestamp && (options.stamp = last_sync_timestamp);
-                    this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
-                    this.roster.getRoster();
+            this.cached_roster.getAllFromRoster((roster_items) => {
+                $(roster_items).each((idx, roster_item) => {
+                    if (roster_item.jid === 'roster_version'){
+                        return;
+                    }
+                    this.contacts.mergeContact(roster_item);
                 });
-            }
-            else {
-                this.roster.getRoster();
-            }
-            this.blocklist.getFromServer();
+                if (this.connection && this.connection.do_synchronization && xabber.chats_view) {
+                    let options = {};
+                    this.cached_sync_conversations.getFromCachedConversations('last_sync_timestamp', (res) => {
+                        let last_sync_timestamp = res && res.timestamp ? res.timestamp : null;
+                        !this.roster.last_chat_msg_id && (options.max = constants.SYNCHRONIZATION_RSM_MAX);
+                        last_sync_timestamp && (options.stamp = last_sync_timestamp);
+                        this.roster.syncFromServer(options, Boolean(last_sync_timestamp), true);
+                        this.roster.getRoster();
+                    });
+                }
+                else {
+                    this.roster.getRoster();
+                }
+                this.blocklist.getFromServer();
+            });
         });
+        console.log(this.roster);
+        if (this.roster) {
+            dfd.resolve();
+        } else {
+            this.once('roster_created', () => {
+                dfd.resolve();
+            });
+        }
     }, this);
 });
 
 xabber.Account.addConnPlugin(function () {
     this.registerIQHandler();
     this.registerSyncedIQHandler();
-    this.roster.registerHandler();
+    if (this.roster) {
+        this.roster.registerHandler();
+    } else {
+        this.once('roster_created', () => {
+            this.roster.registerHandler();
+        });
+    }
     this.blocklist.registerHandler();
 }, true, true);
 
