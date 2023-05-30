@@ -8719,7 +8719,10 @@ xabber.Roster = xabber.ContactsBase.extend({
             jid = $item.attr('jid'), saved = false;
         if (cached_conversations){
             $(cached_conversations).each((idx, conv) => {
-                if (conv.account_conversation_type.includes(jid) && (conv.account_conversation_type !== ($(item).attr('jid') +  '/' + $(item).attr('type')))){
+                if (!(conv.account_conversation_type && conv.account_conversation_type.split))
+                    return;
+                let cached_conv_type_jid = conv.account_conversation_type.split('/')[0];
+                if ((cached_conv_type_jid === jid) && (conv.account_conversation_type !== ($(item).attr('jid') +  '/' + $(item).attr('type')))){
                     if ($item.attr('type') === Strophe.NS.GROUP_CHAT || conv.account_conversation_type.includes(Strophe.NS.GROUP_CHAT)){
                         this.account.cached_sync_conversations.removeFromCachedConversations(conv.account_conversation_type);
                     }

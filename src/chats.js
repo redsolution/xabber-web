@@ -1102,6 +1102,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     console.log(this.item_view.content.isVisible());
                     if (this.item_view.content.isVisible()){
                         this.item_view.content.scrollToUnread();
+                    } else {
+                        this.set('show_new_unread', true);
                     }
                     this.item_view.content._no_scrolling_event = false;
                 });
@@ -3307,6 +3309,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
         this.model.set('const_unread', 0);
+        this.model.set('show_new_unread', false);
         _.each(unread_messages, (msg) => {
             if (!timestamp || msg.get('timestamp') <= timestamp) {
                 msg.set('is_unread', false);
@@ -3352,6 +3355,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     onScrollY: function () {
+        this._prev_scrolltop = this._scrolltop || 0;
+        this._scrolltop = this.getScrollTop();
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);
             this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
@@ -8260,14 +8265,15 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.updateScreenAllChats();
             if (!view.model.get('history_loaded')) {
                 if (
-                    (view.model.get('const_unread') || (!view.content._prev_scrolltop && view.model.get('unread')))
-                    && view.model.get('last_read_msg')
+                    (view.model.get('const_unread') || view.model.get('unread'))
+                    && view.model.get('last_read_msg') && (!view.content._prev_scrolltop || (view.model.get('show_new_unread') === true))
                     && !view.model.get('loading_unread_history') && !options.force_bottom
                 ){
+                    view.model.set('show_new_unread', false);
                     view.model._wait_load_unread_history = new $.Deferred();
                     view.content._no_scrolling_event = true;
                     view.content.loadUnreadHistory();
-                } else if ((view.model.messages.length < 20))
+                } else if (view.model.messages.length < 20)
                     view.content.loadPreviousHistory();
             }
             if (!options.right_force_close && (
@@ -8281,13 +8287,14 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     view.contact.showDetailsRight('all-chats', {right_saved: false});
             }
             if (!view.model.get('loading_unread_history')){
+                let current_scrolling = view.content.getScrollTop() || view.content._scrolltop;
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
                     clear_search: options.clear_search,
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                view.content.scrollTo(view.content._prev_scrolltop);
+                view.content.scrollTo(current_scrolling);
             } else {
                 view.model._wait_load_unread_history.done(() => {
                     view.model.set('loading_unread_history', false)
