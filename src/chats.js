@@ -2331,7 +2331,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       onScroll: function () {
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
-          this._prev_scrolltop = this._scrolltop || 0;
+          this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
           this._scrolltop = this.getScrollTop();
           if (!this.history_loaded && !this.loading_history && (this._scrolltop < this._prev_scrolltop) && (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
               this.loading_history = true;
@@ -2437,7 +2437,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       onScroll: function () {
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
-          this._prev_scrolltop = this._scrolltop || 0;
+          this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
           this._scrolltop = this.getScrollTop();
           this._scrollbottom = this.getScrollBottom();
 
@@ -3081,7 +3081,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       render: function () {
           this.cancelSearch();
-          this.scrollToBottom();
+          if (this._prev_scrolltop)
+              this.scrollTo(this._prev_scrolltop);
+          else
+              this.scrollToBottom();
           this.onScroll();
           this.updateContactStatus();
           this.updateWaveforms();
@@ -3355,7 +3358,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     onScrollY: function () {
-        this._prev_scrolltop = this._scrolltop || 0;
+        this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop();
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);
@@ -3373,7 +3376,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             $messages = this.$('.chat-message'),
             indicator_idx = undefined,
             opacity_value;
-        this._prev_scrolltop = this._scrolltop || 0;
+        this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop();
         $chatday_indicator.each((idx, indicator) => {
             if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {

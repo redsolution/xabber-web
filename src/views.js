@@ -908,6 +908,13 @@ xabber.Body = xabber.NodeView.extend({
         if ((!attrs && xabber.body.screen.get('right'))
             || (attrs && !attrs.right && attrs.right !== null && xabber.body.screen.get('right')))
             new_attrs.right = xabber.body.screen.get('right');
+        new_attrs = _.extend(new_attrs, attrs);
+        let chat_item_view;
+        if (_.isUndefined(new_attrs.chat_item)){
+            chat_item_view = this.screen.get('chat_item');
+            if (chat_item_view && chat_item_view.content)
+                chat_item_view.content._prev_scrolltop = chat_item_view.content.getScrollTop() || chat_item_view.content._scrolltop;
+        }
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
 
