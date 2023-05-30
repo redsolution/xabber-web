@@ -1101,9 +1101,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     last_read_msg.set('is_unread', false);
                     console.log(this.item_view.content.isVisible());
                     if (this.item_view.content.isVisible()){
-                        let $last_read_msg = this.item_view.content.$(`.chat-message.unread-message:first`);
-                        $last_read_msg.length && (this.item_view.content.scrollTo(this.item_view.content.getScrollTop()
-                            - this.item_view.content.$el.height() + $last_read_msg.offset().top));
+                        this.item_view.content.scrollToUnread();
                     }
                     this.item_view.content._no_scrolling_event = false;
                 });
@@ -3345,6 +3343,14 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
     },
 
+    scrollToUnread: function () {
+        let $last_read_msg = this.$(`.chat-message.unread-message:first`);
+        console.log(this.$el.height())
+        console.log((this.$el.height() * 0.2))
+        $last_read_msg.length && (this.scrollTo(this.getScrollTop()
+          - (this.$el.height() * 0.2) + $last_read_msg.offset().top));
+    },
+
     onScrollY: function () {
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);
@@ -4028,20 +4034,21 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     this.model.setMessagesDisplayed(message.get('timestamp'));
                 }
             }
-            if (this.contact && this.model.get('archived'))
+            if (this.contact && this.model.get('archived')){
                 if (this.model.isMuted())
                     message.set('archived', true);
                 else {
                     this.head.archiveChat();
                     this.model.set('archived', false);
                 }
+            }
             if (this.model.get('saved')) {
                 message.set('muted', true);
                 message.set('state', constants.MSG_DISPLAYED);
             }
         }
 
-        if (this.isVisible() && !message.get('is_unread') && !message.get('is_between_anchors')) {
+        if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
             if (is_scrolled_to_bottom || message.get('submitted_here')) {
                 this.scrollToBottom();
             } else {
@@ -8290,9 +8297,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         chat_item: view,
                         blocked: view.model.get('blocked')
                     },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                    let $last_read_msg = view.content.$(`.chat-message.unread-message:first`);
-                    $last_read_msg.length && (view.content.scrollTo(view.content.getScrollTop()
-                        - view.content.$el.height() + $last_read_msg.offset().top));
+                    view.content.scrollToUnread();
                     view.content._no_scrolling_event = false;
                     view.content.onScroll();
                 });
