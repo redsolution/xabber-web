@@ -10092,6 +10092,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                       headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
                       url: this.model.get('gallery_url') + 'v1/files/',
                       dataType: 'json',
+                      contentType: "application/json",
                       data: {obj_per_page: 50, order_by: '-id', type: 'image'},
                       success: (response) => {
                           console.log(response)
@@ -10109,6 +10110,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                       headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
                       url: this.model.get('gallery_url') + 'v1/files/',
                       dataType: 'json',
+                      contentType: "application/json",
                       data: {obj_per_page: 50, order_by: '-id', type: 'video'},
                       success: (response) => {
                           console.log(response)

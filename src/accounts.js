@@ -1304,6 +1304,7 @@ xabber.Account = Backbone.Model.extend({
                     type: 'POST',
                     url: this.get('gallery_url') + 'v1/account/xmpp_code_request/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: JSON.stringify({jid: this.jid, type: "iq"}),
                     success: (response) => {
                         if (response.request_id){
@@ -1333,6 +1334,7 @@ xabber.Account = Backbone.Model.extend({
                     type: 'POST',
                     url: this.get('gallery_url') + 'v1/account/xmpp_auth/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: JSON.stringify({jid: this.id, code: confirm_code}),
                     success: (response) => {
                         if (response.token)
@@ -1385,6 +1387,7 @@ xabber.Account = Backbone.Model.extend({
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
                         url: this.get('gallery_url') + 'v1/files/stats/',
                         dataType: 'json',
+                        contentType: "application/json",
                         data: params,
                         success: (response) => {
                             callback && callback(response)
@@ -1405,6 +1408,7 @@ xabber.Account = Backbone.Model.extend({
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
                         url: this.get('gallery_url') + 'v1/files/slot/',
                         dataType: 'json',
+                        contentType: "application/json",
                         data: params,
                         success: (response) => {
                             this.uploadFile(file , callback)
@@ -1487,6 +1491,7 @@ xabber.Account = Backbone.Model.extend({
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
                         url: this.get('gallery_url') + 'v1/files/',
                         dataType: 'json',
+                        contentType: "application/json",
                         data: JSON.stringify({id: file_id}),
                         success: (response) => {
                             console.log(response)
@@ -1509,6 +1514,7 @@ xabber.Account = Backbone.Model.extend({
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token'), "Content-Type": "application/json"},
                         url: this.get('gallery_url') + 'v1/opengraph/',
                         dataType: 'json',
+                        contentType: "application/json",
                         data: JSON.stringify({url: url}),
                         success: (response) => {
                             response.site = $(response.ogp).closest('meta[property="og:site_name"]').attr('content')
@@ -2292,6 +2298,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
                     url: this.account.get('gallery_url') + 'v1/files/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: options,
                     success: (response) => {
                         response.type = options.type
@@ -2325,6 +2332,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
                     url: this.account.get('gallery_url') + 'v1/avatar/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: options,
                     success: (response) => {
                         response.type = options.type
@@ -2419,6 +2427,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
                     url: this.account.get('gallery_url') + 'v1/avatar/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: JSON.stringify({id: file_id}),
                     success: (response) => {
                         this.updateStorage(true);
@@ -2444,6 +2453,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
                     url: this.account.get('gallery_url') + 'v1/files/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
                     success: (response) => {
                         this.updateStorage(true);
@@ -3488,6 +3498,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
                     headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
                     url: this.model.get('gallery_url') + 'v1/avatar/',
                     dataType: 'json',
+                    contentType: "application/json",
                     data: options,
                     success: (response) => {
                         console.log(response)
