@@ -8674,11 +8674,36 @@ input[type=text].simple-input-field:hover {
     color: #616161;
 }
 
+.chat-content .unread-marker {
+    width: calc(100% - 160px);
+    margin: 0px 96px 0px 64px!important;
+    position: relative;
+    z-index: 3;
+    height: 30px;
+}
+
+.chat-content .unread-marker .unread-marker-content{
+    pointer-events: none;
+    padding: 4px 16px;
+    position: absolute;
+    top: 4px;
+    left: 0;
+    right: 0;
+    width: fit-content;
+    margin: 0 auto;
+    font-size: 12px;
+    color: #9E9E9E;
+    line-height: 14px;
+    background: #EEEEEE;
+    border-radius: 50px;
+}
+
 .chat-message {
     max-width: 768px;
     transform: translate(-50%, 0);
     left: 50%;
     position: relative;
+    min-height: 44px;
     width: 100%;
     padding: 7px 0;
     border-top: 1px solid transparent;
@@ -9051,9 +9076,6 @@ input[type=text].simple-input-field:hover {
 }
 .chat-message .chat-msg-content {
     white-space: pre-wrap;
-}
-.chat-message .chat-msg-content:empty {
-    min-height: 20px;
 }
 
 .chat-message .chat-msg-content .quote {

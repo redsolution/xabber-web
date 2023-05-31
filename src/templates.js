@@ -184,6 +184,7 @@
     addTemplate('chats.chat_content');
     addTemplate('chats.chat_content_contact');
     addTemplate('chats.chat_bottom');
+    addTemplate('chats.unread_marker');
     addTemplate('chats.location_popup');
     addTemplate('chats.subscription_buttons');
     addTemplate('chats.forward_panel');

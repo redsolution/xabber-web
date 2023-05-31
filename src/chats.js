@@ -3049,6 +3049,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             }
         }
         this._scrolltop = this.getScrollTop();
+        this._is_scrolled_bottom = true;
         let wheel_ev = this.defineMouseWheelEvent();
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
         this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
@@ -3333,6 +3334,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
     },
 
+    showUnreadMarker: function () {
+        this.$('.unread-marker').remove();
+        if (this.$(`.chat-message.unread-message`).length){
+            let text = xabber.getQuantityString("new_chat_messages_no_number", this.model.get('const_unread') + this.model.get('unread')),
+                $template = $(templates.unread_marker({text: text}));
+            $template.insertBefore(this.$(`.chat-message.unread-message:first`));
+        }
+    },
+
     onMouseWheel: function (ev) {
         if (ev.originalEvent.deltaY < 0)
             this.loadPreviousHistory();
@@ -3360,6 +3370,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop();
+        this._is_scrolled_bottom = this.isScrolledToBottom();
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);
             this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
@@ -3378,6 +3389,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
             opacity_value;
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop();
+        if (this.$('.unread-marker').length) {
+            let marker = this.$('.unread-marker');
+            if (marker[0].offsetTop < this._scrolltop)
+                marker.remove();
+        }
         $chatday_indicator.each((idx, indicator) => {
             if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {
                 if (this._scrolltop < this._prev_scrolltop) {
@@ -4057,9 +4073,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
 
         if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
-            if (is_scrolled_to_bottom || message.get('submitted_here')) {
+            let is_scrolling_needed;
+            if (is_scrolled_to_bottom){
+                if (this.$(`.chat-message.unread-message`).length){
+                    if (this.$(`.chat-message.unread-message`)[0].offsetTop > (this._scrolltop + 140)) {
+                        is_scrolling_needed = true;
+                    }
+                } else
+                    is_scrolling_needed = true;
+            }
+            if ((is_scrolled_to_bottom && is_scrolling_needed) || message.get('submitted_here')) {
                 this.scrollToBottom();
-            } else {
+            } else if (!is_scrolled_to_bottom) {
                 this.updateScrollBar();
                 this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
             }
@@ -8269,7 +8294,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             if (!view.model.get('history_loaded')) {
                 if (
                     (view.model.get('const_unread') || view.model.get('unread'))
-                    && view.model.get('last_read_msg') && (!view.content._prev_scrolltop || (view.model.get('show_new_unread') === true))
+                    && view.model.get('last_read_msg') &&
+                    (!view.content._prev_scrolltop || (view.content._prev_scrolltop && view.content._is_scrolled_bottom) || (view.model.get('show_new_unread') === true))
                     && !view.model.get('loading_unread_history') && !options.force_bottom
                 ){
                     view.model.set('show_new_unread', false);
@@ -8297,6 +8323,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                view.content.showUnreadMarker();
                 view.content.scrollTo(current_scrolling);
             } else {
                 view.model._wait_load_unread_history.done(() => {
@@ -8307,6 +8334,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         chat_item: view,
                         blocked: view.model.get('blocked')
                     },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                    view.content.showUnreadMarker();
                     view.content.scrollToUnread();
                     view.content._no_scrolling_event = false;
                     view.content.onScroll();
