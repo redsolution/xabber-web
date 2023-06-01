@@ -1,6 +1,6 @@
 <div class="gallery-file{[if (file.is_avatar === 'True'){]} gallery-avatar{[}]}" title="{{file.name}}" data-id="{{file.id}}" data-file="{{file.file}}" data-name="{{file.name}}" data-size="{{file.size}}" data-width="{{file.width}}" data-height="{{file.height}}" data-media-type="{{file.media_type}}" >
     {[if (file.media_type && (file.media_type.includes('image') || file.media_type.includes('video'))){]}
-        <img class="{[if (file.media_type.includes('video')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}" data-mfp-src="{{file.file}}" src="{{file.thumbnail}}" {[if (file.media_type && file.media_type.includes('image')){]}onerror="this.src = '{{file.file}}'" {[}]}>
+        <img class="{[if (file.media_type.includes('video')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}" data-mfp-src="{{file.file}}" src="{{file.thumbnail}}" {[if (file.media_type && file.media_type.includes('image')){]}onerror="this.src = '{{file.file}}'; this.onerror = null;" {[}]}>
     {[} else {]}
         {[if (svg_icon == 'file-audio' && file.media_type.includes('+voice')){]}
             <div class="gallery-file-placeholder-background gallery-audio-file-not-uploaded">
