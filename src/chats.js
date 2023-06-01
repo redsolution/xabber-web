@@ -3479,7 +3479,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             if (this.$('.chat-message.unread-message').length && xabber.get('focused')){
                 let last_visible_unread_msg;
                 this.$('.chat-message.unread-message').each((idx, msg) => {
-                    if ($(msg).isFullyVisibleInContainer(this.$('.chat-content'))) {
+                    if ($(msg).isBottomVisibleInContainer(this.$('.chat-content'))) {
                         last_visible_unread_msg = msg;
                     }
                 });

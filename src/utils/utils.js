@@ -73,6 +73,21 @@ $.fn.isFullyVisibleInContainer = function(container) {
     );
 };
 
+$.fn.isBottomVisibleInContainer = function(container) {
+    if (!this.length || !container.length)
+        return;
+    container = container[0];
+    let eleTop = this[0].offsetTop,
+        eleBottom = eleTop + this[0].clientHeight;
+
+    let containerTop = container.scrollTop,
+        containerBottom = containerTop + container.clientHeight;
+
+    return (
+        eleBottom <= containerBottom
+    );
+};
+
 var getHyperLink = function (url) {
     var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
         escaped_url = "";

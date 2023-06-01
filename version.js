@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.114","version_description":"fixed contentType for media gallery requests"}'
+'{"version_number":"2.3.3.115","version_description":"changed message reading, now it reads them when their bottom is visible"}'
 )});
