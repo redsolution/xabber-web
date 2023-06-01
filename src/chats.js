@@ -6049,6 +6049,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
                             $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-wrap').remove();
                         };
                         (this.status === 0) && (message.get('files')[idx] = null);
+                        if (!message.get('files').filter((element) => { return element != null}).length && !message.get('message')){
+                            self.bottom.setEditedMessageAttachments(message, true);
+                            self.bottom.setRedactedUploadMessage(message);
+                            self.removeMessage($message);
+                            return;
+                        }
                         files_count++;
                         if (this.status != 0) {
                             if (!$message.find('div[data-upload-file-id="' + file.upload_id + '"]').closest('.img-content-template.hidden').length){
