@@ -5990,7 +5990,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 $message.find('div[data-upload-file-id="' + file.upload_id + '"] .preloader-path-new').css({ 'stroke-dasharray': '' + (150 * percentage) + ', 149.825'});
             };
             xhr.onload = xhr.onerror = xhr.onabort = function () {
-                if (this.status === 200) {
+                if (this.status >= 200 && this.status < 300) {
                     $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-center-loading-indicator').addClass('mdi-check').removeClass('mdi-close');
                     let response = JSON.parse(this.response)
                     message.get('files')[idx].id = response.id;

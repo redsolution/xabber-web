@@ -210,7 +210,7 @@ xabber.Account = Backbone.Model.extend({
                             .c('item', {id: avatar_hash})
                             .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
                             .c('info', {bytes: data.size, id: avatar_hash, type: data.type, url: data.file});
-                    data.thumbnails.forEach((thumbnail) => {
+                    data.thumbnails && data.thumbnails.forEach((thumbnail) => {
                         iq_pub_metadata.c('thumbnail', {
                             xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
                             url: thumbnail.url,
@@ -257,7 +257,7 @@ xabber.Account = Backbone.Model.extend({
             else if (this.get('gallery_token') && this.get('gallery_url') && !image.generated && !image.uploaded){
                 let file = image.name ? image : image.file;
                 this.uploadAvatar(file, (res) => {
-                    if (res.thumbnails.length || res.file){
+                    if (res.thumbnails && res.thumbnails.length || res.file){
                         res.type = file.type;
                         dfd.resolve(res, true)
                     } else
@@ -2364,13 +2364,13 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 this.$('.indicator').addClass('ground-color-500');
             }
         }
-        if (!response.items.length){
+        if (!response.items || !response.items.length){
             !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
             return;
         }
         this.total_pages = response.total_pages;
         this.$('.gallery-files .preloader-wrapper').remove()
-        if (response.items.length){
+        if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
                 let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));

@@ -60,6 +60,7 @@ xabber.Contact = Backbone.Model.extend({
         this.on("update_avatar", this.updateAvatar, this);
         this.on("change:full_jid", this.updateCachedInfo, this);
         this.on("change:roster_name", this.updateName, this);
+        this.on("destroy", this.onDestroy, this);
         this.account.dfd_presence.done(() => {
             if (!this.get('blocked') && !this.get('vcard_updated') && !attrs.is_deleted)
                 this.getVCard();
@@ -305,6 +306,13 @@ xabber.Contact = Backbone.Model.extend({
         }
     },
 
+    onDestroy: function () {
+        if (this.account && this.account.groupchat_settings && this.participants) {
+            this.participants.reset();
+            this.account.groupchat_settings.resetParticipantsList(this.get('jid'));
+        }
+    },
+
     getBlockedParticipants: function (callback, errback) {
         let iq = $iq({
             type: 'get',
@@ -427,6 +435,8 @@ xabber.Contact = Backbone.Model.extend({
             this.account.sendIQFast(iq, callback, errback);
             this.set('known', false);
             this.set('removed', true);
+            if (this.get('group_chat'))
+                this.destroy();
         }
         return this;
     },
@@ -474,15 +484,15 @@ xabber.Contact = Backbone.Model.extend({
                             .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#delete`}).t(localpart);
                     this.account.sendIQFast(iq, () => {
                         this.declineSubscription();
-                        this.removeFromRoster();
                         let chat = this.account.chats.getChat(this);
+                        this.removeFromRoster();
                         chat.trigger("close_chat");
                         xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                     });
                 } else {
+                    let chat = this.account.chats.getChat(this);
                     this.removeFromRoster();
                     if (result.delete_history) {
-                        let chat = this.account.chats.getChat(this);
                         chat.retractAllMessages(false);
                         chat.deleteFromSynchronization();
                         xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
@@ -604,19 +614,17 @@ xabber.Contact = Backbone.Model.extend({
         } else if (type === 'unsubscribe') {
             this.set('subscription_request_in', false);
             if (this.get('group_chat')) {
+                let chat = this.account.chats.getChat(this),
+                    sync_deleted = this.get('sync_deleted');
                 this.removeFromRoster();
-                let chat = this.account.chats.getChat(this);
-                if (!this.get('sync_deleted')){
+                if (!sync_deleted){
                     chat.deleteFromSynchronization(() => {
                         chat.trigger("close_chat");
-                        this.destroy();
                     }, () => {
                         chat.trigger("close_chat");
-                        this.destroy();
                     });
                 } else {
                     chat.trigger("close_chat");
-                    this.destroy();
                 }
             }
         } else if (type === 'unsubscribed') {
@@ -2334,8 +2342,8 @@ xabber.GroupChatDetailsView = xabber.BasicView.extend({
         utils.dialogs.ask(xabber.getString("groupchat_leave_full"), xabber.getString("groupchat_leave_confirm", [contact.get('name')]), null, { ok_button_text: xabber.getString("groupchat_leave")}).done((result) => {
             if (result) {
                 contact.declineSubscription();
-                contact.removeFromRoster();
                 let chat = this.account.chats.getChat(contact);
+                contact.removeFromRoster();
                 chat.deleteFromSynchronization(() => {
                     chat.trigger("close_chat");
                     xabber.body.setScreen('all-chats', {right: undefined});
@@ -2775,8 +2783,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         utils.dialogs.ask(xabber.getString("groupchat_leave_full"), xabber.getString("groupchat_leave_confirm", [contact.get('name')]), null, { ok_button_text: xabber.getString("groupchat_leave")}).done((result) => {
             if (result) {
                 contact.declineSubscription();
-                contact.removeFromRoster();
                 let chat = this.account.chats.getChat(contact);
+                contact.removeFromRoster();
                 chat.deleteFromSynchronization(() => {
                     chat.trigger("close_chat");
                     xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
@@ -8813,6 +8821,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 contact && contact.set('known', false);
                 contact && contact.set('removed', true);
                 this.account.cached_roster.removeFromRoster(jid);
+                contact.destroy();
             }
         }
         else
