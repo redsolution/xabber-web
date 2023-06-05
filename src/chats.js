@@ -3294,6 +3294,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             read_count = this.model.get('const_unread') - read_count;
             (read_count < 0) && (read_count = 0);
             this.model.set('const_unread', read_count);
+            xabber.toolbar_view.recountAllMessageCounter();
         } else {
             let unread_messages = _.clone(this.model.messages_unread.models);
             _.each(unread_messages, (msg) => {
@@ -3488,7 +3489,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     this.readMessage(last_visible_unread_msg);
                 }
             }
-        }, 1000)
+        }, 2000)
         if (this._scrolltop < this._prev_scrolltop &&
             (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
             this.loadPreviousHistory();
