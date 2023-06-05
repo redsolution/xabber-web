@@ -681,7 +681,10 @@ xabber.Contact = Backbone.Model.extend({
         $index.length && (info.searchable = $index.text());
         $model.length && (info.model = $model.text());
         $description.length && (info.description = $description.text());
-        $online_members_num.length && (info.online_members_num = Number($online_members_num.text()));
+        if ($online_members_num.length)
+            info.online_members_num = Number($online_members_num.text());
+        else
+            info.online_members_num = 1;
         private_chat && this.set('private_chat', private_chat);
         privacy === 'incognito' && this.set('incognito_chat', true);
         let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
