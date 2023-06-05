@@ -435,8 +435,10 @@ xabber.Contact = Backbone.Model.extend({
             this.account.sendIQFast(iq, callback, errback);
             this.set('known', false);
             this.set('removed', true);
-            if (this.get('group_chat'))
-                this.destroy();
+            if (this.get('group_chat')){
+                this.participants.reset();
+                this.account.groupchat_settings.resetParticipantsList(this.get('jid'));
+            }
         }
         return this;
     },
@@ -8821,7 +8823,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                 contact && contact.set('known', false);
                 contact && contact.set('removed', true);
                 this.account.cached_roster.removeFromRoster(jid);
-                contact.destroy();
+                contact.participants.reset();
+                this.account.groupchat_settings.resetParticipantsList(contact.get('jid'));
             }
         }
         else

@@ -9917,6 +9917,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                     (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteFromSynchronization();
                     this.leaveGroupChat();
                     this.closeChat();
+                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
                 }
             });
         }
@@ -9938,6 +9939,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                         });
                     }
                     this.closeChat();
+                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
                 }
             });
         }
