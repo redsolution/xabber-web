@@ -764,30 +764,27 @@ xabber.Contact = Backbone.Model.extend({
             .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
             .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
             .c('value').t(Strophe.NS.MAM).up().up();
-        if (this.account.server_features.get(Strophe.NS.ARCHIVE) && options.encrypted)    {
-            iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_encrypted`})
-                .c('value').t(options.encrypted).up().up();
-        }
-        if (this.account.server_features.get(Strophe.NS.ARCHIVE) && !options.encrypted)    {
-            if (options.filter_image)
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_image`})
-                    .c('value').t(options.filter_image).up().up();
-            if (options.filter_video)
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_video`})
-                    .c('value').t(options.filter_video).up().up();
-            if (options.filter_voice)
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_voice`})
-                    .c('value').t(options.filter_voice).up().up();
-            if (options.filter_files){
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_image`})
-                    .c('value').t('false').up().up();
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_video`})
-                    .c('value').t('false').up().up();
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_voice`})
-                    .c('value').t('false').up().up();
-                iq.c('field', {'var': `{${Strophe.NS.ARCHIVE}}filter_sticker`})
-                    .c('value').t('false').up().up();
+        if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+            if (this.account.server_features.get(Strophe.NS.ARCHIVE)) {
+                iq.c('field', {'var': `payload-type`});
+                if (options.encrypted){
+                    iq.c('value').t(Strophe.NS.OMEMO).up().up();
+                } else {
+                    iq.c('value').t('cleartext').up().up();
+                }
             }
+        }
+        if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
+            iq.c('field', {'var': `with-tags`});
+            if (options.filter_image)
+                iq.c('value').t('image').up();
+            if (options.filter_video)
+                iq.c('value').t('video').up();
+            if (options.filter_voice)
+                iq.c('value').t('voice').up();
+            if (options.filter_files)
+                iq.c('value').t('document').up();
+            iq.up();
         }
         if (!is_groupchat)
             iq.c('field', {'var': 'with'})
