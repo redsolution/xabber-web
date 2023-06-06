@@ -681,10 +681,7 @@ xabber.Contact = Backbone.Model.extend({
         $index.length && (info.searchable = $index.text());
         $model.length && (info.model = $model.text());
         $description.length && (info.description = $description.text());
-        if ($online_members_num.length)
-            info.online_members_num = Number($online_members_num.text());
-        else
-            info.online_members_num = 1;
+        $online_members_num.length && (info.online_members_num = Number($online_members_num.text()));
         private_chat && this.set('private_chat', private_chat);
         privacy === 'incognito' && this.set('incognito_chat', true);
         let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
@@ -6676,7 +6673,6 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.openChat();
         contact.trigger('remove_invite', contact);
         let chat = this.account.chats.getChat(this.model);
-        chat.item_view && chat.item_view.content && chat.item_view.content.onChangedActiveStatus();
     },
 
     reject: function () {

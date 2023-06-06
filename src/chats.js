@@ -3141,9 +3141,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     onSubscriptionChange: function () {
         let subscription = this.contact.get('subscription');
-        if (subscription === 'both'&& this.contact.get('group_chat')){
+        if (subscription === 'both' && this.contact.get('group_chat')){
             this.updateGroupChat();
             this.loadPreviousHistory();
+            this.model.get('active') && this.onChangedActiveStatus();
         }
     },
 
@@ -3184,16 +3185,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.sendChatState(active ? 'active' : 'inactive');
         if (this.model.get('group_chat') && !this.contact.get('invitation')) {
             if (active){
-                if (this.contact.get('status') === 'offline'){
-                    this.contact.once('change:status', () => {
-                        let active_now = this.model.get('active');
-                        if (active_now){
-                            this.sendChatState('active');
-                            this.contact.setActiveStateSendInterval();
-                        }
-                    });
-                } else
-                    this.contact.setActiveStateSendInterval();
+                this.contact.setActiveStateSendInterval();
             }
             else{
                 clearTimeout(this.contact._sending_active_chatstate_timeout);
@@ -8076,6 +8068,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.model.on("add", this.onChatAdded, this);
         this.model.on("destroy", this.onChatRemoved, this);
         this.model.on("change:active", this.onChangedActiveStatus, this);
+        this.model.on("add_opened_chat", this.onChangedActiveStatus, this);
         this.model.on("change:unread", this.onChangedReadStatus, this);
         this.model.on("change:const_unread", this.onChangedReadStatus, this);
         this.model.on("change:timestamp", this.updateChatPosition, this);
