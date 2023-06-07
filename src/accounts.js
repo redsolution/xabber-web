@@ -2483,6 +2483,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
 xabber.AccountSettingsLeftView = xabber.BasicView.extend({
     className: 'account-settings-left-wrap',
     template: templates.settings_left,
+    ps_selector: '.settings-tabs-wrap',
+    ps_settings: {
+        wheelPropagation: true
+    },
     avatar_size: constants.AVATAR_SIZES.ACCOUNT_SETTINGS_LEFT,
 
     events: {

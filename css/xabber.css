@@ -11054,6 +11054,12 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 
+.settings-panel .settings-tabs-wrap:not(.settings-tabs-bottom-wrap) {
+    height: calc(100% - 268px);
+    position: relative;
+    width: 100%;
+}
+
 .settings-panel .xabber-info-wrap .version {
     width: 100%;
     height: 19px;

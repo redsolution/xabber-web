@@ -3663,7 +3663,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             if (options.previous_history && (messages.length < query.max) && success) {
                 this.model.set('history_loaded', true);
             }
-            if (options.previous_history || !this.model.get('first_archive_id')) {
+            if (options.previous_history || options.unread_history_before || !this.model.get('first_archive_id')) {//34
                 rsm.first && this.model.set('first_archive_id', rsm.first);
             }
             if (options.last_history || !this.model.get('last_archive_id')) {
