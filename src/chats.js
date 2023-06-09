@@ -3534,6 +3534,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.removeAllMessagesExceptLast();
         this.readMessages();
         this.model.resetUnread();
+        this.model.set('history_loaded', false);
         this.loadPreviousHistory();
         this._long_reading_timeout = false;
         this._no_scrolling_event = false;
@@ -4382,13 +4383,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
             let $message, $message_in_chat;
             $message_in_chat = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`);
             (this.bottom.content_view) && ($message = this.bottom.content_view.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`));
-            if ($message_in_chat) {
-                this.removeMessageFromDOM($message_in_chat);
-            }
-            if ($message && ($message !== $message_in_chat))
-                this.removeMessageFromDOM($message);
+            $message.prev('.chat-day-indicator').remove();
+            $message.remove();
         });
         this.model.messages.reset(messages_to_save);
+        this.updateScrollBar();
     },
 
     removeMessage: function (item) {
@@ -8361,7 +8360,6 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                view.content.showUnreadMarker();
                 view.content.scrollTo(current_scrolling);
             } else {
                 view.model._wait_load_unread_history.done(() => {
@@ -8372,7 +8370,6 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         chat_item: view,
                         blocked: view.model.get('blocked')
                     },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                    view.content.showUnreadMarker();
                     view.content.scrollToUnread();
                     view.content._long_reading_timeout = true;
                     view.content._no_scrolling_event = false;

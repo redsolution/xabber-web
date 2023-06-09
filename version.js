@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.125","version_description":"added scroll to unread button near scroll to bottom, changed messages reading mechanism, removed gif compressing"}'
+'{"version_number":"2.3.3.126","version_description":"removed unread marker rendering, fixed scroll to bottom history loading, fixed message removal speed on scroll to bottom"}'
 )});
