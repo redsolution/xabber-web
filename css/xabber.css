@@ -1401,7 +1401,7 @@ body {
 [data-main-color=red] .add-user-group-chat .list-item.click-selected {
     background-color: #ffebee;
 }
-[data-main-color=red] .chat-message.unread-message {
+[data-main-color=red] .chat-message.unread-message-background {
     background-color: #ffebee;
     background-image: none !important;
 }
@@ -1518,7 +1518,7 @@ body {
 [data-main-color=pink] .add-user-group-chat .list-item.click-selected {
     background-color: #FCE4EC;
 }
-[data-main-color=pink] .chat-message.unread-message {
+[data-main-color=pink] .chat-message.unread-message-background {
     background-color: #FCE4EC;
     background-image: none !important;
 }
@@ -1634,7 +1634,7 @@ body {
 [data-main-color=purple] .add-user-group-chat .list-item.click-selected {
     background-color: #F3E5F5;
 }
-[data-main-color=purple] .chat-message.unread-message {
+[data-main-color=purple] .chat-message.unread-message-background {
     background-color: #F3E5F5;
     background-image: none !important;
 }
@@ -1750,7 +1750,7 @@ body {
 [data-main-color=deep-purple] .add-user-group-chat .list-item.click-selected {
     background-color: #EDE7F6;
 }
-[data-main-color=deep-purple] .chat-message.unread-message {
+[data-main-color=deep-purple] .chat-message.unread-message-background {
     background-color: #EDE7F6;
     background-image: none !important;
 }
@@ -1865,7 +1865,7 @@ body {
 [data-main-color=indigo] .add-user-group-chat .list-item.click-selected {
     background-color: #E8EAF6;
 }
-[data-main-color=indigo] .chat-message.unread-message {
+[data-main-color=indigo] .chat-message.unread-message-background {
     background-color: #E8EAF6;
     background-image: none !important;
 }
@@ -1981,7 +1981,7 @@ body {
 [data-main-color=blue] .add-user-group-chat .list-item.click-selected {
     background-color: #E3F2FD;
 }
-[data-main-color=blue] .chat-message.unread-message {
+[data-main-color=blue] .chat-message.unread-message-background {
     background-color: #E3F2FD;
     background-image: none !important;
 }
@@ -2097,7 +2097,7 @@ body {
 [data-main-color=light-blue] .add-user-group-chat .list-item.click-selected {
     background-color: #E1F5FE;
 }
-[data-main-color=light-blue] .chat-message.unread-message {
+[data-main-color=light-blue] .chat-message.unread-message-background {
     background-color: #E1F5FE;
     background-image: none !important;
 }
@@ -2213,7 +2213,7 @@ body {
 [data-main-color=cyan] .add-user-group-chat .list-item.click-selected {
     background-color: #E0F7FA;
 }
-[data-main-color=cyan] .chat-message.unread-message {
+[data-main-color=cyan] .chat-message.unread-message-background {
     background-color: #E0F7FA;
     background-image: none !important;
 }
@@ -2329,7 +2329,7 @@ body {
 [data-main-color=teal] .add-user-group-chat .list-item.click-selected {
     background-color: #E0F2F1;
 }
-[data-main-color=teal] .chat-message.unread-message {
+[data-main-color=teal] .chat-message.unread-message-background {
     background-color: #E0F2F1;
     background-image: none !important;
 }
@@ -2445,7 +2445,7 @@ body {
 [data-main-color=green] .add-user-group-chat .list-item.click-selected {
     background-color: #E8F5E9;
 }
-[data-main-color=green] .chat-message.unread-message {
+[data-main-color=green] .chat-message.unread-message-background {
     background-color: #E8F5E9;
     background-image: none !important;
 }
@@ -2561,7 +2561,7 @@ body {
 [data-main-color=light-green] .add-user-group-chat .list-item.click-selected {
     background-color: #F1F8E9;
 }
-[data-main-color=light-green] .chat-message.unread-message {
+[data-main-color=light-green] .chat-message.unread-message-background {
     background-color: #F1F8E9;
     background-image: none !important;
 }
@@ -2677,7 +2677,7 @@ body {
 [data-main-color=lime] .add-user-group-chat .list-item.click-selected {
     background-color: #F9FBE7;
 }
-[data-main-color=lime] .chat-message.unread-message {
+[data-main-color=lime] .chat-message.unread-message-background {
     background-color: #F9FBE7;
     background-image: none !important;
 }
@@ -2793,7 +2793,7 @@ body {
 [data-main-color=amber] .add-user-group-chat .list-item.click-selected {
     background-color: #FFF8E1;
 }
-[data-main-color=amber] .chat-message.unread-message {
+[data-main-color=amber] .chat-message.unread-message-background {
     background-color: #FFF8E1;
     background-image: none !important;
 }
@@ -2909,7 +2909,7 @@ body {
 [data-main-color=orange] .add-user-group-chat .list-item.click-selected {
     background-color: #FFF3E0;
 }
-[data-main-color=orange] .chat-message.unread-message {
+[data-main-color=orange] .chat-message.unread-message-background {
     background-color: #FFF3E0;
     background-image: none !important;
 }
@@ -3025,7 +3025,7 @@ body {
 [data-main-color=deep-orange] .add-user-group-chat .list-item.click-selected {
     background-color: #FBE9E7;
 }
-[data-main-color=deep-orange] .chat-message.unread-message {
+[data-main-color=deep-orange] .chat-message.unread-message-background {
     background-color: #FBE9E7;
     background-image: none !important;
 }
@@ -3141,7 +3141,7 @@ body {
 [data-main-color=brown] .add-user-group-chat .list-item.click-selected {
     background-color: #EFEBE9;
 }
-[data-main-color=brown] .chat-message.unread-message {
+[data-main-color=brown] .chat-message.unread-message-background {
     background-color: #EFEBE9;
     background-image: none !important;
 }
@@ -3258,7 +3258,7 @@ body {
 [data-main-color=blue-grey] .add-user-group-chat .list-item.click-selected {
     background-color: #ECEFF1;
 }
-[data-main-color=blue-grey] .chat-message.unread-message {
+[data-main-color=blue-grey] .chat-message.unread-message-background {
     background-color: #ECEFF1;
     background-image: none !important;
 }
@@ -7058,7 +7058,8 @@ input[type=text].simple-input-field:hover {
 }
 /* -------------- BACK TO BOTTOM LABEL ---------------- */
 
-.back-to-bottom {
+.back-to-bottom,
+.back-to-unread {
     position: absolute;
     padding: 2px 0 0;
     color: #9E9E9E;
@@ -7071,8 +7072,25 @@ input[type=text].simple-input-field:hover {
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.55);
 }
 
-.encryption-warning ~ .back-to-bottom {
+.encryption-warning ~ .back-to-bottom,
+.encryption-warning ~ .back-to-unread{
     bottom: 76px;
+}
+
+.back-to-unread .back-to-unread-counter{
+    background-color: #388e3c;
+    border-radius: 10px;
+    top: -4px;
+    right: -4px;
+    color: #fff!important;
+    font-size: 12px;
+    height: 18px;
+    line-height: 12px;
+    min-width: 18px;
+    padding: 3px 5px;
+    position: absolute;
+    font-style: normal;
+    text-align: center;
 }
 
 /* -------------- DATA FORM IN MESSAGE ------------------ */
@@ -8447,8 +8465,7 @@ input[type=text].simple-input-field:hover {
     left: initial !important;
     right: 100.5% !important;
     min-width: 200px !important;
-    width: 100% !important;
-    max-width: 272px !important;
+    width: fit-content!important;
     overflow: hidden;
 }
 

@@ -98,15 +98,17 @@ var getAccountColor = function (name) {
 };
 
 var getImageSize = function (size, max_size) {
-    if (size.width > size.height) {
-        if (size.width > max_size) {
-            size.height *= max_size / size.width;
-            size.width = max_size;
-        }
-    } else {
-        if (size.height > max_size) {
-            size.width *= max_size / size.height;
-            size.height = max_size;
+    if (max_size){
+        if (size.width > size.height) {
+            if (size.width > max_size) {
+                size.height *= max_size / size.width;
+                size.width = max_size;
+            }
+        } else {
+            if (size.height > max_size) {
+                size.width *= max_size / size.height;
+                size.height = max_size;
+            }
         }
     }
     return size;
@@ -125,7 +127,7 @@ var compressImage = function (file) {
             file_type = file.type,
             file_name = file.name,
             new_size = getImageSize({width: width, height: height}, MAX_IMG_SIZE);
-        if (file.type === 'image/svg+xml') {
+        if (file.type === 'image/svg+xml' || file.type.includes('image/gif')) {
             file.width = width;
             file.height = height;
             deferred.resolve(file);

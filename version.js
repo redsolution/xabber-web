@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.124","version_description":"added scrolling to account settings tabs, fixed loading previous message history when opening chat with unread messages"}'
+'{"version_number":"2.3.3.125","version_description":"added scroll to unread button near scroll to bottom, changed messages reading mechanism, removed gif compressing"}'
 )});
