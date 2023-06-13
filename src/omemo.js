@@ -1084,7 +1084,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (!this.get('device_id'))
             this.set('device_id', this.generateDeviceId());
         this.store = new xabber.SignalProtocolStore();
-        this.account.on('device_published', this.publishBundle, this);
         this.account.on("devices_updated", this.onOwnDevicesUpdated, this);
         this.store.on('prekey_removed', this.removePreKey, this);
         this.store.on('session_stored', this.cacheSession, this);
@@ -1211,12 +1210,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 let device = omemo.devices[device_id];
                 if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                     let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
-                    omemo.publishDevice(device_id, label, () => {
-                        this.account.trigger('device_published');
-                    });
+                    this.publishBundle({device_id: device_id, label: label, omemo: omemo});
                 }
-                else
-                    this.account.trigger('device_published');
+                else {
+                    this.publishBundle();
+                }
             }
             else
                 omemo.getDevicesNode(null, (cb) => {
@@ -1228,12 +1226,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     let device = omemo.devices[device_id];
                     if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
                         let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
-                        omemo.publishDevice(device_id, label, () => {
-                            this.account.trigger('device_published');
-                        });
+                        this.publishBundle({device_id: device_id, label: label, omemo: omemo});
                     }
-                    else
-                        this.account.trigger('device_published');
+                    else {
+                        this.publishBundle();
+                    }
                 });
         }
     },
@@ -1799,7 +1796,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
     },
 
-    publish: function (spk, ik, pks) {
+    publish: function (spk, ik, pks, callback) {
         if (!this.account.connection)
             return;
         let conn_omemo = this.account.getConnectionForIQ().omemo,
@@ -1821,7 +1818,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 ik:  utils.ArrayBuffertoBase64(ik),
                 pks: prekeys,
                 device_id: this.get('device_id')
-            });
+            }, callback);
         });
     },
 
@@ -1871,7 +1868,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         return sessions[id];
     },
 
-    publishBundle: async function () {
+    publishBundle: async function (device_attrs) {
         if (!this.bundle)
             return;
         let spk = this.bundle.preKeys.find(pk => pk.signature),
@@ -1881,12 +1878,22 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             this.set('resend_bundle', true);
             return;
         }
+        let dfd = new $.Deferred();
+        dfd.done(() => {
+            if (device_attrs){
+                device_attrs.omemo.publishDevice(device_attrs.device_id, device_attrs.label);
+            }
+        });
         this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, () => {
-                this.publish(spk, ik.pubKey, pks);
+                this.publish(spk, ik.pubKey, pks, () => {
+                    dfd.resolve();
+                });
             }, (err) => {
                 if (($(err).find('error').attr('code') == 404))
                     this.account.getConnectionForIQ().omemo.createBundleNode(() => {
-                        this.publish(spk, ik.pubKey, pks);
+                        this.publish(spk, ik.pubKey, pks, () => {
+                            dfd.resolve();
+                        });
                     });
             });
     },
