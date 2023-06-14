@@ -1166,8 +1166,6 @@ xabber.Account = Backbone.Model.extend({
             if (this.connection && !this.connection.register._registering)
                 this.connection.connect_callback = null;
             if (this.omemo){
-                this.model.omemo.stopListening();
-                this.omemo.off();
                 this.omemo.destroy();
                 this.omemo = undefined;
             }
@@ -3006,8 +3004,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
     },
 
     destroyOmemo: function () {
-        this.model.omemo.stopListening();
-        this.model.omemo.off();
         this.model.omemo.destroy();
         this.model.omemo = undefined;
         this.updateXTokens();
@@ -3043,8 +3039,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
                     });
                     omemo.save('prekeys', {});
                     this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
-                    omemo.stopListening();
-                    omemo.off();
                     omemo.destroy();
                 }
             }
