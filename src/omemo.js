@@ -708,8 +708,9 @@ xabber.Bundle = Backbone.Model.extend({
             await this.generateIdentity();
        await this.getPreKeys();
        if (this.model.get('resend_bundle')) {
-           this.model.publishBundle();
-           this.set('resend_bundle', false);
+           this.model.publishBundle(this.model.get('device_attrs'));
+           this.model.set('resend_bundle', false);
+           this.model.set('device_attrs', null);
        }
     },
 
@@ -788,7 +789,7 @@ xabber.Bundle = Backbone.Model.extend({
             this.store.storeSignedPreKey(spk.keyId, spk.keyPair);
         }
         else {
-            this.generatePreKeys().then((prekeys) => {
+            await this.generatePreKeys().then((prekeys) => {
                 this.preKeys = prekeys;
                 this.getUsedPreKeys();
             });
@@ -1208,7 +1209,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             let omemo = this.account.getConnectionForIQ().omemo;
             if (Object.keys(omemo.devices).length) {
                 let device = omemo.devices[device_id];
-                if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                if (!device) {
                     let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
                     this.publishBundle({device_id: device_id, label: label, omemo: omemo});
                 }
@@ -1224,7 +1225,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             this.own_devices[dev_id] = new xabber.Device({jid: this.account.get('jid'), id: dev_id}, { account: this.account, store: this.store});
                     }
                     let device = omemo.devices[device_id];
-                    if (!device || device && (device.label || this.account.settings.get('device_label_text')) && device.label != this.account.settings.get('device_label_text')) {
+                    if (!device) {
                         let label = this.account.settings.get('device_label_text') || `PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
                         this.publishBundle({device_id: device_id, label: label, omemo: omemo});
                     }
@@ -1876,6 +1877,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             pks = this.bundle.preKeys;
         if (!spk || !ik) {
             this.set('resend_bundle', true);
+            this.set('device_attrs', device_attrs);
             return;
         }
         let dfd = new $.Deferred();
@@ -1884,18 +1886,32 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 device_attrs.omemo.publishDevice(device_attrs.device_id, device_attrs.label);
             }
         });
-        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, () => {
+        this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, (res) => {
+            if ($(res).find(`items[node="${Strophe.NS.OMEMO}:bundles"]`).children().length){
+                pks.forEach((pk) => {
+                    let id = pk.keyId,
+                        pubKey = utils.ArrayBuffertoBase64(pk.keyPair.pubKey),
+                        privKey = utils.ArrayBuffertoBase64(pk.keyPair.privKey),
+                        key = JSON.stringify({pubKey, privKey});
+                    if (!pk.signature) {
+                        this.prekeys.put({id, key});
+                    }
+                });
+                dfd.resolve();
+            } else {
                 this.publish(spk, ik.pubKey, pks, () => {
                     dfd.resolve();
                 });
-            }, (err) => {
-                if (($(err).find('error').attr('code') == 404))
-                    this.account.getConnectionForIQ().omemo.createBundleNode(() => {
-                        this.publish(spk, ik.pubKey, pks, () => {
-                            dfd.resolve();
-                        });
+            }
+        }, (err) => {
+            if (($(err).find('error').attr('code') == 404)){
+                this.account.getConnectionForIQ().omemo.createBundleNode(() => {
+                    this.publish(spk, ik.pubKey, pks, () => {
+                        dfd.resolve();
                     });
-            });
+                });
+            }
+        });
     },
 
     onOwnDevicesUpdated: async function () {
