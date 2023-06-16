@@ -1760,15 +1760,11 @@ xabber.SettingsView = xabber.BasicView.extend({
         "change #vignetting": "changeVignetting",
         "change #blur": "changeBlur",
         "change #notifications_volume": "changeNotificationsVolume",
-        "change #transparency": "changeTransparency",
         "change #blur_switch": "switchBlur",
         "change #vignetting_switch": "switchVignetting",
         "click .selected-color-wrap": "openColorPicker",
         "click .current-main-color-wrap": "openMainColorPicker",
         "change .background input[type=radio][name=background]": "setBackground",
-        "change .background input[type=radio][name=side-panel]": "setSidePanelTheme",
-        "change #side_panel_blur_switch": "setSidePanelBlur",
-        "change #transparency_switch": "switchTransparency",
         "click .current-background-wrap": "changeBackgroundImage",
         "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
         "change .avatar-shape input[type=radio][name=avatar_shape]": "setAvatarShape",
@@ -2042,20 +2038,6 @@ xabber.SettingsView = xabber.BasicView.extend({
         }
     },
 
-    setSidePanelTheme: function (ev) {
-        let value = ev.target.value,
-            side_panel_settings = this.model.get('side_panel');
-        this.model.save('side_panel', _.extend(side_panel_settings, {theme: value}));
-        xabber.roster_view.updateTheme(value);
-    },
-
-    setSidePanelBlur: function () {
-        let value = this.$('#side_panel_blur_switch')[0].checked,
-            side_panel_settings = this.model.get('side_panel');
-        this.model.save('side_panel', _.extend(side_panel_settings, {blur: value}));
-        xabber.roster_view.updateBlur(value);
-    },
-
     changeBackgroundImage: function () {
         let type = this.model.get('background').type;
         if (type == 'repeating-pattern' || type == 'image') {
@@ -2083,16 +2065,6 @@ xabber.SettingsView = xabber.BasicView.extend({
         this.model.save('appearance', _.extend(appearance, {blur: value}));
     },
 
-    switchTransparency: function () {
-        let is_switched = this.$('#transparency_switch')[0].checked,
-            side_panel_settings = this.model.get('side_panel'),
-            value = is_switched ? constants.TRANSPARENCY_VALUE : false;
-        this.$('.transparency-setting .disabled').switchClass('hidden', is_switched);
-        this.$('#transparency')[0].value = constants.TRANSPARENCY_VALUE;
-        this.model.save('side_panel', _.extend(side_panel_settings, {transparency: value}));
-        xabber.roster_view.updateTransparency(value);
-    },
-
     changeNotificationsVolume: function () {
         let volume = this.$('#notifications_volume')[0].value / 100,
             sound = this.$('.sound input[type=radio][name=private_sound]:checked').val() || this.$('.sound input[type=radio][name=group_sound]:checked').val();
@@ -2101,13 +2073,6 @@ xabber.SettingsView = xabber.BasicView.extend({
             this.current_sound && this.current_sound.pause();
             this.current_sound = xabber.playAudio(sound, false, volume);
         }
-    },
-
-    changeTransparency: function () {
-        let value = this.$('#transparency')[0].value,
-            side_panel_settings = this.model.get('side_panel');
-        this.model.save('side_panel', _.extend(side_panel_settings, {transparency: value}));
-        xabber.roster_view.updateTransparency(value);
     },
 
     changeVignetting: function () {

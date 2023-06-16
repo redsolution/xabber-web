@@ -64,47 +64,28 @@ xabber.once("start", function () {
 
     this.updateLayout = function (options) {
         options || (options = {});
-        if (this.roster_view.isVisible()) {
-            this.updateRosterLayout(options);
-        }
+        this.updateContainersLayout();
         xabber.trigger('update_css', options);
         this.body.$('.ps-container').perfectScrollbar('update');
     };
 
-    this.updateRosterLayout = function (options) {
+    this.updateContainersLayout = function () {
         let width = this.body.$el.width(),
             is_wide = width >= constants.WIDTH_MEDIUM,
-            is_narrow = width < constants.WIDTH_MEDIUM,
-            is_tiny = width < constants.WIDTH_TINY,
-            expanded = this.roster_view.data.get('expanded'),
-            pinned = this.roster_view.data.get('pinned');
-        this.roster_view.$('.collapsed-wrap').hideIf(expanded);
-        this.roster_view.$('.expanded-wrap').showIf(expanded);
-        this.roster_view.$('.btn-pin').hide();
-        if (is_narrow && pinned) {
-            this.roster_view.data.set({expanded: false, pinned: false});
-            return;
-        }
-        let roster_width,
-            panel_width,
+            is_narrow = width < constants.WIDTH_MEDIUM;
+        let panel_width,
             left_panel_width,
             right_panel_width,
             right_contact_panel_width,
             chat_bottom_panel_width,
             toolbar_width = 50,
             right_contact_panel_styles = {};
-        if (is_wide || !(is_narrow || pinned)) {
+        if (is_wide || !(is_narrow)) {
             panel_width = 1536;
-            roster_width = 300;
         } else if (is_narrow) {
             panel_width = width - toolbar_width - 20 - 44;
-            roster_width = 250;
         } else {
             panel_width = (width - toolbar_width - 20) * 7 / 9;
-            roster_width = (width - toolbar_width - 20) * 2 / 9;
-        }
-        if (!expanded) {
-            roster_width = is_wide ? 48 : 44;
         }
         left_panel_width = right_contact_panel_width = 384;
         right_panel_width = panel_width - (left_panel_width + right_contact_panel_width);
@@ -149,11 +130,6 @@ xabber.once("start", function () {
             chat_bottom_panel_width = right_panel_width;
         }
 
-        let panel_gap = (width - panel_width) / 2,
-            left_gap = panel_gap - toolbar_width,
-            right_gap = panel_gap - roster_width;
-        this.roster_view.$('.expanded-wrap').switchClass('solid',
-                (!pinned && (!is_wide || right_gap < 0)));
         right_contact_panel_styles.width = right_contact_panel_width;
         this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
         this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
@@ -173,7 +149,6 @@ xabber.once("start", function () {
         this.chat_bottom.setCustomCss({
             width: chat_bottom_panel_width,
         });
-        this.roster_view.setCustomCss({width: roster_width});
     };
 
     this.on("update_layout", this.updateLayout, this);

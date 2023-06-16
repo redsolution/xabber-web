@@ -9390,76 +9390,6 @@ xabber.RosterView = xabber.SearchPanelView.extend({
     }
 });
 
-xabber.RosterRightView = xabber.RosterView.extend({
-    className: 'roster-right-container container',
-    template: templates.roster_right,
-    ps_settings: {theme: 'roster-right'},
-    account_roster_view: xabber.AccountRosterRightView,
-
-    events: {
-        "click .collapsed-wrap": "expand",
-        "mouseleave .expanded-wrap": "collaps"
-    },
-
-    __initialize: function () {
-        this.updateCounter();
-        this.updateTheme();
-        this.updateBlur();
-        this.updateTransparency();
-        this.model.on("activate deactivate destroy", this.updateCounter, this);
-        this.data.on("change", this.updateLayout, this);
-        let pinned = this._settings.get('pinned');
-        this.data.set({expanded: false, pinned: false});
-    },
-
-    updateTheme: function (theme) {
-        theme = theme || xabber.settings.side_panel.theme;
-        this.$el.attr('data-theme', theme);
-        this.updateTransparency();
-    },
-
-    updateTransparency: function (transparency) {
-        transparency = transparency || xabber.settings.side_panel.transparency;
-        if (xabber.settings.side_panel.theme == 'dark')
-            this.$el.css('background-color', `rgba(0, 0, 0, ${1 - transparency/100})`);
-        else
-            this.$el.css('background-color', `rgba(255, 255, 255, ${1 - transparency/100})`);
-    },
-
-    updateBlur: function (blur) {
-        blur = _.isUndefined(blur) ? xabber.settings.side_panel.blur : blur;
-        this.$el.switchClass('with-blur', blur);
-    },
-
-    expand: function () {
-        this.data.set('expanded', true);
-    },
-
-    collaps: function () {
-        if (!this.data.get('pinned'))
-            this.data.set('expanded', false);
-    },
-
-    updateLayout: function () {
-        let changed = this.data.changed;
-        if (_.has(changed, 'expanded') || _.has(changed, 'pinned')) {
-            xabber.trigger('update_layout', {roster_state_changed: true});
-        }
-    },
-
-    updateCounter: function () {
-        this.$('.all-contacts-counter').text(
-            _.reduce(this.children, function (counter, view) {
-                let roster_length = view.roster ? view.roster.length : 0;
-                return counter + roster_length;
-            }, 0)
-        );
-    },
-
-    onListChanged: function () {
-        this.updateScrollBar();
-    }
-});
 
 xabber.RosterLeftView = xabber.RosterView.extend({
     className: 'roster-left-container container',
@@ -10095,8 +10025,6 @@ xabber.once("start", function () {
     this.roster_settings_view = xabber.settings_view.addChild(
         'roster_settings', this.RosterSettingsView, {model: this._roster_settings});
     this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
-        {model: this.accounts});
-    this.roster_view = this.body.addChild('roster', this.RosterRightView,
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);
     this.details_container = this.right_contact_panel.addChild('details', this.Container);
