@@ -1847,7 +1847,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (this.content){
             return;
         }
-        if (this.message_counter == 0 ){
+        if (this.message_counter == 0 && !(!msg.get('synced_from_server') && msg.get('encrypted') && this.model.get('encrypted'))){
             this.message_counter++;
             return
         }
@@ -3043,8 +3043,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.$search_form = this.$('.search-form-header');
         this.$el.attr('data-id', this.model.id);
         this.updateContentColorScheme();
-        if (this.model.sync_created && this.model.last_message){
-            this.onMessage(this.model.last_message);
+        if ((this.model.sync_created && this.model.last_message) || options.new_message && !options.new_message.get('synced_from_server') && options.new_message.get('encrypted') && this.model.get('encrypted')){
+            this.model.last_message && this.onMessage(this.model.last_message);
             if (options.new_message){
                 this.onMessage(options.new_message);
                 this.onChangedReadState(options.new_message);

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.129","version_description":"added handling if omemo device or bundle already exist, fixed async code not waiting for prekeys to generate"}'
+'{"version_number":"2.3.3.130","version_description":"fixed first incoming encrypted message not appearing in chats view and chat content"}'
 )});
