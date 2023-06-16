@@ -794,12 +794,13 @@ xabber.Account = Backbone.Model.extend({
                     let $token = $(token),
                         client = $token.find('client').text(),
                         device = $token.find('info').text(),
-                        description = $token.find('description').text(),
+                        description = $token.find('public-label').text(),
+                        omemo_id = $token.find('omemo-id').text(),
                         token_uid = $token.attr('id'),
                         expire = Number($token.find('expire').text())*1000,
                         last_auth = Number($token.find('last-auth').text())*1000,
                         ip_address = $token.find('ip').text();
-                    tokens_list.push({client: client, device: device, description: description, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address});
+                    tokens_list.push({client: client, device: device, description: description, token_uid: token_uid, last_auth: last_auth, expire: expire, ip: ip_address, omemo_id: omemo_id});
                 });
                 this.x_tokens_list = tokens_list;
                 callback && callback();
@@ -2857,6 +2858,11 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
                 this.omemo_own_devices.updateTrustDevice(Number(pretty_token.token_uid.slice(0,8)), $token_html);
+            } else {
+                if (token.omemo_id){
+                    $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
+                    $token_html.find('.device-encryption .mdi-lock').removeClass('hidden');
+                }
             }
         });
         if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
