@@ -8110,8 +8110,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     render: function (options) {
         if (options.right === undefined)
             this.active_chat = null;
-        this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item.unread').length);
-        if (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
+        this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').length);
+        if (options.right !== 'chat' && options.right !== 'contact_details' && !options.no_unread && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
             this.clearSearch();
             if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
                 this.showAllChats();
@@ -8150,7 +8150,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     onUpdatedScreen: function (name) {
-        this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item.active.unread').length);
+        this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo).active.unread').length);
     },
 
     // onWindowResized: function (options) {
@@ -8388,7 +8388,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (!group_chats.length && !group_chats_pinned.length) {
             group_chats = chats.filter(chat => !chat.get('saved') && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
             group_chats_pinned = chats.filter(chat => !chat.get('saved') && chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
-            xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
             this.onUpdatedScreen();
         }
         group_chats.forEach((chat) => {
@@ -8420,7 +8420,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (!private_chats.length && !private_chats_pinned.length) {
             private_chats = chats.filter(chat => !chat.get('saved') && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && (chat.get('pinned') === '0' || !chat.get('pinned')));
             private_chats_pinned = chats.filter(chat => !chat.get('saved') && !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.get('pinned') !== '0' && chat.get('pinned'));
-            xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
             this.onUpdatedScreen();
         }
         private_chats.forEach((chat) => {
@@ -8462,21 +8462,31 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
     },
 
-    showArchiveChats: function () {
+    showArchiveChats: function (no_unread) {
         this.$('.chat-item').detach();
         let chats = this.model,
             archive_chats = chats.filter(chat => !chat.get('saved') && chat.get('archived'));
+        if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
+            xabber.toolbar_view.data.set('account_filtering', null);
+            xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+        }
+        if (xabber.toolbar_view.data.get('account_filtering'))
+            archive_chats = archive_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         archive_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
         });
     },
 
-    showAllChats: function () {
+    showAllChats: function (no_unread) {
         this.$('.chat-item').detach();
         let chats = this.model,
-            is_unread = xabber.toolbar_view.$('.active.unread').length,
+            is_unread = no_unread || xabber.toolbar_view.data.get('account_filtering') ? false : xabber.toolbar_view.$('.active.unread').length,
             all_chats = [],
             all_chats_pinned = [];
+        if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
+            xabber.toolbar_view.data.set('account_filtering', null);
+            xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+        }
         if (is_unread) {
             all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('invitation') || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
             all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && !chat.get('archived') && chat.last_message && ((chat.get('unread') || chat.get('const_unread')) || (chat.contact.get('invitation') || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
@@ -8484,8 +8494,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (!all_chats.length && !all_chats_pinned.length) {
             all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned')));
             all_chats_pinned = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned'));
-            xabber.toolbar_view.$('.toolbar-item.unread').removeClass('unread');
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
             this.onUpdatedScreen();
+        }
+        if (xabber.toolbar_view.data.get('account_filtering')){
+            all_chats = all_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')))
+            all_chats_pinned = all_chats_pinned.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')))
         }
         all_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
@@ -8504,8 +8518,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     updateScreenAllChats: function () {
-        xabber.toolbar_view.$('.toolbar-item').removeClass('active')
-            .filter('.all-chats').addClass('active');
+        xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active')
+            .filter('.all-chats:not(.toolbar-logo)').addClass('active');
         this.showAllChats();
     }
 });
@@ -12910,16 +12924,12 @@ xabber.once("start", function () {
         this.chats_view.showChats();
     }, this);
 
-    this.on("show_all_chats", function () {
-        this.chats_view.showAllChats();
+    this.on("show_all_chats", function (no_unread) {
+        this.chats_view.showAllChats(no_unread);
     }, this);
 
-    this.on("show_account_chats", function (ev, account) {
-        this.chats_view.showChatsByAccount(account);
-    }, this);
-
-    this.on("show_archive_chats", function () {
-        this.chats_view.showArchiveChats();
+    this.on("show_archive_chats", function (no_unread) {
+        this.chats_view.showArchiveChats(no_unread);
     }, this);
 
     this.on("clear_search", function () {

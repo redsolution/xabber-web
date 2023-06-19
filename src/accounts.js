@@ -1746,8 +1746,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
     events: {
-        'click .filter-chats': 'filterChats',
-        'click .circle-avatar': 'showSettings'
+        'click': 'filterChats'
     },
 
     _initialize: function () {
@@ -1762,7 +1761,6 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         this.model.on("change:status", this.updateStatus, this);
         this.model.on("change:image", this.updateAvatar, this);
         this.model.settings.on("change:color", this.updateColorScheme, this);
-        this.model.on("filter_chats", this.setActive, this);
         this.model.on("open_settings", this.setActive, this);
     },
 
@@ -1791,24 +1789,13 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         this.$el.attr('data-color', this.model.settings.get('color'));
     },
 
-    showSettings: function () {
-        let scroll_top = xabber.toolbar_view.getScrollTop();
-        this.model.showSettings();
-        xabber.toolbar_view.scrollTo(scroll_top);
-    },
-
     filterChats: function (ev) {
-        let scroll_top = xabber.toolbar_view.getScrollTop();
         ev.stopPropagation();
-        xabber.chats_view.showChatsByAccount(this.model);
-        this.model.trigger('filter_chats');
-        xabber.toolbar_view.scrollTo(scroll_top);
+        xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+        if (xabber.toolbar_view.data.get('account_filtering') != this.model.get('jid'))
+            this.$el.addClass('active');
+        xabber.toolbar_view.showChatsByAccount(this.model);
     },
-
-    setActive: function () {
-        xabber.toolbar_view.$('.toolbar-item').removeClass('active');
-        this.$el.addClass('active');
-    }
 });
 
 xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({

@@ -78,7 +78,7 @@ xabber.once("start", function () {
             right_panel_width,
             right_contact_panel_width,
             chat_bottom_panel_width,
-            toolbar_width = 50,
+            toolbar_width = 64,
             right_contact_panel_styles = {};
         if (is_wide || !(is_narrow)) {
             panel_width = 1536;

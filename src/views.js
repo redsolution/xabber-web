@@ -942,16 +942,12 @@ xabber.Body = xabber.NodeView.extend({
 
 xabber.ToolbarView = xabber.BasicView.extend({
     className: "toolbar noselect",
-    ps_selector: '.accounts',
-    ps_settings: {theme: 'item-list'},
     template: templates.toolbar,
 
     events: {
+        "click .toolbar-logo":             "clickAllChats",
         "click .all-chats":             "showAllChats",
-        "click .chats":                 "showChats",
-        "click .group-chats":           "showGroupChats",
         "click .contacts":              "showContacts",
-        "click .search":                "showSearch",
         "click .archive-chats":         "showArchive",
         "click .mentions":              "showMentions",
         "click .settings":              "showSettings",
@@ -959,7 +955,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .add-variant.account":   "showAddAccountView",
         "click .add-variant.public-groupchat": "showAddPublicGroupChatView",
         "click .add-variant.incognito-groupchat": "showAddIncognitoGroupChatView",
-        "click .about":                 "showAbout"
     },
 
     _initialize: function () {
@@ -999,68 +994,61 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     updateColor: function (color) {
-        this.$('.toolbar-icon').css('color', color);
-        this.$('.toolbar-icon path').css('fill', color);
     },
 
     onUpdatedScreen: function (name) {
         if ((name === 'account_settings') || ((name === 'all-chats') &&
-            (this.$('.toolbar-item.all-chats').hasClass('active') ||
-                this.$('.toolbar-item.group-chats').hasClass('active') ||
-                this.$('.toolbar-item.chats').hasClass('active')||
-                this.$('.toolbar-item.account-item').hasClass('active')||
-                this.$('.toolbar-item.archive-chats').hasClass('active')))) {
+            (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
+                this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
+                this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')))) {
             return;
         }
-        this.$('.toolbar-item').removeClass('active unread');
+        this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         if (_.contains(['all-chats', 'contacts', 'mentions',
                         'settings', 'search', 'about'], name)) {
-            this.$('.toolbar-item.'+name).addClass('active');
+            this.$('.toolbar-item:not(.toolbar-logo).'+name).addClass('active');
         }
     },
 
-    showAllChats: function (ev) {
-        let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
-        this.$('.toolbar-item').removeClass('active unread')
+    clickAllChats: function (ev) {
+        this.$('.all-chats').click();
+    },
+
+    showAllChats: function (ev, no_unread) {
+        let $el;
+        if (ev && ev.target)
+            $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
+        else
+            $el = this.$('.all-chats');
+        let is_active = $el.hasClass('active') && !$el.hasClass('unread');
+        this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
             .filter('.all-chats').addClass('active').switchClass('unread', is_active);
-        xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_all_chats');
+        let options = {}
+        no_unread && (options.no_unread = no_unread);
+        xabber.body.setScreen('all-chats', options);
+        xabber.trigger('show_all_chats', no_unread);
     },
 
-    showChats: function (ev) {
-        let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
-        this.$('.toolbar-item').removeClass('active unread')
-            .filter('.chats').addClass('active').switchClass('unread', is_active);
-        xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_chats');
-    },
-
-    showGroupChats: function (ev) {
-        let $el = $(ev.target).closest('.toolbar-item'), is_active = $el.hasClass('active') && !$el.hasClass('unread');
-        this.$('.toolbar-item').removeClass('active unread')
-            .filter('.group-chats').addClass('active').switchClass('unread', is_active);
-        xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_group_chats');
-    },
-
-    showArchive: function () {
-        this.$('.toolbar-item').removeClass('active unread')
+    showArchive: function (ev, no_unread) {
+        this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
             .filter('.archive-chats').addClass('active');
         xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_archive_chats');
+        xabber.trigger('show_archive_chats', no_unread);
     },
 
     showChatsByAccount: function (account) {
-        this.$('.toolbar-item').removeClass('active unread')
-            .filter('.account-item[data-jid="' + account.get('jid') + '"]').addClass('active');
-        xabber.body.setScreen('all-chats', {
-            right_contact_save: true
-        });
-        xabber.trigger('show_account_chats', [account]);
-    },
-
-    showSearch: function () {
-        xabber.body.setScreen('search');
+        if (this.data.get('account_filtering') === account.get('jid'))
+            this.data.set('account_filtering', null);
+        else
+            this.data.set('account_filtering', account.get('jid'));
+        if (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active')) {
+            this.showAllChats(null, true);
+            return;
+        }
+        if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')) {
+            this.showArchive(null, true);
+            return;
+        }
     },
 
     showContacts: function () {
@@ -1089,12 +1077,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     showAddPublicGroupChatView: function () {
         xabber.trigger('add_group_chat', {public: true, right: null});
-    },
-
-    showAbout: function () {
-        if (!xabber.about_view)
-            xabber.about_view = xabber.wide_panel.addChild('about', xabber.AboutView, {model: xabber});
-        xabber.body.setScreen('about');
     },
 
     setAllMessageCounter: function () {

@@ -1087,6 +1087,9 @@ body {
     height: 100%;
     background-color: transparent;
     z-index: 490;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .client-body-wrap .blur-overlay {
@@ -1350,19 +1353,22 @@ body {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     width: auto;
     height: 48px;
     cursor: pointer;
 }
 
-.toolbar .account-item:not(:hover) {
-    width: 50px;
-    display: block;
+.toolbar .account-item {
+    height: 64px;
 }
 
 .toolbar .toolbar-item:not(.account-item) {
-    width: 50px;
+    width: 64px;
+}
+
+.toolbar .toolbar-item.toolbar-logo {
+    height: 56px;
 }
 
 .toolbar .toolbar-item.unread img,
@@ -1374,15 +1380,15 @@ body {
 .toolbar .toolbar-item .logo {
     position: absolute;
     width: 32px;
-    top: 10px;
-    left: 10px;
+    top: 12px;
+    left: 16px;
     display: block;
 }
 
 .toolbar .toolbar-item .toolbar-icon {
     position: absolute;
     top: 12px;
-    left: 14px;
+    left: 20px;
     /*color: #9E9E9E;*/
     color: #E0E0E0;
 }
@@ -3414,8 +3420,8 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .all-msg-indicator {
-    top: 7px;
-    left: 35px;
+    top: 6px;
+    right: 8px;
     min-width: 16px;
     height: 16px;
 }
@@ -3445,6 +3451,14 @@ input[type=text].simple-input-field:hover {
     display: none !important;
 }
 
+.toolbar-top {
+    position: absolute;
+    top: 0;
+}
+
+.toolbar-middle {
+}
+
 .toolbar-bottom {
     position: absolute;
     bottom: 0;
@@ -3453,6 +3467,7 @@ input[type=text].simple-input-field:hover {
 
 .toolbar .add-something-wrap {
     position: relative;
+    margin-top: 16px;
 }
 
 .lean-overlay.toolbar-menu {
@@ -3531,10 +3546,11 @@ input[type=text].simple-input-field:hover {
     top: 7px;
     left: 9px;*/
     display: inline-grid;
-    margin: 7px 0 7px 9px;
-    width: 34px;
-    height: 34px;
+    margin: 0 !important;
+    width: 32px;
+    height: 32px;
     border: 1px solid;
+    background-color: transparent !important;
 }
 
 .non-circle-avatars .account-item .circle-avatar {
@@ -3544,23 +3560,25 @@ input[type=text].simple-input-field:hover {
 
 .toolbar-item.account-item .circle-avatar-wrap {
     height: 48px;
+    background: none !important;
 }
 
 .non-circle-avatars .account-item .circle-avatar-wrap {
     display: inline-grid;
-    margin: 6px 0 6px 8px;
-    width: 36px;
-    height: 36px !important;
+    height: 32px!important;
+    margin: 16px 0 16px 16px;
+    width: 32px;
 }
 
 .account-item .status {
     position: absolute;
-    top: 32px;
-    left: 34px;
+    top: 41px;
+    left: 41px;
     width: 8px;
     height: 8px;
     border: 1px solid rgba(255,255,255,0.5);
     border-radius: 50%;
+    pointer-events: none;
 }
 
 .account-item .auth-failed {
