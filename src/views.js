@@ -942,6 +942,8 @@ xabber.Body = xabber.NodeView.extend({
 
 xabber.ToolbarView = xabber.BasicView.extend({
     className: "toolbar noselect",
+    ps_selector: '.accounts',
+    ps_settings: {theme: 'item-list'},
     template: templates.toolbar,
 
     events: {
@@ -949,6 +951,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .all-chats":             "showAllChats",
         "click .contacts":              "showContacts",
         "click .archive-chats":         "showArchive",
+        "click .saved-chats":           "showSavedChats",
         "click .mentions":              "showMentions",
         "click .settings":              "showSettings",
         "click .add-variant.contact":   "showAddContactView",
@@ -1000,6 +1003,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if ((name === 'account_settings') || ((name === 'all-chats') &&
             (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
                 this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
+                this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')))) {
             return;
         }
@@ -1036,6 +1040,13 @@ xabber.ToolbarView = xabber.BasicView.extend({
         xabber.trigger('show_archive_chats', no_unread);
     },
 
+    showSavedChats: function (ev, no_unread) {
+        this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
+            .filter('.saved-chats').addClass('active');
+        xabber.body.setScreen('all-chats',);
+        xabber.trigger('show_saved_chats', no_unread);
+    },
+
     showChatsByAccount: function (account) {
         if (this.data.get('account_filtering') === account.get('jid'))
             this.data.set('account_filtering', null);
@@ -1047,6 +1058,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
         if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')) {
             this.showArchive(null, true);
+            return;
+        }
+        if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
+            this.showSavedChats(null, true);
             return;
         }
     },

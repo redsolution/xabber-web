@@ -71,6 +71,7 @@ xabber.once("start", function () {
 
     this.updateContainersLayout = function () {
         let width = this.body.$el.width(),
+            height = this.body.$el.height(),
             is_wide = width >= constants.WIDTH_MEDIUM,
             is_narrow = width < constants.WIDTH_MEDIUM;
         let panel_width,
@@ -79,6 +80,7 @@ xabber.once("start", function () {
             right_contact_panel_width,
             chat_bottom_panel_width,
             toolbar_width = 64,
+            toolbar_accounts_heigth = height - 506,
             right_contact_panel_styles = {};
         if (is_wide || !(is_narrow)) {
             panel_width = 1536;
@@ -148,6 +150,9 @@ xabber.once("start", function () {
         this.right_contact_panel.setCustomCss(right_contact_panel_styles);
         this.chat_bottom.setCustomCss({
             width: chat_bottom_panel_width,
+        });
+        this.toolbar_view.$el.find('.toolbar-bottom .accounts-wrap .accounts').css({
+            'max-height': toolbar_accounts_heigth,
         });
     };
 

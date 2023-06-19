@@ -8271,11 +8271,14 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             return;
         if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
             return;
+        if (active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
+            return;
+        }
         active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
         active_toolbar.hasClass('chats') && (view.model.get('saved') || !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || !chat.contact.get('group_chat') && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
         active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
         active_toolbar.hasClass('archive-chats') && (view.model.get('saved') || view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.get('archived')));
-        active_toolbar.hasClass('account-item') && (view.model.get('saved') || (view.account.get('jid') === active_toolbar.attr('data-jid'))) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || chat.account.get('jid') === (active_toolbar.attr('data-jid')) && !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
+        active_toolbar.hasClass('saved-chats') && (view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved'))));
     },
 
     onEnterPressed: function (selection) {
@@ -8473,6 +8476,21 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (xabber.toolbar_view.data.get('account_filtering'))
             archive_chats = archive_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         archive_chats.forEach((chat) => {
+            this.$('.chat-list').append(chat.item_view.$el);
+        });
+    },
+
+    showSavedChats: function (no_unread) {
+        this.$('.chat-item').detach();
+        let chats = this.model,
+            saved_chats = chats.filter(chat => chat.get('saved'));
+        if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
+            xabber.toolbar_view.data.set('account_filtering', null);
+            xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+        }
+        if (xabber.toolbar_view.data.get('account_filtering'))
+            saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
+        saved_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
         });
     },
@@ -12930,6 +12948,10 @@ xabber.once("start", function () {
 
     this.on("show_archive_chats", function (no_unread) {
         this.chats_view.showArchiveChats(no_unread);
+    }, this);
+
+    this.on("show_saved_chats", function (no_unread) {
+        this.chats_view.showSavedChats(no_unread);
     }, this);
 
     this.on("clear_search", function () {
