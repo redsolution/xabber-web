@@ -954,6 +954,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .saved-chats":           "showSavedChats",
         "click .mentions":              "showMentions",
         "click .settings":              "showSettings",
+        "click .jingle-calls":              "showPlaceholder",
+        "click .geolocation-chats":              "showPlaceholder",
         "click .add-variant.contact":   "showAddContactView",
         "click .add-variant.account":   "showAddAccountView",
         "click .add-variant.public-groupchat": "showAddPublicGroupChatView",
@@ -1009,7 +1011,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         if (_.contains(['all-chats', 'contacts', 'mentions',
-                        'settings', 'search', 'about'], name)) {
+                        'settings', 'search', 'jingle-calls', 'geolocation-chats', 'about'], name)) {
             this.$('.toolbar-item:not(.toolbar-logo).'+name).addClass('active');
         }
     },
@@ -1031,6 +1033,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         no_unread && (options.no_unread = no_unread);
         xabber.body.setScreen('all-chats', options);
         xabber.trigger('show_all_chats', no_unread);
+        xabber.trigger('update_placeholder');
     },
 
     showArchive: function (ev, no_unread) {
@@ -1038,6 +1041,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             .filter('.archive-chats').addClass('active');
         xabber.body.setScreen('all-chats',);
         xabber.trigger('show_archive_chats', no_unread);
+        xabber.trigger('update_placeholder');
     },
 
     showSavedChats: function (ev, no_unread) {
@@ -1045,6 +1049,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             .filter('.saved-chats').addClass('active');
         xabber.body.setScreen('all-chats',);
         xabber.trigger('show_saved_chats', no_unread);
+        xabber.trigger('update_placeholder');
     },
 
     showChatsByAccount: function (account) {
@@ -1064,18 +1069,35 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.showSavedChats(null, true);
             return;
         }
+        if (this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').hasClass('active') ||
+            this.$('.toolbar-item:not(.toolbar-logo).geolocation-chats').hasClass('active')){
+            this.showAllChats(null, true);
+            return;
+        }
     },
 
     showContacts: function () {
         xabber.body.setScreen('contacts', {right_contact: null});
+        xabber.trigger('update_placeholder');
     },
 
     showMentions: function () {
         xabber.body.setScreen('mentions');
+        xabber.trigger('update_placeholder');
     },
 
     showSettings: function () {
         xabber.body.setScreen('settings');
+        xabber.trigger('update_placeholder');
+    },
+
+    showPlaceholder: function (ev) {
+        xabber.chats_view && xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.trigger('hide_chat');
+        xabber.body.setScreen(xabber.body.screen.get('name'), {chat_item: null});
+        let $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
+        this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
+        $el.addClass('active');
+        xabber.trigger('update_placeholder');
     },
 
     showAddContactView: function () {
@@ -1823,7 +1845,6 @@ xabber.SettingsView = xabber.BasicView.extend({
         this.updateBackgroundSetting();
         this.updateColor();
         this.updateMainColor();
-        this.updateSidePanelSetting();
         this.$('.toolbar-main-color-setting-wrap .dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -1870,16 +1891,6 @@ xabber.SettingsView = xabber.BasicView.extend({
             this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
         }
         xabber.toolbar_view.updateColor(color);
-    },
-
-    updateSidePanelSetting: function () {
-        let side_panel_settings = this.model.get('side_panel'),
-            transparency_switched = side_panel_settings.transparency !== false;
-        this.$('#side_panel_blur_switch')[0].checked = side_panel_settings.blur;
-        this.$('#transparency_switch')[0].checked = transparency_switched;
-        this.$('.transparency-setting .disabled').switchClass('hidden', transparency_switched);
-        this.$('#transparency')[0].value = transparency_switched ? side_panel_settings.transparency : constants.TRANSPARENCY_VALUE;
-        this.$(`#${this.cid}-${side_panel_settings.theme}-side-panel`)[0].checked = true;
     },
 
     jumpToBlock: function (ev) {

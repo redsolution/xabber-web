@@ -429,7 +429,19 @@ xabber.MentionItemView = xabber.BasicView.extend({
 
 xabber.MentionsPlaceholderView = xabber.BasicView.extend({
     className: 'placeholder-wrap mentions-placeholder-wrap noselect',
-    template: templates.mentions_placeholder
+    template: templates.mentions_placeholder,
+
+    _initialize: function (options) {
+        xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
+    },
+
+    onPlaceholderUpdate: function () {
+        if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
+            this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
+        } else {
+            this.$('.text').text(xabber.getString("mentions_list__placeholder"));
+        }
+    },
 });
 
 xabber.Account.addInitPlugin(function () {

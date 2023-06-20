@@ -9540,7 +9540,19 @@ xabber.AccountGroupView = xabber.BasicView.extend({
 
 xabber.ContactPlaceholderView = xabber.BasicView.extend({
     className: 'placeholder-wrap contact-placeholder-wrap noselect',
-    template: templates.contact_placeholder
+    template: templates.contact_placeholder,
+
+    _initialize: function (options) {
+        xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
+    },
+
+    onPlaceholderUpdate: function () {
+        if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
+            this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
+        } else {
+            this.$('.text').text(xabber.getString("contact_list__placeholder"));
+        }
+    },
 });
 
 xabber.AddContactView = xabber.BasicView.extend({
@@ -10028,7 +10040,7 @@ xabber.once("start", function () {
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);
     this.details_container = this.right_contact_panel.addChild('details', this.Container);
-    this.contact_placeholder = this.right_contact_panel.addChild('contact_placeholder',
+    this.contact_placeholder = this.right_panel.addChild('contact_placeholder',
         this.ContactPlaceholderView);
     this.add_contact_view = new this.AddContactView();
     this.on("add_contact", function () {

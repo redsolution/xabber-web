@@ -9106,6 +9106,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           this.account = this.model.account;
           this.$el.find('.circle-avatar:not(.voice-message-player-avatar)').html(env.templates.svg['saved-messages']());
           this.model.on("close_chat", this.closeChat, this);
+          this.model.on("hide_chat", this.hideChat, this);
           xabber.on('plyr_player_updated', this.updatePlyrControls, this);
           xabber.on('update_layout', this.updatePlyrTitle, this);
           xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
@@ -9138,6 +9139,11 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
       closeChat: function () {
           this.model.set({'opened': false, 'display': false, 'active': false});
+          xabber.chats_view.clearSearch();
+      },
+
+      hideChat: function () {
+          this.model.set({'active': false});
           xabber.chats_view.clearSearch();
       },
 
@@ -9453,6 +9459,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updatePinned();
         this.model.on("change:encrypted", this.updateEncrypted, this);
         this.model.on("close_chat", this.closeChat, this);
+        this.model.on("hide_chat", this.hideChat, this);
         this.model.on("pinned", this.pinChat, this);
         this.model.on("change:muted", this.updateNotifications, this);
         this.model.on("change:archived", this.updateArchived, this);
@@ -9961,6 +9968,11 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     closeChat: function () {
         this.model.set({'opened': false, 'display': false, 'active': false});
+        xabber.chats_view.clearSearch();
+    },
+
+    hideChat: function () {
+        this.model.set({'active': false});
         xabber.chats_view.clearSearch();
     },
 
@@ -12734,7 +12746,19 @@ xabber.ChatBottomContainer = xabber.Container.extend({
 
 xabber.ChatPlaceholderView = xabber.BasicView.extend({
     className: 'placeholder-wrap chat-placeholder-wrap noselect',
-    template: templates.chat_placeholder
+    template: templates.chat_placeholder,
+
+    _initialize: function (options) {
+        xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
+    },
+
+    onPlaceholderUpdate: function () {
+        if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
+            this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
+        } else {
+            this.$('.text').text(xabber.getString("chat_list__placeholder"));
+        }
+    },
 });
 
 xabber.ChatSettings = Backbone.ModelWithStorage.extend({
