@@ -1843,6 +1843,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.account.settings.on("change:color", this.updateColorScheme, this);
     },
 
+    render: function () {
+        if (this.model.get('saved') && (this.$('.chat-title').text() !== xabber.getString("saved_messages__header"))) {
+            this.$('.chat-title').text(xabber.getString("saved_messages__header"));
+        }
+    },
+
     updateChatCard: function (msg) {
         if (this.content){
             return;
@@ -8279,6 +8285,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         active_toolbar.hasClass('all-chats') && (view.model.get('saved') || !view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || !chat.get('archived')) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || !chat.get('archived')) && chat.get('pinned') !== '0' && chat.get('pinned')));
         active_toolbar.hasClass('archive-chats') && (view.model.get('saved') || view.model.get('archived')) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved') || chat.get('archived')));
         active_toolbar.hasClass('saved-chats') && (view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved'))));
+        active_toolbar.hasClass('mentions') && (view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => (chat.get('jid') === chat.account.domain))));
     },
 
     onEnterPressed: function (selection) {
@@ -8491,6 +8498,22 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (xabber.toolbar_view.data.get('account_filtering'))
             saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         saved_chats.forEach((chat) => {
+            this.$('.chat-list').append(chat.item_view.$el);
+            this.$(`.chat-list .chat-item[data-id="${chat.id}"] .chat-title`).text(chat.get('jid'));
+        });
+    },
+
+    showNotifications: function (no_unread) {
+        this.$('.chat-item').detach();
+        let chats = this.model,
+            notificatons_chats = chats.filter(chat => (chat.get('jid') === chat.account.domain ));
+        if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
+            xabber.toolbar_view.data.set('account_filtering', null);
+            xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+        }
+        if (xabber.toolbar_view.data.get('account_filtering'))
+            notificatons_chats = notificatons_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
+        notificatons_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
         });
     },
@@ -12976,6 +12999,10 @@ xabber.once("start", function () {
 
     this.on("show_saved_chats", function (no_unread) {
         this.chats_view.showSavedChats(no_unread);
+    }, this);
+
+    this.on("show_notification_chats", function (no_unread) {
+        this.chats_view.showNotifications(no_unread);
     }, this);
 
     this.on("clear_search", function () {

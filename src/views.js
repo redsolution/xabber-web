@@ -952,7 +952,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .contacts":              "showContacts",
         "click .archive-chats":         "showArchive",
         "click .saved-chats":           "showSavedChats",
-        "click .mentions":              "showMentions",
+        "click .mentions":              "showNotifications",
         "click .settings":              "showSettings",
         "click .jingle-calls":              "showPlaceholder",
         "click .geolocation-chats":              "showPlaceholder",
@@ -1006,6 +1006,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
                 this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')||
+                this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')))) {
             return;
         }
@@ -1045,10 +1046,23 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showSavedChats: function (ev, no_unread) {
+        if (xabber.accounts.connected.length === 1){
+            let saved_chat = xabber.accounts.connected[0].chats.getSavedChat();
+            saved_chat.item_view && saved_chat.item_view.open();
+        } else {
+            this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
+                .filter('.saved-chats').addClass('active');
+            xabber.body.setScreen('all-chats',);
+            xabber.trigger('show_saved_chats', no_unread);
+            xabber.trigger('update_placeholder');
+        }
+    },
+
+    showNotifications: function (ev, no_unread) {
         this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
-            .filter('.saved-chats').addClass('active');
+            .filter('.mentions').addClass('active');
         xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_saved_chats', no_unread);
+        xabber.trigger('show_notification_chats', no_unread);
         xabber.trigger('update_placeholder');
     },
 
@@ -1067,6 +1081,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
         if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
             this.showSavedChats(null, true);
+            return;
+        }
+        if (this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active')) {
+            this.showNotifications(null, true);
             return;
         }
         if (this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').hasClass('active') ||
