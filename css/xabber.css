@@ -3548,7 +3548,7 @@ input[type=text].simple-input-field:hover {
     margin: 0 !important;
     width: 32px;
     height: 32px;
-    border: 1px solid;
+    border: 0;
     background-color: transparent !important;
 }
 
@@ -3558,15 +3558,14 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar-item.account-item .circle-avatar-wrap {
-    height: 48px;
-    background: none !important;
-}
-
-.non-circle-avatars .account-item .circle-avatar-wrap {
     display: inline-grid;
     height: 32px!important;
     margin: 16px 0 16px 16px;
     width: 32px;
+    background: none !important;
+}
+
+.non-circle-avatars .account-item .circle-avatar-wrap {
 }
 
 .account-item .status {
