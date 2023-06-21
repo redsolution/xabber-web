@@ -2844,7 +2844,8 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-                this.omemo_own_devices.updateTrustDevice(Number(pretty_token.token_uid.slice(0,8)), $token_html);
+                let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
+                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html);
             } else {
                 if (token.omemo_id){
                     $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
@@ -2863,7 +2864,9 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             let $target = $(ev.target).closest('.device-encryption'),
                 is_own = $target.hasClass('is-own');
             !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            this.omemo_own_devices.open(Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8)), is_own);
+            let token = this.model.x_tokens_list.find(item => (item.token_uid === $target.closest('.token-wrap').attr('data-token-uid'))),
+                omemo_device_id = token && token.omemo_id ? token.omemo_id : Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8));
+            this.omemo_own_devices.open(Number(omemo_device_id), is_own);
         }
     },
 
