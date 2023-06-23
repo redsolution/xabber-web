@@ -1391,6 +1391,7 @@ body {
     left: 20px;
     /*color: #9E9E9E;*/
     color: #E0E0E0;
+    pointer-events: none;
 }
 
 .toolbar .toolbar-item svg.toolbar-icon path {
@@ -3537,7 +3538,13 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .accounts .ps-scrollbar-y-rail {
-    right: 0px !important;
+    left: 63px!important;
+    width: 2px !important;
+    pointer-events: none;
+}
+
+.toolbar .accounts .ps-scrollbar-y {
+    width: 2px !important;
 }
 
 .account-item .circle-avatar {
@@ -3557,10 +3564,16 @@ input[type=text].simple-input-field:hover {
     border: 0;
 }
 
+.toolbar-item.account-item .account-item-avatar-wrap {
+    height: 56px!important;
+    width: 64px;
+    background: none !important;
+}
+
 .toolbar-item.account-item .circle-avatar-wrap {
     display: inline-grid;
     height: 32px!important;
-    margin: 16px 0 16px 16px;
+    margin: 12px 0 12px 16px;
     width: 32px;
     background: none !important;
 }
@@ -3605,9 +3618,8 @@ input[type=text].simple-input-field:hover {
     position: relative;
     font-size: 16px;
     height: 36px;
-    opacity: 0;
     z-index: 1000;
-    visibility: hidden;
+    display: none;
     padding-left: 10px;
     color: #C0C0C0;
     text-align: center;
@@ -3619,7 +3631,7 @@ input[type=text].simple-input-field:hover {
     transition: opacity .4s;
 }
 
-.toolbar .account-item .filter-chats {
+.toolbar .account-item .show-account-settings {
     padding: 8px 12px;
     border-radius: 18px;
     display: flex;
@@ -3632,9 +3644,8 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .account-item .account-actions-panel:hover,
-.toolbar .account-item .circle-avatar-wrap:hover ~ .account-actions-panel {
-    opacity: 1;
-    visibility: visible !important;
+.toolbar .account-item:not(.single-item) .account-item-avatar-wrap:hover ~ .account-actions-panel {
+    display: block;
 }
 
 .toolbar .account-item .account-actions-panel:hover {
@@ -11134,11 +11145,17 @@ input[type='range'].voice-message-volume:focus {
     background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
+.settings-panel .left-column .details-icon.mdi,
 .settings-panel .settings-tab .mdi {
     position: absolute;
     top: 12px;
     left: 24px;
     color: #FFFFFF;
+}
+
+.settings-panel .left-column .details-icon.mdi{
+    cursor: pointer;
+    z-index: 1000;
 }
 
 .settings-panel .settings-tab svg path {

@@ -943,7 +943,6 @@ xabber.Body = xabber.NodeView.extend({
 xabber.ToolbarView = xabber.BasicView.extend({
     className: "toolbar noselect",
     ps_selector: '.accounts',
-    ps_settings: {theme: 'item-list'},
     template: templates.toolbar,
 
     events: {
@@ -1002,12 +1001,17 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function (name) {
-        if ((name === 'account_settings') || ((name === 'all-chats') &&
+        if (name === 'account_settings'){
+            this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
+            this.$('.toolbar-item:not(.toolbar-logo).settings').addClass('active');
+            return;
+        }
+        if ((name === 'all-chats') &&
             (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
                 this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active')||
-                this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')))) {
+                this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active'))) {
             return;
         }
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
@@ -1111,7 +1115,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     showPlaceholder: function (ev) {
         xabber.chats_view && xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.trigger('hide_chat');
-        xabber.body.setScreen(xabber.body.screen.get('name'), {chat_item: null});
+        let screen_name = this.$('.toolbar-item:not(.toolbar-logo).settings').hasClass('active') ? 'all-chats' : xabber.body.screen.get('name');
+        xabber.body.setScreen(screen_name, {chat_item: null});
         let $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         $el.addClass('active');

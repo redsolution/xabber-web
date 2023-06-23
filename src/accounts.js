@@ -1746,7 +1746,8 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
     events: {
-        'click': 'filterChats'
+        'click .account-item-avatar-wrap': 'filterChats',
+        'click .show-account-settings': 'showSettings'
     },
 
     _initialize: function () {
@@ -1791,10 +1792,18 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
 
     filterChats: function (ev) {
         ev.stopPropagation();
+        let is_single = $(ev.target).closest('.single-item').length;
+        if (is_single){
+            this.model.showSettings();
+        }
         xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
         if (xabber.toolbar_view.data.get('account_filtering') != this.model.get('jid'))
             this.$el.addClass('active');
         xabber.toolbar_view.showChatsByAccount(this.model);
+    },
+
+    showSettings: function () {
+        this.model.showSettings();
     },
 });
 
@@ -1807,11 +1816,14 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
     },
 
     updateList: function (account) {
+        this.$el.find('.single-item').removeClass('single-item');
         _.each(this.children, function (view) { view.detach(); });
         _.each(this.model.enabled, (account) => {
             let jid = account.get('jid'), view = this.child(jid);
             !view && (view = this.addChild(jid, xabber.AccountToolbarItemView, {model: account}));
             this.$el.append(view.$el);
+            if (this.model.enabled.length === 1)
+                this.$el.find('.toolbar-item.account-item').addClass('single-item');
         });
         this.parent.updateScrollBar();
     },
@@ -1836,6 +1848,9 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
             account.last_msg_timestamp = 0;
             this.removeChild(jid);
         }
+        this.$el.find('.single-item').removeClass('single-item');
+        if (this.model.enabled.length === 1)
+            this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.parent.updateScrollBar();
     },
 
@@ -2480,6 +2495,7 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
     events: {
         "change .main-info-wrap .circle-avatar input": "changeAvatar",
         "click .btn-choose-image": "chooseAvatar",
+        "click .btn-back": "showSettings",
         "click .btn-emoji-panel": "openEmojiPanel",
         "click .btn-selfie": "openWebcamPanel",
         "click .main-info-wrap .status": "openChangeStatus",
@@ -2574,6 +2590,11 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
             avatar_view.render({model: this.model});
         } else
             this.$('.main-info-wrap .circle-avatar input').click();
+    },
+
+    showSettings: function () {
+        xabber.body.setScreen('settings');
+        xabber.trigger('update_placeholder');
     },
 
     openEmojiPanel: function () {
