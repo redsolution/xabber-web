@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.134","version_description":"changed toolbar accounts click behaviour, added back button to account settings, added chats with incoming subscription to notifications filtering, fixed placeholder filter clicking when settings screen is active"}'
+'{"version_number":"2.3.3.135","version_description":"one account saved messages button click, saved messages chat scrolling,  fixed active chat marking after opening placeholder filter"}'
 )});

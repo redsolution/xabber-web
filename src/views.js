@@ -1050,9 +1050,15 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showSavedChats: function (ev, no_unread) {
-        if (xabber.accounts.connected.length === 1){
-            let saved_chat = xabber.accounts.connected[0].chats.getSavedChat();
-            saved_chat.item_view && saved_chat.item_view.open();
+        if (xabber.accounts.enabled.length === 1){
+            let saved_chat = xabber.accounts.enabled[0].chats.getSavedChat();
+            saved_chat.item_view && saved_chat.item_view.open({right_contact_save: true, clear_search: false, scroll_to_chat: true});
+            this.$('.active').removeClass('active');
+            this.$('.saved-chats').addClass('active');
+            saved_chat.once("change:active", () => {
+                xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
+                xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).'+xabber.body.screen.get('name')).addClass('active');
+            });
         } else {
             this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
                 .filter('.saved-chats').addClass('active');
@@ -1114,7 +1120,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showPlaceholder: function (ev) {
-        xabber.chats_view && xabber.chats_view.active_chat && xabber.chats_view.active_chat.model.trigger('hide_chat');
+        if (xabber.chats_view && xabber.chats_view.active_chat){
+            xabber.chats_view.active_chat.model.trigger('hide_chat');
+            xabber.chats_view.active_chat = null;
+        }
         let screen_name = this.$('.toolbar-item:not(.toolbar-logo).settings').hasClass('active') ? 'all-chats' : xabber.body.screen.get('name');
         xabber.body.setScreen(screen_name, {chat_item: null});
         let $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');

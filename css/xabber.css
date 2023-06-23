@@ -11156,6 +11156,7 @@ input[type='range'].voice-message-volume:focus {
 .settings-panel .left-column .details-icon.mdi{
     cursor: pointer;
     z-index: 1000;
+    top: 16px;
 }
 
 .settings-panel .settings-tab svg path {
