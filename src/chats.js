@@ -11577,8 +11577,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             return;
         let url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g,
             list = text && text.match(url_regexp);
-        list = _.difference(list, this.link_reference_exempted)
-        list = _.difference(list, this.currently_loaded_link_references)
+        list = _.difference(list, this.link_reference_exempted);
         if (list && list.length){
             this.stopped_loading_link_reference = false;
             this.$('.preview-preloader-container').removeClass('hidden');
@@ -11586,14 +11585,24 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.link_reference_request_timestamp = Date.now();
             let request_timestamp = this.link_reference_request_timestamp;
             list.forEach((item, idx) => {
+                let loaded_domain = item.match(/[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/g);
+                loaded_domain && loaded_domain.length && (loaded_domain = loaded_domain[0]);
+                if (this.currently_loaded_link_references.includes(loaded_domain)){
+                    request_count++;
+                    if (request_count === list.length)
+                        this.$('.preview-preloader-container').addClass('hidden');
+                    return;
+                }
                 this.account.getOpenGraphData(item, (res) => {
                     if (this.stopped_loading_link_reference || !(request_timestamp === this.link_reference_request_timestamp))
                         return;
-                    if (this.currently_loaded_link_references.includes(item)){
+                    if (this.currently_loaded_link_references.includes(loaded_domain)){
                         request_count++;
                         if (request_count === list.length)
                             this.$('.preview-preloader-container').addClass('hidden');
                         return;
+                    } else {
+                        loaded_domain && (this.currently_loaded_link_references = this.currently_loaded_link_references.concat([loaded_domain]));
                     }
                     let dfd = new $.Deferred();
                     dfd.done(() => {
@@ -11625,7 +11634,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                             }
                         });
                         this.link_references = this.link_references.concat(res);
-                        this.currently_loaded_link_references = this.currently_loaded_link_references.concat([item]);
                         xabber.chat_body.updateHeight();
                         this.scrollToBottom();
                     });
@@ -11676,7 +11684,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
             this.$('.message-reference-preview').addClass('hidden');
         this.link_references = this.link_references.filter(item => item.original_text != url);
-        this.currently_loaded_link_references = this.currently_loaded_link_references.filter(item => item != url);
+        let loaded_domain = url.match(/[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/g);
+        loaded_domain && loaded_domain.length && (loaded_domain = loaded_domain[0]);
+        loaded_domain && (this.currently_loaded_link_references = this.currently_loaded_link_references.filter(item => item != loaded_domain));
         this.link_reference_exempted = this.link_reference_exempted.concat([url]);
         xabber.chat_body.updateHeight();
         this.scrollToBottom();
@@ -11774,7 +11784,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         link_references.forEach((item) => {
             this.link_references = this.link_references.concat([item]);
-            this.currently_loaded_link_references = this.currently_loaded_link_references.concat(item.original_text);
+            let loaded_domain = item.original_text.match(/[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+/g);
+            loaded_domain && loaded_domain.length && (loaded_domain = loaded_domain[0]);
+            loaded_domain && (this.currently_loaded_link_references = this.currently_loaded_link_references.concat(loaded_domain));
             this.$('.message-reference-preview-container').prepend($(templates.messages.link_reference({
                 item: item,
                 domain: item.url ? utils.getDomainFromUrl(item.url) : item.site_name,

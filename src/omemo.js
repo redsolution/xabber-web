@@ -1740,7 +1740,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
         let keys = $header.find(`key`).get().map(function(keyElement) {
             return {
-                preKey: $(keyElement).attr('kex') === 'true',
+                preKey: $(keyElement).attr('kex') === 'true' || $(keyElement).attr('kex') === '1',
                 ciphertext: utils.fromBase64toArrayBuffer($(keyElement).text()),
                 deviceId: parseInt($(keyElement).attr('rid'))
             };
