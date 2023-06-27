@@ -750,6 +750,7 @@ Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protoco
 Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');
 Strophe.addNamespace('SYNCHRONIZATION_OLD_OMEMO', 'urn:xmpp:omemo:1');
 Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:2');
+Strophe.addNamespace('XABBER_CHAT', 'urn:xabber:chat');
 Strophe.addNamespace('EXPLICIT_MESSAGE_ENCRYPTION', 'urn:xmpp:eme:0');
 Strophe.addNamespace('DELIVERY', 'https://xabber.com/protocol/delivery');
 Strophe.addNamespace('ARCHIVE', 'https://xabber.com/protocol/archive');

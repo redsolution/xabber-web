@@ -763,16 +763,12 @@ xabber.Contact = Backbone.Model.extend({
             .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
             .c('value').t(Strophe.NS.MAM).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
-            if (this.account.server_features.get(Strophe.NS.ARCHIVE)) {
-                iq.c('field', {'var': `payload-type`});
-                if (options.encrypted){
-                    iq.c('value').t(Strophe.NS.OMEMO).up().up();
-                } else {
-                    iq.c('value').t('cleartext').up().up();
-                }
+            iq.c('field', {'var': `conversation-type`});
+            if (options.encrypted){
+                iq.c('value').t(Strophe.NS.OMEMO).up().up();
+            } else {
+                iq.c('value').t(Strophe.NS.XABBER_CHAT).up().up();
             }
-        }
-        if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
             iq.c('field', {'var': `with-tags`});
             if (options.filter_image)
                 iq.c('value').t('image').up();

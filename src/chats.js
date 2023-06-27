@@ -3554,11 +3554,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.MAM).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE)) {
-            iq.c('field', {'var': `payload-type`});
+            iq.c('field', {'var': `conversation-type`});
             if (this.model.get('encrypted')){
                 iq.c('value').t(Strophe.NS.OMEMO).up().up();
             } else {
-                iq.c('value').t('cleartext').up().up();
+                iq.c('value').t(Strophe.NS.XABBER_CHAT).up().up();
             }
         }
         if (!is_groupchat)
