@@ -724,12 +724,13 @@ xabber.Contact = Backbone.Model.extend({
             account = this.account,
             is_fast = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
             conn = is_fast ? account.fast_connection : account.connection,
-            iq = $iq({type: 'set', to: this.get('full_jid') || this.get('jid')})
+            receiver = this.get('group_chat') ? this.get('full_jid') || this.get('jid') : this.account.get('jid'),
+            iq = $iq({type: 'set', to: receiver})
                 .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
                 .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
                 .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
                 .c('value').t(Strophe.NS.MAM).up().up()
-                .c('field', {'var': '{urn:xmpp:sid:0}stanza-id'})
+                .c('field', {'var': 'ids'})
                 .c('value').t(stanza_id);
         let handler = conn.addHandler((message) => {
             let $msg = $(message);
