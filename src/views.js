@@ -247,6 +247,12 @@ xabber.Container = xabber.BasicView.extend({
     className: 'container',
 
     render: function (options, path) {
+        if (_.isNull(path)){
+            this.$el.addClass('hidden');
+            return;
+        } else {
+            this.$el.removeClass('hidden');
+        }
         let new_view = path.applyTo(options);
         this.$el.children().detach();
         if (this.view !== new_view) {
@@ -899,6 +905,9 @@ xabber.Body = xabber.NodeView.extend({
         let new_attrs = {stamp: _.uniqueId()};
         if (name && !this.isScreen(name)) {
             new_attrs.name = name;
+        }
+        if (!attrs || !attrs.show_placeholder) {
+            new_attrs.show_placeholder = null;
         }
         if ((attrs && attrs.right && attrs.right === 'group_invitation') || (name === 'settings' || name ==='account_settings') || options.right_force_close)
             new_attrs.right_contact = null;

@@ -182,6 +182,7 @@
     addTemplate('chats.send_media');
     addTemplate('chats.saved_chat_head');
     addTemplate('chats.chat_content');
+    addTemplate('chats.chat_content_placeholder');
     addTemplate('chats.chat_content_contact');
     addTemplate('chats.chat_bottom');
     addTemplate('chats.unread_marker');

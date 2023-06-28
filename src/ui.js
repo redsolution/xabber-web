@@ -221,6 +221,7 @@ xabber.once("start", function () {
 
     let path_chat_head = new this.ViewPath('chat_item.content.head'),
         path_chat_body = new this.ViewPath('chat_item.content'),
+        path_chat_body_placeholder = new this.ViewPath('chat_item.content_placeholder'),
         path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
         path_group_invitation = new this.ViewPath('contact.invitation'),
         path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
@@ -280,10 +281,19 @@ xabber.once("start", function () {
     this.right_panel.patchTree = function (tree, options) {
         if (options.right === undefined)
             return;
+        if (options.show_placeholder) {
+            return {
+                chat_head: path_chat_head,
+                chat_body: null,
+                chat_body_placeholder: path_chat_body_placeholder,
+                chat_bottom: null
+            };
+        }
         if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
             return {
                 chat_head: path_chat_head,
                 chat_body: path_participant_messages,
+                chat_body_placeholder: null,
                 chat_bottom: path_chat_bottom
             };
         }
@@ -299,6 +309,7 @@ xabber.once("start", function () {
             return {
                 chat_head: path_chat_head,
                 chat_body: path_chat_body,
+                chat_body_placeholder: null,
                 chat_bottom: path_chat_bottom
             };
         }

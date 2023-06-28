@@ -1794,6 +1794,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.$el.attr('data-id', this.model.id);
         if (!this.model.sync_created)
             this.content = new xabber.ChatContentView({chat_item: this});
+        this.content_placeholder = new xabber.ChatContentPlaceholderView();
         this.updateName();
         this.updateStatus();
         this.updateCounter();
@@ -3008,7 +3009,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
       }
   });
 
-  xabber.ChatContentView = xabber.BasicView.extend({
+xabber.ChatContentView = xabber.BasicView.extend({
     className: 'chat-content-wrap',
     template: templates.chat_content,
     ps_selector: '.chat-content',
@@ -3090,29 +3091,29 @@ xabber.ChatItemView = xabber.BasicView.extend({
         return this;
     },
 
-      render: function () {
-          this.cancelSearch();
-          if (this._prev_scrolltop)
-              this.scrollTo(this._prev_scrolltop);
-          else
-              this.scrollToBottom();
-          this.onScroll();
-          this.updateCounter();
-          this.updateContactStatus();
-          this.updateWaveforms();
-          this.onUpdatePlyr();
-          if (this.contact) {
-              this.contact.get('group_chat') && this.updatePinnedMessage();
-              this.subscription_buttons.render();
-          }
-      },
+    render: function () {
+        this.cancelSearch();
+        if (this._prev_scrolltop)
+            this.scrollTo(this._prev_scrolltop);
+        else
+            this.scrollToBottom();
+        this.onScroll();
+        this.updateCounter();
+        this.updateContactStatus();
+        this.updateWaveforms();
+        this.onUpdatePlyr();
+        if (this.contact) {
+            this.contact.get('group_chat') && this.updatePinnedMessage();
+            this.subscription_buttons.render();
+        }
+    },
 
-      openDevicesWindow: function () {
-          if (!this.account.omemo)
-              return;
-          let peer = this.account.omemo.getPeer(this.contact.get('jid'));
-          peer.fingerprints.open();
-      },
+    openDevicesWindow: function () {
+        if (!this.account.omemo)
+            return;
+        let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+        peer.fingerprints.open();
+    },
 
     defineMouseWheelEvent: function () {
         if (!_.isUndefined(window.onwheel)) {
@@ -3138,12 +3139,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.bottom.$el.attr('data-color', color);
     },
 
-      onTrustedChanged: function (message) {
-          let trusted = message.get('trusted'),
-              $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]');
-          (trusted === null) && (trusted = 'none');
-          $message.attr('data-trust', trusted);
-      },
+    onTrustedChanged: function (message) {
+        let trusted = message.get('trusted'),
+            $message = this.$('.chat-message[data-uniqueid="' + message.get('unique_id') + '"]');
+        (trusted === null) && (trusted = 'none');
+        $message.attr('data-trust', trusted);
+    },
 
     updateGroupChat: function () {
         this._loading_history = false;
@@ -3225,12 +3226,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (contact === this.contact) {
             this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
                 $(this).find('.left-side .circle-avatar').setAvatar(
-                        image, this.avatar_size);
+                    image, this.avatar_size);
             });
         } else {
             this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
                 $(this).find('.fwd-left-side .circle-avatar').setAvatar(
-                        image, this.avatar_size);
+                    image, this.avatar_size);
             });
         }
     },
@@ -3259,11 +3260,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
             jid = this.account.get('jid');
         this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
             $(this).find('.left-side .circle-avatar').setAvatar(
-                    image, this.avatar_size);
+                image, this.avatar_size);
         });
         this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
             $(this).find('.fwd-left-side .circle-avatar').setAvatar(
-                    image, this.avatar_size);
+                image, this.avatar_size);
         });
     },
 
@@ -3288,7 +3289,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
         if (last_visible_msg.get('is_unread_archived') || last_visible_msg.get('unique_id') === this.model.last_message.get('unique_id') || this.model.get('const_unread')){
             let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread'))),
-                read_count = 1;
+                read_count = 0;
 
             _.each(unread_messages, (msg) => {
                 if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
@@ -3371,7 +3372,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     scrollToUnread: function () {
         let $last_read_msg = this.$(`.chat-message.unread-message:first`);
         $last_read_msg.length && (this.scrollTo(this.getScrollTop()
-          - (this.$el.height() * 0.2) + $last_read_msg.offset().top));
+            - (this.$el.height() * 0.2) + $last_read_msg.offset().top));
     },
 
     scrollToUnreadWithButton: function () {
@@ -3550,9 +3551,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
         else
             iq = $iq({type: 'set'});
         iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
-                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
-                .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
-                .c('value').t(Strophe.NS.MAM).up().up();
+            .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+            .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+            .c('value').t(Strophe.NS.MAM).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE)) {
             iq.c('field', {'var': `conversation-type`});
             if (this.model.get('encrypted')){
@@ -3592,28 +3593,28 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     func_conn.deleteHandler(handler);
                 }, 14000);
                 let callb = function (res) {
-                    func_conn.deleteHandler(handler);
-                    clearTimeout(_delete_handler_timeout);
-                    clearInterval(_interval);
-                    handler = null;
-                    account.chats.onCompletedMAMRequest(deferred);
-                    let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
-                    if ($fin.length && $fin.attr('queryid') === queryid) {
-                        let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
-                        rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
-                        callback && callback(success, messages, rsm);
-                    }
-                },
-                errb = function (err) {
-                    func_conn.deleteHandler(handler);
-                    clearTimeout(_delete_handler_timeout);
-                    clearInterval(_interval);
-                    handler = null;
-                    xabber.error("MAM error");
-                    xabber.error(err);
-                    account.chats.onCompletedMAMRequest(deferred);
-                    errback && errback(err);
-                };
+                        func_conn.deleteHandler(handler);
+                        clearTimeout(_delete_handler_timeout);
+                        clearInterval(_interval);
+                        handler = null;
+                        account.chats.onCompletedMAMRequest(deferred);
+                        let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
+                        if ($fin.length && $fin.attr('queryid') === queryid) {
+                            let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
+                            rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
+                            callback && callback(success, messages, rsm);
+                        }
+                    },
+                    errb = function (err) {
+                        func_conn.deleteHandler(handler);
+                        clearTimeout(_delete_handler_timeout);
+                        clearInterval(_interval);
+                        handler = null;
+                        xabber.error("MAM error");
+                        xabber.error(err);
+                        account.chats.onCompletedMAMRequest(deferred);
+                        errback && errback(err);
+                    };
                 console.log('trying to send')
                 if (is_fast)
                     account.sendFast(iq, callb, errb);
@@ -3767,22 +3768,22 @@ xabber.ChatItemView = xabber.BasicView.extend({
             });
     },
 
-      loadUnreadHistory: function () {
-          if (this.contact) {
-              if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
-                  return;
-              }
-          }
-          this.model.set('loading_unread_history', true)
-          this.getMessageArchive({
-              fast: true,
-              max: xabber.settings.mam_messages_limit,
-              after: this.model.get('last_read_msg'),
-          }, {
-              unread_history_first: true,
-              unread_history: true,
-          });
-      },
+    loadUnreadHistory: function () {
+        if (this.contact) {
+            if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
+                return;
+            }
+        }
+        this.model.set('loading_unread_history', true)
+        this.getMessageArchive({
+            fast: true,
+            max: xabber.settings.mam_messages_limit,
+            after: this.model.get('last_read_msg'),
+        }, {
+            unread_history_first: true,
+            unread_history: true,
+        });
+    },
 
     showHistoryFeedback: function (is_error) {
         if (this._load_history_feedback_timeout) {
@@ -4182,64 +4183,64 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
 
-      decryptImages: function (message, force) {
+    decryptImages: function (message, force) {
         let scrolled_from_bottom = this.getScrollBottom(),
             unique_id = message.get('unique_id');
-          if (this.model.get('encrypted') || message.get('encrypted') || force) {
-              let images = message.get('images') || [];
-              if (images.length) {
-                  images.forEach((img) => {
-                      let source = img.sources[0];
-                      if (!img.key)
-                          return;
-                      this.model.messages.decryptFile(source, img.key).then((result) => {
-                          if (result === null)
-                              return;
-                          let $msg = [];
-                          if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context')
-                              $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
-                          else
-                              $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
-                          if ($msg.length) {
-                              $msg[0].src = result;
-                              $msg[0].onload = () => {
-                                  if (!scrolled_from_bottom)
-                                      this.scrollToBottom();
-                                  else
-                                      this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
-                              };
-                              $msg.attr('data-mfp-src', result);
-                          }
-                      });
-                  });
-              }
-              let fwd_msgs = message.get('forwarded_message') || [];
-              fwd_msgs.forEach((fwd_msg) => {
-                  let fwd_images = fwd_msg.get('images') || [],
-                      fwd_unique_id = fwd_msg.get('unique_id');
-                  fwd_images.forEach((img) => {
-                      let source = img.sources[0];
-                      if (!img.key)
-                          return;
-                      this.model.messages.decryptFile(source, img.key).then((result) => {
-                          if (result === null)
-                              return;
-                          let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
-                          if ($msg.length) {
-                              $msg[0].src = result;
-                              $msg[0].onload = () => {
-                                  if (!scrolled_from_bottom)
-                                      this.scrollToBottom();
-                                  else
-                                      this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
-                              };
-                              $msg.attr('data-mfp-src', result);
-                          }
-                      });
-                  });
-              });
-          }
-      },
+        if (this.model.get('encrypted') || message.get('encrypted') || force) {
+            let images = message.get('images') || [];
+            if (images.length) {
+                images.forEach((img) => {
+                    let source = img.sources[0];
+                    if (!img.key)
+                        return;
+                    this.model.messages.decryptFile(source, img.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let $msg = [];
+                        if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context')
+                            $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                        else
+                            $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                        if ($msg.length) {
+                            $msg[0].src = result;
+                            $msg[0].onload = () => {
+                                if (!scrolled_from_bottom)
+                                    this.scrollToBottom();
+                                else
+                                    this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                            };
+                            $msg.attr('data-mfp-src', result);
+                        }
+                    });
+                });
+            }
+            let fwd_msgs = message.get('forwarded_message') || [];
+            fwd_msgs.forEach((fwd_msg) => {
+                let fwd_images = fwd_msg.get('images') || [],
+                    fwd_unique_id = fwd_msg.get('unique_id');
+                fwd_images.forEach((img) => {
+                    let source = img.sources[0];
+                    if (!img.key)
+                        return;
+                    this.model.messages.decryptFile(source, img.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
+                        if ($msg.length) {
+                            $msg[0].src = result;
+                            $msg[0].onload = () => {
+                                if (!scrolled_from_bottom)
+                                    this.scrollToBottom();
+                                else
+                                    this.scrollTo(this.ps_container[0].scrollHeight - scrolled_from_bottom);
+                            };
+                            $msg.attr('data-mfp-src', result);
+                        }
+                    });
+                });
+            });
+        }
+    },
 
     addMessage: function (message) {
         let $message = this.buildMessageHtml(message),
@@ -5325,7 +5326,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let is_system = $prev_msg.hasClass('system'),
             is_same_sender = ($msg.data('from') === $prev_msg.data('from')),
             is_same_date = moment($msg.data('time')).startOf('day')
-                    .isSame(moment($prev_msg.data('time')).startOf('day'));
+                .isSame(moment($prev_msg.data('time')).startOf('day'));
         if (!is_same_date) {
             this.getDateIndicator($msg.data('time')).insertBefore($msg);
             this.showMessageAuthor($msg);
@@ -5394,19 +5395,19 @@ xabber.ChatItemView = xabber.BasicView.extend({
         xabber.recountAllMessageCounter();
     },
 
-      attentionMessage: function () {
-          let notification = xabber.popupNotification({
-              title: this.contact.get('name'),
-              text: xabber.getString("chats_attention"),
-              icon: this.contact.cached_image.url
-          });
-          notification.onclick = () => {
-              window.focus();
-              this.model.trigger('open');
-          };
-          let sound = xabber.settings.sound_on_attention;
-          xabber.playAudio(sound);
-      },
+    attentionMessage: function () {
+        let notification = xabber.popupNotification({
+            title: this.contact.get('name'),
+            text: xabber.getString("chats_attention"),
+            icon: this.contact.cached_image.url
+        });
+        notification.onclick = () => {
+            window.focus();
+            this.model.trigger('open');
+        };
+        let sound = xabber.settings.sound_on_attention;
+        xabber.playAudio(sound);
+    },
 
     sendMessage: function (message) {
         let body = message.get('message'),
@@ -5611,62 +5612,62 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
     },
 
-      msgCallback: function (msg_sending_timestamp, message) {
-          this.bottom.click_counter = 0;
-          this.bottom.setDefaultPlaceholder();
-          if (!this.model.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
-              setTimeout(() => {
-                  if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
-                      message.set('state', constants.MSG_SENT);
-                  } else {
-                      this.account.connection.ping.ping(this.account.get('jid'), () => {
-                          (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
-                      });
-                      setTimeout(() => {
-                          if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
-                              message.set('state', constants.MSG_ERROR);
-                      }, 5000);
-                  }
-              }, 1000);
-          }
-          else {
-              let _pending_time = 5, was_reconnecting;
-              if (!(this.account.connection.authenticated && !this.account.connection.disconnecting && this.account.session.get('connected') && this.account.session.get('ready_to_send') && this.account.get('status') !== 'offline'))
-                  was_reconnecting = true;
-              if (this.account.session.get('reconnecting'))
-                  was_reconnecting = true;
-              this.account.session.once('change:reconnecting', () => {
-                  console.log('change reconnecting');
-                  console.log(this.account.session.get('reconnecting'));
-                  was_reconnecting = true;
-              })
-              let _interval = setInterval(() => {
-                  console.log(was_reconnecting);
-                  if (was_reconnecting)
-                      clearInterval(_interval);
-                  if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
-                      console.log('ping on message pending');
-                      this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
-                          let downtime = (moment.now() - this.account.last_stanza_timestamp) / 1000;
-                          if (downtime >= 2){
-                              console.log('message initiated reconnection');
-                              console.log(message);
-                              this.account.connection.disconnect();
-                          } else {
-                              console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
-                          }
-                      }, 2000);
-                  }
-                  if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
-                      message.set('state', constants.MSG_ERROR);
-                      clearInterval(_interval);
-                  }
-                  else if (message.get('state') !== constants.MSG_PENDING)
-                      clearInterval(_interval);
-                  _pending_time += 3;
-              }, 3000);
-          }
-      },
+    msgCallback: function (msg_sending_timestamp, message) {
+        this.bottom.click_counter = 0;
+        this.bottom.setDefaultPlaceholder();
+        if (!this.model.get('group_chat') && !this.account.server_features.get(Strophe.NS.DELIVERY)) {
+            setTimeout(() => {
+                if ((this.account.last_stanza_timestamp > msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                    message.set('state', constants.MSG_SENT);
+                } else {
+                    this.account.connection.ping.ping(this.account.get('jid'), () => {
+                        (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
+                    });
+                    setTimeout(() => {
+                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                            message.set('state', constants.MSG_ERROR);
+                    }, 5000);
+                }
+            }, 1000);
+        }
+        else {
+            let _pending_time = 5, was_reconnecting;
+            if (!(this.account.connection.authenticated && !this.account.connection.disconnecting && this.account.session.get('connected') && this.account.session.get('ready_to_send') && this.account.get('status') !== 'offline'))
+                was_reconnecting = true;
+            if (this.account.session.get('reconnecting'))
+                was_reconnecting = true;
+            this.account.session.once('change:reconnecting', () => {
+                console.log('change reconnecting');
+                console.log(this.account.session.get('reconnecting'));
+                was_reconnecting = true;
+            })
+            let _interval = setInterval(() => {
+                console.log(was_reconnecting);
+                if (was_reconnecting)
+                    clearInterval(_interval);
+                if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
+                    console.log('ping on message pending');
+                    this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
+                        let downtime = (moment.now() - this.account.last_stanza_timestamp) / 1000;
+                        if (downtime >= 2){
+                            console.log('message initiated reconnection');
+                            console.log(message);
+                            this.account.connection.disconnect();
+                        } else {
+                            console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
+                        }
+                    }, 2000);
+                }
+                if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
+                    message.set('state', constants.MSG_ERROR);
+                    clearInterval(_interval);
+                }
+                else if (message.get('state') !== constants.MSG_PENDING)
+                    clearInterval(_interval);
+                _pending_time += 3;
+            }, 3000);
+        }
+    },
 
     initJingleMessage: function (media_type) {
         xabber.current_voip_call && xabber.current_voip_call.destroy();
@@ -6145,9 +6146,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     },
 
-      encryptFile: async function (file) {
+    encryptFile: async function (file) {
         return await utils.AES.encrypt(file);
-      },
+    },
 
     onFileUploaded: function (message, $message) {
         $message.find('.dropdown-content.retry-send-message').removeClass('hidden');
@@ -6980,6 +6981,23 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 $message.find(`.plyr-video-container[data-message-id="${xabber.current_plyr_player.player_item.message_id}"]`).addClass('active-plyr-container');
             }
         }
+    },
+});
+
+
+xabber.ChatContentPlaceholderView = xabber.BasicView.extend({
+    className: 'chat-body-content-placeholder-wrap',
+    template: templates.chat_content_placeholder,
+
+    events: {
+
+    },
+
+    _initialize: function (options) {
+        return this;
+    },
+
+    render: function () {
     },
 });
 
@@ -8363,18 +8381,28 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
                 view.content.scrollTo(current_scrolling);
             } else {
+                xabber.body.setScreen((options.screen || 'all-chats'), {
+                    right: 'chat',
+                    clear_search: options.clear_search,
+                    chat_item: view,
+                    show_placeholder: true,
+                    blocked: view.model.get('blocked')
+                },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                view.model.set('active', true);
                 view.model._wait_load_unread_history.done(() => {
-                    view.model.set('loading_unread_history', false)
-                    xabber.body.setScreen((options.screen || 'all-chats'), {
-                        right: 'chat',
-                        clear_search: options.clear_search,
-                        chat_item: view,
-                        blocked: view.model.get('blocked')
-                    },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                    view.content.scrollToUnread();
-                    view.content._long_reading_timeout = true;
-                    view.content._no_scrolling_event = false;
-                    view.content.onScroll();
+                    if (xabber.body.screen.get('chat_item') === view) {
+                        view.model.set('loading_unread_history', false)
+                        xabber.body.setScreen((options.screen || 'all-chats'), {
+                            right: 'chat',
+                            clear_search: options.clear_search,
+                            chat_item: view,
+                            blocked: view.model.get('blocked')
+                        },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                        view.content.scrollToUnread();
+                        view.content._long_reading_timeout = true;
+                        view.content._no_scrolling_event = false;
+                        view.content.onScroll();
+                    }
                 });
             }
             if (view.contact && (!view.contact.get('vcard_updated') || (view.contact.get('group_chat') && !view.contact.get('group_info')) || (view.contact.get('vcard_updated') && !moment(view.contact.get('vcard_updated')).startOf('hour').isSame(moment().startOf('hour'))))) {
@@ -12742,6 +12770,10 @@ xabber.ChatBodyContainer = xabber.Container.extend({
     }
 });
 
+xabber.ChatBodyPlaceholderContainer = xabber.Container.extend({
+    className: 'chat-body-placeholder-container',
+});
+
 xabber.NotificationsPlaceholder = xabber.BasicView.extend({
     className: 'notifications-placeholder',
     events: {
@@ -12974,6 +13006,8 @@ xabber.once("start", function () {
             this.ChatHeadContainer);
     this.chat_body = this.right_panel.addChild('chat_body',
             this.ChatBodyContainer);
+    this.chat_body_placeholder = this.right_panel.addChild('chat_body_placeholder',
+            this.ChatBodyPlaceholderContainer);
     this.chat_bottom = this.right_panel.addChild('chat_bottom',
             this.ChatBottomContainer);
     this.chat_placeholder = this.right_panel.addChild('chat_placeholder',
