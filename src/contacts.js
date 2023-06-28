@@ -8696,7 +8696,8 @@ xabber.Roster = xabber.ContactsBase.extend({
         delete(options.cached_conversations_exclude);
         let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
         this.account.sendFast(iq, (response) => {
-            this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync, cached_conversations_exclude);
+            this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync, cached_conversations_exclude).then(() => {
+            });
         });
     },
 
@@ -8890,7 +8891,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         xabber.toolbar_view.recountAllMessageCounter();
     },
 
-    onSyncIQ: function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync, cached_conversations_exclude) {
+    onSyncIQ: async function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync, cached_conversations_exclude) {
         let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
             sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
         this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
