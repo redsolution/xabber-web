@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.141","version_description":"fixed reading when chat is not scrollable"}'
+'{"version_number":"2.3.3.142","version_description":"changed that if encrypted message is submitted here, then it is shown as trusted, fixed selected message buttons in encrypted chat after switching chats, changed background color for unread messages in normal and encrypted chats, changed chat bottom blocks height, fixed encrypted selected message buttons block background, fixed unread counter position in chat content, changed all msgs counter if there is more than 99 messages"}'
 )});

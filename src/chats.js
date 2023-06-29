@@ -4698,8 +4698,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 classlist: classes.join(' ')
             })));
 
-        if (attrs.hasOwnProperty('is_trusted'))
+        if (attrs.hasOwnProperty('is_trusted')){
             $message.attr('data-trust', attrs.is_trusted);
+        }
+        if (attrs.hasOwnProperty('encrypted') && attrs.hasOwnProperty('submitted_here')){
+            $message.attr('data-trust', true);
+        }
 
         if (is_image) {
             if (images.length > 1) {
@@ -11031,7 +11035,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     setButtonsWidth: function () {
         let widths = [];
         this.$('.message-actions-panel .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.message-actions-panel .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+        (Math.max.apply(null, widths) !== 0) && this.$('.message-actions-panel .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
     },
 
     updateEncrypted: function () {

@@ -1201,6 +1201,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     onChangedAllMessageCounter: function () {
         let c = this.data.get('all_msg_counter');
+        if (c >= 100)
+            c = '99+';
         this.$('.all-msg-indicator').switchClass('unread', c).text(c);
     },
 });
