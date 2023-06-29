@@ -3529,7 +3529,13 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.contact.MAMRequest(options, (success, messages, rsm) => {
             let messages_count = 0;
             if (this.encrypted) {
-                $(templates.preloader()).appendTo(this.$('.gallery-files'))
+                if (messages.length)
+                    $(templates.preloader()).appendTo(this.$('.gallery-files'));
+                else {
+                    this.loading_messages = false;
+                    callback && callback();
+                    return;
+                }
             }
             $(messages).each((idx, message) => {
                 let $message = $(message),
