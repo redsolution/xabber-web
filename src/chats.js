@@ -3416,7 +3416,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$('.back-to-unread').removeClass('back-to-bottom');
     },
 
-    onScroll: function () {
+    onScroll: function (is_focused) {
         if (!this.isVisible() || this._no_scrolling_event)
             return;
         this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
@@ -3509,7 +3509,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.current_day_indicator !== null) {
             this.showDayIndicator(this.current_day_indicator);
         }
-        let scroll_read_timer = this._long_reading_timeout ? 2000 : 1;
+        let scroll_read_timer = this._long_reading_timeout || is_focused ? 2000 : 1;
         clearTimeout(this._onscroll_read_messages_timeout);
         this._onscroll_read_messages_timeout = setTimeout(() => {
             this.readVisibleMessages();
@@ -13034,7 +13034,7 @@ xabber.once("start", function () {
         if (this.get('focused')) {
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
-                view.content.onScroll();
+                view.content.onScroll(true);
                 if (view.model.get('is_accepted') !== false)
                     view.content.bottom.focusOnInput();
             }

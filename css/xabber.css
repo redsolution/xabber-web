@@ -1431,9 +1431,9 @@ body {
 [data-main-color=red] .add-user-group-chat .list-item.click-selected {
     background-color: #ffebee;
 }
-[data-main-color=red] .chat-message.unread-message-background {
-    /*background-color: #ffebee;*/
-    /*background-image: none !important;*/
+[data-main-color=red] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#FFCDD2 25%,transparent 0,transparent 74%,#FFCDD2 75%,#FFCDD2),linear-gradient(45deg,#FFCDD2 25%,#fff 0,#fff 74%,#FFCDD2 75%,#FFCDD2);
+    background-color: transparent;
 }
 [data-main-color=red] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFCDD2;
@@ -1548,9 +1548,9 @@ body {
 [data-main-color=pink] .add-user-group-chat .list-item.click-selected {
     background-color: #FCE4EC;
 }
-[data-main-color=pink] .chat-message.unread-message-background {
-    /*background-color: #FCE4EC;*/
-    /*background-image: none !important;*/
+[data-main-color=pink] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#F8BBD0 25%,transparent 0,transparent 74%,#F8BBD0 75%,#F8BBD0),linear-gradient(45deg,#F8BBD0 25%,#fff 0,#fff 74%,#F8BBD0 75%,#F8BBD0);
+    background-color: transparent;
 }
 [data-main-color=pink] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFCDD2;
@@ -1664,9 +1664,9 @@ body {
 [data-main-color=purple] .add-user-group-chat .list-item.click-selected {
     background-color: #F3E5F5;
 }
-[data-main-color=purple] .chat-message.unread-message-background {
-    /*background-color: #F3E5F5;*/
-    /*background-image: none !important;*/
+[data-main-color=purple] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#E1BEE7 25%,transparent 0,transparent 74%,#E1BEE7 75%,#E1BEE7),linear-gradient(45deg,#E1BEE7 25%,#fff 0,#fff 74%,#E1BEE7 75%,#E1BEE7);
+    background-color: transparent;
 }
 [data-main-color=purple] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFCDD2;
@@ -1780,9 +1780,9 @@ body {
 [data-main-color=deep-purple] .add-user-group-chat .list-item.click-selected {
     background-color: #EDE7F6;
 }
-[data-main-color=deep-purple] .chat-message.unread-message-background {
-    /*background-color: #EDE7F6;*/
-    /*background-image: none !important;*/
+[data-main-color=deep-purple] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#D1C4E9 25%,transparent 0,transparent 74%,#D1C4E9 75%,#D1C4E9),linear-gradient(45deg,#D1C4E9 25%,#fff 0,#fff 74%,#D1C4E9 75%,#D1C4E9);
+    background-color: transparent;
 }
 [data-main-color=deep-purple] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #D1C4E9;
@@ -1895,9 +1895,9 @@ body {
 [data-main-color=indigo] .add-user-group-chat .list-item.click-selected {
     background-color: #E8EAF6;
 }
-[data-main-color=indigo] .chat-message.unread-message-background {
-    /*background-color: #E8EAF6;*/
-    /*background-image: none !important;*/
+[data-main-color=indigo] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#C5CAE9 25%,transparent 0,transparent 74%,#C5CAE9 75%,#C5CAE9),linear-gradient(45deg,#C5CAE9 25%,#fff 0,#fff 74%,#C5CAE9 75%,#C5CAE9);
+    background-color: transparent;
 }
 [data-main-color=indigo] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #C5CAE9;
@@ -2011,9 +2011,9 @@ body {
 [data-main-color=blue] .add-user-group-chat .list-item.click-selected {
     background-color: #E3F2FD;
 }
-[data-main-color=blue] .chat-message.unread-message-background {
-    /*background-color: #E3F2FD;*/
-    /*background-image: none !important;*/
+[data-main-color=blue] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#BBDEFB 25%,transparent 0,transparent 74%,#BBDEFB 75%,#BBDEFB),linear-gradient(45deg,#BBDEFB 25%,#fff 0,#fff 74%,#BBDEFB 75%,#BBDEFB);
+    background-color: transparent;
 }
 [data-main-color=blue] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #BBDEFB;
@@ -2127,9 +2127,9 @@ body {
 [data-main-color=light-blue] .add-user-group-chat .list-item.click-selected {
     background-color: #E1F5FE;
 }
-[data-main-color=light-blue] .chat-message.unread-message-background {
-    /*background-color: #E1F5FE;*/
-    /*background-image: none !important;*/
+[data-main-color=light-blue] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#B3E5FC 25%,transparent 0,transparent 74%,#B3E5FC 75%,#B3E5FC),linear-gradient(45deg,#B3E5FC 25%,#fff 0,#fff 74%,#B3E5FC 75%,#B3E5FC);
+    background-color: transparent;
 }
 [data-main-color=light-blue] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #B3E5FC;
@@ -2243,9 +2243,9 @@ body {
 [data-main-color=cyan] .add-user-group-chat .list-item.click-selected {
     background-color: #E0F7FA;
 }
-[data-main-color=cyan] .chat-message.unread-message-background {
-    /*background-color: #E0F7FA;*/
-    /*background-image: none !important;*/
+[data-main-color=cyan] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#B2EBF2 25%,transparent 0,transparent 74%,#B2EBF2 75%,#B2EBF2),linear-gradient(45deg,#B2EBF2 25%,#fff 0,#fff 74%,#B2EBF2 75%,#B2EBF2);
+    background-color: transparent;
 }
 [data-main-color=cyan] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #B2EBF2;
@@ -2359,9 +2359,9 @@ body {
 [data-main-color=teal] .add-user-group-chat .list-item.click-selected {
     background-color: #E0F2F1;
 }
-[data-main-color=teal] .chat-message.unread-message-background {
-    /*background-color: #E0F2F1;*/
-    /*background-image: none !important;*/
+[data-main-color=teal] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#B2DFDB 25%,transparent 0,transparent 74%,#B2DFDB 75%,#B2DFDB),linear-gradient(45deg,#B2DFDB 25%,#fff 0,#fff 74%,#B2DFDB 75%,#B2DFDB);
+    background-color: transparent;
 }
 [data-main-color=teal] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #B2DFDB;
@@ -2475,9 +2475,9 @@ body {
 [data-main-color=green] .add-user-group-chat .list-item.click-selected {
     background-color: #E8F5E9;
 }
-[data-main-color=green] .chat-message.unread-message-background {
-    /*background-color: #E8F5E9;*/
-    /*background-image: none !important;*/
+[data-main-color=green] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#C8E6C9 25%,transparent 0,transparent 74%,#C8E6C9 75%,#C8E6C9),linear-gradient(45deg,#C8E6C9 25%,#fff 0,#fff 74%,#C8E6C9 75%,#C8E6C9);
+    background-color: transparent;
 }
 [data-main-color=green] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #B2DFDB;
@@ -2591,9 +2591,9 @@ body {
 [data-main-color=light-green] .add-user-group-chat .list-item.click-selected {
     background-color: #F1F8E9;
 }
-[data-main-color=light-green] .chat-message.unread-message-background {
-    /*background-color: #F1F8E9;*/
-    /*background-image: none !important;*/
+[data-main-color=light-green] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#DCEDC8 25%,transparent 0,transparent 74%,#DCEDC8 75%,#DCEDC8),linear-gradient(45deg,#DCEDC8 25%,#fff 0,#fff 74%,#DCEDC8 75%,#DCEDC8);
+    background-color: transparent;
 }
 [data-main-color=light-green] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #DCEDC8;
@@ -2707,9 +2707,9 @@ body {
 [data-main-color=lime] .add-user-group-chat .list-item.click-selected {
     background-color: #F9FBE7;
 }
-[data-main-color=lime] .chat-message.unread-message-background {
-    /*background-color: #F9FBE7;*/
-    /*background-image: none !important;*/
+[data-main-color=lime] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#F0F4C3 25%,transparent 0,transparent 74%,#F0F4C3 75%,#F0F4C3),linear-gradient(45deg,#F0F4C3 25%,#fff 0,#fff 74%,#F0F4C3 75%,#F0F4C3);
+    background-color: transparent;
 }
 [data-main-color=lime] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #F0F4C3;
@@ -2823,9 +2823,9 @@ body {
 [data-main-color=amber] .add-user-group-chat .list-item.click-selected {
     background-color: #FFF8E1;
 }
-[data-main-color=amber] .chat-message.unread-message-background {
-    /*background-color: #FFF8E1;*/
-    /*background-image: none !important;*/
+[data-main-color=amber] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#FFECB3 25%,transparent 0,transparent 74%,#FFECB3 75%,#FFECB3),linear-gradient(45deg,#FFECB3 25%,#fff 0,#fff 74%,#FFECB3 75%,#FFECB3);
+    background-color: transparent;
 }
 [data-main-color=amber] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFECB3;
@@ -2939,9 +2939,9 @@ body {
 [data-main-color=orange] .add-user-group-chat .list-item.click-selected {
     background-color: #FFF3E0;
 }
-[data-main-color=orange] .chat-message.unread-message-background {
-    /*background-color: #FFF3E0;*/
-    /*background-image: none !important;*/
+[data-main-color=orange] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#FFE0B2 25%,transparent 0,transparent 74%,#FFE0B2 75%,#FFE0B2),linear-gradient(45deg,#FFE0B2 25%,#fff 0,#fff 74%,#FFE0B2 75%,#FFE0B2);
+    background-color: transparent;
 }
 [data-main-color=orange] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFE0B2;
@@ -3055,9 +3055,9 @@ body {
 [data-main-color=deep-orange] .add-user-group-chat .list-item.click-selected {
     background-color: #FBE9E7;
 }
-[data-main-color=deep-orange] .chat-message.unread-message-background {
-    /*background-color: #FBE9E7;*/
-    /*background-image: none !important;*/
+[data-main-color=deep-orange] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#FFCCBC 25%,transparent 0,transparent 74%,#FFCCBC 75%,#FFCCBC),linear-gradient(45deg,#FFCCBC 25%,#fff 0,#fff 74%,#FFCCBC 75%,#FFCCBC);
+    background-color: transparent;
 }
 [data-main-color=deep-orange] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #FFCCBC;
@@ -3171,9 +3171,9 @@ body {
 [data-main-color=brown] .add-user-group-chat .list-item.click-selected {
     background-color: #EFEBE9;
 }
-[data-main-color=brown] .chat-message.unread-message-background {
-    /*background-color: #EFEBE9;*/
-    /*background-image: none !important;*/
+[data-main-color=brown] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#D7CCC8 25%,transparent 0,transparent 74%,#D7CCC8 75%,#D7CCC8),linear-gradient(45deg,#D7CCC8 25%,#fff 0,#fff 74%,#D7CCC8 75%,#D7CCC8);
+    background-color: transparent;
 }
 [data-main-color=brown] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #D7CCC8;
@@ -3288,9 +3288,9 @@ body {
 [data-main-color=blue-grey] .add-user-group-chat .list-item.click-selected {
     background-color: #ECEFF1;
 }
-[data-main-color=blue-grey] .chat-message.unread-message-background {
-    /*background-color: #ECEFF1;*/
-    /*background-image: none !important;*/
+[data-main-color=blue-grey] .chat-message.selected.encrypted {
+    background-image: linear-gradient(45deg,#CFD8DC 25%,transparent 0,transparent 74%,#CFD8DC 75%,#CFD8DC),linear-gradient(45deg,#CFD8DC 25%,#fff 0,#fff 74%,#CFD8DC 75%,#CFD8DC);
+    background-color: transparent;
 }
 [data-main-color=blue-grey] .add-contact-modal .input-field.checkbox-field input[type=checkbox]:checked + label{
     background-color: #CFD8DC;
@@ -8941,14 +8941,15 @@ input[type=text].simple-input-field:hover {
 
 .fwd-message.selected,
 .chat-message.selected {
-    background-image: unset !important;
     -webkit-transition: background-color 0s;
     -moz-transition: background-color 0s;
     -ms-transition: background-color 0s;
     -o-transition: background-color 0s;
     transition: background-color 0s;
 }
-
+.chat-message.selected:not(.encrypted){
+    background-image: unset !important;
+}
 .chat-day-indicator {
     position: relative;
     width: 100%;
