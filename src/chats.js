@@ -3416,7 +3416,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$('.back-to-unread').removeClass('back-to-bottom');
     },
 
-    onScroll: function (is_focused) {
+    onScroll: function (ev, is_focused) {
         if (!this.isVisible() || this._no_scrolling_event)
             return;
         this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
@@ -13034,7 +13034,7 @@ xabber.once("start", function () {
         if (this.get('focused')) {
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
-                view.content.onScroll(true);
+                view.content.onScroll(null, true);
                 if (view.model.get('is_accepted') !== false)
                     view.content.bottom.focusOnInput();
             }
