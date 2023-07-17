@@ -6687,6 +6687,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
             contact.declineRequest();
             this.blockInvitation();
         });
+        contact.trigger('remove_invite', contact);
     },
 
     blockContact: function () {
@@ -6700,6 +6701,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         });
         this.blockInvitation();
         this.closeChat();
+        contact.trigger('remove_invite', contact);
     }
 });
 

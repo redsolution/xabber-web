@@ -3521,7 +3521,7 @@ xabber.DragManager = Backbone.Model.extend({
         if (ev.which != 1) {
             return;
         }
-        let draghandle_elem = ev.target.closest('.drag-handle'),
+        let draghandle_elem = ev && ev.target && ev.target.closest ? ev.target.closest('.drag-handle') : $(ev.target).closest('.drag-handle'),
             elem = draghandle_elem && draghandle_elem.closest('.draggable');
         if (!elem) {
             return this.resetElem();
