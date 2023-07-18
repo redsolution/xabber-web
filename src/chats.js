@@ -4704,7 +4704,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else if (attrs.hasOwnProperty('is_trusted')){
                 $message.attr('data-trust', attrs.is_trusted);
             } else {
-                $message.attr('data-trust', 'untrusted');
+                $message.attr('data-trust', this.$el.attr('data-trust'));
             }
         }
 

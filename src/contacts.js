@@ -8791,7 +8791,8 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (encrypted && this.account.omemo) {
             chat.set('timestamp', chat_timestamp);
             chat.set('opened', true);
-            chat.item_view.updateEncryptedChat();
+            if (!(chat.last_message && chat.last_message.get('message')))
+                chat.item_view.updateEncryptedChat();
         }
         if (!saved) {
             if ($item.attr('mute') || $item.attr('mute') === '0') {
