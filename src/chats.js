@@ -1091,14 +1091,14 @@ xabber.MessagesBase = Backbone.Collection.extend({
                             is_between_anchors: true,
                         }
                     );
-                message_item.set('is_unread', false)
+                message_item && message_item.set('is_unread', false)
             });
             if (rsm.complete){
                 console.log(this.get('last_read_msg'));
                 let last_read_msg = this.messages.find(m => this.get('last_read_msg') && (m.get('stanza_id') === this.get('last_read_msg') || m.get('contact_stanza_id') === this.get('last_read_msg'))),
                     deferred = new $.Deferred();
                 deferred.done(() => {
-                    last_read_msg.set('is_unread', false);
+                    last_read_msg && last_read_msg.set('is_unread', false);
                     if (this.item_view.content.isVisible()){
                         this.item_view.content._long_reading_timeout = true;
                         this.item_view.content.scrollToUnread();
@@ -4698,11 +4698,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 classlist: classes.join(' ')
             })));
 
-        if (attrs.hasOwnProperty('is_trusted')){
-            $message.attr('data-trust', attrs.is_trusted);
-        }
-        if (attrs.hasOwnProperty('encrypted') && attrs.hasOwnProperty('submitted_here')){
-            $message.attr('data-trust', true);
+        if (attrs.hasOwnProperty('encrypted')){
+            if (attrs.hasOwnProperty('submitted_here')){
+                $message.attr('data-trust', true);
+            } else if (attrs.hasOwnProperty('is_trusted')){
+                $message.attr('data-trust', attrs.is_trusted);
+            } else {
+                $message.attr('data-trust', 'untrusted');
+            }
         }
 
         if (is_image) {

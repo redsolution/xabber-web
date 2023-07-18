@@ -4808,7 +4808,8 @@ input[type=text].simple-input-field:hover {
 
 .fingerprints-devices-wrap .fingerprints-content .other-device-content .buttons .dropdown-content{
     top: 100% !important;
-    width: calc(100% - 12px) !important;
+    min-width: calc(100% - 12px) !important;
+    width: fit-content !important;
     left: 6px !important;
 }
 

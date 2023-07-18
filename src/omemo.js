@@ -1420,7 +1420,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
                 cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
 
-            if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied)
+            if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent')
                 return;
 
             if (cached_msg) {
