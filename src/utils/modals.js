@@ -229,8 +229,8 @@ export default {
             return this.common(getString("warning"), text, {ok_button: true}, dialog_options);
         },
 
-        error: function (text, dialog_options) {
-            return this.common(getString("xabber_account__login__dialog_error__header"), text, {ok_button: true}, dialog_options);
+        error: function (text, dialog_options, header) {
+            return this.common(header || getString("xabber_account__login__dialog_error__header"), text, {ok_button: true}, dialog_options);
         },
 
         ask: function (header, text, dialog_options, buttons, flag) {

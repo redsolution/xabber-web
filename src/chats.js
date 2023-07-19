@@ -12223,7 +12223,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         this.$(`.message-reference-preview-item-file[data-id="${file.uid}"]`).remove();
                         this.removeFileSnippetById(file.uid);
                     });
-                    utils.dialogs.error(xabber.getString("message__file_was_deleted"));
+                    utils.dialogs.error('' + _.pluck(failed_files, 'name').join('\n'), {}, xabber.getQuantityString("message__file_was_deleted", failed_files.length));
                     dfd.reject();
                 } else {
                     dfd.resolve();
