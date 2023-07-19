@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.150","version_description":"changed encrypted messages background, fixed decrypting messages text placeholder appearing on existing message, encryption session logs"}'
+'{"version_number":"2.3.3.151","version_description":"added file reader to exempt locally deleted files, added size to formdata on file uploading"}'
 )});

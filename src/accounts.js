@@ -1430,6 +1430,8 @@ xabber.Account = Backbone.Model.extend({
                     formData.append('file', file, file.name);
                     if (file.duration)
                         formData.append('duration', file.duration);
+                    if (file.size)
+                        formData.append('duration', file.size);
                     if (file.voice)
                         formData.append('media_type', file.type + '+voice');
                     else

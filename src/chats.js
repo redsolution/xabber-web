@@ -5996,6 +5996,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             formData.append('file', file, file.name);
             if (file.duration)
                 formData.append('duration', file.duration);
+            if (file.size)
+                formData.append('size', file.size);
             if (file.voice)
                 formData.append('media_type', file.type + '+voice');
             else
@@ -6049,7 +6051,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         self.account.testGalleryTokenExpire(() => {
                             if (!is_error) {
                                 xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'))
+                                xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
                                 xhr_requests[files_count].is_uploading = true;
                                 xhr_requests[files_count].send(xhr_requests[files_count].formData);
                             }
@@ -6076,7 +6078,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                     self.account.testGalleryTokenExpire(() => {
                                         if (!is_error) {
                                             xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                            xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'))
+                                            xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
                                             xhr_requests[files_count].is_uploading = true;
                                             xhr_requests[files_count].send(xhr_requests[files_count].formData);
                                         }
@@ -6132,7 +6134,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 self.account.testGalleryTokenExpire(() => {
                                     if (!is_error) {
                                         xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                        xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'))
+                                        xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
                                         xhr_requests[files_count].is_uploading = true;
                                         xhr_requests[files_count].send(xhr_requests[files_count].formData);
                                     }
@@ -6150,7 +6152,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 this.account.testGalleryTokenExpire(() => {
                     if (!is_error) {
                         xhr_requests[0].open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
-                        xhr_requests[0].setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'))
+                        xhr_requests[0].setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'));
                         xhr_requests[0].is_uploading = true;
                         xhr_requests[0].send(xhr_requests[0].formData);
                     }
@@ -12068,146 +12070,182 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             blockquotes = [],
             link_references = this.link_references,
             attached_files = this.attached_files,
-            text = $rich_textarea.getTextFromRichTextarea();
-        this.$('.mentions-list').html("").hide();
-        $rich_textarea.find('.emoji').each((idx, emoji_item) => {
-            let emoji = emoji_item.innerText;
-            this.account.chat_settings.updateLastEmoji(emoji);
-        });
-        let content_concat = [];
-        if (text.length >= constants.STANZA_MAX_SIZE) {
-            utils.dialogs.error(xabber.getString("message__error_big_stanza"));
-            $rich_textarea.flushRichTextarea();
-            return;
-        }
-        if (text.length) {
-            this.quill.getContents().forEach((content) => {
-                if (content.attributes) {
-                    let content_attrs = [],
-                        start_idx = content_concat.length,
-                        end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
-                    for (let attr in content.attributes)
-                        (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
-                    if (content_attrs.indexOf('mention') > -1) {
-                        let mention_idx = content_attrs.indexOf('mention'),
-                            is_gc = this.contact.get('group_chat'),
-                            target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
-                        content_attrs.splice(mention_idx, mention_idx + 1);
-                        target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
-                        mentions.push({
+            text = $rich_textarea.getTextFromRichTextarea(),
+            dfd = new $.Deferred();
+        dfd.done(() => {
+            this.$('.mentions-list').html("").hide();
+            $rich_textarea.find('.emoji').each((idx, emoji_item) => {
+                let emoji = emoji_item.innerText;
+                this.account.chat_settings.updateLastEmoji(emoji);
+            });
+            let content_concat = [];
+            if (text.length >= constants.STANZA_MAX_SIZE) {
+                utils.dialogs.error(xabber.getString("message__error_big_stanza"));
+                $rich_textarea.flushRichTextarea();
+                return;
+            }
+            if (text.length) {
+                this.quill.getContents().forEach((content) => {
+                    if (content.attributes) {
+                        let content_attrs = [],
+                            start_idx = content_concat.length,
+                            end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
+                        for (let attr in content.attributes)
+                            (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
+                        if (content_attrs.indexOf('mention') > -1) {
+                            let mention_idx = content_attrs.indexOf('mention'),
+                                is_gc = this.contact.get('group_chat'),
+                                target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
+                            content_attrs.splice(mention_idx, mention_idx + 1);
+                            target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
+                            mentions.push({
+                                start: start_idx,
+                                end: end_idx,
+                                target: target,
+                                is_gc: is_gc
+                            });
+                        }
+                        if (content.attributes.blockquote) {
+                            if (content_concat.length) {
+                                Array.from(content.insert).forEach((ins) => {
+                                    let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
+                                        quote_end_idx = content_concat.length;
+                                    blockquotes.push({
+                                        marker: constants.QUOTE_MARKER,
+                                        start: quote_start_idx,
+                                        end: quote_end_idx + constants.QUOTE_MARKER.length
+                                    });
+                                    text = Array.from(_.escape(text));
+
+                                    if (quote_start_idx === quote_end_idx) {
+                                        text[quote_start_idx - 1] += constants.QUOTE_MARKER;
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER;
+                                    }
+                                    else {
+                                        text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
+                                        content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
+                                    }
+                                    (quote_end_idx > text.length) && (quote_end_idx = text.length);
+                                    text[quote_end_idx - 1] += '\n';
+
+                                    text = _.unescape(text.join(""));
+                                    content_concat = Array.from(content_concat.join(""));
+
+                                    markup_references.forEach((markup_ref) => {
+                                        if (markup_ref.start >= quote_start_idx) {
+                                            markup_ref.start += constants.QUOTE_MARKER.length;
+                                            markup_ref.end += constants.QUOTE_MARKER.length;
+                                        }
+                                    });
+
+                                    content_concat = content_concat.concat(Array.from(_.escape(ins)));
+                                })
+                            }
+                        }
+                        content_attrs.length && markup_references.push({
                             start: start_idx,
                             end: end_idx,
-                            target: target,
-                            is_gc: is_gc
+                            markup: content_attrs
                         });
                     }
-                    if (content.attributes.blockquote) {
-                        if (content_concat.length) {
-                            Array.from(content.insert).forEach((ins) => {
-                                let quote_start_idx = (content_concat.lastIndexOf('\n') < 0) ? 0 : (content_concat.lastIndexOf('\n') + 1),
-                                    quote_end_idx = content_concat.length;
-                                blockquotes.push({
-                                    marker: constants.QUOTE_MARKER,
-                                    start: quote_start_idx,
-                                    end: quote_end_idx + constants.QUOTE_MARKER.length
-                                });
-                                text = Array.from(_.escape(text));
-
-                                if (quote_start_idx === quote_end_idx) {
-                                    text[quote_start_idx - 1] += constants.QUOTE_MARKER;
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER;
-                                }
-                                else {
-                                    text[quote_start_idx] = constants.QUOTE_MARKER + text[quote_start_idx];
-                                    content_concat[quote_start_idx] = constants.QUOTE_MARKER + content_concat[quote_start_idx];
-                                }
-                                (quote_end_idx > text.length) && (quote_end_idx = text.length);
-                                text[quote_end_idx - 1] += '\n';
-
-                                text = _.unescape(text.join(""));
-                                content_concat = Array.from(content_concat.join(""));
-
-                                markup_references.forEach((markup_ref) => {
-                                    if (markup_ref.start >= quote_start_idx) {
-                                        markup_ref.start += constants.QUOTE_MARKER.length;
-                                        markup_ref.end += constants.QUOTE_MARKER.length;
-                                    }
-                                });
-
-                                content_concat = content_concat.concat(Array.from(_.escape(ins)));
-                            })
+                    if (content.insert && content.insert.emoji) {
+                        content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
+                    }
+                    else if (content.attributes && content.attributes.blockquote) {
+                    }
+                    else
+                        content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
+                });
+            }
+            let start_length = text.length;
+            text = text.trimStart();
+            if (start_length > text.length) {
+                let delta = start_length - text.length;
+                mentions.forEach((mention) => {
+                    mention.start -= delta;
+                    mention.end -= delta;
+                });
+                markup_references.forEach((markup_reference) => {
+                    markup_reference.start -= delta;
+                    markup_reference.end -= delta;
+                });
+                blockquotes.forEach((blockquote) => {
+                    blockquote.start -= delta;
+                    blockquote.end -= delta;
+                });
+            }
+            if (link_references && link_references.length) {
+                link_references = link_references.filter(item => item.original_text);
+                link_references.forEach((link_reference) => {
+                    if (link_reference && link_reference.original_text) {
+                        link_reference.start = text.indexOf(link_reference.original_text);
+                        if (link_reference.start != -1) {
+                            link_reference.start = 0;
+                            link_reference.end = 0;
                         }
                     }
-                    content_attrs.length && markup_references.push({
-                        start: start_idx,
-                        end: end_idx,
-                        markup: content_attrs
-                    });
-                }
-                if (content.insert && content.insert.emoji) {
-                    content_concat = content_concat.concat(Array.from($(content.insert.emoji).data('emoji')));
-                }
-                else if (content.attributes && content.attributes.blockquote) {
-                }
-                else
-                    content_concat = content_concat.concat(Array.from(_.escape(content.insert)));
-            });
-        }
-        let start_length = text.length;
-        text = text.trimStart();
-        if (start_length > text.length) {
-            let delta = start_length - text.length;
-            mentions.forEach((mention) => {
-                mention.start -= delta;
-                mention.end -= delta;
-            });
-            markup_references.forEach((markup_reference) => {
-                markup_reference.start -= delta;
-                markup_reference.end -= delta;
-            });
-            blockquotes.forEach((blockquote) => {
-                blockquote.start -= delta;
-                blockquote.end -= delta;
-            });
-        }
-        if (link_references && link_references.length) {
-            link_references = link_references.filter(item => item.original_text);
-            link_references.forEach((link_reference) => {
-                if (link_reference && link_reference.original_text) {
-                    link_reference.start = text.indexOf(link_reference.original_text);
-                    if (link_reference.start != -1) {
-                        link_reference.start = 0;
-                        link_reference.end = 0;
-                    }
-                }
-            });
-        }
-        this.removeAllLinkReferences();
-        this.link_reference_exempted = [];
-        this.removeAllFileSnippets();
-        text = text.trimEnd();
-        $rich_textarea.flushRichTextarea();
-        this.quill.focus();
-        this.displayMicrophone();
-        if (this.edit_message) {
-            this.editMessage(text, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
-            $rich_textarea.placeCaretAtEnd();
-            return;
-        }
-        if (text || this.fwd_messages.length || (attached_files && attached_files.length) || (link_references && link_references.length)) {
-            if (this.model.get('saved') && this.fwd_messages.length && !text)
-                this.fwd_messages.forEach((message) => {
-                    this.view.onSubmit("", [message]);
                 });
-            else
-                this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
+            }
+            this.removeAllLinkReferences();
+            this.link_reference_exempted = [];
+            this.removeAllFileSnippets();
+            text = text.trimEnd();
+            $rich_textarea.flushRichTextarea();
+            this.quill.focus();
+            this.displayMicrophone();
+            if (this.edit_message) {
+                this.editMessage(text, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
+                $rich_textarea.placeCaretAtEnd();
+                return;
+            }
+            if (text || this.fwd_messages.length || (attached_files && attached_files.length) || (link_references && link_references.length)) {
+                if (this.model.get('saved') && this.fwd_messages.length && !text)
+                    this.fwd_messages.forEach((message) => {
+                        this.view.onSubmit("", [message]);
+                    });
+                else
+                    this.view.onSubmit(text, this.fwd_messages, {mentions: mentions, markup_references: markup_references, link_references: link_references, attached_files: attached_files, blockquotes: blockquotes});
+            }
+            this.unsetForwardedMessages();
+            xabber.chats_view.clearSearch();
+            if (this.model.messages_view)
+                if (this.model.messages_view.data.get('visible'))
+                    xabber.chats_view.openChat(this.model.item_view, {right_contact_save: true, clear_search: true, screen: xabber.body.screen.get('name')});
+            $rich_textarea.placeCaretAtEnd();
+        });
+        if (attached_files && attached_files.length) {
+            let failed_files = [],
+                files_count = 0,
+                file_check_dfd = new $.Deferred();
+            file_check_dfd.done(() => {
+                if (failed_files.length){
+                    failed_files.forEach((file) => {
+                        this.$(`.message-reference-preview-item-file[data-id="${file.uid}"]`).remove();
+                        this.removeFileSnippetById(file.uid);
+                    });
+                    utils.dialogs.error(xabber.getString("message__file_was_deleted"));
+                    dfd.reject();
+                } else {
+                    dfd.resolve();
+                }
+            });
+            attached_files.forEach((file) => {
+                utils.tryReadingFile(file).then(()=> {
+                    files_count++;
+                    if (attached_files.length === files_count) {
+                        file_check_dfd.resolve();
+                    }
+                }, ()=> {
+                    failed_files = failed_files.concat([file]);
+                    files_count++;
+                    if (attached_files.length === files_count) {
+                        file_check_dfd.resolve();
+                    }
+                });
+            });
+        } else {
+            dfd.resolve();
         }
-        this.unsetForwardedMessages();
-        xabber.chats_view.clearSearch();
-        if (this.model.messages_view)
-            if (this.model.messages_view.data.get('visible'))
-                xabber.chats_view.openChat(this.model.item_view, {right_contact_save: true, clear_search: true, screen: xabber.body.screen.get('name')});
-        $rich_textarea.placeCaretAtEnd();
     },
 
     setEditedMessage: function (message) {

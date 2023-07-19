@@ -228,6 +228,20 @@ var utils = {
             return false;
     },
 
+    tryReadingFile: function(file) {
+        return new Promise((resolve, reject) => {
+            let r = new FileReader();
+            r.onload = (e) => {
+                resolve();
+            };
+            r.onerror = (e) => {
+                console.log(r.error);
+                reject(r.error);
+            };
+            r.readAsDataURL(file)
+        });
+    },
+
     getDomainFromUrl: function(url) {
         let a = document.createElement('a');
         if (url && !/^https?:\/\//i.test(url))
