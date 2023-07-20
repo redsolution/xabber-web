@@ -3483,6 +3483,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             this.updateMedia();
         }).fail(() => {
             this.temporary_items = [];
+            this.$el.html("<div class='gallery-files'></div>");
             this.updateMedia()
         });
 
