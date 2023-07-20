@@ -1,5 +1,5 @@
 <div class="gallery-file" title="{{file.name}}" data-id="{{file.id}}" data-uniqueid="{{file.uniqueid}}"  data-file="{{file.sources[0]}}" data-name="{{file.name}}" data-size="{{file.size}}" data-width="{{file.width}}" data-height="{{file.height}}" data-media-type="{{file.media_type}}" >
-    {[if (file.media_type && (file.media_type.includes('image') || (file.media_type.includes('video') && !file.has_encrypted_files))){]}
+    {[if (file.media_type && (file.media_type.includes('image') || (file.media_type.includes('video') && !file.has_encrypted_files && !is_encrypted))){]}
     <img class="{[if (file.media_type.includes('video')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}"
          data-mfp-src="{{file.sources[0]}}"
          src="{[if (file.thumbnail){]}{{file.thumbnail}}{[} else {]}{{file.sources[0]}}{[}]}"

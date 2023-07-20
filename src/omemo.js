@@ -1432,7 +1432,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         $message.find('body').remove();
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
                         if (options.gallery && deferred)
-                            deferred.resolve($message);
+                            deferred.resolve($message, options);
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
                     return;
@@ -1488,7 +1488,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                     $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                     if (options.gallery && decrypted_msg && deferred)
-                        deferred.resolve($message);
+                        deferred.resolve($message, options);
                     else if (options.gallery && deferred)
                         deferred.reject();
                     this.account.chats.receiveChatMessage($message[0], options);
@@ -1975,6 +1975,12 @@ xabber.DecryptedMessages = Backbone.ModelWithStorage.extend({
         let messages = _.clone(this.get('messages')),
             contact_messages = messages[contact.get('jid')] || {};
         return contact_messages[stanza_id];
+    },
+
+    getMessages: function (contact) {
+        let messages = _.clone(this.get('messages')),
+            contact_messages = messages[contact.get('jid')] || {};
+        return contact_messages;
     },
 
     putMessage: function (contact, stanza_id, message) {

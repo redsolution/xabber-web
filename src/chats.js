@@ -1457,33 +1457,73 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
     getMessageContext: function (unique_id, options) {
         options = options || {};
-        let messages = options.mention && this.account.messages || options.searched_messages && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
-            message = messages.get(unique_id);
-        if (message) {
-            if (options.searched_messages)
-                message.set('searched_message', false);
-            let stanza_id = message.get('stanza_id');
-            this.messages_view = new xabber.MessageContextView({
-                contact: this.contact,
-                mention_context: options.mention,
-                model: this,
-                stanza_id_context: stanza_id,
-                encrypted: options.encrypted
-            });
-            this.account.context_messages.add(message);
-            this.messages_view.messagesRequest({after: stanza_id}, () => {
-                let screen = 'all-chats';
-                if (options.mention)
-                    screen = 'mentions';
-                else if (options.message)
-                    screen = xabber.body.screen.get('name');
-                xabber.body.setScreen(screen, {
-                    right: 'message_context',
+        let messages = options.mention && this.account.messages || options.searched_messages && !options.encrypted && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
+            message = messages.get(unique_id),
+            dfd = new $.Deferred;
+
+        dfd.done(() => {
+            if (message) {
+                if (options.searched_messages)
+                    message.set('searched_message', false);
+                let stanza_id = message.get('stanza_id');
+                this.messages_view = new xabber.MessageContextView({
+                    contact: this.contact,
+                    mention_context: options.mention,
                     model: this,
-                }, {
-                    right_contact_save: true
+                    stanza_id_context: stanza_id,
+                    encrypted: options.encrypted
                 });
-            });
+                this.account.context_messages.add(message);
+                this.messages_view.messagesRequest({after: stanza_id}, () => {
+                    let screen = 'all-chats';
+                    if (options.mention)
+                        screen = 'mentions';
+                    else if (options.message)
+                        screen = xabber.body.screen.get('name');
+                    xabber.body.setScreen(screen, {
+                        right: 'message_context',
+                        model: this,
+                    }, {
+                        right_contact_save: true
+                    });
+                });
+            }
+
+        })
+        if (!message) {
+            message = messages.models.find(item => {
+                return item.get('origin_id') === unique_id;
+            })
+            if (!message) {
+                this.contact.getMessageByStanzaId(unique_id, ($message) => {
+                    if (options.encrypted && this.account.omemo) {
+                        let omemo_dfd = new $.Deferred;
+                        omemo_dfd.done(($msg, msg_options) => {
+                            msg_options = msg_options || {};
+                            msg_options.searched_message = true;
+                            message = this.account.chats.receiveChatMessage($msg[0], msg_options);
+                            dfd.resolve();
+                        }).fail(() => {
+                            dfd.resolve();
+                        });
+                        message = this.account.omemo.receiveChatMessage($message, {
+                            searched_message: true,
+                            gallery: true,
+                        }, omemo_dfd);
+
+                    } else {
+                        message = this.account.chats.receiveChatMessage($message, {
+                            searched_message: true,
+                        });
+                        dfd.resolve();
+                    }
+                }, {encrypted: options.encrypted});
+
+            } else {
+                dfd.resolve()
+            }
+        } else {
+            dfd.resolve()
         }
     },
 
