@@ -4080,7 +4080,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else {
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', true);
-                    if (message.get('is_unread') && xabber.get('focused') && this.isVisible()){//34
+                    if (message.get('is_unread') && xabber.get('focused') && this.isVisible()){
                         this.readVisibleMessages();
                     }
                     if (!xabber.get('focused')) {
@@ -5176,10 +5176,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 player.message_unique_id = $msg.attr('data-uniqueid');
                 if (msg_videos && msg_videos.length && player.video_id >= 0) {
                     let video_file = msg_videos[player.video_id];
-                    if (video_file.key){
-                        player.key = video_file.key;
-                        video_file.type && (player.type = video_file.type);
-                    }
+                    video_file && (player.video_file = video_file);
                 }
                 this.model.plyr_players = this.model.plyr_players.concat([player]).sort((a, b) => a.msg_time - b.msg_time);
                 xabber.plyr_players = xabber.plyr_players.concat([player]);
@@ -6241,6 +6238,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 !xabber.settings.load_media && $message.find('.chat-msg-media-content.chat-main-upload-media .img-content').append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
             }
         }
+        message.set('videos', videos);
         if (videos.length > 0) {
             let video_content = this.createVideoContainer();
             $message.find('.chat-msg-media-content.chat-main-upload-media').find('.chat-file-info').remove();
@@ -6310,7 +6308,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         this.initPopup($message);
         message.set('images', images);
-        message.set('videos', videos);
         message.set('files', files_);
         if ((message.get('encrypted') || this.model.get('encrypted')) && message.get('images').length) {
             this.decryptImages(message);

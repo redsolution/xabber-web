@@ -958,11 +958,7 @@ xabber.Device = Backbone.Model.extend({
             let sessionCipher = new SessionCipher(this.store, this.address), plainText;
 
             if (preKey){
-                console.log(this.getCachedSession());
-                console.log('1');
                 plainText = await sessionCipher.decryptPreKeyWhisperMessage(cipherText, 'binary');
-                console.log(this.getCachedSession());
-                console.log('2');
             }
             else {
                 if (!this.store.hasSession(this.address.toString())) {

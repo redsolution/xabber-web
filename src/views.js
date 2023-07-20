@@ -1641,9 +1641,15 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             });
         });
 
-        if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src){
+        if (options.player && options.player.video_file && options.player.video_file.key) {
+            options.player.key = options.player.video_file.key;
+            options.player.video_file.type && (options.player.type = options.player.video_file.type);
+        }
+
+        if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src && !options.player.video_decrypted){
             options.player.chat_item.model.messages.decryptFile(options.player.video_src, options.player.key).then((result) => {
                 options.player.video_src = result;
+                options.player.video_decrypted = true;
                 dfd.resolve();
             });
         } else
